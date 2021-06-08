@@ -13,8 +13,8 @@ import com.roamblue.cloud.management.data.mapper.HostMapper;
 import com.roamblue.cloud.management.data.mapper.VncMapper;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.InstanceStatus;
-import com.roamblue.cloud.management.util.InstanceType;
+import com.roamblue.cloud.management.util.VmStatus;
+import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.TemplateType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
 
     @Override
     public String getType() {
-        return InstanceType.CONSOLE;
+        return VMType.CONSOLE;
     }
 
     @Override
@@ -121,7 +121,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
             SystemVmEntity systemVm = systemVmMapper.findByNetworkIdAndVmType(networkId, this.getType());
             if (systemVm != null) {
                 VmEntity instance = this.vmMapper.selectById(systemVm.getVmId());
-                if (instance != null && instance.getVmStatus().equals(InstanceStatus.RUNING)) {
+                if (instance != null && instance.getVmStatus().equals(VmStatus.RUNNING)) {
                     HostEntity vmHost = hostMapper.selectById(instance.getHostId());
                     if (vmHost != null) {
                         writeVncConfig(instance, networkId, vmHost);
@@ -157,7 +157,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
                 continue;
             }
             VmEntity vm = vmMapper.selectById(systemVm.getVmId());
-            if (vm == null || !vm.getVmStatus().equals(InstanceStatus.RUNING)) {
+            if (vm == null || !vm.getVmStatus().equals(VmStatus.RUNNING)) {
                 continue;
             }
             VncEntity vnc = map.get(networkId).get(0);

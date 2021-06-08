@@ -1,5 +1,7 @@
 package com.roamblue.cloud.management.util;
 
+import com.roamblue.cloud.common.error.CodeException;
+import com.roamblue.cloud.common.util.ErrorCode;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -16,27 +18,12 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     private static ApplicationContext _applicationContext = null;
 
-    private static SpringContextUtils _self;
-
     public static <T> T getBean(Class<T> requiredType) {
         if (_applicationContext != null) {
             return _applicationContext.getBean(requiredType);
         } else {
-            throw new org.springframework.context.ApplicationContextException("ApplicationContext has not been set.");
+            throw new CodeException(ErrorCode.SERVER_ERROR,"系统未初始化完成....");
         }
-    }
-
-
-    private static SpringContextUtils self() {
-        if (_self == null) {
-            if (_applicationContext != null) {
-                _self = _applicationContext.getBean(SpringContextUtils.class);
-            } else {
-                throw new org.springframework.context.ApplicationContextException(
-                        "ApplicationContext has not been set.");
-            }
-        }
-        return _self;
     }
 
     @Override

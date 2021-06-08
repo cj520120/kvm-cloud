@@ -14,8 +14,8 @@ import com.roamblue.cloud.management.service.InstanceService;
 import com.roamblue.cloud.management.service.VmService;
 import com.roamblue.cloud.management.service.VncService;
 import com.roamblue.cloud.management.util.BeanConverter;
-import com.roamblue.cloud.management.util.InstanceStatus;
-import com.roamblue.cloud.management.util.InstanceType;
+import com.roamblue.cloud.management.util.VmStatus;
+import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,10 +82,10 @@ public class InstanceServiceImpl implements InstanceService {
             wrapper.eq("group_id", groupId);
         }
         if (!StringUtils.isEmpty(type)) {
-            if (type.equalsIgnoreCase(InstanceType.GUEST)) {
-                wrapper.eq("vm_type", InstanceType.GUEST);
+            if (type.equalsIgnoreCase(VMType.GUEST)) {
+                wrapper.eq("vm_type", VMType.GUEST);
             } else {
-                wrapper.ne("vm_type", InstanceType.GUEST);
+                wrapper.ne("vm_type", VMType.GUEST);
             }
         }
         if (!StringUtils.isEmpty(status)) {
@@ -94,8 +94,8 @@ public class InstanceServiceImpl implements InstanceService {
         List<VmEntity> entityList = this.vmMapper.selectList(wrapper);
         List<VmInfo> list = BeanConverter.convert(entityList, this::initInstanceInfo);
         Collections.sort(list, (o1, o2) -> {
-            int val1 = InstanceStatus.getCompareValue(o1.getStatus());
-            int val2 = InstanceStatus.getCompareValue(o2.getStatus());
+            int val1 = VmStatus.getCompareValue(o1.getStatus());
+            int val2 = VmStatus.getCompareValue(o2.getStatus());
             int result = Integer.compare(val1, val2);
             if (result == 0) {
                 result = o1.getDescription().compareTo(o2.getDescription());
@@ -121,7 +121,7 @@ public class InstanceServiceImpl implements InstanceService {
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
-        if (vm.getVmStatus().equals(InstanceStatus.RUNING)) {
+        if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             return this.vncService.findVncByVmId(vm.getClusterId(), vm.getId());
 
         } else {

@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.roamblue.cloud.management.filter.GsonDateSerializer;
 import com.roamblue.cloud.management.filter.SpringfoxJsonToGsonAdapter;
 import com.roamblue.cloud.management.util.HttpHeaderNames;
+import com.roamblue.cloud.management.util.Version;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,7 +42,6 @@ public class WebAutoConfiguration {
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
 
-        //2.添加映射路径
         UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
         configSource.registerCorsConfiguration("/**", config);
         return new CorsFilter(configSource);
@@ -82,7 +82,7 @@ public class WebAutoConfiguration {
         return new ApiInfoBuilder()
                 .title(description)
                 .description(description)
-                .version("1.0")
+                .version(Version.CURRENT_VERSION)
                 .build();
     }
 }

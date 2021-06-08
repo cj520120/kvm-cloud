@@ -11,8 +11,8 @@ import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.service.GuestService;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.InstanceStatus;
-import com.roamblue.cloud.management.util.InstanceType;
+import com.roamblue.cloud.management.util.VmStatus;
+import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.TemplateType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         vm.setRemoveTime(null);
-        vm.setVmStatus(InstanceStatus.STOPPED);
+        vm.setVmStatus(VmStatus.STOPPED);
         vmMapper.updateById(vm);
         return this.initVmInfo(vm);
 
@@ -69,7 +69,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         vm.setVmIso(iso);
         vm.setLastUpdateTime(new Date());
         vmMapper.updateById(vm);
-        if (vm.getVmStatus().equals(InstanceStatus.RUNING)) {
+        if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             HostInfo host = this.hostService.findHostById(vm.getHostId());
             ResultUtil<Void> resultUtil = this.agentService.changeCdRoom(host.getUri(), vm.getVmName(), path);
             if (resultUtil.getCode() != ErrorCode.SUCCESS) {
@@ -90,7 +90,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         vm.setLastUpdateTime(new Date());
         vmMapper.updateById(vm);
 
-        if (vm.getVmStatus().equals(InstanceStatus.RUNING)) {
+        if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             StorageEntity storage = this.storageMapper.selectById(volumeInfo.getStorageId());
             if (storage != null) {
                 VmModel.Disk disk = VmModel.Disk.builder().path("/mnt/" + storage.getStorageTarget() + "/" + volumeInfo.getTarget()).device(volumeInfo.getDevice()).build();
@@ -113,7 +113,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         }
         vm.setLastUpdateTime(new Date());
         vmMapper.updateById(vm);
-        if (vm.getVmStatus().equals(InstanceStatus.RUNING)) {
+        if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             StorageEntity storage = this.storageMapper.selectById(volumeInfo.getStorageId());
             if (storage != null) {
                 VmModel.Disk disk = VmModel.Disk.builder().path("/mnt/" + storage.getStorageTarget() + "/" + volumeInfo.getTarget()).device(volumeInfo.getDevice()).build();
@@ -147,7 +147,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
-        if (!vm.getVmStatus().equalsIgnoreCase(InstanceStatus.STOPPED)) {
+        if (!vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED)) {
             throw new CodeException(ErrorCode.VM_NOT_STOP, "虚拟机没有停止");
         }
         List<VolumeInfo> volumeInfoList = this.volumeService.listVolumeByVmId(vmId);
@@ -216,6 +216,6 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
     @Override
     public String getType() {
-        return InstanceType.GUEST;
+        return VMType.GUEST;
     }
 }

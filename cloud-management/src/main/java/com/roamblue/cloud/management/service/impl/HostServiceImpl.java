@@ -21,7 +21,7 @@ import com.roamblue.cloud.management.service.CalculationSchemeService;
 import com.roamblue.cloud.management.service.HostService;
 import com.roamblue.cloud.management.util.BeanConverter;
 import com.roamblue.cloud.management.util.HostStatus;
-import com.roamblue.cloud.management.util.InstanceStatus;
+import com.roamblue.cloud.management.util.VmStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,7 +65,7 @@ public class HostServiceImpl implements HostService {
         List<CalculationSchemeInfo> calculationSchemeInfoList = calculationSchemeService.listCalculationScheme();
         if (calculationSchemeInfoList != null && !calculationSchemeInfoList.isEmpty()) {
             Map<Integer, CalculationSchemeInfo> map = calculationSchemeInfoList.stream().collect(Collectors.toMap(CalculationSchemeInfo::getId, Function.identity()));
-            List<VmEntity> instanceList = vmMapper.findByHostId(hostEntity.getId()).stream().filter(t -> t.getVmStatus().equals(InstanceStatus.RUNING)).collect(Collectors.toList());
+            List<VmEntity> instanceList = vmMapper.findByHostId(hostEntity.getId()).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)).collect(Collectors.toList());
             int totalCpu = 0;
             long totalMemory = 0L;
             for (VmEntity instanceEntity : instanceList) {
@@ -167,11 +167,11 @@ public class HostServiceImpl implements HostService {
         if (entity == null) {
             return;
         }
-        List<VmEntity> vmList = vmMapper.findByHostId(id).stream().filter(t -> t.getVmStatus().equals(InstanceStatus.RUNING)).collect(Collectors.toList());
+        List<VmEntity> vmList = vmMapper.findByHostId(id).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)).collect(Collectors.toList());
         if (!vmList.isEmpty()) {
             for (VmEntity vm : vmList) {
                 this.agentService.destroyVm(entity.getHostUri(), vm.getVmName());
-                vm.setVmStatus(InstanceStatus.STOPPED);
+                vm.setVmStatus(VmStatus.STOPPED);
                 vmMapper.updateById(vm);
             }
         }

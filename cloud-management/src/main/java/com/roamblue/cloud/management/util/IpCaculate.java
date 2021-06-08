@@ -204,10 +204,8 @@ public class IpCaculate {
     }
 
     private static String getCompanyMacAddrPart() {
-        String[] compListArray = new String[MAX_COMPANY_LIST_LEN];
-        compListArray = companyListString.split("#");
-        int index = (int) Math.round(Math.random() * (compListArray.length - 1)
-                + 0);
+        String[] compListArray = companyListString.split("#");
+        int index = (int) Math.round(Math.random() * (compListArray.length - 1) + 0);
         return compListArray[index];
     }
 

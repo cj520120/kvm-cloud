@@ -96,7 +96,7 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
     @Override
     @Rule(min = RuleType.ADMIN)
     public ResultUtil<NetworkInfo> pauseNetwork(int id) {
-        return super.call(() -> networkService.stopNetworkById(id));
+        return super.call(() -> networkService.pauseNetworkById(id));
 
     }
 

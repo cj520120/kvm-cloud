@@ -8,7 +8,7 @@ import com.roamblue.cloud.management.data.mapper.ManagementTaskMapper;
 import com.roamblue.cloud.management.service.LockService;
 import com.roamblue.cloud.management.service.ManagementService;
 import com.roamblue.cloud.management.util.LockKeyUtil;
-import com.roamblue.cloud.management.util.ServiceUtil;
+import com.roamblue.cloud.management.util.ServiceId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +32,9 @@ public class ManagementServiceImpl implements ManagementService {
 
     @Override
     public void keep() {
-        ManagementEntity entity = managementMapper.findByServerId(ServiceUtil.SERVICE_ID);
+        ManagementEntity entity = managementMapper.findByServerId(ServiceId.CURRENT_SERVICE_ID);
         if (entity == null) {
-            entity = ManagementEntity.builder().serverId(ServiceUtil.SERVICE_ID).lastActiveTime(new Date()).createTime(new Date()).build();
+            entity = ManagementEntity.builder().serverId(ServiceId.CURRENT_SERVICE_ID).lastActiveTime(new Date()).createTime(new Date()).build();
             managementMapper.insert(entity);
         } else {
             entity.setLastActiveTime(new Date());
@@ -48,20 +48,20 @@ public class ManagementServiceImpl implements ManagementService {
             try {
                 ManagementTaskEntity taskEntity = managementTaskMapper.selectById(name);
                 if (taskEntity == null) {
-                    taskEntity = ManagementTaskEntity.builder().taskName(name).serverId(ServiceUtil.SERVICE_ID).createTime(new Date()).build();
+                    taskEntity = ManagementTaskEntity.builder().taskName(name).serverId(ServiceId.CURRENT_SERVICE_ID).createTime(new Date()).build();
                     managementTaskMapper.insert(taskEntity);
                     return true;
                 } else {
                     QueryWrapper<ManagementEntity> queryWrapper = new QueryWrapper<>();
                     queryWrapper.eq("server_id", taskEntity.getServerId());
                     ManagementEntity entity = managementMapper.selectOne(queryWrapper);
-                    if (entity == null || taskEntity.getServerId().equals(ServiceUtil.SERVICE_ID) || System.currentTimeMillis() - entity.getLastActiveTime().getTime() > 30000) {
+                    if (entity == null || taskEntity.getServerId().equals(ServiceId.CURRENT_SERVICE_ID) || System.currentTimeMillis() - entity.getLastActiveTime().getTime() > 30000) {
                         //请求更新
                         QueryWrapper<ManagementTaskEntity> wrapper = new QueryWrapper<>();
                         wrapper.eq("server_id", taskEntity.getServerId());
                         wrapper.eq("task_name", taskEntity.getTaskName());
                         wrapper.eq("create_time", taskEntity.getCreateTime());
-                        taskEntity = ManagementTaskEntity.builder().taskName(name).serverId(ServiceUtil.SERVICE_ID).createTime(new Date()).build();
+                        taskEntity = ManagementTaskEntity.builder().taskName(name).serverId(ServiceId.CURRENT_SERVICE_ID).createTime(new Date()).build();
                         return managementTaskMapper.update(taskEntity, wrapper) > 0;
 
                     } else {

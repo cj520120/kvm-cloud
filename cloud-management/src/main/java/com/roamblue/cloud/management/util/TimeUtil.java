@@ -24,10 +24,4 @@ public class TimeUtil {
         }
         return list;
     }
-
-//    public static void main(String[] args) throws ParseException {
-//        DateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        List<Date> time=getIntervalTimeList(f.parse("2021-05-11 00:00:00"),f.parse("2021-05-11 00:35:00"),10);
-//        System.out.println(time);
-//    }
 }

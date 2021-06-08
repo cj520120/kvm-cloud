@@ -5,7 +5,7 @@ import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.data.mapper.StorageMapper;
 import com.roamblue.cloud.management.data.mapper.VmMapper;
 import com.roamblue.cloud.management.service.*;
-import com.roamblue.cloud.management.util.InstanceStatus;
+import com.roamblue.cloud.management.util.VmStatus;
 import com.roamblue.cloud.management.util.LockKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class InstanceDestroyTask extends AbstractTask {
     protected void call() {
         long removeTime = System.currentTimeMillis() - 30 * 60 * 1000;
         QueryWrapper<VmEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("vm_status", InstanceStatus.DESTROY);
+        wrapper.eq("vm_status", VmStatus.DESTROY);
         wrapper.lt("remove_time", new Date(removeTime));
         List<VmEntity> list = vmMapper.selectList(wrapper);
         if (list.isEmpty()) {

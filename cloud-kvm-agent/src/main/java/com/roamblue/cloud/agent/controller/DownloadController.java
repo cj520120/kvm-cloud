@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Api(tags = "文件下载服务")
+@Api(tags = "模版文件下载")
 @Slf4j
 public class DownloadController {
     @Autowired

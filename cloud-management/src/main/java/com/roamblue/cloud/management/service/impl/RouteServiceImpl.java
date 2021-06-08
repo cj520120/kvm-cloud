@@ -12,7 +12,7 @@ import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.RouteService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.InstanceType;
+import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.IpCaculate;
 import com.roamblue.cloud.management.util.IpType;
 import com.roamblue.cloud.management.util.TemplateType;
@@ -44,7 +44,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
 
     @Override
     public String getType() {
-        return InstanceType.ROUTE;
+        return VMType.ROUTE;
     }
 
     @Override

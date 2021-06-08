@@ -14,7 +14,7 @@ import com.roamblue.cloud.management.data.mapper.VmMapper;
 import com.roamblue.cloud.management.service.AllocateService;
 import com.roamblue.cloud.management.service.CalculationSchemeService;
 import com.roamblue.cloud.management.util.HostStatus;
-import com.roamblue.cloud.management.util.InstanceStatus;
+import com.roamblue.cloud.management.util.VmStatus;
 import com.roamblue.cloud.management.util.StorageStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class AllocateServiceImpl implements AllocateService {
         List<CalculationSchemeInfo> calculationSchemeInfoList = calculationSchemeService.listCalculationScheme();
         if (calculationSchemeInfoList != null && !calculationSchemeInfoList.isEmpty()) {
             Map<Integer, CalculationSchemeInfo> map = calculationSchemeInfoList.stream().collect(Collectors.toMap(CalculationSchemeInfo::getId, Function.identity()));
-            List<VmEntity> instanceList = vmMapper.findByHostId(hostEntity.getId()).stream().filter(t -> t.getVmStatus().equals(InstanceStatus.RUNING)).collect(Collectors.toList());
+            List<VmEntity> instanceList = vmMapper.findByHostId(hostEntity.getId()).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)).collect(Collectors.toList());
             int totalCpu = 0;
             long totalMemory = 0L;
             for (VmEntity instanceEntity : instanceList) {

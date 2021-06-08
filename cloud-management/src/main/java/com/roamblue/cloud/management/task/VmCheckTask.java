@@ -12,7 +12,7 @@ import com.roamblue.cloud.management.service.AgentService;
 import com.roamblue.cloud.management.service.HostService;
 import com.roamblue.cloud.management.service.LockService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.InstanceStatus;
+import com.roamblue.cloud.management.util.VmStatus;
 import com.roamblue.cloud.management.util.LockKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class VmCheckTask extends AbstractTask {
                     continue;
                 }
                 lockService.tryRun(LockKeyUtil.getInstanceLockKey(vm.getId()), () -> {
-                    if (!vm.getVmStatus().equalsIgnoreCase(InstanceStatus.STOPPED) && vm.getHostId().equals(hostInfo.getId())) {
+                    if (!vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED) && vm.getHostId().equals(hostInfo.getId())) {
                         return null;
                     }
 //                    String pwd="password";
@@ -85,7 +85,7 @@ public class VmCheckTask extends AbstractTask {
 //                        vmMapper.updateById(find);
 //                        vncService.addInstance(find.getClusterId(),find.getId(),hostInfo.getHostIp(),find.getVncPort(),pwd);
 //                    }
-                    if (find.getVmStatus().equalsIgnoreCase(InstanceStatus.STOPPED) || !find.getHostId().equals(hostInfo.getId())) {
+                    if (find.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED) || !find.getHostId().equals(hostInfo.getId())) {
                         log.warn("VM状态不一致，自动销毁", vmInfo.getName());
                         //如果运行机器和当前机器不一致，则直接销毁
                         agentService.destroyVm(hostInfo.getHostUri(), find.getVmName());

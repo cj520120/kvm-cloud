@@ -175,12 +175,12 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public NetworkInfo stopNetworkById(int id) {
+    public NetworkInfo pauseNetworkById(int id) {
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
-        entity.setNetworkStatus(NetworkStatus.STOP);
+        entity.setNetworkStatus(NetworkStatus.PAUSE);
         networkMapper.updateById(entity);
         return init(entity);
     }

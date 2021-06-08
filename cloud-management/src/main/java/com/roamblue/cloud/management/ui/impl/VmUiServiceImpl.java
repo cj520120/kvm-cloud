@@ -7,7 +7,7 @@ import com.roamblue.cloud.management.bean.*;
 import com.roamblue.cloud.management.service.InstanceService;
 import com.roamblue.cloud.management.service.LockService;
 import com.roamblue.cloud.management.ui.VmUiService;
-import com.roamblue.cloud.management.util.InstanceType;
+import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.LockKeyUtil;
 import com.roamblue.cloud.management.util.RuleType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         if (networkId <= 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "网络不能为空");
         }
-        return this.call(() -> vmService.getVmServiceByType(InstanceType.GUEST).create(name, calculationSchemeId, clusterId, storageId, hostId, templateId, size, networkId, groupId));
+        return this.call(() -> vmService.getVmServiceByType(VMType.GUEST).create(name, calculationSchemeId, clusterId, storageId, hostId, templateId, size, networkId, groupId));
     }
 
     @Override

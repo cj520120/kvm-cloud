@@ -15,7 +15,7 @@ import com.roamblue.cloud.management.data.entity.LoginInfoEntity;
 import com.roamblue.cloud.management.data.mapper.LoginInfoMapper;
 import com.roamblue.cloud.management.service.UserService;
 import com.roamblue.cloud.management.util.BeanConverter;
-import com.roamblue.cloud.management.util.State;
+import com.roamblue.cloud.management.util.UserState;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         if (!realPassword.equals(password)) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户名密码错误");
         }
-        if (loginInfoEntity.getLoginState() != State.ABLE) {
+        if (loginInfoEntity.getLoginState() != UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return getToken(loginInfoEntity.getUserId(), loginInfoEntity.getLoginPassword());
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
         } catch (JWTVerificationException e) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "Token验证错误");
         }
-        if (loginInfoEntity.getLoginState() != State.ABLE) {
+        if (loginInfoEntity.getLoginState() != UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return loginInfoEntity.getUserId();
@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
-        if (loginInfoEntity.getLoginState() != State.ABLE) {
+        if (loginInfoEntity.getLoginState() != UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return getToken(loginInfoEntity.getUserId(), loginInfoEntity.getLoginPassword());
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService {
         }
         String salt = "CRY:" + RandomStringUtils.randomAlphanumeric(16);
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
-        entity = LoginInfoEntity.builder().loginState(State.ABLE).loginName(loginName).ruleType(rule).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
+        entity = LoginInfoEntity.builder().loginState(UserState.ABLE).loginName(loginName).ruleType(rule).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
         loginInfoMapper.insert(entity);
         return this.initUserInfoBO(entity);
     }

@@ -2,6 +2,7 @@ package com.roamblue.cloud.management.filter;
 
 import com.roamblue.cloud.common.bean.ResultUtil;
 import com.roamblue.cloud.common.error.CodeException;
+import com.roamblue.cloud.common.util.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,12 +20,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class WebExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public ResultUtil<Exception> exceptionHandler(Exception error) {
+    public ResultUtil exceptionHandler(Exception error) {
         if (error instanceof CodeException) {
-            return ResultUtil.<Exception>builder().code(((CodeException) error).getCode()).message(error.getMessage()).build();
+            CodeException codeException=(CodeException)error;
+            return ResultUtil.error(codeException.getCode(),codeException.getMessage());
         } else {
-            log.error("", error);
-            return ResultUtil.<Exception>builder().data(error).code(500).message(error.getMessage()).build();
+            log.error("request fail.", error);
+            return ResultUtil.error(ErrorCode.SERVER_ERROR, error.getMessage());
         }
     }
 }

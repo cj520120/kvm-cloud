@@ -72,5 +72,5 @@ public interface NetworkService {
      *
      * @param id
      */
-    NetworkInfo stopNetworkById(int id);
+    NetworkInfo pauseNetworkById(int id);
 }

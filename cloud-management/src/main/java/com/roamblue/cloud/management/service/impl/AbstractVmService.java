@@ -97,7 +97,7 @@ public abstract class AbstractVmService implements VmService {
         VmEntity vmEntity = VmEntity.builder()
                 .clusterId(clusterId)
                 .vmType(instanceType)
-                .vmStatus(InstanceStatus.CREATING)
+                .vmStatus(VmStatus.CREATING)
                 .hostId(0)
                 .vmName("")
                 .vmIp("")
@@ -120,15 +120,15 @@ public abstract class AbstractVmService implements VmService {
             VmNetworkInfo network = this.allocateNetwork(networkId, vmEntity.getId());
             vmEntity.setVmIp(network.getIp());
             vmEntity.setVmName("VM" + "-" + vmEntity.getClusterId() + "-" + vmEntity.getId());
-            vmEntity.setVmStatus(InstanceStatus.STOPPED);
+            vmEntity.setVmStatus(VmStatus.STOPPED);
             vmMapper.updateById(vmEntity);
             return vmEntity;
         } catch (CodeException err) {
-            vmEntity.setVmStatus(InstanceStatus.ERROR);
+            vmEntity.setVmStatus(VmStatus.ERROR);
             vmMapper.updateById(vmEntity);
             throw err;
         } catch (Exception err) {
-            vmEntity.setVmStatus(InstanceStatus.ERROR);
+            vmEntity.setVmStatus(VmStatus.ERROR);
             vmMapper.updateById(vmEntity);
             throw new CodeException(ErrorCode.SERVER_ERROR, err.getMessage());
         }
@@ -185,7 +185,7 @@ public abstract class AbstractVmService implements VmService {
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
-        if (vm.getVmStatus().equals(InstanceStatus.STOPPED)) {
+        if (vm.getVmStatus().equals(VmStatus.STOPPED)) {
 
             CalculationSchemeInfo calculationSchemeInfo = calculationSchemeService.findCalculationSchemeById(vm.getCalculationSchemeId());
             HostEntity hostInfo = this.allocateService.allocateHost(vm.getClusterId(), hostId, calculationSchemeInfo.getCpu(), calculationSchemeInfo.getMemory());
@@ -214,7 +214,7 @@ public abstract class AbstractVmService implements VmService {
                 throw err;
             }
             vm.setHostId(hostInfo.getId());
-            vm.setVmStatus(InstanceStatus.RUNING);
+            vm.setVmStatus(VmStatus.RUNNING);
             vm.setLastUpdateTime(new Date());
             vmMapper.updateById(vm);
 
@@ -227,7 +227,7 @@ public abstract class AbstractVmService implements VmService {
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
-        if (vm.getVmStatus().equals(InstanceStatus.RUNING)) {
+        if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
 
             HostInfo host = this.hostService.findHostById(vm.getHostId());
             ResultUtil<Void> resultUtil;
@@ -243,7 +243,7 @@ public abstract class AbstractVmService implements VmService {
             switch (resultUtil.getCode()) {
                 case ErrorCode.SUCCESS:
                 case ErrorCode.AGENT_VM_NOT_FOUND:
-                    vm.setVmStatus(InstanceStatus.STOPPED);
+                    vm.setVmStatus(VmStatus.STOPPED);
                     vm.setHostId(0);
                     vm.setVncPort(0);
                     vm.setLastUpdateTime(new Date());
@@ -282,7 +282,7 @@ public abstract class AbstractVmService implements VmService {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         stopVm(id, true);
-        if (!vm.getVmType().equals(InstanceType.GUEST) || vm.getVmStatus().equals(InstanceStatus.ERROR)) {
+        if (!vm.getVmType().equals(VMType.GUEST) || vm.getVmStatus().equals(VmStatus.ERROR)) {
             //
             this.networkService.detachVmNetworkByVmId(id);
             this.volumeService.destroyByVmId(id);
@@ -290,7 +290,7 @@ public abstract class AbstractVmService implements VmService {
         } else {
             vm.setHostId(0);
             vm.setVncPort(0);
-            vm.setVmStatus(InstanceStatus.DESTROY);
+            vm.setVmStatus(VmStatus.DESTROY);
             vm.setRemoveTime(new Date());
             vmMapper.updateById(vm);
         }

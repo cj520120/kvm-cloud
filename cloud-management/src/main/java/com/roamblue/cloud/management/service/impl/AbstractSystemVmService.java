@@ -10,7 +10,7 @@ import com.roamblue.cloud.management.data.entity.SystemVmEntity;
 import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.data.mapper.NetworkMapper;
 import com.roamblue.cloud.management.data.mapper.SystemVmMapper;
-import com.roamblue.cloud.management.util.InstanceStatus;
+import com.roamblue.cloud.management.util.VmStatus;
 import com.roamblue.cloud.management.util.IpCaculate;
 import com.roamblue.cloud.management.util.NetworkStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -147,7 +147,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                         systemVmMapper.deleteById(systemVmEntity.getId());
                         log.debug("检测系统VM Type={} Network={} 失败，无效的VM，准备重新创建VM", this.getType(), network.getId());
                         continue;
-                    } else if (instance.getVmStatus().equals(InstanceStatus.STOPPED)) {
+                    } else if (instance.getVmStatus().equals(VmStatus.STOPPED)) {
                         super.startVm(instance.getId(), 0);
                     } else {
                         log.debug("检测系统VM Type={} Network={} 通过", this.getType(), network.getId());

@@ -58,7 +58,7 @@ public class BriaggeNetworkAllocateServiceImpl implements NetworkAllocateService
 
     @Override
     public String getType() {
-        return NetworkType.BRIDGEE;
+        return NetworkType.BRIDGE;
     }
 
     private VmNetworkInfo initInstanceNetwork(VmNetworkEntity entity) {

@@ -203,7 +203,7 @@ public class VolumeServiceImpl implements VolumeService {
         }
         if (entity.getVmId() > 0) {
             VmEntity vm = this.vmMapper.selectById(entity.getVmId());
-            if (vm != null && !vm.getVmStatus().equalsIgnoreCase(InstanceStatus.STOPPED)) {
+            if (vm != null && !vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED)) {
                 throw new CodeException(ErrorCode.VM_NOT_STOP, "磁盘调整时虚拟机必须处于停止状态");
             }
         }
