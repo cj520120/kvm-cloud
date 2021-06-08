@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link href="../layui/css/layui.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link rel="icon" href="../image/kl_logo.png" type="image/png" >
+</head>
+<body>
+<body>
+<div style="display: flex; justify-content: space-between;">
+    <div style="display:flex">
+        <div class="layui-form">
+            <div class="layui-input-inline">
+                <button class="layui-btn layui-btn-sm" lay-filter="formSearch" onclick="create_user_click()">
+                    <i class="layui-icon layui-icon-addition"></i>注册用户
+                </button>
+            </div>
+        </div>
+    </div>
+    <div style="display:flex">
+        <div class="layui-form-item" style="margin-right: 0px">
+            <div class="layui-input-block" style="margin-left:0px">
+                <input autocomplete="off" class="layui-input" id="searchText" lay-verify="required" placeholder="关键字"
+                        required="" style="width:200px" type="text">
+            </div>
+        </div>
+    </div>
+</div>
+<div id="content">
+
+</div>
+</body>
+
+<script id="createDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">登陆名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="loginName" placeholder="请输入登陆名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">登陆密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">用户权限</label>
+            <div class="layui-input-inline">
+               <select name="rule">
+                   <option value="0">超级管理员</option>
+                   <option value="100">管理员</option>
+                   <option value="200">普通用户</option>
+               </select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="ruleDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="userId">
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">用户权限</label>
+            <div class="layui-input-inline">
+                <select name="rule">
+                    <option value="0">超级管理员</option>
+                    <option value="100">管理员</option>
+                    <option value="200">普通用户</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="resetPasswordDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="userId">
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">登陆密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </form>
+</script>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/config_util.js"></script>
+<script src="../layui/layui.js"></script>
+<script src="../js/util.js"></script>
+<script src="../js/table_util.js"></script>
+<script src="../js/data_handler.js"></script>
+<script src="../js/data_util.js"></script>
+<script src="../js/dialog_util.js"></script>
+<script>
+
+    config_util.init(()=> {
+        window.data_handler  = new data_handler({uri: config_util.base_uri+"/management/user/list", idName: "userId"})
+        table_util.render({
+            elem: "#content",
+            idName: "userId",
+            cols: [
+                {width: 80, title: "ID", name: "userId",filter: true},
+                {width: 180, title: "名称", name: "loginName",filter: true},
+                {width: 180, title: "权限", name: "rule",filter: true,render:function (data) {
+                        if(data.rule===0){
+                            return '超级管理员';
+                        } else if(data.rule===100){
+                            return '管理员';
+                        } else if(data.rule===200){
+                            return '普通用户';
+                        } else if(data.rule===200){
+                            return '未知';
+                        }
+                    }
+                },
+                {width: 180, title: "状态", name: "state",render:function (data) {
+                        return data.state===0?"启用":"禁用"
+                    }
+                },
+                {
+                    width: 180, title: "创建时间", render: function (data) {
+                        return dateFormat("YYYY-mm-dd HH:MM:SS", new Date(data.registerTime))
+                    }
+                }
+            ],
+            menu: [
+                {
+                    title: "启用用户", icon: "layui-icon-ok-circle", show: function (data) {
+                        return data.state!=0
+                    }, click: enable_user_click
+                },
+                {
+                    title: "禁用用户", icon: "layui-icon-reduce-circle", show: function (data) {
+                        return data.state===0
+                    }, click: disable_user_click
+                },
+                {
+                    title: "重置密码", icon: "layui-icon-password", show: function (data) {
+                        return true
+                    }, click: reset_password_click
+                },
+                {
+                    title: "修改权限", icon: "layui-icon-auz", show: function (data) {
+                        return true
+                    }, click: update_rule_click
+                },
+                {
+                    title: "删除用户", icon: "layui-icon-delete", show: function (data) {
+                        return true
+                    }, click: destroy_user_click
+                },
+            ],
+            handler: window.data_handler
+        })
+        $("#searchText").on('input', function () {
+            table_util.filter_text = $("#searchText").val()
+            table_util.refresh();
+        })
+    })
+
+    function create_user_click() {
+        dialog_util.show_modify("#createDialog", "注册用户", "layui-icon-addition", "POST", config_util.base_uri+"/management/user/register", undefined, function (response) {
+            if (response.code === 0) {
+                table_util.append(response.data);
+            } else {
+                dialog_util.show_tool_tip('注册用户失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function reset_password_click(data) {
+        dialog_util.show_modify("#resetPasswordDialog", "重置密码", "layui-icon-set", "POST", config_util.base_uri+"/management/user/reset/password", function () {
+            $("form[name='modify'] [name='userId']").val(data.userId)
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重置密码失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+    function update_rule_click(data) {
+        dialog_util.show_modify("#ruleDialog", "修改权限", "layui-icon-auz", "POST", config_util.base_uri+"/management/user/rule", function () {
+            $("form[name='modify'] [name='userId']").val(data.userId)
+            $("form[name='modify'] [name='rule']").val(data.rule)
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重置密码失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function enable_user_click(data) {
+        dialog_util.show_confirm_dialog('确认启用用户', 'POST', config_util.base_uri+"/management/user/state", {userId: data.userId,state:0}, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('启用用户失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function disable_user_click(data) {
+        dialog_util.show_confirm_dialog('确认禁用用户', 'POST', config_util.base_uri+"/management/user/state", {userId: data.userId,state:1}, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('禁用用户失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+    function destroy_user_click(data) {
+        dialog_util.show_confirm_dialog('确认删除用户', 'POST', config_util.base_uri+"/management/user/destroy", {userId: data.userId,state:1}, function (response) {
+            if (response.code === 0) {
+                table_util.remove(data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('删除用户失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+</script>

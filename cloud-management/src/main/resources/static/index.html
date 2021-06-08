@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link href="layui/css/layui.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="icon" href="image/kl_logo.png" type="image/png" >
+    <title>Roamblue Cloud</title>
+</head>
+<body>
+<!--上方标题栏-->
+<div class="parentTop">
+    <span class="appName" href="javascript:;"><img class="loginIcon" src="image/kl_logo.png">&nbsp;&nbsp;Roamblue&nbsp;Cloud</span>
+    <div class="loginNameDiv" onclick="show_menu()">
+        <img class="loginIcon" src="image/icon.png">
+        <div class="loginUserInfo">
+        </div>
+    </div>
+</div>
+
+<!--左侧菜单-->
+<div class="leftMenu">
+    <a id="slide" onclick="slide_menu()"
+       slide="false"
+       style="display:block;color: white;background: #25262d;text-align: center;cursor: pointer;height: 30px;" title="展开菜单"><i class="layui-icon layui-icon-spread-left"
+                                              style="font-size: 18px;line-height: 30px;"></i></a>
+    <ul class="layui-nav layui-nav-tree" lay-filter="test" style="width:60px">
+        <li class="layui-nav-item layui-this"><a href="javascript:;" onclick="load_page('./page/vm.html')"
+                                                 title="虚拟机管理"><i class="layui-icon layui-icon-app"
+                                                                  style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">虚拟机管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/cluster.html')" title="集群管理"><i
+                class="layui-icon layui-icon-location" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">集群管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/network.html')" title="网络管理"><i
+                class="layui-icon layui-icon-website" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">网络管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/host.html')" title="主机管理"><i
+                class="layui-icon layui-icon-slider" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">主机管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/template.html')" title="模版管理"><i
+                class="layui-icon layui-icon-template-1" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">模版管理</span> </a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/storage.html')" title="存储管理"><i
+                class="layui-icon layui-icon-note" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">存储管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/volume.html')" title="磁盘管理"><i
+                class="layui-icon layui-icon-senior" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">磁盘管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/calculation.html')" title="计算方案"><i
+                class="layui-icon layui-icon-theme" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">计算方案</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/group.html')" title="群组管理"><i
+                class="layui-icon layui-icon-table" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">群组管理</span></a></li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="load_page('./page/user.html')" title="用户管理"><i
+                class="layui-icon layui-icon-username" style="font-size: 18px;"></i><span
+                style="margin-left: 10px;display: none;">用户管理</span></a></li>
+    </ul>
+</div>
+<!--主要内容区-->
+<div class="parentMain">
+    <iframe id="iframeParent" src="./page/vm.html"></iframe>
+</div>
+<div class="dialogMenu">
+    <div class="dialogMenu-item" id="parentChangePassword" onclick="show_change_password()"><i class="layui-icon layui-icon-password"></i>&nbsp;&nbsp;修改密码</div>
+    <div class="dialogMenu-item" id="parentExit" onclick="logout()"><i class="layui-icon layui-icon-logout"></i>&nbsp;&nbsp;退出</div>
+</div>
+</body>
+</html>
+<!--修改密码弹框-->
+<script id="dialogChangePassword" type="text/html">
+    <form class="layui-form" id="dialogChangePasswordForm" style="margin-top:30px;padding-right:30px;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">原密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password"
+                       placeholder="请输入原密码" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">新密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="newPassword"
+                       placeholder="请输入新密码" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">确认密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="okPassword"
+                       placeholder="请重复输入密码" class="layui-input">
+            </div>
+        </div>
+    </form>
+</script>
+<script src="js/jquery.min.js"></script>
+<script src="js/config_util.js"></script>
+<script src="layui/layui.js"></script>
+<script src="js/sha256.js"></script>
+<script src="js/util.js"></script>
+<script src="js/dialog_util.js"></script>
+
+<script type="text/javascript">
+    function load_page(page){
+        $('.dialogMenu').css('display', 'none');
+        $('#iframeParent').attr('src', page);
+    }
+
+    function show_menu(){
+        if ($('.dialogMenu').css('display') === 'block') {
+            $('.dialogMenu').css('display', 'none');
+        } else {
+            $('.dialogMenu').css('display', 'block');
+        }
+    }
+    function slide_menu(){
+        const show = $("#slide").attr("slide") === 'true';
+        if(show){
+            $(".leftMenu").css("width","60px")
+            $(".layui-nav-tree").css("width","60px")
+            $(".leftMenu span").hide()
+            $("#slide i").removeClass("layui-icon-shrink-right")
+            $("#slide i").addClass("layui-icon-spread-left")
+            $(".parentMain").css("left","60px")
+            $("#slide").attr("slide","false")
+            $("#slide").attr("title", "展开菜单")
+        }else{
+            $(".leftMenu").css("width","200px")
+            $(".layui-nav-tree").css("width","200px")
+            $(".leftMenu span").show()
+            $("#slide i").removeClass("layui-icon-spread-left")
+            $("#slide i").addClass("layui-icon-shrink-right")
+            $(".parentMain").css("left","200px")
+            $("#slide").attr("slide","true")
+            $("#slide").attr("title", "收起菜单")
+        }
+    }
+    function show_change_password(){
+        $('.dialogMenu').css('display', 'none');
+        layer.open({
+            type: 1,
+            title: '<i class="layui-icon layui-icon-password"></i>&nbsp;&nbsp;修改密码',
+            content: $('#dialogChangePassword').html(), //这里content是一个普通的String
+            btn: ['确定', '取消'],
+            success: function (index, layero) {
+                form.render();
+            },
+            yes: function (index, layero) {
+                const pwd = formArray2Data($('#dialogChangePasswordForm').serializeArray());
+                if(pwd.password==''){
+                    dialog_util.show_tool_tip('原密码不能为空');
+                    return false
+                }
+                if(pwd.newPassword==''){
+                    dialog_util.show_tool_tip('新密码不能为空');
+                    return false
+                }
+                if(pwd.okPassword==''){
+                    dialog_util.show_tool_tip('确认密码不能为空');
+                    return false
+                }
+                if(pwd.okPassword!=pwd.newPassword){
+                    dialog_util.show_tool_tip('新密码与确认密码不一致');
+                    return false
+                }
+                $.ajax({
+                        url: config_util.base_uri + '/management/signature',
+                        method: "GET",
+                        dataType: "json",
+                        async: false,
+                        headers: {"X-CLOUD-TOKEN": getToken()},
+                        success: function (data) {
+                            if (data.code == 0) {
+                                $.ajax({
+                                        url: config_util.base_uri+'/management/password',
+                                        method: "POST",
+                                        dataType: "json",
+                                        data:{
+                                            oldPassword:sha256_digest(sha256_digest(pwd.password+":"+data.data.signature)+":"+data.data.nonce),
+                                            newPassword:sha256_digest(pwd.okPassword+":"+data.data.signature),
+                                            nonce:data.data.nonce
+                                        },
+                                        headers: {
+                                            "X-CLOUD-TOKEN": getToken()
+                                        },
+                                        async: false,
+                                        success: function (data) {
+                                            console.log(data)
+                                            if (data.code == 0) {
+                                                dialog_util.show_tool_tip('密码修改成功');
+                                                layer.close(index);
+                                                sessionStorage.setItem("X_GATEWAY_TOKEN",data.data.token);
+                                            }
+                                            else  if(data.code==401){
+                                                window.location.href = 'login.html'
+                                            }else{
+                                                dialog_util.show_tool_tip('修改密码失败，错误码:'+data.code+',信息:'+data.message);
+                                            }
+                                        }
+                                })
+                            }
+                            else  if(data.code==401){
+                                window.location.href = 'login.html'
+                            }else{
+                                dialog_util.show_tool_tip('获取签名失败，错误码:'+data.code+',信息:'+data.message);
+                            }
+                        }
+                 })
+            }
+        });
+    }
+    function logout(){
+        $('.dialogMenu').css('display', 'none');
+        layer.open({
+            type: 1,
+            title:'<i class="layui-icon layui-icon-logout"></i>&nbsp;&nbsp;提示',
+            content: '<div style="padding: 20px;">是否退出</div>',
+            btn: ["确定退出", "暂不退出"],
+            yes: function (index, layero) {
+                sessionStorage.setItem("X_GATEWAY_TOKEN","");
+                location.href = "login.html";
+            },
+            btn2: function (index, layero) {
+
+            }
+        });
+    }
+    config_util.init();
+</script>

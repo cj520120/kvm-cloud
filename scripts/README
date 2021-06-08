@@ -1,0 +1,4 @@
+编辑qemu-ga 的配置文件 /etc/sysconfig/qemu-ga   将配置中 BLACKLIST_RPC 中的命令去掉。
+修改 /etc/selinux/config  SELINUX=disabled
+关闭防火墙
+route: yum -y install dhcp

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VM管理</title>
+    <link href="../layui/css/layui.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../image/kl_logo.png" rel="icon" type="image/png">
+</head>
+<body>
+<div style="display: flex; justify-content: space-between;">
+    <div style="display:flex">
+        <div class="layui-form">
+            <form name="searchForm">
+                <label>集群</label>
+                <div class="layui-input-inline"  style="width: 150px;">
+                    <select name="clusterId"></select>
+                </div>
+
+                <label>群组</label>
+                <div class="layui-input-inline" style="width:150px">
+                    <select name="groupId">
+                        <option value="0">所有</option>
+                    </select>
+                </div>
+                <label>运行主机</label>
+                <div class="layui-input-inline" style="width:150px">
+                    <select name="hostId">
+                        <option value="0">所有</option>
+                    </select>
+                </div>
+                <label>系统类型</label>
+                <div class="layui-input-inline" style="width:100px">
+                    <select name="type">
+                        <option value="Guest">用户</option>
+                        <option value="System">系统</option>
+                    </select>
+                </div>
+                <label>运行状态</label>
+                <div class="layui-input-inline" style="width:100px">
+                    <select name="status">
+                        <option value="">所有</option>
+                        <option value="Creating">Creating</option>
+                        <option value="Running">Running</option>
+                        <option value="Stopped">Stopped</option>
+                        <option value="Destroy">Destroy</option>
+                        <option value="Error">Error</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline">
+                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                         onclick="search_vm_click()"><i class="layui-icon layui-icon-search"></i>搜索
+                    </div>
+                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                         onclick="create_vm_click()"><i class="layui-icon layui-icon-addition"></i>创建VM
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div style="display:flex">
+        <div class="layui-form-item" style="margin-right: 0px">
+            <div class="layui-input-block" style="margin-left:0px">
+                <input autocomplete="off" class="layui-input" id="searchText" lay-verify="required" placeholder="关键字"
+                       required="" style="width:200px" type="text">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="content">
+
+</div>
+</body>
+
+<script id="createDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <div class="layui-form-item">
+            <table class="layui-table" style="margin: 0;" lay-size="sm">
+                <colgroup>
+                    <col width="100">
+                    <col width="200">
+                    <col width="100">
+                    <col width="200">
+                </colgroup>
+                <tbody>
+                <tr>
+                    <th>实例名称</th>
+                    <td>
+                        <div class="layui-input-inline"><input type="text" name="name" placeholder="请输入虚拟机名称"
+                                                               autocomplete="off"
+                                                               class="layui-input"/></div>
+                    </td>
+                    <th>计算方案</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="calculationSchemeId"></select></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>选择集群</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="clusterId" id="createClusterId"
+                                                                lay-filter="createClusterId"
+                                                                lay-verify="required"></select></div>
+                    </td>
+                    <th>系统模版</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="templateId"></select></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>选择存储</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="storageId"></select></div>
+                    </td>
+                    <th>磁盘大小</th>
+                    <td>
+                        <div class="layui-input-inline" style="width:100px">
+                            <input type="text"
+                                   onkeyup="value=verify_number(this.value)"
+                                   name="size" value="100" autocomplete="off"
+                                   class="layui-input"/>
+                        </div>
+                        <div class="layui-input-inline" style="width:80px;padding-top:10px">GB</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>选择网络</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="networkId"></select></div>
+                    </td>
+                    <th>选择主机</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="hostId"></select></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>选择群组</th>
+                    <td>
+                        <div class="layui-input-inline"><select name="groupId" lay-filter="groupId"
+                                                                lay-verify="required"></select></div>
+                    </td>
+                    <th>&nbsp;</th>
+                    <td>&nbsp;</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+</script>
+<script id="startDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">选择主机</label>
+            <div class="layui-input-inline">
+                <select name="hostId">
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="stopDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                <input type="checkbox" title="强制停止" name="force"/>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="rebootDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                <input type="checkbox" title="强制重启" name="force"/>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="reinstallDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">选择模版</label>
+            <div class="layui-input-inline">
+                <select name="templateId">
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="modifyDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">虚拟机名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="description" placeholder="请输入主机名称"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;;font-size:12px">计算方案</label>
+            <div class="layui-input-inline">
+                <select name="calculationSchemeId"></select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;;font-size:12px">选择群组</label>
+            <div class="layui-input-inline">
+                <select name="groupId"></select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="attachDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">选择光盘</label>
+            <div class="layui-input-inline">
+                <select name="iso">
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="templateDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="id"/>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;;font-size:12px">模版名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="name" placeholder="请输入模版名称" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+    </form>
+</script>
+<script id="viewDialog" type="text/html">
+    <form class="layui-form" action="" style="padding: 0px;" lay-filter="view">
+        <div class="layui-form-item">
+            <div class="layui-tab" style="margin: 0;">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">基础信息</li>
+                    <li>磁盘信息</li>
+                    <li>网卡信息</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-table" lay-size="sm">
+                            <tbody>
+                            <tr>
+                                <th>VM ID</th>
+                                <td id="view_id"></td>
+                                <th>VM 名称</th>
+                                <td id="view_name"></td>
+                            </tr>
+                            <tr>
+                                <th>VM 备注</th>
+                                <td id="view_description"></td>
+                                <th>所属集群</th>
+                                <td id="view_clusterName"></td>
+                            </tr>
+                            <tr>
+                                <th>VM 内核</th>
+                                <td id="view_cpu"></td>
+                                <th>VM 内存</th>
+                                <td id="view_memory"></td>
+                            </tr>
+                            <tr>
+                                <th>VM 类型</th>
+                                <td id="view_type"></td>
+                                <th>启动机器</th>
+                                <td id="view_hostName"></td>
+                            </tr>
+                            <tr>
+                                <th>光盘</th>
+                                <td id="view_iso" colspan="3">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>模版</th>
+                                <td id="view_template" colspan="3">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>群组</th>
+                                <td id="view_group">&nbsp;</td>
+                                <th>状态</th>
+                                <td id="view_status">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>创建时间</th>
+                                <td id="view_createTime"></td>
+                                <th>&nbsp;</th>
+                                <td>&nbsp;</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="layui-tab-item">
+                        <table class="layui-table" lay-size="sm">
+                            <thead>
+                            <tr>
+                                <th>磁盘ID</th>
+                                <th>磁盘名称</th>
+                                <th>挂载类型</th>
+                                <th>磁盘状态</th>
+                                <th>创建时间</th>
+                            </tr>
+                            </thead>
+                            <tbody id="volumeBody">
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div class="layui-tab-item">
+                        <table class="layui-table" lay-size="sm">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>MAC</th>
+                                <th>IP</th>
+                                <th>创建时间</th>
+                            </tr>
+                            </thead>
+                            <tbody id="networkBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/config_util.js"></script>
+<script src="../layui/layui.js"></script>
+<script src="../js/util.js"></script>
+<script src="../js/table_util.js"></script>
+<script src="../js/data_handler.js"></script>
+<script src="../js/data_util.js"></script>
+<script src="../js/dialog_util.js"></script>
+<script src="../js/render_util.js"></script>
+<script>
+
+    config_util.init(()=> {
+        render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
+        render_util.render_search_group_select($("form[name='searchForm'] select[name='groupId']"))
+        render_util.render_search_group_select($("form[name='searchForm'] select[name='groupId']"))
+        render_util.render_search_host_select($("form[name='searchForm'] select[name='hostId']"))
+
+
+        window.data_handler = new data_handler({elem: "form[name='searchForm']", uri: config_util.base_uri+"/management/vm/search", idName: "id"})
+
+        table_util.render({
+            elem: "#content",
+            idName: "id",
+            page:true,
+            cols: [
+                {title: "ID", name: "id", filter: true},
+                {title: "名称", name: "name", filter: true},
+                {
+                    title: "集群", name: "clusterId", render: function (data) {
+                        return data_util.get_cluster_name_by_id(data.clusterId)
+                    }, filter: true
+                },
+                {title: "备注", name: "description", filter: true},
+                {title: "IP", name: "ip", filter: true},
+                {title: "类型", name: "type", filter: true},
+                {
+                    title: "状态", name: "status", render: function (data) {
+                        return render_util.render_status(data.status)
+                    }, filter: true
+                },
+                {
+                    width: 180, title: "创建时间", render: function (data) {
+                        return dateFormat("YYYY-mm-dd HH:MM:SS", new Date(data.createTime))
+                    }
+                }
+            ],
+            menu: [
+                {
+                    title: "实例详情", icon: "layui-icon-form", show: function (data) {
+                        return true
+                    }, click: view_vm_click
+                },
+                {
+                    title: "卸载光盘", icon: "layui-icon-unlink", show: function (data) {
+                        return data.status != "Destroy" && data.type === 'Guest' && data.iso > 0
+                    }, click: detach_cd_room_click
+                },
+                {
+                    title: "挂载光盘", icon: "layui-icon-link", show: function (data) {
+                        return data.status != "Destroy" && data.type === 'Guest' && data.iso === 0
+                    }, click: attach_cd_room_click
+                },
+                {
+                    title: "远程桌面", icon: "layui-icon-layer", show: function (data) {
+                        return data.status === "Running"
+                    }, click: vnc_click
+                },
+                {
+                    title: "修改实例", icon: "layui-icon-set", show: function (data) {
+                        return data.status != "Destroy" && data.type === 'Guest' && data.status != "Running"
+                    }, click: modify_vm_click
+                },
+                {
+                    title: "启动实例", icon: "layui-icon-play", show: function (data) {
+                        return data.status === "Stopped"
+                    }, click: start_vm_click
+                },
+                {
+                    title: "重启实例", icon: "layui-icon-refresh-3", show: function (data) {
+                        return data.status === "Running"
+                    }, click: reboot_vm_click
+                },
+                {
+                    title: "停止实例", icon: "layui-icon-logout", show: function (data) {
+                        return data.status === "Running"
+                    }, click: stop_vm_click
+                },
+                {
+                    title: "创建模版", icon: "layui-icon-export", show: function (data) {
+                        return data.type === 'Guest' && data.status === "Stopped"
+                    }, click: create_template_click
+                },
+                {
+                    title: "重装系统", icon: "layui-icon-transfer", show: function (data) {
+                        return data.status != "Destroy" && data.type === 'Guest'
+                    }, click: reinstall_vm_click
+                },
+                {
+                    title: "指标监控", icon: "layui-icon-chart", show: function (data) {
+                        return data.status != "Destroy"
+                    }, click: vm_statistics_click
+                },
+                {
+                    title: "销毁实例", icon: "layui-icon-delete", show: function (data) {
+                        return data.status != "Destroy"
+                    }, click: destroy_vm_click
+                },
+                {
+                    title: "恢复实例", icon: "layui-icon-time", show: function (data) {
+                        return data.type === 'Guest' && data.status === "Destroy"
+                    }, click: resume_vm_click
+                },
+            ],
+            handler: window.data_handler
+        })
+        $("#searchText").on('input', function () {
+            table_util.filter_text = $("#searchText").val()
+            table_util.refresh();
+        })
+    })
+
+    function search_vm_click() {
+        window.data_handler.refresh();
+        table_util.refresh();
+    }
+
+    function view_vm_click(view_data) {
+        layer.open({
+            type: 1,
+            title: '<i class="layui-icon layui-icon-form"></i>&nbsp;' + view_data.description,
+            content: $('#viewDialog').html(),
+            btn: ['确定'],
+            area: ['600px', '430px'],
+            success: function (index, layero) {
+                const calculation = data_util.find_calculation_by_id(view_data.calculationSchemeId);
+                $("#view_id").html(view_data.id);
+                $("#view_name").html(view_data.name);
+                $("#view_group").html(data_util.find_group_name_by_id(view_data.groupId));
+                $("#view_description").html(view_data.description);
+                $("#view_clusterName").html(data_util.get_cluster_name_by_id(view_data.clusterId));
+                $("#view_hostName").html(data_util.get_host_name_by_id(view_data.hostId));
+                if (calculation) {
+                    $("#view_cpu").html(calculation.cpu);
+                    $("#view_memory").html(render_util.get_memory_capacity(calculation.memory));
+                } else {
+                    $("#view_cpu").html("-");
+                    $("#view_memory").html("-");
+                }
+                $("#view_iso").html(data_util.get_template_name_by_id(view_data.iso));
+                $("#view_template").html(data_util.get_template_name_by_id(view_data.templateId));
+                $("#view_type").html(view_data.type);
+                $("#view_status").html(view_data.status);
+                $("#view_createTime").html(dateFormat("YYYY-mm-dd HH:MM:SS", new Date(view_data.createTime)));
+                let volume_data=new data_handler({uri:config_util.base_uri+`/management/volume/search?clusterId=${view_data.clusterId}&vmId=${view_data.id}&storageId=0`}).load_data();
+                document.querySelector('#volumeBody').innerHTML = volume_data.map((item, index) => {
+                    const timeStr = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(item.createTime));
+                    const type = item.device == 0 ? "ROOT" : "DATA";
+                    return ` <tr > <td>${item.id}</td><td>${item.name}</td><td>${type}</td><td>${item.status}</td><td>${timeStr}</td> </tr>`;
+                }).join('');
+                let network_data=new data_handler({uri:config_util.base_uri+`/management/network/vm?vmId=${view_data.id}`}).load_data();
+                document.querySelector('#networkBody').innerHTML = network_data.map((item, index) => {
+                    const timeStr = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(item.createTime));
+                    return ` <tr > <td>${item.id}</td><td>${item.mac}</td><td>${item.ip}</td><td>${timeStr}</td</tr>`;
+                }).join('')
+            }
+        })
+    }
+
+    function create_vm_click() {
+        dialog_util.show_modify("#createDialog", "创建VM", "layui-icon-addition", "POST", config_util.base_uri+"/management/vm/create", function () {
+            form.on("select(createClusterId)", function (data) {
+                const clusterId = parseInt(data.value);
+                render_util.render_edit_host_select(clusterId, $("form[name='modify'] [name='hostId']"));
+                render_util.render_edit_storage_select(clusterId, $("form[name='modify'] [name='storageId']"));
+                render_util.render_edit_network_select(clusterId, $("form[name='modify'] [name='networkId']"));
+                render_util.render_edit_template_select(clusterId, $("form[name='modify'] [name='templateId']"));
+            });
+            render_util.render_edit_group_select($("form[name='modify'] [name='groupId']"))
+            render_util.render_edit_calculation_scheme_select($("form[name='modify'] [name='calculationSchemeId']"));
+            render_util.render_edit_cluster_select($("form[name='modify'] [name='clusterId']"))
+            const clusterId = parseInt($("form[name='modify'] [name='clusterId']").val());
+
+            render_util.render_edit_host_select(clusterId, $("form[name='modify'] [name='hostId']"));
+            render_util.render_edit_storage_select(clusterId, $("form[name='modify'] [name='storageId']"));
+            render_util.render_edit_network_select(clusterId, $("form[name='modify'] [name='networkId']"));
+            render_util.render_edit_template_select(clusterId, $("form[name='modify'] [name='templateId']"));
+
+
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.append(response.data);
+            } else {
+                dialog_util.show_tool_tip('添加VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function create_template_click(data) {
+        dialog_util.show_modify("#templateDialog", "创建模版", "layui-icon-export", "POST", config_util.base_uri+"/management/vm/template", function () {
+            $("form[name='modify'] [name='id']").val(data.id)
+        }, function (response) {
+            if (response.code === 0) {
+                window.template.push(response.data)
+            } else {
+                dialog_util.show_tool_tip('创建模版失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function start_vm_click(data) {
+        dialog_util.show_modify("#startDialog", "启动VM", "layui-icon-play", "POST", config_util.base_uri+"/management/vm/start", function () {
+            render_util.render_edit_host_select(data.clusterId, $("form[name='modify'] [name='hostId']"))
+            $("form[name='modify'] [name='id']").val(data.id)
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('启动VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function stop_vm_click(data) {
+        dialog_util.show_modify("#stopDialog", "停止VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/stop", function () {
+            $("form[name='modify'] [name='id']").val(data.id)
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('停止VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function reboot_vm_click(data) {
+        dialog_util.show_modify("#rebootDialog", "重启VM", "layui-icon-refresh-3", "POST", config_util.base_uri+"/management/vm/reboot", function () {
+            $("form[name='modify'] [name='id']").val(data.id)
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重启VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function reinstall_vm_click(data) {
+        dialog_util.show_modify("#reinstallDialog", "重装VM", "layui-icon-transfer", "POST", config_util.base_uri+"/management/vm/reinstall", function () {
+            $("form[name='modify'] [name='id']").val(data.id)
+            render_util.render_edit_template_select(data.clusterId, $("form[name='modify'] [name='templateId']"))
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function modify_vm_click(data) {
+        dialog_util.show_modify("#modifyDialog", `修改${data.description}`, "layui-icon-edit", "POST", config_util.base_uri+"/management/vm/modify", function () {
+            render_util.render_edit_calculation_scheme_select($("form[name='modify'] [name='calculationSchemeId']"))
+            render_util.render_edit_group_select($("form[name='modify'] [name='groupId']"))
+            $("form[name='modify'] [name='id']").val(data.id)
+            $("form[name='modify'] [name='calculationSchemeId']").val(data.calculationSchemeId)
+            $("form[name='modify'] [name='groupId']").val(data.groupId)
+            $("form[name='modify'] [name='description']").val(data.description)
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function attach_cd_room_click(data) {
+        dialog_util.show_modify("#attachDialog", "附加光驱", "layui-icon-link", "POST", config_util.base_uri+"/management/vm/attach/cdroom", function () {
+            $("form[name='modify'] [name='id']").val(data.id)
+            render_util.render_attach_iso_select(data.clusterId, $("form[name='modify'] [name='iso']"))
+        }, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function detach_cd_room_click(data) {
+        dialog_util.show_confirm_dialog('确认卸载光盘', 'POST', config_util.base_uri+"/management/vm/detach/cdroom", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('卸载光盘失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function vnc_click(data) {
+        window.open(config_util.base_uri+"/page/vnc.html?id=" + data.id + "&name=" + encodeURI(data.description))
+    }
+
+    function destroy_vm_click(data) {
+        dialog_util.show_confirm_dialog('确认删除VM', 'POST', config_util.base_uri+"/management/vm/destroy", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else if (response.code === 10000010) {
+                table_util.remove(data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('销毁VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function resume_vm_click(data) {
+        dialog_util.show_confirm_dialog('确认恢复VM', 'POST', config_util.base_uri+"/management/vm/resume", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                table_util.modify(response.data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('恢复VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function vm_statistics_click(data) {
+        layer.open({
+            type: 2,
+            maxmin: false,
+            title: '<i class="layui-icon layui-icon-chart"></i>&nbsp;' + data.description + " 监控",
+            scrollbar: false,
+            area: ['620px', '530px'],
+            content: ["../page/chat.html?id=" + data.id + "&name=" + encodeURI(data.description), 'yes']
+        })
+    }
+</script>

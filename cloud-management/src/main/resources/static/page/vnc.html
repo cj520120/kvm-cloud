@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+    <link href="../layui/css/layui.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../image/kl_logo.png" rel="icon" type="image/png">
+    <style type="text/css">
+
+
+        body {
+            margin: 0;
+            background-color: dimgrey;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        html {
+            height: 100%;
+        }
+
+        #top_bar {
+            background-color: #6e84a3;
+            color: white;
+            font: bold 12px Helvetica;
+            padding: 6px 5px 4px 5px;
+            border-bottom: 1px outset;
+        }
+        #status {
+            text-align: center;
+        }
+        #sendCtrlAltDelButton {
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            border: 1px outset;
+            padding: 5px 5px 4px 5px;
+            cursor: pointer;
+        }
+
+        #screen {
+            flex: 1; /* fill remaining space */
+            overflow: hidden;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="top_bar">
+    <div id="status">正在连接...</div>
+    <div id="sendCtrlAltDelButton" onclick="sendCtrlAltDel()">发送 Ctrl+Alt+Del</div>
+</div>
+<div id="screen">
+
+</div>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/config_util.js"></script>
+<script src="../layui/layui.js"></script>
+<script src="../js/config_util.js"></script>
+<script src="../js/util.js"></script>
+<script src="../js/data_handler.js"></script>
+<script src="../novnc/vendor/promise.js"></script>
+
+<script nomodule src="../novnc/vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
+<script crossorigin="anonymous" src="../js/vnc_util.js" type="module"></script>
+</body>
+</html>
