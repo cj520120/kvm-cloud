@@ -43,7 +43,7 @@ public class VmCheckTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 10000;
+        return 600000;
     }
 
     @Override
