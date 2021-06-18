@@ -53,13 +53,27 @@ vi /etc/sysconfig/nfs
 systemctl restart rpcbind
 systemctl restart nfs-server
 ```
-### KVM
-#### 1、主机安装KVM
+
+#### 8、测试挂载是否正常
 ```sh
-yum install qemu-kvm libvirt bridge-utils
+mount -t nfs 127.0.0.1:/data/nfs /mnt
+df -h        ###查看有了代表成功
+umount /mnt
 ```
 
-#### 2、配置KVM 主机网桥，增加一个网桥
+### KVM
+#### 1、验证主机是否支持虚拟化
+```sh
+ lsmod | grep kvm #查看结果确认是否支持虚拟化
+ 如果是vmware开启的虚拟机，请启用虚拟化技术
+```
+#### 2、主机安装KVM
+```sh
+yum install qemu-kvm libvirt bridge-utils
+yum install java-1.8.0-openjdk* -y
+```
+
+#### 3、配置KVM 主机网桥，增加一个网桥
 ```sh
 vi /etc/sysconfig/network-scripts/ifcfg-br0
     DEVICE="br0"
@@ -67,6 +81,7 @@ vi /etc/sysconfig/network-scripts/ifcfg-br0
     ONBOOT="yes"
     BOOTPROTO=static
     IPADDR=192.168.2.130
+    NATMASK=255.255.255.0
     PREFIX=24
     GATEWAY=192.168.2.1
     DNS1=8.8.4.4
@@ -81,12 +96,12 @@ vi /etc/sysconfig/network-scripts/ifcfg-eth0
     BOOTPROTO=none
     BRIDGE="br0"
 ```
-#### 3、VNC 配置  
+#### 4、VNC 配置  
 ```sh
 vi /etc/libvirt/qemu.conf
     vnc_listen=0.0.0.0
 ```
-#### 4、Libvirtd配置
+#### 5、Libvirtd配置
 ```sh
 vi /etc/libvirt/libvirtd.conf
     listen_tls = 0
@@ -94,9 +109,9 @@ vi /etc/libvirt/libvirtd.conf
     tcp_port = "16059"
     auth_tcp = "none"
     mdns_adv = 0
-    vi /etc/sysconfig/libvirtd
+vi /etc/sysconfig/libvirtd
     LIBVIRTD_ARGS="--listen"
-service libvirtd restart
+systemctl restart libvirtd 
 ```
 #### 项目编译
 ```sh
