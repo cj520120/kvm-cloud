@@ -56,7 +56,6 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        allocateService.allocateGuestAddress(network.getId(), vmId);
         return managerAddress;
     }
 
