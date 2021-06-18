@@ -97,8 +97,8 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                         .append("BOOTPROTO=static\r\n")
                         .append("DEFROUTE=yes\r\n")
                         .append("IPV4_FAILURE_FATAL=no\r\n")
-                        .append("NAME=eth").append(i).append("\r\n")
-                        .append("DEVICE=eth").append(i).append("\r\n")
+                        .append("NAME=eth").append(vmNetworkInfo.getDevice()).append("\r\n")
+                        .append("DEVICE=eth").append(vmNetworkInfo.getDevice()).append("\r\n")
                         .append("ONBOOT=yes\r\n")
                         .append(String.format("IPADDR=%s\r\n", vmNetworkInfo.getIp()))
                         .append(String.format("NETMASK=%s\r\n", IpCaculate.getNetMask(networkInfo.getSubnet().split("/")[1])))
@@ -107,7 +107,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                 for (int dnsIndex = 0; dnsIndex < dns.length; dnsIndex++) {
                     sb.append("DNS").append(dnsIndex + 1).append("=").append(dns[dnsIndex]).append("\r\n");
                 }
-                String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + i;
+                String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + vmNetworkInfo.getDevice();
                 ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, sb.toString());
                 if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND) {
                     throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "]网络初始化超时.VM未启动");

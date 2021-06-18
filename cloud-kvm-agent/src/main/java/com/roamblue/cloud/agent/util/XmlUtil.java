@@ -100,9 +100,13 @@ public class XmlUtil {
         sb.append("<driver name='qemu' type='qcow2' cache='none'/>");
         sb.append("<source file='").append(instance.getRoot().getPath()).append("'/>");
         sb.append("<target dev='vda' bus='").append(instance.getRoot().getDriver()).append("'/>");
-        if ("ide".equalsIgnoreCase(instance.getRoot().getDriver()) || "sata".equalsIgnoreCase(instance.getRoot().getDriver())) {
+        if ("ide".equalsIgnoreCase(instance.getRoot().getDriver()) ) {
             sb.append("<address type='drive' controller='0' bus='1' target='0' unit='0'/>");
-        } else {
+        }else if ("sata".equalsIgnoreCase(instance.getRoot().getDriver())) {
+            sb.append("<address type='drive' controller='0' bus='0' target='0' unit='0'/>");
+        }else if ("scsi".equalsIgnoreCase(instance.getRoot().getDriver())) {
+            sb.append("<address type='drive' controller='0' bus='0' target='0' unit='0'/>");
+        }else {
             sb.append("<address type='pci' domain='0x0000' bus='0x00' slot='").append(String.format("0x%02x", 5)).append("' function='0x0'/>");
         }
         sb.append("</disk>");
