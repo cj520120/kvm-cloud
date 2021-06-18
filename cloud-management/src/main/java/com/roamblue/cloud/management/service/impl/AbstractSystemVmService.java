@@ -139,6 +139,9 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
 
         List<NetworkEntity> networks = networkMapper.findByClusterId(clusterId);
         for (NetworkEntity network : networks) {
+            if(!network.getNetworkStatus().equals(NetworkStatus.READY)){
+                continue;
+            }
             try {
                 SystemVmEntity systemVmEntity = systemVmMapper.findByNetworkIdAndVmType(network.getId(), this.getType());
                 if (systemVmEntity != null) {
