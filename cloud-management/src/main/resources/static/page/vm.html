@@ -645,7 +645,7 @@
         dialog_util.show_confirm_dialog('确认删除VM', 'POST', config_util.base_uri+"/management/vm/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
                 table_util.modify(response.data);
-            } else if (response.code === 10000010||response.code === 10000001) {
+            } else if (response.code === 10000010||response.code === 1000001) {
                 table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁VM失败，错误码:' + response.code + '。错误信息:' + response.message);
