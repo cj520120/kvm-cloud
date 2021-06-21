@@ -72,6 +72,9 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
         if (StringUtils.isEmpty(type)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "网络类型不能为空");
         }
+        if (StringUtils.isEmpty(card)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "网卡名称不能为空");
+        }
         if (clusterId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "集群不能为空");
         }
@@ -97,7 +100,6 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
     @Rule(min = RuleType.ADMIN)
     public ResultUtil<NetworkInfo> pauseNetwork(int id) {
         return super.call(() -> networkService.pauseNetworkById(id));
-
     }
 
 }

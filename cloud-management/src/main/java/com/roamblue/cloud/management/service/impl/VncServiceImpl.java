@@ -164,6 +164,5 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
             return VncInfo.builder().password(vnc.getVncPassword()).ip(vm.getVmIp()).token(token).build();
         }
         throw new CodeException(ErrorCode.VM_NOT_START, "没有可用的Console实例");
-
     }
 }

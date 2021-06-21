@@ -70,7 +70,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         if (clusterId <= 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群不能为空");
         }
-        if (calculationSchemeId <= 0) {
+        if (calculationSchemeId < 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "计算方案不能为空");
         }
         if (templateId <= 0) {

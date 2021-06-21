@@ -186,7 +186,7 @@ public abstract class AbstractVmService implements VmService {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         if (vm.getVmStatus().equals(VmStatus.STOPPED)) {
-
+            this.vmMapper.updateLastActiveTime(id,new Date());
             CalculationSchemeInfo calculationSchemeInfo = calculationSchemeService.findCalculationSchemeById(vm.getCalculationSchemeId());
             HostEntity hostInfo = this.allocateService.allocateHost(vm.getClusterId(), hostId, calculationSchemeInfo.getCpu(), calculationSchemeInfo.getMemory());
             vm.setHostId(hostInfo.getId());
