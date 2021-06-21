@@ -19,6 +19,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     public List<VolumeModel> listVolume(String storageName) {
         return super.excute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
+            storagePool.refresh(0);
             String[] volumes = storagePool.listVolumes();
             List<VolumeModel> list = new ArrayList<>();
             for (String volume : volumes) {
@@ -34,9 +35,13 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
             StorageVolInfo storageVolInfo = storageVol.getInfo();
+            String type=null;
+            if(storageVolInfo!=null&& storageVolInfo.type!=null){
+                type=storageVolInfo.type.toString();
+            }
             return VolumeModel.builder().storage(storageName)
                     .name(volumeName)
-                    .type(storageVolInfo.type.toString())
+                    .type(type)
                     .path(storageVol.getPath())
                     .capacity(storageVolInfo.capacity)
                     .allocation(storageVolInfo.allocation)
@@ -113,7 +118,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
             StoragePool storagePool = connect.storagePoolLookupByName(storage);
             StorageVol storageVol = storagePool.storageVolCreateXML(sb.toString(), 0);
             StorageVolInfo storageVolInfo = storageVol.getInfo();
-
+            storagePool.refresh(0);
             log.info("创建磁盘.storage={} volume={} xml={}", storage, volume, sb.toString());
             return VolumeModel.builder().storage(storage)
                     .name(volume)
