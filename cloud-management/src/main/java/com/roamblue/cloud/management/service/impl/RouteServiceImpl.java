@@ -12,10 +12,7 @@ import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.RouteService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.VMType;
-import com.roamblue.cloud.management.util.IpCaculate;
-import com.roamblue.cloud.management.util.IpType;
-import com.roamblue.cloud.management.util.TemplateType;
+import com.roamblue.cloud.management.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +36,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
+        log.info("Route 申请网络地址成功,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -73,6 +71,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
     }
 
     private void initializeDHCP(VmEntity vm, HostEntity host) {
+        log.info("开始初始化DHCP服务");
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(vm.getClusterId());
         if (networks.isEmpty()) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法开启路由:网络未找到");
@@ -81,6 +80,9 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         dhcp.append("ddns-update-style none;\r\n").append("ignore client-updates;\r\n");
         for (int i = 0; i < networks.size(); i++) {
             NetworkInfo networkInfo = networks.get(i);
+            if (!networkInfo.getStatus().equals(NetworkStatus.READY)) {
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "无法初始化DHCP，网络未就绪");
+            }
             List<VmNetworkInfo> allInstance = this.networkService.listVmNetworkByNetworkId(networkInfo.getId());
             if (!allInstance.isEmpty()) {
                 dhcp.append(String.format("subnet %s netmask %s {\r\n", networkInfo.getSubnet().split("/")[0], IpCaculate.getNetMask(networkInfo.getSubnet().split("/")[1])));
@@ -112,7 +114,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         if (restartDhcpResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(restartDhcpResultUtil.getCode(), restartDhcpResultUtil.getMessage());
         }
-
+        log.info("DHCP服务初始化成功");
     }
 
     @Override

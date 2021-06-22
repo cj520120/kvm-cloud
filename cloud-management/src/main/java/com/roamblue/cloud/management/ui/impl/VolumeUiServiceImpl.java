@@ -53,12 +53,12 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
 
     @Override
     public ResultUtil<VolumeInfo> destroyVolumeById(int id) {
-        return lockService.run(LockKeyUtil.getVolumeLockKey(id), ()->this.call(() -> volumeService.destroyVolumeById(id)),1, TimeUnit.MINUTES);
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> this.call(() -> volumeService.destroyVolumeById(id)), 1, TimeUnit.MINUTES);
     }
 
     @Override
     public ResultUtil<VolumeInfo> resume(int id) {
-        return lockService.run(LockKeyUtil.getVolumeLockKey(id), ()-> super.call(() -> volumeService.resume(id)),1,TimeUnit.MINUTES);
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.resume(id)), 1, TimeUnit.MINUTES);
     }
 
     @Override
@@ -66,6 +66,6 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
         if (size <= 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "磁盘大小不能小于1G");
         }
-        return lockService.run(LockKeyUtil.getVolumeLockKey(id), ()-> super.call(() -> volumeService.resize(id, size)),1,TimeUnit.MINUTES);
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.resize(id, size)), 1, TimeUnit.MINUTES);
     }
 }

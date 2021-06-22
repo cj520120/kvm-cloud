@@ -22,8 +22,8 @@ public class WebExceptionHandler {
     @ResponseBody
     public ResultUtil exceptionHandler(Exception error) {
         if (error instanceof CodeException) {
-            CodeException codeException=(CodeException)error;
-            return ResultUtil.error(codeException.getCode(),codeException.getMessage());
+            CodeException codeException = (CodeException) error;
+            return ResultUtil.error(codeException.getCode(), codeException.getMessage());
         } else {
             log.error("request fail.", error);
             return ResultUtil.error(ErrorCode.SERVER_ERROR, error.getMessage());

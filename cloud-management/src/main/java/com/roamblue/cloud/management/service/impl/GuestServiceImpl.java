@@ -11,9 +11,9 @@ import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.service.GuestService;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.VmStatus;
-import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.TemplateType;
+import com.roamblue.cloud.management.util.VMType;
+import com.roamblue.cloud.management.util.VmStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,12 +35,14 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
     protected VmNetworkInfo allocateNetwork(NetworkInfo network, int vmId) {
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
-        return allocateService.allocateGuestAddress(network.getId(), vmId);
+        VmNetworkInfo vmNetworkInfo = allocateService.allocateGuestAddress(network.getId(), vmId);
+
+        log.info("申请网络地址成功,VM={} IP={} MAC={} Device={}", vmId, vmNetworkInfo.getIp(), vmNetworkInfo.getMac(), vmNetworkInfo.getDevice());
+        return vmNetworkInfo;
     }
 
     @Override
     public VmInfo resume(int vmId) {
-
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");

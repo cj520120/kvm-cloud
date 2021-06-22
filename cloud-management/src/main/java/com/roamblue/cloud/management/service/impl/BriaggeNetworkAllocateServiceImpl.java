@@ -41,10 +41,11 @@ public class BriaggeNetworkAllocateServiceImpl implements NetworkAllocateService
         }
         VmNetworkEntity instanceNetworkEntity = null;
         boolean allocate = false;
-        List<VmNetworkEntity> list = vmNetworkMapper.findByNetworkIdAndIpType(networkId, ipType).stream().filter(t -> t.getVmId().equals(0)).collect(Collectors.toList());
+
+        List<VmNetworkEntity> list = vmNetworkMapper.findEmptyNetworkByNetworkIdAndIpType(networkId, ipType);
         while (list.size() > 0 && !allocate) {
             instanceNetworkEntity = list.remove(0);
-            allocate = vmNetworkMapper.allocateNetwork(instanceNetworkEntity.getId(), vmId) > 0;
+            allocate = vmNetworkMapper.allocateNetwork(instanceNetworkEntity.getId(), vmId, deviceId) > 0;
         }
         if (!allocate) {
             throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "网络不可用或无可用地址");

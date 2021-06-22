@@ -10,15 +10,16 @@ import com.roamblue.cloud.management.data.entity.SystemVmEntity;
 import com.roamblue.cloud.management.data.entity.VmEntity;
 import com.roamblue.cloud.management.data.mapper.NetworkMapper;
 import com.roamblue.cloud.management.data.mapper.SystemVmMapper;
-import com.roamblue.cloud.management.util.VmStatus;
 import com.roamblue.cloud.management.util.IpCaculate;
 import com.roamblue.cloud.management.util.NetworkStatus;
+import com.roamblue.cloud.management.util.VmStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -64,64 +65,61 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
     }
 
     protected void initializeNetwork(VmEntity instance, HostEntity host) {
-        long startTime = System.currentTimeMillis();
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(instance.getClusterId());
         if (networks.isEmpty()) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，网络不存在");
         }
         List<VmNetworkInfo> vmNetworkInfoList = this.networkService.findVmNetworkByVmId(instance.getId());
-        if (networks.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，没有配置IP");
+        if (vmNetworkInfoList.isEmpty()) {
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，VM没有配置IP");
         }
-        boolean completed = false;
-        do {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+        Map<Integer, NetworkInfo> networkInfoMap = networks.stream().collect(Collectors.toMap(NetworkInfo::getId, Function.identity()));
+        for (int i = 0; i < vmNetworkInfoList.size(); i++) {
+            VmNetworkInfo vmNetworkInfo = vmNetworkInfoList.get(i);
+            NetworkInfo networkInfo = networkInfoMap.get(vmNetworkInfo.getNetworkId());
+            if (networkInfo == null) {
+                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，网络不存在");
             }
-
-            for (int i = 0; i < networks.size(); i++) {
-                NetworkInfo networkInfo = networks.get(i);
-                if (!networkInfo.getStatus().equals(NetworkStatus.READY)) {
-                    continue;
-                }
-                StringBuilder sb = new StringBuilder();
-                VmNetworkInfo vmNetworkInfo = vmNetworkInfoList.stream().filter(t -> t.getNetworkId() == networkInfo.getId()).findFirst().orElse(null);
-                if (vmNetworkInfo == null) {
-                    continue;
-                }
-
-
-                sb.append("TYPE=Ethernet\r\n")
-                        .append("BROWSER_ONLY=no\r\n")
-                        .append("BOOTPROTO=static\r\n")
-                        .append("DEFROUTE=yes\r\n")
-                        .append("IPV4_FAILURE_FATAL=no\r\n")
-                        .append("NAME=eth").append(vmNetworkInfo.getDevice()).append("\r\n")
-                        .append("DEVICE=eth").append(vmNetworkInfo.getDevice()).append("\r\n")
-                        .append("ONBOOT=yes\r\n")
-                        .append(String.format("IPADDR=%s\r\n", vmNetworkInfo.getIp()))
-                        .append(String.format("NETMASK=%s\r\n", IpCaculate.getNetMask(networkInfo.getSubnet().split("/")[1])))
-                        .append(String.format("GATEWAY=%s\r\n", networkInfo.getGateway()));
-                String[] dns = networkInfo.getDns().split(",");
-                for (int dnsIndex = 0; dnsIndex < dns.length; dnsIndex++) {
-                    sb.append("DNS").append(dnsIndex + 1).append("=").append(dns[dnsIndex]).append("\r\n");
-                }
-                String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + vmNetworkInfo.getDevice();
-                ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, sb.toString());
-                if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND) {
-                    throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "]网络初始化超时.VM未启动");
-                } else if (resultUtil.getCode() != ErrorCode.SUCCESS) {
-                    completed = false;
+            if (!networkInfo.getStatus().equals(NetworkStatus.READY)) {
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "无法初始化[" + this.getType() + "]网络，网络未就绪");
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("TYPE=Ethernet\r\n")
+                    .append("BROWSER_ONLY=no\r\n")
+                    .append("BOOTPROTO=static\r\n")
+                    .append("DEFROUTE=yes\r\n")
+                    .append("IPV4_FAILURE_FATAL=no\r\n")
+                    .append("NAME=eth").append(vmNetworkInfo.getDevice()).append("\r\n")
+                    .append("DEVICE=eth").append(vmNetworkInfo.getDevice()).append("\r\n")
+                    .append("ONBOOT=yes\r\n")
+                    .append(String.format("IPADDR=%s\r\n", vmNetworkInfo.getIp()))
+                    .append(String.format("NETMASK=%s\r\n", IpCaculate.getNetMask(networkInfo.getSubnet().split("/")[1])))
+                    .append(String.format("GATEWAY=%s\r\n", networkInfo.getGateway()));
+            String[] dns = networkInfo.getDns().split(",");
+            for (int dnsIndex = 0; dnsIndex < dns.length; dnsIndex++) {
+                sb.append("DNS").append(dnsIndex + 1).append("=").append(dns[dnsIndex]).append("\r\n");
+            }
+            String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + vmNetworkInfo.getDevice();
+            String networkConfig = sb.toString();
+            log.info("[{}]开始写入网卡配置.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
+            long startTime = System.currentTimeMillis();
+            do {
+                ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, networkConfig);
+                if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                    log.info("[{}]写入网卡配置成功,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
                     break;
-                } else {
-                    completed = true;
+                } else if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND) {
+                    throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "]网络初始化失败.VM未启动");
                 }
-            }
-            if ((System.currentTimeMillis() - startTime) > 60 * 1000) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "[" + this.getType() + "]网络初始化超时.");
-            }
-        } while (!completed);
+                if ((System.currentTimeMillis() - startTime) > 60 * 1000) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "[" + this.getType() + "]网络初始化失败.写入网卡配置超市");
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                }
+            } while (true);
+        }
 
         ResultUtil<Map<String, Object>> restartNetworkResultUtil = this.agentService.execute(host.getHostUri(), instance.getVmName(), "systemctl restart network");
         if (restartNetworkResultUtil.getCode() != ErrorCode.SUCCESS) {
@@ -139,7 +137,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
 
         List<NetworkEntity> networks = networkMapper.findByClusterId(clusterId);
         for (NetworkEntity network : networks) {
-            if(!network.getNetworkStatus().equals(NetworkStatus.READY)){
+            if (!network.getNetworkStatus().equals(NetworkStatus.READY)) {
                 continue;
             }
             try {

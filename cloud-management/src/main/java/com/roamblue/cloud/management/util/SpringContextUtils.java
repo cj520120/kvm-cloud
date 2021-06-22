@@ -22,7 +22,7 @@ public class SpringContextUtils implements ApplicationContextAware {
         if (_applicationContext != null) {
             return _applicationContext.getBean(requiredType);
         } else {
-            throw new CodeException(ErrorCode.SERVER_ERROR,"系统未初始化完成....");
+            throw new CodeException(ErrorCode.SERVER_ERROR, "系统未初始化完成....");
         }
     }
 

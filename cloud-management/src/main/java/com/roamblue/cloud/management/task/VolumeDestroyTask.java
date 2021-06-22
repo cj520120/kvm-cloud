@@ -37,6 +37,7 @@ public class VolumeDestroyTask extends AbstractTask {
     private AgentService agentService;
     @Autowired
     private LockService lockService;
+
     @Override
     protected int getInterval() {
         return 60000;
@@ -74,7 +75,7 @@ public class VolumeDestroyTask extends AbstractTask {
                     continue;
                 }
             }
-            lockService.run(LockKeyUtil.getVolumeLockKey(volume.getId()), ()-> volumeMapper.deleteById(volume.getId()) ,1, TimeUnit.MINUTES);
+            lockService.run(LockKeyUtil.getVolumeLockKey(volume.getId()), () -> volumeMapper.deleteById(volume.getId()), 1, TimeUnit.MINUTES);
         }
     }
 }

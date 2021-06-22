@@ -125,8 +125,8 @@ public class InstanceController {
                                      @RequestParam("networkId") int networkId,
                                      @RequestParam("groupId") int groupId) {
 
-    	// 
-        return vmUiService.create(name,  clusterId,  storageId,  hostId,  calculationSchemeId,  templateId,  size,  networkId,  groupId);
+        //
+        return vmUiService.create(name, clusterId, storageId, hostId, calculationSchemeId, templateId, size, networkId, groupId);
     }
 
     @Login

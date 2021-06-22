@@ -12,8 +12,8 @@ import com.roamblue.cloud.management.service.AgentService;
 import com.roamblue.cloud.management.service.HostService;
 import com.roamblue.cloud.management.service.LockService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.VmStatus;
 import com.roamblue.cloud.management.util.LockKeyUtil;
+import com.roamblue.cloud.management.util.VmStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,8 +75,8 @@ public class VmCheckTask extends AbstractTask {
                     if (find == null) {
                         return null;
                     }
-                    if((System.currentTimeMillis()-find.getLastUpdateTime().getTime())< 60000){
-                        log.info("忽略VM检测 VM-Name={}",vm.getVmDescription());
+                    if ((System.currentTimeMillis() - find.getLastUpdateTime().getTime()) < 60000) {
+                        log.info("忽略VM检测 VM-Name={}", vm.getVmDescription());
                         return null;
                     }
                     if (find.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED) || !find.getHostId().equals(hostInfo.getId())) {

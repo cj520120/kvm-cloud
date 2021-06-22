@@ -13,9 +13,9 @@ import com.roamblue.cloud.management.data.mapper.HostMapper;
 import com.roamblue.cloud.management.data.mapper.VncMapper;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.VncService;
-import com.roamblue.cloud.management.util.VmStatus;
-import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.TemplateType;
+import com.roamblue.cloud.management.util.VMType;
+import com.roamblue.cloud.management.util.VmStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +56,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
+        log.info("VNC申请网络地址成功,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -68,7 +69,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         for (Integer networkId : networkIds) {
             writeVncConfig(vm, networkId, host);
         }
-        log.info("Console 启动完成");
+        log.info("Vnc Console 启动完成");
     }
 
     @Override
@@ -103,6 +104,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     public ResultUtil<Void> register(int clusterId, int vmId, String host, int port, String password) {
 
         this.unRegister(clusterId, vmId);
+        log.info("开始注册VNC地址.vm={} vnc=vnc://{}:{} password={}", vmId, host, port, password);
         List<VmNetworkInfo> networks = this.networkService.findVmNetworkByVmId(vmId);
         List<Integer> networkIds = networks.stream().map(VmNetworkInfo::getNetworkId).distinct().collect(Collectors.toList());
         for (Integer networkId : networkIds) {
@@ -134,6 +136,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     @Override
     public ResultUtil<Void> unRegister(int clusterId, int vmId) {
         try {
+            log.info("取消VNC注册.vm={}", vmId);
             this.vncMapper.deleteByVmId(vmId);
             return ResultUtil.<Void>builder().build();
         } catch (Exception err) {

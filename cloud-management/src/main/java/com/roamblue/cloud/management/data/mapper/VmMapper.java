@@ -27,5 +27,5 @@ public interface VmMapper extends BaseMapper<VmEntity> {
     VmEntity findByName(@Param("name") String name);
 
     @Update(value = "UPDATE tbl_vm_info set last_update_time=#{lastUpdateTime} where id=#{vmId}")
-    int updateLastActiveTime(@Param("vmId") int id,@Param("lastUpdateTime") Date lastUpdateTime);
+    int updateLastActiveTime(@Param("vmId") int id, @Param("lastUpdateTime") Date lastUpdateTime);
 }
