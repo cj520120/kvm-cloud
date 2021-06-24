@@ -8,11 +8,19 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.util.StringUtils;
+import org.xml.sax.SAXException;
 
 import java.io.StringReader;
 import java.util.List;
 
-public class XmlUtil {
+/**
+ * @author chenjun
+ */
+public final class XmlUtil {
+
+    private XmlUtil() {
+
+    }
 
     public static String toXml(String cdRoom) {
         StringBuilder sb = new StringBuilder();
@@ -153,9 +161,10 @@ public class XmlUtil {
         return sb.toString();
     }
 
-    public static int getVnc(String xml) throws DocumentException {
+    public static int getVnc(String xml) throws DocumentException, SAXException {
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
             String path = "/domain/devices/graphics";
             Element node = (Element) doc.selectSingleNode(path);
@@ -163,9 +172,10 @@ public class XmlUtil {
         }
     }
 
-    public static String getVncPassword(String xml) throws DocumentException {
+    public static String getVncPassword(String xml) throws DocumentException, SAXException {
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
             String path = "/domain/devices/graphics";
             Element node = (Element) doc.selectSingleNode(path);

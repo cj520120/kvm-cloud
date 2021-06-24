@@ -10,6 +10,9 @@ import org.libvirt.DomainInfo;
 
 import java.io.Serializable;
 
+/**
+ * @author chenjun
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

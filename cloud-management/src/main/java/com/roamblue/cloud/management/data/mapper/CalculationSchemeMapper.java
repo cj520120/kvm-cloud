@@ -7,9 +7,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface CalculationSchemeMapper extends BaseMapper<CalculationSchemeEntity> {
 
+    /**
+     * 获取所有计算方案
+     *
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_calculation_scheme")
     List<CalculationSchemeEntity> selectAll();
 }

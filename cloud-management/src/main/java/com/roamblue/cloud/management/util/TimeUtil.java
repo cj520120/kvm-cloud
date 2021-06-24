@@ -5,6 +5,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public class TimeUtil {
 
     public static List<Date> getIntervalTimeList(Date startDate, Date endDate, int interval) {

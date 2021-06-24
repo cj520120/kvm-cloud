@@ -4,6 +4,9 @@ import com.roamblue.cloud.management.bean.StorageInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface StorageService {
     /**
      * 存储池列表
@@ -32,6 +35,10 @@ public interface StorageService {
     /**
      * 创建存储池
      *
+     * @param clusterId
+     * @param name
+     * @param uri
+     * @param source
      * @return
      */
     StorageInfo createStorage(int clusterId, String name, String uri, String source);
@@ -39,6 +46,7 @@ public interface StorageService {
     /**
      * 销毁存储池
      *
+     * @param id
      * @return
      */
     void destroyStorageById(int id);

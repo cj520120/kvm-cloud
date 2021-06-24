@@ -8,6 +8,9 @@ import javax.annotation.PostConstruct;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 public abstract class AbstractTask {
 
@@ -16,8 +19,18 @@ public abstract class AbstractTask {
     @Autowired
     private ManagementService managementService;
 
+    /**
+     * 获取任务间隔时间毫秒
+     *
+     * @return
+     */
     protected abstract int getInterval();
 
+    /**
+     * 获取任务名称
+     *
+     * @return
+     */
     protected abstract String getName();
 
     @PostConstruct
@@ -35,6 +48,9 @@ public abstract class AbstractTask {
         }
     }
 
+    /**
+     * 执行任务
+     */
     protected abstract void call();
 }
 

@@ -7,9 +7,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface ClusterMapper extends BaseMapper<ClusterEntity> {
-
+    /**
+     * 获取所有集群信息
+     *
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_cluster_info")
     List<ClusterEntity> selectAll();
 }

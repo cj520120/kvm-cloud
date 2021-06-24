@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
+/**
+ * @author chenjun
+ */
 @Configuration
 public class TimezoneConfig {
     @Value("${time.zone:Asia/Shanghai}")

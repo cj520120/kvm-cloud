@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 管理端保活
+ *
+ * @author chenjun
  */
 @Slf4j
 @Component

@@ -8,6 +8,9 @@ import com.roamblue.cloud.management.service.RuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class RuleServiceImpl implements RuleService {
     @Autowired

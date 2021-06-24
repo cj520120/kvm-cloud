@@ -6,6 +6,9 @@ import com.roamblue.cloud.common.util.ErrorCode;
 
 import java.util.concurrent.Callable;
 
+/**
+ * @author chenjun
+ */
 public abstract class AbstractUiService {
     protected <T> ResultUtil<T> call(Callable<T> callable) {
         try {

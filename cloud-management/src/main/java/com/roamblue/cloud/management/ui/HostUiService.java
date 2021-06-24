@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.HostInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface HostUiService {
     /**
      * 获取主机列表

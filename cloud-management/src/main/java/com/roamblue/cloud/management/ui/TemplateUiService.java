@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.TemplateInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface TemplateUiService {
     /**
      * 获取模版列表

@@ -4,6 +4,9 @@ import com.roamblue.cloud.management.bean.HostInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface HostService {
     /**
      * 获取所有主机列表
@@ -32,6 +35,10 @@ public interface HostService {
     /**
      * 创建
      *
+     * @param clusterId
+     * @param name
+     * @param ip
+     * @param uri
      * @return
      */
     HostInfo createHost(int clusterId, String name, String ip, String uri);
@@ -39,6 +46,7 @@ public interface HostService {
     /**
      * 销毁
      *
+     * @param id
      * @return
      */
     void destroyHostById(int id);

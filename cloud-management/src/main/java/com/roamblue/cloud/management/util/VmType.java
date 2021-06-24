@@ -1,6 +1,9 @@
 package com.roamblue.cloud.management.util;
 
-public class VMType {
+/**
+ * @author chenjun
+ */
+public class VmType {
     /**
      * 路由，负责DHCP功能
      */

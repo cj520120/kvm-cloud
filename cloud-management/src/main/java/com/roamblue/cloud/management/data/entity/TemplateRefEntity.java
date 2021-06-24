@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * @author chenjun
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

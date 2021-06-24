@@ -1,5 +1,8 @@
 package com.roamblue.cloud.management.util;
 
+/**
+ * @author chenjun
+ */
 public class TemplateType {
     /**
      * 系统route vm

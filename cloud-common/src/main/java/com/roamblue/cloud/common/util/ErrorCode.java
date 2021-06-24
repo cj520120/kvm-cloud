@@ -1,6 +1,9 @@
 package com.roamblue.cloud.common.util;
 
-public class ErrorCode {
+/**
+ * @author chenjun
+ */
+public final class ErrorCode {
     public static final int BASE_ERROR = 1000000;
     public static final int SUCCESS = 0;
     public static final int PARAM_ERROR = 300;
@@ -8,7 +11,6 @@ public class ErrorCode {
     public static final int LOCK_TIMEOUT = 504;
     public static final int NO_LOGIN_ERROR = 401;
     public static final int NOT_SUPPORTED = 404;
-
     public static final int VM_NOT_FOUND = BASE_ERROR + 1;
     public static final int STORAGE_NOT_FOUND = BASE_ERROR + 2;
     public static final int TEMPLATE_NOT_FOUND = BASE_ERROR + 3;
@@ -45,4 +47,7 @@ public class ErrorCode {
     public static final int GROUP_NOT_FOUND = BASE_ERROR + 34;
     public static final int LOGIN_USER_EXISTS = BASE_ERROR + 35;
     public static final int QEMU_NOT_CONNECT = BASE_ERROR + 36;
+    private ErrorCode() {
+
+    }
 }

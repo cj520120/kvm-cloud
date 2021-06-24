@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.GroupInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface GroupUiService {
     /**
      * 获取群组列表

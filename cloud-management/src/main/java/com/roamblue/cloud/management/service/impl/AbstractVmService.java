@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 public abstract class AbstractVmService implements VmService {
 
@@ -61,14 +64,43 @@ public abstract class AbstractVmService implements VmService {
         return this.allocateNetwork(networkInfo, vmId);
     }
 
+    /**
+     * 申请网络
+     *
+     * @param network
+     * @param vmId
+     * @return
+     */
     protected abstract VmNetworkInfo allocateNetwork(NetworkInfo network, int vmId);
 
+    /**
+     * VM准备启动
+     *
+     * @param vm
+     * @param host
+     */
     protected abstract void onBeforeStart(VmEntity vm, HostEntity host);
 
+    /**
+     * VM完成启动
+     *
+     * @param vm
+     * @param host
+     */
     protected abstract void onAfterStart(VmEntity vm, HostEntity host);
 
+    /**
+     * VM停止
+     *
+     * @param vm
+     */
     protected abstract void onStop(VmEntity vm);
 
+    /**
+     * VM销毁
+     *
+     * @param vm
+     */
     protected abstract void onDestroy(VmEntity vm);
 
     public VmEntity createVm(String description,
@@ -282,7 +314,7 @@ public abstract class AbstractVmService implements VmService {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         stopVm(id, true);
-        if (!vm.getVmType().equals(VMType.GUEST) || vm.getVmStatus().equals(VmStatus.ERROR)) {
+        if (!vm.getVmType().equals(VmType.GUEST) || vm.getVmStatus().equals(VmStatus.ERROR)) {
             //
             this.networkService.unBindVmNetworkByVmId(id);
             this.volumeService.destroyByVmId(id);

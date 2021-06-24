@@ -6,6 +6,9 @@ import com.roamblue.cloud.management.bean.VncInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface InstanceService {
 
     /**

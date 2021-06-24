@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.VmNetworkInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface NetworkService {
     /**
      * 网络列表
@@ -24,6 +27,7 @@ public interface NetworkService {
     /**
      * 根据集群获取网络信息
      *
+     * @param clusterId
      * @return
      */
     List<NetworkInfo> listNetworkByClusterId(int clusterId);
@@ -64,6 +68,17 @@ public interface NetworkService {
     /**
      * 创建网络
      *
+     * @param name
+     * @param clusterId
+     * @param managerStartIp
+     * @param managerEndIp
+     * @param guestStartIp
+     * @param guestEndIp
+     * @param subnet
+     * @param gateway
+     * @param dns
+     * @param card
+     * @param type
      * @return
      */
     NetworkInfo createNetwork(String name, int clusterId, String managerStartIp, String managerEndIp, String guestStartIp, String guestEndIp, String subnet, String gateway, String dns, String card, String type);
@@ -71,6 +86,7 @@ public interface NetworkService {
     /**
      * 销毁网络
      *
+     * @param id
      * @return
      */
     void destroyNetworkById(int id);
@@ -79,6 +95,7 @@ public interface NetworkService {
      * 启动网络
      *
      * @param id
+     * @return
      */
     NetworkInfo startNetworkById(int id);
 
@@ -86,6 +103,7 @@ public interface NetworkService {
      * 暂停网络
      *
      * @param id
+     * @return
      */
     NetworkInfo pauseNetworkById(int id);
 }

@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author chenjun
+ */
 public class RequestContext {
     private static ThreadLocal<Context> threadLocal = new ThreadLocal<>();
 

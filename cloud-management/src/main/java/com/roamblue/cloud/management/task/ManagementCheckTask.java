@@ -10,6 +10,8 @@ import java.util.Date;
 
 /**
  * 管理端检测清理
+ *
+ * @author chenjun
  */
 @Component
 public class ManagementCheckTask extends AbstractTask {

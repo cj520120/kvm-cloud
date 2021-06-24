@@ -15,8 +15,8 @@ import com.roamblue.cloud.management.service.VmService;
 import com.roamblue.cloud.management.service.VncService;
 import com.roamblue.cloud.management.util.BeanConverter;
 import com.roamblue.cloud.management.util.TimeUtil;
-import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.VmStatus;
+import com.roamblue.cloud.management.util.VmType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -26,6 +26,9 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Primary
 @Service
@@ -82,10 +85,10 @@ public class InstanceServiceImpl implements InstanceService {
             wrapper.eq("group_id", groupId);
         }
         if (!StringUtils.isEmpty(type)) {
-            if (type.equalsIgnoreCase(VMType.GUEST)) {
-                wrapper.eq("vm_type", VMType.GUEST);
+            if (type.equalsIgnoreCase(VmType.GUEST)) {
+                wrapper.eq("vm_type", VmType.GUEST);
             } else {
-                wrapper.ne("vm_type", VMType.GUEST);
+                wrapper.ne("vm_type", VmType.GUEST);
             }
         }
         if (!StringUtils.isEmpty(status)) {

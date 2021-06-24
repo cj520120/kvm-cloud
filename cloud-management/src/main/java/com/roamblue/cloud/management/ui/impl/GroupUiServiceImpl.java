@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class GroupUiServiceImpl extends AbstractUiService implements GroupUiService {
     @Autowired

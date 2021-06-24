@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 public abstract class AbstractSystemVmService extends AbstractVmService {
     @Autowired
@@ -123,6 +126,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
+                    // do nothing
                 }
             } while (true);
         }

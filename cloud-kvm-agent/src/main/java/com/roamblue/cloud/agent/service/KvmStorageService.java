@@ -4,6 +4,9 @@ import com.roamblue.cloud.common.agent.StorageModel;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface KvmStorageService {
     /**
      * 获取存储池

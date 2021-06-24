@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Service
 public class BriaggeNetworkAllocateServiceImpl implements NetworkAllocateService {

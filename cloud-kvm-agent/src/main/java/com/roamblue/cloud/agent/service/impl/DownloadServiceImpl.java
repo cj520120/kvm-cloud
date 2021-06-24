@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class DownloadServiceImpl implements DownloadService {
     @Override
@@ -17,7 +20,11 @@ public class DownloadServiceImpl implements DownloadService {
             HttpUtil.downloadFile(uri, file);
             return ResultUtil.<Long>builder().data(file.length()).build();
         } catch (Exception err) {
-            file.delete();
+            if (file.exists()) {
+                if (file.delete()) {
+                    //do nothing
+                }
+            }
             return ResultUtil.<Long>builder().code(ErrorCode.SERVER_ERROR).build();
         }
     }

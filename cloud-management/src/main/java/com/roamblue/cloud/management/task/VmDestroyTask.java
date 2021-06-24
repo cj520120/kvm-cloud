@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 销毁超过等待期的Vm
+ *
+ * @author chenjun
  */
 @Slf4j
 @Component

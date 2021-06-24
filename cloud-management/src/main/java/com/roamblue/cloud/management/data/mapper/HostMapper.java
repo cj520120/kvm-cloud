@@ -8,11 +8,25 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface HostMapper extends BaseMapper<HostEntity> {
+    /**
+     * 获取所有主机
+     *
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_host_info")
     List<HostEntity> selectAll();
 
+    /**
+     * 获取集群的所有主机
+     *
+     * @param clusterId
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_host_info WHERE cluster_id=#{clusterId}")
     List<HostEntity> findByClusterId(@Param("clusterId") int clusterId);
 

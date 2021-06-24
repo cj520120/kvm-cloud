@@ -3,6 +3,9 @@ package com.roamblue.cloud.management.service;
 import com.roamblue.cloud.management.data.entity.HostEntity;
 import com.roamblue.cloud.management.data.entity.StorageEntity;
 
+/**
+ * @author chenjun
+ */
 public interface AllocateService {
     /**
      * 申请存储池

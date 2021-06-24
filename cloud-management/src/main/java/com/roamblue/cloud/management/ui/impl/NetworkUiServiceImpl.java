@@ -15,6 +15,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUiService {
     @Autowired

@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.OsCategoryInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface CategoryUiService {
     /**
      * 获取系统分类

@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Service
 public class RouteServiceImpl extends AbstractSystemVmService implements RouteService {
@@ -42,7 +45,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
 
     @Override
     public String getType() {
-        return VMType.ROUTE;
+        return VmType.ROUTE;
     }
 
     @Override
@@ -70,7 +73,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         this.vncService.unRegister(vm.getClusterId(), vm.getId());
     }
 
-    private void initializeDHCP(VmEntity vm, HostEntity host) {
+    private void initializeDhcp(VmEntity vm, HostEntity host) {
         log.info("开始初始化DHCP服务");
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(vm.getClusterId());
         if (networks.isEmpty()) {
@@ -121,7 +124,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
     protected void onAfterStart(VmEntity vm, HostEntity host) {
         this.vncService.register(vm.getClusterId(), vm.getId(), host.getHostIp(), vm.getVncPort(), vm.getVncPassword());
         super.initializeNetwork(vm, host);
-        this.initializeDHCP(vm, host);
+        this.initializeDhcp(vm, host);
         log.info("Route 启动完成");
     }
 }

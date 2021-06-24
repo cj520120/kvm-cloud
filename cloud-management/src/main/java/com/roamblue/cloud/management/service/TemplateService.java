@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.TemplateRefInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface TemplateService {
     /**
      * 获取模版列表
@@ -24,6 +27,7 @@ public interface TemplateService {
     /**
      * 获取集群的模版列表
      *
+     * @param clusterId
      * @return
      */
     List<TemplateInfo> listTemplateByClusterId(int clusterId);
@@ -39,6 +43,11 @@ public interface TemplateService {
     /**
      * 创建模版
      *
+     * @param clusterId
+     * @param osCategoryId
+     * @param name
+     * @param type
+     * @param uri
      * @return
      */
     TemplateInfo createTemplate(int clusterId, int osCategoryId, String name, String type, String uri);
@@ -46,6 +55,7 @@ public interface TemplateService {
     /**
      * 销毁模版
      *
+     * @param id
      * @return
      */
     void destroyTemplateById(int id);

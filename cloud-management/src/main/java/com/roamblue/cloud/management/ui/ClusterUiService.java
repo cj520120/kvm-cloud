@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.ClusterInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface ClusterUiService {
     /**
      * 获取集群列表

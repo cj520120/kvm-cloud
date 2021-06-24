@@ -9,7 +9,7 @@ import com.roamblue.cloud.management.service.LockService;
 import com.roamblue.cloud.management.ui.VmUiService;
 import com.roamblue.cloud.management.util.LockKeyUtil;
 import com.roamblue.cloud.management.util.RuleType;
-import com.roamblue.cloud.management.util.VMType;
+import com.roamblue.cloud.management.util.VmType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,6 +17,9 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     @Autowired
@@ -79,7 +82,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         if (networkId <= 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "网络不能为空");
         }
-        return this.call(() -> vmService.getVmServiceByType(VMType.GUEST).create(name, calculationSchemeId, clusterId, storageId, hostId, templateId, size, networkId, groupId));
+        return this.call(() -> vmService.getVmServiceByType(VmType.GUEST).create(name, calculationSchemeId, clusterId, storageId, hostId, templateId, size, networkId, groupId));
     }
 
     @Override

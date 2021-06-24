@@ -10,6 +10,8 @@ import java.util.Calendar;
 
 /**
  * 清理过期的实例监控信息
+ *
+ * @author chenjun
  */
 @Component
 public class ClearInstanceStatsTask extends AbstractTask {

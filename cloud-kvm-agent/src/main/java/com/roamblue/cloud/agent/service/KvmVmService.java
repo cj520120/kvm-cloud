@@ -6,6 +6,9 @@ import com.roamblue.cloud.common.agent.VmStaticsModel;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface KvmVmService {
     /**
      * 获取VM列表

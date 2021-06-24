@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @RestController
 @Api(tags = "群组管理")
 @Slf4j

@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 过期磁盘销毁
+ *
+ * @author chenjun
  */
 @Slf4j
 @Component
@@ -61,7 +63,7 @@ public class VolumeDestroyTask extends AbstractTask {
         if (list.isEmpty()) {
             return;
         }
-        Map<Integer, HostEntity> clusterHostMap = new HashMap<>();
+        Map<Integer, HostEntity> clusterHostMap = new HashMap<>(4);
         for (VolumeEntity volume : list) {
             StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
             if (storage != null) {

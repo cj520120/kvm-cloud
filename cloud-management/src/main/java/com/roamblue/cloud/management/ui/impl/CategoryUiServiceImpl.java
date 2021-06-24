@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class CategoryUiServiceImpl extends AbstractUiService implements CategoryUiService {
     @Autowired

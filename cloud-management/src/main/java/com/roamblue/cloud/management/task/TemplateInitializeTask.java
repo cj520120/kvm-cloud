@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 模版检测下载
+ *
+ * @author chenjun
  */
 @Slf4j
 @Component
@@ -90,7 +92,7 @@ public class TemplateInitializeTask extends AbstractTask {
                     .templateTarget(UUID.randomUUID().toString().replace("-", ""))
                     .createTime(new Date())
                     .build();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(2);
             map.put("path", "/mnt/" + storageEntity.getStorageTarget() + "/" + templateRefEntity.getTemplateTarget());
             map.put("uri", template.getTemplateUri());
             log.info("开始下载模版信息.template={} path", template, map.get("path"));

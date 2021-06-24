@@ -1,5 +1,8 @@
 package com.roamblue.cloud.management.util;
 
+/**
+ * @author chenjun
+ */
 public class TemplateStatus {
     /**
      * 模版初始化中

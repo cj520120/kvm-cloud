@@ -6,7 +6,9 @@ import com.roamblue.cloud.common.bean.ResultUtil;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * @author chenjun
+ */
 public interface AgentService {
     /**
      * 查询主机存储池信息

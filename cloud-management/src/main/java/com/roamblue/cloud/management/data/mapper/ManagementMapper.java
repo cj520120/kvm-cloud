@@ -6,8 +6,17 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface ManagementMapper extends BaseMapper<ManagementEntity> {
+    /**
+     * 查询管理端
+     *
+     * @param serverId
+     * @return
+     */
     @Select("SELECT * FROM tbl_management_info WHERE server_id=#{serverId}")
     ManagementEntity findByServerId(@Param("serverId") String serverId);
 }

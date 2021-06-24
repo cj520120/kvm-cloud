@@ -7,8 +7,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface GroupMapper extends BaseMapper<GroupEntity> {
+    /**
+     * 获取所有群组信息
+     *
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_group_info")
     List<GroupEntity> selectAll();
 }

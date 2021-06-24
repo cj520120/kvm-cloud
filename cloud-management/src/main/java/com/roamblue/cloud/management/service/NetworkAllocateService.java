@@ -2,6 +2,9 @@ package com.roamblue.cloud.management.service;
 
 import com.roamblue.cloud.management.bean.VmNetworkInfo;
 
+/**
+ * @author chenjun
+ */
 public interface NetworkAllocateService {
     /**
      * 申请管理端地址

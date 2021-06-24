@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.CalculationSchemeInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface SchemeUiService {
     /**
      * 计算方案列表

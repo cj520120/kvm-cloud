@@ -4,6 +4,9 @@ import com.roamblue.cloud.management.bean.TemplateInfo;
 import com.roamblue.cloud.management.bean.VmInfo;
 import com.roamblue.cloud.management.bean.VolumeInfo;
 
+/**
+ * @author chenjun
+ */
 public interface VmService {
     /**
      * Vm类型
@@ -23,6 +26,7 @@ public interface VmService {
      * @param templateId
      * @param diskSize
      * @param network
+     * @param groupId
      * @return
      */
     VmInfo create(String description, int calculationSchemeId, int clusterId, int storageId, int hostId, int templateId, long diskSize, int network, int groupId);
@@ -104,6 +108,7 @@ public interface VmService {
      * @param vmId
      * @param description
      * @param calculationSchemeId
+     * @param groupId
      * @return
      */
     VmInfo modify(int vmId, String description, int calculationSchemeId, int groupId);
@@ -112,6 +117,7 @@ public interface VmService {
      * 创建模版
      *
      * @param vmId
+     * @param name
      * @return
      */
     TemplateInfo createTemplate(int vmId, String name);

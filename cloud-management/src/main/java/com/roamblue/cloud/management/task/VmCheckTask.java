@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * VM 检测
+ *
+ * @author chenjun
  */
 @Slf4j
 @Component
@@ -40,7 +42,7 @@ public class VmCheckTask extends AbstractTask {
     @Autowired
     private VmStatsMapper vmStatsMapper;
 
-    private LRUCache<Integer, VmStaticsEntity> cache = new LRUCache<>(100000, 60 * 1000);
+    private LRUCache<Integer, VmStaticsEntity> cache = new LRUCache<>(100000, 60000L);
     @Autowired
     private VncService vncService;
 

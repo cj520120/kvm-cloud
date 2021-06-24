@@ -8,11 +8,25 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface NetworkMapper extends BaseMapper<NetworkEntity> {
+    /**
+     * 获取网络信息
+     *
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_network_info")
     List<NetworkEntity> selectAll();
 
+    /**
+     * 获取集群的所有网络
+     *
+     * @param clusterId
+     * @return
+     */
     @Select(value = "SELECT * FROM tbl_network_info WHERE cluster_id=#{clusterId}")
     List<NetworkEntity> findByClusterId(@Param("clusterId") int clusterId);
 }

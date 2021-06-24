@@ -20,6 +20,9 @@ import springfox.documentation.spring.web.plugins.Docket;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Configuration
 @EnableConfigurationProperties

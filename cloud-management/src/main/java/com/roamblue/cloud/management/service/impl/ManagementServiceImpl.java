@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class ManagementServiceImpl implements ManagementService {
     private ManagementMapper managementMapper;

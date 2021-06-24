@@ -4,6 +4,9 @@ import com.roamblue.cloud.agent.service.KvmHostService;
 import com.roamblue.cloud.common.agent.HostModel;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class KvmHostServiceImpl extends AbstractKvmService implements KvmHostService {
 

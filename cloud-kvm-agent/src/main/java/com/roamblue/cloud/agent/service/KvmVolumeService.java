@@ -4,6 +4,9 @@ import com.roamblue.cloud.common.agent.VolumeModel;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface KvmVolumeService {
     /**
      * 根据存储池获取磁盘列表

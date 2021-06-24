@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.VolumeInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface VolumeService {
     /**
      * 获取磁盘列表
@@ -27,6 +30,7 @@ public interface VolumeService {
     /**
      * 获取磁盘列表
      *
+     * @param vmId
      * @return
      */
     List<VolumeInfo> listVolumeByVmId(int vmId);
@@ -35,6 +39,7 @@ public interface VolumeService {
     /**
      * 根据ID获取磁盘
      *
+     * @param id
      * @return
      */
     VolumeInfo findVolumeById(int id);
@@ -42,6 +47,11 @@ public interface VolumeService {
     /**
      * 创建磁盘
      *
+     * @param clusterId
+     * @param parentVolumePath
+     * @param storageId
+     * @param name
+     * @param size
      * @return
      */
     VolumeInfo createVolume(int clusterId, String parentVolumePath, int storageId, String name, long size);

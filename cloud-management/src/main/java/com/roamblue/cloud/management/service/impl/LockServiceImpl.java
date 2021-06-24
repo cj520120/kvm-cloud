@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class LockServiceImpl implements LockService {
 
@@ -26,7 +29,7 @@ public class LockServiceImpl implements LockService {
     private void incrementLockRef(String key) {
         Map<String, LockRef> map = context.get();
         if (map == null) {
-            map = new HashMap<>();
+            map = new HashMap<>(4);
             context.set(map);
         }
         map.computeIfAbsent(key, k -> new LockRef()).incrementAndGet();
@@ -80,8 +83,9 @@ public class LockServiceImpl implements LockService {
                 entity.setLockTime(new Date(System.currentTimeMillis()));
                 entity.setLockTimeout(new Date(timeUnit.toMillis(timeout) + System.currentTimeMillis()));
                 isLock = lockMapper.update(entity, wrapper) > 0;
-            } else
+            } else {
                 isLock = lockUUID.equals(entity.getLockUuid()) && entity.getLockThread().equals(Thread.currentThread().getId());
+            }
         }
         if (isLock) {
             this.incrementLockRef(key);
@@ -99,7 +103,7 @@ public class LockServiceImpl implements LockService {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+               // do nothing
             }
         }
         throw new CodeException(ErrorCode.LOCK_TIMEOUT, "获取锁超时");

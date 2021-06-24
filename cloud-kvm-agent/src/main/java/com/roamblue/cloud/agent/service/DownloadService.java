@@ -2,6 +2,9 @@ package com.roamblue.cloud.agent.service;
 
 import com.roamblue.cloud.common.bean.ResultUtil;
 
+/**
+ * @author chenjun
+ */
 public interface DownloadService {
     /**
      * 下载文件

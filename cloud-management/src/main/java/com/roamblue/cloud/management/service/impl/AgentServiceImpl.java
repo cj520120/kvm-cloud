@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class AgentServiceImpl implements AgentService {
 
@@ -52,7 +55,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<StorageModel> addHostStorage(String uri, String host, String source, String target) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(4);
             map.put("name", target);
             map.put("nfs", host);
             map.put("path", source);
@@ -68,7 +71,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<VolumeModel> createVolume(String uri, String storage, String volume, String backingVolume, long size) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(5);
             map.put("storageName", storage);
             map.put("volumeName", volume);
             map.put("path", volume);
@@ -88,7 +91,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<VolumeModel> resize(String uri, String storageTarget, String volumeTarget, long size) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(3);
             map.put("storageName", storageTarget);
             map.put("volumeName", volumeTarget);
             map.put("size", size);
@@ -102,7 +105,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> destroyVolume(String uri, String storage, String volume) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(2);
             map.put("storageName", storage);
             map.put("volumeName", volume);
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/destroy", map), new TypeToken<ResultUtil<Void>>() {
@@ -114,7 +117,7 @@ public class AgentServiceImpl implements AgentService {
     @Override
     public ResultUtil<Void> destroyStorage(String uri, String storage) {
         return this.call(() -> {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(1);
             map.put("name", storage);
             Gson gson = new Gson();
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/storage/destroy", map), new TypeToken<ResultUtil<Void>>() {
@@ -127,7 +130,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> destroyVm(String uri, String vm) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/vm/destroy", map), new TypeToken<ResultUtil<Void>>() {
             }.getType());
@@ -139,7 +142,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> stopVm(String uri, String vm) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/vm/stop", map), new TypeToken<ResultUtil<Void>>() {
             }.getType());
@@ -151,7 +154,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> rebootVm(String uri, String vm) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/vm/restart", map), new TypeToken<ResultUtil<Void>>() {
             }.getType());
@@ -163,7 +166,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> writeFile(String uri, String vm, String path, String body) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(3);
             map.put("name", vm);
             map.put("path", path);
             map.put("body", body);
@@ -177,7 +180,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Map<String, Object>> execute(String uri, String vm, String command) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(3);
             map.put("name", vm);
             map.put("command", command);
             map.put("timeout", 10);
@@ -191,7 +194,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> changeCdRoom(String uri, String vm, String path) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, String> header = new HashMap<>();
+            Map<String, String> header = new HashMap<>(3);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/update/cdroom");
             request.addHeaders(header);
             VmModel.UpdateCdRoom kvm = new VmModel.UpdateCdRoom();
@@ -208,7 +211,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<Void> attachDisk(String uri, String vm, VmModel.Disk disk, boolean attach) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, String> header = new HashMap<>();
+            Map<String, String> header = new HashMap<>(0);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/update/disk");
             request.addHeaders(header);
             VmModel.UpdateDisk kvm = new VmModel.UpdateDisk();
@@ -226,7 +229,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<VmInfoModel> startVm(String uri, VmModel kvm) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, String> header = new HashMap<>();
+            Map<String, String> header = new HashMap<>(0);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/start");
             request.addHeaders(header);
             request.body(gson.toJson(kvm));
@@ -241,7 +244,7 @@ public class AgentServiceImpl implements AgentService {
 
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(5);
             map.put("sourceStorage", sourceStorage);
             map.put("sourceVolume", sourceVolume);
             map.put("targetStorage", targetStorage);
@@ -259,7 +262,7 @@ public class AgentServiceImpl implements AgentService {
         return this.call(() -> {
 
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(2);
             map.put("storageName", storageName);
             map.put("volumeName", volumeName);
             ResultUtil<VolumeModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/volume/info", map), new TypeToken<ResultUtil<VolumeModel>>() {
@@ -272,7 +275,7 @@ public class AgentServiceImpl implements AgentService {
     public ResultUtil<List<VmStaticsModel>> listVmStatics(String uri) {
         return this.call(() -> {
             Gson gson = new Gson();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(0);
             ResultUtil<List<VmStaticsModel>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/list/statics", map), new TypeToken<ResultUtil<List<VmStaticsModel>>>() {
             }.getType());
             return resultUtil;
@@ -290,6 +293,11 @@ public class AgentServiceImpl implements AgentService {
 
     @FunctionalInterface
     public interface AgentCall<T extends ResultUtil> {
+        /**
+         * 执行agent操作
+         *
+         * @return
+         */
         T call();
     }
 }

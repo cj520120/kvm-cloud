@@ -2,6 +2,9 @@ package com.roamblue.cloud.management.service;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 public interface LockService {
     /**
      * 获取锁
@@ -54,6 +57,11 @@ public interface LockService {
 
     @FunctionalInterface
     interface LockCallable<T> {
+        /**
+         * 任务执行
+         *
+         * @return
+         */
         T call();
     }
 }

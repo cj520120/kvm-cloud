@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Vnc检测
+ *
+ * @author chenjun
  */
 @Slf4j
 @Component

@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.StorageInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface StorageUiService {
     /**
      * 获取存储池列表

@@ -17,6 +17,7 @@ import org.dom4j.io.SAXReader;
 import org.libvirt.Error;
 import org.libvirt.*;
 import org.springframework.stereotype.Service;
+import org.xml.sax.SAXException;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -24,6 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Service
 public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService {
@@ -51,13 +55,13 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     public List<VmStaticsModel> listVmStatics() {
         return super.excute(connect -> {
             int[] ids = connect.listDomains();
-            Map<Integer, VmCurrentStaticsInfo> map = new HashMap<>();
+            Map<Integer, VmCurrentStaticsInfo> map = new HashMap<>(4);
             for (int id : ids) {
                 try {
                     Domain domain = connect.domainLookupByID(id);
                     map.put(id, getVmStatics(domain));
                 } catch (Exception e) {
-
+                    log.info("获取Vm指标数据错误.ID={}", id, e);
                 }
             }
             Thread.sleep(2000);
@@ -67,31 +71,31 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                     Domain domain = connect.domainLookupByID(entry.getKey());
                     VmCurrentStaticsInfo prev = entry.getValue();
                     VmCurrentStaticsInfo current = getVmStatics(domain);
-                    long txBytes = current.tx_bytes - prev.tx_bytes;
-                    long rxBytes = current.rx_bytes - prev.rx_bytes;
-                    long wdBytes = current.wr_bytes - prev.wr_bytes;
-                    long rdBytes = current.rd_bytes - prev.rd_bytes;
+                    long txBytes = current.txBytes - prev.txBytes;
+                    long rxBytes = current.rxBytes - prev.rxBytes;
+                    long wdBytes = current.wrBytes - prev.wrBytes;
+                    long rdBytes = current.rdBytes - prev.rdBytes;
 
-                    float disk_time = (current.disk_nano_time - prev.disk_nano_time) / 1000000000.0f;
-                    float network_time = (current.network_nano_time - prev.network_nano_time) / 1000000000.0f;
-                    int nr_cores = current.cpu;
+                    float diskTime = (current.diskNanoTime - prev.diskNanoTime) / 1000000000.0f;
+                    float networkTime = (current.networkNanoTime - prev.networkNanoTime) / 1000000000.0f;
+                    int nrCores = current.cpu;
 
                     //首先得到一个周期差：cpu_time_diff = cpuTimenow — cpuTimet seconds ago
                     //然后根据这个差值计算实际使用率：%CPU = 100 × cpu_time_diff / (t × nr_cores × 1e9)
-                    long cpu_time_diff = current.cpu_time - prev.cpu_time;
-                    float cpu_time = (current.cpu_nano_time - prev.cpu_nano_time) / 1000000000.0f;
-                    int usage = (int) (100.0f * cpu_time_diff / (cpu_time * nr_cores * 1e9));
+                    long cpuTimeDiff = current.cpuTime - prev.cpuTime;
+                    float cpuTime = (current.cpuNanoTime - prev.cpuNanoTime) / 1000000000.0f;
+                    int usage = (int) (100.0f * cpuTimeDiff / (cpuTime * nrCores * 1e9));
 
 
-                    long wt_speed = (long) (wdBytes / disk_time);
-                    long rd_speed = (long) (rdBytes / disk_time);
-                    long tx_speed = (long) (txBytes / network_time);
-                    long rx_speed = (long) (rxBytes / network_time);
+                    long wtSpeed = (long) (wdBytes / diskTime);
+                    long rdSpeed = (long) (rdBytes / diskTime);
+                    long txSpeed = (long) (txBytes / networkTime);
+                    long rxSpeed = (long) (rxBytes / networkTime);
                     VmStaticsModel response = VmStaticsModel.builder().cpuUsage(usage)
-                            .networkSendSpeed(tx_speed)
-                            .networkReceiveSpeed(rx_speed)
-                            .diskReadSpeed(rd_speed)
-                            .diskWriteSpeed(wt_speed)
+                            .networkSendSpeed(txSpeed)
+                            .networkReceiveSpeed(rxSpeed)
+                            .diskReadSpeed(rdSpeed)
+                            .diskWriteSpeed(wtSpeed)
                             .name(domain.getName())
                             .build();
                     list.add(response);
@@ -103,23 +107,25 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
         });
     }
 
-    private VmCurrentStaticsInfo getVmStatics(Domain domain) throws LibvirtException, DocumentException {
+    private VmCurrentStaticsInfo getVmStatics(Domain domain) throws LibvirtException, SAXException, DocumentException {
         VmCurrentStaticsInfo statics = new VmCurrentStaticsInfo();
         String xml = domain.getXMLDesc(0);
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
+
             String path = "/domain/devices/disk";
             List<Node> nodeList = doc.selectNodes(path);
             for (Node node : nodeList) {
                 Element element = (Element) node;
-                if (element.attributeValue("device").equals("disk")) {
+                if ("disk".equals(element.attributeValue("device"))) {
                     String dev = ((Element) (element.selectSingleNode("target"))).attributeValue("dev");
                     DomainBlockStats blockStats = domain.blockStats(dev);
-                    statics.rd_bytes += blockStats.rd_bytes;
-                    statics.wr_bytes += blockStats.wr_bytes;
+                    statics.rdBytes += blockStats.rd_bytes;
+                    statics.wrBytes += blockStats.wr_bytes;
                 }
-                statics.disk_nano_time = System.nanoTime();
+                statics.diskNanoTime = System.nanoTime();
             }
             path = "/domain/devices/interface";
             nodeList = doc.selectNodes(path);
@@ -128,14 +134,14 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 String dev = ((Element) (element.selectSingleNode("target"))).attributeValue("dev");
                 if (StringUtils.isNotBlank(dev)) {
                     DomainInterfaceStats interfaceStats = domain.interfaceStats(dev);
-                    statics.rx_bytes += interfaceStats.rx_bytes;
-                    statics.tx_bytes += interfaceStats.tx_bytes;
+                    statics.rxBytes += interfaceStats.rx_bytes;
+                    statics.txBytes += interfaceStats.tx_bytes;
                 }
-                statics.network_nano_time = System.nanoTime();
+                statics.networkNanoTime = System.nanoTime();
             }
-            statics.cpu_time = domain.getInfo().cpuTime;
+            statics.cpuTime = domain.getInfo().cpuTime;
             statics.cpu = domain.getInfo().nrVirtCpu;
-            statics.cpu_nano_time = System.nanoTime();
+            statics.cpuNanoTime = System.nanoTime();
             return statics;
         }
     }
@@ -158,7 +164,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
         });
     }
 
-    private VmInfoModel initVmResponse(Domain domain) throws LibvirtException, DocumentException {
+    private VmInfoModel initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
         DomainInfo domainInfo = domain.getInfo();
         VmInfoModel info = VmInfoModel.builder().name(domain.getName())
                 .uuid(domain.getUUIDString())
@@ -285,7 +291,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 Domain domain = connect.domainLookupByName(info.getName());
                 domain.destroy();
             } catch (LibvirtException err) {
-
+                //do nothing
             }
             String xml = XmlUtil.toXml(info);
             log.info("start xml={}", xml);
@@ -313,15 +319,15 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     }
 
     private class VmCurrentStaticsInfo {
-        public long rd_bytes = 0L;
-        public long wr_bytes = 0L;
-        public long rx_bytes = 0L;
-        public long tx_bytes = 0L;
-        public long disk_nano_time;
-        public long network_nano_time;
-        public long cpu_time;
-        public int cpu;
-        public long cpu_nano_time;
+        private long rdBytes = 0L;
+        private long wrBytes = 0L;
+        private long rxBytes = 0L;
+        private long txBytes = 0L;
+        private long diskNanoTime;
+        private long networkNanoTime;
+        private long cpuTime;
+        private int cpu;
+        private long cpuNanoTime;
 
     }
 }

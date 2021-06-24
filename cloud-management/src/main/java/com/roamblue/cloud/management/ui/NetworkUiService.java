@@ -6,6 +6,9 @@ import com.roamblue.cloud.management.bean.VmNetworkInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface NetworkUiService {
     /**
      * 获取网络列表

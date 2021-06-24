@@ -3,6 +3,9 @@ package com.roamblue.cloud.management.service;
 import com.roamblue.cloud.common.bean.ResultUtil;
 import com.roamblue.cloud.management.bean.VncInfo;
 
+/**
+ * @author chenjun
+ */
 public interface VncService extends VmService {
     /**
      * 根据集群ID启动VNC
@@ -19,6 +22,7 @@ public interface VncService extends VmService {
      * @param vmId
      * @param host
      * @param port
+     * @param password
      * @return
      */
     ResultUtil<Void> register(int clusterId, int vmId, String host, int port, String password);

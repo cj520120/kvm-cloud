@@ -12,8 +12,8 @@ import com.roamblue.cloud.management.service.GuestService;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.VncService;
 import com.roamblue.cloud.management.util.TemplateType;
-import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.VmStatus;
+import com.roamblue.cloud.management.util.VmType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Service
 public class GuestServiceImpl extends AbstractVmService implements GuestService {
@@ -218,6 +221,6 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
     @Override
     public String getType() {
-        return VMType.GUEST;
+        return VmType.GUEST;
     }
 }

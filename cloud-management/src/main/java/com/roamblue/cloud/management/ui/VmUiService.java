@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.*;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface VmUiService {
     /**
      * VM列表

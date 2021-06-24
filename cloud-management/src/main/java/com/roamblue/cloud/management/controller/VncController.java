@@ -17,6 +17,9 @@ import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
 import java.nio.ByteBuffer;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @ServerEndpoint(value = "/vnc/connect/{id}")
 @Component

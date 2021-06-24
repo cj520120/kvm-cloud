@@ -6,13 +6,15 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.libvirt.Connect;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 public class ConnectFactory extends BasePooledObjectFactory<Connect> {
 
 
     @Override
     public Connect create() throws Exception {
-//        return new Connect("qemu+tcp://192.168.2.219:16509/system");
         return new Connect("qemu:///system");
     }
 
@@ -38,11 +40,11 @@ public class ConnectFactory extends BasePooledObjectFactory<Connect> {
 
     @Override
     public void activateObject(PooledObject<Connect> p) throws Exception {
-
+        //do nothing
     }
 
     @Override
     public void passivateObject(PooledObject<Connect> p) throws Exception {
-
+        //do nothing
     }
 }

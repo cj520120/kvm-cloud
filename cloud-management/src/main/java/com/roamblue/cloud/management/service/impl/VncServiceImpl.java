@@ -14,8 +14,8 @@ import com.roamblue.cloud.management.data.mapper.VncMapper;
 import com.roamblue.cloud.management.service.NetworkAllocateService;
 import com.roamblue.cloud.management.service.VncService;
 import com.roamblue.cloud.management.util.TemplateType;
-import com.roamblue.cloud.management.util.VMType;
 import com.roamblue.cloud.management.util.VmStatus;
+import com.roamblue.cloud.management.util.VmType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 @Slf4j
 public class VncServiceImpl extends AbstractSystemVmService implements VncService {
@@ -38,7 +41,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
 
     @Override
     public String getType() {
-        return VMType.CONSOLE;
+        return VmType.CONSOLE;
     }
 
     @Override

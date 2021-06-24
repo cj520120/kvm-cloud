@@ -5,6 +5,9 @@ import com.roamblue.cloud.management.bean.VolumeInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface VolumeUiService {
     /**
      * 获取磁盘列表

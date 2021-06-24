@@ -1,5 +1,8 @@
 package com.roamblue.cloud.management.util;
 
+/**
+ * @author chenjun
+ */
 public class VmStatus {
     public final static String CREATING = "Creating";
     public final static String RUNNING = "Running";

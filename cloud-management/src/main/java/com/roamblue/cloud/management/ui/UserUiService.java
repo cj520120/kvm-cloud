@@ -7,6 +7,9 @@ import com.roamblue.cloud.management.bean.UserInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface UserUiService {
     /**
      * 用户登陆

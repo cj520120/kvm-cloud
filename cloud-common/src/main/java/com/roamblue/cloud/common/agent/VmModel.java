@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Data
 @ApiModel("VM")
 public class VmModel implements Serializable {

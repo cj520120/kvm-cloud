@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component;
 public class SpringContextUtils implements ApplicationContextAware {
 
 
-    private static ApplicationContext _applicationContext = null;
+    private static ApplicationContext applicationContext = null;
 
     public static <T> T getBean(Class<T> requiredType) {
-        if (_applicationContext != null) {
-            return _applicationContext.getBean(requiredType);
+        if (applicationContext != null) {
+            return applicationContext.getBean(requiredType);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "系统未初始化完成....");
         }
@@ -28,7 +28,7 @@ public class SpringContextUtils implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        _applicationContext = applicationContext;
+        SpringContextUtils.applicationContext = applicationContext;
     }
 
 }

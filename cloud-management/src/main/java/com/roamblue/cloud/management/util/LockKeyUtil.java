@@ -1,5 +1,8 @@
 package com.roamblue.cloud.management.util;
 
+/**
+ * @author chenjun
+ */
 public class LockKeyUtil {
     public static String getInstanceLockKey(int id) {
         return "Instance." + id;

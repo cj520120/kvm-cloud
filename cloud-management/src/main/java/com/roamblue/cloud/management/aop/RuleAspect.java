@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 验证用户是否有权限
+ *
+ * @author chenjun
  */
 @Aspect
 @Component

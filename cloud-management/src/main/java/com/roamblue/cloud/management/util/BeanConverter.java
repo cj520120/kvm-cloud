@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 public class BeanConverter {
 
     public static <T, S> T convert(S source, Converter<S, T> converter) {
@@ -38,6 +41,12 @@ public class BeanConverter {
 
     @FunctionalInterface
     public interface Converter<S, T> {
+        /**
+         * 类型转换
+         *
+         * @param s
+         * @return
+         */
         T convert(S s);
     }
 
@@ -52,7 +61,7 @@ public class BeanConverter {
         @Override
         public T convert(S source) {
             try {
-                T target = classType.newInstance();
+                T target = classType.getDeclaredConstructor().newInstance();
                 BeanUtils.copyProperties(source, target);
                 return target;
             } catch (Exception e) {

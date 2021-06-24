@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 /**
  * VM统计收集
+ *
+ * @author chenjun
  */
 @Component
 public class VmStaticsCollectTask extends AbstractTask {
@@ -34,7 +36,7 @@ public class VmStaticsCollectTask extends AbstractTask {
     @Autowired
     private VmStatsMapper vmStatsMapper;
 
-    private LRUCache<Integer, VmStaticsEntity> cache = new LRUCache<>(100000, 60 * 1000);
+    private LRUCache<Integer, VmStaticsEntity> cache = new LRUCache<>(100000, 60000L);
 
     @Override
     protected int getInterval() {

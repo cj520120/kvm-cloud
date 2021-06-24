@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.roamblue.cloud.management.data.entity.VmStaticsEntity;
 import org.springframework.stereotype.Repository;
 
+/**
+ * @author chenjun
+ */
 @Repository
 public interface VmStatsMapper extends BaseMapper<VmStaticsEntity> {
 }

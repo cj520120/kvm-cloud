@@ -77,6 +77,7 @@ public interface UserService {
      *
      * @param loginName
      * @param password
+     * @param rule
      * @return
      */
     UserInfo register(String loginName, String password, int rule);

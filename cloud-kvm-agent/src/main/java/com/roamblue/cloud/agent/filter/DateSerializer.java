@@ -16,7 +16,7 @@ public class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Da
     }
 
     @Override
-    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
         return new Date(json.getAsJsonPrimitive().getAsLong());
     }
 }

@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class GroupServiceImpl implements GroupService {
     @Autowired

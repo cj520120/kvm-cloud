@@ -4,8 +4,13 @@ import com.roamblue.cloud.management.bean.GroupInfo;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface GroupService {
     /**
+     * 获取群组列表
+     *
      * @return
      */
     List<GroupInfo> listGroup();
@@ -14,6 +19,7 @@ public interface GroupService {
     /**
      * 创建
      *
+     * @param name
      * @return
      */
     GroupInfo createGroup(String name);
@@ -21,6 +27,8 @@ public interface GroupService {
     /**
      * 修改
      *
+     * @param id
+     * @param name
      * @return
      */
     GroupInfo modifyGroup(int id, String name);
@@ -28,6 +36,7 @@ public interface GroupService {
     /**
      * 销毁
      *
+     * @param id
      * @return
      */
     void destroyGroupById(int id);

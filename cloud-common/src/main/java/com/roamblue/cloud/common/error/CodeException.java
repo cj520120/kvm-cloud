@@ -2,9 +2,12 @@ package com.roamblue.cloud.common.error;
 
 import com.roamblue.cloud.common.bean.ResultUtil;
 
+/**
+ * @author chenjun
+ */
 public class CodeException extends RuntimeException {
     static final long serialVersionUID = 1L;
-    private int code;
+    private final int code;
 
     public CodeException(ResultUtil resultUtil) {
         this(resultUtil.getCode(), resultUtil.getMessage());
