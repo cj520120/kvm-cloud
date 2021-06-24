@@ -196,7 +196,7 @@
                                             if (data.code == 0) {
                                                 dialog_util.show_tool_tip('密码修改成功');
                                                 layer.close(index);
-                                                sessionStorage.setItem("X_GATEWAY_TOKEN",data.data.token);
+                                                localStorage.setItem("X_CLOUD_TOKEN",data.data.token);
                                             }
                                             else  if(data.code==401){
                                                 window.location.href = 'login.html'
@@ -224,7 +224,7 @@
             content: '<div style="padding: 20px;">是否退出</div>',
             btn: ["确定退出", "暂不退出"],
             yes: function (index, layero) {
-                sessionStorage.setItem("X_GATEWAY_TOKEN","");
+                localStorage.setItem("X_CLOUD_TOKEN","");
                 location.href = "login.html";
             },
             btn2: function (index, layero) {

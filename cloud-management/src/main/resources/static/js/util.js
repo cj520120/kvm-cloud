@@ -1,5 +1,5 @@
 window.getToken = () => {
-    return sessionStorage.getItem("X_CLOUD_TOKEN");
+    return localStorage.getItem("X_CLOUD_TOKEN");
 }
 window.dateFormat = (fmt, date) => {
     let ret;
