@@ -1,5 +1,5 @@
 ### 操作系统
-Centos 7
+Linux
 ### SELinux配置
 ```sh
 setenforce 0
