@@ -6,5 +6,10 @@ import com.roamblue.cloud.management.bean.OsCategoryInfo;
 import java.util.List;
 
 public interface CategoryUiService {
+    /**
+     * 获取系统分类
+     *
+     * @return
+     */
     ResultUtil<List<OsCategoryInfo>> listOsCategory();
 }

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@Api(tags = "计算方案")
+@Api(tags = "计算方案管理")
 @Slf4j
 public class CalculationSchemeController {
     @Autowired
@@ -33,7 +33,7 @@ public class CalculationSchemeController {
 
     @Login
     @GetMapping("/management/calculation/scheme/info")
-    @ApiOperation(value = "查找计算方案")
+    @ApiOperation(value = "根据ID查找计算方案")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "ID")
     })

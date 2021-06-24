@@ -6,11 +6,15 @@ import java.util.List;
 
 public interface StorageService {
     /**
+     * 存储池列表
+     *
      * @return
      */
     List<StorageInfo> listStorage();
 
     /**
+     * 搜索存储池
+     *
      * @param clusterId
      * @return
      */
@@ -18,7 +22,7 @@ public interface StorageService {
 
 
     /**
-     * 根据ID获取
+     * 根据ID获取存储池
      *
      * @param id
      * @return
@@ -26,14 +30,14 @@ public interface StorageService {
     StorageInfo findStorageById(int id);
 
     /**
-     * 创建
+     * 创建存储池
      *
      * @return
      */
     StorageInfo createStorage(int clusterId, String name, String uri, String source);
 
     /**
-     * 销毁
+     * 销毁存储池
      *
      * @return
      */

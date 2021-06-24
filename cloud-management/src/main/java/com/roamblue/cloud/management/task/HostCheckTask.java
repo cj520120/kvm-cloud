@@ -20,6 +20,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 更新主机信息
+ */
 @Slf4j
 @Component
 public class HostCheckTask extends AbstractTask {

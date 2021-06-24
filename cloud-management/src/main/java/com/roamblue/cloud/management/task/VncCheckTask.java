@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Vnc检测
+ */
 @Slf4j
 @Component
 public class VncCheckTask extends AbstractTask {

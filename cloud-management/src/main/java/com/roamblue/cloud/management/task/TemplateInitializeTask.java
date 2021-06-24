@@ -24,6 +24,9 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 模版检测下载
+ */
 @Slf4j
 @Component
 public class TemplateInitializeTask extends AbstractTask {
@@ -43,7 +46,7 @@ public class TemplateInitializeTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 10000;
+        return 5000;
     }
 
     @Override

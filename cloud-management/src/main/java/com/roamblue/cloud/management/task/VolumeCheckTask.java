@@ -31,6 +31,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 磁盘检测并更新任务
+ */
 @Slf4j
 @Component
 public class VolumeCheckTask extends AbstractTask {

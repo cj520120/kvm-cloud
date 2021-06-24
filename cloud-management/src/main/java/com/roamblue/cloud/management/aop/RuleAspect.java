@@ -11,6 +11,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 验证用户是否有权限
+ */
 @Aspect
 @Component
 public class RuleAspect {
@@ -26,7 +29,7 @@ public class RuleAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Rule rule = signature.getMethod().getAnnotation(Rule.class);
         if (rule != null) {
-            ruleService.verifyPermission(RequestContext.getCurrent().getUserId(), rule.min());
+            ruleService.hasPermission(RequestContext.getCurrent().getUserId(), rule.min());
         }
         return joinPoint.proceed();
     }

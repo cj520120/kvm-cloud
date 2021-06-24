@@ -44,6 +44,6 @@ public class VmInfo implements Serializable {
     private String type;
     @ApiModelProperty("虚拟机状态")
     private String status;
-    @ApiModelProperty("虚拟机状态")
+    @ApiModelProperty("创建时间")
     private Date createTime;
 }

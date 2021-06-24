@@ -15,9 +15,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 销毁超过等待期的Vm
+ */
 @Slf4j
 @Component
-public class InstanceDestroyTask extends AbstractTask {
+public class VmDestroyTask extends AbstractTask {
     @Autowired
     private VmMapper vmMapper;
     @Autowired
@@ -57,7 +60,7 @@ public class InstanceDestroyTask extends AbstractTask {
         }
         for (VmEntity instance : list) {
             lockService.tryRun(LockKeyUtil.getInstanceLockKey(instance.getId()), () -> {
-                this.networkService.detachVmNetworkByVmId(instance.getId());
+                this.networkService.unBindVmNetworkByVmId(instance.getId());
                 this.volumeService.destroyByVmId(instance.getId());
                 this.vncService.destroy(instance.getId());
                 vmMapper.deleteById(instance.getId());

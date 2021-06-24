@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 过期磁盘销毁
+ */
 @Slf4j
 @Component
 public class VolumeDestroyTask extends AbstractTask {

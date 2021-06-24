@@ -26,7 +26,7 @@ public interface VmNetworkMapper extends BaseMapper<VmNetworkEntity> {
     int freeByVmId(@Param("vmId") int vmId);
 
     @Update(value = "UPDATE tbl_vm_network SET vm_id=#{vmId},vm_device=#{deviceId} WHERE id=#{id} and vm_id=0")
-    int allocateNetwork(@Param("id") int id, @Param("vmId") int vmId, @Param("deviceId")int deviceId);
+    int allocateNetwork(@Param("id") int id, @Param("vmId") int vmId, @Param("deviceId") int deviceId);
 
 
 }

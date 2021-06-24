@@ -284,7 +284,7 @@ public abstract class AbstractVmService implements VmService {
         stopVm(id, true);
         if (!vm.getVmType().equals(VMType.GUEST) || vm.getVmStatus().equals(VmStatus.ERROR)) {
             //
-            this.networkService.detachVmNetworkByVmId(id);
+            this.networkService.unBindVmNetworkByVmId(id);
             this.volumeService.destroyByVmId(id);
             this.vmMapper.deleteById(id);
         } else {

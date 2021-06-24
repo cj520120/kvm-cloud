@@ -21,6 +21,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * VM 检测
+ */
 @Slf4j
 @Component
 public class VmCheckTask extends AbstractTask {

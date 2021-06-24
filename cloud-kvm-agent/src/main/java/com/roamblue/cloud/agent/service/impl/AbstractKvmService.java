@@ -19,20 +19,17 @@ public abstract class AbstractKvmService {
         try {
             connect = connectPool.borrowObject();
             return runner.call(connect);
-        }catch (LibvirtException err){
-            if(err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN) ){
-                throw new CodeException(ErrorCode.VM_NOT_FOUND,"VM未启动");
+        } catch (LibvirtException err) {
+            if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                throw new CodeException(ErrorCode.VM_NOT_FOUND, "VM未启动");
+            } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_NETWORK)) {
+                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "VM网络未找到");
+            } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_CONNECT)) {
+                throw new CodeException(ErrorCode.QEMU_NOT_CONNECT, "QemuAgent 未安装或VM未启动完成");
+            } else {
+                throw new CodeException(ErrorCode.SERVER_ERROR, err);
             }
-            else if(err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_NETWORK) ){
-                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND,"VM网络未找到");
-            }
-            else if(err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_CONNECT) ){
-                throw new CodeException(ErrorCode.QEMU_NOT_CONNECT,"QemuAgent 未安装或VM未启动完成");
-            }
-            else {
-                throw new CodeException(ErrorCode.SERVER_ERROR,err);
-            }
-        }catch (CodeException err) {
+        } catch (CodeException err) {
             throw err;
         } catch (Exception err) {
             log.error("执行出错", err);

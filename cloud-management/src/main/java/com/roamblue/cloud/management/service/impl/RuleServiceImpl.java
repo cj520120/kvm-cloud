@@ -14,7 +14,7 @@ public class RuleServiceImpl implements RuleService {
     private LoginInfoMapper loginInfoMapper;
 
     @Override
-    public void verifyPermission(int userId, int rule) {
+    public void hasPermission(int userId, int rule) {
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户不存在");

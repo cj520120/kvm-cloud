@@ -64,6 +64,12 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
         throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
+    /**
+     * 初始化网卡信息
+     *
+     * @param instance
+     * @param host
+     */
     protected void initializeNetwork(VmEntity instance, HostEntity host) {
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(instance.getClusterId());
         if (networks.isEmpty()) {
@@ -182,8 +188,20 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
         }
     }
 
+    /**
+     * 获取虚拟机名称
+     *
+     * @param clusterInfo
+     * @param networkInfo
+     * @return
+     */
     protected abstract String getVmDescription(ClusterInfo clusterInfo, NetworkEntity networkInfo);
 
+    /**
+     * 获取模版类型
+     *
+     * @return
+     */
     protected abstract String getTemplateType();
 
 }

@@ -35,9 +35,9 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
             StorageVolInfo storageVolInfo = storageVol.getInfo();
-            String type=null;
-            if(storageVolInfo!=null&& storageVolInfo.type!=null){
-                type=storageVolInfo.type.toString();
+            String type = null;
+            if (storageVolInfo != null && storageVolInfo.type != null) {
+                type = storageVolInfo.type.toString();
             }
             return VolumeModel.builder().storage(storageName)
                     .name(volumeName)

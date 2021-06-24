@@ -6,10 +6,18 @@ import java.util.List;
 
 public interface HostService {
     /**
+     * 获取所有主机列表
+     *
      * @return
      */
     List<HostInfo> listHost();
 
+    /**
+     * 查询
+     *
+     * @param clusterId
+     * @return
+     */
     List<HostInfo> search(int clusterId);
 
 

@@ -81,13 +81,44 @@ public interface UserService {
      */
     UserInfo register(String loginName, String password, int rule);
 
+    /**
+     * 更新用户状态
+     *
+     * @param userId
+     * @param state
+     * @return
+     */
     UserInfo updateUserState(int userId, short state);
 
+    /**
+     * 更新用户权限
+     *
+     * @param userId
+     * @param rule
+     * @return
+     */
     UserInfo updateUserRule(int userId, int rule);
 
+    /**
+     * 获取用户列表
+     *
+     * @return
+     */
     List<UserInfo> listUsers();
 
+    /**
+     * 重置密码
+     *
+     * @param userId
+     * @param password
+     * @return
+     */
     UserInfo resetPassword(int userId, String password);
 
+    /**
+     * 销毁用户
+     *
+     * @param userId
+     */
     void destroyUser(int userId);
 }

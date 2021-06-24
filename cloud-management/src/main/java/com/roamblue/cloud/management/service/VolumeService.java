@@ -13,7 +13,14 @@ public interface VolumeService {
      */
     List<VolumeInfo> listVolume();
 
-
+    /**
+     * 搜索磁盘列表
+     *
+     * @param clusterId
+     * @param storageId
+     * @param vmId
+     * @return
+     */
     List<VolumeInfo> search(int clusterId, int storageId, int vmId);
 
 
@@ -57,17 +64,45 @@ public interface VolumeService {
     VolumeInfo attachVm(int volumeId, int vmId);
 
     /**
+     * 卸载磁盘
+     *
      * @param volumeId
      * @param vmId
      * @return
      */
     VolumeInfo detachVm(int volumeId, int vmId);
 
+    /**
+     * 恢复磁盘
+     *
+     * @param id
+     * @return
+     */
     VolumeInfo resume(int id);
 
+    /**
+     * 销毁磁盘
+     *
+     * @param vmId
+     */
     void destroyByVmId(int vmId);
 
+    /**
+     * 创建磁盘模版
+     *
+     * @param id
+     * @param osCategoryId
+     * @param name
+     * @return
+     */
     TemplateInfo createTemplateById(int id, int osCategoryId, String name);
 
+    /**
+     * 磁盘扩容
+     *
+     * @param id
+     * @param size
+     * @return
+     */
     VolumeInfo resize(int id, long size);
 }

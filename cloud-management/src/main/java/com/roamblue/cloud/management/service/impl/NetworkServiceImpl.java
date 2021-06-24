@@ -158,7 +158,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public void detachVmNetworkByVmId(int vmId) {
+    public void unBindVmNetworkByVmId(int vmId) {
         vmNetworkMapper.freeByVmId(vmId);
         log.info("回收网络信息成功. vmId={}", vmId);
     }

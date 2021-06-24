@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+/**
+ * 管理端检测清理
+ */
 @Component
 public class ManagementCheckTask extends AbstractTask {
     @Autowired

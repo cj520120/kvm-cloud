@@ -47,7 +47,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     }
 
     @Override
-    public ResultUtil<VmInfo> modifyInstance(int vmId, String description, int calculationSchemeId, int groupId) {
+    public ResultUtil<VmInfo> modify(int vmId, String description, int calculationSchemeId, int groupId) {
 
         if (StringUtils.isEmpty(description)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "VM备注不能为空");

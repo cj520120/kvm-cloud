@@ -19,7 +19,7 @@ public interface GroupService {
     GroupInfo createGroup(String name);
 
     /**
-     * 创建
+     * 修改
      *
      * @return
      */

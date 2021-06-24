@@ -7,19 +7,30 @@ import java.util.List;
 
 public interface NetworkService {
     /**
+     * 网络列表
+     *
      * @return
      */
     List<NetworkInfo> listNetwork();
 
-
+    /**
+     * 搜索
+     *
+     * @param clusterId
+     * @return
+     */
     List<NetworkInfo> search(int clusterId);
 
     /**
+     * 根据集群获取网络信息
+     *
      * @return
      */
     List<NetworkInfo> listNetworkByClusterId(int clusterId);
 
     /**
+     * 根据ID获取网络信息
+     *
      * @param id
      * @return
      */
@@ -27,13 +38,15 @@ public interface NetworkService {
 
 
     /**
+     * 解除网络绑定
+     *
      * @param vmId
      * @return
      */
-    void detachVmNetworkByVmId(int vmId);
+    void unBindVmNetworkByVmId(int vmId);
 
     /**
-     * 根据ID获取
+     * 根据ID获取网络信息
      *
      * @param id
      * @return
@@ -41,20 +54,22 @@ public interface NetworkService {
     NetworkInfo findNetworkById(int id);
 
     /**
+     * 获取网络对IP地址列表
+     *
      * @param networkId
      * @return
      */
     List<VmNetworkInfo> listVmNetworkByNetworkId(int networkId);
 
     /**
-     * 创建
+     * 创建网络
      *
      * @return
      */
     NetworkInfo createNetwork(String name, int clusterId, String managerStartIp, String managerEndIp, String guestStartIp, String guestEndIp, String subnet, String gateway, String dns, String card, String type);
 
     /**
-     * 销毁
+     * 销毁网络
      *
      * @return
      */

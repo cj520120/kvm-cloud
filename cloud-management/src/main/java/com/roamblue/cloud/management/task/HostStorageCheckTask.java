@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 更新存储池占用情况
+ */
 @Slf4j
 @Component
 public class HostStorageCheckTask extends AbstractTask {
@@ -52,7 +55,7 @@ public class HostStorageCheckTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 10000;
+        return 60000;
     }
 
     @Override

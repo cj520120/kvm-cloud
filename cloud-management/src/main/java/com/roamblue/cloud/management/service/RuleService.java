@@ -1,5 +1,11 @@
 package com.roamblue.cloud.management.service;
 
 public interface RuleService {
-    void verifyPermission(int userId, int rule);
+    /**
+     * 验证用户权限
+     *
+     * @param userId
+     * @param rule
+     */
+    void hasPermission(int userId, int rule);
 }

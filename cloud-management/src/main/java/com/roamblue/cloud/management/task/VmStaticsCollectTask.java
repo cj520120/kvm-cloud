@@ -18,8 +18,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * VM统计收集
+ */
 @Component
-public class VmStaticsCheckTask extends AbstractTask {
+public class VmStaticsCollectTask extends AbstractTask {
     @Autowired
     private HostMapper hostMapper;
     @Autowired

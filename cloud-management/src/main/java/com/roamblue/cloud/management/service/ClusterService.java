@@ -27,7 +27,7 @@ public interface ClusterService {
     ClusterInfo createCluster(String name, float overCpu, float overMemory);
 
     /**
-     * 创建集群
+     * 修改集群
      *
      * @return
      */

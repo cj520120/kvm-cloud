@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @Api(tags = "虚拟管理")
 @Slf4j
-public class InstanceController {
+public class VmController {
     @Autowired
     private VmUiService vmUiService;
 
@@ -87,7 +87,7 @@ public class InstanceController {
             @RequestParam("calculationSchemeId") int calculationSchemeId,
             @RequestParam("groupId") int groupId) {
 
-        return vmUiService.modifyInstance(vmId, description, calculationSchemeId, groupId);
+        return vmUiService.modify(vmId, description, calculationSchemeId, groupId);
     }
 
     @Login
@@ -111,7 +111,7 @@ public class InstanceController {
             @ApiImplicitParam(name = "hostId", value = "主机ID"),
             @ApiImplicitParam(name = "calculationSchemeId", value = "计算方案"),
             @ApiImplicitParam(name = "templateId", value = "模版ID"),
-            @ApiImplicitParam(name = "size", value = "磁盘大小"),
+            @ApiImplicitParam(name = "size", value = "磁盘大小(GB)"),
             @ApiImplicitParam(name = "networkId", value = "网络ID"),
             @ApiImplicitParam(name = "groupId", value = "群组ID"),
     })
@@ -125,7 +125,6 @@ public class InstanceController {
                                      @RequestParam("networkId") int networkId,
                                      @RequestParam("groupId") int groupId) {
 
-        //
         return vmUiService.create(name, clusterId, storageId, hostId, calculationSchemeId, templateId, size, networkId, groupId);
     }
 

@@ -6,6 +6,8 @@ import com.roamblue.cloud.management.bean.VolumeInfo;
 
 public interface VmService {
     /**
+     * Vm类型
+     *
      * @return
      */
     String getType();

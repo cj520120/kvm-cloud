@@ -6,7 +6,7 @@
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <link href="layui/css/layui.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <link rel="icon" href="image/kl_logo.png" type="image/png" >
+    <link href="image/kl_logo.png" rel="icon" type="image/png">
     <title>Roamblue Cloud</title>
 </head>
 <body>
@@ -24,8 +24,9 @@
 <div class="leftMenu">
     <a id="slide" onclick="slide_menu()"
        slide="false"
-       style="display:block;color: white;background: #25262d;text-align: center;cursor: pointer;height: 30px;" title="展开菜单"><i class="layui-icon layui-icon-spread-left"
-                                              style="font-size: 18px;line-height: 30px;"></i></a>
+       style="display:block;color: white;background: #25262d;text-align: center;cursor: pointer;height: 30px;"
+       title="展开菜单"><i class="layui-icon layui-icon-spread-left"
+                       style="font-size: 18px;line-height: 30px;"></i></a>
     <ul class="layui-nav layui-nav-tree" lay-filter="test" style="width:60px">
         <li class="layui-nav-item layui-this"><a href="javascript:;" onclick="load_page('./page/vm.html')"
                                                  title="虚拟机管理"><i class="layui-icon layui-icon-app"
@@ -65,8 +66,11 @@
     <iframe id="iframeParent" src="./page/vm.html"></iframe>
 </div>
 <div class="dialogMenu">
-    <div class="dialogMenu-item" id="parentChangePassword" onclick="show_change_password()"><i class="layui-icon layui-icon-password"></i>&nbsp;&nbsp;修改密码</div>
-    <div class="dialogMenu-item" id="parentExit" onclick="logout()"><i class="layui-icon layui-icon-logout"></i>&nbsp;&nbsp;退出</div>
+    <div class="dialogMenu-item" id="parentChangePassword" onclick="show_change_password()"><i
+            class="layui-icon layui-icon-password"></i>&nbsp;&nbsp;修改密码
+    </div>
+    <div class="dialogMenu-item" id="parentExit" onclick="logout()"><i class="layui-icon layui-icon-logout"></i>&nbsp;&nbsp;退出
+    </div>
 </div>
 </body>
 </html>
@@ -229,4 +233,5 @@
         });
     }
     config_util.init();
+
 </script>

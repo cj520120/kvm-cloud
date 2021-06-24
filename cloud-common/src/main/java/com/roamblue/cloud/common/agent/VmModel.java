@@ -12,16 +12,27 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
+@ApiModel("VM")
 public class VmModel implements Serializable {
+    @ApiModelProperty("ID")
     private int id;
+    @ApiModelProperty("cpu信息")
     private Cpu cpu;
+    @ApiModelProperty("内存信息")
     private Memory memory;
+    @ApiModelProperty("名称")
     private String name;
+    @ApiModelProperty("备注")
     private String description;
+    @ApiModelProperty("光盘路径")
     private String cdRoom;
+    @ApiModelProperty("根磁盘")
     private RootDisk root;
+    @ApiModelProperty("vnc密码")
     private String password;
+    @ApiModelProperty("挂载磁盘")
     private List<Disk> disks;
+    @ApiModelProperty("网卡列表")
     private List<Network> netwroks;
 
     @Data
@@ -42,8 +53,11 @@ public class VmModel implements Serializable {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ApiModel("Cpu")
     public static class Cpu implements Serializable {
+        @ApiModelProperty("CPU核数")
         private int cpu;
+        @ApiModelProperty("CPU速率")
         private int speed;
     }
 
@@ -64,7 +78,9 @@ public class VmModel implements Serializable {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @ApiModel("内存")
     public static class Memory implements Serializable {
+        @ApiParam(value = "内存大小")
         private long memory;
     }
 

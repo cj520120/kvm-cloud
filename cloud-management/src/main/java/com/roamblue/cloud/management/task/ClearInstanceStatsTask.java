@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 
+/**
+ * 清理过期的实例监控信息
+ */
 @Component
 public class ClearInstanceStatsTask extends AbstractTask {
     @Autowired
