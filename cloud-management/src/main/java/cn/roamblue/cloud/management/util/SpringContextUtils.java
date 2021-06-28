@@ -1,0 +1,34 @@
+package cn.roamblue.cloud.management.util;
+
+import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.ErrorCode;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+/**
+ * 提供静态方法获取spring bean实例
+ *
+ * @author
+ */
+@Component
+public class SpringContextUtils implements ApplicationContextAware {
+
+
+    private static ApplicationContext applicationContext = null;
+
+    public static <T> T getBean(Class<T> requiredType) {
+        if (applicationContext != null) {
+            return applicationContext.getBean(requiredType);
+        } else {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "系统未初始化完成....");
+        }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        SpringContextUtils.applicationContext = applicationContext;
+    }
+
+}
