@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.service.impl;
 
+import cn.roamblue.cloud.common.agent.VmInfoModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -160,8 +161,21 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                         continue;
                     } else if (instance.getVmStatus().equals(VmStatus.STOPPED)) {
                         super.startVm(instance.getId(), 0);
-                    } else {
-                        log.debug("检测系统VM Type={} Network={} 通过", this.getType(), network.getId());
+                    } else if(instance.getVmStatus().equals(VmStatus.RUNNING)){
+
+                        log.debug("开始检测系统VM Type={} Network={} HostId={}", this.getType(), network.getId(),instance.getHostId());
+                        HostInfo hostInfo= this.hostService.findHostById(instance.getHostId());
+                        ResultUtil<VmInfoModel> resultUtil=this.agentService.getInstance(hostInfo.getUri(),instance.getVmName());
+                        if(resultUtil.getCode()==ErrorCode.SUCCESS){
+                            log.debug("检测系统VM Type={} Network={} 通过", this.getType(), network.getId());
+                        }else if(resultUtil.getCode()==ErrorCode.AGENT_VM_NOT_FOUND){
+                            log.warn("检测系统VM Type={} Network={} 实例状态不同步，强制重启,VM={}", this.getType(), network.getId(),instance.getVmName());
+                            super.reboot(instance.getId(),true);
+                        }else{
+                            log.error("检测系统VM Type={} Network={} 错误.msg={}", this.getType(), network.getId(),resultUtil.getMessage());
+                        }
+                    }else{
+                        log.warn("检测系统VM Type={} Network={} 错误，未知状态[{}]", this.getType(), network.getId(),instance.getVmStatus());
                     }
                 } else {
                     log.info("开始创建系统VM Type={} Network={}", this.getType(), network.getId());

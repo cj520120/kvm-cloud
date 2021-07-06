@@ -42,6 +42,18 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
+    public ResultUtil<VmInfoModel> getInstance(String uri, String name) {
+        return this.call(() -> {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(4);
+            map.put("name", name);
+            ResultUtil<VmInfoModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/info", map), new TypeToken<ResultUtil<VmInfoModel>>() {
+            }.getType());
+            return resultUtil;
+        });
+    }
+
+    @Override
     public ResultUtil<List<StorageModel>> getHostStorage(String uri) {
         return this.call(() -> {
             Gson gson = new Gson();

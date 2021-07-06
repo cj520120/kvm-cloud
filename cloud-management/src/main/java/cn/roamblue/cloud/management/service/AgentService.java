@@ -35,6 +35,14 @@ public interface AgentService {
     ResultUtil<List<VmInfoModel>> getInstance(String uri);
 
     /**
+     * 获取主机实例信息
+     * @param uri
+     * @param name
+     * @return
+     */
+    ResultUtil<VmInfoModel> getInstance(String uri,String name);
+
+    /**
      * 添加主机存储池
      *
      * @param uri
