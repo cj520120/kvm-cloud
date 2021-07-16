@@ -4,6 +4,7 @@ import cn.roamblue.cloud.agent.service.DownloadService;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,6 +24,7 @@ public class DownloadController {
      * @param path
      * @return
      */
+    @PostMapping("/download/template")
     public ResultUtil<Long> downloadTemplate(@RequestParam("uri") String uri, @RequestParam("path") String path) {
         return downloadService.downloadTemplate(uri, path);
     }
