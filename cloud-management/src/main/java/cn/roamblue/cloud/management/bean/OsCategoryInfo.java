@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * 系统类型
  *
@@ -32,4 +34,8 @@ public class OsCategoryInfo {
      * 磁盘驱动
      */
     private String diskDriver;
+    /**
+     * 创建时间
+     */
+    private Date createTime;
 }

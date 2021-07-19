@@ -22,4 +22,29 @@ public interface OsCategoryService {
      * @return
      */
     List<OsCategoryInfo> listAllOsCategory();
+
+    /**
+     * 创建系统分类
+     * @param categoryName
+     * @param networkDriver
+     * @param diskDriver
+     * @return
+     */
+    OsCategoryInfo createOsCategory(String categoryName,String networkDriver,String diskDriver);
+
+    /**
+     * 修改系统分类
+     * @param id
+     * @param categoryName
+     * @param diskDriver
+     * @param networkDriver
+     * @return
+     */
+    OsCategoryInfo modifyOsCategory(int id, String categoryName, String diskDriver, String networkDriver);
+
+    /***
+     * 删除系统分类
+     * @param id
+     */
+    void destroyOsCategoryById(int id);
 }
