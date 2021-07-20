@@ -229,6 +229,18 @@
         </div>
     </form>
 </script>
+<script id="attachNetworkDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="vmId"/>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">选择网络</label>
+            <div class="layui-input-inline">
+                <select name="networkId">
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
 <script id="templateDialog" type="text/html">
     <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
         <input type="hidden" name="id"/>
@@ -326,6 +338,7 @@
                                 <th>MAC</th>
                                 <th>IP</th>
                                 <th>创建时间</th>
+                                <th>&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody id="networkBody">
@@ -441,6 +454,11 @@
                     }, click: vm_statistics_click
                 },
                 {
+                    title: "附加网络", icon: "layui-icon-website", show: function (data) {
+                        return data.status != "Destroy"
+                    }, click: attach_network_click
+                },
+                {
                     title: "销毁实例", icon: "layui-icon-delete", show: function (data) {
                         return data.status != "Destroy"
                     }, click: destroy_vm_click
@@ -500,10 +518,40 @@
                 let network_data=new data_handler({uri:config_util.base_uri+`/management/network/vm?vmId=${view_data.id}`}).load_data();
                 document.querySelector('#networkBody').innerHTML = network_data.map((item, index) => {
                     const timeStr = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(item.createTime));
-                    return ` <tr > <td>${item.id}</td><td>${item.mac}</td><td>${item.ip}</td><td>${timeStr}</td</tr>`;
+                    if(item.device>0){
+                        return ` <tr id="tr_network_${item.id}"> <td>${item.id}</td><td>${item.mac}</td><td>${item.ip}</td><td>${timeStr}</td><td><button type="button" class="layui-btn layui-btn-xs" onclick="detach_vm_network_click(${view_data.id},${item.id})"><i class="layui-icon layui-icon-delete"></i></button></td></tr>`;
+                    }else{
+                        return ` <tr id="tr_network_${item.id}"> <td>${item.id}</td><td>${item.mac}</td><td>${item.ip}</td><td>${timeStr}</td><td>&nbsp;</td></tr>`;
+                    }
+
                 }).join('')
+
             }
         })
+    }
+    function detach_vm_network_click(vmId,networkId){
+        $.ajax({
+            url: config_util.base_uri+"/management/vm/detach/network",
+            method: 'POST',
+            data: {
+                vmId:vmId,
+                vmNetworkId:networkId
+            },
+            headers: {"X-CLOUD-TOKEN": getToken()},
+            async: false,
+            success: (response) => {
+                if (response.code === 401) {
+                    go_login_page();
+                } else if (response.code === 0) {
+                    $(`#tr_network_${networkId}`).remove();
+                } else {
+                    dialog_util.show_tool_tip('卸载网卡失败，错误码:' + response.code + '。错误信息:' + response.message);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                dialog_util.show_tool_tip('卸载网卡失败,请检查网络或联系管理员');
+            }
+        });
     }
 
     function create_vm_click() {
@@ -621,6 +669,18 @@
         }, function (response) {
             if (response.code === 0) {
                 table_util.modify(response.data);
+            } else {
+                dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+    function attach_network_click(data){
+        dialog_util.show_modify("#attachNetworkDialog", "附加网络", "layui-icon-website", "POST", config_util.base_uri+"/management/vm/attach/network", function () {
+            $("form[name='modify'] [name='vmId']").val(data.id)
+            render_util.render_attach_network_select(data.clusterId, $("form[name='modify'] [name='networkId']"))
+        }, function (response) {
+            if (response.code === 0) {
+                dialog_util.show_tool_tip('网卡附加成功,IP:' + response.data.ip);
             } else {
                 dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

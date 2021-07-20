@@ -173,4 +173,24 @@ public interface VmUiService {
      * @return
      */
     ResultUtil<VolumeInfo> detachDisk(int id, int volume);
+
+
+
+    /**
+     * 附加网卡
+     *
+     * @param vmId
+     * @param networkId
+     * @return
+     */
+    ResultUtil<VmNetworkInfo> attachNetwork(int vmId, int networkId);
+
+    /**
+     * 取消附加网卡
+     *
+     * @param vmId
+     * @param vmNetworkId
+     * @return
+     */
+    ResultUtil<Void> detachNetwork(int vmId, int vmNetworkId);
 }

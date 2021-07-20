@@ -148,4 +148,13 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).detachDisk(id, volume)), 1, TimeUnit.MINUTES);
     }
 
+    @Override
+    public ResultUtil<VmNetworkInfo> attachNetwork(int vmId, int networkId) {
+        return lockService.run(LockKeyUtil.getInstanceLockKey(vmId), () -> this.call(() -> vmService.getVmServiceByVmId(vmId).attachNetwork(vmId, networkId)), 1, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public ResultUtil<Void> detachNetwork(int vmId, int vmNetworkId) {
+        return lockService.run(LockKeyUtil.getInstanceLockKey(vmId), () -> this.call(() -> vmService.getVmServiceByVmId(vmId).detachNetwork(vmId, vmNetworkId)), 1, TimeUnit.MINUTES);
+    }
 }

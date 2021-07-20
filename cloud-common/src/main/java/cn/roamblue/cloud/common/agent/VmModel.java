@@ -79,6 +79,27 @@ public class VmModel implements Serializable {
     }
 
     /**
+     * 更新设备信息
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateNetwork implements Serializable {
+        /**
+         * 是否挂载
+         */
+        private boolean attach;
+        /**
+         * 虚拟机名称
+         */
+        private String name;
+        /**
+         * 网卡信息
+         */
+        private Network network;
+    }
+    /**
      * Cpu
      */
     @Builder

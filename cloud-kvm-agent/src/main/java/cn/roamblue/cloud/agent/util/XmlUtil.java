@@ -2,6 +2,8 @@ package cn.roamblue.cloud.agent.util;
 
 import cn.hutool.crypto.digest.MD5;
 import cn.roamblue.cloud.common.agent.VmModel;
+import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.ErrorCode;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -52,6 +54,9 @@ public final class XmlUtil {
     }
 
     public static String toXml(VmModel.Disk disk) {
+        if(disk.getDevice()>=10){
+            throw new CodeException(ErrorCode.SERVER_ERROR,"超过最大磁盘数量");
+        }
         StringBuilder sb = new StringBuilder();
         String dev = "vd" + (char) ('a' + disk.getDevice());
         sb.append("<disk type='file' device='disk'>");
@@ -59,18 +64,22 @@ public final class XmlUtil {
         sb.append("<source file='").append(disk.getPath()).append("'/>");
         sb.append("<target dev='").append(dev).append("' bus='virtio'/>");
         sb.append("<address type='pci' domain='0x0000' bus='0x00' slot='" + String.format("0x%02x", disk.getDevice() + 5) + "' function='0x0'/>");
+
         sb.append("<alias name='disk-").append(disk.getDevice()).append("'/>");
         sb.append("</disk>");
         return sb.toString();
     }
 
-    public static String toXml(int id, VmModel.Network network) {
+    public static String toXml(VmModel.Network network) {
+        if(network.getDevice()>=10){
+            throw new CodeException(ErrorCode.SERVER_ERROR,"超过最大磁盘数量");
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("<interface type='bridge'>")
                 .append("<mac address='").append(network.getMac()).append("'/>")
                 .append("<source bridge='").append(network.getSource()).append("'/>")
                 .append("<model type='" + network.getDriver() + "'/>")
-                .append("<address type='pci' domain='0x0000' bus='0x00' slot='").append(String.format("0x%02x", network.getDevice() + 30)).append("' function='0x0'/>")
+                .append("<address type='pci' domain='0x0000' bus='0x00' slot='").append(String.format("0x%02x", network.getDevice() + 20)).append("' function='0x0'/>")
                 .append("<link state='up'/>")
                 .append("</interface>");
         return sb.toString();
@@ -151,7 +160,7 @@ public final class XmlUtil {
         List<VmModel.Network> networks = instance.getNetwroks();
         if (networks != null) {
             for (VmModel.Network network : networks) {
-                sb.append(toXml(instance.getId(), network));
+                sb.append(toXml(network));
             }
         }
         //增加监控

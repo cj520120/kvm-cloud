@@ -165,6 +165,10 @@ public class NetworkServiceImpl implements NetworkService {
         vmNetworkMapper.freeByVmId(vmId);
         log.info("回收网络信息成功. vmId={}", vmId);
     }
+    @Override
+    public void unBindVmNetworkByVmAndId(int vmId,int id){
+        vmNetworkMapper.freeByVmIdAndId(vmId,id);
+    }
 
     @Override
     public NetworkInfo startNetworkById(int id) {

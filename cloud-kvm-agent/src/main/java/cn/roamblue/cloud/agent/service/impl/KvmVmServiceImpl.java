@@ -149,9 +149,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     @Override
     public VmInfoModel findByName(String name) {
         return super.excute(connect -> {
-
             try {
-                log.info("restart name={}", name);
                 Domain domain = connect.domainLookupByName(name);
                 return initVmResponse(domain);
             } catch (LibvirtException err) {

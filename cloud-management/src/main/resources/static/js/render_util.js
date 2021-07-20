@@ -94,6 +94,13 @@ window.render_util=new function (){
         pSelect.html(html);
         form.render("select")
     }
+    this.render_attach_network_select=(clusterId,pSelect) =>{
+        const html = data_util.network_hander.load_data().map(item => {
+            return `<option value="${item.id}" >${item.name}</option>`
+        });
+        pSelect.html(html);
+        form.render("select")
+    }
     this.render_edit_network_select=(clusterId,pSelect) =>{
         const html = data_util.network_hander.load_data().map(item => {
             if (item.clusterId === clusterId) {

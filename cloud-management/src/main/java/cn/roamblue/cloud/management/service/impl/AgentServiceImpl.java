@@ -236,6 +236,23 @@ public class AgentServiceImpl implements AgentService {
             return resultUtil;
         });
     }
+    @Override
+    public ResultUtil<Void> attachNetwork(String uri, String vm, VmModel.Network network, boolean attach) {
+        return this.call(() -> {
+            Gson gson = new Gson();
+            Map<String, String> header = new HashMap<>(0);
+            HttpRequest request = HttpUtil.createPost(uri + "/vm/update/network");
+            request.addHeaders(header);
+            VmModel.UpdateNetwork kvm = new VmModel.UpdateNetwork();
+            kvm.setName(vm);
+            kvm.setNetwork(network);
+            kvm.setAttach(attach);
+            request.body(gson.toJson(kvm));
+            ResultUtil<Void> resultUtil = gson.fromJson(request.execute().body(), new TypeToken<ResultUtil<Void>>() {
+            }.getType());
+            return resultUtil;
+        });
+    }
 
     @Override
     public ResultUtil<VmInfoModel> startVm(String uri, VmModel kvm) {

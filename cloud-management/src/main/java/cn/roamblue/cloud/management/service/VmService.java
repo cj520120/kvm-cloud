@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.service;
 
 import cn.roamblue.cloud.management.bean.TemplateInfo;
 import cn.roamblue.cloud.management.bean.VmInfo;
+import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.bean.VolumeInfo;
 
 /**
@@ -30,6 +31,21 @@ public interface VmService {
      * @return
      */
     VmInfo create(String description, int calculationSchemeId, int clusterId, int storageId, int hostId, int templateId, long diskSize, int network, int groupId);
+
+    /**
+     * 附加网卡
+     * @param vmId 虚拟机ID
+     * @param networkId  网络ID
+     * @return
+     */
+    VmNetworkInfo attachNetwork(int vmId, int networkId);
+
+    /**
+     * 卸载网卡
+     * @param vmId
+     * @param vmNetworkId
+     */
+    void detachNetwork(int vmId,int vmNetworkId);
 
     /**
      * 启动虚拟机

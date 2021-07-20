@@ -53,6 +53,16 @@ public interface VmNetworkMapper extends BaseMapper<VmNetworkEntity> {
     int freeByVmId(@Param("vmId") int vmId);
 
     /**
+     * 释放VM的网络信息
+     *
+     * @param vmId
+     * @param id
+     * @return
+     */
+    @Update(value = "UPDATE tbl_vm_network SET vm_id=0 WHERE vm_id=#{vmId} and id=#{id}")
+    int freeByVmIdAndId(@Param("vmId") int vmId,@Param("id") int id);
+
+    /**
      * 申请网络信息
      *
      * @param id

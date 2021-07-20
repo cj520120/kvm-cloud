@@ -285,4 +285,31 @@ public class VmController {
         return vmUiService.detachDisk(id, volume);
     }
 
+
+
+    /**
+     * 挂载网络
+     *
+     * @param vmId     虚拟机ID
+     * @param networkId 网络ID
+     * @return
+     */
+    @Login
+    @PostMapping("/management/vm/attach/network")
+    public ResultUtil<VmNetworkInfo> attachNetwork(@RequestParam("vmId") int vmId, @RequestParam("networkId") int networkId) {
+        return vmUiService.attachNetwork(vmId, networkId);
+    }
+
+    /**
+     * 取消挂载磁盘
+     *
+     * @param vmId     虚拟机ID
+     * @param vmNetworkId 虚拟机网卡ID
+     * @return
+     */
+    @Login
+    @PostMapping("/management/vm/detach/network")
+    public ResultUtil<Void> detachNetwork(@RequestParam("vmId") int vmId, @RequestParam("vmNetworkId") int vmNetworkId) {
+        return vmUiService.detachNetwork(vmId, vmNetworkId);
+    }
 }

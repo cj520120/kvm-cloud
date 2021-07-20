@@ -165,6 +165,17 @@ public interface AgentService {
     ResultUtil<Void> attachDisk(String uri, String vm, VmModel.Disk disk, boolean attach);
 
     /**
+     * 附加网卡
+     *
+     * @param uri
+     * @param vm
+     * @param network
+     * @param attach
+     * @return
+     */
+    ResultUtil<Void> attachNetwork(String uri, String vm, VmModel.Network network, boolean attach);
+
+    /**
      * 启动实例
      *
      * @param uriInfo

@@ -126,6 +126,23 @@ public class VmController {
         return ResultUtil.<Void>builder().build();
     }
 
+
+    /**
+     * 修改虚拟机挂载磁盘
+     *
+     * @param info
+     * @return
+     */
+    @PostMapping("/vm/update/network")
+    public ResultUtil<Void> updateAttachNetwork(@RequestBody VmModel.UpdateNetwork info) {
+        if (info.isAttach()) {
+            vmService.attachDevice(info.getName(), XmlUtil.toXml(info.getNetwork()));
+        } else {
+            vmService.detachDevice(info.getName(), XmlUtil.toXml(info.getNetwork()));
+        }
+        return ResultUtil.<Void>builder().build();
+    }
+
     /**
      * 启动虚拟机
      *

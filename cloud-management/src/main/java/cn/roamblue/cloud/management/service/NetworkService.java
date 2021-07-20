@@ -92,6 +92,13 @@ public interface NetworkService {
     void destroyNetworkById(int id);
 
     /**
+     * 释放VM指定网卡
+     * @param vmId
+     * @param id
+     */
+    void unBindVmNetworkByVmAndId(int vmId, int id);
+
+    /**
      * 启动网络
      *
      * @param id
