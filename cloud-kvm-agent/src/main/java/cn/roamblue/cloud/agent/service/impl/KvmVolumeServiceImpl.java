@@ -36,19 +36,24 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     public VolumeModel getVolume(String storageName, String volumeName) {
         return super.excute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
-            StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
-            StorageVolInfo storageVolInfo = storageVol.getInfo();
-            String type = null;
-            if (storageVolInfo != null && storageVolInfo.type != null) {
-                type = storageVolInfo.type.toString();
+            try {
+                StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
+                StorageVolInfo storageVolInfo = storageVol.getInfo();
+                String type = null;
+                if (storageVolInfo != null && storageVolInfo.type != null) {
+                    type = storageVolInfo.type.toString();
+                }
+                return VolumeModel.builder().storage(storageName)
+                        .name(volumeName)
+                        .type(type)
+                        .path(storageVol.getPath())
+                        .capacity(storageVolInfo.capacity)
+                        .allocation(storageVolInfo.allocation)
+                        .build();
+            }catch (Exception e) {
+                storagePool.refresh(0);
+                throw e;
             }
-            return VolumeModel.builder().storage(storageName)
-                    .name(volumeName)
-                    .type(type)
-                    .path(storageVol.getPath())
-                    .capacity(storageVolInfo.capacity)
-                    .allocation(storageVolInfo.allocation)
-                    .build();
         });
     }
 
