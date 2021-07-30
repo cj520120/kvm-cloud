@@ -1,8 +1,8 @@
 package cn.roamblue.cloud.agent.controller;
 
+import cn.roamblue.cloud.agent.service.CommmandService;
 import cn.roamblue.cloud.agent.service.KvmVmService;
 import cn.roamblue.cloud.agent.util.XmlUtil;
-import cn.roamblue.cloud.agent.service.CommmandService;
 import cn.roamblue.cloud.common.agent.VmInfoModel;
 import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
@@ -89,12 +89,13 @@ public class VmController {
     /**
      * 停止虚拟机
      *
-     * @param name 虚拟机名称
+     * @param name    虚拟机名称
+     * @param timeout 超时时间(秒)
      * @return
      */
     @PostMapping("/vm/stop")
-    public ResultUtil<Void> stop(@RequestParam("name") String name) {
-        vmService.stop(name);
+    public ResultUtil<Void> stop(@RequestParam("name") String name, @RequestParam(value = "timeout", defaultValue = "180") int timeout) {
+        vmService.stop(name, timeout);
         return ResultUtil.<Void>builder().build();
     }
 

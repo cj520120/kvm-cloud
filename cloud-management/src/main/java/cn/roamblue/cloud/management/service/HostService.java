@@ -51,4 +51,12 @@ public interface HostService {
      */
     void destroyHostById(int id);
 
+    /**
+     * 更新主机状态
+     * @param id
+     * @param status
+     *  @return
+     */
+    HostInfo updateHostStatusById(int id, String status);
+
 }

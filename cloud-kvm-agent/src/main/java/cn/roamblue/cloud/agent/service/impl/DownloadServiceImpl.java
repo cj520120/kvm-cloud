@@ -17,13 +17,13 @@ import java.io.File;
 public class DownloadServiceImpl implements DownloadService {
     @Override
     public ResultUtil<Long> downloadTemplate(String uri, String path) {
-        log.info("开始下载模版.uri={},path={}",uri,path);
+        log.info("开始下载模版.uri={},path={}", uri, path);
         File file = new File(path);
         try {
             HttpUtil.downloadFile(uri, file);
             return ResultUtil.<Long>builder().data(file.length()).build();
         } catch (Exception err) {
-            log.error("下载模版文件出错.uri={}.file={}",uri,path,err);
+            log.error("下载模版文件出错.uri={}.file={}", uri, path, err);
             if (file.exists()) {
                 if (file.delete()) {
                     //do nothing

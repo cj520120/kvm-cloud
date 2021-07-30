@@ -207,14 +207,20 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     }
 
     @Override
-    public void stop(String name) {
+    public void stop(String name, int timeout) {
+        long start = System.currentTimeMillis();
         super.excute(connect -> {
             while (true) {
                 try {
                     log.info("shutdown {}", name);
                     Domain domain = connect.domainLookupByName(name);
                     if (domain.getInfo().state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
-                        domain.shutdown();
+                        if ((System.currentTimeMillis() - start) / 1000 > timeout) {
+                            log.warn("shutdown {} timeout.begin destroy",name);
+                            domain.destroy();
+                        } else {
+                            domain.shutdown();
+                        }
                     }
                     Thread.sleep(1000);
                 } catch (LibvirtException err) {

@@ -50,7 +50,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
                         .capacity(storageVolInfo.capacity)
                         .allocation(storageVolInfo.allocation)
                         .build();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 storagePool.refresh(0);
                 throw e;
             }

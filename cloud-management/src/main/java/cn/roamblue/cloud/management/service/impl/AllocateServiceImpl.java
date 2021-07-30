@@ -116,7 +116,7 @@ public class AllocateServiceImpl implements AllocateService {
         } else {
             List<HostEntity> list = this.hostMapper.findByClusterId(clusterId);
             list.forEach(this::refreshHost);
-            list.stream().filter(t -> (t.getHostAllocationCpu() + cpu < t.getHostCpu()) && (t.getHostAllocationMemory() + memory < t.getHostMemory()) && t.getHostStatus().equals(HostStatus.READY))
+            list = list.stream().filter(t -> (t.getHostAllocationCpu() + cpu < t.getHostCpu()) && (t.getHostAllocationMemory() + memory < t.getHostMemory()) && t.getHostStatus().equals(HostStatus.READY))
                     .collect(Collectors.toList());
             list.sort((o1, o2) -> {
                 long memory1 = o1.getHostMemory() - o1.getHostAllocationMemory();

@@ -5,9 +5,11 @@ import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.common.agent.*;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.config.ApplicaionConfig;
 import cn.roamblue.cloud.management.service.AgentService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +23,8 @@ import java.util.Map;
 @Component
 public class AgentServiceImpl implements AgentService {
 
+    @Autowired
+    private ApplicaionConfig applicaionConfig;
     @Override
     public ResultUtil<HostModel> getHostInfo(String uri) {
         return this.call(() -> {
@@ -156,6 +160,7 @@ public class AgentServiceImpl implements AgentService {
             Gson gson = new Gson();
             Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
+            map.put("timeout", applicaionConfig.getStopTimeout());
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/vm/stop", map), new TypeToken<ResultUtil<Void>>() {
             }.getType());
             return resultUtil;

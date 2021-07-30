@@ -99,6 +99,7 @@ public class VmModel implements Serializable {
          */
         private Network network;
     }
+
     /**
      * Cpu
      */

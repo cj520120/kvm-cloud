@@ -50,8 +50,9 @@ public interface KvmVmService {
      * 停止VM
      *
      * @param name
+     * @param timeout 超时时间
      */
-    void stop(String name);
+    void stop(String name, int timeout);
 
     /**
      * 附加设备

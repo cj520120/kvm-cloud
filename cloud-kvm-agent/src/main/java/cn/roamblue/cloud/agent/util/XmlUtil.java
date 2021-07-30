@@ -54,8 +54,8 @@ public final class XmlUtil {
     }
 
     public static String toXml(VmModel.Disk disk) {
-        if(disk.getDevice()>=10){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"超过最大磁盘数量");
+        if (disk.getDevice() >= 10) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
         StringBuilder sb = new StringBuilder();
         String dev = "vd" + (char) ('a' + disk.getDevice());
@@ -71,8 +71,8 @@ public final class XmlUtil {
     }
 
     public static String toXml(VmModel.Network network) {
-        if(network.getDevice()>=10){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"超过最大磁盘数量");
+        if (network.getDevice() >= 10) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
         StringBuilder sb = new StringBuilder();
         sb.append("<interface type='bridge'>")
