@@ -164,6 +164,33 @@ public class HostServiceImpl implements HostService {
     }
 
     @Override
+    public HostInfo updateHostStatusById(int id, String status) {
+        HostEntity entity = hostMapper.selectById(id);
+        if (entity == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+        }else if(entity.getHostStatus().equals(status)){
+            return this.init(entity);
+        }
+        entity.setHostStatus(status);
+        this.hostMapper.updateById(entity);
+        if(HostStatus.MAINTENANCE.equals(status)){
+            List<VmEntity> vmList = this.vmMapper.findByHostId(id);
+            vmList.parallelStream().forEach(vmEntity -> {
+                this.agentService.stopVm(entity.getHostUri(), vmEntity.getVmName());
+                vmEntity.setVmStatus(VmStatus.STOPPED);
+                vmEntity.setHostId(0);
+                vmEntity.setLastUpdateTime(new Date());
+                vmMapper.updateById(vmEntity);
+            });
+
+        }
+        entity.setHostAllocationCpu(0);
+        entity.setHostAllocationMemory(0L);
+        this.hostMapper.updateById(entity);
+        return this.init(entity);
+    }
+
+    @Override
     public void destroyHostById(int id) {
 
         HostEntity entity = hostMapper.selectById(id);
@@ -172,11 +199,13 @@ public class HostServiceImpl implements HostService {
         }
         List<VmEntity> vmList = vmMapper.findByHostId(id).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)).collect(Collectors.toList());
         if (!vmList.isEmpty()) {
-            for (VmEntity vm : vmList) {
-                this.agentService.destroyVm(entity.getHostUri(), vm.getVmName());
+            vmList.parallelStream().forEach( vm->{
+                this.agentService.stopVm(entity.getHostUri(), vm.getVmName());
                 vm.setVmStatus(VmStatus.STOPPED);
+                vm.setHostId(0);
+                vm.setLastUpdateTime(new Date());
                 vmMapper.updateById(vm);
-            }
+            });
         }
         hostMapper.deleteById(id);
         log.info("删除主机成功,id={} name={} uri={} uri={}", entity.getId(), entity.getHostName(), entity.getHostUri());
@@ -192,7 +221,7 @@ public class HostServiceImpl implements HostService {
                 .memory(entity.getHostMemory())
                 .allocationMemory(entity.getHostAllocationMemory())
                 .cpu(entity.getHostCpu())
-                .status(HostStatus.READY)
+                .status(entity.getHostStatus())
                 .allocationCpu(entity.getHostAllocationCpu())
                 .clusterId(entity.getClusterId())
                 .createTime(entity.getCreateTime())

@@ -37,6 +37,16 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
 
     }
 
+    @Rule(min = RuleType.ADMIN)
+    @Override
+    public ResultUtil<HostInfo> updateHostStatusById(int id, String status) {
+
+        if (StringUtils.isEmpty(status)) {
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "状态不能为空");
+        }
+        return super.call(() -> hostService.updateHostStatusById(id,status));
+    }
+
     @Override
     @Rule(min = RuleType.ADMIN)
     public ResultUtil<HostInfo> createHost(int clusterId, String name, String ip, String uri) {

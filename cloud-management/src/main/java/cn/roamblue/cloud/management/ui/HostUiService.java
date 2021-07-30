@@ -33,6 +33,14 @@ public interface HostUiService {
     ResultUtil<HostInfo> findHostById(int id);
 
     /**
+     * 更新主机状态
+     * @param id
+     * @param status
+     * @return
+     */
+    ResultUtil<HostInfo> updateHostStatusById(int id,String status);
+
+    /**
      * 创建主机
      *
      * @param clusterId

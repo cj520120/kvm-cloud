@@ -5,4 +5,5 @@ package cn.roamblue.cloud.management.util;
  */
 public class HostStatus {
     public static final String READY = "Ready";
+    public static final String MAINTENANCE = "Maintenance";
 }
