@@ -43,10 +43,14 @@ public class VncCheckTask extends AbstractTask {
     protected void call() {
         List<ClusterEntity> list = clusterMapper.selectAll();
         list.stream().filter(t -> t.getClusterStatus().equals(ClusterStatus.READY)).forEach(cluster -> {
-            lockService.tryRun(LockKeyUtil.getVncLock(cluster.getId()), () -> {
-                vncService.start(cluster.getId());
-                return null;
-            }, 2, TimeUnit.MINUTES);
+            try {
+                lockService.tryRun(LockKeyUtil.getVncLock(cluster.getId()), () -> {
+                    vncService.start(cluster.getId());
+                    return null;
+                }, 2, TimeUnit.MINUTES);
+            } catch (Exception e) {
+                log.error("检测Vnc失败.集群ID={}", cluster.getId(), e);
+            }
         });
     }
 
