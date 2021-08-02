@@ -54,6 +54,12 @@
                     <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
                          onclick="create_vm_click()"><i class="layui-icon layui-icon-addition"></i>创建VM
                     </div>
+                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch" id="btn_batch_start" style="display: none"
+                            onclick="batch_start_click()"><i class="layui-icon layui-icon-play"></i>批量启动
+                    </div>
+                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch"  id="btn_batch_stop" style="display: none"
+                            onclick="batch_stop_click()"><i class="layui-icon layui-icon-logout"></i>批量停止
+                    </div>
                 </div>
             </form>
         </div>
@@ -136,7 +142,7 @@
                         <div class="layui-input-inline"><select name="groupId" lay-filter="groupId"
                                 lay-verify="required"></select></div>
                     </td>
-                </tr> 
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -157,6 +163,16 @@
 <script id="stopDialog" type="text/html">
     <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
         <input type="hidden" name="id"/>
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                <input type="checkbox" title="强制停止" name="force"/>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="batchStopDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="ids"/>
         <div class="layui-form-item">
             <div class="layui-input-inline">
                 <input type="checkbox" title="强制停止" name="force"/>
@@ -368,6 +384,7 @@
             elem: "#content",
             idName: "id",
             page:true,
+            checkbox:true,
             cols: [
                 {title: "ID", name: "id", filter: true},
                 {title: "名称", name: "name", filter: true},
@@ -462,7 +479,16 @@
                     }, click: resume_vm_click
                 },
             ],
-            handler: window.data_handler
+            handler: window.data_handler,
+            checkbox_callback:function (ids) {
+                if(ids.length>0){
+                    $("#btn_batch_start").show();
+                    $("#btn_batch_stop").show();
+                }else{
+                    $("#btn_batch_start").hide();
+                    $("#btn_batch_stop").hide();
+                }
+            }
         })
         $("#searchText").on('input', function () {
             table_util.filter_text = $("#searchText").val()
@@ -609,6 +635,41 @@
                 table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('停止VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+    function batch_start_click(){
+        dialog_util.show_confirm_dialog('确认启动虚拟机', 'POST', config_util.base_uri+"/management/vm/start/batch", {ids: table_util.get_selected_rows().join(",")}, function (res) {
+            if(res.code!=0){
+                dialog_util.show_tool_tip('启动VM失败，错误码:' + res.code + '。错误信息:' + res.message);
+            }else{
+                $.each(res.data,function(idx,response){
+                    if (response.code === 0) {
+                        table_util.modify(response.data);
+                    } else {
+                        dialog_util.show_tool_tip('启动VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+                    }
+
+                })
+            }
+        })
+    }
+    function batch_stop_click(){
+        dialog_util.show_modify("#batchStopDialog", "批量停止VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/stop/batch", function () {
+
+            $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
+        }, function (res) {
+            if(res.code!=0){
+                dialog_util.show_tool_tip('停止VM失败，错误码:' + res.code + '。错误信息:' + res.message);
+            }else{
+                $.each(res.data,function(idx,response){
+                    if (response.code === 0) {
+                        table_util.modify(response.data);
+                    } else {
+                        dialog_util.show_tool_tip('停止VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+                    }
+
+                })
             }
         })
     }

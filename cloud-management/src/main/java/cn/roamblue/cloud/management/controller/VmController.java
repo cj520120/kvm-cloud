@@ -1,17 +1,27 @@
 package cn.roamblue.cloud.management.controller;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.ui.VmUiService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 虚拟管理
@@ -165,7 +175,55 @@ public class VmController {
     public ResultUtil<VmInfo> stop(@RequestParam("id") int id, @RequestParam(value = "force", defaultValue = "false") boolean force) {
         return vmUiService.stop(id, force);
     }
-
+    /**
+     * 批量停止虚拟机
+     *
+     * @param ids  虚拟机ID
+     * @param force 是否强制
+     * @return
+     */
+    @Login
+    @PostMapping("/management/vm/stop/batch")
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchStop(@RequestParam("ids") String ids, @RequestParam(value = "force", defaultValue = "false") boolean force) {
+         List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
+        List<ResultUtil<VmInfo>> resultUtils=new ArrayList<>(vmIds.size());
+        if(vmIds!=null&&!vmIds.isEmpty()) {
+            vmIds.parallelStream().forEach(id -> {
+                try {
+                    resultUtils.add( vmUiService.stop(id, force));
+                } catch (CodeException e){
+                    resultUtils.add(ResultUtil.<VmInfo>builder().code(e.getCode()).message(e.getMessage()).build());
+                }catch (Exception e) {
+                    resultUtils.add(ResultUtil.<VmInfo>builder().code(ErrorCode.SERVER_ERROR).message("停止虚拟机错误。"+e.getMessage()).build());
+                }
+            });
+        }
+        return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(resultUtils).build();
+    }
+    /**
+     * 批量启动虚拟机
+     *
+     * @param ids  虚拟机ID
+     * @return
+     */
+    @Login
+    @PostMapping("/management/vm/start/batch")
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(@RequestParam("ids") String ids) {
+        List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
+        List<ResultUtil<VmInfo>> resultUtils=new ArrayList<>(vmIds.size());
+        if(vmIds!=null&&!vmIds.isEmpty()) {
+            vmIds.stream().forEach(id -> {
+                try {
+                    resultUtils.add(vmUiService.start(id, 0));
+                } catch (CodeException e){
+                    resultUtils.add(ResultUtil.<VmInfo>builder().code(e.getCode()).message(e.getMessage()).build());
+                }catch (Exception e) {
+                    resultUtils.add(ResultUtil.<VmInfo>builder().code(ErrorCode.SERVER_ERROR).message("停止虚拟机错误。"+e.getMessage()).build());
+                }
+            });
+        }
+        return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(resultUtils).build();
+    }
     /**
      * 重启虚拟机
      *

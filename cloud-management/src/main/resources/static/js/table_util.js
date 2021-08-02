@@ -4,6 +4,9 @@ window.table_util = new function () {
     this.render = (config) => {
         this.config = config;
         let template = `<table class="layui-table view-table" lay-size="sm" lay-skin="line"><colgroup>`;
+        if(this.config.checkbox){
+            template+=`<col width="30px"/>`
+        }
         template += config.cols.map((item, index) => {
             if (item.width) {
                 return `<col width="${item.width}"/>`
@@ -13,6 +16,9 @@ window.table_util = new function () {
         }).join('')
         template += "<col/>"
         template += '</colgroup><thead><tr>'
+        if(this.config.checkbox){
+            template+=`<th><input type="checkbox" class="check-all"/></th>`
+        }
         template += this.config.cols.map((item, index) => {
             return `<th>${item.title}</th>`
         }).join('');
@@ -21,10 +27,11 @@ window.table_util = new function () {
             template += `<div id="page"></div>`
         }
         $(config.elem).html(template)
+
         this.refresh();
     };
     this.render_row = (data) => {
-        const html = this.config.cols.map((col, index) => {
+        let html = this.config.cols.map((col, index) => {
             let td = "";
             if (col.render) {
                 td = col.render(data)
@@ -33,6 +40,9 @@ window.table_util = new function () {
             }
             return `<td>${td}</td>`
         }).join('');
+        if(this.config.checkbox){
+            html=`<td><input type="checkbox" data-id="${data[this.config.idName]}" class="table-child" /></td>${html}`
+        }
         const json = JSON.stringify(data);
         const button = `<a  onclick="table_util.render_menu(this)" data='${json}' class="layui-btn layui-btn-xs" lay-event="more"><i class="layui-icon layui-icon-more" style="font-size: 16px;" style="float: right;"></i></a>`;
         return `${html}<td>${button}</td>`
@@ -41,8 +51,7 @@ window.table_util = new function () {
         const html = this.render_row(data);
         return `<tr id="tr_${data[this.config.idName]}">${html}</tr>`;
     };
-    this.refresh = () => {
-        $("#page").html('')
+    this.load_init_data=()=>{
         const data = this.config.handler.load_data();
         const table_data= data.filter(item => {
             if (!this.filter_text || this.filter_text === '') {
@@ -63,6 +72,11 @@ window.table_util = new function () {
             }
 
         })
+        return table_data;
+    }
+    this.refresh = () => {
+        $("#page").html('')
+        let table_data = this.load_init_data();
         if(this.config.page){
             window.laypage.render({
                 elem: 'page'
@@ -72,6 +86,7 @@ window.table_util = new function () {
                 ,curr:1
                 ,layout: ['count', 'prev', 'page', 'next', 'limit', 'skip']
                 ,jump: (obj)=>{
+                    const table_data=this.load_init_data();
                     this.refresh_page(table_data,(obj.curr-1)*obj.limit,obj.limit)
                 }
             });
@@ -87,6 +102,36 @@ window.table_util = new function () {
                 return ''
             }
         }).join("");
+        if(this.config.checkbox){
+            $(`${this.config.elem} input[type=checkbox]`).prop("checked",false)
+            $(`${this.config.elem} input[type=checkbox]`).on('change',  (event) =>{
+                this.on_checkbox_changed(event)
+            })
+            this.config.checkbox_callback(this.get_selected_rows())
+        }
+    }
+    this.on_checkbox_changed=(event)=>{
+        if(event.target.classList.contains("table-child")){
+            let checked=true
+            $(`${this.config.elem} .table-child`).each(function (index,element){
+                checked &= element.checked
+            });
+            $(`${this.config.elem} .check-all`).prop("checked",Boolean(checked))
+        }else {
+            $(`${this.config.elem} .table-child`).prop("checked", event.target.checked)
+        }
+        if(this.config.checkbox_callback){
+            this.config.checkbox_callback(this.get_selected_rows())
+        }
+    }
+    this.get_selected_rows =()=>{
+        let ids=[]
+        $(`${this.config.elem} .table-child`).each(function (index,element) {
+            if($(element).prop("checked")){
+                ids.push($(element).attr("data-id"))
+            }
+        })
+        return ids;
     }
     this.render_menu = (pThis) => {
         const data = JSON.parse($(pThis).attr("data"));
@@ -120,11 +165,23 @@ window.table_util = new function () {
     this.modify = (data) => {
         this.config.handler.modify(data)
         $('#tr_' + data[this.config.idName]).html(this.render_row(data))
+        if(this.config.checkbox_callback){
+
+            $(`${this.config.elem} #tr_${data[this.config.idName]} input[type=checkbox]`).on('change',  (event) =>{
+                this.on_checkbox_changed(event)
+            })
+            this.config.checkbox_callback(this.get_selected_rows())
+        }
     };
     this.append = function (data) {
         this.config.handler.append(data)
         $('#tbody').append(this.render_item(data))
-
+        if(this.config.checkbox_callback){
+            $(`${this.config.elem} #tr_${data[this.config.idName]} input[type=checkbox]`).on('change',  (event) =>{
+                this.on_checkbox_changed(event)
+            })
+            this.config.checkbox_callback(this.get_selected_rows())
+        }
     };
     this.remove = (data) => {
         this.config.handler.remove(data)
