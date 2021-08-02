@@ -68,7 +68,6 @@ public interface VmUiService {
      * @param name
      * @param clusterId
      * @param storageId
-     * @param hostId
      * @param calculationSchemeId
      * @param templateId
      * @param size
@@ -76,7 +75,7 @@ public interface VmUiService {
      * @param groupId
      * @return
      */
-    ResultUtil<VmInfo> create(String name, int clusterId, int storageId, int hostId, int calculationSchemeId, int templateId, long size, int networkId, int groupId);
+    ResultUtil<VmInfo> create(String name, int clusterId, int storageId, int calculationSchemeId, int templateId, long size, int networkId, int groupId);
 
     /**
      * 启动VM

@@ -350,7 +350,7 @@ public abstract class AbstractVmService implements VmService {
     }
 
     @Override
-    public VmInfo create(String description, int calculationSchemeId, int clusterId, int storageId, int hostId, int templateId, long diskSize, int network, int groupId) {
+    public VmInfo create(String description, int calculationSchemeId, int clusterId, int storageId, int templateId, long diskSize, int network, int groupId) {
 
         log.info("开始创建主机 :description={}", description);
         VmEntity vm = this.createVm(description,

@@ -64,7 +64,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     }
 
     @Override
-    public ResultUtil<VmInfo> create(String name, int clusterId, int storageId, int hostId, int calculationSchemeId, int templateId, long size, int networkId, int groupId) {
+    public ResultUtil<VmInfo> create(String name, int clusterId, int storageId, int calculationSchemeId, int templateId, long size, int networkId, int groupId) {
 
         if (StringUtils.isEmpty(name)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
@@ -82,7 +82,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         if (networkId <= 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "网络不能为空");
         }
-        return this.call(() -> vmService.getVmServiceByType(VmType.GUEST).create(name, calculationSchemeId, clusterId, storageId, hostId, templateId, size, networkId, groupId));
+        return this.call(() -> vmService.getVmServiceByType(VmType.GUEST).create(name, calculationSchemeId, clusterId, storageId,  templateId, size, networkId, groupId));
     }
 
     @Override

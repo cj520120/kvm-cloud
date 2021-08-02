@@ -119,7 +119,6 @@ public class VmController {
      * @param name                虚拟机名称
      * @param clusterId           集群ID
      * @param storageId           存储ID
-     * @param hostId              主机ID
      * @param calculationSchemeId 计算方案
      * @param templateId          模版ID
      * @param size                磁盘大小(GB)
@@ -132,14 +131,13 @@ public class VmController {
     public ResultUtil<VmInfo> create(@RequestParam("name") String name,
                                      @RequestParam("clusterId") int clusterId,
                                      @RequestParam("storageId") int storageId,
-                                     @RequestParam("hostId") int hostId,
                                      @RequestParam("calculationSchemeId") int calculationSchemeId,
                                      @RequestParam("templateId") int templateId,
                                      @RequestParam("size") long size,
                                      @RequestParam("networkId") int networkId,
                                      @RequestParam("groupId") int groupId) {
 
-        return vmUiService.create(name, clusterId, storageId, hostId, calculationSchemeId, templateId, size, networkId, groupId);
+        return vmUiService.create(name, clusterId, storageId, calculationSchemeId, templateId, size, networkId, groupId);
     }
 
     /**
@@ -286,11 +284,10 @@ public class VmController {
     }
 
 
-
     /**
      * 挂载网络
      *
-     * @param vmId     虚拟机ID
+     * @param vmId      虚拟机ID
      * @param networkId 网络ID
      * @return
      */
@@ -303,7 +300,7 @@ public class VmController {
     /**
      * 取消挂载磁盘
      *
-     * @param vmId     虚拟机ID
+     * @param vmId        虚拟机ID
      * @param vmNetworkId 虚拟机网卡ID
      * @return
      */

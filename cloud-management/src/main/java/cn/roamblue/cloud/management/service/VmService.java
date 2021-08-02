@@ -23,14 +23,13 @@ public interface VmService {
      * @param calculationSchemeId
      * @param clusterId
      * @param storageId
-     * @param hostId
      * @param templateId
      * @param diskSize
      * @param network
      * @param groupId
      * @return
      */
-    VmInfo create(String description, int calculationSchemeId, int clusterId, int storageId, int hostId, int templateId, long diskSize, int network, int groupId);
+    VmInfo create(String description, int calculationSchemeId, int clusterId, int storageId, int templateId, long diskSize, int network, int groupId);
 
     /**
      * 附加网卡
