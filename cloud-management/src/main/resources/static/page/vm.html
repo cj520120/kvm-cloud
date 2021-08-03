@@ -670,6 +670,7 @@
         })
     }
     function batch_start_click(){
+        if($("#btn_batch_start").hasClass("layui-btn-disabled")) return;
         dialog_util.show_modify("#batchStartDialog", "批量启动VM", "layui-icon-play", "POST", config_util.base_uri+"/management/vm/batch/start", function () {
             render_util.render_edit_host_select(0, $("form[name='modify'] [name='hostId']"))
             $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
@@ -689,6 +690,7 @@
         })
     }
     function batch_stop_click(){
+        if($("#btn_batch_stop").hasClass("layui-btn-disabled")) return;
         dialog_util.show_modify("#batchStopDialog", "批量停止VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/batch/stop", function () {
             $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
         }, function (res) {
@@ -707,6 +709,7 @@
         })
     }
     function batch_reboot_click(){
+        if($("#btn_batch_reboot").hasClass("layui-btn-disabled")) return;
         dialog_util.show_modify("#batchRebootDialog", "批量重启VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/batch/reboot", function () {
             $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
         }, function (res) {
