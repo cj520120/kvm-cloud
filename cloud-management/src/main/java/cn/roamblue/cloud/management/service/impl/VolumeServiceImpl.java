@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class VolumeServiceImpl implements VolumeService {
+public class VolumeServiceImpl extends AbstractService implements VolumeService {
     @Autowired
     private VolumeMapper volumeMapper;
     @Autowired
@@ -107,7 +107,7 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         VolumeInfo info = init(entity);
         return info;
@@ -118,7 +118,7 @@ public class VolumeServiceImpl implements VolumeService {
 
         ClusterEntity clusterEntity = this.clusterMapper.selectById(clusterId);
         if (clusterEntity == null) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "集群不存在");
+            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, localeMessage.getMessage("CLUSTER_NOT_FOUND", "集群不存在"));
         }
         StorageEntity storageEntity = this.allocateService.allocateStorage(clusterId, 0, size);
 
@@ -146,7 +146,7 @@ public class VolumeServiceImpl implements VolumeService {
         volumeEntity.setVolumeStatus(VolumeStatus.READY);
         volumeMapper.insert(volumeEntity);
         VolumeInfo info = init(volumeEntity);
-        log.info("创建磁盘信息成功:info={}", kvmVolumeInfo);
+        log.info("create volume success:info={}", kvmVolumeInfo);
         return info;
     }
 
@@ -155,14 +155,14 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(volumeId);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         if (entity.getVmId() > 0) {
-            throw new CodeException(ErrorCode.VOLUME_ATTACH_ERROR, "磁盘卷已挂载");
+            throw new CodeException(ErrorCode.VOLUME_ATTACH_ERROR, localeMessage.getMessage("VOLUME_ATTACH_EXISTS", "磁盘卷已挂载"));
         }
         StorageEntity storageEntity = this.storageMapper.selectById(entity.getStorageId());
         if (storageEntity == null) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, localeMessage.getMessage("STORAGE_NOT_FOUND", "存储不存在"));
         }
         List<Integer> deviceIds = volumeMapper.findByVmId(vmId).stream().map(VolumeEntity::getVmDevice).collect(Collectors.toList());
         int device = 0;
@@ -172,7 +172,7 @@ public class VolumeServiceImpl implements VolumeService {
         entity.setVmDevice(device);
         entity.setVmId(vmId);
         volumeMapper.updateById(entity);
-        log.info("挂载磁盘信息成功:volumeId={} vmId={} device={}", volumeId, vmId, device);
+        log.info("attach volume success:volumeId={} vmId={} device={}", volumeId, vmId, device);
         return this.init(entity);
     }
 
@@ -181,18 +181,18 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(volumeId);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         if (entity.getVmId() > 0 && entity.getVmId() != vmId) {
-            throw new CodeException(ErrorCode.VOLUME_ATTACH_ERROR, "磁盘卷挂载到其他虚拟机");
+            throw new CodeException(ErrorCode.VOLUME_ATTACH_ERROR, localeMessage.getMessage("VOLUME_DETACH_VM_ERROR", "磁盘卷挂载到其他虚拟机"));
         }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, localeMessage.getMessage("STORAGE_NOT_FOUND", "存储不存在"));
         }
         entity.setVmId(0);
         volumeMapper.updateById(entity);
-        log.info("取消挂载磁盘信息成功:volumeId={} vmId={}", volumeId, vmId);
+        log.info("detach volume success.volumeId={} vmId={}", volumeId, vmId);
         return this.init(entity);
 
     }
@@ -202,17 +202,17 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         if (entity.getVmId() > 0) {
             VmEntity vm = this.vmMapper.selectById(entity.getVmId());
             if (vm != null && !vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED)) {
-                throw new CodeException(ErrorCode.VM_NOT_STOP, "磁盘调整时虚拟机必须处于停止状态");
+                throw new CodeException(ErrorCode.VM_NOT_STOP, localeMessage.getMessage("VM_NOT_STOP", "虚拟机未停止"));
             }
         }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, localeMessage.getMessage("STORAGE_NOT_FOUND", "存储不存在"));
         }
         size = entity.getVolumeCapacity() + size * 1024 * 1024 * 1024;
         HostEntity hostEntity = this.allocateService.allocateHost(entity.getClusterId(), 0, 0, 0);
@@ -225,7 +225,7 @@ public class VolumeServiceImpl implements VolumeService {
         entity.setVolumeAllocation(kvmVolumeInfo.getAllocation());
         entity.setVolumeCapacity(kvmVolumeInfo.getCapacity());
         volumeMapper.updateById(entity);
-        log.info("扩容磁盘成功:volumeId={} size={}", id, size);
+        log.info("resize volume success.volumeId={} size={}", id, size);
         return this.init(entity);
     }
 
@@ -234,12 +234,12 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         entity.setRemoveTime(null);
         entity.setVolumeStatus(VolumeStatus.READY);
         volumeMapper.updateById(entity);
-        log.info("恢复磁盘成功:volumeId={}", id);
+        log.info("resume volume success:volumeId={}", id);
         return this.init(entity);
     }
 
@@ -256,7 +256,7 @@ public class VolumeServiceImpl implements VolumeService {
             volumeMapper.deleteById(volume.getId());
 
         }
-        log.info("释放主机磁盘成功:vmId={}", vmId);
+        log.info("free volume success:vmId={}", vmId);
 
     }
 
@@ -265,17 +265,17 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         if (!entity.getVolumeStatus().equals(VolumeStatus.READY)) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘卷未就绪");
+            throw new CodeException(ErrorCode.VOLUME_NOT_READY, localeMessage.getMessage("VOLUME_NOT_READY", "磁盘卷未就绪"));
         }
         entity.setVolumeStatus(VolumeStatus.TEMPLATE);
         volumeMapper.updateById(entity);
         try {
             StorageEntity sourceStorageEntity = this.storageMapper.selectById(entity.getStorageId());
             if (!sourceStorageEntity.getStorageStatus().equalsIgnoreCase(StorageStatus.READY)) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "磁盘卷所在存储未就绪");
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, localeMessage.getMessage("STORAGE_NOT_READY", "存储池未就绪"));
             }
             StorageEntity toStorageEntity = this.allocateService.allocateStorage(entity.getClusterId(), 0, entity.getVolumeAllocation());
             HostEntity hostEntity = this.allocateService.allocateHost(entity.getClusterId(), 0, 0, 0);
@@ -331,10 +331,10 @@ public class VolumeServiceImpl implements VolumeService {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘卷不存在"));
         }
         if (!entity.getVolumeStatus().equals(VolumeStatus.READY)) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘卷未就绪");
+            throw new CodeException(ErrorCode.VOLUME_NOT_READY, localeMessage.getMessage("VOLUME_NOT_READY", "磁盘卷未就绪"));
         }
         entity.setRemoveTime(new Date());
         entity.setVolumeStatus(VolumeStatus.DESTROY);

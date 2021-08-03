@@ -1,15 +1,11 @@
 package cn.roamblue.cloud.management.controller;
 
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.common.error.CodeException;
-import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.ui.VmUiService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -175,32 +169,35 @@ public class VmController {
     public ResultUtil<VmInfo> stop(@RequestParam("id") int id, @RequestParam(value = "force", defaultValue = "false") boolean force) {
         return vmUiService.stop(id, force);
     }
+
     /**
      * 批量停止虚拟机
      *
-     * @param ids  虚拟机ID
+     * @param ids   虚拟机ID
      * @param force 是否强制
      * @return
      */
     @Login
     @PostMapping("/management/vm/batch/stop")
     public ResultUtil<List<ResultUtil<VmInfo>>> batchStop(@RequestParam("ids") String ids, @RequestParam(value = "force", defaultValue = "false") boolean force) {
-         List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
+        List<Integer> vmIds = Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
         return vmUiService.batchStop(vmIds, force);
     }
+
     /**
      * 批量启动虚拟机
      *
-     * @param ids  虚拟机ID
+     * @param ids    虚拟机ID
      * @param hostId 主机ID
      * @return
      */
     @Login
     @PostMapping("/management/vm/batch/start")
-    public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(@RequestParam("ids") String ids, @RequestParam(value = "hostId",defaultValue = "0") int hostId) {
-        List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(@RequestParam("ids") String ids, @RequestParam(value = "hostId", defaultValue = "0") int hostId) {
+        List<Integer> vmIds = Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
         return vmUiService.batchStart(vmIds, hostId);
     }
+
     /**
      * 重启虚拟机
      *
@@ -213,19 +210,21 @@ public class VmController {
     public ResultUtil<VmInfo> reboot(@RequestParam("id") int id, @RequestParam(value = "force", defaultValue = "false") boolean force) {
         return vmUiService.reboot(id, force);
     }
+
     /**
      * 批量重启虚拟机
      *
-     * @param ids  虚拟机ID
+     * @param ids   虚拟机ID
      * @param force 是否强制
      * @return
      */
     @Login
     @PostMapping("/management/vm/batch/reboot")
     public ResultUtil<List<ResultUtil<VmInfo>>> batchReboot(@RequestParam("ids") String ids, @RequestParam(value = "force", defaultValue = "false") boolean force) {
-        List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
+        List<Integer> vmIds = Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
         return vmUiService.batchReboot(vmIds, force);
     }
+
     /**
      * 重装虚拟机
      *

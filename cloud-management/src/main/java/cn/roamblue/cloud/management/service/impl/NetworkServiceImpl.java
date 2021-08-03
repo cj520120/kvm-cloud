@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class NetworkServiceImpl implements NetworkService {
+public class NetworkServiceImpl extends AbstractService implements NetworkService {
     @Autowired
     private ClusterMapper clusterMapper;
     @Autowired
@@ -69,7 +69,7 @@ public class NetworkServiceImpl implements NetworkService {
 
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
         }
         NetworkInfo info = init(entity);
         return info;
@@ -89,7 +89,7 @@ public class NetworkServiceImpl implements NetworkService {
 
         ClusterEntity clusterEntity = this.clusterMapper.selectById(clusterId);
         if (clusterEntity == null) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "集群不存在");
+            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, localeMessage.getMessage("CLUSTER_NOT_FOUND", "集群不存在"));
         }
 
         NetworkEntity entity = NetworkEntity.builder().networkName(name)
@@ -150,31 +150,32 @@ public class NetworkServiceImpl implements NetworkService {
         wrapper.gt("vm_id", 0);
         wrapper.eq("network_id", id);
         if (vmNetworkMapper.selectCount(wrapper) > 0) {
-            throw new CodeException(ErrorCode.HAS_VM_ERROR, "网络包含主机信息");
+            throw new CodeException(ErrorCode.HAS_VM_ERROR, localeMessage.getMessage("DEL_NETWORK_HAS_VM", "网络包含主机信息"));
         }
         QueryWrapper<VmNetworkEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("network_id", id);
         vmNetworkMapper.delete(queryWrapper);
         networkMapper.deleteById(id);
-        log.info("销毁网络信息成功.network={}", id);
+        log.info("destroy network success.network={}", id);
 
     }
 
     @Override
     public void unBindVmNetworkByVmId(int vmId) {
         vmNetworkMapper.freeByVmId(vmId);
-        log.info("回收网络信息成功. vmId={}", vmId);
+        log.info("release vm network success. vmId={}", vmId);
     }
+
     @Override
-    public void unBindVmNetworkByVmAndId(int vmId,int id){
-        vmNetworkMapper.freeByVmIdAndId(vmId,id);
+    public void unBindVmNetworkByVmAndId(int vmId, int id) {
+        vmNetworkMapper.freeByVmIdAndId(vmId, id);
     }
 
     @Override
     public NetworkInfo startNetworkById(int id) {
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
         }
         entity.setNetworkStatus(NetworkStatus.READY);
         networkMapper.updateById(entity);
@@ -185,7 +186,7 @@ public class NetworkServiceImpl implements NetworkService {
     public NetworkInfo pauseNetworkById(int id) {
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
         }
         entity.setNetworkStatus(NetworkStatus.PAUSE);
         networkMapper.updateById(entity);

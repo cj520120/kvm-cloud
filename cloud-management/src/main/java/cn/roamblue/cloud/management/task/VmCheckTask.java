@@ -68,7 +68,7 @@ public class VmCheckTask extends AbstractTask {
                 VmEntity vm = vmMapper.findByName(vmInfo.getName());
                 if (vm == null) {
                     agentService.destroyVm(hostInfo.getHostUri(), vmInfo.getName());
-                    log.warn("未知的VM,自动关闭.name={}", vmInfo.getName());
+                    log.warn("Unknown VM, auto shutdown.name={}", vmInfo.getName());
                     continue;
                 }
                 lockService.tryRun(LockKeyUtil.getInstanceLockKey(vm.getId()), () -> {
@@ -81,11 +81,11 @@ public class VmCheckTask extends AbstractTask {
                         return null;
                     }
                     if ((System.currentTimeMillis() - find.getLastUpdateTime().getTime()) < 60000) {
-                        log.info("忽略VM检测 VM-Name={}", vm.getVmDescription());
+                        log.info("Ignore VM detection VM-Name={}", vm.getVmDescription());
                         return null;
                     }
                     if (find.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED) || !find.getHostId().equals(hostInfo.getId())) {
-                        log.warn("VM状态不一致，自动销毁", vmInfo.getName());
+                        log.warn("VM state is inconsistent, auto destroy", vmInfo.getName());
                         //如果运行机器和当前机器不一致，则直接销毁
                         agentService.destroyVm(hostInfo.getHostUri(), find.getVmName());
                     }

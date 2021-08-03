@@ -49,37 +49,37 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
 
 
         if (StringUtils.isEmpty(name)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "名称不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_NAME_EMPTY", "名称不能为空"));
         }
         if (StringUtils.isEmpty(guestStartIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "Guest分配开始IP不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_GUEST_START_IP_EMPTY", "Guest分配开始IP不能为空"));
         }
         if (StringUtils.isEmpty(guestEndIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "Guest分配结束IP不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_GUEST_STOP_IP_EMPTY", "Guest分配结束IP不能为空"));
         }
         if (StringUtils.isEmpty(managerStartIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "管理分配开始IP不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_MANAGER_START_IP_EMPTY", "管理分配开始IP不能为空"));
         }
         if (StringUtils.isEmpty(managerEndIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "管理分配结束IP不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_MANAGER_STOP_IP_EMPTY", "管理分配结束IP不能为空"));
         }
         if (StringUtils.isEmpty(subnet)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "子网信息不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_SUBNET_EMPTY", "子网信息不能为空"));
         }
         if (StringUtils.isEmpty(gateway)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "网关不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_GATEWAY_EMPTY", "网关不能为空"));
         }
         if (StringUtils.isEmpty(dns)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "dns信息不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_DNS_EMPTY", "dns信息不能为空"));
         }
         if (StringUtils.isEmpty(type)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "网络类型不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_TYPE_EMPTY", "网络类型不能为空"));
         }
         if (StringUtils.isEmpty(card)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "网卡名称不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_CARD_EMPTY", "网卡名称不能为空"));
         }
         if (clusterId <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "集群不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("MUST_HAS_CLUSTER", "集群不能为空"));
         }
         return super.call(() -> networkService.createNetwork(name, clusterId, managerStartIp, managerEndIp, guestStartIp, guestEndIp, subnet, gateway, dns, card, type));
 

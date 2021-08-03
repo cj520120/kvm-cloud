@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class HostServiceImpl implements HostService {
+public class HostServiceImpl extends AbstractService implements HostService {
 
     @Autowired
     private HostMapper hostMapper;
@@ -118,7 +118,7 @@ public class HostServiceImpl implements HostService {
 
         HostEntity entity = hostMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, localeMessage.getMessage("HOST_NOT_FOUND", "主机不存在"));
         }
         refreshHost(entity);
         HostInfo info = init(entity);
@@ -131,7 +131,7 @@ public class HostServiceImpl implements HostService {
         QueryWrapper<HostEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("host_ip", ip);
         if (hostMapper.selectCount(queryWrapper) > 0) {
-            throw new CodeException(ErrorCode.HOST_EXISTS, "创建主机失败，主机信息已经存在");
+            throw new CodeException(ErrorCode.HOST_EXISTS, localeMessage.getMessage("HOST_EXISTS", "创建主机失败，主机信息已经存在"));
         }
         ResultUtil<HostModel> hostInfoResultUtil = this.agentService.getHostInfo(uri);
         if (hostInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
@@ -159,7 +159,7 @@ public class HostServiceImpl implements HostService {
                 .build();
         hostMapper.insert(entity);
         HostInfo hostInfo = init(entity);
-        log.error("创建主机成功,host={}", name, uri, hostInfo);
+        log.error("create host success,host={}", name, uri, hostInfo);
         return hostInfo;
     }
 
@@ -167,13 +167,13 @@ public class HostServiceImpl implements HostService {
     public HostInfo updateHostStatusById(int id, String status) {
         HostEntity entity = hostMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
-        }else if(entity.getHostStatus().equals(status)){
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, localeMessage.getMessage("HOST_NOT_FOUND", "主机不存在"));
+        } else if (entity.getHostStatus().equals(status)) {
             return this.init(entity);
         }
         entity.setHostStatus(status);
         this.hostMapper.updateById(entity);
-        if(HostStatus.MAINTENANCE.equals(status)){
+        if (HostStatus.MAINTENANCE.equals(status)) {
             List<VmEntity> vmList = this.vmMapper.findByHostId(id);
             vmList.parallelStream().forEach(vmEntity -> {
                 this.agentService.stopVm(entity.getHostUri(), vmEntity.getVmName());
@@ -199,7 +199,7 @@ public class HostServiceImpl implements HostService {
         }
         List<VmEntity> vmList = vmMapper.findByHostId(id).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)).collect(Collectors.toList());
         if (!vmList.isEmpty()) {
-            vmList.parallelStream().forEach( vm->{
+            vmList.parallelStream().forEach(vm -> {
                 this.agentService.stopVm(entity.getHostUri(), vm.getVmName());
                 vm.setVmStatus(VmStatus.STOPPED);
                 vm.setHostId(0);
@@ -208,7 +208,7 @@ public class HostServiceImpl implements HostService {
             });
         }
         hostMapper.deleteById(id);
-        log.info("删除主机成功,id={} name={} uri={} uri={}", entity.getId(), entity.getHostName(), entity.getHostUri());
+        log.info("destroy host success,id={} name={} uri={} uri={}", entity.getId(), entity.getHostName(), entity.getHostUri());
 
     }
 

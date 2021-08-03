@@ -59,7 +59,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        log.info("VNC申请网络地址成功,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
+        log.info("VNC allocate network success,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -72,7 +72,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         for (Integer networkId : networkIds) {
             writeVncConfig(vm, networkId, host);
         }
-        log.info("Vnc Console 启动完成");
+        log.info("Vnc Console start complete");
     }
 
     @Override
@@ -107,7 +107,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     public ResultUtil<Void> register(int clusterId, int vmId, String host, int port, String password) {
 
         this.unRegister(clusterId, vmId);
-        log.info("开始注册VNC地址.vm={} vnc=vnc://{}:{} password={}", vmId, host, port, password);
+        log.info("register vnc.vm={} vnc=vnc://{}:{} password={}", vmId, host, port, password);
         List<VmNetworkInfo> networks = this.networkService.findVmNetworkByVmId(vmId);
         List<Integer> networkIds = networks.stream().map(VmNetworkInfo::getNetworkId).distinct().collect(Collectors.toList());
         for (Integer networkId : networkIds) {
@@ -139,11 +139,11 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     @Override
     public ResultUtil<Void> unRegister(int clusterId, int vmId) {
         try {
-            log.info("取消VNC注册.vm={}", vmId);
+            log.info("unregister vnc.vm={}", vmId);
             this.vncMapper.deleteByVmId(vmId);
             return ResultUtil.<Void>builder().build();
         } catch (Exception err) {
-            log.error("删除VNC出错.", err);
+            log.error("unregister vnc error.", err);
             return ResultUtil.<Void>builder().code(ErrorCode.SERVER_ERROR).message(err.getMessage()).build();
         }
     }
@@ -152,7 +152,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     public VncInfo findVncByVmId(Integer clusterId, Integer vmId) {
         List<VncEntity> list = this.vncMapper.findByVmId(vmId);
         if (list.isEmpty()) {
-            throw new CodeException(ErrorCode.VM_NOT_START, "实例未启动");
+            throw new CodeException(ErrorCode.VM_NOT_START, localeMessage.getMessage("VM_NOT_START", "实例未启动"));
         }
         Map<Integer, List<VncEntity>> map = list.stream().collect(Collectors.groupingBy(VncEntity::getNetworkId));
         List<Integer> networkIds = list.stream().map(VncEntity::getNetworkId).distinct().collect(Collectors.toList());
@@ -169,6 +169,6 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
             String token = MD5.create().digestHex(String.valueOf(vmId));
             return VncInfo.builder().password(vnc.getVncPassword()).ip(vm.getVmIp()).token(token).build();
         }
-        throw new CodeException(ErrorCode.VM_NOT_START, "没有可用的Console实例");
+        throw new CodeException(ErrorCode.VM_NOT_START, localeMessage.getMessage("CONSOLE_VM_NOT_READY", "Console实例未就绪"));
     }
 }

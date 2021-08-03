@@ -80,8 +80,8 @@
                                     if (data.code == 0) {
                                         localStorage.setItem("X_CLOUD_TOKEN", data.data.token);
                                         window.location.href = 'index.html'
-                                    } else if (data.code == 401) {
-                                        dialog_util.show_tool_tip("用户名密码错误")
+                                    } else {
+                                        dialog_util.show_tool_tip(data.message)
                                     }
                                 }
                             }

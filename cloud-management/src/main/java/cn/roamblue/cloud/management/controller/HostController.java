@@ -82,6 +82,7 @@ public class HostController {
 
     /**
      * 主机状态修改
+     *
      * @param id
      * @param status
      * @return
@@ -89,9 +90,10 @@ public class HostController {
     @Login
     @PostMapping("/management/host/status")
     public ResultUtil<HostInfo> updateHostStatusById(@RequestParam("id") int id,
-                                                     @RequestParam("status") String status){
-        return hostUiService.updateHostStatusById(id,status);
+                                                     @RequestParam("status") String status) {
+        return hostUiService.updateHostStatusById(id, status);
     }
+
     /**
      * 销毁主机
      *

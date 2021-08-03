@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class ClusterServiceImpl implements ClusterService {
+public class ClusterServiceImpl extends AbstractService implements ClusterService {
 
     @Autowired
     private ClusterMapper clusterMapper;
@@ -47,7 +47,7 @@ public class ClusterServiceImpl implements ClusterService {
     public ClusterInfo findClusterById(int id) {
         ClusterEntity entity = clusterMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, "集群不存在");
+            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, localeMessage.getMessage("CLUSTER_NOT_FOUND", "集群不存在"));
         }
         ClusterInfo clusterInfo = init(entity);
         return clusterInfo;
@@ -65,7 +65,7 @@ public class ClusterServiceImpl implements ClusterService {
                 .build();
         clusterMapper.insert(entity);
         ClusterInfo clusterInfo = init(entity);
-        log.info("创建集群cluster={}", clusterInfo);
+        log.info("create cluster={}", clusterInfo);
         return clusterInfo;
 
     }
@@ -75,7 +75,7 @@ public class ClusterServiceImpl implements ClusterService {
 
         ClusterEntity entity = clusterMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, "集群不存在");
+            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, localeMessage.getMessage("CLUSTER_NOT_FOUND", "集群不存在"));
         }
         entity.setClusterName(name);
         entity.setOverCpu(overCpu);
@@ -91,15 +91,15 @@ public class ClusterServiceImpl implements ClusterService {
 
         QueryWrapper wrapper = new QueryWrapper<>().eq("cluster_id", id);
         if (hostMapper.selectCount(wrapper) > 0) {
-            throw new CodeException(ErrorCode.HAS_HOST_ERROR, "请先删除主机信息");
+            throw new CodeException(ErrorCode.HAS_HOST_ERROR, localeMessage.getMessage("DEL_CUSTER_HAS_VM", "删除集群前请先删除主机信息"));
         }
         if (networkRepository.selectCount(wrapper) > 0) {
-            throw new CodeException(ErrorCode.HAS_NETWORK_ERROR, "请先删除网络信息");
+            throw new CodeException(ErrorCode.HAS_NETWORK_ERROR, localeMessage.getMessage("DEL_CUSTER_HAS_NETWORK", "删除集群前请请先删除网络信息"));
         }
         if (storageRepository.selectCount(wrapper) > 0) {
-            throw new CodeException(ErrorCode.HAS_STORAGE_ERROR, "请先删除存储信息");
+            throw new CodeException(ErrorCode.HAS_STORAGE_ERROR, localeMessage.getMessage("DEL_CUSTER_HAS_STORAGE", "删除集群前请请先删除存储信息"));
         }
-        log.info("销毁集群clusterId={}", id);
+        log.info("destroy clusterId={}", id);
         clusterMapper.deleteById(id);
 
     }

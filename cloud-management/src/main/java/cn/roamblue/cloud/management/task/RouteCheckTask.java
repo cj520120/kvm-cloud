@@ -48,7 +48,7 @@ public class RouteCheckTask extends AbstractTask {
                     return null;
                 }, 2, TimeUnit.MINUTES);
             } catch (Exception e) {
-                log.error("检测Route失败.集群ID={}", cluster.getId(), e);
+                log.error("check Route fail.clusterId={}", cluster.getId(), e);
             }
         });
     }

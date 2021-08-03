@@ -34,7 +34,7 @@ public class CommmandServiceImpl extends AbstractKvmService implements CommmandS
                 if (name.equals(domain.getName())) {
                     String response = domain.qemuAgentCommand(command, timeout, 0);
                     if (StringUtils.isEmpty(response)) {
-                        throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机未启动");
+                        throw new CodeException(ErrorCode.VM_NOT_FOUND, "vm not found");
                     }
                     Gson gson = new Gson();
                     Map<String, Object> map = gson.fromJson(response, new TypeToken<Map<String, Object>>() {

@@ -13,5 +13,5 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "roamblue.cloud")
 public class ApplicaionConfig {
-    private int stopTimeout=180;
+    private int stopTimeout = 180;
 }

@@ -31,18 +31,18 @@ public abstract class AbstractKvmService {
             return runner.call(connect);
         } catch (LibvirtException err) {
             if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                throw new CodeException(ErrorCode.VM_NOT_FOUND, "VM未启动");
+                throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
             } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_NETWORK)) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "VM网络未找到");
+                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "agent vm network not found");
             } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_CONNECT)) {
-                throw new CodeException(ErrorCode.QEMU_NOT_CONNECT, "QemuAgent 未安装或VM未启动完成");
+                throw new CodeException(ErrorCode.QEMU_NOT_CONNECT, "agent QemuAgent not connect");
             } else {
                 throw new CodeException(ErrorCode.SERVER_ERROR, err);
             }
         } catch (CodeException err) {
             throw err;
         } catch (Exception err) {
-            log.error("执行出错", err);
+            log.error("execute fail.", err);
             throw new CodeException(ErrorCode.SERVER_ERROR, err);
         } finally {
             if (connect != null) {

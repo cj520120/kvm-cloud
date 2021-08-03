@@ -21,10 +21,11 @@ import java.util.Map;
  * @author chenjun
  */
 @Component
-public class AgentServiceImpl implements AgentService {
+public class AgentServiceImpl extends AbstractService implements AgentService {
 
     @Autowired
     private ApplicaionConfig applicaionConfig;
+
     @Override
     public ResultUtil<HostModel> getHostInfo(String uri) {
         return this.call(() -> {
@@ -241,6 +242,7 @@ public class AgentServiceImpl implements AgentService {
             return resultUtil;
         });
     }
+
     @Override
     public ResultUtil<Void> attachNetwork(String uri, String vm, VmModel.Network network, boolean attach) {
         return this.call(() -> {

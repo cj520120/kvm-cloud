@@ -33,18 +33,20 @@ public interface VmService {
 
     /**
      * 附加网卡
-     * @param vmId 虚拟机ID
-     * @param networkId  网络ID
+     *
+     * @param vmId      虚拟机ID
+     * @param networkId 网络ID
      * @return
      */
     VmNetworkInfo attachNetwork(int vmId, int networkId);
 
     /**
      * 卸载网卡
+     *
      * @param vmId
      * @param vmNetworkId
      */
-    void detachNetwork(int vmId,int vmNetworkId);
+    void detachNetwork(int vmId, int vmNetworkId);
 
     /**
      * 启动虚拟机

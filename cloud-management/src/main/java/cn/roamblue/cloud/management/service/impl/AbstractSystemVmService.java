@@ -35,37 +35,37 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
 
     @Override
     public VmInfo resume(int vmId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     @Override
     public VmInfo changeCdRoom(int id, int isoTemplateId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     @Override
     public VolumeInfo attachDisk(int vmId, int volumeId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     @Override
     public VolumeInfo detachDisk(int vmId, int volumeId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     @Override
     public VmInfo modify(int vmId, String description, int calculationSchemeId, int groupId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     @Override
     public TemplateInfo createTemplate(int vmId, String name) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     @Override
     public VmInfo reInstall(int vmId, int templateId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED","系统实例不支持该操作"));
     }
 
     /**
@@ -77,21 +77,21 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
     protected void initializeNetwork(VmEntity instance, HostEntity host) {
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(instance.getClusterId());
         if (networks.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，网络不存在");
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND","网络不存在"));
         }
         List<VmNetworkInfo> vmNetworkInfoList = this.networkService.findVmNetworkByVmId(instance.getId());
         if (vmNetworkInfoList.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，VM没有配置IP");
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND","网络不存在"));
         }
         Map<Integer, NetworkInfo> networkInfoMap = networks.stream().collect(Collectors.toMap(NetworkInfo::getId, Function.identity()));
         for (int i = 0; i < vmNetworkInfoList.size(); i++) {
             VmNetworkInfo vmNetworkInfo = vmNetworkInfoList.get(i);
             NetworkInfo networkInfo = networkInfoMap.get(vmNetworkInfo.getNetworkId());
             if (networkInfo == null) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "无法初始化[" + this.getType() + "]网络，网络不存在");
+                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND","网络不存在"));
             }
             if (!networkInfo.getStatus().equals(NetworkStatus.READY)) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "无法初始化[" + this.getType() + "]网络，网络未就绪");
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, localeMessage.getMessage("NETWORK_NOT_READY","网络不存在"));
             }
             StringBuilder sb = new StringBuilder();
             sb.append("TYPE=Ethernet\r\n")
@@ -111,18 +111,18 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
             }
             String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + vmNetworkInfo.getDevice();
             String networkConfig = sb.toString();
-            log.info("[{}]开始写入网卡配置.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
+            log.info("[{}] begin write network config.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
             long startTime = System.currentTimeMillis();
             do {
                 ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, networkConfig);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                    log.info("[{}]写入网卡配置成功,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
+                    log.info("[{}] write network config success,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
                     break;
-                } else if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND) {
-                    throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "]网络初始化失败.VM未启动");
+                } else if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND||resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
+                    throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "] init file.vm not start");
                 }
-                if ((System.currentTimeMillis() - startTime) > 60 * 1000) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "[" + this.getType() + "]网络初始化失败.写入网卡配置超市");
+                if ((System.currentTimeMillis() - startTime) > 3 * 60 * 1000) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "[" + this.getType() + "] init file.write timeout");
                 }
                 try {
                     Thread.sleep(2000);
@@ -142,7 +142,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
         ClusterInfo clusterInfo = this.clusterService.findClusterById(clusterId);
         List<Integer> templateIds = this.templateService.listTemplateByClusterId(clusterId).stream().filter(t -> t.getType().equals(this.getTemplateType())).map(TemplateInfo::getId).collect(Collectors.toList());
         if (templateIds.isEmpty()) {
-            log.warn("无法初始化[{}]，模版不存在", this.getType());
+            log.warn("conn't init system vm [{}]，template not found", this.getType());
             return;
         }
 
@@ -157,28 +157,28 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                     VmEntity instance = this.vmMapper.selectById(systemVmEntity.getVmId());
                     if (instance == null) {
                         systemVmMapper.deleteById(systemVmEntity.getId());
-                        log.debug("检测系统VM Type={} Network={} 失败，无效的VM，准备重新创建VM", this.getType(), network.getId());
+                        log.debug("check system VM Type={} Network={} fail, invalid VM, ready to recreate VM", this.getType(), network.getId());
                         continue;
                     } else if (instance.getVmStatus().equals(VmStatus.STOPPED)) {
                         super.startVm(instance.getId(), 0);
-                    } else if(instance.getVmStatus().equals(VmStatus.RUNNING)){
+                    } else if (instance.getVmStatus().equals(VmStatus.RUNNING)) {
 
-                        log.debug("开始检测系统VM Type={} Network={} HostId={}", this.getType(), network.getId(),instance.getHostId());
-                        HostInfo hostInfo= this.hostService.findHostById(instance.getHostId());
-                        ResultUtil<VmInfoModel> resultUtil=this.agentService.getInstance(hostInfo.getUri(),instance.getVmName());
-                        if(resultUtil.getCode()==ErrorCode.SUCCESS){
-                            log.debug("检测系统VM Type={} Network={} 通过", this.getType(), network.getId());
-                        }else if(resultUtil.getCode()==ErrorCode.AGENT_VM_NOT_FOUND){
-                            log.warn("检测系统VM Type={} Network={} 实例状态不同步，强制重启,VM={}", this.getType(), network.getId(),instance.getVmName());
-                            super.reboot(instance.getId(),true);
-                        }else{
-                            log.error("检测系统VM Type={} Network={} 错误.msg={}", this.getType(), network.getId(),resultUtil.getMessage());
+                        log.debug("check system vm VM Type={} Network={} HostId={}", this.getType(), network.getId(), instance.getHostId());
+                        HostInfo hostInfo = this.hostService.findHostById(instance.getHostId());
+                        ResultUtil<VmInfoModel> resultUtil = this.agentService.getInstance(hostInfo.getUri(), instance.getVmName());
+                        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                            log.debug("check system vm  Type={} Network={} pass", this.getType(), network.getId());
+                        } else if (resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
+                            log.warn("check VM Type={} Network={}. vm state out of sync，force reboot,VM={}", this.getType(), network.getId(), instance.getVmName());
+                            super.reboot(instance.getId(), true);
+                        } else {
+                            log.error("check VM Type={} Network={} error.msg={}", this.getType(), network.getId(), resultUtil.getMessage());
                         }
-                    }else{
-                        log.warn("检测系统VM Type={} Network={} 错误，未知状态[{}]", this.getType(), network.getId(),instance.getVmStatus());
+                    } else {
+                        log.warn("check system VM Type={} Network={} fail，unknown status[{}]", this.getType(), network.getId(), instance.getVmStatus());
                     }
                 } else {
-                    log.info("开始创建系统VM Type={} Network={}", this.getType(), network.getId());
+                    log.info("create system VM Type={} Network={}", this.getType(), network.getId());
                     String description = this.getVmDescription(clusterInfo, network);
                     int templateId = templateIds.get(0);
                     long diskSize = 0L;
@@ -194,14 +194,14 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                     systemVmEntity.setVmId(instance.getId());
                     systemVmMapper.updateById(systemVmEntity);
                     super.startVm(instance.getId(), 0);
-                    log.info("启动系统VM Type={} Network={} 成功", this.getType(), network.getId());
+                    log.info("start VM Type={} Network={} success", this.getType(), network.getId());
 
                 }
             } catch (CodeException e) {
-                log.error("初始化系统VM{}失败.msg={}", this.getType(), e.getMessage());
+                log.error("init VM{} fail.msg={}", this.getType(), e.getMessage());
 
             } catch (Exception e) {
-                log.error("初始化系统VM{}失败.", this.getType(), e);
+                log.error("init VM{} fail.", this.getType(), e);
             }
         }
     }

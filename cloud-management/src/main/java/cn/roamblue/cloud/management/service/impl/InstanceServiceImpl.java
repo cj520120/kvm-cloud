@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Primary
 @Service
-public class InstanceServiceImpl implements InstanceService {
+public class InstanceServiceImpl extends AbstractService implements InstanceService {
 
     @Autowired
     private VmMapper vmMapper;
@@ -47,7 +47,7 @@ public class InstanceServiceImpl implements InstanceService {
     public VmService getVmServiceByVmId(int id) {
         VmEntity entity = vmMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "实例未找到");
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "VM不存在"));
         }
         return getVmServiceByType(entity.getVmType());
     }
@@ -56,7 +56,7 @@ public class InstanceServiceImpl implements InstanceService {
     public VmService getVmServiceByType(String type) {
         VmService vmService = vmServiceList.stream().filter(t -> t.getType().equals(type)).findFirst().orElse(null);
         if (vmService == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "未知的实例类型:" + type);
+            throw new CodeException(ErrorCode.SERVER_ERROR, String.format(localeMessage.getMessage("UNKNOWN_VM_TYPE", "未知的实例类型:%s"), type));
         }
         return vmService;
     }
@@ -66,7 +66,7 @@ public class InstanceServiceImpl implements InstanceService {
 
         VmEntity entity = vmMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "VM不存在");
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "VM不存在"));
         }
         return this.initInstanceInfo(entity);
     }
@@ -122,13 +122,13 @@ public class InstanceServiceImpl implements InstanceService {
 
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "VM不存在"));
         }
         if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             return this.vncService.findVncByVmId(vm.getClusterId(), vm.getId());
 
         } else {
-            throw new CodeException(ErrorCode.VM_NOT_START, "虚拟机未启动");
+            throw new CodeException(ErrorCode.VM_NOT_START, localeMessage.getMessage("VM_NOT_START", "虚拟机未启动"));
         }
     }
 

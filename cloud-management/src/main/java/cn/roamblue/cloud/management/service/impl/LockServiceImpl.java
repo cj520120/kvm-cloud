@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenjun
  */
 @Service
-public class LockServiceImpl implements LockService {
+public class LockServiceImpl extends AbstractService implements LockService {
 
     public final String lockUUID = UUID.randomUUID().toString();
     private ThreadLocal<Map<String, LockRef>> context = new ThreadLocal<>();
@@ -106,7 +106,7 @@ public class LockServiceImpl implements LockService {
                 // do nothing
             }
         }
-        throw new CodeException(ErrorCode.LOCK_TIMEOUT, "获取锁超时");
+        throw new CodeException(ErrorCode.LOCK_TIMEOUT, localeMessage.getMessage("LOCK_REQ_TIMEOUT", "获取锁超时"));
 
     }
 

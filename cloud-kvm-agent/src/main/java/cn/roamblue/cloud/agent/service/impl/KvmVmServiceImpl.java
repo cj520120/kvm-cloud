@@ -61,7 +61,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                     Domain domain = connect.domainLookupByID(id);
                     map.put(id, getVmStatics(domain));
                 } catch (Exception e) {
-                    log.info("获取Vm指标数据错误.ID={}", id, e);
+                    log.info("Error getting VM indicator data.ID={}", id, e);
                 }
             }
             Thread.sleep(2000);
@@ -154,7 +154,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 return initVmResponse(domain);
             } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "虚拟机未启动");
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
                 } else {
                     throw err;
                 }
@@ -190,7 +190,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 return null;
             } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "虚拟机未启动");
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
                 } else {
                     throw err;
                 }
@@ -261,7 +261,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 return null;
             } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "虚拟机未启动");
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
                 } else {
                     throw err;
                 }
@@ -280,7 +280,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 return null;
             } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "虚拟机未启动");
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
                 } else {
                     throw err;
                 }
@@ -314,7 +314,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
                 return null;
             } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "虚拟机未启动");
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
                 } else {
                     throw err;
                 }

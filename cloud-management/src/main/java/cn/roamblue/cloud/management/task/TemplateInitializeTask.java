@@ -95,7 +95,7 @@ public class TemplateInitializeTask extends AbstractTask {
             Map<String, Object> map = new HashMap<>(2);
             map.put("path", "/mnt/" + storageEntity.getStorageTarget() + "/" + templateRefEntity.getTemplateTarget());
             map.put("uri", template.getTemplateUri());
-            log.info("开始下载模版信息.template={} path", template, map.get("path"));
+            log.info("Start downloading template.template={} path={}", template, map.get("path"));
             Gson gson = new Gson();
             ResultUtil<Long> downloadResult = gson.fromJson(HttpUtil.post(hostEntity.getHostUri() + "/download/template", map), new TypeToken<ResultUtil<Long>>() {
             }.getType());
@@ -105,12 +105,12 @@ public class TemplateInitializeTask extends AbstractTask {
                 templateRefEntity.setTemplateStatus(TemplateStatus.READY);
                 templateMapper.updateById(template);
                 templateRefMapper.insert(templateRefEntity);
-                log.info("成功下载模版.template={}", template);
+                log.info("Template downloaded successfully.template={}", template);
             } else {
-                log.error("下载模版失败.template={}.msg={}", template, downloadResult.getMessage());
+                log.error("Failed to download template.template={}.msg={}", template, downloadResult.getMessage());
             }
         } catch (Exception err) {
-            log.error("下载模版失败.template={}", template, err);
+            log.error("Failed to download template.template={}", template, err);
         }
     }
 }

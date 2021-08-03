@@ -17,7 +17,7 @@ import java.util.List;
  * @author chenjun
  */
 @Service
-public class GroupServiceImpl implements GroupService {
+public class GroupServiceImpl extends AbstractService implements GroupService {
     @Autowired
     private GroupMapper mapper;
 
@@ -37,7 +37,7 @@ public class GroupServiceImpl implements GroupService {
     public GroupInfo modifyGroup(int id, String name) {
         GroupEntity entity = mapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.GROUP_NOT_FOUND, "群组不存在");
+            throw new CodeException(ErrorCode.GROUP_NOT_FOUND, localeMessage.getMessage("GROUP_NOT_FOUND", "群组不存在"));
         }
         entity.setGroupName(name);
         mapper.updateById(entity);

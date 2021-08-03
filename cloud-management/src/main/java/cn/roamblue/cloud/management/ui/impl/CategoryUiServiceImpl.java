@@ -28,37 +28,37 @@ public class CategoryUiServiceImpl extends AbstractUiService implements Category
     public ResultUtil<OsCategoryInfo> createCategory(String categoryName, String diskDriver, String networkDriver) {
 
         if (StringUtils.isEmpty(categoryName)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CATEGORY_NAME_NOT_EMPTY", "名称不能为空"));
         }
 
         if (StringUtils.isEmpty(diskDriver)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "硬盘驱动不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("DISK_DRIVE_EMPTY", "硬盘驱动不能为空"));
         }
 
         if (StringUtils.isEmpty(networkDriver)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "网络驱动不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_DRIVE_EMPTY", "网络驱动不能为空"));
         }
-        return super.call(()->osCategoryService.createOsCategory(categoryName, diskDriver, networkDriver));
+        return super.call(() -> osCategoryService.createOsCategory(categoryName, diskDriver, networkDriver));
     }
 
     @Override
     public ResultUtil<OsCategoryInfo> modifyCategory(int id, String categoryName, String diskDriver, String networkDriver) {
         if (StringUtils.isEmpty(categoryName)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CATEGORY_NAME_NOT_EMPTY", "名称不能为空"));
         }
 
         if (StringUtils.isEmpty(diskDriver)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "硬盘驱动不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("DISK_DRIVE_EMPTY", "硬盘驱动不能为空"));
         }
 
         if (StringUtils.isEmpty(networkDriver)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "网络驱动不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("NETWORK_DRIVE_EMPTY", "网络驱动不能为空"));
         }
-        return super.call(()->osCategoryService.modifyOsCategory(id,categoryName, diskDriver, networkDriver));
+        return super.call(() -> osCategoryService.modifyOsCategory(id, categoryName, diskDriver, networkDriver));
     }
 
     @Override
     public ResultUtil<Void> destroyCategory(int id) {
-        return super.call(()->osCategoryService.destroyOsCategoryById(id));
+        return super.call(() -> osCategoryService.destroyOsCategoryById(id));
     }
 }

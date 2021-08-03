@@ -28,7 +28,7 @@ public class ConnectFactory extends BasePooledObjectFactory<Connect> {
         try {
             return p.getObject().isAlive();
         } catch (Exception err) {
-            log.error("检测连接状态出现问题.", err);
+            log.error("There was a problem detecting the connection status.", err);
             return false;
         }
     }

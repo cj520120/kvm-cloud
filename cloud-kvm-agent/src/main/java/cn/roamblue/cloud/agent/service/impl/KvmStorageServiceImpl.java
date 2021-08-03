@@ -50,7 +50,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
                         .build();
             } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_STORAGE_POOL)) {
-                    throw new CodeException(ErrorCode.AGENT_STORAGE_NOT_FOUND, "存储池不存在");
+                    throw new CodeException(ErrorCode.AGENT_STORAGE_NOT_FOUND, "storage not found");
                 } else {
                     throw err;
                 }
@@ -92,7 +92,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
             for (String pool : pools) {
                 if (pool.equals(name)) {
                     isExist = true;
-                    log.info("存储池已存在.name={} nfs={} path={} target={}", name, nfs, path, target);
+                    log.info("storage exists.name={} nfs={} path={} target={}", name, nfs, path, target);
                 }
             }
             if (!isExist) {
@@ -109,7 +109,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
                         .append("</target>")
                         .append("</pool>");
                 connect.storagePoolCreateXML(sb.toString(), 0);
-                log.info("创建存储池.name={} nfs={} path={} target={}", name, nfs, path, target);
+                log.info("create storage.name={} nfs={} path={} target={}", name, nfs, path, target);
             }
             StoragePool storagePool = connect.storagePoolLookupByName(name);
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();

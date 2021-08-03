@@ -60,7 +60,7 @@ public interface VmNetworkMapper extends BaseMapper<VmNetworkEntity> {
      * @return
      */
     @Update(value = "UPDATE tbl_vm_network SET vm_id=0 WHERE vm_id=#{vmId} and id=#{id}")
-    int freeByVmIdAndId(@Param("vmId") int vmId,@Param("id") int id);
+    int freeByVmIdAndId(@Param("vmId") int vmId, @Param("id") int id);
 
     /**
      * 申请网络信息

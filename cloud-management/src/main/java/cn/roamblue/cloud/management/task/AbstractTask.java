@@ -44,7 +44,7 @@ public abstract class AbstractTask {
                 this.call();
             }
         } catch (Exception e) {
-            log.error("任务 {} 执行失败", this.getName(), e);
+            log.error("task={} run fail.", this.getName(), e);
         }
     }
 

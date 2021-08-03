@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * @author chenjun
  */
 @Service
-public class RuleServiceImpl implements RuleService {
+public class RuleServiceImpl extends AbstractService implements RuleService {
     @Autowired
     private LoginInfoMapper loginInfoMapper;
 
@@ -20,10 +20,10 @@ public class RuleServiceImpl implements RuleService {
     public void hasPermission(int userId, int rule) {
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户不存在");
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "用户不存在"));
         }
         if (loginInfoEntity.getRuleType() > rule) {
-            throw new CodeException(ErrorCode.PERMISSION_ERROR, "当前账号权限不足，请联系管理员进行操作");
+            throw new CodeException(ErrorCode.PERMISSION_ERROR, localeMessage.getMessage("USER_PERMISSION_ERROR", "当前账号权限不足，请联系管理员进行操作"));
         }
     }
 }

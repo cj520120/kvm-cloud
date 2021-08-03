@@ -36,8 +36,6 @@ public class OsCategoryController {
     }
 
 
-
-
     /**
      * 创建系统类型
      *
@@ -46,10 +44,11 @@ public class OsCategoryController {
     @Login
     @PostMapping("/management/os/category/create")
     public ResultUtil<OsCategoryInfo> createOsCategoryInfo(@RequestParam("categoryName") String categoryName,
-                                                          @RequestParam("diskDriver") String diskDriver,
-                                                          @RequestParam("networkDriver") String networkDriver) {
+                                                           @RequestParam("diskDriver") String diskDriver,
+                                                           @RequestParam("networkDriver") String networkDriver) {
         return categoryUiService.createCategory(categoryName, diskDriver, networkDriver);
     }
+
     /**
      * 创建系统类型
      *
@@ -59,9 +58,9 @@ public class OsCategoryController {
     @PostMapping("/management/os/category/modify")
     public ResultUtil<OsCategoryInfo> modifyOsCategoryInfo(@RequestParam("id") int id,
                                                            @RequestParam("categoryName") String categoryName,
-                                                          @RequestParam("diskDriver") String diskDriver,
-                                                          @RequestParam("networkDriver") String networkDriver) {
-        return categoryUiService.modifyCategory(id,categoryName, diskDriver, networkDriver);
+                                                           @RequestParam("diskDriver") String diskDriver,
+                                                           @RequestParam("networkDriver") String networkDriver) {
+        return categoryUiService.modifyCategory(id, categoryName, diskDriver, networkDriver);
     }
 
     /**

@@ -53,9 +53,10 @@ public interface HostService {
 
     /**
      * 更新主机状态
+     *
      * @param id
      * @param status
-     *  @return
+     * @return
      */
     HostInfo updateHostStatusById(int id, String status);
 

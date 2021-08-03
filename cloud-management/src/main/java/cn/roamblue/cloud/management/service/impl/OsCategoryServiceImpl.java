@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class OsCategoryServiceImpl implements OsCategoryService {
+public class OsCategoryServiceImpl extends AbstractService implements OsCategoryService {
     @Autowired
     private OsCategoryMapper osCategoryMapper;
 
@@ -29,7 +29,7 @@ public class OsCategoryServiceImpl implements OsCategoryService {
     public OsCategoryInfo findOsCategoryById(int id) {
         OsCategoryEntity entity = osCategoryMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, "操作系统模版未找到");
+            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, localeMessage.getMessage("OS_CATEGORY_NOT_FOUND", "操作系统类型未找到"));
         }
         return this.init(entity);
     }
@@ -42,7 +42,7 @@ public class OsCategoryServiceImpl implements OsCategoryService {
 
     @Override
     public OsCategoryInfo createOsCategory(String categoryName, String networkDriver, String diskDriver) {
-        OsCategoryEntity entity=OsCategoryEntity.builder().categoryName(categoryName)
+        OsCategoryEntity entity = OsCategoryEntity.builder().categoryName(categoryName)
                 .networkDriver(networkDriver)
                 .diskDriver(diskDriver)
                 .createTime(new Date())
@@ -51,12 +51,13 @@ public class OsCategoryServiceImpl implements OsCategoryService {
         this.osCategoryMapper.insert(entity);
         return this.init(entity);
     }
+
     @Rule(min = RuleType.ADMIN)
     @Override
     public OsCategoryInfo modifyOsCategory(int id, String categoryName, String diskDriver, String networkDriver) {
-        OsCategoryEntity osCategoryEntity=osCategoryMapper.selectById(id);
-        if(osCategoryEntity == null){
-            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND,"系统分类不存在");
+        OsCategoryEntity osCategoryEntity = osCategoryMapper.selectById(id);
+        if (osCategoryEntity == null) {
+            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, localeMessage.getMessage("OS_CATEGORY_NOT_FOUND", "操作系统类型未找到"));
         }
         osCategoryEntity.setDiskDriver(diskDriver);
         osCategoryEntity.setNetworkDriver(networkDriver);
@@ -64,6 +65,7 @@ public class OsCategoryServiceImpl implements OsCategoryService {
         this.osCategoryMapper.updateById(osCategoryEntity);
         return this.init(osCategoryEntity);
     }
+
     @Rule(min = RuleType.ADMIN)
     @Override
     public void destroyOsCategoryById(int id) {

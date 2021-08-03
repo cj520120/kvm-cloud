@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class BriaggeNetworkAllocateServiceImpl implements NetworkAllocateService {
+public class BriaggeNetworkAllocateServiceImpl extends AbstractService implements NetworkAllocateService {
 
     @Autowired
     private VmNetworkMapper vmNetworkMapper;
@@ -51,12 +51,12 @@ public class BriaggeNetworkAllocateServiceImpl implements NetworkAllocateService
             allocate = vmNetworkMapper.allocateNetwork(instanceNetworkEntity.getId(), vmId, deviceId) > 0;
         }
         if (!allocate) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "网络不可用或无可用地址");
+            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, localeMessage.getMessage("ALLOCATE_ADDRESS_NOT_RESOURCE", "网络不可用或无可用地址"));
         }
         instanceNetworkEntity.setVmDevice(deviceId);
         instanceNetworkEntity.setVmId(vmId);
         VmNetworkInfo info = this.initInstanceNetwork(instanceNetworkEntity);
-        log.info("申请网络信息成功.networkIds={} vmId={}", networkId, vmId);
+        log.info("allocate network success.networkIds={} vmId={}", networkId, vmId);
         return info;
     }
 

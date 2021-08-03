@@ -34,11 +34,12 @@ public interface HostUiService {
 
     /**
      * 更新主机状态
+     *
      * @param id
      * @param status
      * @return
      */
-    ResultUtil<HostInfo> updateHostStatusById(int id,String status);
+    ResultUtil<HostInfo> updateHostStatusById(int id, String status);
 
     /**
      * 创建主机

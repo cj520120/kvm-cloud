@@ -84,9 +84,9 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
                 storageVol.delete(0);
                 return null;
             });
-            log.info("删除磁盘.storage={} volume={}", storage, volume);
+            log.info("destroy volume.storage={} volume={}", storage, volume);
         } catch (Exception err) {
-            log.error("删除磁盘失败.storage={} volume={}", storage, volume, err);
+            log.error("destroy volume fail.storage={} volume={}", storage, volume, err);
         }
     }
 
@@ -127,7 +127,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
             StorageVol storageVol = storagePool.storageVolCreateXML(sb.toString(), 0);
             StorageVolInfo storageVolInfo = storageVol.getInfo();
             storagePool.refresh(0);
-            log.info("创建磁盘.storage={} volume={} xml={}", storage, volume, sb.toString());
+            log.info("create volume.storage={} volume={} xml={}", storage, volume, sb.toString());
             return VolumeModel.builder().storage(storage)
                     .name(volume)
                     .path(storageVol.getPath())

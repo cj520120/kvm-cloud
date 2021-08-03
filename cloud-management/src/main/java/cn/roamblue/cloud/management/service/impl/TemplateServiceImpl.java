@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class TemplateServiceImpl implements TemplateService {
+public class TemplateServiceImpl extends AbstractService implements TemplateService {
     @Autowired
     private TemplateMapper templateRepository;
     @Autowired
@@ -64,7 +64,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         TemplateEntity entity = templateRepository.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, localeMessage.getMessage("TEMPLATE_NOT_FOUND", "模版不存在"));
         }
         TemplateInfo info = initTemplateInfo(entity);
         return info;
@@ -85,7 +85,7 @@ public class TemplateServiceImpl implements TemplateService {
                 .build();
         templateRepository.insert(entity);
         TemplateInfo info = initTemplateInfo(entity);
-        log.info("创建模版成功.info={}", info);
+        log.info("create template success.info={}", info);
         return info;
     }
 
@@ -94,7 +94,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         templateRepository.deleteById(id);
         templateRefRepository.deleteByTemplateId(id);
-        log.info("删除模版成功.id={}", id);
+        log.info("destroy template success.id={}", id);
 
     }
 
@@ -104,7 +104,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         List<TemplateRefEntity> list = this.templateRefRepository.selectList(new QueryWrapper<TemplateRefEntity>().eq("template_id", templateId));
         if (list.isEmpty()) {
-            throw new CodeException(ErrorCode.TEMPLATE_STORAGE_NOT_READY, "模版未就绪");
+            throw new CodeException(ErrorCode.TEMPLATE_STORAGE_NOT_READY, localeMessage.getMessage("TEMPLATE_NOT_READY", "模版未就绪"));
         }
         List<TemplateRefInfo> result = BeanConverter.convert(list, this::initTemplateRefInfo);
         return result;

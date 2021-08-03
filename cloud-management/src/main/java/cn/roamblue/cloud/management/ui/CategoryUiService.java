@@ -18,25 +18,28 @@ public interface CategoryUiService {
 
     /**
      * 创建系统分类
+     *
      * @param categoryName
      * @param diskDriver
      * @param networkDriver
      * @return
      */
-    ResultUtil<OsCategoryInfo> createCategory(String categoryName,String diskDriver,String networkDriver);
+    ResultUtil<OsCategoryInfo> createCategory(String categoryName, String diskDriver, String networkDriver);
 
     /**
      * 修改系统分类
+     *
      * @param id
      * @param categoryName
      * @param diskDriver
      * @param networkDriver
      * @return
      */
-    ResultUtil<OsCategoryInfo> modifyCategory(int id,String categoryName, String diskDriver, String networkDriver);
+    ResultUtil<OsCategoryInfo> modifyCategory(int id, String categoryName, String diskDriver, String networkDriver);
 
     /**
      * 删除系统分类
+     *
      * @param id
      * @return
      */

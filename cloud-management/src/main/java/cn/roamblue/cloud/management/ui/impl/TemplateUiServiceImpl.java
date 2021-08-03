@@ -41,20 +41,20 @@ public class TemplateUiServiceImpl extends AbstractUiService implements Template
     public ResultUtil<TemplateInfo> createTemplate(int clusterId, int osCategoryId, String name, String type, String uri) {
 
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "模版名称不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("TEMPLATE_NAME_EMPTY", "模版名称不能为空"));
         }
         if (StringUtils.isEmpty(type)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "模版类型不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("TEMPLATE_TYPE_EMPTY", "模版类型不能为空"));
         }
         if (StringUtils.isEmpty(uri)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "远程不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("TEMPLATE_URI_EMPTY", "模版下载地址不能为空"));
         }
         if (osCategoryId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "模版系统类型不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("TEMPLATE_OS_CATEGORY_EMPTY", "模版系统类型不能为空"));
         }
 
         if (clusterId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("MUST_HAS_CLUSTER", "集群不能为空"));
         }
 
         return super.call(() -> templateService.createTemplate(clusterId, osCategoryId, name, type, uri));

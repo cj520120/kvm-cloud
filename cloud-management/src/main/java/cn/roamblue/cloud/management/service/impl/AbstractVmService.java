@@ -25,7 +25,7 @@ import java.util.Optional;
  * @author chenjun
  */
 @Slf4j
-public abstract class AbstractVmService implements VmService {
+public abstract class AbstractVmService extends AbstractService implements VmService {
 
 
     @Autowired
@@ -369,8 +369,8 @@ public abstract class AbstractVmService implements VmService {
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
-        VmNetworkInfo vmNetworkInfo= this.allocateNetwork(networkId, vmId);
-        updateVmNetwork(vm,vmNetworkInfo,true);
+        VmNetworkInfo vmNetworkInfo = this.allocateNetwork(networkId, vmId);
+        updateVmNetwork(vm, vmNetworkInfo, true);
         return vmNetworkInfo;
     }
 
@@ -381,25 +381,26 @@ public abstract class AbstractVmService implements VmService {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         List<VmNetworkInfo> list = networkService.findVmNetworkByVmId(vmId);
-        Optional<VmNetworkInfo> optional=list.stream().filter(t->t.getId().equals(id)).findFirst();
-        VmNetworkInfo vmNetworkInfo=optional.orElse(null);
-        if(vmNetworkInfo != null){
-            if(vmNetworkInfo.getDevice().equals(0)){
-                throw new CodeException(ErrorCode.DETACH_NETWORK_ERROR,"默认网卡不允许卸载");
+        Optional<VmNetworkInfo> optional = list.stream().filter(t -> t.getId().equals(id)).findFirst();
+        VmNetworkInfo vmNetworkInfo = optional.orElse(null);
+        if (vmNetworkInfo != null) {
+            if (vmNetworkInfo.getDevice().equals(0)) {
+                throw new CodeException(ErrorCode.DETACH_NETWORK_ERROR, "默认网卡不允许卸载");
             }
             networkService.unBindVmNetworkByVmAndId(vmId, id);
-            updateVmNetwork(vm,vmNetworkInfo,false);
+            updateVmNetwork(vm, vmNetworkInfo, false);
         }
     }
 
-    private void updateVmNetwork(VmEntity vm,VmNetworkInfo vmNetworkInfo,boolean attach){
+    private void updateVmNetwork(VmEntity vm, VmNetworkInfo vmNetworkInfo, boolean attach) {
         if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             HostInfo host = this.hostService.findHostById(vm.getHostId());
-            NetworkInfo networkInfo= this.networkService.findNetworkById(vmNetworkInfo.getNetworkId());
-            VmModel.Network network=VmModel.Network.builder().mac(vmNetworkInfo.getMac()).source(networkInfo.getCard()).device(vmNetworkInfo.getDevice()).build();
-            this.agentService.attachNetwork(host.getUri(), vm.getVmName(), network,attach);
+            NetworkInfo networkInfo = this.networkService.findNetworkById(vmNetworkInfo.getNetworkId());
+            VmModel.Network network = VmModel.Network.builder().mac(vmNetworkInfo.getMac()).source(networkInfo.getCard()).device(vmNetworkInfo.getDevice()).build();
+            this.agentService.attachNetwork(host.getUri(), vm.getVmName(), network, attach);
         }
     }
+
     @Override
     public VmInfo start(int id, int hostId) {
 

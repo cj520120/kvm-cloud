@@ -43,13 +43,13 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
     @Override
     public ResultUtil<VolumeInfo> createVolume(int clusterId, int storageId, String name, long size) {
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "磁盘名称不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VOLUME_NAME_EMPTY", "磁盘名称不能为空"));
         }
         if (clusterId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群不能为空");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("MUST_HAS_CLUSTER", "集群不能为空"));
         }
         if (size <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "磁盘大小不能小于1G");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VOLUME_SIZE_MUST_GT_1", "磁盘大小不能小于1G"));
         }
         return super.call(() -> volumeService.createVolume(clusterId, null, storageId, name, size));
     }
@@ -67,7 +67,7 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
     @Override
     public ResultUtil<VolumeInfo> resize(int id, long size) {
         if (size <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "磁盘大小不能小于1G");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VOLUME_SIZE_MUST_GT_1", "磁盘大小不能小于1G"));
         }
         return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.resize(id, size)), 1, TimeUnit.MINUTES);
     }

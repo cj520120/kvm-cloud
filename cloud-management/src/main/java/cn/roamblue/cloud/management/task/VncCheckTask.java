@@ -49,7 +49,7 @@ public class VncCheckTask extends AbstractTask {
                     return null;
                 }, 2, TimeUnit.MINUTES);
             } catch (Exception e) {
-                log.error("检测Vnc失败.集群ID={}", cluster.getId(), e);
+                log.error("check vnc fail.clusterId={}", cluster.getId(), e);
             }
         });
     }

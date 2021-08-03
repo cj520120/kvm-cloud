@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenjun
  */
 @Service
-public class ManagementServiceImpl implements ManagementService {
+public class ManagementServiceImpl extends AbstractService implements ManagementService {
     private ManagementMapper managementMapper;
     @Autowired
     private LockService lockService;
