@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.*;
@@ -14,8 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -91,13 +98,38 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     }
 
     @Override
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(List<Integer> ids, int hostId) {
+        if(ids==null||ids.isEmpty()){
+            return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(new ArrayList<>(0)).build();
+        }
+        List<Supplier<ResultUtil<VmInfo>>> supplierList=ids.stream().map(id-> (Supplier<ResultUtil<VmInfo>>) () -> start(id,hostId)).collect(Collectors.toList());
+        return super.batchSSupplyAsync(supplierList);
+    }
+
+    @Override
     public ResultUtil<VmInfo> stop(int id, boolean force) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).stop(id, force)), 1, TimeUnit.MINUTES);
+    }
+    @Override
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchStop(List<Integer> ids, boolean force) {
+        if(ids==null||ids.isEmpty()){
+            return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(new ArrayList<>(0)).build();
+        }
+        List<Supplier<ResultUtil<VmInfo>>> supplierList=ids.stream().map(id-> (Supplier<ResultUtil<VmInfo>>) () -> stop(id,force)).collect(Collectors.toList());
+        return super.batchSSupplyAsync(supplierList);
     }
 
     @Override
     public ResultUtil<VmInfo> reboot(int id, boolean force) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).reboot(id, force)), 1, TimeUnit.MINUTES);
+    }
+    @Override
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchReboot(List<Integer> ids, boolean force) {
+        if(ids==null||ids.isEmpty()){
+            return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(new ArrayList<>(0)).build();
+        }
+        List<Supplier<ResultUtil<VmInfo>>> supplierList=ids.stream().map(id-> (Supplier<ResultUtil<VmInfo>>) () -> reboot(id,force)).collect(Collectors.toList());
+        return super.batchSSupplyAsync(supplierList);
     }
 
     @Override

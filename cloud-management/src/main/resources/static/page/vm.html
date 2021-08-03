@@ -48,17 +48,24 @@
                     </select>
                 </div>
                 <div class="layui-input-inline">
-                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
-                         onclick="search_vm_click()"><i class="layui-icon layui-icon-search"></i>搜索
-                    </div>
-                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
-                         onclick="create_vm_click()"><i class="layui-icon layui-icon-addition"></i>创建VM
-                    </div>
-                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch" id="btn_batch_start" style="display: none"
-                            onclick="batch_start_click()"><i class="layui-icon layui-icon-play"></i>批量启动
-                    </div>
-                    <div class="layui-btn layui-btn-sm" lay-filter="formSearch"  id="btn_batch_stop" style="display: none"
-                            onclick="batch_stop_click()"><i class="layui-icon layui-icon-logout"></i>批量停止
+                        <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                             onclick="search_vm_click()"><i class="layui-icon layui-icon-search"></i>搜索
+                        </div>
+                        <div class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                             onclick="create_vm_click()"><i class="layui-icon layui-icon-addition"></i>创建
+                        </div>
+                </div>
+                <div class="layui-input-inline" style="margin-top: 10px;">
+                    <div class="layui-btn-group">
+                        <div class="layui-btn layui-btn-primary layui-btn-sm layui-btn-disabled" lay-filter="formSearch" id="btn_batch_start"
+                                onclick="batch_start_click()"><i class="layui-icon layui-icon-play"></i>批量启动
+                        </div>
+                        <div class="layui-btn layui-btn-primary layui-btn-sm layui-btn-disabled" lay-filter="formSearch"  id="btn_batch_reboot"
+                                onclick="batch_reboot_click()"><i class="layui-icon layui-icon-refresh-3"></i>批量重启
+                        </div>
+                        <div class="layui-btn layui-btn-primary layui-btn-sm layui-btn-disabled" lay-filter="formSearch"  id="btn_batch_stop"
+                                onclick="batch_stop_click()"><i class="layui-icon layui-icon-logout"></i>批量停止
+                        </div>
                     </div>
                 </div>
             </form>
@@ -160,6 +167,18 @@
         </div>
     </form>
 </script>
+<script id="batchStartDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="ids"/>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">选择主机</label>
+            <div class="layui-input-inline">
+                <select name="hostId">
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
 <script id="stopDialog" type="text/html">
     <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
         <input type="hidden" name="id"/>
@@ -183,6 +202,16 @@
 <script id="rebootDialog" type="text/html">
     <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
         <input type="hidden" name="id"/>
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                <input type="checkbox" title="强制重启" name="force"/>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="batchRebootDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <input type="hidden" name="ids"/>
         <div class="layui-form-item">
             <div class="layui-input-inline">
                 <input type="checkbox" title="强制重启" name="force"/>
@@ -482,11 +511,13 @@
             handler: window.data_handler,
             checkbox_callback:function (ids) {
                 if(ids.length>0){
-                    $("#btn_batch_start").show();
-                    $("#btn_batch_stop").show();
+                    $("#btn_batch_start").removeClass("layui-btn-disabled")
+                    $("#btn_batch_stop").removeClass("layui-btn-disabled")
+                    $("#btn_batch_reboot").removeClass("layui-btn-disabled")
                 }else{
-                    $("#btn_batch_start").hide();
-                    $("#btn_batch_stop").hide();
+                    $("#btn_batch_start").addClass("layui-btn-disabled")
+                    $("#btn_batch_stop").addClass("layui-btn-disabled")
+                    $("#btn_batch_reboot").addClass("layui-btn-disabled")
                 }
             }
         })
@@ -639,7 +670,10 @@
         })
     }
     function batch_start_click(){
-        dialog_util.show_confirm_dialog('确认启动虚拟机', 'POST', config_util.base_uri+"/management/vm/start/batch", {ids: table_util.get_selected_rows().join(",")}, function (res) {
+        dialog_util.show_modify("#batchStartDialog", "批量启动VM", "layui-icon-play", "POST", config_util.base_uri+"/management/vm/batch/start", function () {
+            render_util.render_edit_host_select(0, $("form[name='modify'] [name='hostId']"))
+            $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
+        }, function (res) {
             if(res.code!=0){
                 dialog_util.show_tool_tip('启动VM失败，错误码:' + res.code + '。错误信息:' + res.message);
             }else{
@@ -655,8 +689,7 @@
         })
     }
     function batch_stop_click(){
-        dialog_util.show_modify("#batchStopDialog", "批量停止VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/stop/batch", function () {
-
+        dialog_util.show_modify("#batchStopDialog", "批量停止VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/batch/stop", function () {
             $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
         }, function (res) {
             if(res.code!=0){
@@ -667,6 +700,24 @@
                         table_util.modify(response.data);
                     } else {
                         dialog_util.show_tool_tip('停止VM失败，错误码:' + response.code + '。错误信息:' + response.message);
+                    }
+
+                })
+            }
+        })
+    }
+    function batch_reboot_click(){
+        dialog_util.show_modify("#batchRebootDialog", "批量重启VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/batch/reboot", function () {
+            $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
+        }, function (res) {
+            if(res.code!=0){
+                dialog_util.show_tool_tip('重启VM失败，错误码:' + res.code + '。错误信息:' + res.message);
+            }else{
+                $.each(res.data,function(idx,response){
+                    if (response.code === 0) {
+                        table_util.modify(response.data);
+                    } else {
+                        dialog_util.show_tool_tip('重启VM失败，错误码:' + response.code + '。错误信息:' + response.message);
                     }
 
                 })

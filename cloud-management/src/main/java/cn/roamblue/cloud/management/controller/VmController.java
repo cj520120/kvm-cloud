@@ -183,46 +183,23 @@ public class VmController {
      * @return
      */
     @Login
-    @PostMapping("/management/vm/stop/batch")
+    @PostMapping("/management/vm/batch/stop")
     public ResultUtil<List<ResultUtil<VmInfo>>> batchStop(@RequestParam("ids") String ids, @RequestParam(value = "force", defaultValue = "false") boolean force) {
          List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
-        List<ResultUtil<VmInfo>> resultUtils=new ArrayList<>(vmIds.size());
-        if(vmIds!=null&&!vmIds.isEmpty()) {
-            vmIds.parallelStream().forEach(id -> {
-                try {
-                    resultUtils.add( vmUiService.stop(id, force));
-                } catch (CodeException e){
-                    resultUtils.add(ResultUtil.<VmInfo>builder().code(e.getCode()).message(e.getMessage()).build());
-                }catch (Exception e) {
-                    resultUtils.add(ResultUtil.<VmInfo>builder().code(ErrorCode.SERVER_ERROR).message("停止虚拟机错误。"+e.getMessage()).build());
-                }
-            });
-        }
-        return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(resultUtils).build();
+        return vmUiService.batchStop(vmIds, force);
     }
     /**
      * 批量启动虚拟机
      *
      * @param ids  虚拟机ID
+     * @param hostId 主机ID
      * @return
      */
     @Login
-    @PostMapping("/management/vm/start/batch")
-    public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(@RequestParam("ids") String ids) {
+    @PostMapping("/management/vm/batch/start")
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(@RequestParam("ids") String ids, @RequestParam(value = "hostId",defaultValue = "0") int hostId) {
         List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
-        List<ResultUtil<VmInfo>> resultUtils=new ArrayList<>(vmIds.size());
-        if(vmIds!=null&&!vmIds.isEmpty()) {
-            vmIds.stream().forEach(id -> {
-                try {
-                    resultUtils.add(vmUiService.start(id, 0));
-                } catch (CodeException e){
-                    resultUtils.add(ResultUtil.<VmInfo>builder().code(e.getCode()).message(e.getMessage()).build());
-                }catch (Exception e) {
-                    resultUtils.add(ResultUtil.<VmInfo>builder().code(ErrorCode.SERVER_ERROR).message("停止虚拟机错误。"+e.getMessage()).build());
-                }
-            });
-        }
-        return ResultUtil.<List<ResultUtil<VmInfo>>>builder().data(resultUtils).build();
+        return vmUiService.batchStart(vmIds, hostId);
     }
     /**
      * 重启虚拟机
@@ -236,7 +213,19 @@ public class VmController {
     public ResultUtil<VmInfo> reboot(@RequestParam("id") int id, @RequestParam(value = "force", defaultValue = "false") boolean force) {
         return vmUiService.reboot(id, force);
     }
-
+    /**
+     * 批量重启虚拟机
+     *
+     * @param ids  虚拟机ID
+     * @param force 是否强制
+     * @return
+     */
+    @Login
+    @PostMapping("/management/vm/batch/reboot")
+    public ResultUtil<List<ResultUtil<VmInfo>>> batchReboot(@RequestParam("ids") String ids, @RequestParam(value = "force", defaultValue = "false") boolean force) {
+        List<Integer>  vmIds=Arrays.asList(ids.split(",")).stream().filter(StringUtils::isNotEmpty).map(NumberUtil::parseInt).collect(Collectors.toList());
+        return vmUiService.batchReboot(vmIds, force);
+    }
     /**
      * 重装虚拟机
      *

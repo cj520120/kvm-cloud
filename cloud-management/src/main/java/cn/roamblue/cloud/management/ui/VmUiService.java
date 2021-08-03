@@ -87,6 +87,13 @@ public interface VmUiService {
     ResultUtil<VmInfo> start(int id, int hostId);
 
     /**
+     * 批量重启
+     * @param ids
+     * @param hostId
+     * @return
+     */
+    ResultUtil<List<ResultUtil<VmInfo>>> batchStart(List<Integer> ids, int hostId);
+    /**
      * 停止VM
      *
      * @param id
@@ -94,7 +101,14 @@ public interface VmUiService {
      * @return
      */
     ResultUtil<VmInfo> stop(int id, boolean force);
-
+    /**
+     * 批量停止VM
+     *
+     * @param ids
+     * @param force
+     * @return
+     */
+    ResultUtil<List<ResultUtil<VmInfo>>> batchStop(List<Integer> ids, boolean force);
     /**
      * 重启VM
      *
@@ -104,6 +118,13 @@ public interface VmUiService {
      */
     ResultUtil<VmInfo> reboot(int id, boolean force);
 
+    /**
+     * 批量重启VM
+     * @param ids
+     * @param force
+     * @return
+     */
+    ResultUtil<List<ResultUtil<VmInfo>>> batchReboot(List<Integer> ids, boolean force);
     /**
      * 重新安装VM
      *

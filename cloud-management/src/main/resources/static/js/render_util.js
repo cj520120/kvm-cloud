@@ -41,7 +41,7 @@ window.render_util=new function (){
     this.render_edit_host_select=(clusterId,pSelect)=> {
         let html = '<option value="0">无限制</option>';
         html += data_util.host_hander.load_data().map(item=>{
-            if(item.clusterId===clusterId){
+            if(clusterId==0 || item.clusterId===clusterId){
                 return `<option value="${item.id}" >${item.name}</option>`
             }else{
                 return ''

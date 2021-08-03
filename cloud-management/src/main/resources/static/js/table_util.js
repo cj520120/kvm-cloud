@@ -103,7 +103,7 @@ window.table_util = new function () {
             }
         }).join("");
         if(this.config.checkbox){
-            $(`${this.config.elem} input[type=checkbox]`).prop("checked",false)
+            this.update_check_box()
             $(`${this.config.elem} input[type=checkbox]`).on('change',  (event) =>{
                 this.on_checkbox_changed(event)
             })
@@ -132,6 +132,13 @@ window.table_util = new function () {
             }
         })
         return ids;
+    }
+    this.update_check_box=()=>{
+        let checked=false;
+        $(`${this.config.elem} .table-child`).each(function (index,element) {
+            checked&=$(element).prop("checked")
+        })
+        $(`${this.config.elem} .check-all`).prop("checked",Boolean(checked))
     }
     this.render_menu = (pThis) => {
         const data = JSON.parse($(pThis).attr("data"));
@@ -166,10 +173,10 @@ window.table_util = new function () {
         this.config.handler.modify(data)
         $('#tr_' + data[this.config.idName]).html(this.render_row(data))
         if(this.config.checkbox_callback){
-
             $(`${this.config.elem} #tr_${data[this.config.idName]} input[type=checkbox]`).on('change',  (event) =>{
                 this.on_checkbox_changed(event)
             })
+            this.update_check_box()
             this.config.checkbox_callback(this.get_selected_rows())
         }
     };
@@ -180,11 +187,13 @@ window.table_util = new function () {
             $(`${this.config.elem} #tr_${data[this.config.idName]} input[type=checkbox]`).on('change',  (event) =>{
                 this.on_checkbox_changed(event)
             })
+            this.update_check_box()
             this.config.checkbox_callback(this.get_selected_rows())
         }
     };
     this.remove = (data) => {
         this.config.handler.remove(data)
         $("#tr_" + data[this.config.idName]).remove()
+        this.update_check_box()
     }
 };
