@@ -116,7 +116,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
             do {
                 ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, networkConfig);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                    log.info("[{}] write network config success,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
+                    log.info("[{}] write network config successful,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
                     break;
                 } else if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND||resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
                     throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "] init file.vm not start");

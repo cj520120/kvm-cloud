@@ -101,7 +101,7 @@ public class VolumeCheckTask extends AbstractTask {
                             queryWrapper.eq("volume_status", volume.getVolumeStatus());
                             volumeMapper.update(update, queryWrapper);
                         } else {
-                            log.error("Detect disk errors,volumeId={} storageId={} hostId={} msg={}", volume.getId(), storage.getId(), host.getHostName(), volumeResultUtil.getMessage());
+                            log.error("check vm disk errors,volumeId={} storageId={} hostId={} msg={}", volume.getId(), storage.getId(), host.getHostName(), volumeResultUtil.getMessage());
                         }
                     }
                     return null;

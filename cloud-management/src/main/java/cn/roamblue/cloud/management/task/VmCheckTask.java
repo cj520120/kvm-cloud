@@ -81,7 +81,7 @@ public class VmCheckTask extends AbstractTask {
                         return null;
                     }
                     if ((System.currentTimeMillis() - find.getLastUpdateTime().getTime()) < 60000) {
-                        log.info("Ignore VM detection VM-Name={}", vm.getVmDescription());
+                        log.info("ignore VM detection VM-Name={}", vm.getVmDescription());
                         return null;
                     }
                     if (find.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED) || !find.getHostId().equals(hostInfo.getId())) {
