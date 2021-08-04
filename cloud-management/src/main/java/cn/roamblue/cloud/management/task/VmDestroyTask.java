@@ -66,6 +66,7 @@ public class VmDestroyTask extends AbstractTask {
                 this.volumeService.destroyByVmId(instance.getId());
                 this.vncService.destroy(instance.getId());
                 vmMapper.deleteById(instance.getId());
+                log.info("destroy vm={}", instance.getVmDescription());
                 return null;
             }, 10, TimeUnit.SECONDS);
         }

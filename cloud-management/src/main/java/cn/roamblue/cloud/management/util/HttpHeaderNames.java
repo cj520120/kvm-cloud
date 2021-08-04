@@ -12,4 +12,8 @@ public class HttpHeaderNames {
      * 登陆用户HTTP 上下文
      */
     public static final String LOGIN_USER_ID_ATTRIBUTE = "X-CLOUD-USER-ID";
+    /**
+     * 语言
+     */
+    public static final String LANGUAGE = "X-Cloud-Language";
 }

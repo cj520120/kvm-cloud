@@ -39,7 +39,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        log.info("Route allocate network success,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
+        log.info("system VM[Route] allocate network success,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -74,7 +74,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
     }
 
     private void initializeDhcp(VmEntity vm, HostEntity host) {
-        log.info("start dhcp service");
+        log.info("system vm init dhcp service.vm={},host={}", vm.getId(), host.getHostIp());
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(vm.getClusterId());
         if (networks.isEmpty()) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络未找到"));
@@ -117,7 +117,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         if (restartDhcpResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(restartDhcpResultUtil.getCode(), restartDhcpResultUtil.getMessage());
         }
-        log.info("DHCP start success");
+        log.info("system vm init dhcp service successful");
     }
 
     @Override
@@ -125,6 +125,6 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         this.vncService.register(vm.getClusterId(), vm.getId(), host.getHostIp(), vm.getVncPort(), vm.getVncPassword());
         super.initializeNetwork(vm, host);
         this.initializeDhcp(vm, host);
-        log.info("Route start complete");
+        log.info("system VM[Route] start complete");
     }
 }

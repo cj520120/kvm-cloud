@@ -10,7 +10,6 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -45,12 +44,5 @@ public class WebAutoConfiguration {
         converter.setDefaultCharset(StandardCharsets.UTF_8);
         return converter;
     }
-    @Bean
-    public LocaleChangeInterceptor localeChangeInterceptor(){
-        LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-        localeChangeInterceptor.setParamName("lg");
-        return localeChangeInterceptor;
-    }
-
 
 }

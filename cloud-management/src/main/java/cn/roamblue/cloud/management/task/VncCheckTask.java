@@ -49,7 +49,7 @@ public class VncCheckTask extends AbstractTask {
                     return null;
                 }, 2, TimeUnit.MINUTES);
             } catch (Exception e) {
-                log.error("check vnc fail.clusterId={}", cluster.getId(), e);
+                log.error("failed to detect system Console VM.clusterId={}", cluster.getId(), e);
             }
         });
     }
