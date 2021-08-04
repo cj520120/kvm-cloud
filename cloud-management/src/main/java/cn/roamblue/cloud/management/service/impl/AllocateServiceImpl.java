@@ -102,7 +102,7 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
     @Override
     public HostEntity allocateHost(int clusterId, int hostId, int cpu, long memory) {
 
-        log.info("开始申请主机:clusterId={}, int hostId={},  cpu={},  memory={}", clusterId, hostId, cpu, memory);
+        log.info("start request host:clusterId={}, int hostId={},  cpu={},  memory={}", clusterId, hostId, cpu, memory);
         if (hostId > 0) {
             HostEntity entity = this.hostMapper.selectById(hostId);
             if (entity == null) {
