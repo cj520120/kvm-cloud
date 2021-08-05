@@ -7,6 +7,7 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.config.ApplicaionConfig;
 import cn.roamblue.cloud.management.service.AgentService;
+import cn.roamblue.cloud.management.util.StoragePathUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +70,15 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<StorageModel> addHostStorage(String uri, String host, String source, String target) {
+    public ResultUtil<StorageModel> addHostStorage(String storageType,String uri, String host, String source, String target) {
         return this.call(() -> {
             Gson gson = new Gson();
             Map<String, Object> map = new HashMap<>(4);
+            map.put("type", storageType);
             map.put("name", target);
-            map.put("nfs", host);
+            map.put("uri", uri);
             map.put("path", source);
-            map.put("target", "/mnt/" + target);
+            map.put("target", StoragePathUtil.getMountPath(target));
 
             ResultUtil<StorageModel> resultUtil = gson.fromJson(HttpUtil.post(uri + "/storage/create", map), new TypeToken<ResultUtil<StorageModel>>() {
             }.getType());

@@ -33,11 +33,12 @@ public interface KvmStorageService {
     /**
      * 创建存储池
      *
+     * @param type
      * @param name
-     * @param nfs
+     * @param uri
      * @param path
      * @param target
      * @return
      */
-    StorageModel createStorage(String name, String nfs, String path, String target);
+    StorageModel createStorage(String type,String name, String uri, String path, String target);
 }

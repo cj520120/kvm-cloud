@@ -15,6 +15,7 @@ import cn.roamblue.cloud.management.service.StorageService;
 import cn.roamblue.cloud.management.util.BeanConverter;
 import cn.roamblue.cloud.management.util.HostStatus;
 import cn.roamblue.cloud.management.util.StorageStatus;
+import cn.roamblue.cloud.common.util.StorageType;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
             if (!hostInfo.getHostStatus().equals(HostStatus.READY)) {
                 continue;
             }
-            ResultUtil<StorageModel> addStorageResultUtil = this.agentService.addHostStorage(hostInfo.getHostUri(), entity.getStorageHost(), entity.getStorageSource(), entity.getStorageTarget());
+            ResultUtil<StorageModel> addStorageResultUtil = this.agentService.addHostStorage(StorageType.NFS,hostInfo.getHostUri(), entity.getStorageHost(), entity.getStorageSource(), entity.getStorageTarget());
             if (addStorageResultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(addStorageResultUtil.getCode(), addStorageResultUtil.getMessage());
             }

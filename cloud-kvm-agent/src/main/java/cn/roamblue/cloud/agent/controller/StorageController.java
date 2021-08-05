@@ -59,14 +59,14 @@ public class StorageController {
      * 创建存储池
      *
      * @param name   存储池名称
-     * @param nfs    nfs服务器地址
-     * @param path   nfs路径
-     * @param target 目标路径
+     * @param uri    存储池地址
+     * @param path   存储路径
+     * @param target 挂载路径
      * @return
      */
     @PostMapping("/storage/create")
-    public ResultUtil<StorageModel> createStorage(@RequestParam("name") String name, @RequestParam("nfs") String nfs, @RequestParam("path") String path, @RequestParam("target") String target) {
-        return ResultUtil.<StorageModel>builder().data(storageService.createStorage(name, nfs, path, target)).build();
+    public ResultUtil<StorageModel> createStorage(@RequestParam("type") String type, @RequestParam("name") String name, @RequestParam("uri") String uri, @RequestParam("path") String path, @RequestParam("target") String target) {
+        return ResultUtil.<StorageModel>builder().data(storageService.createStorage(type,name, uri, path, target)).build();
 
     }
 

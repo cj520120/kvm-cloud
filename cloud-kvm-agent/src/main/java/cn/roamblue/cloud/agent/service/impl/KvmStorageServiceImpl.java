@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.agent.service.impl;
 
 import cn.roamblue.cloud.agent.service.KvmStorageService;
+import cn.roamblue.cloud.agent.service.impl.storage.impl.StroageInitializeFactory;
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -9,6 +10,7 @@ import org.libvirt.Error;
 import org.libvirt.LibvirtException;
 import org.libvirt.StoragePool;
 import org.libvirt.StoragePoolInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,6 +23,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStorageService {
+
+    @Autowired
+    private StroageInitializeFactory stroageBuilderStrategy;
 
     @Override
     public List<StorageModel> listStorage() {
@@ -84,7 +89,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     }
 
     @Override
-    public StorageModel createStorage(String name, String nfs, String path, String target) {
+    public StorageModel createStorage(String type,String name, String uri, String path, String target) {
 
         return super.excute(connect -> {
             String[] pools = connect.listStoragePools();
@@ -92,24 +97,13 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
             for (String pool : pools) {
                 if (pool.equals(name)) {
                     isExist = true;
-                    log.info("storage exists.name={} nfs={} path={} target={}", name, nfs, path, target);
+                    log.info("storage exists.name={} uri={} path={} target={}", name, uri, path, target);
                 }
             }
             if (!isExist) {
                 this.createPath(target);
-                StringBuilder sb = new StringBuilder();
-                sb.append("<pool type='netfs' xmlns:fs='http://libvirt.org/schemas/storagepool/fs/1.0'>")
-                        .append("<name>").append(name).append("</name>")
-                        .append("<source>")
-                        .append("<host name='").append(nfs).append("'/>")
-                        .append("<dir path='").append(path).append("'/>")
-                        .append("</source>")
-                        .append("<target>")
-                        .append("<path>").append(target).append("</path>")
-                        .append("</target>")
-                        .append("</pool>");
-                connect.storagePoolCreateXML(sb.toString(), 0);
-                log.info("create storage.name={} nfs={} path={} target={}", name, nfs, path, target);
+                stroageBuilderStrategy.find(type).initialize(connect,name, uri, path, target);
+                log.info("create storage.name={} uri={} path={} target={}", name, uri, path, target);
             }
             StoragePool storagePool = connect.storagePoolLookupByName(name);
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();

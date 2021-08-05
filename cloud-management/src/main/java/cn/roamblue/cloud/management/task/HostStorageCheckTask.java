@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.task;
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.common.util.StorageType;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
@@ -83,7 +84,7 @@ public class HostStorageCheckTask extends AbstractTask {
                     StorageModel cloudStorageInfo = map.get(storageEntity.getStorageTarget());
                     if (cloudStorageInfo == null) {
                         log.info("storage pool is missing. begin reinitialize.host={} storage={}", hostEntity.getHostName(), storageEntity.getStorageName());
-                        ResultUtil<StorageModel> initStorageInfoResultUtil = agentService.addHostStorage(hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
+                        ResultUtil<StorageModel> initStorageInfoResultUtil = agentService.addHostStorage(StorageType.NFS,hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
                         if (initStorageInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
                             log.info("storage pool is missing. reinitialization failed.host={} storage={} msg={}", hostEntity.getHostName(), storageEntity.getStorageName(), initStorageInfoResultUtil.getMessage());
                         } else {

@@ -283,7 +283,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
             String targetStorage = toStorageEntity.getStorageTarget();
             String sourceVolume = entity.getVolumeTarget();
             String targetVolume = UUID.randomUUID().toString().replace("-", "");
-            String targetPath = "/mnt/" + targetStorage + "/" + targetVolume;
+            String targetPath = StoragePathUtil.getVolumePath(targetStorage, targetVolume);
 
             ResultUtil<VolumeModel> cloneResultUtil = this.agentService.cloneVolume(hostEntity.getHostUri(), sourceStorage, sourceVolume, targetStorage, targetVolume, targetPath);
             if (cloneResultUtil.getCode() != ErrorCode.SUCCESS) {

@@ -125,7 +125,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
 
         String parentVolumePath = null;
         if (!template.getType().equals(TemplateType.ISO)) {
-            parentVolumePath = "/mnt/" + templateStorage.getTarget() + "/" + templateRef.getTarget();
+            parentVolumePath = StoragePathUtil.getVolumePath(templateStorage.getTarget(), templateRef.getTarget());
         }
         VmEntity vmEntity = VmEntity.builder()
                 .clusterId(clusterId)
@@ -181,7 +181,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
             TemplateInfo template = templateService.findTemplateById(vm.getVmIso());
             TemplateRefInfo templateRef = templateService.listTemplateRefByTemplateId(template.getId()).stream().findAny().get();
             StorageInfo templateStorage = storageService.findStorageById(templateRef.getStorageId());
-            String path = "/mnt/" + templateStorage.getTarget() + "/" + templateRef.getTarget();
+            String path = StoragePathUtil.getVolumePath(templateStorage.getTarget(), templateRef.getTarget());
             kvm.setCdRoom(path);
         }
         List<VmModel.Disk> disks = new ArrayList<>();
@@ -194,7 +194,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
             if (!volumeStorage.getStatus().equals(StorageStatus.READY)) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, localeMessage.getMessage("STORAGE_NOT_READY", "存储未就绪"));
             }
-            String path = "/mnt/" + volumeStorage.getTarget() + "/" + volume.getTarget();
+            String path = StoragePathUtil.getVolumePath(volumeStorage.getTarget(), volume.getTarget());
             if (volume.getDevice() == 0) {
                 kvm.setRoot(VmModel.RootDisk.builder().driver(categoryInfo.getDiskDriver()).path(path).build());
             } else {

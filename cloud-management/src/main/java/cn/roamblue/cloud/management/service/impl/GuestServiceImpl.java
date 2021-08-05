@@ -11,6 +11,7 @@ import cn.roamblue.cloud.management.data.entity.VmEntity;
 import cn.roamblue.cloud.management.service.GuestService;
 import cn.roamblue.cloud.management.service.NetworkAllocateService;
 import cn.roamblue.cloud.management.service.VncService;
+import cn.roamblue.cloud.management.util.StoragePathUtil;
 import cn.roamblue.cloud.management.util.TemplateType;
 import cn.roamblue.cloud.management.util.VmStatus;
 import cn.roamblue.cloud.management.util.VmType;
@@ -69,7 +70,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
             TemplateInfo template = templateService.findTemplateById(iso);
             TemplateRefInfo templateRef = templateService.listTemplateRefByTemplateId(template.getId()).stream().findAny().get();
             StorageInfo templateStorage = storageService.findStorageById(templateRef.getStorageId());
-            path = "/mnt/" + templateStorage.getTarget() + "/" + templateRef.getTarget();
+            path = StoragePathUtil.getVolumePath(templateStorage.getTarget(), templateRef.getTarget());
         }
         vm.setVmIso(iso);
         vm.setLastUpdateTime(new Date());
@@ -98,7 +99,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             StorageEntity storage = this.storageMapper.selectById(volumeInfo.getStorageId());
             if (storage != null) {
-                VmModel.Disk disk = VmModel.Disk.builder().path("/mnt/" + storage.getStorageTarget() + "/" + volumeInfo.getTarget()).device(volumeInfo.getDevice()).build();
+                VmModel.Disk disk = VmModel.Disk.builder().path(StoragePathUtil.getVolumePath(storage.getStorageTarget(), volumeInfo.getTarget())).device(volumeInfo.getDevice()).build();
 
                 HostInfo host = this.hostService.findHostById(vm.getHostId());
                 this.agentService.attachDisk(host.getUri(), vm.getVmName(), disk, true);
@@ -121,7 +122,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
             StorageEntity storage = this.storageMapper.selectById(volumeInfo.getStorageId());
             if (storage != null) {
-                VmModel.Disk disk = VmModel.Disk.builder().path("/mnt/" + storage.getStorageTarget() + "/" + volumeInfo.getTarget()).device(volumeInfo.getDevice()).build();
+                VmModel.Disk disk = VmModel.Disk.builder().path(StoragePathUtil.getVolumePath(storage.getStorageTarget(), volumeInfo.getTarget())).device(volumeInfo.getDevice()).build();
                 HostInfo host = this.hostService.findHostById(vm.getHostId());
                 this.agentService.attachDisk(host.getUri(), vm.getVmName(), disk, false);
             }
@@ -178,7 +179,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
         String parentVolumePath = null;
         if (!template.getType().equals(TemplateType.ISO)) {
-            parentVolumePath = "/mnt/" + templateStorage.getTarget() + "/" + templateRef.getTarget();
+            parentVolumePath = StoragePathUtil.getVolumePath(templateStorage.getTarget(), templateRef.getTarget());
         }
         String parentVolPath = parentVolumePath;
         VmEntity vm = this.stopVm(vmId, true);

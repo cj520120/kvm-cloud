@@ -47,12 +47,13 @@ public interface AgentService {
      * 添加主机存储池
      *
      * @param uri
+     * @param storageType
      * @param host
      * @param source
      * @param target
      * @return
      */
-    ResultUtil<StorageModel> addHostStorage(String uri, String host, String source, String target);
+    ResultUtil<StorageModel> addHostStorage(String storageType,String uri, String host, String source, String target);
 
     /**
      * 创建磁盘卷
