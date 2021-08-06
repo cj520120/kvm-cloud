@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.util;
 
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +127,11 @@ public class IpCaculate {
     public static String getBroadcastAddr(String subnet) {
         String broadcast = "";
         String[] addresses = subnet.split("/")[0].split("\\.");
-        String[] masks = getNetMask(subnet.split("/")[1]).split("\\.");
+        String netMask=getNetMask(subnet.split("/")[1]);
+        if(StringUtils.isEmpty(netMask)){
+            throw new CodeException(ErrorCode.PARAM_ERROR,"subnet error.subnet="+subnet);
+        }
+        String[] masks = netMask.split("\\.");
         for (int i = 0; i < 4; i++) {
             int opmaskSegement = ~Integer.parseInt(masks[i]) & 0xFF;
             int netSegment = Integer.parseInt(addresses[i]) & Integer.parseInt(masks[i]);

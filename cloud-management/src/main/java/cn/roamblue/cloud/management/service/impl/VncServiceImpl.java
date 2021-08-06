@@ -107,7 +107,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     public ResultUtil<Void> register(int clusterId, int vmId, String host, int port, String password) {
 
         this.unRegister(clusterId, vmId);
-        log.info("register vnc.vm={} vnc=vnc://{}:{} password={}", vmId, host, port, password);
+        log.info("register vnc.vm={} vnc=vnc://{}:{}", vmId, host, port);
         List<VmNetworkInfo> networks = this.networkService.findVmNetworkByVmId(vmId);
         List<Integer> networkIds = networks.stream().map(VmNetworkInfo::getNetworkId).distinct().collect(Collectors.toList());
         for (Integer networkId : networkIds) {
