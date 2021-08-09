@@ -138,7 +138,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         }
         String salt = "CRY:" + RandomStringUtils.randomAlphanumeric(16);
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
-        entity = LoginInfoEntity.builder().loginState(UserState.ABLE).loginName(loginName).ruleType(rule).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
+        entity = LoginInfoEntity.builder().loginState(UserState.ABLE).loginName(loginName).ruleId(rule).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
         loginInfoMapper.insert(entity);
         return this.initUserInfoBO(entity);
     }
@@ -160,7 +160,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "登陆用户不存在"));
         }
-        loginInfoEntity.setRuleType(rule);
+        loginInfoEntity.setRuleId(rule);
         this.loginInfoMapper.updateById(loginInfoEntity);
         return this.initUserInfoBO(loginInfoEntity);
     }
@@ -204,7 +204,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
         userModel.setLoginName(loginInfoEntity.getLoginName());
         userModel.setPasswordSalt(loginInfoEntity.getLoginPasswordSalt());
         userModel.setState(loginInfoEntity.getLoginState());
-        userModel.setRule(loginInfoEntity.getRuleType());
+        userModel.setRule(loginInfoEntity.getRuleId());
         userModel.setRegisterTime(loginInfoEntity.getCreateTime());
         return userModel;
     }

@@ -6,7 +6,6 @@ import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.TemplateInfo;
 import cn.roamblue.cloud.management.service.TemplateService;
 import cn.roamblue.cloud.management.ui.TemplateUiService;
-import cn.roamblue.cloud.management.util.RuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,7 +36,7 @@ public class TemplateUiServiceImpl extends AbstractUiService implements Template
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "template.create")
     public ResultUtil<TemplateInfo> createTemplate(int clusterId, int osCategoryId, String name, String type, String uri) {
 
         if (StringUtils.isEmpty(name)) {
@@ -61,7 +60,7 @@ public class TemplateUiServiceImpl extends AbstractUiService implements Template
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "template.destroy")
     public ResultUtil<Void> destroyTemplate(int id) {
         return super.call(() -> templateService.destroyTemplateById(id));
     }

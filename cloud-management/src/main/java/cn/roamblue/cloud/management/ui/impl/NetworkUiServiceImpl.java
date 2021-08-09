@@ -8,7 +8,6 @@ import cn.roamblue.cloud.management.bean.NetworkInfo;
 import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.service.NetworkService;
 import cn.roamblue.cloud.management.ui.NetworkUiService;
-import cn.roamblue.cloud.management.util.RuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -44,7 +43,7 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "network.create")
     public ResultUtil<NetworkInfo> createNetwork(String name, int clusterId, String guestStartIp, String guestEndIp, String managerStartIp, String managerEndIp, String subnet, String gateway, String dns, String card, String type) {
 
 
@@ -86,21 +85,21 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "network.destroy")
     public ResultUtil<Void> destroyNetworkById(int id) {
         return super.call(() -> networkService.destroyNetworkById(id));
 
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "network.status.modify")
     public ResultUtil<NetworkInfo> startNetwork(int id) {
         return super.call(() -> networkService.startNetworkById(id));
 
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "network.status.modify")
     public ResultUtil<NetworkInfo> pauseNetwork(int id) {
         return super.call(() -> networkService.pauseNetworkById(id));
     }

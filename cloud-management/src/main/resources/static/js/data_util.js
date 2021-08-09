@@ -8,7 +8,20 @@ window.data_util = new function () {
     this.cluster_hander = new data_handler({uri: config_util.base_uri+'/management/cluster'})
     this.storage_hander = new data_handler({uri: config_util.base_uri+'/management/storage'})
     this.vm_hander = new data_handler({uri: config_util.base_uri+'/management/vm'})
+    this.rules_hander = new data_handler({uri: config_util.base_uri+'/management/rules'})
 
+    this.get_rule_name_by_id = (ruleId) => {
+        if (ruleId == 0) {
+            return "-";
+        }
+        const data = this.rules_hander.load_data();
+        for (let idx in data) {
+            if (data[idx].id === ruleId) {
+                return data[idx].name
+            }
+        }
+        return "--"
+    }
     this.get_host_name_by_id = (hostId) => {
         if (hostId == 0) {
             return "";

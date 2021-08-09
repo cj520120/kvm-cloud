@@ -49,6 +49,7 @@ public final class ErrorCode {
     public static final int QEMU_NOT_CONNECT = BASE_ERROR + 36;
     public static final int DETACH_NETWORK_ERROR = BASE_ERROR + 38;
     public static final int USER_LOGIN_NAME_OR_PASSWORD_ERROR = BASE_ERROR + 39;
+    public static final int RULE_PERMISSION_NOT_FOUND = BASE_ERROR + 40;
 
     private ErrorCode() {
 

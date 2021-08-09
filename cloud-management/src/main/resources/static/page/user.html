@@ -93,6 +93,7 @@
 <script src="../js/data_handler.js"></script>
 <script src="../js/data_util.js"></script>
 <script src="../js/dialog_util.js"></script>
+<script src="../js/render_util.js"></script>
 <script>
 
     config_util.init(()=> {
@@ -104,15 +105,7 @@
                 {width: 80, title: "ID", name: "userId",filter: true},
                 {width: 180, title: "名称", name: "loginName",filter: true},
                 {width: 180, title: "权限", name: "rule",filter: true,render:function (data) {
-                        if(data.rule===0){
-                            return '超级管理员';
-                        } else if(data.rule===100){
-                            return '管理员';
-                        } else if(data.rule===200){
-                            return '普通用户';
-                        } else if(data.rule===200){
-                            return '未知';
-                        }
+                        return data_util.get_rule_name_by_id(data.rule)
                     }
                 },
                 {width: 180, title: "状态", name: "state",render:function (data) {
@@ -161,7 +154,9 @@
     })
 
     function create_user_click() {
-        dialog_util.show_modify("#createDialog", "注册用户", "layui-icon-addition", "POST", config_util.base_uri+"/management/user/register", undefined, function (response) {
+        dialog_util.show_modify("#createDialog", "注册用户", "layui-icon-addition", "POST", config_util.base_uri+"/management/user/register", function (){
+            render_util.render_edit_rules_select($("form[name='modify'] [name='rule']"))
+        }, function (response) {
             if (response.code === 0) {
                 table_util.append(response.data);
             } else {
@@ -183,6 +178,7 @@
     }
     function update_rule_click(data) {
         dialog_util.show_modify("#ruleDialog", "修改权限", "layui-icon-auz", "POST", config_util.base_uri+"/management/user/rule", function () {
+            render_util.render_edit_rules_select($("form[name='modify'] [name='rule']"))
             $("form[name='modify'] [name='userId']").val(data.userId)
             $("form[name='modify'] [name='rule']").val(data.rule)
         }, function (response) {

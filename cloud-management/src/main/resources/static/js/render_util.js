@@ -71,7 +71,13 @@ window.render_util=new function (){
         pSelect.html(html);
         form.render("select")
     }
-
+    this.render_edit_rules_select=(pSelect)=>{
+        const html = data_util.rules_hander.load_data().map(item =>{
+            return `<option value="${item.id}" >${item.name}</option>`
+        });
+        pSelect.html(html);
+        form.render("select")
+    }
     this.render_edit_template_select=(clusterId,pSelect)=> {
         const html = data_util.template_hander.load_data().map(item => {
             if (item.type != 'Route' && item.type != 'Console' && item.clusterId === clusterId) {

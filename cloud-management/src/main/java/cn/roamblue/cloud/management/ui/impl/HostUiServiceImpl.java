@@ -6,7 +6,6 @@ import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.HostInfo;
 import cn.roamblue.cloud.management.service.HostService;
 import cn.roamblue.cloud.management.ui.HostUiService;
-import cn.roamblue.cloud.management.util.RuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,7 +36,7 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
 
     }
 
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "host.status.modify")
     @Override
     public ResultUtil<HostInfo> updateHostStatusById(int id, String status) {
 
@@ -48,7 +47,7 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "host.create")
     public ResultUtil<HostInfo> createHost(int clusterId, String name, String ip, String uri) {
 
         if (StringUtils.isEmpty(name)) {
@@ -70,7 +69,7 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "host.destroy")
     public ResultUtil<Void> destroyHostById(int id) {
         return super.call(() -> hostService.destroyHostById(id));
     }

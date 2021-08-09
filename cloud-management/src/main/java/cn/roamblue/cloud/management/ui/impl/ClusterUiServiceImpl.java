@@ -6,7 +6,6 @@ import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.ClusterInfo;
 import cn.roamblue.cloud.management.service.ClusterService;
 import cn.roamblue.cloud.management.ui.ClusterUiService;
-import cn.roamblue.cloud.management.util.RuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -32,7 +31,7 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
         return super.call(() -> clusterService.findClusterById(id));
     }
 
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "cluster.create")
     @Override
     public ResultUtil<ClusterInfo> createCluster(String name, float overCpu, float overMemory) {
         if (StringUtils.isEmpty(name)) {
@@ -47,7 +46,7 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
         return super.call(() -> clusterService.createCluster(name, overCpu, overMemory));
     }
 
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "cluster.modify")
     @Override
     public ResultUtil<ClusterInfo> modifyCluster(int id, String name, float overCpu, float overMemory) {
         if (StringUtils.isEmpty(name)) {
@@ -62,7 +61,7 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
         return super.call(() -> clusterService.modifyCluster(id, name, overCpu, overMemory));
     }
 
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "cluster.destroy")
     @Override
     public ResultUtil<Void> destroyClusterById(int id) {
         return super.call(() -> clusterService.destroyClusterById(id));

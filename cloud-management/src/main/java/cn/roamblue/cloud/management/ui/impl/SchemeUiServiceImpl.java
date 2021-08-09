@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.CalculationSchemeInfo;
 import cn.roamblue.cloud.management.service.CalculationSchemeService;
 import cn.roamblue.cloud.management.ui.SchemeUiService;
@@ -29,6 +30,7 @@ public class SchemeUiServiceImpl extends AbstractUiService implements SchemeUiSe
         return super.call(() -> calculationSchemeService.findCalculationSchemeById(id));
     }
 
+    @Rule(permissions = "scheme.create")
     @Override
     public ResultUtil<CalculationSchemeInfo> createScheme(String name, int cpu, int speed, long memory) {
         if (StringUtils.isEmpty(name)) {
@@ -43,6 +45,7 @@ public class SchemeUiServiceImpl extends AbstractUiService implements SchemeUiSe
         return super.call(() -> calculationSchemeService.createCalculationScheme(name, cpu, speed, memory));
     }
 
+    @Rule(permissions = "scheme.destroy")
     @Override
     public ResultUtil<Void> destroyScheme(int id) {
         return super.call(() -> calculationSchemeService.destroyCalculationSchemeById(id));

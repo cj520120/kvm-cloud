@@ -81,7 +81,7 @@ public class VmCheckTask extends AbstractTask {
                         return null;
                     }
                     if ((System.currentTimeMillis() - find.getLastUpdateTime().getTime()) < 60000) {
-                        log.info("iVM startup time is too short, ignoring VM detection. VM={}", vm.getVmDescription());
+                        log.info("VM startup time is too short, ignoring VM detection. VM={}", vm.getVmDescription());
                         return null;
                     }
                     if (find.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED) || !find.getHostId().equals(hostInfo.getId())) {

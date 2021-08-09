@@ -39,7 +39,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
         List<OsCategoryEntity> list = osCategoryMapper.selectAll();
         return BeanConverter.convert(list, this::init);
     }
-
+    @Rule(permissions="category.create")
     @Override
     public OsCategoryInfo createOsCategory(String categoryName, String networkDriver, String diskDriver) {
         OsCategoryEntity entity = OsCategoryEntity.builder().categoryName(categoryName)
@@ -52,7 +52,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
         return this.init(entity);
     }
 
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions="category.modify")
     @Override
     public OsCategoryInfo modifyOsCategory(int id, String categoryName, String diskDriver, String networkDriver) {
         OsCategoryEntity osCategoryEntity = osCategoryMapper.selectById(id);
@@ -66,7 +66,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
         return this.init(osCategoryEntity);
     }
 
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions="category.destroy")
     @Override
     public void destroyOsCategoryById(int id) {
         this.osCategoryMapper.deleteById(id);

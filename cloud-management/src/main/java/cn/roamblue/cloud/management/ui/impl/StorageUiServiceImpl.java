@@ -6,7 +6,6 @@ import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.StorageInfo;
 import cn.roamblue.cloud.management.service.StorageService;
 import cn.roamblue.cloud.management.ui.StorageUiService;
-import cn.roamblue.cloud.management.util.RuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,7 +36,7 @@ public class StorageUiServiceImpl extends AbstractUiService implements StorageUi
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "storage.create")
     public ResultUtil<StorageInfo> createStorage(int clusterId, String name, String uri, String source) {
         if (StringUtils.isEmpty(name)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("STORAGE_NAME_EMPTY", "名称不能为空"));
@@ -55,7 +54,7 @@ public class StorageUiServiceImpl extends AbstractUiService implements StorageUi
     }
 
     @Override
-    @Rule(min = RuleType.ADMIN)
+    @Rule(permissions = "storage.destroy")
     public ResultUtil<Void> destroyStorageById(int id) {
         return super.call(() -> storagePoolService.destroyStorageById(id));
     }

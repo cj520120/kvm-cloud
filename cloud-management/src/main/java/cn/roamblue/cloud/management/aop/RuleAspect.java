@@ -30,8 +30,9 @@ public class RuleAspect {
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Rule rule = signature.getMethod().getAnnotation(Rule.class);
-        if (rule != null) {
-            ruleService.hasPermission(RequestContext.getCurrent().getUserId(), rule.min());
+
+        if(rule.permissions().length > 0){
+            ruleService.hasPermission(RequestContext.getCurrent().getUserId(),rule.permissions());
         }
         return joinPoint.proceed();
     }

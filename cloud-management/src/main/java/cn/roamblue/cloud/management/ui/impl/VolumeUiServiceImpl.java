@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Rule;
 import cn.roamblue.cloud.management.bean.VolumeInfo;
 import cn.roamblue.cloud.management.service.LockService;
 import cn.roamblue.cloud.management.service.VolumeService;
@@ -41,6 +42,7 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
     }
 
     @Override
+    @Rule(permissions = "volume.create")
     public ResultUtil<VolumeInfo> createVolume(int clusterId, int storageId, String name, long size) {
         if (StringUtils.isEmpty(name)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VOLUME_NAME_EMPTY", "磁盘名称不能为空"));
@@ -54,16 +56,19 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
         return super.call(() -> volumeService.createVolume(clusterId, null, storageId, name, size));
     }
 
+    @Rule(permissions = "volume.destroy")
     @Override
     public ResultUtil<VolumeInfo> destroyVolumeById(int id) {
         return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> this.call(() -> volumeService.destroyVolumeById(id)), 1, TimeUnit.MINUTES);
     }
 
+    @Rule(permissions = "volume.resume")
     @Override
     public ResultUtil<VolumeInfo> resume(int id) {
         return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.resume(id)), 1, TimeUnit.MINUTES);
     }
 
+    @Rule(permissions = "volume.resize")
     @Override
     public ResultUtil<VolumeInfo> resize(int id, long size) {
         if (size <= 0) {

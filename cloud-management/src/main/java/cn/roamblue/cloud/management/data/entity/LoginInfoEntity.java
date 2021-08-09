@@ -42,8 +42,8 @@ public class LoginInfoEntity {
     /**
      *
      */
-    @TableField("rule_type")
-    private int ruleType;
+    @TableField("rule_id")
+    private int ruleId;
     /**
      * 密码
      */
