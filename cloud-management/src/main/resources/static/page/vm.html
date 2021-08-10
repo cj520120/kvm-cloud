@@ -407,13 +407,17 @@
         render_util.render_search_host_select($("form[name='searchForm'] select[name='hostId']"))
 
 
-        window.data_handler = new data_handler({elem: "form[name='searchForm']", uri: config_util.base_uri+"/management/vm/search", idName: "id"})
-
-        table_util.render({
+        window.data_handler = new data_handler({
+            elem: "form[name='searchForm']",
+            uri: config_util.base_uri + "/management/vm/search",
+            idName: "id"
+        })
+        window.vm_table_util = new table_util()
+        vm_table_util.render({
             elem: "#content",
             idName: "id",
-            page:true,
-            checkbox:true,
+            page: true,
+            checkbox: true,
             cols: [
                 {title: "ID", name: "id", filter: true},
                 {title: "名称", name: "name", filter: true},
@@ -522,14 +526,14 @@
             }
         })
         $("#searchText").on('input', function () {
-            table_util.filter_text = $("#searchText").val()
-            table_util.refresh();
+            vm_table_util.filter_text = $("#searchText").val()
+            vm_table_util.refresh();
         })
     })
 
     function search_vm_click() {
         window.data_handler.refresh();
-        table_util.refresh();
+        vm_table_util.refresh();
     }
 
     function view_vm_click(view_data) {
@@ -626,7 +630,7 @@
 
         }, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                vm_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -651,7 +655,7 @@
             $("form[name='modify'] [name='id']").val(data.id)
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('启动VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -663,7 +667,7 @@
             $("form[name='modify'] [name='id']").val(data.id)
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('停止VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -673,14 +677,14 @@
         if($("#btn_batch_start").hasClass("layui-btn-disabled")) return;
         dialog_util.show_modify("#batchStartDialog", "批量启动VM", "layui-icon-play", "POST", config_util.base_uri+"/management/vm/batch/start", function () {
             render_util.render_edit_host_select(0, $("form[name='modify'] [name='hostId']"))
-            $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
+            $("form[name='modify'] [name='ids']").val(vm_table_util.get_selected_rows().join(","))
         }, function (res) {
             if(res.code!=0){
                 dialog_util.show_tool_tip('启动VM失败，错误码:' + res.code + '。错误信息:' + res.message);
             }else{
                 $.each(res.data,function(idx,response){
                     if (response.code === 0) {
-                        table_util.modify(response.data);
+                        vm_table_util.modify(response.data);
                     } else {
                         dialog_util.show_tool_tip('启动VM失败，错误码:' + response.code + '。错误信息:' + response.message);
                     }
@@ -692,14 +696,14 @@
     function batch_stop_click(){
         if($("#btn_batch_stop").hasClass("layui-btn-disabled")) return;
         dialog_util.show_modify("#batchStopDialog", "批量停止VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/batch/stop", function () {
-            $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
+            $("form[name='modify'] [name='ids']").val(vm_table_util.get_selected_rows().join(","))
         }, function (res) {
             if(res.code!=0){
                 dialog_util.show_tool_tip('停止VM失败，错误码:' + res.code + '。错误信息:' + res.message);
             }else{
                 $.each(res.data,function(idx,response){
                     if (response.code === 0) {
-                        table_util.modify(response.data);
+                        vm_table_util.modify(response.data);
                     } else {
                         dialog_util.show_tool_tip('停止VM失败，错误码:' + response.code + '。错误信息:' + response.message);
                     }
@@ -711,14 +715,14 @@
     function batch_reboot_click(){
         if($("#btn_batch_reboot").hasClass("layui-btn-disabled")) return;
         dialog_util.show_modify("#batchRebootDialog", "批量重启VM", "layui-icon-logout", "POST", config_util.base_uri+"/management/vm/batch/reboot", function () {
-            $("form[name='modify'] [name='ids']").val(table_util.get_selected_rows().join(","))
+            $("form[name='modify'] [name='ids']").val(vm_table_util.get_selected_rows().join(","))
         }, function (res) {
             if(res.code!=0){
                 dialog_util.show_tool_tip('重启VM失败，错误码:' + res.code + '。错误信息:' + res.message);
             }else{
                 $.each(res.data,function(idx,response){
                     if (response.code === 0) {
-                        table_util.modify(response.data);
+                        vm_table_util.modify(response.data);
                     } else {
                         dialog_util.show_tool_tip('重启VM失败，错误码:' + response.code + '。错误信息:' + response.message);
                     }
@@ -733,7 +737,7 @@
             $("form[name='modify'] [name='id']").val(data.id)
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('重启VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -746,7 +750,7 @@
             render_util.render_edit_template_select(data.clusterId, $("form[name='modify'] [name='templateId']"))
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -763,7 +767,7 @@
             $("form[name='modify'] [name='description']").val(data.description)
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -776,7 +780,7 @@
             render_util.render_attach_iso_select(data.clusterId, $("form[name='modify'] [name='iso']"))
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('重装VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -798,7 +802,7 @@
     function detach_cd_room_click(data) {
         dialog_util.show_confirm_dialog('确认卸载光盘', 'POST', config_util.base_uri+"/management/vm/detach/cdroom", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('卸载光盘失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -812,9 +816,9 @@
     function destroy_vm_click(data) {
         dialog_util.show_confirm_dialog('确认删除VM', 'POST', config_util.base_uri+"/management/vm/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else if (response.code === 10000010||response.code === 1000001) {
-                table_util.remove(data);
+                vm_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -824,7 +828,7 @@
     function resume_vm_click(data) {
         dialog_util.show_confirm_dialog('确认恢复VM', 'POST', config_util.base_uri+"/management/vm/resume", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                vm_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('恢复VM失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

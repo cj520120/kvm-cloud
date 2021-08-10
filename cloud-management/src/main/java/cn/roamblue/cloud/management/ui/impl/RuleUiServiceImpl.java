@@ -4,6 +4,8 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.bean.PermissionCategory;
+import cn.roamblue.cloud.management.bean.PermissionInfo;
 import cn.roamblue.cloud.management.bean.RulePermissionInfo;
 import cn.roamblue.cloud.management.service.RuleService;
 import cn.roamblue.cloud.management.ui.RuleUiService;
@@ -26,6 +28,16 @@ public class RuleUiServiceImpl extends AbstractUiService implements RuleUiServic
     @Override
     public ResultUtil<List<RulePermissionInfo>> listRulePermission() {
         return super.call(() -> ruleService.listRulePermission());
+    }
+
+
+    @Override
+    public ResultUtil<List<PermissionCategory>> listPermissionCategory() {
+        return super.call(() -> ruleService.listPermissionCategory());
+    }
+    @Override
+    public ResultUtil<List<PermissionInfo>> listPermission() {
+        return super.call(() -> ruleService.listPermission());
     }
 
     @Override

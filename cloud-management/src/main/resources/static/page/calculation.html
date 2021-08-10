@@ -65,8 +65,12 @@
 <script>
 
     config_util.init(()=> {
-        window.data_handler = new data_handler({uri: config_util.base_uri+"/management/calculation/scheme", idName: "id"});
-        table_util.render({
+        window.data_handler = new data_handler({
+            uri: config_util.base_uri + "/management/calculation/scheme",
+            idName: "id"
+        });
+        window.calculation_table_util = new table_util()
+        calculation_table_util.render({
             elem: "#content",
             idName: "id",
             cols: [
@@ -101,7 +105,7 @@
     function create_calculation_click() {
         dialog_util.show_modify("#createDialog", "创建计算方案", "layui-icon-addition", "POST", config_util.base_uri+"/management/calculation/scheme/create", undefined, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                calculation_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加计算方案失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -111,7 +115,7 @@
     function destroy_calculation_click(data) {
         dialog_util.show_confirm_dialog('确认删除计算方案', 'POST', config_util.base_uri+"/management/calculation/scheme/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.remove(data);
+                calculation_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁计算方案失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

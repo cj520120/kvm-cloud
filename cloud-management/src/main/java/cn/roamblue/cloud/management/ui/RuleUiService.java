@@ -1,6 +1,8 @@
 package cn.roamblue.cloud.management.ui;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.management.bean.PermissionCategory;
+import cn.roamblue.cloud.management.bean.PermissionInfo;
 import cn.roamblue.cloud.management.bean.RulePermissionInfo;
 
 import java.util.List;
@@ -17,6 +19,18 @@ public interface RuleUiService {
      * @return
      */
     ResultUtil<List<RulePermissionInfo>> listRulePermission();
+
+    /**
+     * 获取所有权限列表
+     * @return
+     */
+    ResultUtil<List<PermissionInfo>> listPermission();
+
+    /**
+     * 获取权限分类
+     * @return
+     */
+    ResultUtil<List<PermissionCategory>> listPermissionCategory();
 
     /**
      * 创建权限组

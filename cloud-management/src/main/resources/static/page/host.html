@@ -115,12 +115,13 @@
 
     config_util.init(()=> {
         render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
+        window.host_table_util = new table_util();
         window.data_handler = new data_handler({
             elem: "form[name='searchForm']",
-            uri: config_util.base_uri+"/management/host/search",
+            uri: config_util.base_uri + "/management/host/search",
             idName: "id"
         })
-        table_util.render({
+        host_table_util.render({
             elem: "#content",
             idName: "id",
             cols: [
@@ -186,7 +187,7 @@
 
     function search_host_click() {
         window.data_handler.refresh();
-        table_util.refresh();
+        host_table_util.refresh();
     }
 
     function view_host_click(view_data) {
@@ -210,7 +211,7 @@
             render_util.render_edit_cluster_select($(`form[name='modify'] [name='clusterId']`))
         }, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                host_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加主机失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -220,7 +221,7 @@
     function destroy_host_click(data) {
         dialog_util.show_confirm_dialog('确认删除主机', 'POST', config_util.base_uri+"/management/host/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.remove(data);
+                host_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁主机失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -229,7 +230,7 @@
     function stop_host_click(data){
         dialog_util.show_confirm_dialog('维护主机将关闭该主机的所有实例，是否继续？', 'POST', config_util.base_uri+"/management/host/status", {id: data.id,status:"Maintenance"}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                host_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('维护主机失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -238,7 +239,7 @@
     function start_host_click(data) {
         dialog_util.show_confirm_dialog('确认取消维护主机?', 'POST', config_util.base_uri+"/management/host/status", {id: data.id,status:"Ready"}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                host_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('取消维护主机失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

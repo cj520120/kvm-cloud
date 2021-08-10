@@ -34,8 +34,25 @@ public class RuleController {
     public ResultUtil<List<RulePermissionInfo>> listAllVm() {
         return ruleUiService.listRulePermission();
     }
-
-
+    /**
+     * 获取权限分类
+     * @return
+     */
+    @Login
+    @GetMapping("/management/rules/category")
+    public ResultUtil<List<PermissionCategory>> listPermissionCategory(){
+        return ruleUiService.listPermissionCategory();
+    }
+    /**
+     * 获取所有权限
+     *
+     * @return
+     */
+    @Login
+    @GetMapping("/management/rules/permission")
+    public ResultUtil<List<PermissionInfo>> listPermission(){
+        return ruleUiService.listPermission();
+    }
     /**
      * 添加权限组
      *

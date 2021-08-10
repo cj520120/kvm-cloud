@@ -168,12 +168,13 @@
 
     config_util.init(()=> {
         render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
+        window.network_table_util = new table_util();
         window.data_handler = new data_handler({
             elem: "form[name='searchForm']",
-            uri: config_util.base_uri+"/management/network/search",
+            uri: config_util.base_uri + "/management/network/search",
             idName: "id"
         })
-        table_util.render({
+        network_table_util.render({
             elem: "#content",
             idName: "id",
             cols: [
@@ -227,7 +228,7 @@
 
     function search_network_click() {
         window.data_handler.refresh();
-        table_util.refresh();
+        network_table_util.refresh();
     }
 
     function view_network_click(view_data) {
@@ -254,7 +255,7 @@
             render_util.render_edit_cluster_select($(`form[name='modify'] [name='clusterId']`))
         }, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                network_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加网络失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -264,7 +265,7 @@
     function destroy_network_click(data) {
         dialog_util.show_confirm_dialog('确认删除网络', 'POST', config_util.base_uri+"/management/network/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.remove(data);
+                network_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁网络失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -274,7 +275,7 @@
     function start_network_click(data) {
         dialog_util.show_confirm_dialog('确认启动网络', 'POST', config_util.base_uri+"/management/network/start", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                network_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('启动网络失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -284,7 +285,7 @@
     function pause_network_click(data) {
         dialog_util.show_confirm_dialog('确认暂停网络', 'POST', config_util.base_uri+"/management/network/pause", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                network_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('暂停网络失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

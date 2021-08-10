@@ -7,8 +7,8 @@ window.data_util = new function () {
     this.group_hander = new data_handler({uri: config_util.base_uri+'/management/group'})
     this.cluster_hander = new data_handler({uri: config_util.base_uri+'/management/cluster'})
     this.storage_hander = new data_handler({uri: config_util.base_uri+'/management/storage'})
-    this.vm_hander = new data_handler({uri: config_util.base_uri+'/management/vm'})
-    this.rules_hander = new data_handler({uri: config_util.base_uri+'/management/rules'})
+    this.vm_hander = new data_handler({uri: config_util.base_uri + '/management/vm'})
+    this.rules_hander = new data_handler({uri: config_util.base_uri + '/management/rules', idName: "id"})
 
     this.get_rule_name_by_id = (ruleId) => {
         if (ruleId == 0) {

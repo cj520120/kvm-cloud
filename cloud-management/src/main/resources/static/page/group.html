@@ -54,8 +54,9 @@
 <script>
 
     config_util.init(()=> {
-        window.data_handler  = new data_handler({uri: config_util.base_uri+"/management/group", idName: "id"})
-        table_util.render({
+        window.data_handler = new data_handler({uri: config_util.base_uri + "/management/group", idName: "id"})
+        window.group_table_util = new table_util();
+        group_table_util.render({
             elem: "#content",
             idName: "id",
             cols: [
@@ -86,7 +87,7 @@
     function create_group_click() {
         dialog_util.show_modify("#createDialog", "创建群组", "layui-icon-addition", "POST", config_util.base_uri+"/management/group/create", undefined, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                group_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加群组失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -100,7 +101,7 @@
             })
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                group_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('修改群组失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -110,7 +111,7 @@
     function destroy_group_click(data) {
         dialog_util.show_confirm_dialog('确认删除群组', 'POST', config_util.base_uri+"/management/group/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.remove(data);
+                group_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁群组失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

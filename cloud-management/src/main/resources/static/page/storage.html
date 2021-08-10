@@ -118,10 +118,11 @@
         render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
         window.data_handler = new data_handler({
             elem: "form[name='searchForm']",
-            uri: config_util.base_uri+"/management/storage/search",
+            uri: config_util.base_uri + "/management/storage/search",
             idName: "id"
         })
-        table_util.render({
+        window.storage_table_util = new table_util();
+        storage_table_util.render({
             elem: "#content",
             idName: "id",
             cols: [
@@ -175,7 +176,7 @@
 
     function search_storage_click() {
         window.data_handler.refresh();
-        table_util.refresh();
+        storage_table_util.refresh();
     }
 
     function view_storage_click(view_data) {
@@ -198,7 +199,7 @@
             render_util.render_edit_cluster_select($(`form[name='modify'] [name='clusterId']`))
         }, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                storage_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加存储失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -208,7 +209,7 @@
     function destroy_storage_click(data) {
         dialog_util.show_confirm_dialog('确认删除存储', 'POST', config_util.base_uri+"/management/storage/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.remove(data);
+                storage_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁存储失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

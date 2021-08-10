@@ -84,8 +84,9 @@
 <script>
 
     config_util.init(()=> {
-        window.data_handler  = new data_handler({uri: config_util.base_uri+"/management/cluster", idName: "id"});
-        table_util.render({
+        window.data_handler = new data_handler({uri: config_util.base_uri + "/management/cluster", idName: "id"});
+        window.cluster_table_util = new table_util()
+        cluster_table_util.render({
             elem: "#content",
             idName: "id",
             cols: [
@@ -126,7 +127,7 @@
     function create_cluster_click() {
         dialog_util.show_modify("#createDialog", "创建集群", "layui-icon-addition", "POST", config_util.base_uri+"/management/cluster/create", undefined, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                cluster_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加集群失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -140,7 +141,7 @@
             })
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                cluster_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('修改集群失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -150,7 +151,7 @@
     function delete_cluster_click(data) {
         dialog_util.show_confirm_dialog('确认删除集群', 'POST', config_util.base_uri+"/management/cluster/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.remove(data);
+                cluster_table_util.remove(data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('删除集群失败，错误码:' + response.code + '。错误信息:' + response.message);
             }

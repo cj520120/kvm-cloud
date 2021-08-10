@@ -1,5 +1,7 @@
 package cn.roamblue.cloud.management.service;
 
+import cn.roamblue.cloud.management.bean.PermissionCategory;
+import cn.roamblue.cloud.management.bean.PermissionInfo;
 import cn.roamblue.cloud.management.bean.RulePermissionInfo;
 
 import java.util.List;
@@ -16,6 +18,18 @@ public interface RuleService {
      * @param permissions
      */
     void  hasPermission(int userId,String[] permissions);
+
+    /**
+     * 获取所有权限列表
+     * @return
+     */
+    List<PermissionInfo> listPermission();
+
+    /**
+     * 获取权限分组
+     * @return
+     */
+    List<PermissionCategory> listPermissionCategory();
 
     /**
      * 获取权限组

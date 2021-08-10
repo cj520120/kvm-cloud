@@ -170,17 +170,17 @@
         render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
         render_util.render_search_storage_select($("form[name='searchForm'] select[name='storageId']"))
         render_util.render_search_vm_select($("form[name='searchForm'] select[name='vmId']"))
-
+        window.volume_table_util = new table_util()
         window.data_handler = new data_handler({
             elem: "form[name='searchForm']",
-            uri: config_util.base_uri+"/management/volume/search",
+            uri: config_util.base_uri + "/management/volume/search",
             idName: "id"
         })
 
-        table_util.render({
+        volume_table_util.render({
             elem: "#content",
             idName: "id",
-            page:true,
+            page: true,
             cols: [
                 {title: "ID", name: "id", filter: true},
                 {title: "名称", name: "name", filter: true},
@@ -250,14 +250,14 @@
             handler: window.data_handler
         })
         $("#searchText").on('input', function () {
-            table_util.filter_text = $("#searchText").val()
-            table_util.refresh();
+            volume_table_util.filter_text = $("#searchText").val()
+            volume_table_util.refresh();
         })
     })
 
     function search_volume_click() {
         window.data_handler.refresh();
-        table_util.refresh();
+        volume_table_util.refresh();
     }
 
     function view_volume_click(view_data) {
@@ -287,7 +287,7 @@
             }
         }, function (response) {
             if (response.code === 0) {
-                table_util.append(response.data);
+                volume_table_util.append(response.data);
             } else {
                 dialog_util.show_tool_tip('添加磁盘失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -299,7 +299,7 @@
             $(`form[name='modify'] [name='id']`).val(data.id)
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                volume_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('扩容磁盘失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -312,7 +312,7 @@
             render_util.render_attach_vm(data.clusterId, $(`form[name='modify'] [name='id']`))
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                volume_table_util.modify(response.data);
             } else {
                 dialog_util.show_tool_tip('挂载磁盘失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -325,7 +325,7 @@
             id: data.vmId
         }, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                volume_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('取消挂载失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -335,7 +335,7 @@
     function destroy_volume_click(data) {
         dialog_util.show_confirm_dialog('确认删除磁盘', 'POST', config_util.base_uri+"/management/volume/destroy", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                volume_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('销毁磁盘失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
@@ -345,7 +345,7 @@
     function resume_volume_click(data) {
         dialog_util.show_confirm_dialog('确认恢复磁盘', 'POST', config_util.base_uri+"/management/volume/resume", {id: data.id}, function (response) {
             if (response.code === 0) {
-                table_util.modify(response.data);
+                volume_table_util.modify(response.data);
             } else if (response.code) {
                 dialog_util.show_tool_tip('恢复磁盘失败，错误码:' + response.code + '。错误信息:' + response.message);
             }
