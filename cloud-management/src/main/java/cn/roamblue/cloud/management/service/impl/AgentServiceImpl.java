@@ -76,7 +76,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
             Map<String, Object> map = new HashMap<>(4);
             map.put("type", storageType);
             map.put("name", target);
-            map.put("uri", uri);
+            map.put("uri", host);
             map.put("path", source);
             map.put("target", StoragePathUtil.getMountPath(target));
 

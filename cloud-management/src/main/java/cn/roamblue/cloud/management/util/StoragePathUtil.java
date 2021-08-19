@@ -1,7 +1,5 @@
 package cn.roamblue.cloud.management.util;
 
-import java.nio.file.Paths;
-
 /**
  * @author chenjun
  * @ClassName: StorageVolUtil
@@ -10,10 +8,11 @@ import java.nio.file.Paths;
  * @Date: 2021/8/5 上午10:58
  */
 public class StoragePathUtil {
-    public static String getVolumePath(String storageName, String volName){
-        return Paths.get("/mnt",storageName,volName).toString();
+    public static String getVolumePath(String storageName, String volName) {
+        return "/mnt/" + storageName + "/" + volName;
     }
-    public static String getMountPath(String storageName){
-        return Paths.get("/mnt",storageName).toString();
+
+    public static String getMountPath(String storageName) {
+        return "/mnt/" + storageName;
     }
 }
