@@ -129,6 +129,7 @@ mvn clean package
 ```
 ### 完成配置
 1、导入mysql表及相关数据
+> **脚本位于scripts下**
 
 2、修改配置文件
 
@@ -147,9 +148,8 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 6、下载系统Route-VM与Console-VM
 
-```
-链接: https://pan.baidu.com/s/1c7Fvenhp9WfrdaqrBkbd8A 提取码: pw3g
-```
+> **链接: https://pan.baidu.com/s/1c7Fvenhp9WfrdaqrBkbd8A 提取码: pw3g**
+
 
 7、安装nginx，配置Route-VM和Console-VM下载地址,并在页面完成模版配置
 
@@ -194,7 +194,11 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 14、系统VM用户名密码均为root/123456，请自行修改相关密码
 
-15、创建VM
+15、上传ISO系统镜像
+
+> **配置镜像时需要指定系统类型**
+
+16、创建VM
 
 
 ![](images/create-vm.png)
