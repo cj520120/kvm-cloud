@@ -198,28 +198,3 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 ![](images/create-vm.png)
 
-
-### VLAN-暂不支持
-```
-yum install vconfig -y
-modprobe 8021q
-lsmod | grep -i 8021q
- 
-
-vim /etc/sysconfig/network-scrips/ifcfg-br0.30 
-TYPE=Ethernet
-DEVICE=br0.30
-ONBOOT=yes
-BOOTPROTO=static
-NM_CONTROLLED=no
-VLAN=yes
-BRIDGE=br0-30
-
-vim  /etc/sysconfig/network-scrips/ifcfg-br0-30
-TYPE=Bridge
-DEVICE=br0-30
-ONBOOT=yes
-NM_CONTROLLED=no
-BOOTPROTO=static
-
-```
