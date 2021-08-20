@@ -13,7 +13,7 @@ public class KvmHostServiceImpl extends AbstractKvmService implements KvmHostSer
     @Override
     public HostModel getHostInfo() {
 
-        return super.excute(connect -> HostModel.builder().hostName(connect.getHostName())
+        return super.execute(connect -> HostModel.builder().hostName(connect.getHostName())
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(connect.nodeInfo().memory)

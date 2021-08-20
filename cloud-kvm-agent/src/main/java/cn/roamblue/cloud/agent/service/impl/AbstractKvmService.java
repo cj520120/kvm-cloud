@@ -24,19 +24,26 @@ public abstract class AbstractKvmService {
      * @param <V>
      * @return
      */
-    protected <V> V excute(Runner<V> runner) {
+    protected <V> V execute(Runner<V> runner) {
         Connect connect = null;
         try {
             connect = connectPool.borrowObject();
             return runner.call(connect);
         } catch (LibvirtException err) {
             if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
+                throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "domain not found or unexpectedly disappeared");
             } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_NETWORK)) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "agent vm network not found");
+                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "network not found");
             } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_CONNECT)) {
-                throw new CodeException(ErrorCode.QEMU_NOT_CONNECT, "agent QemuAgent not connect");
+                throw new CodeException(ErrorCode.QEMU_NOT_CONNECT, "can't connect to hypervisor");
+            } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_STORAGE_POOL)) {
+                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "storage not found");
+            } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_STORAGE_VOL)) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "storage vol not found");
+            } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_INVALID_STORAGE_VOL)) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "invalid storage vol object");
             } else {
+                log.error("call error", err.getMessage());
                 throw new CodeException(ErrorCode.SERVER_ERROR, err);
             }
         } catch (CodeException err) {

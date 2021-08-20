@@ -30,7 +30,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     @Override
     public List<StorageModel> listStorage() {
 
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             String[] pools = connect.listStoragePools();
             List<StorageModel> list = new ArrayList<>(pools.length);
             for (String pool : pools) {
@@ -43,7 +43,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
 
     @Override
     public StorageModel getStorageInfo(String name) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             try {
                 StoragePool storagePool = connect.storagePoolLookupByName(name);
                 StoragePoolInfo storagePoolInfo = storagePool.getInfo();
@@ -66,7 +66,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
 
     @Override
     public void destroyStorage(String name) {
-        super.excute(connect -> {
+        super.execute(connect -> {
             try {
                 StoragePool storagePool = connect.storagePoolLookupByName(name);
                 storagePool.destroy();
@@ -91,7 +91,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     @Override
     public StorageModel createStorage(String type,String name, String uri, String path, String target) {
 
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             String[] pools = connect.listStoragePools();
             boolean isExist = false;
             for (String pool : pools) {

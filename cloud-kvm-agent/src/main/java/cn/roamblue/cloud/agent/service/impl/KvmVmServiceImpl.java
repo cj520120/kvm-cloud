@@ -33,7 +33,7 @@ import java.util.Map;
 public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService {
     @Override
     public List<VmInfoModel> listVm() {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             int[] ids = connect.listDomains();
             List<VmInfoModel> list = new ArrayList<>(ids.length);
             for (int id : ids) {
@@ -53,7 +53,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
 
     @Override
     public List<VmStaticsModel> listVmStatics() {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             int[] ids = connect.listDomains();
             Map<Integer, VmCurrentStaticsInfo> map = new HashMap<>(4);
             for (int id : ids) {
@@ -148,7 +148,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
 
     @Override
     public VmInfoModel findByName(String name) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             try {
                 Domain domain = connect.domainLookupByName(name);
                 return initVmResponse(domain);
@@ -182,7 +182,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
 
     @Override
     public void restart(String name) {
-        super.excute(connect -> {
+        super.execute(connect -> {
             try {
                 log.info("restart name={}", name);
                 Domain domain = connect.domainLookupByName(name);
@@ -200,7 +200,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
 
     @Override
     public void destroy(String name) {
-        super.excute(connect -> {
+        super.execute(connect -> {
             destroyDomain(name, connect);
             return null;
         });
@@ -209,7 +209,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     @Override
     public void stop(String name, int timeout) {
         long start = System.currentTimeMillis();
-        super.excute(connect -> {
+        super.execute(connect -> {
             while (true) {
                 try {
                     log.info("shutdown {}", name);
@@ -253,7 +253,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     @Override
     public void attachDevice(String name, String xml) {
 
-        super.excute(connect -> {
+        super.execute(connect -> {
             try {
                 log.info("attachDevice name={} xml={}", name, xml);
                 Domain domain = connect.domainLookupByName(name);
@@ -272,7 +272,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     @Override
     public void detachDevice(String name, String xml) {
 
-        super.excute(connect -> {
+        super.execute(connect -> {
             try {
                 log.info("detachDevice name={} xml={}", name, xml);
                 Domain domain = connect.domainLookupByName(name);
@@ -290,7 +290,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
 
     @Override
     public VmInfoModel start(VmModel info) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             try {
                 Domain domain = connect.domainLookupByName(info.getName());
                 domain.destroy();
@@ -306,7 +306,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
 
     @Override
     public void updateDevice(String name, String xml) {
-        super.excute(connect -> {
+        super.execute(connect -> {
             try {
                 log.info("updateDevice name={} xml={}", name, xml);
                 Domain domain = connect.domainLookupByName(name);

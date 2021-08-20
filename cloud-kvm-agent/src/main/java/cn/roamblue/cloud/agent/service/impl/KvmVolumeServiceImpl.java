@@ -20,7 +20,7 @@ import java.util.List;
 public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolumeService {
     @Override
     public List<VolumeModel> listVolume(String storageName) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             storagePool.refresh(0);
             String[] volumes = storagePool.listVolumes();
@@ -34,7 +34,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
 
     @Override
     public VolumeModel getVolume(String storageName, String volumeName) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             try {
                 StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
@@ -59,7 +59,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
 
     @Override
     public VolumeModel reSize(String storageName, String volumeName, long size) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
             storageVol.resize(size, 0);
@@ -77,7 +77,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     @Override
     public void destroyVolume(String storage, String volume) {
         try {
-            super.excute(connect -> {
+            super.execute(connect -> {
                 StoragePool storagePool = connect.storagePoolLookupByName(storage);
                 StorageVol storageVol = storagePool.storageVolLookupByName(volume);
                 storageVol.wipe();
@@ -93,7 +93,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     @Override
     public VolumeModel createVolume(String storage, String volume, String path, long capacityGb, String backingVolume) {
 
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             StringBuilder sb = new StringBuilder();
             sb.append("<volume type='file'>")
                     .append("<name>").append(volume).append("</name>")
@@ -140,7 +140,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
 
     @Override
     public VolumeModel cloneVolume(String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String path) {
-        return super.excute(connect -> {
+        return super.execute(connect -> {
             StoragePool sourceStoragePool = connect.storagePoolLookupByName(sourceStorage);
             StoragePool targetStoragePool = connect.storagePoolLookupByName(targetStorage);
             StorageVol sourceVol = sourceStoragePool.storageVolLookupByName(sourceVolume);

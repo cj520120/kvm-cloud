@@ -27,7 +27,7 @@ public class CommmandServiceImpl extends AbstractKvmService implements CommmandS
 
     @Override
     public ResultUtil<Map<String, Object>> execute(String name, String command, int timeout) {
-        return this.excute(connect -> {
+        return this.execute(connect -> {
             int[] ids = connect.listDomains();
             for (int id : ids) {
                 Domain domain = connect.domainLookupByID(id);
@@ -48,7 +48,7 @@ public class CommmandServiceImpl extends AbstractKvmService implements CommmandS
 
     @Override
     public ResultUtil<Void> writeFile(String name, String path, String body) {
-        return this.excute(connect -> {
+        return this.execute(connect -> {
             int[] ids = connect.listDomains();
             for (int id : ids) {
                 Domain domain = connect.domainLookupByID(id);
@@ -110,7 +110,7 @@ public class CommmandServiceImpl extends AbstractKvmService implements CommmandS
     @Override
     public ResultUtil<Map<String, Object>> execute(String name, String commandStr, List<String> args, int timeout) {
 
-        return this.excute(connect -> {
+        return this.execute(connect -> {
             int[] ids = connect.listDomains();
             for (int id : ids) {
                 Domain domain = connect.domainLookupByID(id);
