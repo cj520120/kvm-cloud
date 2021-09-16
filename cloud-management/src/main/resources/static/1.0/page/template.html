@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>模版管理</title>
+    <link href="../layui/css/layui.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../image/kl_logo.png" rel="icon" type="image/png">
+</head>
+<body>
+<div class="layui-form">
+    <label>集群</label>
+    <div class="layui-input-inline">
+        <form name="searchForm">
+            <select name="clusterId"></select>
+        </form>
+    </div>
+    <div class="layui-input-inline">
+        <button class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                onclick="search_template_click()"><i class="layui-icon layui-icon-search"></i>搜索
+        </button>
+        <button class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                onclick="create_template_click()"><i class="layui-icon layui-icon-addition"></i>创建模版
+        </button>
+    </div>
+</div>
+<div id="content">
+
+</div>
+</body>
+
+<script id="createDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">模版名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="templateName" placeholder="请输入模版名称" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">模版地址</label>
+            <div class="layui-input-inline">
+                <input type="text" name="templateUri" placeholder="请输入模版地址" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">选择集群</label>
+            <div class="layui-input-inline">
+                <select name="clusterId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:5px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">系统类型</label>
+            <div class="layui-input-inline">
+                <select name="osCategoryId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom:0px">
+            <label class="layui-form-label" style="padding-left: 0px;padding-right: 5px;">模版类型</label>
+            <div class="layui-input-inline">
+                <select name="templateType">
+                    <option value="ISO">ISO</option>
+                    <option value="Disk">Disk</option>
+                    <option value="Route">Route</option>
+                    <option value="Console">Console</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</script>
+<script id="viewDialog" type="text/html">
+    <form class="layui-form" action="" style="padding: 0px;" lay-filter="view">
+        <div class="layui-form-item">
+            <table class="layui-table" style="margin: 0;" lay-size="sm">
+
+                <tbody>
+                <tr>
+                    <th>模版ID</th>
+                    <td id="view_id"></td>
+                    <th>所属集群</th>
+                    <td id="view_clusterName"></td>
+                </tr>
+                <tr>
+                    <th>模版名称</th>
+                    <td id="view_name"></td>
+                    <th>模版类型</th>
+                    <td id="view_type"></td>
+                </tr>
+                <tr>
+                    <th>模版地址</th>
+                    <td id="view_uri" colspan="3"></td>
+                </tr>
+                <tr>
+                    <th>系统类型</th>
+                    <td id="view_category" colspan="3"></td>
+                </tr>
+                <tr>
+                    <th>状态</th>
+                    <td id="view_status">&nbsp;</td>
+                    <th>创建时间</th>
+                    <td id="view_createTime"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+</script>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/config_util.js"></script>
+<script src="../layui/layui.js"></script>
+<script src="../js/util.js"></script>
+<script src="../js/table_util.js"></script>
+<script src="../js/data_handler.js"></script>
+<script src="../js/data_util.js"></script>
+<script src="../js/dialog_util.js"></script>
+<script src="../js/render_util.js"></script>
+<script>
+
+    config_util.init(()=> {
+        render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
+        window.data_handler = new data_handler({
+            elem: "form[name='searchForm']",
+            uri: config_util.base_uri + "/management/template/search",
+            idName: "id"
+        })
+        window.template_table_util = new table_util()
+        template_table_util.render({
+            elem: "#content",
+            idName: "id",
+            cols: [
+                {width: 80, title: "ID", name: "id"},
+                {width: 250, title: "名称", name: "name"},
+                {
+                    width: 150, title: "集群", name: "clusterId", render: function (data) {
+                        return data_util.get_cluster_name_by_id(data.clusterId)
+                    }
+                },
+                {
+                    width: 150, title: "状态", name: "status", render: function (data) {
+                        return render_util.render_status(data.status)
+                    }
+                },
+                {
+                    width: 180, title: "创建时间", render: function (data) {
+                        return dateFormat("YYYY-mm-dd HH:MM:SS", new Date(data.createTime))
+                    }
+                }
+            ],
+            menu: [
+                {
+                    title: "模版详情", icon: "layui-icon-form", show: function (data) {
+                        return true
+                    }, click: view_template_click
+                },
+                {
+                    title: "销毁模版", icon: "layui-icon-delete", show: function (data) {
+                        return true
+                    }, click: destroy_template_click
+                },
+            ],
+            handler: window.data_handler
+        })
+    })
+
+    function search_template_click() {
+        window.data_handler.refresh();
+        template_table_util.refresh();
+    }
+
+    function view_template_click(view_data) {
+        dialog_util.show_view("#viewDialog", "查看模版", "layui-icon-form", function () {
+            const osCategoryName = data_util.get_os_category_name_by_id(view_data.osCategoryId);
+            $("#view_category").html(osCategoryName);
+            $("#view_id").html(view_data.id);
+            $("#view_name").html(view_data.name);
+            $("#view_clusterName").html(data_util.get_cluster_name_by_id(view_data.clusterId));
+            $("#view_uri").html(view_data.uri);
+            $("#view_type").html(view_data.type);
+            $("#view_status").html(view_data.status);
+            $("#view_createTime").html(dateFormat("YYYY-mm-dd HH:MM:SS", new Date(view_data.createTime)));
+        })
+    }
+
+    function create_template_click() {
+        dialog_util.show_modify("#createDialog", "创建模版", "layui-icon-addition", "POST", config_util.base_uri+"/management/template/create", function () {
+            render_util.render_edit_cluster_select($(`form[name='modify'] [name='clusterId']`))
+            render_util.render_edit_os_category_select($(`form[name='modify'] [name='osCategoryId']`));
+        }, function (response) {
+            if (response.code === 0) {
+                template_table_util.append(response.data);
+            } else {
+                dialog_util.show_tool_tip('添加模版失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function destroy_template_click(data) {
+        dialog_util.show_confirm_dialog('确认删除模版', 'POST', config_util.base_uri+"/management/template/destroy", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                template_table_util.remove(data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('销毁模版失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+
+
+
+</script>

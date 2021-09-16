@@ -133,7 +133,7 @@ mvn clean package
 
 2、修改配置文件
 
-3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
+3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/ (旧版本界面:http://localhost:8080/1.0/login.html)
 ```
 管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.properties
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties

@@ -295,15 +295,19 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
         }
-        int hostId = vm.getHostId();
-        if (force) {
-            stopVm(vm.getId(), true);
-            vm = startVm(vm.getId(), hostId);
-        } else {
-            HostEntity host = this.allocateService.allocateHost(vm.getClusterId(), vm.getHostId(), 0, 0);
-            ResultUtil<Void> resultUtil = this.agentService.rebootVm(host.getHostUri(), vm.getVmName());
-            if (ErrorCode.SUCCESS != resultUtil.getCode()) {
-                throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        if(vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED)){
+            vm = startVm(vm.getId(), 0);
+        }else {
+            int hostId = vm.getHostId();
+            if (force) {
+                stopVm(vm.getId(), true);
+                vm = startVm(vm.getId(), hostId);
+            } else {
+                HostEntity host = this.allocateService.allocateHost(vm.getClusterId(), vm.getHostId(), 0, 0);
+                ResultUtil<Void> resultUtil = this.agentService.rebootVm(host.getHostUri(), vm.getVmName());
+                if (ErrorCode.SUCCESS != resultUtil.getCode()) {
+                    throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+                }
             }
         }
         return vm;

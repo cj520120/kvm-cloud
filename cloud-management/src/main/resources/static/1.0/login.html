@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Roamblue Cloud</title>
+    <link href="layui/css/layui.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="image/kl_logo.png" rel="icon" type="image/png">
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url("image/login_bg.png");
+            background-size: cover;
+        }
+
+
+
+    </style>
+</head>
+<body>
+<div class="login-div">
+    <h1>登录</h1>
+    <form action="#" id="login-form">
+        <div class="login-form-item">
+            <input id="username" placeholder="用户名">
+        </div>
+        <div class="login-form-item">
+            <input id="password" placeholder="密码" type="password">
+        </div>
+        <button class="btn-login" type="submit">登录</button>
+    </form>
+</div>
+</body>
+</html>
+<script src="js/jquery.min.js"></script>
+<script src="js/config_util.js"></script>
+<script src="layui/layui.js"></script>
+<script src="js/util.js"></script>
+<script src="js/dialog_util.js"></script>
+<script src="js/sha256.js"></script>
+<script>
+    config_util.init(()=>{
+        $('#login-form').submit(function () {
+            if ($('#username').val() == '') {
+                layui.msg('请输入用户名')
+            } else if ($('#password').val() == '') {
+                layui.msg('密码不能为空')
+            } else {
+                $.ajax({
+                    url: config_util.base_uri+'/management/login/signature',
+                    method: "GET",
+                    dataType: "json",
+                    async: false,
+                    data: {
+                        loginName: $("#username").val()
+                    },
+                    success: function (data) {
+                        if (data.code != 0) {
+                            dialog_util.show_tool_tip("获取签名错误:" + data.code)
+                            return;
+                        }
+                        $.ajax({
+                                url: config_util.base_uri+'/management/login',
+                                method: "POST",
+                                dataType: "json",
+                                data: {
+                                    loginName: $("#username").val(),
+                                    password: sha256_digest(sha256_digest($('#password').val() + ":" + data.data.signature) + ":" + data.data.nonce),
+                                    nonce: data.data.nonce
+                                },
+                                async: false,
+                                success: function (data) {
+                                    console.log(data)
+                                    if (data.code == 0) {
+                                        localStorage.setItem("X_CLOUD_TOKEN", data.data.token);
+                                        window.location.href = 'index.html'
+                                    } else {
+                                        dialog_util.show_tool_tip(data.message)
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                })
+            }
+            return false;
+        })
+    })
+
+
+
+
+
+</script>

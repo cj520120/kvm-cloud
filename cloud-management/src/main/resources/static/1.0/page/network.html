@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>网络管理</title>
+    <link href="../layui/css/layui.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../image/kl_logo.png" rel="icon" type="image/png">
+</head>
+<body>
+<div class="layui-form">
+    <label>集群</label>
+    <div class="layui-input-inline">
+        <form name="searchForm">
+            <select name="clusterId"></select>
+        </form>
+    </div>
+    <div class="layui-input-inline">
+        <button class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                onclick="search_network_click()"><i class="layui-icon layui-icon-search"></i>搜索
+        </button>
+        <button class="layui-btn layui-btn-sm" lay-filter="formSearch"
+                onclick="create_network_click()"><i class="layui-icon layui-icon-addition"></i>创建网络
+        </button>
+    </div>
+</div>
+<div id="content">
+
+</div>
+</body>
+
+<script id="createDialog" type="text/html">
+    <form class="layui-form" name="modify" action="" style="padding: 20px;padding-bottom: 5px;" lay-filter="modify">
+        <div class="layui-form-item">
+            <table class="layui-table" style="margin: 0;" lay-size="sm" lay-skin="nob">
+
+                <tr>
+                    <th style="text-align: right;">网络名称</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="name" autocomplete="off"
+                                                                             class="layui-input"></td>
+                    <th style="text-align: right;">网卡名称</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="card" placeholder="br0"
+                                                                             autocomplete="off"
+                                                                             class="layui-input"></td>
+                </tr>
+                <tr>
+
+                    <th style="text-align: right;">选择集群</th>
+                    <td style="padding-left: 5px;padding-right: 5px;">
+                        <div><select name="clusterId"></select></div>
+                    </td>
+                    <th style="text-align: right;">网络类型</th>
+                    <td style="padding-left: 5px;padding-right: 5px;">
+                        <div><select name="type">
+                            <option value="Bridge">Bridge</option>
+                        </select></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: right;">管理开始IP</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" placeholder="192.168.2.10"
+                                                                             name="managerStartIp" autocomplete="off"
+                                                                             class="layui-input"></td>
+
+                    <th style="text-align: right;">管理结束IP</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="managerEndIp"
+                                                                             autocomplete="off"
+                                                                             placeholder="192.168.2.50"
+                                                                             class="layui-input"></td>
+
+                </tr>
+                <tr>
+                    <th style="text-align: right;">Guest开始IP</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="guestStartIp"
+                                                                             autocomplete="off"
+                                                                             placeholder="192.168.2.100"
+                                                                             class="layui-input"></td>
+                    <th style="text-align: right;">Guest结束IP</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="guestEndIp"
+                                                                             autocomplete="off"
+                                                                             placeholder="192.168.2.200"
+                                                                             class="layui-input"></td>
+                </tr>
+                <tr>
+                    <th style="text-align: right;">子网地址</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="subnet"
+                                                                             autocomplete="off" class="layui-input"
+                                                                             placeholder="192.168.2.0/24"></td>
+                    <th style="text-align: right;">网关地址</th>
+                    <td style="padding-left: 5px;padding-right: 5px;"><input type="text" name="gateway"
+                                                                             autocomplete="off" class="layui-input"
+                                                                             placeholder="192.168.2.1"></td>
+                </tr>
+                <tr>
+                    <th style="text-align: right;">系统DNS</th>
+                    <td colspan="3" style="padding-left: 5px;padding-right: 5px;"><input type="text" name="dns"
+                                                                                         placeholder="114.114.114.114,8.8.8.8"
+                                                                                         value="" autocomplete="off"
+                                                                                         class="layui-input"></td>
+
+                </tr>
+            </table>
+        </div>
+    </form>
+</script>
+<script id="viewDialog" type="text/html">
+    <form class="layui-form" action="" style="padding: 0px;" lay-filter="view">
+        <div class="layui-form-item">
+            <table class="layui-table" style="margin: 0;" lay-size="sm"
+            <tbody>
+            <tr>
+                <th>网络ID</th>
+                <td id="view_id"></td>
+                <th>网络名称</th>
+                <td id="view_name"></td>
+            </tr>
+            <tr>
+                <th>集群名称</th>
+                <td id="view_clusterId"></td>
+                <th>网关信息</th>
+                <td id="view_gateway"></td>
+            </tr>
+            <tr>
+                <th>管理起始IP</th>
+                <td id="view_managerStartIp"></td>
+                <th>管理结束IP</th>
+                <td id="view_managerEndIp"></td>
+            </tr>
+            <tr>
+                <th>VM开始IP</th>
+                <td id="view_guestStartIp"></td>
+                <th>VM结束IP</th>
+                <td id="view_guestEndIp"></td>
+            </tr>
+            <tr>
+                <th>子网地址</th>
+                <td id="view_subnet"></td>
+                <th>DNS信息</th>
+                <td id="view_dns"></td>
+            </tr>
+            <tr>
+                <th>网卡名称</th>
+                <td id="view_card"></td>
+                <th>网络状态</th>
+                <td id="view_status"></td>
+            </tr>
+            <tr>
+                <th>网络类型</th>
+                <td id="view_network_type"></td>
+                <th>创建时间</th>
+                <td id="view_createTime"></td>
+            </tr>
+            </tbody>
+            </table>
+        </div>
+    </form>
+</script>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/config_util.js"></script>
+<script src="../layui/layui.js"></script>
+<script src="../js/util.js"></script>
+<script src="../js/table_util.js"></script>
+<script src="../js/data_handler.js"></script>
+<script src="../js/data_util.js"></script>
+<script src="../js/dialog_util.js"></script>
+<script src="../js/render_util.js"></script>
+<script>
+
+    config_util.init(()=> {
+        render_util.render_search_cluster_select($("form[name='searchForm'] select[name='clusterId']"))
+        window.network_table_util = new table_util();
+        window.data_handler = new data_handler({
+            elem: "form[name='searchForm']",
+            uri: config_util.base_uri + "/management/network/search",
+            idName: "id"
+        })
+        network_table_util.render({
+            elem: "#content",
+            idName: "id",
+            cols: [
+                {title: "ID", name: "id"},
+                {title: "名称", name: "name"},
+                {
+                    title: "集群", name: "clusterId", render: function (data) {
+                        return data_util.get_cluster_name_by_id(data.clusterId)
+                    }
+                },
+                {title: "网关", name: "gateway"},
+                {title: "开始IP", name: "guestStartIp"},
+                {title: "结束IP", name: "guestEndIp"},
+                {title: "类型", name: "type"},
+                {
+                    title: "状态", name: "status", render: function (data) {
+                         return render_util.render_status(data.status)
+                    }
+                },
+                {
+                    width: 180, title: "创建时间", render: function (data) {
+                        return dateFormat("YYYY-mm-dd HH:MM:SS", new Date(data.createTime))
+                    }
+                }
+            ],
+            menu: [
+                {
+                    title: "网络详情", icon: "layui-icon-form", show: function (data) {
+                        return true
+                    }, click: view_network_click
+                },
+                {
+                    title: "启用网络", icon: "layui-icon-play", show: function (data) {
+                        return data.status != "Ready"
+                    }, click: start_network_click
+                },
+                {
+                    title: "暂停网络", icon: "layui-icon-pause", show: function (data) {
+                        return data.status === "Ready"
+                    }, click: pause_network_click
+                },
+                {
+                    title: "销毁网络", icon: "layui-icon-delete", show: function (data) {
+                        return true
+                    }, click: destroy_network_click
+                },
+            ],
+            handler: window.data_handler
+        })
+    })
+
+    function search_network_click() {
+        window.data_handler.refresh();
+        network_table_util.refresh();
+    }
+
+    function view_network_click(view_data) {
+        dialog_util.show_view("#viewDialog", "查看网络", "layui-icon-form", function () {
+            $("#view_id").html(view_data.id);
+            $("#view_name").html(view_data.name);
+            $("#view_clusterId").html(data_util.get_cluster_name_by_id(view_data.clusterId));
+            $("#view_guestStartIp").html(view_data.guestStartIp);
+            $("#view_guestEndIp").html(view_data.guestEndIp);
+            $("#view_managerStartIp").html(view_data.managerStartIp);
+            $("#view_managerEndIp").html(view_data.managerEndIp);
+            $("#view_subnet").html(view_data.subnet);
+            $("#view_gateway").html(view_data.gateway);
+            $("#view_dns").html(view_data.dns);
+            $("#view_card").html(view_data.card);
+            $("#view_status").html(view_data.status);
+            $("#view_network_type").html(view_data.type);
+            $("#view_createTime").html(dateFormat("YYYY-mm-dd HH:MM:SS", new Date(view_data.createTime)));
+        })
+    }
+
+    function create_network_click() {
+        dialog_util.show_modify("#createDialog", "创建网络", "layui-icon-addition", "POST", config_util.base_uri+"/management/network/create", function () {
+            render_util.render_edit_cluster_select($(`form[name='modify'] [name='clusterId']`))
+        }, function (response) {
+            if (response.code === 0) {
+                network_table_util.append(response.data);
+            } else {
+                dialog_util.show_tool_tip('添加网络失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function destroy_network_click(data) {
+        dialog_util.show_confirm_dialog('确认删除网络', 'POST', config_util.base_uri+"/management/network/destroy", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                network_table_util.remove(data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('销毁网络失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function start_network_click(data) {
+        dialog_util.show_confirm_dialog('确认启动网络', 'POST', config_util.base_uri+"/management/network/start", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                network_table_util.modify(response.data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('启动网络失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+    function pause_network_click(data) {
+        dialog_util.show_confirm_dialog('确认暂停网络', 'POST', config_util.base_uri+"/management/network/pause", {id: data.id}, function (response) {
+            if (response.code === 0) {
+                network_table_util.modify(response.data);
+            } else if (response.code) {
+                dialog_util.show_tool_tip('暂停网络失败，错误码:' + response.code + '。错误信息:' + response.message);
+            }
+        })
+    }
+
+
+
+</script>
