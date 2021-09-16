@@ -137,6 +137,7 @@ mvn clean package
 ```
 管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.properties
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
+ --spring.config.location 是可选项，用于指定配置文件，如果不需要修改，可以去掉
 ```
 
 4、平台登陆账号默认用户名/密码:admin/111111
