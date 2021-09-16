@@ -124,7 +124,7 @@ export default {
   components:{Top,Menu,EditStorage},
   data(){
     return {
-      menuIndex:"7"
+      menuIndex:"6"
     }
   },
   created() {
