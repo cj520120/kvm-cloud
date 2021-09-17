@@ -1,60 +1,53 @@
 <template>
-  <el-dialog :title="title" :visible.sync="dialog_visible" center width="600px"  height="400px" :close-on-click-modal="false" :close-on-press-escape="false">
+  <el-dialog :title="title" :visible.sync="dialog_visible" center width="620px"  :close-on-click-modal="false" :close-on-press-escape="false">
     <el-tabs v-model="activeName">
       <el-tab-pane label="基础信息" name="first">
-          <div class="details" style="width: 600px;height:400px;">
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">实例编号</div></el-col>
-              <el-col :span="17"><div class="content">{{instance.id}}</div></el-col>
+          <div class="details">
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title">实例编号</div></el-col>
+              <el-col :span="8"><div class="content">{{instance.id}}</div></el-col>
+              <el-col :span="4"><div class="title">实例名称</div></el-col>
+              <el-col :span="8"><div class="content">{{instance.name}}</div></el-col>
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">实例名称</div></el-col>
-              <el-col :span="17"><div class="content">{{instance.name}}</div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title">实例备注</div></el-col>
+              <el-col :span="8"><div class="content">{{instance.description}}</div></el-col>
+              <el-col :span="4"><div class="title"> 集群名称</div></el-col>
+              <el-col :span="8"><div class="content">{{get_cluster_name_by_id(instance.clusterId)}}</div></el-col>
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">实例备注</div></el-col>
-              <el-col :span="17"><div class="content">{{instance.description}}</div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title"> 计算方案</div></el-col>
+              <el-col :span="8"><div class="content">{{get_scheme_name_by_id(instance.calculationSchemeId)}}</div></el-col>
+              <el-col :span="4"><div class="title">所属群组</div></el-col>
+              <el-col :span="8"><div class="content">{{get_group_name_by_id(instance.groupId)}}</div></el-col>
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title"> 集群名称</div></el-col>
-              <el-col :span="17"><div class="content">{{get_cluster_name_by_id(instance.clusterId)}}</div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title">实例类型</div></el-col>
+              <el-col :span="8"><div class="content">  <el-tag  size="mini">{{instance.type}}</el-tag> </div></el-col>
+              <el-col :span="4"><div class="title">运行状态</div></el-col>
+              <el-col :span="8"><div class="content"><el-tag :type="get_status_tag_type(instance.status)" size="mini">{{ instance.status }}</el-tag></div></el-col>
+
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">所属群组</div></el-col>
-              <el-col :span="17"><div class="content">{{get_group_name_by_id(instance.groupId)}}</div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title">运行主机</div></el-col>
+              <el-col :span="20"><div class="content">{{get_host_name_by_id(instance.hostId)}}</div></el-col>
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">实例类型</div></el-col>
-              <el-col :span="17"><div class="content">  <el-tag  size="mini">{{instance.type}}</el-tag> </div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title">附加光盘</div></el-col>
+              <el-col :span="20"><div class="content">{{get_template_name_by_id(instance.iso)}}</div></el-col>
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">运行状态</div></el-col>
-              <el-col :span="17"><div class="content"><el-tag :type="get_status_tag_type(instance.status)" size="mini">{{ instance.status }}</el-tag></div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title"> 系统模版</div></el-col>
+              <el-col :span="20"><div class="content">{{get_template_name_by_id(instance.templateId)}}</div></el-col>
             </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title"> 计算方案</div></el-col>
-              <el-col :span="17"><div class="content">{{get_scheme_name_by_id(instance.calculationSchemeId)}}</div></el-col>
-            </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">运行主机</div></el-col>
-              <el-col :span="17"><div class="content">{{get_host_name_by_id(instance.hostId)}}</div></el-col>
-            </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">附加光盘</div></el-col>
-              <el-col :span="17"><div class="content">{{get_template_name_by_id(instance.iso)}}</div></el-col>
-            </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title"> 系统模版</div></el-col>
-              <el-col :span="17"><div class="content">{{get_template_name_by_id(instance.templateId)}}</div></el-col>
-            </el-row>
-            <el-row :gutter="20">
-              <el-col :span="3"><div class="title">创建时间</div></el-col>
-              <el-col :span="17"><div class="content">{{ parse_date(instance.createTime) }}</div></el-col>
+            <el-row :gutter="24">
+              <el-col :span="4"><div class="title">创建时间</div></el-col>
+              <el-col :span="20"><div class="content">{{ parse_date(instance.createTime) }}</div></el-col>
             </el-row>
           </div>
       </el-tab-pane>
       <el-tab-pane label="磁盘信息" name="second">
-        <div style="width: 600px;height:400px;overflow: auto">
+        <div class="container">
           <el-table   v-loading="volume_loading" size="small"  :data="instance_volumes">
             <el-table-column
                 label="ID"
@@ -95,7 +88,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="网络信息" name="third">
-        <div  style="width: 600px;height:400px;overflow: auto">
+        <div class="container">
           <el-table   v-loading="network_loading" size="small"  ref="filterTable" :data="instance_network_interfaces" >
             <el-table-column
                 label="ID"
@@ -133,6 +126,9 @@
       </el-tab-pane>
     </el-tabs>
 
+    <div slot="footer" style="text-align: right">
+      <el-button @click="dialog_visible = false">取 消</el-button>
+    </div>
   </el-dialog>
 </template>
 
@@ -204,16 +200,23 @@ export default {
 </script>
 
 <style scoped>
+.container{
+  width: 100%;
+  height:320px;
+  padding: 0;
+  overflow: auto
+}
 .details .title{
-  color: #909399;
-  font-size: 12px;
-  line-height: 32px;
+  color: #99a9bf;
+  font-size: 14px;
+  line-height: 40px;
   width: 100%;
 
 }
 .details .content{
   color: #606266;
   font-size: 12px;
-  line-height: 32px;
+  line-height: 40px;
+  width: 100%;
 }
 </style>

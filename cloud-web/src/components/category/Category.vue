@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_category_click">创建系统分类</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新系统分类</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="all_category" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="all_category" style="width: 100%">
                 <el-table-column
                     label="ID"
                     prop="id"
@@ -72,13 +73,19 @@ export default {
   components:{Top,Menu,EditCategory},
   data(){
     return {
-      menuIndex:"9"
+      menuIndex:"9",
+      loading:false
     }
   },
   created() {
-    this.load_category()
+    this.on_refresh()
   },
   methods:{
+    on_refresh(){
+      this.loading=true
+      this.all_category=[]
+      this.load_category().then(()=>this.loading=false)
+    },
     on_category_click(){
       this.$refs.EditEditCategory.init_data()
     },

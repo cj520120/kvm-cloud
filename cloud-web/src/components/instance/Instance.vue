@@ -209,7 +209,7 @@ export default {
       batch_start_loading:false
     }
   },
-  created() {
+  mounted() {
     this.load_cluster().then(() => this.load_host().then(() => this.load_groups().then(()=>this.load_template().then(()=>this.load_scheme().then(()=>this.load_network().then(()=>this.load_storage().then(()=>{
       this.$refs.SearchRef.init_data(this.all_groups, this.all_cluster, this.all_host)
       this.on_search_callback()

@@ -2,7 +2,7 @@
   <el-dialog :title="title" :visible.sync="dialog_visible" center width="600px"  :close-on-click-modal="false" :close-on-press-escape="false">
    <el-container>
     <el-header>
-      <el-steps :active="active" finish-status="success" size="mini">
+      <el-steps :active="active" finish-status="success" :simple="false" :align-center="true">
         <el-step title="基本信息"></el-step>
         <el-step title="系统镜像"></el-step>
         <el-step title="网络与存储"></el-step>
@@ -98,7 +98,7 @@
         </el-select>
       </el-form-item>
     </el-form>
-    <div slot="footer">
+    <div slot="footer" style="text-align: right">
       <el-button type="primary" v-show="active>0" @click="prev">上一步</el-button>
       <el-button type="primary" v-show="active===0" :disabled="modify.name==='' || modify.clusterId==='' " @click="next">下一步</el-button>
       <el-button type="primary" v-show="active===1" :disabled="modify.templateId==='' || modify.size===''" @click="next">下一步</el-button>

@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_cluster_click">创建集群</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新集群</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="all_cluster" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="all_cluster" style="width: 100%">
                 <el-table-column
                     label="ID"
                     prop="id"
@@ -78,13 +79,19 @@ export default {
   components:{Top,Menu,EditCluster},
   data(){
     return {
-      menuIndex:"2"
+      menuIndex:"2",
+      loading:false
     }
   },
   created() {
-    this.load_cluster()
+    this.on_refresh()
   },
   methods:{
+    on_refresh(){
+      this.all_cluster=[]
+      this.loading=true
+      this.load_cluster().then(()=>this.loading=false)
+    },
     on_cluster_click(){
       this.$refs.EditClusterRef.init_data()
     },

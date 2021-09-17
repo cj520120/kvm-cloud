@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_storage_click">创建存储池</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新存储池</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="all_storage" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="all_storage" style="width: 100%">
                 <el-table-column type="expand">
                   <template slot-scope="props">
                     <div>
@@ -124,13 +125,20 @@ export default {
   components:{Top,Menu,EditStorage},
   data(){
     return {
-      menuIndex:"6"
+      menuIndex:"6",
+      loading:true
     }
   },
   created() {
-    this.load_cluster().then(()=>this.load_storage())
+    this.on_refresh()
   },
   methods:{
+    on_refresh(){
+      this.all_cluster=[]
+      this.all_storage=[]
+      this.loading=true
+      this.load_cluster().then(()=>this.load_storage().then(()=>this.loading=false))
+    },
     on_storage_click(){
       this.$refs.EditStorageRef.init_data(this.all_cluster)
     },

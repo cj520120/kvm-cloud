@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_network_click">创建网络</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新网络</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="all_network" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="all_network" style="width: 100%">
                 <el-table-column type="expand">
                   <template slot-scope="props">
                     <div>
@@ -134,13 +135,19 @@ export default {
   components:{Top,Menu,EditNetwork},
   data(){
     return {
-      menuIndex:"3"
+      menuIndex:"3",
+      loading:false
     }
   },
   created() {
-    this.load_cluster().then(()=>this.load_network())
+    this.on_refresh()
   },
   methods:{
+    on_refresh(){
+      this.all_cluster=[]
+      this.all_network=[]
+      this.load_cluster().then(()=>this.load_network()).then(()=>this.loading=false)
+    },
     on_network_click(){
       this.$refs.EditNetworkRef.init_data(this.all_cluster)
     },

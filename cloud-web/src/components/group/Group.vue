@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_group_click">创建群组</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新群组</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="all_groups" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="all_groups" style="width: 100%">
                 <el-table-column
                     label="ID"
                     prop="id"
@@ -62,13 +63,19 @@ export default {
   components:{Top,Menu,EditGroup},
   data(){
     return {
-      menuIndex:"10"
+      menuIndex:"10",
+      loading:false
     }
   },
   created() {
-    this.load_groups()
+    this.on_refresh()
   },
   methods:{
+    on_refresh(){
+      this.all_groups=[]
+      this.loading=true
+      this.load_groups().then(()=>this.loading=false)
+    },
     on_group_click(){
       this.$refs.EditGroupRef.init_data()
     },

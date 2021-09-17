@@ -57,7 +57,7 @@ export default {
               this.loading = false
               if (res.data.code === 0) {
                 this.setToken(res.data.data.token)
-                this.$router.push({path: "/Group"})
+                this.$router.push({path: "/"})
               }
           })
         }else{

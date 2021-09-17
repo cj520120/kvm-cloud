@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :title="title" :visible.sync="dialog_visible"  center width="700px"  :close-on-click-modal="false" :close-on-press-escape="false">
+  <el-dialog  :title="title" :visible.sync="dialog_visible"  center width="700px"  :close-on-click-modal="false" :close-on-press-escape="false">
     <el-form :model="modify" label-position="right" label-width="100px"  :inline="true" class="demo-form-inline">
       <el-form-item label="名称">
         <el-input v-model="modify.name" style="width: 200px" ></el-input>
@@ -46,7 +46,7 @@
         <el-input v-model="modify.dns" style="width: 200px"  placeholder="例:192.168.3.1,8.8.8.8"></el-input>
       </el-form-item>
     </el-form>
-    <div slot="footer">
+    <div slot="footer" style="text-align: right">
       <el-button :loading="loading" type="primary" @click="create_storage">确 定</el-button>
       <el-button @click="dialog_visible = false">取 消</el-button>
     </div>

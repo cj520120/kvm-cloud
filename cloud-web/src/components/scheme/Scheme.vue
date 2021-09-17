@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_scheme_click">创建计算方案</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新计算方案</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="table_scheme" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="table_scheme" style="width: 100%">
                 <el-table-column
                     label="ID"
                     prop="id"
@@ -100,8 +101,8 @@ export default {
       total_size:0,
     }
   },
-  created() {
-    this.load_scheme().then(()=>this.refresh_data())
+  mounted() {
+    this.on_refresh()
   },
   computed:{
     table_scheme(){
@@ -109,6 +110,16 @@ export default {
     }
   },
   methods:{
+    on_refresh(){
+      this.all_scheme=[]
+      this.loading=true
+      this.load_scheme().then(()=>{
+        this.current_page=1
+        this.refresh_data()
+        this.loading=false
+      })
+
+    },
     on_scheme_click(){
       this.$refs.EditSchemeRef.init_data()
     },

@@ -10,12 +10,13 @@
               <el-col :span="24">
                 <div class="grid-content bg-purple-light" style="padding-top: 5px;padding-bottom: 5px">
                   <el-button icon="el-icon-plus" plain type="primary" @click="on_template_click">创建模版</el-button>&nbsp;
+                  <el-button icon="el-icon-refresh" plain type="primary" @click="on_refresh">刷新模版</el-button>
                 </div>
               </el-col>
             </el-row>
             <el-divider></el-divider>
             <div style="display: flex">
-              <el-table ref="filterTable" :data="all_template" style="width: 100%">
+              <el-table v-loading="loading" ref="filterTable" :data="all_template" style="width: 100%">
                 <el-table-column type="expand">
                   <template slot-scope="props">
                     <div>
@@ -110,13 +111,21 @@ export default {
   components:{Top,Menu,EditTemplate},
   data(){
     return {
-      menuIndex:"5"
+      menuIndex:"5",
+      loading:false
     }
   },
   created() {
-    this.load_cluster().then(()=>this.load_category().then(()=>this.load_template()))
+    this.on_refresh()
   },
   methods:{
+    on_refresh(){
+      this.all_cluster=[]
+      this.all_category=[]
+      this.all_template=[]
+      this.loading=true
+      this.load_cluster().then(()=>this.load_category().then(()=>this.load_template().then(()=>this.loading=false)))
+    },
     on_template_click(){
       this.$refs.EditTemplateRef.init_data(this.all_cluster,this.all_category)
     },

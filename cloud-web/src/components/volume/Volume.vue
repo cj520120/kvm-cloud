@@ -226,7 +226,7 @@ export default {
       total_size:0
     }
   },
-  created() {
+  mounted() {
     this.on_search_volume_click()
   },
   computed:{
@@ -288,6 +288,7 @@ export default {
     on_search_volume_click(){
       this.loading=true
       this.load_cluster().then(()=>this.load_storage().then(()=>this.load_instance().then(()=>this.search_volume().then(()=>{
+        this.current_page=1
         this.on_filter_key_change()
         this.init_search_storage()
         this.init_search_instance()

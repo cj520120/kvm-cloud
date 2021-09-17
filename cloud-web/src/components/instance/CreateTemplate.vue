@@ -6,7 +6,7 @@
         <el-input v-model="modify.name"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button :loading="loading" type="primary" :disabled="modify.name==''" @click="ok">确 定</el-button>
+        <el-button type="primary" :disabled="modify.name==''" @click="ok">确 定</el-button>
         <el-button @click="dialog_visible = false" >取 消</el-button>
       </el-form-item>
     </el-form>
@@ -24,7 +24,6 @@ export default {
         name:""
       },
       title:"",
-      loading:false,
       dialog_visible:false
     }
   },
@@ -32,20 +31,26 @@ export default {
     init_data(instance){
       this.title=`${instance.description}-创建模版`
       this.dialog_visible=true
-      this.loading=false
       this.modify.id=instance.id
       this.modify.description=instance.description
     },
     ok(){
-      this.loading=true
+      const load = this.$loading({
+        lock: true,
+        text: '正在创建模版，该过程需要一段时间，请耐心等待....',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.dialog_visible=false
       this.post_data(`/management/vm/template`, this.modify).then(res => {
-        this.loading=false
+        load.close()
         if (res.data.code === 0) {
           this.$emit("on_modify", res.data.data)
           this.dialog_visible = false
+        }else{
+          this.dialog_visible=true
         }
       })
-      this.dialog_visible=true
     }
   }
 }
