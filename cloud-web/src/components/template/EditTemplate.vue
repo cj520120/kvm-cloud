@@ -14,7 +14,7 @@
         </el-option>
       </el-select>
       </el-form-item>
-      <el-form-item label="集群">
+      <el-form-item label="系统类型">
         <el-select v-model="modify.osCategoryId">
           <el-option
               v-for="category in all_category"
