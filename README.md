@@ -8,6 +8,7 @@
     6、支持模版维护，用于快速创建VM
     7、简单群组功能
     8、虚拟机IP自动管理
+    9、多网卡支持
 ### 操作系统
 Linux
 ### SELinux配置
@@ -155,11 +156,9 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 7、安装nginx，配置Route-VM和Console-VM下载地址,并在页面完成模版配置
 
 
-![](images/console.png)
+![](images/template.png)
 
-
-![](images/route.png)
-
+ 
 
 8、创建网络
 
@@ -185,10 +184,8 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 12、Console VM	负责Vnc连接、Route VM负责DHCP下发
 
 
-![](images/vm.png)
 
-
-![](images/vm-2.png)
+![](images/route.png)
 
 
 13、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动
@@ -204,3 +201,43 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 ![](images/create-vm.png)
 
+
+![](images/vm.png)
+
+### 相关问题
+
+1、关于找不到配置文件问题导致数据库连接问题
+```
+server.properties 和 client.properties 内容分别为management和agent项目下的application.properties的文件，运行时自行修改名称
+```
+2、关于备份与恢复
+```$xslt
+对数据库和存储池进行完整备份，恢复时如果需要修改存储池IP，请调整tbl_storage_info标中storage_host的主机地址即可；
+数据无价，建议对虚拟机中的数据进行备份
+```
+3、关于网络隔离
+```$xslt
+目前不支持自动创建隔离网络，可以通过创建两个桥接网络的方式进行隔离,大致步骤如下:
+    1)、通过eth0创建桥接网络br0
+    2)、通过br0创建vlan网络(例如br0.2)
+    3)、通过创建的vlan再次创建桥接网络(例如br2)
+    4)、在管理界面初始化网络br2
+    5)、等待该网络的console和route虚拟机初始化完成
+    6)、创建一台br0的网络的跳板虚拟机
+    7)、为该跳板机附加br2对应的网络
+    8)、外部访问vlan所对应的虚拟机，可通过该跳板机进行访问
+```
+4、个别windows系统无法找到引导的问题
+```$xslt
+    1)、首先确认创建的ISO系统类型是否正确
+    2)、如果确认系统类型没有问题，可以通过老毛桃做一个PE的ISO镜像，在创建系统的时候可以通过PE镜像创建，然后进入PE系统，在页面上卸载光盘，重新挂载你要安装的操作系统，然后通过PE安装就可以正常安装了
+```
+5、windows系统附加磁盘不识别问题
+```$xslt
+    windows没有virto的驱动，请安装virtio-win-0.1.185.iso驱动
+```
+6、服务器掉电重启后处理
+```$xslt
+   1、服务器掉电重启后，请在页面手动关闭所有自己创建的虚拟机，然后重新启动，系统虚拟机有自动检测重启功能，无需处理
+   2、掉电可能引起虚拟磁盘损坏，如无法启动，可通过qemu-img check检查并进行相应修复
+```
