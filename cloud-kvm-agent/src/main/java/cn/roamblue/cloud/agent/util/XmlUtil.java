@@ -44,6 +44,7 @@ public final class XmlUtil {
         if (cpu.getSpeed() > 0) {
             sb.append("<cputune><shares>").append(cpu.getSpeed()).append("</shares></cputune>");
         }
+        sb.append("<cpu><topology sockets='2' cores='4' threads='8'/></cpu>");
         return sb.toString();
     }
 

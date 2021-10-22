@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -118,21 +119,11 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
             list.forEach(this::refreshHost);
             list = list.stream().filter(t -> (t.getHostAllocationCpu() + cpu < t.getHostCpu()) && (t.getHostAllocationMemory() + memory < t.getHostMemory()) && t.getHostStatus().equals(HostStatus.READY))
                     .collect(Collectors.toList());
-            list.sort((o1, o2) -> {
-                long memory1 = o1.getHostMemory() - o1.getHostAllocationMemory();
-                long memory2 = o2.getHostMemory() - o2.getHostAllocationMemory();
-                int result = Long.compare(memory1, memory2);
-                if (result == 0) {
-                    int cpu1 = o1.getHostCpu() - o1.getHostAllocationCpu();
-                    int cpu2 = o2.getHostCpu() - o2.getHostAllocationCpu();
-                    result = Integer.compare(cpu1, cpu2);
-                }
-                return result;
-            });
+            Collections.shuffle(list);
             if (list.isEmpty()) {
                 throw new CodeException(ErrorCode.HOST_NOT_SPACE, localeMessage.getMessage("ALLOCATE_HOST_NOT_RESOURCE", "主机未就绪或资源不足"));
             }
-            return list.get(list.size() - 1);
+            return list.get(0);
         }
     }
 
