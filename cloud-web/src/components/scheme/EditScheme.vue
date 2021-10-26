@@ -10,8 +10,17 @@
         </el-input>
 
       </el-form-item>
-      <el-form-item label="内核数" prop="cpu">
+      <el-form-item label="CPU" prop="cpu">
         <el-input-number v-model="modify.cpu" :max="100" :min="1"></el-input-number>
+      </el-form-item>
+      <el-form-item label="套接字" prop="socket">
+        <el-input-number v-model="modify.socket" :max="10" :min="1"></el-input-number>
+      </el-form-item>
+      <el-form-item label="核心" prop="core">
+        <el-input-number v-model="modify.core" :max="10" :min="1"></el-input-number>
+      </el-form-item>
+      <el-form-item label="线程" prop="threads">
+        <el-input-number v-model="modify.threads" :max="10" :min="1"></el-input-number>
       </el-form-item>
       <el-form-item label="主频" prop="memory">
         <el-input v-model="modify.speed">
@@ -37,6 +46,9 @@ export default {
         memory: "",
         cpu: 1,
         speed: 0,
+        socket: 4,
+        core: 2,
+        threads: 2,
       },
       dialog_visible: false,
       title: ""
@@ -51,12 +63,18 @@ export default {
         this.modify.memory=scheme.memory
         this.modify.cpu=scheme.cpu
         this.modify.speed=scheme.speed
+        this.modify.socket=scheme.socket
+        this.modify.core=scheme.core
+        this.modify.threads=scheme.threads
       }else{
         this.title="创建计算方案"
         this.modify.id=0
         this.modify.name=""
         this.modify.memory="1024"
         this.modify.cpu=1
+        this.modify.socket=4
+        this.modify.core=2
+        this.modify.threads=2
         this.modify.speed=0
       }
       this.dialog_visible=true

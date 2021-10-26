@@ -40,7 +40,7 @@ Vue.mixin({
     },
     data() {
         return {
-            base_api_uri: process.env.NODE_ENV === 'production' ? "." : '//192.168.2.219:8080',
+            base_api_uri: process.env.NODE_ENV === 'production' ? "." : '//127.0.0.1:8080',
             base_image_uri: ""
         }
     },

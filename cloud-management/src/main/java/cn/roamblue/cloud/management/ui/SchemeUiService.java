@@ -31,9 +31,11 @@ public interface SchemeUiService {
      * @param cpu
      * @param speed
      * @param memory
-     * @return
+     * @param socket
+     * @param core
+     * @param threads
      */
-    ResultUtil<CalculationSchemeInfo> createScheme(String name, int cpu, int speed, long memory);
+    ResultUtil<CalculationSchemeInfo> createScheme(String name, int cpu, int speed, long memory,int socket,int core,int threads);
 
     /**
      * 销毁计算方案

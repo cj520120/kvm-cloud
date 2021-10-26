@@ -39,6 +39,18 @@ public class CalculationSchemeInfo implements Serializable {
      */
     private int speed;
     /**
+     * 套接字数量
+     */
+    private int socket;
+    /**
+     * 每个套接字核心数
+     */
+    private  int core;
+    /**
+     * 超线程数
+     */
+    private int threads;
+    /**
      * 创建时间
      */
     private Date createTime;

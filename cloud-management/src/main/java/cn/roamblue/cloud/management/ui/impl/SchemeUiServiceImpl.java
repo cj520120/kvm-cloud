@@ -32,7 +32,7 @@ public class SchemeUiServiceImpl extends AbstractUiService implements SchemeUiSe
 
     @Rule(permissions = "scheme.create")
     @Override
-    public ResultUtil<CalculationSchemeInfo> createScheme(String name, int cpu, int speed, long memory) {
+    public ResultUtil<CalculationSchemeInfo> createScheme(String name, int cpu, int speed, long memory,int socket,int core,int threads) {
         if (StringUtils.isEmpty(name)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CALCULATION_SCHEME_NAME_EMPTY", "名称不能为空"));
         }
@@ -42,7 +42,7 @@ public class SchemeUiServiceImpl extends AbstractUiService implements SchemeUiSe
         if (speed < 0) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CALCULATION_SCHEME_CPU_SPEED_MUST_GT_0", "CPU主频必须大于等于0(当为0时表示系统默认)"));
         }
-        return super.call(() -> calculationSchemeService.createCalculationScheme(name, cpu, speed, memory));
+        return super.call(() -> calculationSchemeService.createCalculationScheme(name, cpu, speed, memory,socket,core,threads));
     }
 
     @Rule(permissions = "scheme.destroy")

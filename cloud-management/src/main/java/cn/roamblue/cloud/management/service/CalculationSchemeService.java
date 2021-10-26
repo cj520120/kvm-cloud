@@ -37,9 +37,12 @@ public interface CalculationSchemeService {
      * @param cpu
      * @param speed
      * @param memory
+     * @param socket
+     * @param core
+     * @param threads
      * @return
      */
-    CalculationSchemeInfo createCalculationScheme(String name, int cpu, int speed, long memory);
+    CalculationSchemeInfo createCalculationScheme(String name, int cpu, int speed, long memory,int socket,int core,int threads);
 
     /**
      * 销毁计算方案

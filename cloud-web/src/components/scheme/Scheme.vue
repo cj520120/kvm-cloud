@@ -28,7 +28,7 @@
                     width="200">
                 </el-table-column>
                 <el-table-column
-                    label="内核数"
+                    label="CPU"
                     prop="cpu"
                     width="100">
                 </el-table-column>
@@ -39,6 +39,22 @@
                   <template slot-scope="scope">
                     <span style="margin-left: 10px">{{ scope.row.speed>0?scope.row.speed:"-" }}</span>
                   </template>
+                </el-table-column>
+
+                <el-table-column
+                    label="套接字"
+                    prop="socket"
+                    width="100">
+                </el-table-column>
+                <el-table-column
+                    label="核心"
+                    prop="core"
+                    width="100">
+                </el-table-column>
+                <el-table-column
+                    label="线程"
+                    prop="threads"
+                    width="100">
                 </el-table-column>
                 <el-table-column
                     label="内存"

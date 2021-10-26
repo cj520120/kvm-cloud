@@ -229,7 +229,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
             kvm.setId(vm.getId());
             kvm.setDescription(vm.getVmDescription());
             kvm.setName(vm.getVmName());
-            kvm.setCpu(VmModel.Cpu.builder().cpu(calculationSchemeInfo.getCpu()).speed(calculationSchemeInfo.getSpeed()).build());
+            kvm.setCpu(VmModel.Cpu.builder().cpu(calculationSchemeInfo.getCpu()).speed(calculationSchemeInfo.getSpeed()).socket(calculationSchemeInfo.getSocket()).core(calculationSchemeInfo.getCore()).threads(calculationSchemeInfo.getThreads()).build());
             kvm.setMemory(VmModel.Memory.builder().memory(calculationSchemeInfo.getMemory()).build());
             kvm.setPassword(vm.getVncPassword());
             this.initDeviceInfo(vm, kvm, calculationSchemeInfo);

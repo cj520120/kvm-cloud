@@ -31,6 +31,13 @@ public class CalculationSchemeEntity {
     private Long schemeMemory;
     @TableField("scheme_cpu_speed")
     private Integer schemeCpuSpeed;
+
+    @TableField("scheme_cpu_socket")
+    private Integer schemeCpuSocket;
+    @TableField("scheme_cpu_core")
+    private Integer schemeCpuCore;
+    @TableField("scheme_cpu_threads")
+    private Integer schemeCpuThreads;
     @TableField("create_time")
     private Date createTime;
 }

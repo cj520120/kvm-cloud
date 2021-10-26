@@ -54,6 +54,9 @@ public class CalculationSchemeController {
      * @param cpu    内核
      * @param speed  频率
      * @param memory 内存
+     * @param socket 套接字数量
+     * @param core 每个套接字核心数
+     * @param threads 线程数
      * @return
      */
     @Login
@@ -62,9 +65,12 @@ public class CalculationSchemeController {
             @RequestParam("name") String name,
             @RequestParam("cpu") int cpu,
             @RequestParam("speed") int speed,
-            @RequestParam("memory") long memory
+            @RequestParam("memory") long memory,
+            @RequestParam("socket") int socket,
+            @RequestParam("core") int core,
+            @RequestParam("threads") int threads
     ) {
-        return schemeUiService.createScheme(name, cpu, speed, memory);
+        return schemeUiService.createScheme(name, cpu, speed, memory,socket,core,threads);
     }
 
     /**

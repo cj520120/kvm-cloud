@@ -44,6 +44,10 @@ public final class XmlUtil {
         if (cpu.getSpeed() > 0) {
             sb.append("<cputune><shares>").append(cpu.getSpeed()).append("</shares></cputune>");
         }
+        if(cpu.getSocket()>0&&cpu.getCore()>0&& cpu.getThreads()>0){
+
+            sb.append("<cpu><topology sockets='").append(cpu.getSocket()).append("' cores='").append(cpu.getCore()).append("' threads='").append(cpu.getThreads()).append("'/></cpu>");
+        }
         sb.append("<cpu><topology sockets='2' cores='4' threads='8'/></cpu>");
         return sb.toString();
     }

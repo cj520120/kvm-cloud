@@ -101,7 +101,8 @@ public class VmModel implements Serializable {
     }
 
     /**
-     * Cpu
+     * Cpu 最大数量为 sockets*core*threads
+     * 
      */
     @Builder
     @Data
@@ -116,6 +117,18 @@ public class VmModel implements Serializable {
          * CPU速率
          */
         private int speed;
+        /**
+         * 插槽
+         */
+        private int socket;
+        /**
+         * 每个插槽核心数
+         */
+        private  int core;
+        /**
+         * 超线程数
+         */
+        private int threads;
     }
 
     /**

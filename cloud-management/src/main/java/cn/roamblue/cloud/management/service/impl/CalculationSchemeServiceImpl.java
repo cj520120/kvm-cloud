@@ -56,6 +56,9 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
                 .memory(entity.getSchemeMemory())
                 .name(entity.getSchemeName())
                 .speed(entity.getSchemeCpuSpeed())
+                .socket(entity.getSchemeCpuSocket())
+                .core(entity.getSchemeCpuCore())
+                .threads(entity.getSchemeCpuThreads())
                 .createTime(entity.getCreateTime())
                 .build();
     }
@@ -66,18 +69,24 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
                 .cpu(1)
                 .memory(512000L)
                 .speed(1000)
+                .socket(1)
+                .core(1)
+                .threads(1)
                 .name("default")
                 .createTime(new Date())
                 .build();
     }
 
     @Override
-    public CalculationSchemeInfo createCalculationScheme(String name, int cpu, int speed, long memory) {
+    public CalculationSchemeInfo createCalculationScheme(String name, int cpu, int speed, long memory,int socket,int core,int threads) {
 
         CalculationSchemeEntity entity = CalculationSchemeEntity.builder()
                 .schemeName(name)
                 .schemeCpu(cpu)
                 .schemeCpuSpeed(speed)
+                .schemeCpuSocket(socket)
+                .schemeCpuCore(core)
+                .schemeCpuThreads(threads)
                 .schemeMemory(memory * 1024)
                 .createTime(new Date())
                 .build();
