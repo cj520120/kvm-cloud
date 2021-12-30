@@ -110,7 +110,7 @@ vi /etc/sysconfig/network-scripts/ifcfg-eth0
 #### 4、VNC 配置  
 ```sh
 vi /etc/libvirt/qemu.conf
-    vnc_listen=0.0.0.0
+    vnc_listen="0.0.0.0"
 ```
 #### 5、Libvirtd配置
 ```sh
