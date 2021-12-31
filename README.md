@@ -17,6 +17,12 @@ setenforce 0
 vi /etc/selinux/config
 SELINUX=permissive
 ```
+### SELinux配置
+```sh
+vim /etc/sysctl.conf 
+net.ipv4.ip_forward=1               # 设置转发并保存
+sysctl –p
+```
 ### 防火墙配置
 ```sh
 systemctl stop firewalld
@@ -253,3 +259,4 @@ server.properties 和 client.properties 内容分别为management和agent项目�
 |:----:|:------:|:----------:|:------:|:-------|
 |pcgc-cn|微信|199.99|2021-11-12|| 
 |Phil|Gitee|50|	2021-12-16|整体架构及代码简洁易懂，适合用来入门学习，忘持续改进，更上一层楼。| 
+|fwt|支付宝|100|2021-12-30|| 
