@@ -48,7 +48,7 @@ public class TemplateInitializeTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 5000;
+        return this.config.getTemplateCheckInterval();
     }
 
     @Override

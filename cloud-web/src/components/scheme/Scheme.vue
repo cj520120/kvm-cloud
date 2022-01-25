@@ -163,18 +163,18 @@ export default {
       this.page_size=page_size
       this.refresh_data()
     },
-    refresh_data(){
-      let nCount=0;
-      this.all_scheme.forEach((item,index)=>{
+    refresh_data: function () {
+      let nCount = 0;
+      this.all_scheme.forEach((item, index) => {
         nCount++;
-        item.isShow=true
-        if(nCount <= this.page_size*(this.current_page-1)
-            || nCount>this.page_size*this.current_page){
-          item.isShow=false
+        item.isShow = true
+        if (nCount <= this.page_size * (this.current_page - 1)
+            || nCount > this.page_size * this.current_page) {
+          item.isShow = false
         }
         this.$set(this.all_scheme, index, item)
       })
-      this.total_size=nCount
+      this.total_size = nCount
     }
 
   }

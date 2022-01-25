@@ -30,9 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class VolumeServiceImpl extends AbstractService implements VolumeService {
     @Autowired
-    private VolumeMapper volumeMapper;
-    @Autowired
-    private HostMapper hostMapper;
+    private VolumeMapper volumeMapper; 
     @Autowired
     private ClusterMapper clusterMapper;
     @Autowired

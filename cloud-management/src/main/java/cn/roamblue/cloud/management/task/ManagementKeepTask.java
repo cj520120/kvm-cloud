@@ -18,7 +18,7 @@ public class ManagementKeepTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 5000;
+        return this.config.getManagerKeepInterval();
     }
 
     @Override

@@ -5,7 +5,6 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.ui.VmUiService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
  * @author chenjun
  */
 @RestController
-@Slf4j
 public class VmController {
     @Autowired
     private VmUiService vmUiService;

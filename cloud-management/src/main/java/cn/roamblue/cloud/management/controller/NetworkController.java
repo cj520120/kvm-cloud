@@ -5,7 +5,6 @@ import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.bean.NetworkInfo;
 import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.ui.NetworkUiService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +19,6 @@ import java.util.List;
  * @author chenjun
  */
 @RestController
-@Slf4j
 public class NetworkController {
     @Autowired
     private NetworkUiService networkUiService;

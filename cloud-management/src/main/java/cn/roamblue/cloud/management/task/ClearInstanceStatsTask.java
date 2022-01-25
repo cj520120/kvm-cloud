@@ -20,7 +20,7 @@ public class ClearInstanceStatsTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 10 * 60 * 1000;
+        return this.config.getVmStatsCleanInterval();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class ClearInstanceStatsTask extends AbstractTask {
     @Override
     protected void call() {
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.DATE, -1);
+        c.add(Calendar.DATE, -this.config.getVmStatsExpireDay());
         QueryWrapper<VmStaticsEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.lt("create_time", c.getTime());
         vmStatsMapper.delete(queryWrapper);

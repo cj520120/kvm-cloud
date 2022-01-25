@@ -67,17 +67,24 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     @Override
     public void destroyStorage(String name) {
         super.execute(connect -> {
-            try {
-                StoragePool storagePool = connect.storagePoolLookupByName(name);
-                storagePool.destroy();
-                return null;
-            } catch (LibvirtException err) {
-                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_STORAGE_POOL)) {
-                    return null;
-                } else {
-                    throw err;
-                }
-            }
+        	while(true) {
+	            try {
+	                StoragePool storagePool = connect.storagePoolLookupByName(name);
+	                if(storagePool==null) {
+	                	break;
+	                }
+	                storagePool.destroy();
+	                storagePool.undefine();
+	                break;
+	            } catch (LibvirtException err) {
+	                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_STORAGE_POOL)) {
+	                    break;
+	                } else {
+	                    throw err;
+	                }
+	            }
+        	}
+            return null;
         });
     }
 
@@ -105,8 +112,12 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
                 stroageBuilderStrategy.find(type).initialize(connect,name, uri, path, target);
                 log.info("create storage.name={} uri={} path={} target={}", name, uri, path, target);
             }
-            StoragePool storagePool = connect.storagePoolLookupByName(name);
+            StoragePool storagePool = connect.storagePoolLookupByName(name); 
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();
+            if(storagePoolInfo.state!=StoragePoolInfo.StoragePoolState.VIR_STORAGE_POOL_RUNNING) { 
+            	storagePool.setAutostart(1);
+            	storagePool.create(1);
+            }
             return StorageModel.builder().name(name)
                     .state(storagePoolInfo.state.toString())
                     .capacity(storagePoolInfo.capacity)

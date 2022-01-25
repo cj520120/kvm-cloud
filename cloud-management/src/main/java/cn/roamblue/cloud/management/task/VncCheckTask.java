@@ -31,7 +31,7 @@ public class VncCheckTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 5000;
+        return this.config.getConsoleCheckInterval();
     }
 
     @Override

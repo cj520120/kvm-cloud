@@ -19,6 +19,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class VmNetworkInfo implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 网卡ID
      */
     private Integer id;

@@ -1,5 +1,17 @@
 package cn.roamblue.cloud.management.task;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -12,21 +24,13 @@ import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.data.mapper.StorageMapper;
 import cn.roamblue.cloud.management.data.mapper.VolumeMapper;
 import cn.roamblue.cloud.management.service.AgentService;
-import cn.roamblue.cloud.management.service.HostService;
 import cn.roamblue.cloud.management.service.LockService;
-import cn.roamblue.cloud.management.service.StorageService;
-import cn.roamblue.cloud.management.util.*;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.roamblue.cloud.management.util.ClusterStatus;
+import cn.roamblue.cloud.management.util.HostStatus;
+import cn.roamblue.cloud.management.util.LockKeyUtil;
+import cn.roamblue.cloud.management.util.StorageStatus;
+import cn.roamblue.cloud.management.util.VolumeStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 磁盘检测并更新任务
@@ -35,13 +39,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class VolumeCheckTask extends AbstractTask {
-
-    @Autowired
-    private HostService hostService;
-
-    @Autowired
-    private StorageService storagePoolService;
+public class VolumeCheckTask extends AbstractTask { 
 
     @Autowired
     private AgentService agentService;
@@ -59,7 +57,7 @@ public class VolumeCheckTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 1000 * 60 * 10;
+        return this.config.getVolumeCheckInterval();
     }
 
     @Override

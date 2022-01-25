@@ -5,7 +5,6 @@ import cn.roamblue.cloud.management.service.InstanceService;
 import cn.roamblue.cloud.management.util.SpringContextUtils;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
-import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
@@ -20,7 +19,6 @@ import java.nio.ByteBuffer;
 /**
  * @author chenjun
  */
-@Slf4j
 @ServerEndpoint(value = "/vnc/connect/{id}")
 @Component
 public class VncController {

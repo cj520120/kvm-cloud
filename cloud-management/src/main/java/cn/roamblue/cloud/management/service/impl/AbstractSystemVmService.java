@@ -112,7 +112,6 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
             String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + vmNetworkInfo.getDevice();
             String networkConfig = sb.toString();
             log.info("system VM[{}] begin write network config.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
-            long startTime = System.currentTimeMillis();
             do {
                 ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, networkConfig);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
@@ -121,9 +120,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                 } else if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND || resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
                     throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "] init file.vm not start");
                 }
-                if ((System.currentTimeMillis() - startTime) > 3 * 60 * 1000) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "[" + this.getType() + "] init file.write timeout");
-                }
+                log.info("system VM[{}] wait start.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -161,13 +158,13 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                         continue;
                     } else if (instance.getVmStatus().equals(VmStatus.STOPPED)) {
                         super.startVm(instance.getId(), 0);
-                    } else if (instance.getVmStatus().equals(VmStatus.RUNNING)) {
+                    } else if (instance.getVmStatus().equals(VmStatus.RUNNING)||instance.getVmStatus().equals(VmStatus.STARING)) {
 
                         log.debug("detect system VM running status.Type={} Network={} HostId={}", this.getType(), network.getId(), instance.getHostId());
                         HostInfo hostInfo = this.hostService.findHostById(instance.getHostId());
                         ResultUtil<VmInfoModel> resultUtil = this.agentService.getInstance(hostInfo.getUri(), instance.getVmName());
                         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                            log.debug("detect that the system VM runs successfully.Type={} Network={}", this.getType(), network.getId());
+                            log.debug("detect that the system VM run successfully.Type={} Network={}", this.getType(), network.getId());
                         } else if (resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
                             log.warn("failed to detect system VM running status: VM is not running.begin reboot Type={} Network={} VM={}", this.getType(), network.getId(), instance.getVmName());
                             super.reboot(instance.getId(), true);

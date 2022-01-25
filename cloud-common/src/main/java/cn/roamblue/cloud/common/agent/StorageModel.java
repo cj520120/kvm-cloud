@@ -18,6 +18,10 @@ import java.io.Serializable;
 @Builder
 public class StorageModel implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 名称
      */
     private String name;

@@ -19,6 +19,10 @@ import java.io.Serializable;
 @Builder
 public class VmInfoModel implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 虚拟机最大内存
      */
     public long maxMem;

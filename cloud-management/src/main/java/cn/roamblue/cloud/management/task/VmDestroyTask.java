@@ -1,19 +1,23 @@
 package cn.roamblue.cloud.management.task;
 
-import cn.roamblue.cloud.management.data.entity.VmEntity;
-import cn.roamblue.cloud.management.data.mapper.StorageMapper;
-import cn.roamblue.cloud.management.data.mapper.VmMapper;
-import cn.roamblue.cloud.management.service.*;
-import cn.roamblue.cloud.management.util.LockKeyUtil;
-import cn.roamblue.cloud.management.util.VmStatus;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
+import cn.roamblue.cloud.management.data.entity.VmEntity;
+import cn.roamblue.cloud.management.data.mapper.VmMapper;
+import cn.roamblue.cloud.management.service.LockService;
+import cn.roamblue.cloud.management.service.NetworkService;
+import cn.roamblue.cloud.management.service.VncService;
+import cn.roamblue.cloud.management.service.VolumeService;
+import cn.roamblue.cloud.management.util.LockKeyUtil;
+import cn.roamblue.cloud.management.util.VmStatus;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 销毁超过等待期的Vm
@@ -24,13 +28,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class VmDestroyTask extends AbstractTask {
     @Autowired
-    private VmMapper vmMapper;
-    @Autowired
-    private AllocateService allocateService;
-    @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private AgentService agentService;
+    private VmMapper vmMapper; 
     @Autowired
     private NetworkService networkService;
     @Autowired
@@ -42,7 +40,7 @@ public class VmDestroyTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 60000;
+        return this.config.getVmDestoryCheckInterval();
     }
 
     @Override
@@ -52,7 +50,7 @@ public class VmDestroyTask extends AbstractTask {
 
     @Override
     protected void call() {
-        long removeTime = System.currentTimeMillis() - 30 * 60 * 1000;
+        long removeTime = System.currentTimeMillis() - this.config.getVmDestoryExpireSeconds() * 1000;
         QueryWrapper<VmEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("vm_status", VmStatus.DESTROY);
         wrapper.lt("remove_time", new Date(removeTime));

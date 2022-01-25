@@ -18,6 +18,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class VmStaticsModel implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 虚拟机名称
      */
     private String name;

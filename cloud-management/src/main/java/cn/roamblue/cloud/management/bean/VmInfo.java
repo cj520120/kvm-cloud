@@ -19,6 +19,10 @@ import java.util.Date;
 @Builder
 public class VmInfo implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 虚拟机ID
      */
     private int id;

@@ -10,11 +10,7 @@ import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.mapper.ClusterMapper;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.data.mapper.StorageMapper;
-import cn.roamblue.cloud.management.data.mapper.VolumeMapper;
 import cn.roamblue.cloud.management.service.AgentService;
-import cn.roamblue.cloud.management.service.HostService;
-import cn.roamblue.cloud.management.service.LockService;
-import cn.roamblue.cloud.management.service.StorageService;
 import cn.roamblue.cloud.management.util.ClusterStatus;
 import cn.roamblue.cloud.management.util.HostStatus;
 import cn.roamblue.cloud.management.util.StorageStatus;
@@ -35,30 +31,21 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class HostStorageCheckTask extends AbstractTask {
-
-    @Autowired
-    private HostService hostService;
-
-    @Autowired
-    private StorageService storagePoolService;
+ 
 
     @Autowired
     private AgentService agentService;
 
     @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private VolumeMapper volumeMapper;
+    private StorageMapper storageMapper; 
     @Autowired
     private HostMapper hostMapper;
     @Autowired
-    private ClusterMapper clusterMapper;
-    @Autowired
-    private LockService lockService;
+    private ClusterMapper clusterMapper; 
 
     @Override
     protected int getInterval() {
-        return 60000;
+        return this.config.getHostStorageCheckInterval();
     }
 
     @Override

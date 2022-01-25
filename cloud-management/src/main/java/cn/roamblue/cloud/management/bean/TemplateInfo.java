@@ -19,6 +19,10 @@ import java.util.Date;
 @Builder
 public class TemplateInfo implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * id
      */
     private int id;

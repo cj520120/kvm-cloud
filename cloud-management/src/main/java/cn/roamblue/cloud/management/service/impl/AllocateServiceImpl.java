@@ -45,7 +45,6 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
 
     private void refreshHost(HostEntity hostEntity) {
         ClusterEntity clusterEntity = clusterMapper.selectById(hostEntity.getClusterId());
-
         if (clusterEntity != null) {
             float overCpu = clusterEntity.getOverCpu();
             float overMemory = clusterEntity.getOverMemory();
@@ -55,11 +54,11 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
         List<CalculationSchemeInfo> calculationSchemeInfoList = calculationSchemeService.listCalculationScheme();
         if (calculationSchemeInfoList != null && !calculationSchemeInfoList.isEmpty()) {
             Map<Integer, CalculationSchemeInfo> map = calculationSchemeInfoList.stream().collect(Collectors.toMap(CalculationSchemeInfo::getId, Function.identity()));
-            List<VmEntity> instanceList = vmMapper.findByHostId(hostEntity.getId()).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)).collect(Collectors.toList());
+            List<VmEntity> instanceList = vmMapper.findByHostId(hostEntity.getId()).stream().filter(t -> t.getVmStatus().equals(VmStatus.RUNNING)||t.getVmStatus().equals(VmStatus.STARING)).collect(Collectors.toList());
             int totalCpu = 0;
             long totalMemory = 0L;
-            for (VmEntity instanceEntity : instanceList) {
-                CalculationSchemeInfo calculationSchemeInfo = map.get(instanceEntity.getCalculationSchemeId());
+            for (VmEntity vm : instanceList) { 
+                CalculationSchemeInfo calculationSchemeInfo = map.get(vm.getCalculationSchemeId());
                 if (calculationSchemeInfo != null) {
                     totalCpu += calculationSchemeInfo.getCpu();
                     totalMemory += calculationSchemeInfo.getMemory();

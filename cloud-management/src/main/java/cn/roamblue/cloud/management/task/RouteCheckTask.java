@@ -30,7 +30,7 @@ public class RouteCheckTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 5000;
+        return this.config.getRouteCheckInterval();
     }
 
     @Override

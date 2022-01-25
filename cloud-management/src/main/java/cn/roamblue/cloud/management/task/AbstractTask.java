@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.task;
 
+import cn.roamblue.cloud.management.config.ApplicaionConfig;
 import cn.roamblue.cloud.management.service.ManagementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ public abstract class AbstractTask {
     private ScheduledExecutorService executorService;
     @Autowired
     private ManagementService managementService;
+    @Autowired
+    protected ApplicaionConfig config;
 
     /**
      * 获取任务间隔时间毫秒
@@ -35,7 +38,7 @@ public abstract class AbstractTask {
 
     @PostConstruct
     public void run() {
-        executorService.scheduleWithFixedDelay(this::schedule, this.getInterval(), this.getInterval(), TimeUnit.MILLISECONDS);
+        executorService.scheduleWithFixedDelay(this::schedule, this.getInterval(), this.getInterval(), TimeUnit.SECONDS);
     }
 
     public void schedule() {

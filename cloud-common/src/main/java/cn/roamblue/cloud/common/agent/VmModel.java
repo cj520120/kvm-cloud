@@ -16,6 +16,10 @@ import java.util.List;
 @Data
 public class VmModel implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * ID
      */
     private int id;
@@ -65,6 +69,10 @@ public class VmModel implements Serializable {
     @AllArgsConstructor
     public static class UpdateDisk implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * 是否挂载
          */
         private boolean attach;
@@ -87,6 +95,10 @@ public class VmModel implements Serializable {
     @AllArgsConstructor
     public static class UpdateNetwork implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * 是否挂载
          */
         private boolean attach;
@@ -110,6 +122,10 @@ public class VmModel implements Serializable {
     @AllArgsConstructor
     public static class Cpu implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * CPU核数
          */
         private int cpu;
@@ -140,6 +156,10 @@ public class VmModel implements Serializable {
     @Builder
     public static class Disk implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * 路径
          */
         private String path;
@@ -159,6 +179,10 @@ public class VmModel implements Serializable {
     @AllArgsConstructor
     public static class Memory implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * 内存大小 Kib
          */
         private long memory;
@@ -173,6 +197,10 @@ public class VmModel implements Serializable {
     @NoArgsConstructor
     public static class Network implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * mac地址
          */
         private String mac;
@@ -202,6 +230,10 @@ public class VmModel implements Serializable {
     @Builder
     public static class RootDisk implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * 路径
          */
         private String path;
@@ -215,6 +247,10 @@ public class VmModel implements Serializable {
     @AllArgsConstructor
     public static class UpdateCdRoom implements Serializable {
         /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		/**
          * 虚拟机名称
          */
         private String name;

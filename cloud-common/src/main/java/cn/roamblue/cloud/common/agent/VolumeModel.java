@@ -18,6 +18,10 @@ import java.io.Serializable;
 @Builder
 public class VolumeModel implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 存储池
      */
     private String storage;

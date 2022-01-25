@@ -5,14 +5,10 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
-import cn.roamblue.cloud.management.data.mapper.StorageMapper;
-import cn.roamblue.cloud.management.data.mapper.VolumeMapper;
 import cn.roamblue.cloud.management.service.AgentService;
-import cn.roamblue.cloud.management.service.HostService;
-import cn.roamblue.cloud.management.service.LockService;
-import cn.roamblue.cloud.management.service.StorageService;
 import cn.roamblue.cloud.management.util.HostStatus;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,32 +20,19 @@ import java.util.stream.Collectors;
  * 更新主机信息
  *
  * @author chenjun
- */
-@Slf4j
+ */ 
 @Component
+@Slf4j
 public class HostCheckTask extends AbstractTask {
-
-    @Autowired
-    private HostService hostService;
-
-    @Autowired
-    private StorageService storagePoolService;
 
     @Autowired
     private AgentService agentService;
 
     @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private VolumeMapper volumeMapper;
-    @Autowired
     private HostMapper hostMapper;
-    @Autowired
-    private LockService lockService;
-
     @Override
     protected int getInterval() {
-        return 10000;
+        return this.config.getHostCheckInterval();
     }
 
     @Override
@@ -72,6 +55,8 @@ public class HostCheckTask extends AbstractTask {
                             .hostMemory(cloudHostInfo.getMemory())
                             .build();
                     hostMapper.updateById(update);
+                    log.info("update host info.uri={} cpu={} memory={}",host.getHostUri(),cloudHostInfo.getCpu(),cloudHostInfo.getMemory());
+                    
                 }
             }
         }

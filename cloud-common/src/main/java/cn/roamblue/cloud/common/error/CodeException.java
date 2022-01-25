@@ -9,7 +9,7 @@ public class CodeException extends RuntimeException {
     static final long serialVersionUID = 1L;
     private final int code;
 
-    public CodeException(ResultUtil resultUtil) {
+    public CodeException(ResultUtil<?> resultUtil) {
         this(resultUtil.getCode(), resultUtil.getMessage());
     }
 

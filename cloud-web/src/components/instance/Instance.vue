@@ -108,7 +108,7 @@
                         <el-dropdown-item :command="bind_instance_dropdown('reboot',scope.row)" v-show="scope.row.status !== 'Destroy'" :disabled="scope.row.status !== 'Running'">
                           <i class="layui-icon layui-icon-refresh-3"></i> 重启实例
                         </el-dropdown-item>
-                        <el-dropdown-item :command="bind_instance_dropdown('stop',scope.row)" v-show="scope.row.status  !== 'Destroy'" :disabled="scope.row.status !== 'Running'">
+                        <el-dropdown-item :command="bind_instance_dropdown('stop',scope.row)" v-show="scope.row.status  !== 'Destroy'" :disabled="!(scope.row.status === 'Running' || scope.row.status === 'Starting')">
                           <i class="layui-icon layui-icon-logout"></i> 停止实例
                         </el-dropdown-item>
                         <el-dropdown-item :command="bind_instance_dropdown('template',scope.row)" v-show="scope.row.status !== 'Destroy'" :disabled="!(scope.row.status === 'Stopped'&&scope.row.type === 'Guest')">

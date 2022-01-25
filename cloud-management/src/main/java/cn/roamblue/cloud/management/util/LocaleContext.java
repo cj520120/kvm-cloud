@@ -9,7 +9,7 @@ import java.util.Locale;
  * @Date: 2021/8/4 下午2:00
  */
 public class LocaleContext {
-    static final ThreadLocal<Locale> context = new ThreadLocal();
+    static final ThreadLocal<Locale> context = new ThreadLocal<>();
 
     public static Locale getLocale() {
         Locale locale = context.get();

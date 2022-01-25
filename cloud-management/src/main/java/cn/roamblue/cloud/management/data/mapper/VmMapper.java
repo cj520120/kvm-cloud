@@ -60,4 +60,13 @@ public interface VmMapper extends BaseMapper<VmEntity> {
      */
     @Update(value = "UPDATE tbl_vm_info set last_update_time=#{lastUpdateTime} where id=#{vmId}")
     int updateLastActiveTime(@Param("vmId") int id, @Param("lastUpdateTime") Date lastUpdateTime);
+    /**
+     * 更新VM最后变更时间
+     *
+     * @param id
+     * @param lastUpdateTime
+     * @return
+     */
+    @Update(value = "UPDATE tbl_vm_info set host_id=#{hostId} , vm_status=#{status} where id=#{vmId}")
+    int updateHostIdAndStatus(@Param("vmId") int id, @Param("hostId") int hostId, @Param("status") String status);
 }

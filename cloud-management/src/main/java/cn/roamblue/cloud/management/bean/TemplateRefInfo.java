@@ -20,6 +20,10 @@ import java.util.Date;
 public class TemplateRefInfo implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * id
      */
     private int id;

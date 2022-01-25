@@ -2,7 +2,6 @@ package cn.roamblue.cloud.management.config;
 
 import cn.roamblue.cloud.management.filter.GsonDateSerializer;
 import com.google.gson.GsonBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,6 @@ import java.text.DateFormat;
 /**
  * @author chenjun
  */
-@Slf4j
 @Configuration
 @EnableConfigurationProperties
 public class WebAutoConfiguration {

@@ -17,7 +17,6 @@ import cn.roamblue.cloud.management.util.TimeUtil;
 import cn.roamblue.cloud.management.util.VmStatus;
 import cn.roamblue.cloud.management.util.VmType;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
-@Slf4j
 @Primary
 @Service
 public class InstanceServiceImpl extends AbstractService implements InstanceService {

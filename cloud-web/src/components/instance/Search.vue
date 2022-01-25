@@ -45,6 +45,7 @@
       <el-form-item label="实例状态"  >
         <el-select v-model="search.status" size="small" style="width: 100px">
           <el-option key="" value="" label="无限制"/>
+          <el-option key="Starting" value="Starting" label="Starting"/>
           <el-option key="Creating" value="Creating" label="Creating"/>
           <el-option key="Running" value="Running" label="Running"/>
           <el-option key="Stopped" value="Stopped" label="Stopped"/>

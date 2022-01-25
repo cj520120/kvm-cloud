@@ -224,6 +224,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
             HostEntity hostInfo = this.allocateService.allocateHost(vm.getClusterId(), hostId, calculationSchemeInfo.getCpu(), calculationSchemeInfo.getMemory());
             vm.setHostId(hostInfo.getId());
             vm.setVncPassword(RandomStringUtils.randomAlphanumeric(16));
+            this.vmMapper.updateHostIdAndStatus(id, hostInfo.getId(), VmStatus.STARING);
             this.onBeforeStart(vm, hostInfo);
             VmModel kvm = new VmModel();
             kvm.setId(vm.getId());
@@ -260,7 +261,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
         if (vm == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
         }
-        if (vm.getVmStatus().equals(VmStatus.RUNNING)) {
+        if (vm.getVmStatus().equals(VmStatus.RUNNING)||vm.getVmStatus().equals(VmStatus.STARING)) {
 
             HostInfo host = this.hostService.findHostById(vm.getHostId());
             ResultUtil<Void> resultUtil;

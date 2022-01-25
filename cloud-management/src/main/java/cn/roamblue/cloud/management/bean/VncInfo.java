@@ -19,6 +19,10 @@ import java.io.Serializable;
 public class VncInfo implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 主机地址
      */
     private String ip;

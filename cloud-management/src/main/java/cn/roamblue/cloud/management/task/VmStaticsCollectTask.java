@@ -1,6 +1,12 @@
 package cn.roamblue.cloud.management.task;
 
-import cn.hutool.cache.impl.LRUCache;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.VmEntity;
@@ -9,14 +15,7 @@ import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.data.mapper.VmMapper;
 import cn.roamblue.cloud.management.data.mapper.VmStatsMapper;
 import cn.roamblue.cloud.management.service.AgentService;
-import cn.roamblue.cloud.management.service.LockService;
 import cn.roamblue.cloud.management.util.HostStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * VM统计收集
@@ -26,21 +25,17 @@ import java.util.stream.Collectors;
 @Component
 public class VmStaticsCollectTask extends AbstractTask {
     @Autowired
-    private HostMapper hostMapper;
-    @Autowired
-    private LockService lockService;
+    private HostMapper hostMapper; 
     @Autowired
     private AgentService agentService;
     @Autowired
     private VmMapper vmMapper;
     @Autowired
-    private VmStatsMapper vmStatsMapper;
-
-    private LRUCache<Integer, VmStaticsEntity> cache = new LRUCache<>(100000, 60000L);
+    private VmStatsMapper vmStatsMapper; 
 
     @Override
     protected int getInterval() {
-        return 5000;
+        return this.config.getVmStatsCheckInterval();
     }
 
     @Override

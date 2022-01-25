@@ -8,7 +8,6 @@ import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,6 @@ import java.util.Map;
  * @author chenjun
  */
 @RestController
-@Slf4j
 public class VmController {
     @Autowired
     private KvmVmService vmService;

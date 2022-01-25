@@ -320,7 +320,8 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
         });
     }
 
-    private <T extends ResultUtil> T call(AgentCall<T> callable) {
+    @SuppressWarnings("unchecked")
+	private <T extends ResultUtil<?>> T call(AgentCall<T> callable) {
         try {
             return callable.call();
         } catch (Exception err) {
@@ -330,7 +331,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @FunctionalInterface
-    public interface AgentCall<T extends ResultUtil> {
+    public interface AgentCall<T extends ResultUtil<?>> {
         /**
          * 执行agent操作
          *

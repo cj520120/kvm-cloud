@@ -3,11 +3,11 @@ package cn.roamblue.cloud.management.service.impl;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.CalculationSchemeInfo;
+import cn.roamblue.cloud.management.config.ApplicaionConfig;
 import cn.roamblue.cloud.management.data.entity.CalculationSchemeEntity;
 import cn.roamblue.cloud.management.data.mapper.CalculationSchemeMapper;
 import cn.roamblue.cloud.management.data.mapper.VmMapper;
 import cn.roamblue.cloud.management.service.CalculationSchemeService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
-@Slf4j
 @Service
 public class CalculationSchemeServiceImpl extends AbstractService implements CalculationSchemeService {
     @Autowired
@@ -28,6 +27,8 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
     @Autowired
     private VmMapper vmMapper;
 
+    @Autowired
+    private ApplicaionConfig config;
     @Override
     public List<CalculationSchemeInfo> listCalculationScheme() {
         List<CalculationSchemeEntity> entityList = calculationSchemeMapper.selectAll();
@@ -39,7 +40,6 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
 
     @Override
     public CalculationSchemeInfo findCalculationSchemeById(int id) {
-
         if (id <= 0) {
             return this.getDefaultCalculationScheme();
         }
@@ -66,12 +66,12 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
     @Override
     public CalculationSchemeInfo getDefaultCalculationScheme() {
         return CalculationSchemeInfo.builder().id(0)
-                .cpu(1)
-                .memory(512000L)
-                .speed(1000)
-                .socket(1)
-                .core(1)
-                .threads(1)
+                .cpu(this.config.getSystemCpu())
+                .memory(this.config.getSystemMemory() * 1024)
+                .speed(this.config.getSystemCpuSpeed())
+                .socket(this.config.getSystemCpuSocket())
+                .core(this.config.getSystemCpuCore())
+                .threads(this.config.getSystemCpuThread())
                 .name("default")
                 .createTime(new Date())
                 .build();
@@ -79,8 +79,7 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
 
     @Override
     public CalculationSchemeInfo createCalculationScheme(String name, int cpu, int speed, long memory,int socket,int core,int threads) {
-
-        CalculationSchemeEntity entity = CalculationSchemeEntity.builder()
+       CalculationSchemeEntity entity = CalculationSchemeEntity.builder()
                 .schemeName(name)
                 .schemeCpu(cpu)
                 .schemeCpuSpeed(speed)

@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.management.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -11,11 +11,11 @@ import java.util.TimeZone;
  */
 @Configuration
 public class TimezoneConfig {
-    @Value("${time.zone:Asia/Shanghai}")
-    private String timeZone;
+    @Autowired
+	private ApplicaionConfig config;
 
     @PostConstruct
     public void setDefaultTimezone() {
-        TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+        TimeZone.setDefault(TimeZone.getTimeZone(this.config.getTimeZone()));
     }
 }

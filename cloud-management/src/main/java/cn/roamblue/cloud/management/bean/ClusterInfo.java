@@ -19,6 +19,10 @@ import java.util.Date;
 @Builder
 public class ClusterInfo implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 集群ID
      */
     private int id;

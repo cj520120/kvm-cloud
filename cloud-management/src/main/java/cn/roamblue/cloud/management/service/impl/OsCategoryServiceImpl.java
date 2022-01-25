@@ -8,8 +8,6 @@ import cn.roamblue.cloud.management.data.entity.OsCategoryEntity;
 import cn.roamblue.cloud.management.data.mapper.OsCategoryMapper;
 import cn.roamblue.cloud.management.service.OsCategoryService;
 import cn.roamblue.cloud.management.util.BeanConverter;
-import cn.roamblue.cloud.management.util.RuleType;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +17,6 @@ import java.util.List;
 /**
  * @author chenjun
  */
-@Slf4j
 @Service
 public class OsCategoryServiceImpl extends AbstractService implements OsCategoryService {
     @Autowired

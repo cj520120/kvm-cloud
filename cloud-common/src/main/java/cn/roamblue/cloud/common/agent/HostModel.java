@@ -18,6 +18,10 @@ import java.io.Serializable;
 @Builder
 public class HostModel implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * 主机名称
      */
     private String hostName;

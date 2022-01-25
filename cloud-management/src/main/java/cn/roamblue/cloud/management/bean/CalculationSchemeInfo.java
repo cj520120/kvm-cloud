@@ -19,6 +19,10 @@ import java.util.Date;
 @Builder
 public class CalculationSchemeInfo implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * ID
      */
     private int id;
@@ -35,7 +39,7 @@ public class CalculationSchemeInfo implements Serializable {
      */
     private long memory;
     /**
-     * 评率
+     * 频率
      */
     private int speed;
     /**

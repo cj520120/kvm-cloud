@@ -17,6 +17,10 @@ import java.util.Date;
 @Builder
 public class HostInfo implements Serializable {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * id
      */
     private int id;

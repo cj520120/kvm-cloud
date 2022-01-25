@@ -20,7 +20,7 @@ public class ManagementCheckTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return 5000;
+        return this.config.getManagerKeepInterval();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class ManagementCheckTask extends AbstractTask {
 
     @Override
     protected void call() {
-        long expire = System.currentTimeMillis() - 30 * 1000;
+        long expire = System.currentTimeMillis() - this.config.getManagerKeepInterval() * 3 * 1000;
         QueryWrapper<ManagementEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.lt("last_active_time", new Date(expire));
         managementMapper.delete(queryWrapper);

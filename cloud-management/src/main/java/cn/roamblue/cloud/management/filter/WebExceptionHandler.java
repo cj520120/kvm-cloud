@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class WebExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public ResultUtil exceptionHandler(Exception error) {
+    public ResultUtil<?> exceptionHandler(Exception error) {
         if (error instanceof CodeException) {
             CodeException codeException = (CodeException) error;
             return ResultUtil.error(codeException.getCode(), codeException.getMessage());

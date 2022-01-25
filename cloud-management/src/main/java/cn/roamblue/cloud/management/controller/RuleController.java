@@ -4,7 +4,6 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.ui.RuleUiService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +18,6 @@ import java.util.List;
  * @author chenjun
  */
 @RestController
-@Slf4j
 public class RuleController {
     @Autowired
     private RuleUiService ruleUiService;

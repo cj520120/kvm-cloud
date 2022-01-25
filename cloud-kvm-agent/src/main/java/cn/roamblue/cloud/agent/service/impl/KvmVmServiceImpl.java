@@ -107,7 +107,8 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
         });
     }
 
-    private VmCurrentStaticsInfo getVmStatics(Domain domain) throws LibvirtException, SAXException, DocumentException {
+    @SuppressWarnings("unchecked")
+	private VmCurrentStaticsInfo getVmStatics(Domain domain) throws LibvirtException, SAXException, DocumentException {
         VmCurrentStaticsInfo statics = new VmCurrentStaticsInfo();
         String xml = domain.getXMLDesc(0);
         try (StringReader sr = new StringReader(xml)) {
@@ -116,7 +117,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
             Document doc = reader.read(sr);
 
             String path = "/domain/devices/disk";
-            List<Node> nodeList = doc.selectNodes(path);
+			List<Node> nodeList = doc.selectNodes(path);
             for (Node node : nodeList) {
                 Element element = (Element) node;
                 if ("disk".equals(element.attributeValue("device"))) {
