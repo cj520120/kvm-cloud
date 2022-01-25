@@ -1,3 +1,4 @@
 target
 *.iml
 .m2
+/.project
