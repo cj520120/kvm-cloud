@@ -55,7 +55,7 @@ public class RuleServiceImpl extends AbstractService implements RuleService {
 
         RulePermissionEntity entity = rulePermissionMapper.selectById(loginInfoEntity.getRuleId());
         if(entity==null || StringUtils.isEmpty(entity.getGroupPermissions())){
-            throw new CodeException(ErrorCode.PERMISSION_ERROR, localeMessage.getMessage("USER_PERMISSION_ERROR", "当前账号权限不足，请联系管理员进行操作"));
+            throw new CodeException(ErrorCode.PERMISSION_ERROR, "当前账号权限不足，请联系管理员进行操作");
         }
         List<String> permissionIds = Arrays.asList(entity.getGroupPermissions().split(","));
         QueryWrapper<PermissionInfoEntity> wrapper = new QueryWrapper<>();
@@ -64,7 +64,7 @@ public class RuleServiceImpl extends AbstractService implements RuleService {
 
         for (String permission : permissions) {
             if (!permissionList.contains(permission)) {
-                throw new CodeException(ErrorCode.PERMISSION_ERROR, localeMessage.getMessage("USER_PERMISSION_ERROR", "当前账号权限不足，请联系管理员进行操作"));
+                throw new CodeException(ErrorCode.PERMISSION_ERROR, "当前账号权限不足，请联系管理员进行操作");
             }
         }
 
@@ -112,7 +112,7 @@ public class RuleServiceImpl extends AbstractService implements RuleService {
     public RulePermissionInfo modifyRulePermission(int id, String name, String[] permissions) {
         RulePermissionEntity entity = ruleGroupMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.RULE_PERMISSION_NOT_FOUND, localeMessage.getMessage("RULE_PERMISSION_NOT_FOUND", "权限组不存在"));
+            throw new CodeException(ErrorCode.RULE_PERMISSION_NOT_FOUND, "权限组不存在");
         }
         entity.setGroupName(name);
         entity.setGroupPermissions(String.join(",",permissions));

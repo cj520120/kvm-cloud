@@ -69,7 +69,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
 
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
         NetworkInfo info = init(entity);
         return info;
@@ -89,7 +89,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
 
         ClusterEntity clusterEntity = this.clusterMapper.selectById(clusterId);
         if (clusterEntity == null) {
-            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, localeMessage.getMessage("CLUSTER_NOT_FOUND", "集群不存在"));
+            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, "集群不存在");
         }
 
         NetworkEntity entity = NetworkEntity.builder().networkName(name)
@@ -150,7 +150,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
         wrapper.gt("vm_id", 0);
         wrapper.eq("network_id", id);
         if (vmNetworkMapper.selectCount(wrapper) > 0) {
-            throw new CodeException(ErrorCode.HAS_VM_ERROR, localeMessage.getMessage("DEL_NETWORK_HAS_VM", "网络包含主机信息"));
+            throw new CodeException(ErrorCode.HAS_VM_ERROR, "网络包含主机信息");
         }
         QueryWrapper<VmNetworkEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("network_id", id);
@@ -175,7 +175,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
     public NetworkInfo startNetworkById(int id) {
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
         entity.setNetworkStatus(NetworkStatus.READY);
         networkMapper.updateById(entity);
@@ -186,7 +186,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
     public NetworkInfo pauseNetworkById(int id) {
         NetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
         entity.setNetworkStatus(NetworkStatus.PAUSE);
         networkMapper.updateById(entity);

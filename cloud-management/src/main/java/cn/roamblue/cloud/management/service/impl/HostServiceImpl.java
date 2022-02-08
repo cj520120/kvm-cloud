@@ -119,7 +119,7 @@ public class HostServiceImpl extends AbstractService implements HostService {
 
         HostEntity entity = hostMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.HOST_NOT_FOUND, localeMessage.getMessage("HOST_NOT_FOUND", "主机不存在"));
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
         refreshHost(entity);
         HostInfo info = init(entity);
@@ -132,7 +132,7 @@ public class HostServiceImpl extends AbstractService implements HostService {
         QueryWrapper<HostEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("host_ip", ip);
         if (hostMapper.selectCount(queryWrapper) > 0) {
-            throw new CodeException(ErrorCode.HOST_EXISTS, localeMessage.getMessage("HOST_EXISTS", "创建主机失败，主机信息已经存在"));
+            throw new CodeException(ErrorCode.HOST_EXISTS, "创建主机失败，主机信息已经存在");
         }
         ResultUtil<HostModel> hostInfoResultUtil = this.agentService.getHostInfo(uri);
         if (hostInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
@@ -168,7 +168,7 @@ public class HostServiceImpl extends AbstractService implements HostService {
     public HostInfo updateHostStatusById(int id, String status) {
         HostEntity entity = hostMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.HOST_NOT_FOUND, localeMessage.getMessage("HOST_NOT_FOUND", "主机不存在"));
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         } else if (entity.getHostStatus().equals(status)) {
             return this.init(entity);
         }

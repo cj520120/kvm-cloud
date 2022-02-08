@@ -99,7 +99,7 @@ public class VolumeCheckTask extends AbstractTask {
                             queryWrapper.eq("volume_status", volume.getVolumeStatus());
                             volumeMapper.update(update, queryWrapper);
                         } else {
-                            log.error("volume information detection failed.volumeId={} storageId={} hostId={} msg={}", volume.getId(), storage.getId(), host.getHostName(), volumeResultUtil.getMessage());
+                            log.error("磁盘卷检测失败.volumeId={} storageId={} hostId={} msg={}", volume.getId(), storage.getId(), host.getHostName(), volumeResultUtil.getMessage());
                         }
                     }
                     return null;

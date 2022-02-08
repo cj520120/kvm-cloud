@@ -71,7 +71,7 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
 
         StorageEntity entity = storageMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, localeMessage.getMessage("STORAGE_NOT_FOUND", "存储不存在"));
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
         }
         StorageInfo info = init(entity);
         return info;
@@ -82,7 +82,7 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
 
         ClusterEntity clusterEntity = this.clusterMapper.selectById(clusterId);
         if (clusterEntity == null) {
-            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, localeMessage.getMessage("CLUSTER_NOT_FOUND", "集群不存在"));
+            throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, "集群不存在");
         }
         List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", clusterId));
         StorageEntity entity = StorageEntity.builder()
@@ -124,7 +124,7 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
         }
         int volumeCount = this.volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq("storage_id", id));
         if (volumeCount > 0) {
-            throw new CodeException(ErrorCode.HAS_VOLUME_ERROR, localeMessage.getMessage("DEL_STORAGE_HAS_VOL", "存储包含数据卷"));
+            throw new CodeException(ErrorCode.HAS_VOLUME_ERROR, "存储包含数据卷");
         }
         if (entity.getStorageStatus().equals(StorageStatus.READY)) {
 

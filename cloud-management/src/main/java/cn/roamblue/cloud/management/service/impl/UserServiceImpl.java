@@ -37,14 +37,14 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public LoginUserTokenInfo login(String loginName, String password, String nonce) {
         LoginInfoEntity loginInfoEntity = loginInfoMapper.findByLoginName(loginName);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, localeMessage.getMessage("USER_LOGIN_NAME_OR_PASSWORD_ERROR", "用户名或密码错误"));
+            throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, "用户名或密码错误");
         }
         String realPassword = DigestUtil.sha256Hex(loginInfoEntity.getLoginPassword() + ":" + nonce);
         if (!realPassword.equals(password)) {
-            throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, localeMessage.getMessage("USER_LOGIN_NAME_OR_PASSWORD_ERROR", "用户名或密码错误"));
+            throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, "用户名或密码错误");
         }
         if (loginInfoEntity.getLoginState() != UserState.ABLE) {
-            throw new CodeException(ErrorCode.USER_FORBID_ERROR, localeMessage.getMessage("USER_FORBID_ERROR", "用户已禁用"));
+            throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return getToken(loginInfoEntity.getUserId(), loginInfoEntity.getLoginPassword());
     }
@@ -62,36 +62,36 @@ public class UserServiceImpl extends AbstractService implements UserService {
     @Override
     public Integer getUserIdByToken(String token) {
         if (StringUtils.isEmpty(token)) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_VERIFY_ERROR", "用户验证失败,请重新登录"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户验证失败,请重新登录");
         }
         try {
             return Integer.parseInt(JWT.decode(token).getAudience().get(0));
         } catch (JWTDecodeException j) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_VERIFY_ERROR", "用户验证失败,请重新登录"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户验证失败,请重新登录");
         }
     }
 
     @Override
     public Integer verify(String token) {
         if (StringUtils.isEmpty(token)) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_VERIFY_ERROR", "用户验证失败,请重新登录"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户验证失败,请重新登录");
         }
         Integer userId = this.getUserIdByToken(token);
         if (userId == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_VERIFY_ERROR", "用户验证失败,请重新登录"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户验证失败,请重新登录");
         }
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_VERIFY_ERROR", "用户验证失败,请重新登录"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户验证失败,请重新登录");
         }
         JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(loginInfoEntity.getLoginPassword())).build();
         try {
             jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_VERIFY_ERROR", "用户验证失败,请重新登录"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户验证失败,请重新登录");
         }
         if (loginInfoEntity.getLoginState() != UserState.ABLE) {
-            throw new CodeException(ErrorCode.USER_FORBID_ERROR, localeMessage.getMessage("USER_FORBID_ERROR", "用户已禁用"));
+            throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return loginInfoEntity.getUserId();
     }
@@ -101,14 +101,14 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "登陆用户不存在"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
         String realPassword = DigestUtil.sha256Hex(loginInfoEntity.getLoginPassword() + ":" + nonce);
         if (!realPassword.equalsIgnoreCase(oldPassword)) {
-            throw new CodeException(ErrorCode.OLD_PASSWORD_ERROR, localeMessage.getMessage("USER_OID_PASSWORD_ERROR", "旧密码错误"));
+            throw new CodeException(ErrorCode.OLD_PASSWORD_ERROR, "旧密码错误");
         }
         if (StringUtils.isEmpty(newPassword)) {
-            throw new CodeException(ErrorCode.PASSWORD_EMPTY_ERROR, localeMessage.getMessage("USER_NEW_PASSWORD_EMPTY", "新密码不能为空"));
+            throw new CodeException(ErrorCode.PASSWORD_EMPTY_ERROR, "新密码不能为空");
         }
         loginInfoEntity.setLoginPassword(newPassword);
         loginInfoMapper.updateById(loginInfoEntity);
@@ -121,10 +121,10 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "登陆用户不存在"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
         if (loginInfoEntity.getLoginState() != UserState.ABLE) {
-            throw new CodeException(ErrorCode.USER_FORBID_ERROR, localeMessage.getMessage("USER_FORBID_ERROR", "用户已禁用"));
+            throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return getToken(loginInfoEntity.getUserId(), loginInfoEntity.getLoginPassword());
     }
@@ -134,7 +134,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
 
         LoginInfoEntity entity = loginInfoMapper.findByLoginName(loginName);
         if (entity != null) {
-            throw new CodeException(ErrorCode.LOGIN_USER_EXISTS, localeMessage.getMessage("USER_EXISTS", "用户已经存在"));
+            throw new CodeException(ErrorCode.LOGIN_USER_EXISTS,"用户已经存在");
         }
         String salt = "CRY:" + RandomStringUtils.randomAlphanumeric(16);
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
@@ -147,7 +147,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public UserInfo updateUserState(int userId, short state) {
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "登陆用户不存在"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
         loginInfoEntity.setLoginState(state);
         this.loginInfoMapper.updateById(loginInfoEntity);
@@ -158,7 +158,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public UserInfo updateUserRule(int userId, int rule) {
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "登陆用户不存在"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
         loginInfoEntity.setRuleId(rule);
         this.loginInfoMapper.updateById(loginInfoEntity);
@@ -175,7 +175,7 @@ public class UserServiceImpl extends AbstractService implements UserService {
     public UserInfo resetPassword(int userId, String password) {
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
-            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, localeMessage.getMessage("USER_NOT_FOUND", "登陆用户不存在"));
+            throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
         String salt = "CRY:" + RandomStringUtils.randomAlphanumeric(16);
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);

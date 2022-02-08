@@ -56,7 +56,7 @@ public class VmCheckTask extends AbstractTask {
 				VmEntity vm = vmMapper.findByName(vmInfo.getName());
 				if (vm == null) {
 					agentService.destroyVm(hostInfo.getHostUri(), vmInfo.getName());
-					log.warn("unknown VM, auto shutdown.VM={}", vmInfo.getName());
+					log.warn("未知的虚拟机，直接关闭.VM={}", vmInfo.getName());
 					continue;
 				}
 
@@ -65,13 +65,13 @@ public class VmCheckTask extends AbstractTask {
 					case VmStatus.RUNNING:
 					case VmStatus.STARING:
 						if (!vm.getHostId().equals(hostInfo.getId())) {
-							log.warn("VM[{}] running host error, auto destroy", vmInfo.getName());
+							log.warn("VM[{}] 运行机器不一致，直接销毁", vmInfo.getName());
 							// 如果运行机器和当前机器不一致，则直接销毁
 							agentService.destroyVm(hostInfo.getHostUri(), vm.getVmName());
 						}
 						break;
 					default:
-						log.warn("VM[{}] running state is inconsistent, auto destroy", vmInfo.getName());
+						log.warn("VM[{}] 不是启动状态，直接销毁", vmInfo.getName());
 						// 如果运行机器和当前机器不一致，则直接销毁
 						agentService.destroyVm(hostInfo.getHostUri(), vm.getVmName());
 						break;

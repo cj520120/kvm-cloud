@@ -152,7 +152,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     public VncInfo findVncByVmId(Integer clusterId, Integer vmId) {
         List<VncEntity> list = this.vncMapper.findByVmId(vmId);
         if (list.isEmpty()) {
-            throw new CodeException(ErrorCode.VM_NOT_START, localeMessage.getMessage("VM_NOT_START", "实例未启动"));
+            throw new CodeException(ErrorCode.VM_NOT_START, "虚拟机未启动");
         }
         Map<Integer, List<VncEntity>> map = list.stream().collect(Collectors.groupingBy(VncEntity::getNetworkId));
         List<Integer> networkIds = list.stream().map(VncEntity::getNetworkId).distinct().collect(Collectors.toList());
@@ -169,6 +169,6 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
             String token = MD5.create().digestHex(String.valueOf(vmId));
             return VncInfo.builder().password(vnc.getVncPassword()).ip(vm.getVmIp()).token(token).build();
         }
-        throw new CodeException(ErrorCode.VM_NOT_START, localeMessage.getMessage("CONSOLE_VM_NOT_READY", "Console实例未就绪"));
+        throw new CodeException(ErrorCode.VM_NOT_START, "Console实例未就绪");
     }
 }

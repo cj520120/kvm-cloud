@@ -70,10 +70,10 @@ public class HostStorageCheckTask extends AbstractTask {
                 for (StorageEntity storageEntity : storageList) {
                     StorageModel cloudStorageInfo = map.get(storageEntity.getStorageTarget());
                     if (cloudStorageInfo == null) {
-                        log.info("storage pool is missing. begin reinitialize.host={} storage={}", hostEntity.getHostName(), storageEntity.getStorageName());
+                        log.info("主机存储池未找到，重新初始化.host={} storage={}", hostEntity.getHostName(), storageEntity.getStorageName());
                         ResultUtil<StorageModel> initStorageInfoResultUtil = agentService.addHostStorage(StorageType.NFS,hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
                         if (initStorageInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
-                            log.info("storage pool is missing. reinitialization failed.host={} storage={} msg={}", hostEntity.getHostName(), storageEntity.getStorageName(), initStorageInfoResultUtil.getMessage());
+                            log.info("主机存储池初始化失败.host={} storage={} msg={}", hostEntity.getHostName(), storageEntity.getStorageName(), initStorageInfoResultUtil.getMessage());
                         } else {
                             cloudStorageInfo = initStorageInfoResultUtil.getData();
                         }

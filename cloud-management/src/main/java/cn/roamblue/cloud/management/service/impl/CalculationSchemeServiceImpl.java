@@ -45,7 +45,7 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
         }
         CalculationSchemeEntity entity = this.calculationSchemeMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.CALCULATION_SCHEME_NOT_FOUND, localeMessage.getMessage("CALCULATION_SCHEME_NOT_FOUND", "计算方案不存在"));
+            throw new CodeException(ErrorCode.CALCULATION_SCHEME_NOT_FOUND, "计算方案不存在");
         }
         return this.init(entity);
     }

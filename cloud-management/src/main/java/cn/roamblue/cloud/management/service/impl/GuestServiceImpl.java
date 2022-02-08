@@ -49,7 +49,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
     public VmInfo resume(int vmId) {
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         vm.setRemoveTime(null);
         vm.setVmStatus(VmStatus.STOPPED);
@@ -63,7 +63,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND,"虚拟机不存在");
         }
         String path = "";
         if (iso > 0) {
@@ -90,7 +90,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
     public VolumeInfo attachDisk(int vmId, int volumeId) {
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         VolumeInfo volumeInfo = volumeService.attachVm(volumeId, vmId);
         vm.setLastUpdateTime(new Date());
@@ -115,7 +115,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         vm.setLastUpdateTime(new Date());
         vmMapper.updateById(vm);
@@ -136,7 +136,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         vm.setVmDescription(description);
         vm.setCalculationSchemeId(calculationSchemeId);
@@ -151,13 +151,13 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         if (!vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED)) {
-            throw new CodeException(ErrorCode.VM_NOT_STOP, localeMessage.getMessage("CREATE_TEMPLATE_MUST_STOP_VM", "创建模版前请停止虚拟机"));
+            throw new CodeException(ErrorCode.VM_NOT_STOP, "创建模版前请停止虚拟机");
         }
         List<VolumeInfo> volumeInfoList = this.volumeService.listVolumeByVmId(vmId);
-        VolumeInfo volumeInfo = volumeInfoList.stream().filter(t -> t.getDevice() == 0).findAny().orElseThrow(() -> new CodeException(ErrorCode.VOLUME_NOT_READY, localeMessage.getMessage("CREATE_TEMPLATE_VOLUME_NOT_FOUND", "创建模版磁盘未找到")));
+        VolumeInfo volumeInfo = volumeInfoList.stream().filter(t -> t.getDevice() == 0).findAny().orElseThrow(() -> new CodeException(ErrorCode.VOLUME_NOT_READY, "创建模版磁盘未找到"));
         return this.volumeService.createTemplateById(volumeInfo.getId(), vm.getOsCategoryId(), name);
 
     }
@@ -170,7 +170,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
 
         List<TemplateRefInfo> templateRefList = templateService.listTemplateRefByTemplateId(template.getId());
         if (templateRefList.isEmpty()) {
-            throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, localeMessage.getMessage("TEMPLATE_NOT_READY", "模版未就绪"));
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "模版未就绪");
         }
         TemplateRefInfo templateRef = templateRefList.stream().findAny().get();
 

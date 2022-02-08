@@ -39,7 +39,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        log.info("system VM[Route] allocate network success,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
+        log.info("系统虚拟机[Route] 申请网络成功,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -77,14 +77,14 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         log.info("system vm init dhcp service.vm={},host={}", vm.getId(), host.getHostIp());
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(vm.getClusterId());
         if (networks.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络未找到"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络未找到");
         }
         StringBuilder dhcp = new StringBuilder();
         dhcp.append("ddns-update-style none;\r\n").append("ignore client-updates;\r\n");
         for (int i = 0; i < networks.size(); i++) {
             NetworkInfo networkInfo = networks.get(i);
             if (!networkInfo.getStatus().equals(NetworkStatus.READY)) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络未就绪"));
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络未就绪");
             }
             List<VmNetworkInfo> allInstance = this.networkService.listVmNetworkByNetworkId(networkInfo.getId());
             if (!allInstance.isEmpty()) {

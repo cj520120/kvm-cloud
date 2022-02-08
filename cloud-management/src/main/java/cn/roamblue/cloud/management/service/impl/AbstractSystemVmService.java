@@ -35,37 +35,37 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
 
     @Override
     public VmInfo resume(int vmId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     @Override
     public VmInfo changeCdRoom(int id, int isoTemplateId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     @Override
     public VolumeInfo attachDisk(int vmId, int volumeId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     @Override
     public VolumeInfo detachDisk(int vmId, int volumeId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     @Override
     public VmInfo modify(int vmId, String description, int calculationSchemeId, int groupId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     @Override
     public TemplateInfo createTemplate(int vmId, String name) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     @Override
     public VmInfo reInstall(int vmId, int templateId) {
-        throw new CodeException(ErrorCode.NOT_SUPPORTED, localeMessage.getMessage("NOT_SUPPORTED", "系统实例不支持该操作"));
+        throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 
     /**
@@ -77,21 +77,21 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
     protected void initializeNetwork(VmEntity instance, HostEntity host) {
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(instance.getClusterId());
         if (networks.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
         List<VmNetworkInfo> vmNetworkInfoList = this.networkService.findVmNetworkByVmId(instance.getId());
         if (vmNetworkInfoList.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
         Map<Integer, NetworkInfo> networkInfoMap = networks.stream().collect(Collectors.toMap(NetworkInfo::getId, Function.identity()));
         for (int i = 0; i < vmNetworkInfoList.size(); i++) {
             VmNetworkInfo vmNetworkInfo = vmNetworkInfoList.get(i);
             NetworkInfo networkInfo = networkInfoMap.get(vmNetworkInfo.getNetworkId());
             if (networkInfo == null) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络不存在"));
+                throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
             }
             if (!networkInfo.getStatus().equals(NetworkStatus.READY)) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, localeMessage.getMessage("NETWORK_NOT_READY", "网络不存在"));
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络不存在");
             }
             StringBuilder sb = new StringBuilder();
             sb.append("TYPE=Ethernet\r\n")

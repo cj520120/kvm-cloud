@@ -64,7 +64,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         TemplateEntity entity = templateRepository.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, localeMessage.getMessage("TEMPLATE_NOT_FOUND", "模版不存在"));
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
         }
         TemplateInfo info = initTemplateInfo(entity);
         return info;
@@ -104,7 +104,7 @@ public class TemplateServiceImpl extends AbstractService implements TemplateServ
 
         List<TemplateRefEntity> list = this.templateRefRepository.selectList(new QueryWrapper<TemplateRefEntity>().eq("template_id", templateId));
         if (list.isEmpty()) {
-            throw new CodeException(ErrorCode.TEMPLATE_STORAGE_NOT_READY, localeMessage.getMessage("TEMPLATE_NOT_READY", "模版未就绪"));
+            throw new CodeException(ErrorCode.TEMPLATE_STORAGE_NOT_READY, "模版未就绪");
         }
         List<TemplateRefInfo> result = BeanConverter.convert(list, this::initTemplateRefInfo);
         return result;

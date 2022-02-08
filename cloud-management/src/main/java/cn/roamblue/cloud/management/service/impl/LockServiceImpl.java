@@ -106,7 +106,7 @@ public class LockServiceImpl extends AbstractService implements LockService {
                 // do nothing
             }
         }
-        throw new CodeException(ErrorCode.LOCK_TIMEOUT, localeMessage.getMessage("LOCK_REQ_TIMEOUT", "获取锁超时"));
+        throw new CodeException(ErrorCode.LOCK_TIMEOUT, "获取锁超时");
 
     }
 

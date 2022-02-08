@@ -30,7 +30,7 @@ public class GroupUiServiceImpl extends AbstractUiService implements GroupUiServ
     @Rule(permissions = "group.create")
     public ResultUtil<GroupInfo> createGroup(String name) {
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("GROUP_NAME_NOT_EMPTY", "名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
         return super.call(() -> groupService.createGroup(name));
     }
@@ -40,7 +40,7 @@ public class GroupUiServiceImpl extends AbstractUiService implements GroupUiServ
     public ResultUtil<GroupInfo> modifyGroup(int id, String name) {
 
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("GROUP_NAME_NOT_EMPTY", "名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
         return super.call(() -> groupService.modifyGroup(id, name));
     }

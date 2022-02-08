@@ -3,7 +3,6 @@ package cn.roamblue.cloud.management.ui.impl;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.util.LocaleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -17,8 +16,6 @@ import java.util.stream.Collectors;
  * @author chenjun
  */
 public abstract class AbstractUiService {
-    @Autowired
-    protected LocaleMessage localeMessage;
     @Autowired
     private ScheduledExecutorService executorService;
 

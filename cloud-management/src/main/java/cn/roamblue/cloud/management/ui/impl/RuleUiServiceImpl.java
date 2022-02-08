@@ -44,7 +44,7 @@ public class RuleUiServiceImpl extends AbstractUiService implements RuleUiServic
     @Rule(permissions = "rule.permission.create")
     public ResultUtil<RulePermissionInfo> createRulePermission(String name, String[] permissions) {
         if (StringUtils.isEmpty(name)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("RULE_PERMISSION_NAME_EMPTY", "名称不能为空"));
+            throw new CodeException(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
         return super.call(() -> ruleService.createRulePermission(name,permissions));
     }
@@ -53,7 +53,7 @@ public class RuleUiServiceImpl extends AbstractUiService implements RuleUiServic
     @Override
     public ResultUtil<RulePermissionInfo> modifyRulePermission(int id, String name, String[] permissions) {
         if (StringUtils.isEmpty(name)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, localeMessage.getMessage("RULE_PERMISSION_NAME_EMPTY", "名称不能为空"));
+            throw new CodeException(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
         return super.call(() -> ruleService.modifyRulePermission(id,name,permissions));
     }

@@ -117,7 +117,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
         TemplateInfo template = templateService.findTemplateById(templateId);
         List<TemplateRefInfo> templateRefList = templateService.listTemplateRefByTemplateId(template.getId());
         if (templateRefList.isEmpty()) {
-            throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, localeMessage.getMessage("TEMPLATE_NOT_READY", "模版未就绪"));
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "模版未就绪");
         }
         TemplateRefInfo templateRef = templateRefList.stream().findAny().get();
 
@@ -171,11 +171,11 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
         OsCategoryInfo categoryInfo = this.osCategoryService.findOsCategoryById(vm.getOsCategoryId());
         List<VolumeInfo> volumes = this.volumeService.listVolumeByVmId(vm.getId());
         if (volumes.isEmpty()) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, localeMessage.getMessage("VOLUME_NOT_FOUND", "磁盘信息丢失"));
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘信息丢失");
         }
         List<VmNetworkInfo> networks = this.networkService.findVmNetworkByVmId(vm.getId());
         if (networks.isEmpty()) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, localeMessage.getMessage("NETWORK_NOT_FOUND", "网络信息丢失"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络信息丢失");
         }
         if (vm.getVmIso() > 0) {
             TemplateInfo template = templateService.findTemplateById(vm.getVmIso());
@@ -188,11 +188,11 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
         kvm.setDisks(disks);
         for (VolumeInfo volume : volumes) {
             if (!volume.getStatus().equals(VolumeStatus.READY)) {
-                throw new CodeException(ErrorCode.VOLUME_NOT_READY, localeMessage.getMessage("VOLUME_NOT_READY", "磁盘未就绪"));
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘未就绪");
             }
             StorageInfo volumeStorage = storageService.findStorageById(volume.getStorageId());
             if (!volumeStorage.getStatus().equals(StorageStatus.READY)) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, localeMessage.getMessage("STORAGE_NOT_READY", "存储未就绪"));
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储未就绪");
             }
             String path = StoragePathUtil.getVolumePath(volumeStorage.getTarget(), volume.getTarget());
             if (volume.getDevice() == 0) {
@@ -207,7 +207,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
             VmNetworkInfo instanceNetwork = networks.get(i);
             NetworkInfo network = this.networkService.findNetworkById(instanceNetwork.getNetworkId());
             if (!network.getStatus().equals(NetworkStatus.READY)) {
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, localeMessage.getMessage("NETWORK_NOT_READY", "网络未就绪"));
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络未就绪");
             }
             kvmNetworks.add(VmModel.Network.builder().mac(instanceNetwork.getMac()).source(network.getCard()).driver(categoryInfo.getNetworkDriver()).device(instanceNetwork.getDevice()).build());
         }
@@ -216,7 +216,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
     public VmEntity startVm(int id, int hostId) {
         VmEntity vm = vmMapper.selectById(id);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         if (vm.getVmStatus().equals(VmStatus.STOPPED)) {
             this.vmMapper.updateLastActiveTime(id, new Date());
@@ -259,7 +259,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
     public VmEntity stopVm(int id, boolean force) {
         VmEntity vm = vmMapper.selectById(id);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         if (vm.getVmStatus().equals(VmStatus.RUNNING)||vm.getVmStatus().equals(VmStatus.STARING)) {
 
@@ -294,7 +294,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
     public VmEntity rebootVm(int id, boolean force) {
         VmEntity vm = vmMapper.selectById(id);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         if(vm.getVmStatus().equalsIgnoreCase(VmStatus.STOPPED)){
             vm = startVm(vm.getId(), 0);
@@ -317,7 +317,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
     public void destroyVm(int id) {
         VmEntity vm = vmMapper.selectById(id);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         stopVm(id, true);
         if (!vm.getVmType().equals(VmType.GUEST) || vm.getVmStatus().equals(VmStatus.ERROR)) {
@@ -370,7 +370,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
     public VmNetworkInfo attachNetwork(int vmId, int networkId) {
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         VmNetworkInfo vmNetworkInfo = this.allocateNetwork(networkId, vmId);
         updateVmNetwork(vm, vmNetworkInfo, true);
@@ -381,14 +381,14 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
     public void detachNetwork(int vmId, int id) {
         VmEntity vm = vmMapper.selectById(vmId);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         List<VmNetworkInfo> list = networkService.findVmNetworkByVmId(vmId);
         Optional<VmNetworkInfo> optional = list.stream().filter(t -> t.getId().equals(id)).findFirst();
         VmNetworkInfo vmNetworkInfo = optional.orElse(null);
         if (vmNetworkInfo != null) {
             if (vmNetworkInfo.getDevice().equals(0)) {
-                throw new CodeException(ErrorCode.DETACH_NETWORK_ERROR, localeMessage.getMessage("DEFAULT_NETWORK_DETACH_ERROR", "默认网卡不允许卸载"));
+                throw new CodeException(ErrorCode.DETACH_NETWORK_ERROR,  "默认网卡不允许卸载");
             }
             networkService.unBindVmNetworkByVmAndId(vmId, id);
             updateVmNetwork(vm, vmNetworkInfo, false);
@@ -409,7 +409,7 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
 
         VmEntity vm = vmMapper.selectById(id);
         if (vm == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, localeMessage.getMessage("VM_NOT_FOUND", "虚拟机不存在"));
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机不存在");
         }
         vm = this.startVm(id, hostId);
         log.info("start vm successful.id={} host={}", id, vm.getHostId());

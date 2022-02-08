@@ -26,7 +26,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
     public OsCategoryInfo findOsCategoryById(int id) {
         OsCategoryEntity entity = osCategoryMapper.selectById(id);
         if (entity == null) {
-            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, localeMessage.getMessage("OS_CATEGORY_NOT_FOUND", "操作系统类型未找到"));
+            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, "操作系统类型未找到");
         }
         return this.init(entity);
     }
@@ -54,7 +54,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
     public OsCategoryInfo modifyOsCategory(int id, String categoryName, String diskDriver, String networkDriver) {
         OsCategoryEntity osCategoryEntity = osCategoryMapper.selectById(id);
         if (osCategoryEntity == null) {
-            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, localeMessage.getMessage("OS_CATEGORY_NOT_FOUND", "操作系统类型未找到"));
+            throw new CodeException(ErrorCode.OS_CATEGORY_NOT_FOUND, "操作系统类型未找到");
         }
         osCategoryEntity.setDiskDriver(diskDriver);
         osCategoryEntity.setNetworkDriver(networkDriver);

@@ -36,7 +36,7 @@ public class ManagementKeepTask extends AbstractTask {
         try {
             managementService.keep();
         } catch (Exception e) {
-            log.error("management keep fail", e);
+            log.error("管理端心跳失败", e);
         }
     }
 }

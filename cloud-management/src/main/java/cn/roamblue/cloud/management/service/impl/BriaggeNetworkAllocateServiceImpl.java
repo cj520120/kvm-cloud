@@ -51,7 +51,7 @@ public class BriaggeNetworkAllocateServiceImpl extends AbstractService implement
             allocate = vmNetworkMapper.allocateNetwork(instanceNetworkEntity.getId(), vmId, deviceId) > 0;
         }
         if (!allocate) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, localeMessage.getMessage("ALLOCATE_ADDRESS_NOT_RESOURCE", "网络不可用或无可用地址"));
+            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "网络不可用或无可用地址");
         }
         instanceNetworkEntity.setVmDevice(deviceId);
         instanceNetworkEntity.setVmId(vmId);

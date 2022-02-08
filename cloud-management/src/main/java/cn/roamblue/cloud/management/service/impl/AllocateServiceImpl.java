@@ -79,20 +79,20 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
         if (storageId > 0) {
             storage = storageMapper.selectById(storageId);
             if (storage == null) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, localeMessage.getMessage("STORAGE_NOT_FOUND", "存储池不存在"));
+                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
             }
             if (!storage.getStorageStatus().equalsIgnoreCase(StorageStatus.READY)) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, localeMessage.getMessage("STORAGE_NOT_READY", "存储池未就绪"));
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
         } else {
             List<StorageEntity> list = storageMapper.findByClusterId(clusterId);
             if (list.isEmpty()) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, localeMessage.getMessage("STORAGE_NOT_CONFIG", "没有配置存储池"));
+                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "没有配置存储池");
 
             }
             list = list.stream().filter(t -> t.getStorageStatus().equals(StorageStatus.READY)).collect(Collectors.toList());
             if (list.isEmpty()) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, localeMessage.getMessage("STORAGE_NOT_HAS_READY", "没有可用存储池"));
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "没有可用存储池");
             }
             storage = list.stream().filter(t -> t.getStorageAllocation() + size < t.getStorageCapacity()).findAny().orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "存储池没有可用空间"));
         }
@@ -106,11 +106,11 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
         if (hostId > 0) {
             HostEntity entity = this.hostMapper.selectById(hostId);
             if (entity == null) {
-                throw new CodeException(ErrorCode.HOST_NOT_FOUND, localeMessage.getMessage("ALLOCATE_HOST_NOT_READY_OR_NOT_RESOURCE", "申请主机失败，主机未就绪或资源不足"));
+                throw new CodeException(ErrorCode.HOST_NOT_FOUND, "申请主机失败，主机未就绪或资源不足");
             }
             this.refreshHost(entity);
             if ((entity.getHostAllocationCpu() + cpu > entity.getHostCpu()) || (entity.getHostAllocationMemory() + memory > entity.getHostMemory())) {
-                throw new CodeException(ErrorCode.HOST_NOT_SPACE, localeMessage.getMessage("ALLOCATE_HOST_NOT_RESOURCE", "主机未就绪或资源不足"));
+                throw new CodeException(ErrorCode.HOST_NOT_SPACE, "主机未就绪或资源不足");
             }
             return entity;
         } else {
@@ -120,7 +120,7 @@ public class AllocateServiceImpl extends AbstractService implements AllocateServ
                     .collect(Collectors.toList());
             Collections.shuffle(list);
             if (list.isEmpty()) {
-                throw new CodeException(ErrorCode.HOST_NOT_SPACE, localeMessage.getMessage("ALLOCATE_HOST_NOT_RESOURCE", "主机未就绪或资源不足"));
+                throw new CodeException(ErrorCode.HOST_NOT_SPACE, "主机未就绪或资源不足");
             }
             return list.get(0);
         }

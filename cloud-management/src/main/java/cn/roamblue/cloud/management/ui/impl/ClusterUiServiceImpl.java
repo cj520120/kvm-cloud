@@ -35,13 +35,13 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
     @Override
     public ResultUtil<ClusterInfo> createCluster(String name, float overCpu, float overMemory) {
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CLUSTER_NAME_EMPTY", "集群名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群名称不能为空");
         }
         if (overCpu < 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CLUSTER_OVER_CPU_MUST_GT_0", "CPU超配必须大于0"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "CPU超配必须大于0");
         }
         if (overMemory < 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CLUSTER_OVER_MEMORY_MUST_GT_0", "内存超配必须大于0"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "内存超配必须大于0");
         }
         return super.call(() -> clusterService.createCluster(name, overCpu, overMemory));
     }
@@ -50,13 +50,13 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
     @Override
     public ResultUtil<ClusterInfo> modifyCluster(int id, String name, float overCpu, float overMemory) {
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CLUSTER_NAME_EMPTY", "集群名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群名称不能为空");
         }
         if (overCpu < 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CLUSTER_OVER_CPU_MUST_GT_0", "CPU超配必须大于0"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "CPU超配必须大于0");
         }
         if (overMemory < 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("CLUSTER_OVER_MEMORY_MUST_GT_0", "内存超配必须大于0"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "内存超配必须大于0");
         }
         return super.call(() -> clusterService.modifyCluster(id, name, overCpu, overMemory));
     }

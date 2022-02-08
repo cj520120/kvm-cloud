@@ -56,7 +56,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     public ResultUtil<VmInfo> modify(int vmId, String description, int calculationSchemeId, int groupId) {
 
         if (StringUtils.isEmpty(description)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VM_DESCRIPTION_EMPTY", "VM备注不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "虚拟机描述信息不能为空");
         }
         return lockService.run(LockKeyUtil.getInstanceLockKey(vmId), () -> this.call(() -> vmService.getVmServiceByVmId(vmId).modify(vmId, description, calculationSchemeId, groupId)), 1, TimeUnit.MINUTES);
     }
@@ -71,20 +71,20 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     public ResultUtil<VmInfo> create(String name, int clusterId, int storageId, int calculationSchemeId, int templateId, long size, int networkId, int groupId) {
 
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VM_NAME_EMPTY", "名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
 
         if (clusterId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("MUST_HAS_CLUSTER", "集群不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群不能为空");
         }
         if (calculationSchemeId < 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VM_CALCULATION_SCHEME_EMPTY", "计算方案不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "计算方案不能为空");
         }
         if (templateId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VM_TEMPLATE_EMPTY", "VM模版不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "模版不能为空");
         }
         if (networkId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("VM_NETWORK_EMPTY", "VM网络不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "网络不能为空");
         }
         return this.call(() -> vmService.getVmServiceByType(VmType.GUEST).create(name, calculationSchemeId, clusterId, storageId, templateId, size, networkId, groupId));
     }
@@ -147,7 +147,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     @Override
     public ResultUtil<TemplateInfo> createTemplate(int id, String name) {
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("TEMPLATE_NAME_EMPTY", "名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).createTemplate(id, name)), 1, TimeUnit.HOURS);
     }

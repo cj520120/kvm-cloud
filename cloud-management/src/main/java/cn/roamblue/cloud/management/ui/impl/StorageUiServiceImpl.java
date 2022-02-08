@@ -39,16 +39,16 @@ public class StorageUiServiceImpl extends AbstractUiService implements StorageUi
     @Rule(permissions = "storage.create")
     public ResultUtil<StorageInfo> createStorage(int clusterId, String name, String uri, String source) {
         if (StringUtils.isEmpty(name)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("STORAGE_NAME_EMPTY", "名称不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
         }
         if (StringUtils.isEmpty(uri)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("STORAGE_ADDRESS_EMPTY", "存储池地址不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "存储池地址不能为空");
         }
         if (StringUtils.isEmpty(source)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("STORAGE_MOUNT_PATH_EMPTY", "存储挂载地址不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "存储挂载地址不能为空");
         }
         if (clusterId <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, localeMessage.getMessage("MUST_HAS_CLUSTER", "集群不能为空"));
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "集群不能为空");
         }
         return super.call(() -> storagePoolService.createStorage(clusterId, name, uri, source));
     }

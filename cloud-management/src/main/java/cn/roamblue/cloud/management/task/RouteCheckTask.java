@@ -48,7 +48,7 @@ public class RouteCheckTask extends AbstractTask {
                     return null;
                 }, 2, TimeUnit.MINUTES);
             } catch (Exception e) {
-                log.error("failed to detect system Route VM.clusterId={}", cluster.getId(), e);
+                log.error("检测系统虚拟机[Route]失败.clusterId={}", cluster.getId(), e);
             }
         });
     }

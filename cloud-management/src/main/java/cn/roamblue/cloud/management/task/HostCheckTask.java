@@ -55,7 +55,7 @@ public class HostCheckTask extends AbstractTask {
                             .hostMemory(cloudHostInfo.getMemory())
                             .build();
                     hostMapper.updateById(update);
-                    log.info("update host info.uri={} cpu={} memory={}",host.getHostUri(),cloudHostInfo.getCpu(),cloudHostInfo.getMemory());
+                    log.info("更新主机信息.uri={} cpu={} memory={}",host.getHostUri(),cloudHostInfo.getCpu(),cloudHostInfo.getMemory());
                     
                 }
             }

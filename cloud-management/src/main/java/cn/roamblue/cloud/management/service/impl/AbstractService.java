@@ -1,7 +1,5 @@
 package cn.roamblue.cloud.management.service.impl;
-
-import cn.roamblue.cloud.management.util.LocaleMessage;
-import org.springframework.beans.factory.annotation.Autowired;
+ 
 
 /**
  * @ClassName: AbstractService
@@ -9,7 +7,5 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @Create by: chenjun
  * @Date: 2021/8/3 下午3:23
  */
-public abstract class AbstractService {
-    @Autowired
-    protected LocaleMessage localeMessage;
+public abstract class AbstractService { 
 }
