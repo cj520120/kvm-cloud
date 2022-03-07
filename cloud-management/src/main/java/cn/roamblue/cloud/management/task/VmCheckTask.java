@@ -48,6 +48,7 @@ public class VmCheckTask extends AbstractTask {
 	protected void call() {
 		List<HostEntity> list = hostMapper.selectAll();
 		for (HostEntity hostInfo : list) {
+			log.info("开始检测主机VM列表,id={},uri={}",hostInfo.getId(),hostInfo.getHostUri());
 			List<VmInfoModel> vmInfoList = agentService.getInstance(hostInfo.getHostUri()).getData();
 			if (vmInfoList == null || vmInfoList.isEmpty()) {
 				continue;
@@ -65,7 +66,7 @@ public class VmCheckTask extends AbstractTask {
 					case VmStatus.RUNNING:
 					case VmStatus.STARING:
 						if (!vm.getHostId().equals(hostInfo.getId())) {
-							log.warn("VM[{}] 运行机器不一致，直接销毁", vmInfo.getName());
+							log.warn("VM[{}] 运行机器不一致.运行主机:{},当前主机:{}，直接销毁.uri={}", vmInfo.getName(),vm.getHostId(),hostInfo.getId(),hostInfo.getHostUri());
 							// 如果运行机器和当前机器不一致，则直接销毁
 							agentService.destroyVm(hostInfo.getHostUri(), vm.getVmName());
 						}

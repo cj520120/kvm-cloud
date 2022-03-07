@@ -17,7 +17,7 @@ axios.interceptors.response.use((response) => {
     if (response.status === 200) {
         if (response.data.code === 401) {
             Route.push({path: "/login"})
-        } else if (response.data.code != 0) {
+        }else if (response.data.code != 0 && response.data.code != 1000001) {
             Notification.error({
                 title: '错误',
                 duration: 3000,

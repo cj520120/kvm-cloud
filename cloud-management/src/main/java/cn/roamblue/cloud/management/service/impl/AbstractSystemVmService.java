@@ -111,16 +111,16 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
             }
             String filePath = "/etc/sysconfig/network-scripts/ifcfg-eth" + vmNetworkInfo.getDevice();
             String networkConfig = sb.toString();
-            log.info("system VM[{}] begin write network config.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
+            log.info("写入系统VM网络配置[{}].name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
             do {
                 ResultUtil<Void> resultUtil = this.agentService.writeFile(host.getHostUri(), instance.getVmName(), filePath, networkConfig);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                    log.info("system VM[{}] write network config successful,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
+                    log.info("系统虚拟机[{}]写入网络配置成功,name=eth{},IP={}", this.getType(), vmNetworkInfo.getDevice(), vmNetworkInfo.getIp());
                     break;
                 } else if (resultUtil.getCode() == ErrorCode.VM_NOT_FOUND || resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
-                    throw new CodeException(ErrorCode.VM_NOT_START, "[" + this.getType() + "] init file.vm not start");
+                    throw new CodeException(ErrorCode.VM_NOT_START, "系统虚拟机[" + this.getType() + "]网络初始化失败。虚拟机未启动");
                 }
-                log.info("system VM[{}] wait start.name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
+                log.info("等待系统虚拟机启动.Type=[{}].name=eth{},config={}", this.getType(), vmNetworkInfo.getDevice(), networkConfig);
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -137,9 +137,10 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
 
     public void start(int clusterId) {
         ClusterInfo clusterInfo = this.clusterService.findClusterById(clusterId);
+    	log.info("{}[{}]开始检测系统虚拟机状态.Type={}",clusterInfo.getName(),clusterInfo.getId(),  this.getType());
         List<Integer> templateIds = this.templateService.listTemplateByClusterId(clusterId).stream().filter(t -> t.getType().equals(this.getTemplateType())).map(TemplateInfo::getId).collect(Collectors.toList());
         if (templateIds.isEmpty()) {
-            log.warn("unable to initialize system VM [{}]，template not found", this.getType());
+            log.warn("{}[{}]不能初始化系统VM [{}]，系统模版未找到",clusterInfo.getName(),clusterInfo.getId(), this.getType());
             return;
         }
 
@@ -154,28 +155,28 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                     VmEntity instance = this.vmMapper.selectById(systemVmEntity.getVmId());
                     if (instance == null) {
                         systemVmMapper.deleteById(systemVmEntity.getId());
-                        log.warn("system VM error detected , invalid VM, ready to recreate VM .Type={} Network={}", this.getType(), network.getId());
+                        log.warn("{}[{}]检测系统虚拟机无效，删除无效数据。准备重新创建虚拟机.Type={} Network={}",clusterInfo.getName(),clusterInfo.getId(),  this.getType(), network.getId());
                         continue;
                     } else if (instance.getVmStatus().equals(VmStatus.STOPPED)) {
                         super.startVm(instance.getId(), 0);
                     } else if (instance.getVmStatus().equals(VmStatus.RUNNING)||instance.getVmStatus().equals(VmStatus.STARING)) {
 
-                        log.debug("detect system VM running status.Type={} Network={} HostId={}", this.getType(), network.getId(), instance.getHostId());
+                        log.debug("{}[{}]开始检测系统VM运行状态.Type={} Network={} HostId={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId(), instance.getHostId());
                         HostInfo hostInfo = this.hostService.findHostById(instance.getHostId());
                         ResultUtil<VmInfoModel> resultUtil = this.agentService.getInstance(hostInfo.getUri(), instance.getVmName());
                         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                            log.debug("detect that the system VM run successfully.Type={} Network={}", this.getType(), network.getId());
+                            log.debug("{}集群[{}]系统虚拟机成功运行.Type={} Network={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId());
                         } else if (resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
-                            log.warn("failed to detect system VM running status: VM is not running.begin reboot Type={} Network={} VM={}", this.getType(), network.getId(), instance.getVmName());
+                            log.warn("{}集群[{}]系统虚拟机未运行,准备重启。 Type={} Network={} VM={}", clusterInfo.getName(),clusterInfo.getId(),this.getType(), network.getId(), instance.getVmName());
                             super.reboot(instance.getId(), true);
                         } else {
-                            log.error("Failed to detect system VM running state: Type={} Network={} msg={}", this.getType(), network.getId(), resultUtil.getMessage());
+                            log.error("{}集群[{}]无法检测系统VM运行状态: Type={} Network={} msg={}", clusterInfo.getName(),clusterInfo.getId(),this.getType(), network.getId(), resultUtil.getMessage());
                         }
                     } else {
-                        log.warn("failed to detect system VM running state: unknown state.Type={} Network={} status={}", this.getType(), network.getId(), instance.getVmStatus());
+                        log.warn("{}集群[{}]无法检测系统VM运行状态：未知状态.Type={} Network={} status={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId(), instance.getVmStatus());
                     }
                 } else {
-                    log.info("create system VM.Type={} Network={}", this.getType(), network.getId());
+                    log.info("{}集群[{}]开始创建系统虚拟机.Type={} Network={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId());
                     String description = this.getVmDescription(clusterInfo, network);
                     int templateId = templateIds.get(0);
                     long diskSize = 0L;
@@ -191,14 +192,14 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
                     systemVmEntity.setVmId(instance.getId());
                     systemVmMapper.updateById(systemVmEntity);
                     super.startVm(instance.getId(), 0);
-                    log.info("start system VM Type={} Network={} success", this.getType(), network.getId());
+                    log.info("{}集群[{}]启动系统虚拟机成功. Type={} Network={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId());
 
                 }
             } catch (CodeException e) {
-                log.error("failed to initialize system VM.type={} msg={}", this.getType(), e.getMessage());
+                log.error("{}集群[{}]无法初始化系统虚拟机.type={} msg={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), e.getMessage());
 
             } catch (Exception e) {
-                log.error("failed to initialize system VM.type={}", this.getType(), e);
+                log.error("{}集群[{}]无法初始化系统虚拟机.type={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), e);
             }
         }
     }

@@ -59,7 +59,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        log.info("system VM[Console] allocate network success,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
+        log.info("系统虚拟机[Console] 申请网络成功,,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice()); 
         return managerAddress;
     }
 
@@ -72,7 +72,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         for (Integer networkId : networkIds) {
             writeVncConfig(vm, networkId, host);
         }
-        log.info("system VM[Console] start complete");
+        log.info("系统VM[Console]服务启动完成.cluter=[]",host.getClusterId());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     public ResultUtil<Void> register(int clusterId, int vmId, String host, int port, String password) {
 
         this.unRegister(clusterId, vmId);
-        log.info("register vnc.vm={} vnc=vnc://{}:{}", vmId, host, port);
+        log.info("开始注册VNC地址.vm={} vnc=vnc://{}:{}", vmId, host, port);
         List<VmNetworkInfo> networks = this.networkService.findVmNetworkByVmId(vmId);
         List<Integer> networkIds = networks.stream().map(VmNetworkInfo::getNetworkId).distinct().collect(Collectors.toList());
         for (Integer networkId : networkIds) {
@@ -139,11 +139,11 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     @Override
     public ResultUtil<Void> unRegister(int clusterId, int vmId) {
         try {
-            log.info("unregister vnc.vm={}", vmId);
+            log.info("取消Console VNC注册.vm={}", vmId);
             this.vncMapper.deleteByVmId(vmId);
             return ResultUtil.<Void>builder().build();
         } catch (Exception err) {
-            log.error("unregister vnc error.", err);
+            log.error("取消Console VNC注册失败.", err);
             return ResultUtil.<Void>builder().code(ErrorCode.SERVER_ERROR).message(err.getMessage()).build();
         }
     }

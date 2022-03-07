@@ -74,7 +74,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
     }
 
     private void initializeDhcp(VmEntity vm, HostEntity host) {
-        log.info("system vm init dhcp service.vm={},host={}", vm.getId(), host.getHostIp());
+        log.info("开始初始化DHCP服务.vm={},host={}", vm.getId(), host.getHostIp());
         List<NetworkInfo> networks = this.networkService.listNetworkByClusterId(vm.getClusterId());
         if (networks.isEmpty()) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络未找到");
@@ -117,7 +117,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         if (restartDhcpResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(restartDhcpResultUtil.getCode(), restartDhcpResultUtil.getMessage());
         }
-        log.info("system vm init dhcp service successful");
+        log.info("系统DHCP服务启动成功.cluter=[]",host.getClusterId());
     }
 
     @Override
@@ -125,6 +125,6 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         this.vncService.register(vm.getClusterId(), vm.getId(), host.getHostIp(), vm.getVncPort(), vm.getVncPassword());
         super.initializeNetwork(vm, host);
         this.initializeDhcp(vm, host);
-        log.info("system VM[Route] start complete");
+        log.info("系统虚拟机[Route]启动完成.cluter=[]",host.getClusterId());
     }
 }
