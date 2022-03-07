@@ -39,7 +39,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        log.info("系统虚拟机[Route] 申请网络成功,VM={} IP={} MAC={} Device={}", vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
+        log.info("系统虚拟机[Route] 申请网络成功,ClusterId={} VM={} IP={} MAC={} Device={}",network.getClusterId(), vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -117,7 +117,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         if (restartDhcpResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(restartDhcpResultUtil.getCode(), restartDhcpResultUtil.getMessage());
         }
-        log.info("系统DHCP服务启动成功.cluter=[]",host.getClusterId());
+        log.info("系统DHCP服务启动成功.clusterId={} hostId={}",host.getClusterId(),host.getId());
     }
 
     @Override
@@ -125,6 +125,6 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
         this.vncService.register(vm.getClusterId(), vm.getId(), host.getHostIp(), vm.getVncPort(), vm.getVncPassword());
         super.initializeNetwork(vm, host);
         this.initializeDhcp(vm, host);
-        log.info("系统虚拟机[Route]启动完成.cluter=[]",host.getClusterId());
+        log.info("系统虚拟机[Route]启动完成.clusterId={} hostId={}",host.getClusterId(),host.getId());
     }
 }

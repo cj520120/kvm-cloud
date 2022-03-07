@@ -380,6 +380,9 @@ export default {
                 let findIndex = this.all_instance.findIndex(item => item.id === data.instance.id)
                 this.$delete(this.all_instance,findIndex)
               }
+            }else if(res.data.code===1000001){
+              let findIndex = this.all_instance.findIndex(item => item.id === data.instance.id)
+              this.$delete(this.all_instance,findIndex)
             }
           })
         })
