@@ -44,7 +44,7 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
 
     @Override
     @Rule(permissions = "network.create")
-    public ResultUtil<NetworkInfo> createNetwork(String name, int clusterId, String guestStartIp, String guestEndIp, String managerStartIp, String managerEndIp, String subnet, String gateway, String dns, String card, String type) {
+    public ResultUtil<NetworkInfo> createNetwork(String name, int clusterId, String managerStartIp, String managerEndIp, String guestStartIp, String guestEndIp, String subnet, String gateway, String dns, String card, String type) {
 
 
         if (StringUtils.isEmpty(name)) {
