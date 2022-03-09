@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.agent.util;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -114,7 +115,13 @@ public final class XmlUtil {
         sb.append("<on_reboot>restart</on_reboot>");
         sb.append("<on_crash>destroy</on_crash>");
         sb.append("<devices>");
-        sb.append("<emulator>/usr/libexec/qemu-kvm</emulator>");
+        if (FileUtil.exist("/usr/libexec/qemu-kvm")) {
+            sb.append("<emulator>/usr/libexec/qemu-kvm</emulator>");
+        } else if (FileUtil.exist("/usr/bin/qemu-system-x86_64")) {
+            sb.append("<emulator>/usr/bin/qemu-system-x86_64</emulator>");
+        } else {
+            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "未找到有效的qemu路径");
+        }
         //光盘
         sb.append(toXml(instance.getCdRoom()));
         //主磁盘
