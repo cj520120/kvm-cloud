@@ -46,10 +46,10 @@ public interface NetworkUiService {
      *
      * @param name
      * @param clusterId
-     * @param guestStartIp
-     * @param guestEndIp
      * @param managerStartIp
      * @param managerEndIp
+     * @param guestStartIp
+     * @param guestEndIp
      * @param subnet
      * @param gateway
      * @param dns
@@ -57,7 +57,7 @@ public interface NetworkUiService {
      * @param type
      * @return
      */
-    ResultUtil<NetworkInfo> createNetwork(String name, int clusterId, String guestStartIp, String guestEndIp, String managerStartIp, String managerEndIp, String subnet, String gateway, String dns, String card, String type);
+    ResultUtil<NetworkInfo> createNetwork(String name, int clusterId, String managerStartIp, String managerEndIp, String guestStartIp, String guestEndIp, String subnet, String gateway, String dns, String card, String type);
 
     /**
      * 销毁网络
