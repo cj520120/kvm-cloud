@@ -91,20 +91,7 @@ yum install java-1.8.0-openjdk* -y
 ```
 
 #### 3、配置KVM 主机网桥，增加一个网桥
-这一步一定注意：
-
-1. 使用`ip addr`查看你的网卡信息，在`CentOS 7`中网卡名可能不是`eth0`
-
-2. 错误的网卡名会导致后期辛苦配置的虚拟机无法正常被访问到！
-
-3. 网上随便就能搜到很多`CentOS 7`改网卡名位`eth0`的教程，内容大同小异
-
-4. 如果你尝试网上的改法反复重启都没能修改网卡名，可以试试最后一招：
-```
-重装系统，在第一个安装界面，光标选择 “Install CentOS 7” 不要着急回车
-根据页面左下角提示，按Tab或e（两种都可能）
-打开kernel启动选项后，增加 net.ifnames=0 biosdevname=0 追加到最后
-```
+这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期辛苦配置的虚拟机无法正常被访问到！
 确认网卡名无误后配置网桥：
 ```sh
 vi /etc/sysconfig/network-scripts/ifcfg-br0
@@ -119,7 +106,10 @@ vi /etc/sysconfig/network-scripts/ifcfg-br0
     DNS1=8.8.4.4
     DNS2=8.8.8.8
 
+# 务必使用 ip addr 命令查看你的实际网卡名，他很可能不是eth0
+# 下面这个编辑命令注意改成 ifcfg-实际网卡名
 vi /etc/sysconfig/network-scripts/ifcfg-eth0
+# 下面这个DEVICE注意改成 实际网卡名
     DEVICE="eth0"
     NM_CONTROLLED="no"
     ONBOOT="yes"
