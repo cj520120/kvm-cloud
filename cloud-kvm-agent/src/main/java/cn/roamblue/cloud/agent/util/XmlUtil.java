@@ -115,9 +115,11 @@ public final class XmlUtil {
         sb.append("<on_reboot>restart</on_reboot>");
         sb.append("<on_crash>destroy</on_crash>");
         sb.append("<devices>");
-        if (FileUtil.exist("/usr/libexec/qemu-kvm")) {
+        if (FileUtil.exist("/usr/libexec/qemu-kvm")) { 
+        	//centos 系统（已测试centos7）
             sb.append("<emulator>/usr/libexec/qemu-kvm</emulator>");
         } else if (FileUtil.exist("/usr/bin/qemu-system-x86_64")) {
+        	//ubuntu 系统 (已测试ubuntu 18.04)
             sb.append("<emulator>/usr/bin/qemu-system-x86_64</emulator>");
         } else {
             throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "未找到有效的qemu路径");
