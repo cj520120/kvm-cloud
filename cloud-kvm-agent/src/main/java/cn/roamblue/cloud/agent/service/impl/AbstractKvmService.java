@@ -43,7 +43,7 @@ public abstract class AbstractKvmService {
             } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_INVALID_STORAGE_VOL)) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "invalid storage vol object");
             } else {
-                log.error("call error", err.getMessage());
+                log.error("call error: {}", err.getMessage());
                 throw new CodeException(ErrorCode.SERVER_ERROR, err);
             }
         } catch (CodeException err) {
