@@ -3,9 +3,7 @@ package cn.roamblue.cloud.management.ui.impl;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.service.impl.BriaggeNetworkAllocateServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -14,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 /**
  * @author chenjun
  */
@@ -29,7 +28,7 @@ public abstract class AbstractUiService {
         } catch (CodeException e) {
             return ResultUtil.<T>builder().code(e.getCode()).message(e.getMessage()).build();
         } catch (Exception e) {
-        	log.error("请求失败",e);
+            log.error("请求失败", e);
             return ResultUtil.<T>builder().code(ErrorCode.SERVER_ERROR).message(e.getMessage()).build();
         }
     }

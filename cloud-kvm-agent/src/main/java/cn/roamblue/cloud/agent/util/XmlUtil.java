@@ -47,7 +47,7 @@ public final class XmlUtil {
         }
         if (cpu.getSocket() > 0 && cpu.getCore() > 0 && cpu.getThreads() > 0) {
             sb.append("<cpu mode='host-passthrough' check='partial'><model fallback='allow'>Nehalem</model><topology sockets='").append(cpu.getSocket()).append("' cores='").append(cpu.getCore()).append("' threads='").append(cpu.getThreads()).append("'/></cpu>");
-        }else {
+        } else {
             sb.append("<cpu mode='host-passthrough' check='partial'><model fallback='allow'>Nehalem</model><topology sockets='2' cores='4' threads='8'/></cpu>");
         }
         return sb.toString();
@@ -115,11 +115,11 @@ public final class XmlUtil {
         sb.append("<on_reboot>restart</on_reboot>");
         sb.append("<on_crash>destroy</on_crash>");
         sb.append("<devices>");
-        if (FileUtil.exist("/usr/libexec/qemu-kvm")) { 
-        	//centos 系统（已测试centos7）
+        if (FileUtil.exist("/usr/libexec/qemu-kvm")) {
+            //centos 系统（已测试centos7）
             sb.append("<emulator>/usr/libexec/qemu-kvm</emulator>");
         } else if (FileUtil.exist("/usr/bin/qemu-system-x86_64")) {
-        	//ubuntu 系统 (已测试ubuntu 18.04)
+            //ubuntu 系统 (已测试ubuntu 18.04)
             sb.append("<emulator>/usr/bin/qemu-system-x86_64</emulator>");
         } else {
             throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "未找到有效的qemu路径");
