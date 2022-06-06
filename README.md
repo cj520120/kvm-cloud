@@ -252,7 +252,21 @@ server.properties 和 client.properties 内容分别为management和agent项目�
    1、服务器掉电重启后，请在页面手动关闭所有自己创建的虚拟机，然后重新启动，系统虚拟机有自动检测重启功能，无需处理
    2、掉电可能引起虚拟磁盘损坏，如无法启动，可通过qemu-img check检查并进行相应修复
 ``` 
-
+7、虚拟机虚拟化嵌套
+```$xslt
+1、验证KVM 宿主机是否启用了嵌套虚拟化：
+    基于 Intel 的处理器运行以下命令：cat /sys/module/kvm_intel/parameters/nested
+    基于 AMD 的处理器运行以下命令： cat /sys/module/kvm_amd/parameters/nested
+    上述命令输出N /0表示嵌套虚拟化是禁用的。如果我们得到的输出是Y/1 则表示在您的宿主机已启用嵌套虚拟化
+2、如果需要启用嵌套虚拟化，使用以下内容创建一个文件名为/etc/modprobe.d/kvm-nested.conf 的文件：
+    options kvm-intel nested=1
+    options kvm-intel enable_shadow_vmcs=1
+    options kvm-intel enable_apicv=1
+    options kvm-intel ept=1
+3、reboot 重启机器
+4、现在验证嵌套虚拟化功能是否启用
+    cat /sys/module/kvm_intel/parameters/nested
+``` 
 ### 捐赠名单
 -------------------------------------------------------------------------------
 |捐赠人|捐赠方式|捐赠金额(元)|捐赠时间|捐赠备注| 
