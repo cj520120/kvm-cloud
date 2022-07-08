@@ -2,3 +2,6 @@ target
 *.iml
 .m2
 /.project
+.settings
+.idea
+.DS_Store
