@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.TemplateInfo;
 import cn.roamblue.cloud.management.service.TemplateService;
 import cn.roamblue.cloud.management.ui.TemplateUiService;
@@ -36,7 +36,7 @@ public class TemplateUiServiceImpl extends AbstractUiService implements Template
     }
 
     @Override
-    @Rule(permissions = "template.create")
+    @PreAuthority(value = "hasAuthority('template.create')")
     public ResultUtil<TemplateInfo> createTemplate(int clusterId, int osCategoryId, String name, String type, String uri) {
 
         if (StringUtils.isEmpty(name)) {
@@ -60,7 +60,7 @@ public class TemplateUiServiceImpl extends AbstractUiService implements Template
     }
 
     @Override
-    @Rule(permissions = "template.destroy")
+    @PreAuthority(value = "hasAuthority('template.destroy')")
     public ResultUtil<Void> destroyTemplate(int id) {
         return super.call(() -> templateService.destroyTemplateById(id));
     }

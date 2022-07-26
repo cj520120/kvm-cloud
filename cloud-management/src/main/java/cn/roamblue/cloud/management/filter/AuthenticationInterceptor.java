@@ -1,10 +1,13 @@
 package cn.roamblue.cloud.management.filter;
 
+import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.service.UserService;
-import cn.roamblue.cloud.management.util.HttpHeaderNames;
 import cn.roamblue.cloud.management.util.RequestContext;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -23,16 +26,16 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
-        String token = httpServletRequest.getHeader(HttpHeaderNames.TOKEN_HEADER);
         if (handler instanceof HandlerMethod){
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
             if (method.isAnnotationPresent(Login.class)) {
                 Login userLoginToken = method.getAnnotation(Login.class);
-                if (userLoginToken.required()) {
-                    Integer userId = userService.verify(token);
-                    RequestContext.set(RequestContext.Context.builder().userId(userId).build());
-                    httpServletRequest.setAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE, userId);
+                if (null == RequestContext.getCurrent().getSelf()) {
+                    httpServletResponse.setContentType("application/json; charset=utf-8");
+                    httpServletResponse.setStatus(HttpStatus.OK.value());
+                    httpServletResponse.getWriter().print(new Gson().toJson(ResultUtil.<Void>builder().code(ErrorCode.NO_LOGIN_ERROR).build()));
+                    return false;
                 }
             }
         }

@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.service.InstanceService;
 import cn.roamblue.cloud.management.service.LockService;
@@ -52,7 +52,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
     }
 
     @Override
-    @Rule(permissions = "vm.modify")
+    @PreAuthority(value = "hasAuthority('vm.modify')")
     public ResultUtil<VmInfo> modify(int vmId, String description, int calculationSchemeId, int groupId) {
 
         if (StringUtils.isEmpty(description)) {
@@ -66,7 +66,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return this.call(() -> vmService.findVncById(id));
     }
 
-    @Rule(permissions = "vm.create")
+    @PreAuthority(value = "hasAuthority('vm.create')")
     @Override
     public ResultUtil<VmInfo> create(String name, int clusterId, int storageId, int calculationSchemeId, int templateId, long size, int networkId, int groupId) {
 
@@ -89,13 +89,13 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return this.call(() -> vmService.getVmServiceByType(VmType.GUEST).create(name, calculationSchemeId, clusterId, storageId, templateId, size, networkId, groupId));
     }
 
-    @Rule(permissions = "vm.status.update")
+    @PreAuthority(value = "hasAuthority('vm.status.update')")
     @Override
     public ResultUtil<VmInfo> start(int id, int hostId) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).start(id, hostId)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.status.update")
+    @PreAuthority(value = "hasAuthority('vm.status.update')")
     @Override
     public ResultUtil<List<ResultUtil<VmInfo>>> batchStart(List<Integer> ids, int hostId) {
         if (ids == null || ids.isEmpty()) {
@@ -105,13 +105,13 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return super.batchSSupplyAsync(supplierList);
     }
 
-    @Rule(permissions = "vm.status.update")
+    @PreAuthority(value = "hasAuthority('vm.status.update')")
     @Override
     public ResultUtil<VmInfo> stop(int id, boolean force) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).stop(id, force)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.status.update")
+    @PreAuthority(value = "hasAuthority('vm.status.update')")
     @Override
     public ResultUtil<List<ResultUtil<VmInfo>>> batchStop(List<Integer> ids, boolean force) {
         if (ids == null || ids.isEmpty()) {
@@ -121,13 +121,13 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return super.batchSSupplyAsync(supplierList);
     }
 
-    @Rule(permissions = "vm.status.update")
+    @PreAuthority(value = "hasAuthority('vm.status.update')")
     @Override
     public ResultUtil<VmInfo> reboot(int id, boolean force) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).reboot(id, force)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.status.update")
+    @PreAuthority(value = "hasAuthority('vm.status.update')")
     @Override
     public ResultUtil<List<ResultUtil<VmInfo>>> batchReboot(List<Integer> ids, boolean force) {
         if (ids == null || ids.isEmpty()) {
@@ -137,13 +137,13 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return super.batchSSupplyAsync(supplierList);
     }
 
-    @Rule(permissions = "vm.reinstall")
+    @PreAuthority(value = "hasAuthority('vm.reinstall')")
     @Override
     public ResultUtil<VmInfo> reInstall(int id, int templateId) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).reInstall(id, templateId)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.template")
+    @PreAuthority(value = "hasAuthority('vm.template')")
     @Override
     public ResultUtil<TemplateInfo> createTemplate(int id, String name) {
         if (StringUtils.isEmpty(name)) {
@@ -152,7 +152,7 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).createTemplate(id, name)), 1, TimeUnit.HOURS);
     }
 
-    @Rule(permissions = "vm.destroy")
+    @PreAuthority(value = "hasAuthority('vm.destroy')")
     @Override
     public ResultUtil<VmInfo> destroyVmById(int id) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> {
@@ -161,44 +161,44 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
         }), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.resume")
+    @PreAuthority(value = "hasAuthority('vm.resume')")
     @Override
     public ResultUtil<VmInfo> resume(int id) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).resume(id)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.cd.update")
+    @PreAuthority(value = "hasAuthority('vm.cd.update')")
     @Override
     public ResultUtil<VmInfo> attachCdRoom(int id, int iso) {
 
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).changeCdRoom(id, iso)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.cd.update")
+    @PreAuthority(value = "hasAuthority('vm.cd.update')")
     @Override
     public ResultUtil<VmInfo> detachCdRoom(int id) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).changeCdRoom(id, 0)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.disk.update")
+    @PreAuthority(value = "hasAuthority('vm.disk.update')")
     @Override
     public ResultUtil<VolumeInfo> attachDisk(int id, int volume) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).attachDisk(id, volume)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.disk.update")
+    @PreAuthority(value = "hasAuthority('vm.disk.update')")
     @Override
     public ResultUtil<VolumeInfo> detachDisk(int id, int volume) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).detachDisk(id, volume)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.nic.update")
+    @PreAuthority(value = "hasAuthority('vm.nic.update')")
     @Override
     public ResultUtil<VmNetworkInfo> attachNetwork(int vmId, int networkId) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(vmId), () -> this.call(() -> vmService.getVmServiceByVmId(vmId).attachNetwork(vmId, networkId)), 1, TimeUnit.MINUTES);
     }
 
-    @Rule(permissions = "vm.nic.update")
+    @PreAuthority(value = "hasAuthority('vm.nic.update')")
     @Override
     public ResultUtil<Void> detachNetwork(int vmId, int vmNetworkId) {
         return lockService.run(LockKeyUtil.getInstanceLockKey(vmId), () -> this.call(() -> vmService.getVmServiceByVmId(vmId).detachNetwork(vmId, vmNetworkId)), 1, TimeUnit.MINUTES);

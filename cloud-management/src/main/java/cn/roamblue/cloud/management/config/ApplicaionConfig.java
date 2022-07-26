@@ -105,5 +105,12 @@ public class ApplicaionConfig {
      * 默认CPU超线程数
      */
     private int systemCpuThread=1;
-    
+    /**
+     * JWT 密码
+     */
+    private String jwtPassword="#$1fa)&*WS09";
+    /**
+     * ISSUser
+     */
+    private String jwtIssuer="Roamblue Cloud Management";
 }

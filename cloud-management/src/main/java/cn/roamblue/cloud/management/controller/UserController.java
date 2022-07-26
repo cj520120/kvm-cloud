@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.controller;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.bean.LoginSignatureInfo;
+import cn.roamblue.cloud.management.bean.LoginUser;
 import cn.roamblue.cloud.management.bean.LoginUserTokenInfo;
 import cn.roamblue.cloud.management.bean.UserInfo;
 import cn.roamblue.cloud.management.ui.UserUiService;
@@ -49,7 +50,7 @@ public class UserController {
      */
     @PostMapping("/management/password")
     @Login
-    public ResultUtil<LoginUserTokenInfo> updatePassword(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) Integer userId, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
+    public ResultUtil<LoginUserTokenInfo> updatePassword(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) Integer userId, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
 
         return userUiService.updatePassword(userId, oldPassword, newPassword, nonce);
     }
@@ -62,7 +63,7 @@ public class UserController {
      */
     @PostMapping("/management/token/refresh")
     @Login
-    public ResultUtil<LoginUserTokenInfo> refreshToken(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) Integer userId) {
+    public ResultUtil<LoginUserTokenInfo> refreshToken(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUser userId) {
         return userUiService.refreshToken(userId);
     }
 
@@ -85,7 +86,7 @@ public class UserController {
      */
     @GetMapping("/management/signature")
     @Login
-    public ResultUtil<LoginSignatureInfo> getLoginSignature(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) Integer userId) {
+    public ResultUtil<LoginSignatureInfo> getLoginSignature(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) Integer userId) {
         return userUiService.getLoginSignature(userId);
     }
 
@@ -115,7 +116,7 @@ public class UserController {
      */
     @PostMapping("/management/user/state")
     @Login
-    public ResultUtil<UserInfo> updateUserState(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId, @RequestParam("state") short state) {
+    public ResultUtil<UserInfo> updateUserState(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId, @RequestParam("state") short state) {
 
         return userUiService.updateUserState(currentUserId, userId, state);
     }
@@ -130,7 +131,7 @@ public class UserController {
      */
     @PostMapping("/management/user/rule")
     @Login
-    public ResultUtil<UserInfo> updateUserRule(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId, @RequestParam("rule") int rule) {
+    public ResultUtil<UserInfo> updateUserRule(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId, @RequestParam("rule") int rule) {
 
         return userUiService.updateUserRule(currentUserId, userId, rule);
     }
@@ -144,7 +145,7 @@ public class UserController {
      */
     @PostMapping("/management/user/destroy")
     @Login
-    public ResultUtil<Void> destroyUser(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId) {
+    public ResultUtil<Void> destroyUser(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId) {
 
         return userUiService.destroyUser(currentUserId, userId);
     }
@@ -159,7 +160,7 @@ public class UserController {
      */
     @PostMapping("/management/user/reset/password")
     @Login
-    public ResultUtil<UserInfo> resetPassword(@RequestAttribute(HttpHeaderNames.LOGIN_USER_ID_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId, @RequestParam("password") String password) {
+    public ResultUtil<UserInfo> resetPassword(@RequestAttribute(HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) int currentUserId, @RequestParam("userId") int userId, @RequestParam("password") String password) {
         return userUiService.resetPassword(currentUserId, userId, password);
     }
 

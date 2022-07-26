@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.util;
 
+import cn.roamblue.cloud.management.bean.LoginUser;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,6 +34,6 @@ public class RequestContext {
     @AllArgsConstructor
     @Builder
     public static class Context {
-        private int userId;
+        private LoginUser self;
     }
 }

@@ -3,7 +3,7 @@ package cn.roamblue.cloud.management.ui.impl;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.PermissionCategory;
 import cn.roamblue.cloud.management.bean.PermissionInfo;
 import cn.roamblue.cloud.management.bean.RulePermissionInfo;
@@ -41,7 +41,7 @@ public class RuleUiServiceImpl extends AbstractUiService implements RuleUiServic
     }
 
     @Override
-    @Rule(permissions = "rule.permission.create")
+    @PreAuthority(value = "hasAuthority('rule.permission.create')")
     public ResultUtil<RulePermissionInfo> createRulePermission(String name, String[] permissions) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "名称不能为空");
@@ -49,7 +49,7 @@ public class RuleUiServiceImpl extends AbstractUiService implements RuleUiServic
         return super.call(() -> ruleService.createRulePermission(name,permissions));
     }
 
-    @Rule(permissions = "rule.permission.modify")
+    @PreAuthority(value = "hasAuthority('rule.permission.modify')")
     @Override
     public ResultUtil<RulePermissionInfo> modifyRulePermission(int id, String name, String[] permissions) {
         if (StringUtils.isEmpty(name)) {
@@ -58,7 +58,7 @@ public class RuleUiServiceImpl extends AbstractUiService implements RuleUiServic
         return super.call(() -> ruleService.modifyRulePermission(id,name,permissions));
     }
 
-    @Rule(permissions = "rule.permission.destroy")
+    @PreAuthority(value = "hasAuthority('rule.permission.destroy')")
     @Override
     public ResultUtil<Void> destroyRulePermissionById(int id) {
         return super.call(() -> ruleService.destroyRulePermissionById(id));

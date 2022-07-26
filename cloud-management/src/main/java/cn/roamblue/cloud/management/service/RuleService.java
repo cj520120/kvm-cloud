@@ -15,9 +15,8 @@ public interface RuleService {
     /**
      * 权限检测
      * @param userId
-     * @param permissions
      */
-    void  hasPermission(int userId,String[] permissions);
+    List<String>  getUserPermissionList(int userId);
 
     /**
      * 获取所有权限列表

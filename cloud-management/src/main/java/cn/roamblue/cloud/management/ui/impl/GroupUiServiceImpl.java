@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.GroupInfo;
 import cn.roamblue.cloud.management.service.GroupService;
 import cn.roamblue.cloud.management.ui.GroupUiService;
@@ -27,7 +27,7 @@ public class GroupUiServiceImpl extends AbstractUiService implements GroupUiServ
     }
 
     @Override
-    @Rule(permissions = "group.create")
+    @PreAuthority(value = "hasAuthority('group.create')")
     public ResultUtil<GroupInfo> createGroup(String name) {
         if (StringUtils.isEmpty(name)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
@@ -36,7 +36,7 @@ public class GroupUiServiceImpl extends AbstractUiService implements GroupUiServ
     }
 
     @Override
-    @Rule(permissions = "group.modify")
+    @PreAuthority(value = "hasAuthority('group.modify')")
     public ResultUtil<GroupInfo> modifyGroup(int id, String name) {
 
         if (StringUtils.isEmpty(name)) {
@@ -46,8 +46,8 @@ public class GroupUiServiceImpl extends AbstractUiService implements GroupUiServ
     }
 
     @Override
-    @Rule(permissions = "group.destroy")
-    public ResultUtil<Void> destroyGroupById(@RequestParam("id") int id) {
+    @PreAuthority(value = "hasAuthority('group.destroy')")
+    public ResultUtil<Void> destroyGroupById(int id) {
         return super.call(() -> groupService.destroyGroupById(id));
     }
 }

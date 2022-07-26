@@ -1,10 +1,12 @@
 package cn.roamblue.cloud.management.service;
 
 
+import cn.roamblue.cloud.management.bean.LoginUser;
 import cn.roamblue.cloud.management.bean.LoginUserInfo;
 import cn.roamblue.cloud.management.bean.LoginUserTokenInfo;
 import cn.roamblue.cloud.management.bean.UserInfo;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,6 +23,13 @@ public interface UserService {
      */
     LoginUserTokenInfo login(String loginName, String password, String nonce);
 
+    /**
+     * Oauth2协议登录
+     * @param id
+     * @param authorities
+     * @return
+     */
+    LoginUserTokenInfo loginOauth2(Object id, Collection<String> authorities);
     /**
      * 根据用户ID获取用户信息
      *
@@ -43,15 +52,8 @@ public interface UserService {
      * @param token token
      * @return
      */
-    Integer getUserIdByToken(String token);
+    LoginUser getUserIdByToken(String token);
 
-    /**
-     * 验证token合法性
-     *
-     * @param token token
-     * @return
-     */
-    Integer verify(String token);
 
     /**
      * 更新密码
@@ -67,10 +69,10 @@ public interface UserService {
     /**
      * 刷新token
      *
-     * @param userId
+     * @param user
      * @return
      */
-    LoginUserTokenInfo refreshToken(Integer userId);
+    LoginUserTokenInfo refreshToken(LoginUser user);
 
     /**
      * 注册用户

@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.ClusterInfo;
 import cn.roamblue.cloud.management.service.ClusterService;
 import cn.roamblue.cloud.management.ui.ClusterUiService;
@@ -31,7 +31,7 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
         return super.call(() -> clusterService.findClusterById(id));
     }
 
-    @Rule(permissions = "cluster.create")
+    @PreAuthority(value = "hasAuthority('cluster.create')")
     @Override
     public ResultUtil<ClusterInfo> createCluster(String name, float overCpu, float overMemory) {
         if (StringUtils.isEmpty(name)) {
@@ -46,7 +46,7 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
         return super.call(() -> clusterService.createCluster(name, overCpu, overMemory));
     }
 
-    @Rule(permissions = "cluster.modify")
+    @PreAuthority(value = "hasAuthority('cluster.modify')")
     @Override
     public ResultUtil<ClusterInfo> modifyCluster(int id, String name, float overCpu, float overMemory) {
         if (StringUtils.isEmpty(name)) {
@@ -61,7 +61,7 @@ public class ClusterUiServiceImpl extends AbstractUiService implements ClusterUi
         return super.call(() -> clusterService.modifyCluster(id, name, overCpu, overMemory));
     }
 
-    @Rule(permissions = "cluster.destroy")
+    @PreAuthority(value = "hasAuthority('cluster.destroy')")
     @Override
     public ResultUtil<Void> destroyClusterById(int id) {
         return super.call(() -> clusterService.destroyClusterById(id));

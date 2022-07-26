@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.HostInfo;
 import cn.roamblue.cloud.management.service.HostService;
 import cn.roamblue.cloud.management.ui.HostUiService;
@@ -36,7 +36,7 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
 
     }
 
-    @Rule(permissions = "host.status.modify")
+    @PreAuthority(value = "hasAuthority('host.status.modify')")
     @Override
     public ResultUtil<HostInfo> updateHostStatusById(int id, String status) {
 
@@ -47,7 +47,7 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
     }
 
     @Override
-    @Rule(permissions = "host.create")
+    @PreAuthority(value = "hasAuthority('host.create')")
     public ResultUtil<HostInfo> createHost(int clusterId, String name, String ip, String uri) {
 
         if (StringUtils.isEmpty(name)) {
@@ -69,7 +69,7 @@ public class HostUiServiceImpl extends AbstractUiService implements HostUiServic
     }
 
     @Override
-    @Rule(permissions = "host.destroy")
+    @PreAuthority(value = "hasAuthority('host.destroy')")
     public ResultUtil<Void> destroyHostById(int id) {
         return super.call(() -> hostService.destroyHostById(id));
     }

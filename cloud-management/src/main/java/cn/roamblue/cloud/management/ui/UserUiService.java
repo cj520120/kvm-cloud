@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.ui;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.bean.LoginSignatureInfo;
+import cn.roamblue.cloud.management.bean.LoginUser;
 import cn.roamblue.cloud.management.bean.LoginUserTokenInfo;
 import cn.roamblue.cloud.management.bean.UserInfo;
 
@@ -35,10 +36,10 @@ public interface UserUiService {
     /**
      * 刷新token
      *
-     * @param userId
+     * @param user
      * @return
      */
-    ResultUtil<LoginUserTokenInfo> refreshToken(Integer userId);
+    ResultUtil<LoginUserTokenInfo> refreshToken(LoginUser user);
 
     /**
      * 获取签名

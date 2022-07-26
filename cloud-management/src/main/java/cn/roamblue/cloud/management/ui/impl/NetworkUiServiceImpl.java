@@ -3,7 +3,7 @@ package cn.roamblue.cloud.management.ui.impl;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.NetworkInfo;
 import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.service.NetworkService;
@@ -43,7 +43,7 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
     }
 
     @Override
-    @Rule(permissions = "network.create")
+    @PreAuthority(value = "hasAuthority('network.create')")
     public ResultUtil<NetworkInfo> createNetwork(String name, int clusterId, String managerStartIp, String managerEndIp, String guestStartIp, String guestEndIp, String subnet, String gateway, String dns, String card, String type) {
 
 
@@ -85,21 +85,21 @@ public class NetworkUiServiceImpl extends AbstractUiService implements NetworkUi
     }
 
     @Override
-    @Rule(permissions = "network.destroy")
+    @PreAuthority(value = "hasAuthority('network.destroy')")
     public ResultUtil<Void> destroyNetworkById(int id) {
         return super.call(() -> networkService.destroyNetworkById(id));
 
     }
 
     @Override
-    @Rule(permissions = "network.status.modify")
+    @PreAuthority(value = "hasAuthority('network.status.modify')")
     public ResultUtil<NetworkInfo> startNetwork(int id) {
         return super.call(() -> networkService.startNetworkById(id));
 
     }
 
     @Override
-    @Rule(permissions = "network.status.modify")
+    @PreAuthority(value = "hasAuthority('network.status.modify')")
     public ResultUtil<NetworkInfo> pauseNetwork(int id) {
         return super.call(() -> networkService.pauseNetworkById(id));
     }

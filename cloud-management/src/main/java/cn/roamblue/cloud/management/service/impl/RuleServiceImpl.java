@@ -47,7 +47,7 @@ public class RuleServiceImpl extends AbstractService implements RuleService {
 
 
     @Override
-    public void hasPermission(int userId, String[] permissions) {
+    public List<String> getUserPermissionList(int userId ) {
         LoginInfoEntity loginInfoEntity = this.loginInfoMapper.findById(userId);
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "用户不存在");
@@ -61,12 +61,7 @@ public class RuleServiceImpl extends AbstractService implements RuleService {
         QueryWrapper<PermissionInfoEntity> wrapper = new QueryWrapper<>();
         wrapper.in("id",permissionIds);
         List<String> permissionList= permissionInfoMapper.selectList(wrapper).stream().map(PermissionInfoEntity::getPermissionName).collect(Collectors.toList());
-
-        for (String permission : permissions) {
-            if (!permissionList.contains(permission)) {
-                throw new CodeException(ErrorCode.PERMISSION_ERROR, "当前账号权限不足，请联系管理员进行操作");
-            }
-        }
+        return permissionList;
 
     }
 

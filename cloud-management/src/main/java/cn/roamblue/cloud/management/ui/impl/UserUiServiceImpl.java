@@ -3,11 +3,8 @@ package cn.roamblue.cloud.management.ui.impl;
 import cn.hutool.core.lang.UUID;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
-import cn.roamblue.cloud.management.bean.LoginSignatureInfo;
-import cn.roamblue.cloud.management.bean.LoginUserInfo;
-import cn.roamblue.cloud.management.bean.LoginUserTokenInfo;
-import cn.roamblue.cloud.management.bean.UserInfo;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
+import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.service.UserService;
 import cn.roamblue.cloud.management.ui.UserUiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +46,8 @@ public class UserUiServiceImpl extends AbstractUiService implements UserUiServic
     }
 
     @Override
-    public ResultUtil<LoginUserTokenInfo> refreshToken(Integer userId) {
-        return super.call(() -> userService.refreshToken(userId));
+    public ResultUtil<LoginUserTokenInfo> refreshToken(LoginUser user) {
+        return super.call(() -> userService.refreshToken(user));
     }
 
     @Override
@@ -73,7 +70,7 @@ public class UserUiServiceImpl extends AbstractUiService implements UserUiServic
     }
 
     @Override
-    @Rule(permissions = "user.register")
+    @PreAuthority(value = "hasAuthority('user.register')")
     public ResultUtil<UserInfo> register(String loginName, String password, int rule) {
         if (StringUtils.isEmpty(loginName)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "用户名不能为空");
@@ -86,7 +83,7 @@ public class UserUiServiceImpl extends AbstractUiService implements UserUiServic
     }
 
     @Override
-    @Rule(permissions = "user.state.update")
+    @PreAuthority(value = "hasAuthority('user.state.update')")
     public ResultUtil<UserInfo> updateUserState(int currentUserId, int userId, short state) {
         if (currentUserId == userId) {
             return ResultUtil.error(ErrorCode.PERMISSION_ERROR, "不能更改自己状态");
@@ -95,7 +92,7 @@ public class UserUiServiceImpl extends AbstractUiService implements UserUiServic
     }
 
     @Override
-    @Rule(permissions = "user.permission.update")
+    @PreAuthority(value = "hasAuthority('user.permission.update')")
     public ResultUtil<UserInfo> updateUserRule(int currentUserId, int userId, int rule) {
         if (currentUserId == userId) {
             return ResultUtil.error(ErrorCode.PERMISSION_ERROR, "不能更改自己权限");
@@ -104,7 +101,7 @@ public class UserUiServiceImpl extends AbstractUiService implements UserUiServic
     }
 
     @Override
-    @Rule(permissions = "user.destroy")
+    @PreAuthority(value = "hasAuthority('user.destroy')")
     public ResultUtil<Void> destroyUser(int currentUserId, int userId) {
         if (currentUserId == userId) {
             return ResultUtil.error(ErrorCode.PERMISSION_ERROR, "不能删除自己账号");
@@ -114,7 +111,7 @@ public class UserUiServiceImpl extends AbstractUiService implements UserUiServic
 
 
     @Override
-    @Rule(permissions = "user.password.reset")
+    @PreAuthority(value = "hasAuthority('user.password.reset')")
     public ResultUtil<UserInfo> resetPassword(int currentUserId, int userId, String password) {
         if (StringUtils.isEmpty(password)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "密码不能为空");

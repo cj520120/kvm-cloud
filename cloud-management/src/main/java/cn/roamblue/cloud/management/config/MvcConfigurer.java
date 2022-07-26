@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.config;
 
 import cn.roamblue.cloud.management.filter.AuthenticationInterceptor;
+import cn.roamblue.cloud.management.filter.UserInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -15,9 +16,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class MvcConfigurer implements WebMvcConfigurer {
     @Autowired
     private AuthenticationInterceptor authenticationInterceptor;
+    @Autowired
+    private UserInterceptor userInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(userInterceptor).addPathPatterns("/management/**");
         registry.addInterceptor(authenticationInterceptor).addPathPatterns("/management/**");
     }
 

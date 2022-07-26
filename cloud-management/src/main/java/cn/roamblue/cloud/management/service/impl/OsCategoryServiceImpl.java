@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.service.impl;
 
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.OsCategoryInfo;
 import cn.roamblue.cloud.management.data.entity.OsCategoryEntity;
 import cn.roamblue.cloud.management.data.mapper.OsCategoryMapper;
@@ -36,7 +36,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
         List<OsCategoryEntity> list = osCategoryMapper.selectAll();
         return BeanConverter.convert(list, this::init);
     }
-    @Rule(permissions="category.create")
+    @PreAuthority(value ="hasAuthority('category.create')")
     @Override
     public OsCategoryInfo createOsCategory(String categoryName, String networkDriver, String diskDriver) {
         OsCategoryEntity entity = OsCategoryEntity.builder().categoryName(categoryName)
@@ -49,7 +49,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
         return this.init(entity);
     }
 
-    @Rule(permissions="category.modify")
+    @PreAuthority(value ="hasAuthority('category.modify')")
     @Override
     public OsCategoryInfo modifyOsCategory(int id, String categoryName, String diskDriver, String networkDriver) {
         OsCategoryEntity osCategoryEntity = osCategoryMapper.selectById(id);
@@ -63,7 +63,7 @@ public class OsCategoryServiceImpl extends AbstractService implements OsCategory
         return this.init(osCategoryEntity);
     }
 
-    @Rule(permissions="category.destroy")
+    @PreAuthority(value ="hasAuthority('category.destroy')")
     @Override
     public void destroyOsCategoryById(int id) {
         this.osCategoryMapper.deleteById(id);

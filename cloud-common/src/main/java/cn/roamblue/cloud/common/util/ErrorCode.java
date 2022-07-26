@@ -50,6 +50,7 @@ public final class ErrorCode {
     public static final int DETACH_NETWORK_ERROR = BASE_ERROR + 38;
     public static final int USER_LOGIN_NAME_OR_PASSWORD_ERROR = BASE_ERROR + 39;
     public static final int RULE_PERMISSION_NOT_FOUND = BASE_ERROR + 40;
+    public static final int LOCAL_USER_NOT_SUPPORT = BASE_ERROR + 41;
 
     private ErrorCode() {
 

@@ -2,7 +2,7 @@ package cn.roamblue.cloud.management.ui.impl;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.annotation.Rule;
+import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.StorageInfo;
 import cn.roamblue.cloud.management.service.StorageService;
 import cn.roamblue.cloud.management.ui.StorageUiService;
@@ -36,7 +36,7 @@ public class StorageUiServiceImpl extends AbstractUiService implements StorageUi
     }
 
     @Override
-    @Rule(permissions = "storage.create")
+    @PreAuthority(value = "hasAuthority('storage.create')")
     public ResultUtil<StorageInfo> createStorage(int clusterId, String name, String uri, String source) {
         if (StringUtils.isEmpty(name)) {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "名称不能为空");
@@ -54,7 +54,7 @@ public class StorageUiServiceImpl extends AbstractUiService implements StorageUi
     }
 
     @Override
-    @Rule(permissions = "storage.destroy")
+    @PreAuthority(value = "hasAuthority('storage.destroy')")
     public ResultUtil<Void> destroyStorageById(int id) {
         return super.call(() -> storagePoolService.destroyStorageById(id));
     }
