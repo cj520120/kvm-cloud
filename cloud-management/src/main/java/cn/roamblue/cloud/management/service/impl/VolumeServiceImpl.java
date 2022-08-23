@@ -118,7 +118,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         if (clusterEntity == null) {
             throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, "集群不存在");
         }
-        StorageEntity storageEntity = this.allocateService.allocateStorage(clusterId, 0, size);
+        StorageEntity storageEntity = this.allocateService.allocateStorage(clusterId, storageId, size);
 
         HostEntity host = this.allocateService.allocateHost(clusterId, 0, 0, 0);
         String target = UUID.randomUUID().toString().replace("-", "");

@@ -136,9 +136,10 @@ public interface VmUiService {
      *
      * @param vmId
      * @param templateId
+     * @param storageId
      * @return
      */
-    ResultUtil<VmInfo> reInstall(int vmId, int templateId);
+    ResultUtil<VmInfo> reInstall(int vmId, int templateId,int storageId);
 
     /**
      * 创建VM模版

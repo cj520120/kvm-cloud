@@ -163,7 +163,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
     }
 
     @Override
-    public VmInfo reInstall(int vmId, int templateId) {
+    public VmInfo reInstall(int vmId, int templateId,int storageId) {
 
 
         TemplateInfo template = templateService.findTemplateById(templateId);
@@ -191,7 +191,7 @@ public class GuestServiceImpl extends AbstractVmService implements GuestService 
         }
         VolumeInfo volumeInfo = this.volumeService.listVolumeByVmId(vmId).stream().filter(t -> t.getDevice() == 0).findFirst().orElseThrow(() -> new CodeException(ErrorCode.VOLUME_NOT_FOUND, "VM Root磁盘丢失"));
         this.volumeService.detachVm(volumeInfo.getId(), vmId);
-        volumeInfo = this.volumeService.createVolume(vm.getClusterId(), parentVolPath, 0, "ROOT-" + vm.getId(), volumeInfo.getCapacity() / 1024 / 1024 / 1024);
+        volumeInfo = this.volumeService.createVolume(vm.getClusterId(), parentVolPath, storageId, "ROOT-" + vm.getId(), volumeInfo.getCapacity() / 1024 / 1024 / 1024);
 
         this.volumeService.attachVm(volumeInfo.getId(), vmId);
 

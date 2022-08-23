@@ -232,8 +232,8 @@ public class VmController {
      */
     @Login
     @PostMapping("/management/vm/reinstall")
-    public ResultUtil<VmInfo> reInstall(@RequestParam("id") int vmId, @RequestParam("templateId") int templateId) {
-        return vmUiService.reInstall(vmId, templateId);
+    public ResultUtil<VmInfo> reInstall(@RequestParam("id") int vmId, @RequestParam("templateId") int templateId, @RequestParam("storageId") int storageId) {
+        return vmUiService.reInstall(vmId, templateId,storageId);
     }
 
     /**

@@ -1,7 +1,7 @@
 package cn.roamblue.cloud.agent.service.impl;
 
 import cn.roamblue.cloud.agent.service.KvmStorageService;
-import cn.roamblue.cloud.agent.service.impl.storage.impl.StroageInitializeFactory;
+import cn.roamblue.cloud.agent.service.impl.storage.impl.StorageInitializeFactory;
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -25,7 +25,7 @@ import java.util.List;
 public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStorageService {
 
     @Autowired
-    private StroageInitializeFactory stroageBuilderStrategy;
+    private StorageInitializeFactory stroageBuilderStrategy;
 
     @Override
     public List<StorageModel> listStorage() {

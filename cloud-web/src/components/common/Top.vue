@@ -41,7 +41,7 @@ export default {
 	methods: {
 		menu_change(command) {
 			if (command === 'logout') {
-				localStorage.setItem('X-Token', '')
+				localStorage.removeItem('X-CLOUD-TOKEN')
 				this.$router.push({ path: '/login' })
 			} else if (command == 'password') {
 				this.$refs.ChangePasswordRef.dialog_visible = true

@@ -64,7 +64,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
     }
 
     @Override
-    public VmInfo reInstall(int vmId, int templateId) {
+    public VmInfo reInstall(int vmId, int templateId,int storageId) {
         throw new CodeException(ErrorCode.NOT_SUPPORTED, "系统实例不支持该操作");
     }
 

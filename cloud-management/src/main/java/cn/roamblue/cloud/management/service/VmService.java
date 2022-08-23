@@ -144,8 +144,9 @@ public interface VmService {
      *
      * @param vmId
      * @param templateId
+     * @param storageId
      * @return
      */
-    VmInfo reInstall(int vmId, int templateId);
+    VmInfo reInstall(int vmId, int templateId,int storageId);
 
 }

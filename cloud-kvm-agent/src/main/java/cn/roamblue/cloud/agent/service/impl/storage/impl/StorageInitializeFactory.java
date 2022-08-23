@@ -14,7 +14,7 @@ import java.util.List;
  * @Date: 2021/8/5 上午11:24
  */
 @Component
-public class StroageInitializeFactory {
+public class StorageInitializeFactory {
     @Autowired
     private List<StorageInitialize> storageList;
 

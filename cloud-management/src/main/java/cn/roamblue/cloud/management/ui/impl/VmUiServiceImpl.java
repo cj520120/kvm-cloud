@@ -139,8 +139,8 @@ public class VmUiServiceImpl extends AbstractUiService implements VmUiService {
 
     @PreAuthority(value = "hasAuthority('vm.reinstall')")
     @Override
-    public ResultUtil<VmInfo> reInstall(int id, int templateId) {
-        return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).reInstall(id, templateId)), 1, TimeUnit.MINUTES);
+    public ResultUtil<VmInfo> reInstall(int id, int templateId,int storageId) {
+        return lockService.run(LockKeyUtil.getInstanceLockKey(id), () -> this.call(() -> vmService.getVmServiceByVmId(id).reInstall(id, templateId,storageId)), 1, TimeUnit.MINUTES);
     }
 
     @PreAuthority(value = "hasAuthority('vm.template')")
