@@ -104,10 +104,16 @@ public final class XmlUtil {
         sb.append("<resource><partition>/machine</partition></resource>");
         sb.append("<sysinfo type='smbios'>");
         sb.append("<system>");
-        sb.append("<entry name='product'>Virt-Manager</entry>");
+        sb.append("<entry name='product'>Roamblue</entry>");
         sb.append("</system>");
         sb.append("</sysinfo>");
-        sb.append("<os><type arch='x86_64'>hvm</type><boot dev='cdrom'/><boot dev='hd'/></os>");
+
+        sb.append("<os>");
+        sb.append("<type>hvm</type>");
+        sb.append("<boot dev='cdrom'/>");
+        sb.append("<boot dev='hd'/>");
+        sb.append("<bootmenu enable ='yes' timeout='5000'/>");
+        sb.append("</os>");
         sb.append("<features><pae/><acpi/><apic/><hap/><privnet/></features>");
         sb.append("<clock offset='localtime'></clock>");
         //控制周期
