@@ -20,8 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map;
 
@@ -41,7 +40,7 @@ public class Oauth2LoginController {
 
     @GetMapping("/login")
     public RedirectView goLoginPage() {
-        String redirectUri = URLEncoder.encode(this.config.getRedirectUri(), StandardCharsets.UTF_8);
+        String redirectUri =  cn.hutool.core.net.URLEncoder.createDefault().encode(this.config.getRedirectUri(), Charset.forName("UTF-8"));
         return new RedirectView(String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", this.config.getAuthUri(), this.config.getClientId(), redirectUri));
     }
 
