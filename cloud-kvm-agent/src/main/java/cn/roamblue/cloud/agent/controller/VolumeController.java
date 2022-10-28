@@ -2,6 +2,7 @@ package cn.roamblue.cloud.agent.controller;
 
 import cn.roamblue.cloud.agent.service.KvmVolumeService;
 import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.agent.VolumeSnapshotModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -117,5 +118,53 @@ public class VolumeController {
             @RequestParam("targetPath") String targetPath) {
         return ResultUtil.<VolumeModel>builder().data(volumeService.cloneVolume(sourceStorage, sourceVolume, targetStorage, targetVolume, targetPath)).build();
 
+    }
+
+
+    /**
+     * 快照列表
+     *
+     * @param file 磁盘路径
+     * @return
+     */
+    @GetMapping("/volume/snapshot/list")
+    public ResultUtil<List<VolumeSnapshotModel>> listSnapshot(@RequestParam("file") String file) {
+        return ResultUtil.success(volumeService.listSnapshot(file));
+    }
+
+    /**
+     * 创建快照
+     *
+     * @param name 快照名称
+     * @param file 磁盘路径
+     * @return
+     */
+    @PostMapping("/volume/snapshot/create")
+    public ResultUtil<VolumeSnapshotModel> createSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
+        return ResultUtil.success(volumeService.createSnapshot(name, file));
+    }
+
+    /**
+     * 恢复快照
+     *
+     * @param name 快照名称
+     * @param file 磁盘路径
+     */
+    @PostMapping("/volume/snapshot/revert")
+    public ResultUtil<Void> revertSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
+        volumeService.revertSnapshot(name, file);
+        return ResultUtil.<Void>builder().build();
+    }
+
+    /**
+     * 删除快照
+     *
+     * @param name 快照名称
+     * @param file 磁盘路径
+     */
+    @PostMapping("/volume/snapshot/delete")
+    public ResultUtil<Void> deleteSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
+        volumeService.deleteSnapshot(name, file);
+        return ResultUtil.<Void>builder().build();
     }
 }

@@ -34,6 +34,27 @@
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.anarres.qemu</groupId>
+            <artifactId>qemu-image</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.anarres.qemu</groupId>
+            <artifactId>qemu-qapi</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.anarres.qemu</groupId>
+            <artifactId>qemu-manager</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.anarres.qemu</groupId>
+            <artifactId>qemu-exec</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

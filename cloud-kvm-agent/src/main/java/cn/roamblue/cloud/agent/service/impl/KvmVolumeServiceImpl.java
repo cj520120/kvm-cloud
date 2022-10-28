@@ -1,8 +1,12 @@
 package cn.roamblue.cloud.agent.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.roamblue.cloud.agent.service.KvmVolumeService;
 import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.agent.VolumeSnapshotModel;
 import lombok.extern.slf4j.Slf4j;
+import org.anarres.qemu.image.QEmuImage;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
 import org.libvirt.StorageVolInfo;
@@ -10,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -38,7 +44,9 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             try {
                 StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
+
                 StorageVolInfo storageVolInfo = storageVol.getInfo();
+
                 String type = null;
                 if (storageVolInfo != null && storageVolInfo.type != null) {
                     type = storageVolInfo.type.toString();
@@ -59,6 +67,8 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
 
     @Override
     public VolumeModel reSize(String storageName, String volumeName, long size) {
+        QEmuImage img;
+
         return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
@@ -169,5 +179,44 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
                     .allocation(storageVolInfo.allocation)
                     .build();
         });
+    }
+
+    @Override
+    public List<VolumeSnapshotModel> listSnapshot(String file) {
+        String command = String.format("qemu-img snapshot -l %s", file);
+        String response = RuntimeUtil.execForStr(command).trim();
+        List<VolumeSnapshotModel> volumeSnapshotModelList = new ArrayList<>();
+        if (!StringUtils.isEmpty(response)) {
+            String[] lines = response.split("\n");
+            for (int i = 2; i < lines.length; i++) {
+                String line=lines[i];
+                List<String> list = Arrays.asList(line.split(" ")).stream().filter(t -> !StringUtils.isEmpty(t)).collect(Collectors.toList());
+                String tag = list.get(1);
+                String createTime = list.get(list.size() - 3) + " " + list.get(list.size() - 2);
+                System.out.println(line);
+                volumeSnapshotModelList.add(VolumeSnapshotModel.builder().tag(tag).createTime(DateUtil.parse(createTime, "yyyy-MM-dd HH:mm:ss")).build());
+            }
+        }
+        return volumeSnapshotModelList;
+    }
+
+    @Override
+    public VolumeSnapshotModel createSnapshot(String name, String file) {
+        String command = String.format("qemu-img snapshot -c %s %s", name, file);
+        RuntimeUtil.execForStr(command);
+        List<VolumeSnapshotModel> list = this.listSnapshot(file);
+        return list.stream().filter(t -> t.getTag().equals(name)).findFirst().get();
+    }
+
+    @Override
+    public void revertSnapshot(String name, String file) {
+        String command = String.format("qemu-img snapshot -a %s %s", name, file);
+        RuntimeUtil.execForStr(command);
+    }
+
+    @Override
+    public void deleteSnapshot(String name, String file) {
+        String command = String.format("qemu-img snapshot -d %s %s", name, file);
+        RuntimeUtil.execForStr(command);
     }
 }
