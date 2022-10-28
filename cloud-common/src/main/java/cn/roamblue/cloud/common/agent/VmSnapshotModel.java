@@ -22,7 +22,16 @@ public class VmSnapshotModel implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
+    /**
+     * 系统快照名称
+     */
     private String name;
+    /**
+     * 系统快照描述
+     */
     private String description;
+    /**
+     * 快照创建时间
+     */
     private Date createTime;
 }

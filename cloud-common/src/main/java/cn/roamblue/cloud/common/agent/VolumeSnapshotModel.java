@@ -22,6 +22,12 @@ public class VolumeSnapshotModel implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
+    /**
+     * 快照标识
+     */
     private String tag;
+    /**
+     * 创建时间
+     */
     private Date createTime;
 }
