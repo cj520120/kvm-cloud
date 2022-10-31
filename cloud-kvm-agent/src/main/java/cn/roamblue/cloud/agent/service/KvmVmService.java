@@ -2,7 +2,6 @@ package cn.roamblue.cloud.agent.service;
 
 import cn.roamblue.cloud.common.agent.VmInfoModel;
 import cn.roamblue.cloud.common.agent.VmModel;
-import cn.roamblue.cloud.common.agent.VmSnapshotModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
 
 import java.util.List;
@@ -33,38 +32,6 @@ public interface KvmVmService {
      */
     VmInfoModel findByName(String name);
 
-    /**
-     * 获取虚拟机快照列表
-     *
-     * @param name 虚拟机名称
-     * @return
-     */
-    List<VmSnapshotModel> listSnapshot(String name);
-
-    /**
-     * 创建虚拟机快照
-     *
-     * @param name        虚拟机名称
-     * @param description 快照描述
-     * @return
-     */
-    VmSnapshotModel createSnapshot(String name, String description);
-
-    /**
-     * 恢复虚拟机快照
-     *
-     * @param name         虚拟机名称
-     * @param snapshotName 快照名称
-     */
-    void revertToSnapshot(String name, String snapshotName);
-
-    /**
-     * 删除虚拟机快照
-     *
-     * @param name
-     * @param snapshotName
-     */
-    void deleteSnapshot(String name, String snapshotName);
 
     /**
      * 重启VM

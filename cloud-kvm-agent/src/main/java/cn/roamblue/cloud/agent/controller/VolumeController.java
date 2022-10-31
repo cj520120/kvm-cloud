@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.agent.controller;
 
 import cn.roamblue.cloud.agent.service.KvmVolumeService;
+import cn.roamblue.cloud.agent.service.KvmVolumeSnapshotService;
 import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.agent.VolumeSnapshotModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
@@ -22,6 +23,10 @@ public class VolumeController {
 
     @Autowired
     private KvmVolumeService volumeService;
+
+
+    @Autowired
+    private KvmVolumeSnapshotService volumeSnapshotService;
 
     /**
      * 获取磁盘列表
@@ -129,7 +134,7 @@ public class VolumeController {
      */
     @GetMapping("/volume/snapshot/list")
     public ResultUtil<List<VolumeSnapshotModel>> listSnapshot(@RequestParam("file") String file) {
-        return ResultUtil.success(volumeService.listSnapshot(file));
+        return ResultUtil.success(volumeSnapshotService.listSnapshot(file));
     }
 
     /**
@@ -141,7 +146,7 @@ public class VolumeController {
      */
     @PostMapping("/volume/snapshot/create")
     public ResultUtil<VolumeSnapshotModel> createSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
-        return ResultUtil.success(volumeService.createSnapshot(name, file));
+        return ResultUtil.success(volumeSnapshotService.createSnapshot(name, file));
     }
 
     /**
@@ -152,7 +157,7 @@ public class VolumeController {
      */
     @PostMapping("/volume/snapshot/revert")
     public ResultUtil<Void> revertSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
-        volumeService.revertSnapshot(name, file);
+        volumeSnapshotService.revertSnapshot(name, file);
         return ResultUtil.<Void>builder().build();
     }
 
@@ -164,7 +169,7 @@ public class VolumeController {
      */
     @PostMapping("/volume/snapshot/delete")
     public ResultUtil<Void> deleteSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
-        volumeService.deleteSnapshot(name, file);
+        volumeSnapshotService.deleteSnapshot(name, file);
         return ResultUtil.<Void>builder().build();
     }
 }
