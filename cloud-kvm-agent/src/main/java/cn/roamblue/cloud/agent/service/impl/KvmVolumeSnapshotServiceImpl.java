@@ -1,16 +1,16 @@
 package cn.roamblue.cloud.agent.service.impl;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.RuntimeUtil;
 import cn.roamblue.cloud.agent.service.KvmVolumeSnapshotService;
-import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.agent.VolumeSnapshotModel;
+import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
-import org.libvirt.StoragePool;
-import org.libvirt.StorageVol;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +28,7 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
     public List<VolumeSnapshotModel> listSnapshot(String storage, String volume) {
         String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -l %s", file);
-        String response = RuntimeUtil.execForStr(command).trim();
+        String response = this.exec(command);
         List<VolumeSnapshotModel> volumeSnapshotModelList = new ArrayList<>();
         if (!StringUtils.isEmpty(response)) {
             log.info("file snapshot response:{}", response);
@@ -48,8 +48,7 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
     public VolumeSnapshotModel createSnapshot(String name, String storage, String volume) {
         String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -c %s %s", name, file);
-        log.info("createSnapshot command={}", command);
-        RuntimeUtil.execForStr(command);
+        this.exec(command);
         List<VolumeSnapshotModel> list = this.listSnapshot(storage, volume);
         return list.stream().filter(t -> t.getTag().equals(name)).findFirst().get();
     }
@@ -58,22 +57,36 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
     public void revertSnapshot(String name, String storage, String volume) {
         String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -a %s %s", name, file);
-        RuntimeUtil.execForStr(command);
+        this.exec(command);
 
     }
 
     @Override
     public void deleteSnapshot(String name, String storage, String volume) {
-        String file = this.getVolumePath(storage,volume);
+        String file = this.getVolumePath(storage, volume);
         String command = String.format("qemu-img snapshot -d %s %s", name, file);
-        RuntimeUtil.execForStr(command);
+        this.exec(command);
+    }
+
+    private String exec(String command) {
+        try {
+            log.info("exec command:{}", command);
+            Process process = Runtime.getRuntime().exec(command);
+            String message = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
+            int code = process.waitFor();
+            if (code != 0) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, message + ".code=" + code);
+            }
+            return message;
+        } catch (CodeException err) {
+            throw err;
+        } catch (Exception err) {
+            log.error("exec command fail.command={}", command, err);
+            throw new CodeException(ErrorCode.SERVER_ERROR, err);
+        }
     }
 
     private String getVolumePath(String storageName, String volumeName) {
-        return super.execute(connect -> {
-            StoragePool storagePool = connect.storagePoolLookupByName(storageName);
-            StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
-            return storageVol.getPath();
-        });
+        return String.format("/mnt/%s/%s", storageName, volumeName);
     }
 }

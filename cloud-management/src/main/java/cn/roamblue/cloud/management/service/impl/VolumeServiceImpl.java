@@ -369,7 +369,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         int vmId = entity.getVmId();
         if (vmId > 0) {
             VmEntity vm = vmMapper.selectById(vmId);
-            if (vm != null && vm.getVmStatus() != VmStatus.STOPPED) {
+            if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
             }
         }
@@ -395,7 +395,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         int vmId = entity.getVmId();
         if (vmId > 0) {
             VmEntity vm = vmMapper.selectById(vmId);
-            if (vm != null && vm.getVmStatus() != VmStatus.STOPPED) {
+            if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
             }
         }
@@ -419,7 +419,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         int vmId = entity.getVmId();
         if (vmId > 0) {
             VmEntity vm = vmMapper.selectById(vmId);
-            if (vm != null && vm.getVmStatus() != VmStatus.STOPPED) {
+            if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
             }
         }

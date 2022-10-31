@@ -8,6 +8,7 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.config.ApplicaionConfig;
 import cn.roamblue.cloud.management.service.AgentService;
+import cn.roamblue.cloud.management.util.GsonBuilderUtil;
 import cn.roamblue.cloud.management.util.StoragePathUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -31,7 +32,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<HostModel> getHostInfo(String uri) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             ResultUtil<HostModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/host/info"), new TypeToken<ResultUtil<HostModel>>() {
             }.getType());
             return resultUtil;
@@ -41,7 +42,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<List<VmInfoModel>> getInstance(String uri) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             ResultUtil<List<VmInfoModel>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/list"), new TypeToken<ResultUtil<List<VmInfoModel>>>() {
             }.getType());
             return resultUtil;
@@ -51,7 +52,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<VmInfoModel> getInstance(String uri, String name) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(4);
             map.put("name", name);
             ResultUtil<VmInfoModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/info", map), new TypeToken<ResultUtil<VmInfoModel>>() {
@@ -63,7 +64,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<List<StorageModel>> getHostStorage(String uri) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             ResultUtil<List<StorageModel>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/storage/list"), new TypeToken<ResultUtil<List<StorageModel>>>() {
             }.getType());
             return resultUtil;
@@ -73,7 +74,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<StorageModel> addHostStorage(String storageType,String uri, String host, String source, String target) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(4);
             map.put("type", storageType);
             map.put("name", target);
@@ -90,7 +91,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<VolumeModel> createVolume(String uri, String storage, String volume, String backingVolume, long size) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(5);
             map.put("storageName", storage);
             map.put("volumeName", volume);
@@ -110,7 +111,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<VolumeModel> resize(String uri, String storageTarget, String volumeTarget, long size) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("storageName", storageTarget);
             map.put("volumeName", volumeTarget);
@@ -124,7 +125,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> destroyVolume(String uri, String storage, String volume) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(2);
             map.put("storageName", storage);
             map.put("volumeName", volume);
@@ -139,7 +140,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
         return this.call(() -> {
             Map<String, Object> map = new HashMap<>(1);
             map.put("name", storage);
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/storage/destroy", map), new TypeToken<ResultUtil<Void>>() {
             }.getType());
             return resultUtil;
@@ -149,7 +150,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> destroyVm(String uri, String vm) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/vm/destroy", map), new TypeToken<ResultUtil<Void>>() {
@@ -161,7 +162,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> stopVm(String uri, String vm) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
             map.put("timeout", applicaionConfig.getStopTimeout());
@@ -174,7 +175,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> rebootVm(String uri, String vm) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(1);
             map.put("name", vm);
             ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/vm/restart", map), new TypeToken<ResultUtil<Void>>() {
@@ -186,7 +187,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> writeFile(String uri, String vm, String path, String body) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("name", vm);
             map.put("path", path);
@@ -200,7 +201,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Map<String, Object>> execute(String uri, String vm, String command) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("name", vm);
             map.put("command", command);
@@ -214,7 +215,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> changeCdRoom(String uri, String vm, String path) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, String> header = new HashMap<>(3);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/update/cdroom");
             request.addHeaders(header);
@@ -231,7 +232,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> attachDisk(String uri, String vm, VmModel.Disk disk, boolean attach) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, String> header = new HashMap<>(0);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/update/disk");
             request.addHeaders(header);
@@ -249,7 +250,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> attachNetwork(String uri, String vm, VmModel.Network network, boolean attach) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, String> header = new HashMap<>(0);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/update/network");
             request.addHeaders(header);
@@ -267,7 +268,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<VmInfoModel> startVm(String uri, VmModel kvm) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, String> header = new HashMap<>(0);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/start");
             request.addHeaders(header);
@@ -282,7 +283,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     public ResultUtil<VolumeModel> cloneVolume(String uri, String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String targetPath) {
 
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(5);
             map.put("sourceStorage", sourceStorage);
             map.put("sourceVolume", sourceVolume);
@@ -300,7 +301,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     public ResultUtil<VolumeModel> getVolumeInfo(String uri, String storageName, String volumeName) {
         return this.call(() -> {
 
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(2);
             map.put("storageName", storageName);
             map.put("volumeName", volumeName);
@@ -313,7 +314,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<List<VmStaticsModel>> listVmStatics(String uri) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(0);
             ResultUtil<List<VmStaticsModel>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/list/statics", map), new TypeToken<ResultUtil<List<VmStaticsModel>>>() {
             }.getType());
@@ -324,7 +325,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri, String storage, String volume) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("storage", storage);
             map.put("volume", volume);
@@ -337,7 +338,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri, String storage, String volume, String name) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("storage", storage);
             map.put("volume", volume);
@@ -351,7 +352,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> revertVolumeSnapshot(String uri, String storage, String volume, String name) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("storage", storage);
             map.put("volume", volume);
@@ -365,7 +366,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     @Override
     public ResultUtil<Void> deleteVolumeSnapshot(String uri, String storage, String volume, String name) {
         return this.call(() -> {
-            Gson gson = new Gson();
+            Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("storage", storage);
             map.put("volume", volume);

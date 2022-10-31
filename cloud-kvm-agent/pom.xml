@@ -44,16 +44,6 @@
             <artifactId>qemu-qapi</artifactId>
             <version>1.0.6</version>
         </dependency>
-        <dependency>
-            <groupId>org.anarres.qemu</groupId>
-            <artifactId>qemu-manager</artifactId>
-            <version>1.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.anarres.qemu</groupId>
-            <artifactId>qemu-exec</artifactId>
-            <version>1.0.6</version>
-        </dependency>
 
     </dependencies>
     <build>
