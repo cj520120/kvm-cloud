@@ -6,6 +6,7 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.TemplateInfo;
 import cn.roamblue.cloud.management.bean.VolumeInfo;
+import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.service.AgentService;
@@ -339,6 +340,98 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         log.info("销毁磁盘成功:id={}", id);
         volumeMapper.updateById(entity);
         return this.init(entity);
+    }
+
+    @Override
+    public List<VolumeSnapshot> listVolumeSnapshot(int id) {
+        VolumeEntity entity = volumeMapper.selectById(id);
+        if (entity == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+        }
+        StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+        }
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
+        ResultUtil<List<VolumeSnapshot>> resultUtil = this.agentService.listVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget());
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
+        return resultUtil.getData();
+    }
+
+    @Override
+    public VolumeSnapshot createVolumeSnapshot(int id) {
+        VolumeEntity entity = volumeMapper.selectById(id);
+        if (entity == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+        }
+        int vmId = entity.getVmId();
+        if (vmId > 0) {
+            VmEntity vm = vmMapper.selectById(vmId);
+            if (vm != null && vm.getVmStatus() != VmStatus.STOPPED) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
+            }
+        }
+        StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+        }
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
+        String name = "volume-snapshot-" + System.currentTimeMillis();
+        ResultUtil<VolumeSnapshot> resultUtil = this.agentService.createVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
+        return resultUtil.getData();
+    }
+
+    @Override
+    public void revertVolumeSnapshot(int id, String name) {
+        VolumeEntity entity = volumeMapper.selectById(id);
+        if (entity == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+        }
+        int vmId = entity.getVmId();
+        if (vmId > 0) {
+            VmEntity vm = vmMapper.selectById(vmId);
+            if (vm != null && vm.getVmStatus() != VmStatus.STOPPED) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
+            }
+        }
+        StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+        }
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
+        ResultUtil<Void> resultUtil = this.agentService.revertVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteVolumeSnapshot(int id, String name) {
+        VolumeEntity entity = volumeMapper.selectById(id);
+        if (entity == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
+        }
+        int vmId = entity.getVmId();
+        if (vmId > 0) {
+            VmEntity vm = vmMapper.selectById(vmId);
+            if (vm != null && vm.getVmStatus() != VmStatus.STOPPED) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
+            }
+        }
+        StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
+        }
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
+        ResultUtil<Void> resultUtil = this.agentService.deleteVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
     }
 
     private VolumeInfo init(VolumeEntity entity) {

@@ -129,35 +129,46 @@ public class VolumeController {
     /**
      * 快照列表
      *
-     * @param file 磁盘路径
+     * @param storage 存储池
+     * @param volume 磁盘
      * @return
      */
     @GetMapping("/volume/snapshot/list")
-    public ResultUtil<List<VolumeSnapshotModel>> listSnapshot(@RequestParam("file") String file) {
-        return ResultUtil.success(volumeSnapshotService.listSnapshot(file));
+    public ResultUtil<List<VolumeSnapshotModel>> listSnapshot(
+            @RequestParam("storage") String storage,
+            @RequestParam("volume") String volume) {
+        return ResultUtil.success(volumeSnapshotService.listSnapshot( storage,volume));
     }
 
     /**
      * 创建快照
      *
      * @param name 快照名称
-     * @param file 磁盘路径
+     * @param storage 存储池
+     * @param volume 磁盘
      * @return
      */
     @PostMapping("/volume/snapshot/create")
-    public ResultUtil<VolumeSnapshotModel> createSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
-        return ResultUtil.success(volumeSnapshotService.createSnapshot(name, file));
+    public ResultUtil<VolumeSnapshotModel> createSnapshot(
+            @RequestParam("storage") String storage,
+            @RequestParam("volume") String volume,
+            @RequestParam("name") String name) {
+        return ResultUtil.success(volumeSnapshotService.createSnapshot(name,  storage,volume));
     }
 
     /**
      * 恢复快照
      *
      * @param name 快照名称
-     * @param file 磁盘路径
+     * @param storage 存储池
+     * @param volume 磁盘
      */
     @PostMapping("/volume/snapshot/revert")
-    public ResultUtil<Void> revertSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
-        volumeSnapshotService.revertSnapshot(name, file);
+    public ResultUtil<Void> revertSnapshot(
+            @RequestParam("storage") String storage,
+            @RequestParam("volume") String volume,
+            @RequestParam("name") String name) {
+        volumeSnapshotService.revertSnapshot(name,  storage,volume);
         return ResultUtil.<Void>builder().build();
     }
 
@@ -165,11 +176,15 @@ public class VolumeController {
      * 删除快照
      *
      * @param name 快照名称
-     * @param file 磁盘路径
+     * @param storage 存储池
+     * @param volume 磁盘
      */
     @PostMapping("/volume/snapshot/delete")
-    public ResultUtil<Void> deleteSnapshot(@RequestParam("name") String name, @RequestParam("file") String file) {
-        volumeSnapshotService.deleteSnapshot(name, file);
+    public ResultUtil<Void> deleteSnapshot(
+            @RequestParam("storage") String storage,
+            @RequestParam("volume") String volume,
+            @RequestParam("name") String name) {
+        volumeSnapshotService.deleteSnapshot(name, storage,volume);
         return ResultUtil.<Void>builder().build();
     }
 }

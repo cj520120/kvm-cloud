@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.common.agent;
+package cn.roamblue.cloud.management.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,21 +17,17 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VmSnapshotModel implements Serializable {
+public class VolumeSnapshot implements Serializable {
     /**
      *
      */
     private static final long serialVersionUID = 1L;
     /**
-     * 系统快照名称
+     * 快照标识
      */
-    private String name;
+    private String tag;
     /**
-     * 系统快照描述
-     */
-    private String description;
-    /**
-     * 快照创建时间
+     * 创建时间
      */
     private Date createTime;
 }

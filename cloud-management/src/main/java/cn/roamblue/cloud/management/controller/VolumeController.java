@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.controller;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.bean.VolumeInfo;
+import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.ui.VolumeUiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,5 +108,52 @@ public class VolumeController {
     @PostMapping("/management/volume/resize")
     public ResultUtil<VolumeInfo> resize(@RequestParam("id") int id, @RequestParam("size") long size) {
         return volumeUiService.resize(id, size);
+    }
+
+
+    /**
+     * 获取磁盘快照列表
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/management/volume/snapshot")
+    public ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(@RequestParam("id") int id) {
+        return volumeUiService.listVolumeSnapshot(id);
+    }
+
+    /**
+     * 创建磁盘快照
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/management/volume/snapshot/create")
+    public ResultUtil<VolumeSnapshot> createVolumeSnapshot(@RequestParam("id") int id) {
+        return volumeUiService.createVolumeSnapshot(id);
+    }
+
+    /**
+     * 恢复磁盘快照
+     *
+     * @param id
+     * @param name
+     * @return
+     */
+    @PostMapping("/management/volume/snapshot/revert")
+    public ResultUtil<Void> revertVolumeSnapshot(@RequestParam("id") int id, @RequestParam("name") String name) {
+        return volumeUiService.revertVolumeSnapshot(id, name);
+    }
+
+    /**
+     * 删除磁盘快照
+     *
+     * @param id
+     * @param name
+     * @return
+     */
+    @PostMapping("/management/volume/snapshot/delete")
+    public ResultUtil<Void> deleteVolumeSnapshot(@RequestParam("id") int id, @RequestParam("name") String name) {
+        return volumeUiService.deleteVolumeSnapshot(id, name);
     }
 }

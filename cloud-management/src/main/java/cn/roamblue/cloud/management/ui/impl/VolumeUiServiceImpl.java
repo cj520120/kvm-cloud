@@ -4,6 +4,7 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.PreAuthority;
 import cn.roamblue.cloud.management.bean.VolumeInfo;
+import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.service.LockService;
 import cn.roamblue.cloud.management.service.VolumeService;
 import cn.roamblue.cloud.management.ui.VolumeUiService;
@@ -72,8 +73,32 @@ public class VolumeUiServiceImpl extends AbstractUiService implements VolumeUiSe
     @Override
     public ResultUtil<VolumeInfo> resize(int id, long size) {
         if (size <= 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR,  "磁盘大小不能小于1G");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "磁盘大小不能小于1G");
         }
         return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.resize(id, size)), 1, TimeUnit.MINUTES);
+    }
+
+    @PreAuthority(value = "hasAuthority('volume.snapshot.list')")
+    @Override
+    public ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(int id) {
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.listVolumeSnapshot(id)), 1, TimeUnit.MINUTES);
+    }
+
+    @PreAuthority(value = "hasAuthority('volume.snapshot.create')")
+    @Override
+    public ResultUtil<VolumeSnapshot> createVolumeSnapshot(int id) {
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.createVolumeSnapshot(id)), 1, TimeUnit.MINUTES);
+    }
+
+    @PreAuthority(value = "hasAuthority('volume.snapshot.revert')")
+    @Override
+    public ResultUtil<Void> revertVolumeSnapshot(int id, String name) {
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.revertVolumeSnapshot(id, name)), 1, TimeUnit.MINUTES);
+    }
+
+    @PreAuthority(value = "hasAuthority('volume.snapshot.delete')")
+    @Override
+    public ResultUtil<Void> deleteVolumeSnapshot(int id, String name) {
+        return lockService.run(LockKeyUtil.getVolumeLockKey(id), () -> super.call(() -> volumeService.deleteVolumeSnapshot(id, name)), 1, TimeUnit.MINUTES);
     }
 }

@@ -62,7 +62,6 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
 
     @Override
     public VolumeModel reSize(String storageName, String volumeName, long size) {
-        QEmuImage img;
 
         return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);

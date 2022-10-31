@@ -59,7 +59,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         Optional<NetworkAllocateService> optional = networkAllocateService.stream().filter(t -> t.getType().equals(network.getType())).findAny();
         NetworkAllocateService allocateService = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型" + network.getType()));
         VmNetworkInfo managerAddress = allocateService.allocateManagerAddress(network.getId(), vmId);
-        log.info("系统虚拟机[Console] 申请网络成功,clusterId={} VM={} IP={} MAC={} Device={}",network.getClusterId(), vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice()); 
+        log.info("系统虚拟机[Console] 申请网络成功,clusterId={} VM={} IP={} MAC={} Device={}", network.getClusterId(), vmId, managerAddress.getIp(), managerAddress.getMac(), managerAddress.getDevice());
         return managerAddress;
     }
 
@@ -72,7 +72,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
         for (Integer networkId : networkIds) {
             writeVncConfig(vm, networkId, host);
         }
-        log.info("系统VM[Console]服务启动完成.clusterId=[{}] hostId={}",host.getClusterId(),host.getId());
+        log.info("系统VM[Console]服务启动完成.clusterId=[{}] hostId={}", host.getClusterId(), host.getId());
     }
 
     @Override
@@ -139,11 +139,11 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     @Override
     public ResultUtil<Void> unRegister(int clusterId, int vmId) {
         try {
-            log.info("取消Console VNC注册.clusterId={} vm={}",clusterId,vmId);
+            log.info("取消Console VNC注册.clusterId={} vm={}", clusterId, vmId);
             this.vncMapper.deleteByVmId(vmId);
             return ResultUtil.<Void>builder().build();
         } catch (Exception err) {
-            log.error("取消Console VNC注册失败.clusterId={} vm={}",clusterId,vmId, err);
+            log.error("取消Console VNC注册失败.clusterId={} vm={}", clusterId, vmId, err);
             return ResultUtil.<Void>builder().code(ErrorCode.SERVER_ERROR).message(err.getMessage()).build();
         }
     }

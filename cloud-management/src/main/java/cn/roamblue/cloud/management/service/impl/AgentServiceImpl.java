@@ -5,6 +5,7 @@ import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.common.agent.*;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.config.ApplicaionConfig;
 import cn.roamblue.cloud.management.service.AgentService;
 import cn.roamblue.cloud.management.util.StoragePathUtil;
@@ -320,8 +321,63 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
         });
     }
 
+    @Override
+    public ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri, String storage, String volume) {
+        return this.call(() -> {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(3);
+            map.put("storage", storage);
+            map.put("volume", volume);
+            ResultUtil<List<VolumeSnapshot>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/volume/snapshot/list", map), new TypeToken<ResultUtil<List<VolumeSnapshot>>>() {
+            }.getType());
+            return resultUtil;
+        });
+    }
+
+    @Override
+    public ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri, String storage, String volume, String name) {
+        return this.call(() -> {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(3);
+            map.put("storage", storage);
+            map.put("volume", volume);
+            map.put("name", name);
+            ResultUtil<VolumeSnapshot> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/snapshot/create", map), new TypeToken<ResultUtil<VolumeSnapshot>>() {
+            }.getType());
+            return resultUtil;
+        });
+    }
+
+    @Override
+    public ResultUtil<Void> revertVolumeSnapshot(String uri, String storage, String volume, String name) {
+        return this.call(() -> {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(3);
+            map.put("storage", storage);
+            map.put("volume", volume);
+            map.put("name", name);
+            ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/snapshot/revert", map), new TypeToken<ResultUtil<Void>>() {
+            }.getType());
+            return resultUtil;
+        });
+    }
+
+    @Override
+    public ResultUtil<Void> deleteVolumeSnapshot(String uri, String storage, String volume, String name) {
+        return this.call(() -> {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(3);
+            map.put("storage", storage);
+            map.put("volume", volume);
+            map.put("name", name);
+            ResultUtil<Void> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/snapshot/delete", map), new TypeToken<ResultUtil<Void>>() {
+            }.getType());
+            return resultUtil;
+        });
+    }
+
     @SuppressWarnings("unchecked")
-	private <T extends ResultUtil<?>> T call(AgentCall<T> callable) {
+    private <T extends ResultUtil<?>> T call(AgentCall<T> callable) {
         try {
             return callable.call();
         } catch (Exception err) {

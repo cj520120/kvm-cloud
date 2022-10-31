@@ -3,8 +3,11 @@ package cn.roamblue.cloud.agent.service.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.roamblue.cloud.agent.service.KvmVolumeSnapshotService;
+import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.agent.VolumeSnapshotModel;
 import lombok.extern.slf4j.Slf4j;
+import org.libvirt.StoragePool;
+import org.libvirt.StorageVol;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -22,7 +25,8 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
 
 
     @Override
-    public List<VolumeSnapshotModel> listSnapshot(String file) {
+    public List<VolumeSnapshotModel> listSnapshot(String storage, String volume) {
+        String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -l %s", file);
         String response = RuntimeUtil.execForStr(command).trim();
         List<VolumeSnapshotModel> volumeSnapshotModelList = new ArrayList<>();
@@ -41,24 +45,35 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
     }
 
     @Override
-    public VolumeSnapshotModel createSnapshot(String name, String file) {
+    public VolumeSnapshotModel createSnapshot(String name, String storage, String volume) {
+        String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -c %s %s", name, file);
         log.info("createSnapshot command={}", command);
         RuntimeUtil.execForStr(command);
-        List<VolumeSnapshotModel> list = this.listSnapshot(file);
+        List<VolumeSnapshotModel> list = this.listSnapshot(storage, volume);
         return list.stream().filter(t -> t.getTag().equals(name)).findFirst().get();
     }
 
     @Override
-    public void revertSnapshot(String name, String file) {
+    public void revertSnapshot(String name, String storage, String volume) {
+        String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -a %s %s", name, file);
         RuntimeUtil.execForStr(command);
 
     }
 
     @Override
-    public void deleteSnapshot(String name, String file) {
+    public void deleteSnapshot(String name, String storage, String volume) {
+        String file = this.getVolumePath(storage,volume);
         String command = String.format("qemu-img snapshot -d %s %s", name, file);
         RuntimeUtil.execForStr(command);
+    }
+
+    private String getVolumePath(String storageName, String volumeName) {
+        return super.execute(connect -> {
+            StoragePool storagePool = connect.storagePoolLookupByName(storageName);
+            StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
+            return storageVol.getPath();
+        });
     }
 }

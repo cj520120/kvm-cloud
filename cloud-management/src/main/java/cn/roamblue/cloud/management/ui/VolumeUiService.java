@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.ui;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.bean.VolumeInfo;
+import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 
 import java.util.List;
 
@@ -69,4 +70,39 @@ public interface VolumeUiService {
      * @return
      */
     ResultUtil<VolumeInfo> resize(int id, long size);
+
+
+    /**
+     * 获取磁盘快照列表
+     *
+     * @param id
+     * @return
+     */
+    ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(int id);
+
+    /**
+     * 创建磁盘快照
+     *
+     * @param id
+     * @return
+     */
+    ResultUtil<VolumeSnapshot> createVolumeSnapshot(int id);
+
+    /**
+     * 恢复磁盘快照
+     *
+     * @param id
+     * @param name
+     * @return
+     */
+    ResultUtil<Void> revertVolumeSnapshot(int id, String name);
+
+    /**
+     * 删除磁盘快照
+     *
+     * @param id
+     * @param name
+     * @return
+     */
+    ResultUtil<Void> deleteVolumeSnapshot(int id, String name);
 }

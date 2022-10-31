@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.service;
 
 import cn.roamblue.cloud.common.agent.*;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 
 import java.util.List;
 import java.util.Map;
@@ -216,4 +217,48 @@ public interface AgentService {
      * @return
      */
     ResultUtil<List<VmStaticsModel>> listVmStatics(String uri);
+
+    /**
+     * 获取快照
+     *
+     * @param uri
+     * @param storage
+     * @param volume
+     * @return
+     */
+    ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri, String storage, String volume);
+
+    /**
+     * 创建快照
+     *
+     * @param uri
+     * @param storageTarget
+     * @param volumeTarget
+     * @param name
+     * @return
+     */
+    ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri, String storageTarget, String volumeTarget, String name);
+
+
+    /**
+     * 恢复快照
+     *
+     * @param uri
+     * @param storageTarget
+     * @param volumeTarget
+     * @param name
+     * @return
+     */
+    ResultUtil<Void> revertVolumeSnapshot(String uri, String storageTarget, String volumeTarget, String name);
+
+    /**
+     * 删除快照
+     *
+     * @param uri
+     * @param storageTarget
+     * @param volumeTarget
+     * @param name
+     * @return
+     */
+    ResultUtil<Void> deleteVolumeSnapshot(String uri, String storageTarget, String volumeTarget, String name);
 }
