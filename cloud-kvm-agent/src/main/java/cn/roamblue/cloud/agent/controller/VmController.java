@@ -5,6 +5,7 @@ import cn.roamblue.cloud.agent.service.KvmVmService;
 import cn.roamblue.cloud.agent.util.XmlUtil;
 import cn.roamblue.cloud.common.agent.VmInfoModel;
 import cn.roamblue.cloud.common.agent.VmModel;
+import cn.roamblue.cloud.common.agent.VmSnapshotModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -189,5 +190,51 @@ public class VmController {
     @PostMapping("/vm/command/write/file")
     public ResultUtil<Void> writeFile(@RequestParam("name") String name, @RequestParam("path") String path, @RequestParam("body") String body) {
         return kvmQemuGuestAgentService.writeFile(name, path, body);
+    }
+
+    /**
+     * 获取虚拟机快照列表
+     *
+     * @param name 虚拟机名称
+     * @return
+     */
+    @GetMapping("/vm/snapshot/list")
+    public ResultUtil<List<VmSnapshotModel>> listSnapshot(@RequestParam("name") String name) {
+        return ResultUtil.success(vmService.listSnapshot(name));
+    }
+
+    /**
+     * 创建虚拟机快照
+     *
+     * @param name 虚拟机名称
+     * @return
+     */
+    @PostMapping("/vm/snapshot/create")
+    public ResultUtil<VmSnapshotModel> createSnapshot(@RequestParam("name") String name) {
+        return ResultUtil.success(vmService.createSnapshot(name));
+    }
+
+    /**
+     * 恢复虚拟机快照
+     *
+     * @param name         虚拟机名称
+     * @param snapshotName 快照名称
+     */
+    @PostMapping("/vm/snapshot/revert")
+    public ResultUtil<Void> revertToSnapshot(@RequestParam("name") String name, @RequestParam("snapshotName") String snapshotName) {
+        vmService.revertToSnapshot(name, snapshotName);
+        return ResultUtil.success(null);
+    }
+
+    /**
+     * 删除虚拟机快照
+     *
+     * @param name
+     * @param snapshotName
+     */
+    @PostMapping("/vm/snapshot/delete")
+    public ResultUtil<Void> deleteSnapshot(@RequestParam("name") String name, @RequestParam("snapshotName") String snapshotName) {
+        vmService.deleteSnapshot(name, snapshotName);
+        return ResultUtil.success(null);
     }
 }

@@ -20,28 +20,31 @@ public interface KvmVolumeSnapshotService {
     /**
      * 创建快照
      *
+     * @param vmName 虚拟机名称
      * @param name 快照名称
      * @param storage 存储池
      * @param volume 磁盘
      * @return
      */
-    VolumeSnapshotModel createSnapshot(String name, String  storage,String volume);
+    VolumeSnapshotModel createSnapshot(String vmName,String name, String  storage,String volume);
 
     /**
      * 恢复快照
      *
+     * @param vmName 虚拟机名称
      * @param name 快照名称
      * @param storage 存储池
      * @param volume 磁盘
      */
-    void revertSnapshot(String name, String  storage,String volume);
+    void revertSnapshot(String vmName,String name, String  storage,String volume);
 
     /**
      * 删除快照
      *
+     * @param vmName 虚拟机名称
      * @param name 快照名称
      * @param storage 存储池
      * @param volume 磁盘
      */
-    void deleteSnapshot(String name, String  storage,String volume);
+    void deleteSnapshot(String vmName,String name, String  storage,String volume);
 }

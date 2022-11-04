@@ -143,6 +143,7 @@ public class VolumeController {
     /**
      * 创建快照
      *
+     * @param vmName 虚拟机名称
      * @param name 快照名称
      * @param storage 存储池
      * @param volume 磁盘
@@ -150,41 +151,46 @@ public class VolumeController {
      */
     @PostMapping("/volume/snapshot/create")
     public ResultUtil<VolumeSnapshotModel> createSnapshot(
+            @RequestParam("vmName") String vmName,
             @RequestParam("storage") String storage,
             @RequestParam("volume") String volume,
             @RequestParam("name") String name) {
-        return ResultUtil.success(volumeSnapshotService.createSnapshot(name,  storage,volume));
+        return ResultUtil.success(volumeSnapshotService.createSnapshot(vmName,name,  storage,volume));
     }
 
     /**
      * 恢复快照
      *
+     * @param vmName 虚拟机名称
      * @param name 快照名称
      * @param storage 存储池
      * @param volume 磁盘
      */
     @PostMapping("/volume/snapshot/revert")
     public ResultUtil<Void> revertSnapshot(
+            @RequestParam("vmName") String vmName,
             @RequestParam("storage") String storage,
             @RequestParam("volume") String volume,
             @RequestParam("name") String name) {
-        volumeSnapshotService.revertSnapshot(name,  storage,volume);
+        volumeSnapshotService.revertSnapshot(vmName,name,  storage,volume);
         return ResultUtil.<Void>builder().build();
     }
 
     /**
      * 删除快照
      *
+     * @param vmName 虚拟机名称
      * @param name 快照名称
      * @param storage 存储池
      * @param volume 磁盘
      */
     @PostMapping("/volume/snapshot/delete")
     public ResultUtil<Void> deleteSnapshot(
+            @RequestParam("vmName") String vmName,
             @RequestParam("storage") String storage,
             @RequestParam("volume") String volume,
             @RequestParam("name") String name) {
-        volumeSnapshotService.deleteSnapshot(name, storage,volume);
+        volumeSnapshotService.deleteSnapshot(vmName,name, storage,volume);
         return ResultUtil.<Void>builder().build();
     }
 }

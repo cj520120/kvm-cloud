@@ -4,6 +4,7 @@ import cn.roamblue.cloud.agent.service.KvmVmService;
 import cn.roamblue.cloud.agent.util.XmlUtil;
 import cn.roamblue.cloud.common.agent.VmInfoModel;
 import cn.roamblue.cloud.common.agent.VmModel;
+import cn.roamblue.cloud.common.agent.VmSnapshotModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -20,10 +21,7 @@ import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author chenjun
@@ -163,6 +161,137 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
         });
     }
 
+    @Override
+    public List<VmSnapshotModel> listSnapshot(String name) {
+        return super.execute(connect -> {
+            try {
+                List<VmSnapshotModel> list = new ArrayList<>();
+                Domain domain = connect.domainLookupByName(name);
+                String[] snapshotNames = domain.snapshotListNames();
+                for (String snapshotName : snapshotNames) {
+                    DomainSnapshot domainSnapshot = domain.snapshotLookupByName(snapshotName);
+                    list.add(initSnapshotModel(domainSnapshot.getXMLDesc()));
+                }
+                return list;
+
+            } catch (LibvirtException err) {
+                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
+                } else {
+                    throw err;
+                }
+            }
+        });
+    }
+
+    @Override
+    public VmSnapshotModel createSnapshot(String name) {
+        return super.execute(connect -> {
+            try {
+                Domain domain = connect.domainLookupByName(name);
+                String xml = domain.getXMLDesc(0);
+                try (StringReader sr = new StringReader(xml)) {
+                    SAXReader reader = new SAXReader();
+                    reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                    Document doc = reader.read(sr);
+                    String path = "/domain/devices/disk";
+                    List<Node> nodeList = doc.selectNodes(path);
+                    StringBuilder snapshotXml = new StringBuilder();
+                    snapshotXml.append("<domainsnapshot>");
+                    snapshotXml.append("<disks>");
+                    for (Node node : nodeList) {
+                        Element element = (Element) node;
+                        if ("disk".equals(element.attributeValue("device"))) {
+                            List<Node> childElements = element.elements();
+                            String device = null;
+                            for (Node childElement : childElements) {
+                                if ("target".equals(childElement.getName())) {
+                                    device = ((Element) childElement).attributeValue("dev");
+                                }
+                            }
+                            if (device != null) {
+                                snapshotXml.append("<disk name=\"").append(device).append("\">").append("</disk>");
+                            }
+                        }
+                    }
+                    snapshotXml.append("</disks>");
+                    snapshotXml.append("</domainsnapshot>");
+                    xml = snapshotXml.toString();
+                    log.info(xml);
+                    DomainSnapshot domainSnapshot = domain.snapshotCreateXML(xml);
+                    return initSnapshotModel(domainSnapshot.getXMLDesc());
+                }
+            } catch (LibvirtException err) {
+                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
+                } else {
+                    throw err;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void revertToSnapshot(String name, String snapshotName) {
+        super.execute(connect -> {
+            try {
+                Domain domain = connect.domainLookupByName(name);
+                DomainSnapshot domainSnapshot = domain.snapshotLookupByName(snapshotName);
+                domain.revertToSnapshot(domainSnapshot);
+                return null;
+
+            } catch (LibvirtException err) {
+
+                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
+                } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN_SNAPSHOT)) {
+                    throw new CodeException(ErrorCode.AGENT_VM_SNAPSHOT_NOT_FOUND, "vm snapshot not found");
+                } else {
+                    throw err;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void deleteSnapshot(String name, String snapshotName) {
+        super.execute(connect -> {
+            try {
+                Domain domain = connect.domainLookupByName(name);
+                DomainSnapshot domainSnapshot = domain.snapshotLookupByName(snapshotName);
+                if (domainSnapshot != null) {
+                    domainSnapshot.delete(0);
+                    domainSnapshot.free();
+                }
+                return null;
+
+            } catch (LibvirtException err) {
+                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                    throw new CodeException(ErrorCode.AGENT_VM_NOT_FOUND, "agent vm not found");
+                } else if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN_SNAPSHOT)) {
+                    return null;
+
+                } else {
+                    throw err;
+                }
+            }
+        });
+    }
+
+    private VmSnapshotModel initSnapshotModel(String xml) throws Exception {
+        try (StringReader sr = new StringReader(xml)) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+            Node descriptionNode = doc.selectSingleNode("/domainsnapshot/description");
+            Node nameNode = doc.selectSingleNode("/domainsnapshot/name");
+            Node creationTimeNode = doc.selectSingleNode("/domainsnapshot/creationTime");
+            String description = descriptionNode == null ? "" : descriptionNode.getText();
+            String name = nameNode == null ? "" : nameNode.getText();
+            Date createTime = creationTimeNode == null ? new Date() : new Date(Long.parseLong(creationTimeNode.getText()) * 1000);
+            return VmSnapshotModel.builder().name(name).description(description).createTime(createTime).build();
+        }
+    }
 
     private VmInfoModel initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
         DomainInfo domainInfo = domain.getInfo();

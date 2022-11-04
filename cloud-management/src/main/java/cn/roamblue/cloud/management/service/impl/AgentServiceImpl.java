@@ -336,10 +336,11 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri, String storage, String volume, String name) {
+    public ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri,String vmName, String storage, String volume, String name) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
-            Map<String, Object> map = new HashMap<>(3);
+            Map<String, Object> map = new HashMap<>(4);
+            map.put("vmName", vmName);
             map.put("storage", storage);
             map.put("volume", volume);
             map.put("name", name);
@@ -350,10 +351,11 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<Void> revertVolumeSnapshot(String uri, String storage, String volume, String name) {
+    public ResultUtil<Void> revertVolumeSnapshot(String uri,String vmName, String storage, String volume, String name) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
-            Map<String, Object> map = new HashMap<>(3);
+            Map<String, Object> map = new HashMap<>(4);
+            map.put("vmName", vmName);
             map.put("storage", storage);
             map.put("volume", volume);
             map.put("name", name);
@@ -364,10 +366,11 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<Void> deleteVolumeSnapshot(String uri, String storage, String volume, String name) {
+    public ResultUtil<Void> deleteVolumeSnapshot(String uri,String vmName, String storage, String volume, String name) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
-            Map<String, Object> map = new HashMap<>(3);
+            Map<String, Object> map = new HashMap<>(4);
+            map.put("vmName", vmName);
             map.put("storage", storage);
             map.put("volume", volume);
             map.put("name", name);

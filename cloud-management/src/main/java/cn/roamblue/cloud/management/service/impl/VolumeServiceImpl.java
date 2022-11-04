@@ -366,20 +366,17 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         if (entity == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
-        int vmId = entity.getVmId();
-        if (vmId > 0) {
-            VmEntity vm = vmMapper.selectById(vmId);
-            if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
-                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
-            }
-        }
+        VmEntity vm = vmMapper.selectById(entity.getVmId());
+//        if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
+//            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
+//        }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
         }
-        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), vm == null ? 0 : vm.getHostId(), 0, 0);
         String name = "volume-snapshot-" + System.currentTimeMillis();
-        ResultUtil<VolumeSnapshot> resultUtil = this.agentService.createVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
+        ResultUtil<VolumeSnapshot> resultUtil = this.agentService.createVolumeSnapshot(host.getHostUri(), vm == null ? "" : vm.getVmName(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }
@@ -392,19 +389,16 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         if (entity == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
-        int vmId = entity.getVmId();
-        if (vmId > 0) {
-            VmEntity vm = vmMapper.selectById(vmId);
-            if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
-                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
-            }
-        }
+        VmEntity vm = vmMapper.selectById(entity.getVmId());
+//        if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
+//            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
+//        }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
         }
-        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
-        ResultUtil<Void> resultUtil = this.agentService.revertVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), vm == null ? 0 : vm.getHostId(), 0, 0);
+        ResultUtil<Void> resultUtil = this.agentService.revertVolumeSnapshot(host.getHostUri(), vm == null ? "" : vm.getVmName(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }
@@ -416,19 +410,16 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         if (entity == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
-        int vmId = entity.getVmId();
-        if (vmId > 0) {
-            VmEntity vm = vmMapper.selectById(vmId);
-            if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
-                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
-            }
-        }
+        VmEntity vm = vmMapper.selectById(entity.getVmId());
+//        if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
+//            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
+//        }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
         }
-        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
-        ResultUtil<Void> resultUtil = this.agentService.deleteVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
+        HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), vm == null ? 0 : vm.getHostId(), 0, 0);
+        ResultUtil<Void> resultUtil = this.agentService.deleteVolumeSnapshot(host.getHostUri(), vm == null ? "" : vm.getVmName(), storage.getStorageTarget(), entity.getVolumeTarget(), name);
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }

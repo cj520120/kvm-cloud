@@ -232,33 +232,36 @@ public interface AgentService {
      * 创建快照
      *
      * @param uri
+     * @param vmName
      * @param storageTarget
      * @param volumeTarget
      * @param name
      * @return
      */
-    ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri, String storageTarget, String volumeTarget, String name);
+    ResultUtil<VolumeSnapshot> createVolumeSnapshot(String uri,String vmName, String storageTarget, String volumeTarget, String name);
 
 
     /**
      * 恢复快照
      *
      * @param uri
+     * @param vmName
      * @param storageTarget
      * @param volumeTarget
      * @param name
      * @return
      */
-    ResultUtil<Void> revertVolumeSnapshot(String uri, String storageTarget, String volumeTarget, String name);
+    ResultUtil<Void> revertVolumeSnapshot(String uri,String vmName, String storageTarget, String volumeTarget, String name);
 
     /**
      * 删除快照
      *
      * @param uri
+     * @param vmName
      * @param storageTarget
      * @param volumeTarget
      * @param name
      * @return
      */
-    ResultUtil<Void> deleteVolumeSnapshot(String uri, String storageTarget, String volumeTarget, String name);
+    ResultUtil<Void> deleteVolumeSnapshot(String uri, String vmName,String storageTarget, String volumeTarget, String name);
 }
