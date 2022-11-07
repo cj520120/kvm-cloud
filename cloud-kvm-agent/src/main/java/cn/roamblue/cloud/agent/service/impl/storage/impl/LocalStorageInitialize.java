@@ -7,7 +7,7 @@ import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Component;
 
 /**
- * @ClassName: NfsStorageBuilder
+ * @ClassName: LocalStorageInitialize
  * @Description: TODO
  * @Create by: chenjun
  * @Date: 2021/8/5 上午11:20

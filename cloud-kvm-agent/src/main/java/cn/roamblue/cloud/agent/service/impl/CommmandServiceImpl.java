@@ -55,7 +55,7 @@ public class CommmandServiceImpl extends AbstractKvmService implements CommmandS
                 if (name.equals(domain.getName())) {
                     Gson gson = new Gson();
                     int handler = openFile(path, domain, gson);
-                    wireteFile(body, domain, gson, handler);
+                    writeFile(body, domain, gson, handler);
                     closeFile(domain, gson, handler);
                     return ResultUtil.<Void>builder().build();
                 }
@@ -76,7 +76,7 @@ public class CommmandServiceImpl extends AbstractKvmService implements CommmandS
         }
     }
 
-    private void wireteFile(String body, Domain domain, Gson gson, int handler) throws LibvirtException {
+    private void writeFile(String body, Domain domain, Gson gson, int handler) throws LibvirtException {
         Map<String, Object> command = new HashMap<>(2);
         command.put("execute", "guest-file-write");
         Map<String, Object> arguments = new HashMap<>(2);
