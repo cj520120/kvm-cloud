@@ -367,9 +367,6 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
         VmEntity vm = vmMapper.selectById(entity.getVmId());
-//        if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
-//            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
-//        }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
@@ -390,9 +387,6 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
         VmEntity vm = vmMapper.selectById(entity.getVmId());
-//        if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
-//            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
-//        }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
@@ -411,9 +405,6 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
         VmEntity vm = vmMapper.selectById(entity.getVmId());
-//        if (vm != null && !VmStatus.STOPPED.equals(vm.getVmStatus())) {
-//            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "该磁盘所在的虚拟机正在运行，清关机后重试");
-//        }
         StorageEntity storage = this.storageMapper.selectById(entity.getStorageId());
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
