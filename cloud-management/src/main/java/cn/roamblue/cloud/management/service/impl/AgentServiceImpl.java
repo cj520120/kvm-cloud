@@ -323,10 +323,11 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri, String storage, String volume) {
+    public ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri,String vmName, String storage, String volume) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
+            map.put("vmName", vmName);
             map.put("storage", storage);
             map.put("volume", volume);
             ResultUtil<List<VolumeSnapshot>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/volume/snapshot/list", map), new TypeToken<ResultUtil<List<VolumeSnapshot>>>() {

@@ -1,16 +1,5 @@
 package cn.roamblue.cloud.management.task;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
@@ -24,6 +13,15 @@ import cn.roamblue.cloud.management.service.LockService;
 import cn.roamblue.cloud.management.util.LockKeyUtil;
 import cn.roamblue.cloud.management.util.StorageStatus;
 import cn.roamblue.cloud.management.util.VolumeStatus;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 过期磁盘销毁
@@ -45,7 +43,7 @@ public class VolumeDestroyTask extends AbstractTask {
 
     @Override
     protected int getInterval() {
-        return this.config.getVolumeDestoryCheckInterval();
+        return this.config.getVolumeDestroyCheckInterval();
     }
 
     @Override
@@ -55,7 +53,7 @@ public class VolumeDestroyTask extends AbstractTask {
 
     @Override
     protected void call() {
-        long removeTime = System.currentTimeMillis() - this.config.getVolumeDestoryExpireSeconds() * 1000;
+        long removeTime = System.currentTimeMillis() - this.config.getVolumeDestroyExpireSeconds() * 1000L;
         QueryWrapper<VolumeEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("volume_status", VolumeStatus.DESTROY);
         wrapper.lt("remove_time", new Date(removeTime));

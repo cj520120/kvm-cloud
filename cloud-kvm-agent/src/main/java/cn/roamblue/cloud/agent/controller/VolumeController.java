@@ -135,9 +135,10 @@ public class VolumeController {
      */
     @GetMapping("/volume/snapshot/list")
     public ResultUtil<List<VolumeSnapshotModel>> listSnapshot(
+            @RequestParam("vmName") String vmName,
             @RequestParam("storage") String storage,
             @RequestParam("volume") String volume) {
-        return ResultUtil.success(volumeSnapshotService.listSnapshot( storage,volume));
+        return ResultUtil.success(volumeSnapshotService.listSnapshot(vmName, storage, volume));
     }
 
     /**

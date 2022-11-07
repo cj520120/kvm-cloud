@@ -352,8 +352,9 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
         }
+        VmEntity vm = vmMapper.selectById(entity.getVmId());
         HostEntity host = this.allocateService.allocateHost(storage.getClusterId(), 0, 0, 0);
-        ResultUtil<List<VolumeSnapshot>> resultUtil = this.agentService.listVolumeSnapshot(host.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget());
+        ResultUtil<List<VolumeSnapshot>> resultUtil = this.agentService.listVolumeSnapshot(host.getHostUri(), vm == null ? "" : vm.getVmName(), storage.getStorageTarget(), entity.getVolumeTarget());
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }

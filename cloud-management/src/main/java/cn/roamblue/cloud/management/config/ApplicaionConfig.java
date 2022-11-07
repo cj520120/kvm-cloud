@@ -48,51 +48,51 @@ public class ApplicaionConfig {
     /**
      * Console(VNC)检测间隔(秒)
      */
-    private int consoleCheckInterval=5; 
+    private int consoleCheckInterval = 5;
     /**
      * 模版下载检测间隔(秒)
      */
-    private int templateCheckInterval=5; 
+    private int templateCheckInterval = 5;
     /**
      * 虚拟机运行状态检测间隔(秒)
      */
-    private int vmStatusCheckInterval=10; 
+    private int vmStatusCheckInterval = 10;
     /**
      * 虚拟机销毁检测间隔(秒)
      */
-    private int vmDestoryCheckInterval=60; 
+    private int vmDestroyCheckInterval = 60;
     /**
      * 虚拟机销毁清理时长(秒)
      */
-    private int vmDestoryExpireSeconds=1800;
+    private int vmDestroyExpireSeconds = 1800;
     /**
      * VM状态数据统计时间间隔(秒)
      */
-    private int vmStatsCheckInterval=5;
+    private int vmStatsCheckInterval = 5;
     /**
      * 磁盘数据检测时间间隔（秒)
      */
-    private int volumeCheckInterval=600;
+    private int volumeCheckInterval = 600;
     /**
      * 磁盘销毁检测时间间隔（秒)
      */
-    private int volumeDestoryCheckInterval=60;
+    private int volumeDestroyCheckInterval = 60;
     /**
      * 磁盘销毁清理时长(秒)
      */
-    private int volumeDestoryExpireSeconds=1800;
+    private int volumeDestroyExpireSeconds = 1800;
     /**
      * 默认CPU数量
-     */  
-    private int systemCpu=1;   
+     */
+    private int systemCpu = 1;
     /**
      * 默认内存
      */
-    private int systemMemory=512;
+    private int systemMemory = 512;
     /**
      * 默认每个套接字核心数
      */
-    private int systemCpuCore=1;  
+    private int systemCpuCore = 1;
     /**
      * 默认CPU套接字数量
      */  

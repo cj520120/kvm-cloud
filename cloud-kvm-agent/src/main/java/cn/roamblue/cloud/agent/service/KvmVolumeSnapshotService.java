@@ -11,11 +11,12 @@ public interface KvmVolumeSnapshotService {
     /**
      * 快照列表
      *
+     * @param vmName  虚拟机名称
      * @param storage 存储池
-     * @param volume 磁盘
+     * @param volume  磁盘
      * @return
      */
-    List<VolumeSnapshotModel> listSnapshot(String  storage,String volume);
+    List<VolumeSnapshotModel> listSnapshot(String vmName, String storage, String volume);
 
     /**
      * 创建快照

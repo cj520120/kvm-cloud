@@ -222,11 +222,12 @@ public interface AgentService {
      * 获取快照
      *
      * @param uri
+     * @param vmName
      * @param storage
      * @param volume
      * @return
      */
-    ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri, String storage, String volume);
+    ResultUtil<List<VolumeSnapshot>> listVolumeSnapshot(String uri,String vmName, String storage, String volume);
 
     /**
      * 创建快照

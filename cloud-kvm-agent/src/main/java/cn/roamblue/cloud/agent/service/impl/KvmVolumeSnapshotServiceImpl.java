@@ -15,6 +15,7 @@ import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,16 +29,11 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
 
 
     @Override
-    public List<VolumeSnapshotModel> listSnapshot(String storage, String volume) {
+    public List<VolumeSnapshotModel> listSnapshot(String vmName, String storage, String volume) {
         String file = this.getVolumePath(storage, volume);
         String command = String.format("qemu-img snapshot -l %s", file);
         try {
-            Process process = Runtime.getRuntime().exec(command);
-            String message = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-            int code = process.waitFor();
-            if (code != 0) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, message + ".code=" + code);
-            }
+            String message = this.execute(command);
             List<VolumeSnapshotModel> volumeSnapshotModelList = new ArrayList<>();
             if (!StringUtils.isEmpty(message)) {
                 log.info("file snapshot response:{}", message);
@@ -49,8 +45,11 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
                     String createTime = list.get(list.size() - 3) + " " + list.get(list.size() - 2);
                     volumeSnapshotModelList.add(VolumeSnapshotModel.builder().tag(tag).createTime(DateUtil.parse(createTime, "yyyy-MM-dd HH:mm:ss")).build());
                 }
+                volumeSnapshotModelList.sort((o1, o2) -> o2.getCreateTime().compareTo(o1.getCreateTime()));
             }
             return volumeSnapshotModelList;
+        } catch (CodeException err) {
+            throw err;
         } catch (Exception err) {
             throw new CodeException(ErrorCode.SERVER_ERROR, err);
         }
@@ -60,35 +59,81 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
     public VolumeSnapshotModel createSnapshot(String vmName, String name, String storage, String volume) {
         String file = this.getVolumePath(storage, volume);
         String command = String.format("qemu-img snapshot -c %s %s", name, file);
+        try {
+            this.saveDomainAndExecute(vmName, command);
+            return VolumeSnapshotModel.builder().tag(name).createTime(new Date()).build();
+        } catch (CodeException err) {
+            throw err;
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, err);
+        }
+    }
+
+    @Override
+    public void revertSnapshot(String vmName, String name, String storage, String volume) {
+        String file = this.getVolumePath(storage, volume);
+        String command = String.format("qemu-img snapshot -a %s %s", name, file);
+        try {
+            this.restartDomainAndExecute(vmName, command);
+        } catch (CodeException err) {
+            throw err;
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, err);
+        }
+    }
+
+    @Override
+    public void deleteSnapshot(String vmName, String name, String storage, String volume) {
+        String file = this.getVolumePath(storage, volume);
+        String command = String.format("qemu-img snapshot -d %s %s", name, file);
+        try {
+            this.saveDomainAndExecute(vmName, command);
+        } catch (CodeException err) {
+            throw err;
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, err);
+        }
+    }
+
+    private String execute(String command) throws IOException, InterruptedException {
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec(command);
+            String message = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
+            int code = process.waitFor();
+            log.info("exec command:{},code:{},response:{}", command, code, message);
+            if (code != 0) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, message + ".code=" + code);
+            }
+            return message;
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+        }
+    }
+
+    private String saveDomainAndExecute(String name, String command) throws LibvirtException {
         return super.execute(connect -> {
             Domain domain = null;
             String tempFile = "/tmp/" + UUID.randomUUID();
-            if (!StringUtils.isEmpty(vmName)) {
+            if (!StringUtils.isEmpty(name)) {
                 try {
-                    domain = connect.domainLookupByName(vmName);
+                    domain = connect.domainLookupByName(name);
                     if (domain.getInfo().state != DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
                         throw new CodeException(ErrorCode.SERVER_ERROR, "当前虚拟机不是运行状态");
                     }
                     domain.save(tempFile);
-                    log.info("save vm {} to {}", vmName, tempFile);
+                    log.info("save vm {} to {}", name, tempFile);
                 } catch (LibvirtException err) {
                     if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                        log.info("vm {} not running", vmName);
-                    } else {
                         throw err;
                     }
                 }
 
             }
             try {
-                log.info("exec command:{}", command);
-                Process process = Runtime.getRuntime().exec(command);
-                String message = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-                int code = process.waitFor();
-                if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, message + ".code=" + code);
-                }
-                return VolumeSnapshotModel.builder().tag(name).createTime(new Date()).build();
+                return this.execute(command);
             } catch (CodeException err) {
                 throw err;
             } catch (Exception err) {
@@ -97,43 +142,33 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
             } finally {
                 if (domain != null) {
                     connect.restore(tempFile);
-                    log.info("restore vm {} from {}", vmName, tempFile);
+                    log.info("restore vm {} from {}", name, tempFile);
                     FileUtil.del(tempFile);
                 }
             }
         });
     }
 
-    @Override
-    public void revertSnapshot(String vmName, String name, String storage, String volume) {
-        String file = this.getVolumePath(storage, volume);
-        String command = String.format("qemu-img snapshot -a %s %s", name, file);
-        super.execute(connect -> {
+    private String restartDomainAndExecute(String name, String command) throws LibvirtException {
+        return super.execute(connect -> {
             String xml = null;
-            if (!StringUtils.isEmpty(vmName)) {
+            if (!StringUtils.isEmpty(name)) {
                 try {
-                    Domain domain = connect.domainLookupByName(vmName);
+                    Domain domain = connect.domainLookupByName(name);
+                    if (domain.getInfo().state != DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "当前虚拟机不是运行状态");
+                    }
                     xml = domain.getXMLDesc(0);
                     domain.destroy();
-                    log.info("destroy vm {}", vmName);
                 } catch (LibvirtException err) {
                     if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                        log.info("vm {} not running", vmName);
-                    } else {
                         throw err;
                     }
                 }
 
             }
             try {
-                log.info("exec command:{}", command);
-                Process process = Runtime.getRuntime().exec(command);
-                String message = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-                int code = process.waitFor();
-                if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, message + ".code=" + code);
-                }
-                return null;
+                return this.execute(command);
             } catch (CodeException err) {
                 throw err;
             } catch (Exception err) {
@@ -142,61 +177,11 @@ public class KvmVolumeSnapshotServiceImpl extends AbstractKvmService implements 
             } finally {
                 if (!StringUtils.isEmpty(xml)) {
                     connect.domainCreateXML(xml, 0);
-                    log.info("start vm {}", vmName);
-                }
-            }
-        });
-
-    }
-
-    @Override
-    public void deleteSnapshot(String vmName, String name, String storage, String volume) {
-        String file = this.getVolumePath(storage, volume);
-        String command = String.format("qemu-img snapshot -d %s %s", name, file);
-        super.execute(connect -> {
-            Domain domain = null;
-            String tempFile = "/tmp/" + UUID.randomUUID();
-            if (!StringUtils.isEmpty(vmName)) {
-                try {
-                    domain = connect.domainLookupByName(vmName);
-                    if (domain.getInfo().state != DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
-                        throw new CodeException(ErrorCode.SERVER_ERROR, "当前虚拟机不是运行状态");
-                    }
-                    domain.save(tempFile);
-                    log.info("save vm {} to {}", vmName, tempFile);
-                } catch (LibvirtException err) {
-                    if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                        log.info("vm {} not running", vmName);
-                    } else {
-                        throw err;
-                    }
-                }
-
-            }
-            try {
-                log.info("exec command:{}", command);
-                Process process = Runtime.getRuntime().exec(command);
-                String message = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-                int code = process.waitFor();
-                if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, message + ".code=" + code);
-                }
-                return message;
-            } catch (CodeException err) {
-                throw err;
-            } catch (Exception err) {
-                log.error("exec command fail.command={}", command, err);
-                throw new CodeException(ErrorCode.SERVER_ERROR, err);
-            } finally {
-                if (domain != null) {
-                    connect.restore(tempFile);
-                    log.info("restore vm {} from {}", vmName, tempFile);
-                    FileUtil.del(tempFile);
+                    log.info("start vm {} xml={}", name, xml);
                 }
             }
         });
     }
-
 
     private String getVolumePath(String storageName, String volumeName) {
         return String.format("/mnt/%s/%s", storageName, volumeName);
