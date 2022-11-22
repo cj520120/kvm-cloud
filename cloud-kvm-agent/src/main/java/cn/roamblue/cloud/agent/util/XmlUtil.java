@@ -107,11 +107,10 @@ public final class XmlUtil {
         sb.append("<entry name='product'>Roamblue</entry>");
         sb.append("</system>");
         sb.append("</sysinfo>");
-
         sb.append("<os>");
         sb.append("<type>hvm</type>");
-        sb.append("<boot dev='cdrom'/>");
         sb.append("<boot dev='hd'/>");
+        sb.append("<boot dev='cdrom'/>");
         sb.append("<bootmenu enable ='yes' timeout='5000'/>");
         sb.append("</os>");
         sb.append("<features><pae/><acpi/><apic/><hap/><privnet/></features>");
