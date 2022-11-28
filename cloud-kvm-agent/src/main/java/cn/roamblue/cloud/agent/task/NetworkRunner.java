@@ -23,10 +23,14 @@ public class NetworkRunner extends AbstractTaskRunner<NetworkRequest, Void> {
     @Override
     protected Void run(Connect connect, NetworkRequest request) throws Exception {
 
-        if (Command.Network.CREATE.equals(request.getCommand())) {
-            operate.create(connect, request);
-        } else if (Command.Network.DESTROY.equals(request.getCommand())) {
-            operate.destroy(connect, request.getName());
+        if (Command.Network.CREATE_BASIC.equals(request.getCommand())) {
+            operate.createVlan(connect, request);
+        }if (Command.Network.CREATE_VLAN.equals(request.getCommand())) {
+            operate.createVlan(connect, request);
+        } if (Command.Network.DESTROY_BASIC.equals(request.getCommand())) {
+            operate.destroyBasic(connect, request);
+        }  else if (Command.Network.DESTROY_VLAN.equals(request.getCommand())) {
+            operate.destroyVlan(connect, request);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络操作:" + request.getCommand());
         }

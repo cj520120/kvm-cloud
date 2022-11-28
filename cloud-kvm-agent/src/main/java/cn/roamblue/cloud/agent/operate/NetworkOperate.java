@@ -8,19 +8,34 @@ import org.libvirt.Connect;
  */
 public interface NetworkOperate {
     /**
-     * 初始化网络信息
+     * 创建基础网络
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void createBasic(Connect connect, NetworkRequest request) throws Exception;
+
+    /**
+     * 创建Vlan网络
      *
      * @param connect
      * @param request
      * @throws Exception
      */
-    void create(Connect connect, NetworkRequest request) throws Exception;
+    void createVlan(Connect connect, NetworkRequest request) throws Exception;
 
     /**
-     * 删除网络信息
+     * 删除基础网络信息
      * @param connect
-     * @param name
+     * @param request
      * @throws Exception
      */
-    void destroy(Connect connect,String name) throws Exception;
+    void destroyBasic(Connect connect, NetworkRequest request) throws Exception;
+    /**
+     * 删除Vlan网络信息
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void destroyVlan(Connect connect, NetworkRequest request) throws Exception;
 }

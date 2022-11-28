@@ -50,6 +50,18 @@ public class NetworkRequest {
          * 网卡名称
          */
         private String nic;
+        /**
+         * IP
+         */
+        private String ip;
+        /**
+         * 子网
+         */
+        private String netmask;
+        /**
+         * 网关
+         */
+        private String geteway;
 
     }
 
@@ -73,5 +85,13 @@ public class NetworkRequest {
          * vlan 桥接网卡名称
          */
         private String bridge;
+        /**
+         * IP
+         */
+        private String ip;
+        /**
+         * 子网
+         */
+        private String netmask;
     }
 }
