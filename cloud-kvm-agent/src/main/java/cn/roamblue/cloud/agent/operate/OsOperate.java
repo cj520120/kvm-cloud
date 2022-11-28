@@ -8,7 +8,7 @@ import org.libvirt.Connect;
  */
 public interface OsOperate {
     /**
-     * 初始化网络信息
+     * 启动
      *
      * @param connect
      * @param request
@@ -17,7 +17,7 @@ public interface OsOperate {
     void start(Connect connect, OsRequest.Start request) throws Exception;
 
     /**
-     * 初始化网络信息
+     * 关机
      *
      * @param connect
      * @param request
@@ -26,7 +26,7 @@ public interface OsOperate {
     void shutdown(Connect connect, OsRequest.Shutdown request) throws Exception;
 
     /**
-     * 初始化网络信息
+     * 重启
      *
      * @param connect
      * @param request
@@ -35,7 +35,7 @@ public interface OsOperate {
     void reboot(Connect connect, OsRequest.Reboot request) throws Exception;
 
     /**
-     * 初始化网络信息
+     * 执行qma
      *
      * @param connect
      * @param request
@@ -44,7 +44,7 @@ public interface OsOperate {
     void qma(Connect connect, OsRequest.Qma request) throws Exception;
 
     /**
-     * 删除网络信息
+     * 销毁
      *
      * @param connect
      * @param request
