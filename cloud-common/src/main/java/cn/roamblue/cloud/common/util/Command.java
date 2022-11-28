@@ -28,7 +28,6 @@ public class Command {
     public static final class  Os{
         public static final String DESTROY = "delete";
         public static final String START = "start";
-        public static final String STOP = "stop";
         public static final String REBOOT = "reboot";
         public static final String SHUTDOWN = "shutdown";
         public static final String QMA = "qma";

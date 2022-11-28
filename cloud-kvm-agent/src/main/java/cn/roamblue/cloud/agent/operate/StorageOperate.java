@@ -1,8 +1,8 @@
 package cn.roamblue.cloud.agent.operate;
 
+import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.agent.StorageRequest;
 import org.libvirt.Connect;
-
-import java.util.Map;
 
 /**
  * @author chenjun
@@ -12,11 +12,10 @@ public interface StorageOperate {
      * 初始化存储池信息
      *
      * @param connect
-     * @param name
-     * @param param
+     * @param request
      * @throws Exception
      */
-    void create(Connect connect, String name, Map<String, Object> param) throws Exception;
+    StorageModel create(Connect connect, StorageRequest request) throws Exception;
 
     /**
      *

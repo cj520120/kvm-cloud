@@ -2,9 +2,7 @@ package cn.roamblue.cloud.common.task;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author chenjun
@@ -28,23 +26,25 @@ public class ScheduledExecutor {
 
     /**
      * 立即执行任务
+     *
      * @param runner
      * @param param
      */
-    public static  <R,V> void submit(ScheduleRunner<R,V> runner,R param){
-        executorService.submit(()->ScheduledExecutor.run(runner,param));
+    public static <R, V> Future<V> submit(ScheduleRunner<R, V> runner, R param) {
+        return (Future<V>) executorService.submit(() -> ScheduledExecutor.run(runner, param));
     }
-    private static  <R,V> void run(ScheduleRunner<R,V> runner,R param){
-        try{
-            runner.onScheduleFinish(true,param, runner.run(param), null);
-        }catch (Throwable err){
-            runner.onScheduleFinish(false,param,null,err);
+
+    public static <V> Future<V> submit(Callable<V> callable) {
+        return executorService.submit(callable);
+    }
+
+    private static <R, V> void run(ScheduleRunner<R, V> runner, R param) {
+        try {
+            runner.onScheduleFinish(true, param, runner.run(param), null);
+        } catch (Throwable err) {
+            runner.onScheduleFinish(false, param, null, err);
         }
     }
-
-
-
-
 
 
     public interface ScheduleRunner<R,V>{
