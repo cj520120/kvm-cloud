@@ -1,14 +1,14 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
 import cn.roamblue.cloud.agent.operate.StorageOperate;
+import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.agent.StorageRequest;
 import org.libvirt.Connect;
-
-import java.util.Map;
 
 public class StorageOperateImpl implements StorageOperate {
     @Override
-    public void create(Connect connect, String name, Map<String, Object> param) throws Exception {
-
+    public StorageModel create(Connect connect, StorageRequest request) throws Exception {
+        return null;
     }
 
     @Override
