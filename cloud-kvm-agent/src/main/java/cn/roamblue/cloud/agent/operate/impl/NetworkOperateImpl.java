@@ -64,7 +64,7 @@ public class NetworkOperateImpl implements NetworkOperate {
         shell("ifconfig " + bridge + " " + ip + " netmask " + netmask + " up");
     }
 
-    private void shell(String command) throws InterruptedException {
+    private void shell(String command) {
         Process process = RuntimeUtil.exec(command);
         try {
             process.waitFor();
@@ -72,7 +72,9 @@ public class NetworkOperateImpl implements NetworkOperate {
             if (code != 0) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "执行网络命令失败:" + command);
             }
-        } finally {
+        } catch (Exception err){
+            throw new CodeException(ErrorCode.SERVER_ERROR, "执行网络命令失败:" + command,err);
+        }finally {
             process.destroy();
         }
     }
