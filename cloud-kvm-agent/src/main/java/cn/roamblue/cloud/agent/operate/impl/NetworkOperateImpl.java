@@ -23,6 +23,7 @@ public class NetworkOperateImpl implements NetworkOperate {
 
     @Override
     public void createVlan(Connect connect, NetworkRequest request) throws Exception {
+        shell("modprobe 8021q");
         NetworkRequest.Vlan vlan = request.getVlan();
         NetworkRequest.BasicBridge bridge = request.getBasicBridge();
         String nic = request.getBasicBridge().getBridge();
