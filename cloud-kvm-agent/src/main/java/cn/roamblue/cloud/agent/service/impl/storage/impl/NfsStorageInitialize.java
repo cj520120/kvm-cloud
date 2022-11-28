@@ -6,6 +6,9 @@ import org.libvirt.Connect;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.util.Map;
+
 /**
  * @ClassName: NfsStorageBuilder
  * @Description: TODO
@@ -31,6 +34,14 @@ public class NfsStorageInitialize implements StorageInitialize {
         connect.storagePoolCreateXML(xml, 0);
     }
 
+
+
+    private void checkAndCreatePath(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+    }
     @Override
     public String getType() {
         return StorageType.NFS;
