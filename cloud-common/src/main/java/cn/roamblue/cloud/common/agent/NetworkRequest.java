@@ -28,7 +28,7 @@ public class NetworkRequest {
     /**
      * 基础网络桥接信息
      */
-    private BasicBridge basic;
+    private BasicBridge basicBridge;
     /**
      * Vlan 网络信息
      */
