@@ -42,7 +42,7 @@ public class VolumeRunner extends AbstractTaskRunner<VolumeRequest, VolumeModel>
             } else if (Command.Volume.DOWNLOAD.equals(request.getCommand())) {
                 return this.operate.download(connect, request.getDownload());
             } else {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池操作:" + request.getCommand());
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的磁盘操作:" + request.getCommand());
             }
             return null;
 
