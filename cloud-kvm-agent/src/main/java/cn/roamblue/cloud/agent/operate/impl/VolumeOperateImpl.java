@@ -31,6 +31,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             xml=ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
             xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetVolume(),request.getTargetType(),request.getParentVolume(),request.getParentType());
         }
+        FileUtil.mkParentDirs(request.getTargetVolume());
         StoragePool storagePool = connect.storagePoolLookupByName(request.getTargetStorage());
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
         StorageVolInfo storageVolInfo = storageVol.getInfo();
@@ -66,6 +67,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
         StorageVol sourceVol = sourceStoragePool.storageVolLookupByName(request.getSourceVolume());
         String xml= ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
+        FileUtil.mkParentDirs(request.getTargetVolume());
         xml=String.format(xml,request.getTargetName(), request.getTargetVolume(),request.getTargetType());
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();
@@ -120,6 +122,7 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeModel template(Connect connect, VolumeRequest.TemplateVolume request) throws Exception {
+
         return clone(connect, VolumeRequest.CloneVolume.builder()
                 .sourceStorage(request.getSourceStorage())
                 .sourceVolume(request.getSourceVolume())
@@ -132,6 +135,7 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeModel download(Connect connect, VolumeRequest.DownloadVolume request) throws Exception {
+        FileUtil.mkParentDirs(request.getTargetVolume());
         String tempFile=request.getTargetVolume()+".data";
         try {
             HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
@@ -159,4 +163,5 @@ public class VolumeOperateImpl implements VolumeOperate {
                 .targetType(request.getTargetType())
                 .build());
     }
+
 }
