@@ -24,6 +24,13 @@ public class StorageOperateImpl implements StorageOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
         }
         StoragePool storagePool = this.findStorage(connect, request.getName());
+        if(storagePool!=null){
+            StoragePoolInfo storagePoolInfo = storagePool.getInfo();
+            if (storagePoolInfo.state != StoragePoolInfo.StoragePoolState.VIR_STORAGE_POOL_RUNNING) {
+                 storagePool.destroy();
+                 storagePool=null;
+            }
+        }
         if (storagePool == null) {
             String nfsUri = request.getParam().get("uri").toString();
             String nfsPath = request.getParam().get("path").toString();
@@ -33,12 +40,8 @@ public class StorageOperateImpl implements StorageOperate {
             xml = String.format(xml, request.getName(), nfsUri, nfsPath, mountPath);
             storagePool = connect.storagePoolCreateXML(xml, 0);
         }
-        StoragePoolInfo storagePoolInfo = storagePool.getInfo();
-        if (storagePoolInfo.state != StoragePoolInfo.StoragePoolState.VIR_STORAGE_POOL_RUNNING) {
-            storagePool.setAutostart(1);
-            storagePool.create(1);
-        }
         storagePool.refresh(0);
+        StoragePoolInfo storagePoolInfo = storagePool.getInfo();
         return StorageModel.builder().name(request.getName())
                 .state(storagePoolInfo.state.toString())
                 .capacity(storagePoolInfo.capacity)
