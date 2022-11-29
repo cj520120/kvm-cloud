@@ -101,11 +101,8 @@ public class OsRequest {
         private String name;
         private int timeout;
         private List<QmaBody> commands;
-        @Data
-        @NoArgsConstructor
-        @AllArgsConstructor
-        @Builder
-        public class QmaType{
+
+        public static class QmaType{
             public static final int WRITE_FILE=0;
             public static final int EXECUTE=1;
         }
@@ -113,7 +110,7 @@ public class OsRequest {
         @NoArgsConstructor
         @AllArgsConstructor
         @Builder
-        public class QmaBody{
+        public static class QmaBody{
             private int command;
             private String data;
         }
@@ -121,7 +118,7 @@ public class OsRequest {
         @NoArgsConstructor
         @AllArgsConstructor
         @Builder
-        public class WriteFile{
+        public static class WriteFile{
             private String fileName;
             private String fileBody;
         }
@@ -129,7 +126,7 @@ public class OsRequest {
         @NoArgsConstructor
         @AllArgsConstructor
         @Builder
-        public class Execute{
+        public static class Execute{
             private String command;
             private String[] args;
         }

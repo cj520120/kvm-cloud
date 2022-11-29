@@ -26,10 +26,10 @@ public class VolumeOperateImpl implements VolumeOperate {
         String xml;
         if(!StringUtils.isEmpty(request.getParentVolume())){
             xml=ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
-            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetType(),request.getTargetVolume());
+            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetVolume(),request.getTargetType());
         }else{
             xml=ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
-            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetType(),request.getTargetVolume(),request.getParentVolume(),request.getParentType());
+            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetVolume(),request.getTargetType(),request.getParentVolume(),request.getParentType());
         }
         StoragePool storagePool = connect.storagePoolLookupByName(request.getTargetStorage());
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
@@ -48,7 +48,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public void destroy(Connect connect, VolumeRequest.DestroyVolume request) throws Exception {
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
-        storagePool.refresh(1);
+        storagePool.refresh(0);
         String[] names=storagePool.listVolumes();
         for (String name : names) {
             StorageVol storageVol = storagePool.storageVolLookupByName(name);
@@ -82,7 +82,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     public VolumeModel resize(Connect connect, VolumeRequest.ResizeVolume request) throws Exception {
 
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
-        storagePool.refresh(1);
+        storagePool.refresh(0);
         String[] names=storagePool.listVolumes();
         StorageVol findVol=null;
         for (String name : names) {

@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.roamblue.cloud.agent.operate.StorageOperate;
 import cn.roamblue.cloud.common.agent.StorageModel;
@@ -27,6 +28,7 @@ public class StorageOperateImpl implements StorageOperate {
             String nfsUri = request.getParam().get("uri").toString();
             String nfsPath = request.getParam().get("path").toString();
             String mountPath = request.getParam().get("mount").toString();
+            FileUtil.mkdir(mountPath);
             String xml = ResourceUtil.readUtf8Str("xml/storage/NfsStorage.xml");
             xml = String.format(xml, request.getName(), nfsUri, nfsPath, mountPath);
             storagePool = connect.storagePoolCreateXML(xml, 0);
@@ -36,7 +38,7 @@ public class StorageOperateImpl implements StorageOperate {
             storagePool.setAutostart(1);
             storagePool.create(1);
         }
-        storagePool.refresh(1);
+        storagePool.refresh(0);
         return StorageModel.builder().name(request.getName())
                 .state(storagePoolInfo.state.toString())
                 .capacity(storagePoolInfo.capacity)
@@ -51,7 +53,6 @@ public class StorageOperateImpl implements StorageOperate {
         StoragePool storagePool = this.findStorage(connect, name);
         if (storagePool != null) {
             storagePool.destroy();
-            storagePool.undefine();
         }
     }
 
