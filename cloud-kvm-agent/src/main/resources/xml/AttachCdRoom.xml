@@ -1,0 +1,7 @@
+<disk type='file' device='cdrom'>
+    <driver name='qemu'/>
+    <source file='%s'/>
+    <target dev='hdc%d' bus='ide'/>
+    <readonly/>
+    <address type='drive' controller='0' bus='0' target='%d' unit='0'/>
+</disk>
