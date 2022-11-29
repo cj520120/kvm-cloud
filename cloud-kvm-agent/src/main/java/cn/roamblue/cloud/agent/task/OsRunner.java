@@ -31,7 +31,19 @@ public class OsRunner extends AbstractTaskRunner<OsRequest, Void> {
             this.operate.reboot(connect, request.getReboot());
         } else if (Command.Os.SHUTDOWN.equals(request.getCommand())) {
             this.operate.shutdown(connect, request.getShutdown());
-        } else if (Command.Os.QMA.equals(request.getCommand())) {
+        } else if (Command.Os.ATTACH_CD_ROOM.equals(request.getCommand())) {
+            this.operate.qma(connect, request.getQma());
+        }  else if (Command.Os.DETACH_CD_ROOM.equals(request.getCommand())) {
+            this.operate.qma(connect, request.getQma());
+        }  else if (Command.Os.ATTACH_DISK.equals(request.getCommand())) {
+            this.operate.qma(connect, request.getQma());
+        }  else if (Command.Os.DETACH_DISK.equals(request.getCommand())) {
+            this.operate.qma(connect, request.getQma());
+        }  else if (Command.Os.ATTACH_NIC.equals(request.getCommand())) {
+            this.operate.qma(connect, request.getQma());
+        }  else if (Command.Os.DETACH_NIC.equals(request.getCommand())) {
+            this.operate.qma(connect, request.getQma());
+        }  else if (Command.Os.QMA.equals(request.getCommand())) {
             this.operate.qma(connect, request.getQma());
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的虚拟机操作:" + request.getCommand());

@@ -1,13 +1,21 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.operate.VolumeOperate;
 import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.agent.VolumeRequest;
+import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.ErrorCode;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
 import org.libvirt.StorageVolInfo;
+import org.springframework.util.StringUtils;
+
+import java.io.File;
+import java.util.Objects;
 
 /**
  * @author chenjun
@@ -15,16 +23,41 @@ import org.libvirt.StorageVolInfo;
 public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public VolumeModel create(Connect connect, VolumeRequest.CreateVolume request) throws Exception {
-        /**
-         * 1、父文件格式只能为qcow2格式
-         * 2、如果文件不为qcow格式，则在存在父文件的情况下直接clone过来，否则利用backupfile
-         */
-        return null;
+        String xml;
+        if(!StringUtils.isEmpty(request.getParentVolume())){
+            xml=ResourceUtil.readUtf8Str("xml/CloneVolume.xml");
+            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetType(),request.getTargetVolume());
+        }else{
+            xml=ResourceUtil.readUtf8Str("xml/CreateVolumeByBackingStore.xml");
+            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetType(),request.getTargetVolume(),request.getParentVolume(),request.getParentType());
+        }
+        StoragePool storagePool = connect.storagePoolLookupByName(request.getTargetStorage());
+        StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
+        StorageVolInfo storageVolInfo = storageVol.getInfo();
+        storagePool.refresh(0);
+        return VolumeModel.builder().storage(request.getTargetStorage())
+                .name(request.getTargetName())
+                .path(storageVol.getPath())
+                .type(storageVolInfo.type.toString())
+                .capacity(storageVolInfo.capacity)
+                .allocation(storageVolInfo.allocation)
+                .build();
     }
+
 
     @Override
     public void destroy(Connect connect, VolumeRequest.DestroyVolume request) throws Exception {
-
+        StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
+        storagePool.refresh(1);
+        String[] names=storagePool.listVolumes();
+        for (String name : names) {
+            StorageVol storageVol = storagePool.storageVolLookupByName(name);
+            if(Objects.equals(storageVol.getPath(),request.getSourceVolume())){
+                storageVol.wipe();
+                storageVol.delete(0);
+                break;
+            }
+        }
     }
 
     @Override
@@ -47,26 +80,83 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeModel resize(Connect connect, VolumeRequest.ResizeVolume request) throws Exception {
-        return null;
+
+        StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
+        storagePool.refresh(1);
+        String[] names=storagePool.listVolumes();
+        StorageVol findVol=null;
+        for (String name : names) {
+            StorageVol storageVol = storagePool.storageVolLookupByName(name);
+            if (Objects.equals(storageVol.getPath(), request.getSourceVolume())) {
+                findVol = storageVol;
+                break;
+            }
+        }
+        if(findVol==null){
+            throw  new CodeException(ErrorCode.SERVER_ERROR,"磁盘不存在:"+request.getSourceVolume());
+        }
+        findVol.resize(request.getSize(),1);
+        StorageVolInfo storageVolInfo = findVol.getInfo();
+        return VolumeModel.builder().storage(request.getSourceStorage())
+                .name(findVol.getName())
+                .type(storageVolInfo.type.toString())
+                .path(findVol.getPath())
+                .capacity(storageVolInfo.capacity)
+                .allocation(storageVolInfo.allocation)
+                .build();
     }
 
     @Override
     public VolumeModel snapshot(Connect connect, VolumeRequest.SnapshotVolume request) throws Exception {
-        return null;
+        return clone(connect, VolumeRequest.CloneVolume.builder()
+                .sourceStorage(request.getSourceStorage())
+                .sourceVolume(request.getSourceVolume())
+                .targetName(request.getTargetName())
+                .targetStorage(request.getTargetStorage())
+                .targetVolume(request.getTargetVolume())
+                .targetType(request.getTargetType())
+                .build());
     }
 
     @Override
     public VolumeModel template(Connect connect, VolumeRequest.TemplateVolume request) throws Exception {
-        return null;
+        return clone(connect, VolumeRequest.CloneVolume.builder()
+                .sourceStorage(request.getSourceStorage())
+                .sourceVolume(request.getSourceVolume())
+                .targetName(request.getTargetName())
+                .targetStorage(request.getTargetStorage())
+                .targetVolume(request.getTargetVolume())
+                .targetType(request.getTargetType())
+                .build());
     }
 
     @Override
     public VolumeModel download(Connect connect, VolumeRequest.DownloadVolume request) throws Exception {
-        return null;
+        String tempFile=request.getTargetVolume()+".data";
+        try {
+            HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
+            return clone(connect, VolumeRequest.CloneVolume.builder()
+                    .sourceStorage(request.getTargetStorage())
+                    .sourceVolume(tempFile)
+                    .targetName(request.getTargetName())
+                    .targetStorage(request.getTargetStorage())
+                    .targetVolume(request.getTargetVolume())
+                    .targetType(request.getTargetType())
+                    .build());
+        }finally {
+            FileUtil.del(tempFile);
+        }
     }
 
     @Override
     public VolumeModel migrate(Connect connect, VolumeRequest.MigrateVolume request) throws Exception {
-        return null;
+        return clone(connect, VolumeRequest.CloneVolume.builder()
+                .sourceStorage(request.getSourceStorage())
+                .sourceVolume(request.getSourceVolume())
+                .targetName(request.getTargetName())
+                .targetStorage(request.getTargetStorage())
+                .targetVolume(request.getTargetVolume())
+                .targetType(request.getTargetType())
+                .build());
     }
 }

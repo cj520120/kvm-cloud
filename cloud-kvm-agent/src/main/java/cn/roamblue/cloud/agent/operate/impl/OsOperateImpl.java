@@ -21,6 +21,36 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
+    public void attachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception {
+
+    }
+
+    @Override
+    public void detachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception {
+
+    }
+
+    @Override
+    public void attachDisk(Connect connect, OsRequest.Disk request) throws Exception {
+
+    }
+
+    @Override
+    public void detachDisk(Connect connect, OsRequest.Disk request) throws Exception {
+
+    }
+
+    @Override
+    public void attachNic(Connect connect, OsRequest.Nic request) throws Exception {
+
+    }
+
+    @Override
+    public void detachNic(Connect connect, OsRequest.Nic request) throws Exception {
+
+    }
+
+    @Override
     public void qma(Connect connect, OsRequest.Qma request) throws Exception {
 
     }

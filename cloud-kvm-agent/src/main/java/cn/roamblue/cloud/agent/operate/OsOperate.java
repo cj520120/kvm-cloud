@@ -35,6 +35,55 @@ public interface OsOperate {
     void reboot(Connect connect, OsRequest.Reboot request) throws Exception;
 
     /**
+     * 挂载光驱
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void attachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception;
+
+    /**
+     * 卸载光驱
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void detachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception;
+
+    /**
+     * 挂载磁盘
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void attachDisk(Connect connect, OsRequest.Disk request) throws Exception;
+
+    /**
+     * 卸载磁盘
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void detachDisk(Connect connect, OsRequest.Disk request) throws Exception;
+
+    /**
+     * 挂载网卡
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void attachNic(Connect connect, OsRequest.Nic request) throws Exception;
+
+    /**
+     * 卸载网卡
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void detachNic(Connect connect, OsRequest.Nic request) throws Exception;
+
+
+    /**
      * 执行qma
      *
      * @param connect

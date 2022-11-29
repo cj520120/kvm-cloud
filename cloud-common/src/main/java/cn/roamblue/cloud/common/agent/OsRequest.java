@@ -14,10 +14,6 @@ public class OsRequest {
      * 命令
      */
     private String command;
-    /**
-     * 虚拟机名称
-     */
-    private String name;
 
     private Start start;
     private Shutdown shutdown;
@@ -80,5 +76,42 @@ public class OsRequest {
          */
         private String name;
 
+    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CdRoom{
+        /**
+         * 虚拟机名称
+         */
+        private String name;
+        private int deviceId;
+        private String path;
+    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Disk{
+        /**
+         * 虚拟机名称
+         */
+        private String name;
+        private int deviceId;
+        private String volume;
+    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Nic{
+        /**
+         * 虚拟机名称
+         */
+        private String name;
+        private int deviceId;
+        private String mac;
+        private String bridge;
     }
 }

@@ -32,6 +32,13 @@ public class Command {
         public static final String START = "StartOs";
         public static final String REBOOT = "RebootOs";
         public static final String SHUTDOWN = "ShutdownOs";
+
+        public static final String ATTACH_CD_ROOM="AttachCdRoom";
+        public static final String DETACH_CD_ROOM="DetachCdRoom";
+        public static final String ATTACH_DISK="AttachDisk";
+        public static final String DETACH_DISK="DetachDisk";
+        public static final String ATTACH_NIC="AttachNic";
+        public static final String DETACH_NIC="DetachNic";
         public static final String QMA = "QMAOs";
     }
 }

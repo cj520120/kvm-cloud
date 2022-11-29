@@ -63,10 +63,11 @@ public class VolumeRequest {
         private String parentStorage;
         private String parentVolume;
         private String parentType;
+        private String targetName;
         private String targetStorage;
         private String targetVolume;
         private String targetType;
-        private int size;
+        private long targetSize;
     }
 
     @Data
@@ -76,7 +77,6 @@ public class VolumeRequest {
     public static class ResizeVolume {
         private String sourceStorage;
         private String sourceVolume;
-        private String sourceType;
         private int size;
     }
 
@@ -100,7 +100,7 @@ public class VolumeRequest {
     public static class TemplateVolume {
         private String sourceStorage;
         private String sourceVolume;
-        private String sourceType;
+        private String targetName;
         private String targetStorage;
         private String targetVolume;
         private String targetType;
@@ -112,7 +112,7 @@ public class VolumeRequest {
     public static class MigrateVolume {
         private String sourceStorage;
         private String sourceVolume;
-        private String sourceType;
+        private String targetName;
         private String targetStorage;
         private String targetVolume;
         private String targetType;
@@ -126,11 +126,10 @@ public class VolumeRequest {
     public static class SnapshotVolume {
         private String sourceStorage;
         private String sourceVolume;
-        private String sourceType;
+        private String targetName;
         private String targetStorage;
         private String targetVolume;
         private String targetType;
-        private boolean inner;
 
     }
 
@@ -150,7 +149,9 @@ public class VolumeRequest {
     @AllArgsConstructor
     public static class DownloadVolume {
         private String sourceUri;
-        private String sourceType;
+        private String targetStorage;
+        private String targetName;
         private String targetVolume;
+        private String targetType;
     }
 }
