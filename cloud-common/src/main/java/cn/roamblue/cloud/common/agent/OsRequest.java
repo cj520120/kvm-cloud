@@ -156,10 +156,17 @@ public class OsRequest {
          * 虚拟机名称
          */
         private String name;
-        private String driveType;
+        private String bus;
         private int deviceId;
         private String volume;
         private String volumeType;
+
+        public static class DiskBus{
+            public static final String VIRTIO="virtio";
+            public static final String IDE="ide";
+            public static final String SCSI="scsi";
+
+        }
     }
     @Data
     @NoArgsConstructor

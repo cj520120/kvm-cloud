@@ -25,10 +25,10 @@ public class VolumeOperateImpl implements VolumeOperate {
     public VolumeModel create(Connect connect, VolumeRequest.CreateVolume request) throws Exception {
         String xml;
         if(!StringUtils.isEmpty(request.getParentVolume())){
-            xml=ResourceUtil.readUtf8Str("xml/CloneVolume.xml");
+            xml=ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
             xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetType(),request.getTargetVolume());
         }else{
-            xml=ResourceUtil.readUtf8Str("xml/CreateVolumeByBackingStore.xml");
+            xml=ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
             xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetType(),request.getTargetVolume(),request.getParentVolume(),request.getParentType());
         }
         StoragePool storagePool = connect.storagePoolLookupByName(request.getTargetStorage());
@@ -65,7 +65,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         StoragePool sourceStoragePool = connect.storagePoolLookupByName(request.getSourceStorage());
         StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
         StorageVol sourceVol = sourceStoragePool.storageVolLookupByName(request.getSourceVolume());
-        String xml= ResourceUtil.readUtf8Str("xml/CloneVolume.xml");
+        String xml= ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
         xml=String.format(xml,request.getTargetName(), request.getTargetVolume(),request.getTargetType());
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();

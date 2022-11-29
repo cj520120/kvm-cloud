@@ -1,0 +1,6 @@
+<disk type="file" device="disk" aio='native'>
+    <driver name="qemu" type="%s" cache="none" aio='native'/>
+    <source file="%s"/>
+    <target dev="hda%d" bus="ide"/>
+    <address type='drive' controller='0' bus='0' target='%d' unit='0'/>
+</disk>

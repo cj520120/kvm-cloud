@@ -85,7 +85,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大光盘数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/AttachCdRoom.xml");
+        String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
         int deviceId = request.getDeviceId() + MIN_CD_ROOM_DEVICE_ID;
         xml = String.format(xml, request.getPath(), request.getDeviceId(), deviceId);
         domain.updateDeviceFlags(xml, 1);
@@ -100,7 +100,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大光盘数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/DetachCdRoom.xml");
+        String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
         int deviceId = request.getDeviceId() + MIN_CD_ROOM_DEVICE_ID;
         xml = String.format(xml, request.getPath(), request.getDeviceId(), deviceId);
         domain.updateDeviceFlags(xml, 1);
@@ -115,9 +115,22 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/Disk.xml");
+        String xml;
+        switch (request.getBus()) {
+            case OsRequest.Disk.DiskBus.VIRTIO:
+                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
+                break;
+            case OsRequest.Disk.DiskBus.IDE:
+                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
+                break;
+            case OsRequest.Disk.DiskBus.SCSI:
+                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + request.getBus());
+        }
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
-        xml = String.format(xml, request.getVolumeType(), request.getVolume(), request.getDriveType(), deviceId);
+        xml = String.format(xml, request.getVolumeType(), request.getVolume(), deviceId);
         domain.attachDevice(xml);
     }
 
@@ -130,9 +143,9 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/Disk.xml");
+        String xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
-        xml = String.format(xml, request.getVolumeType(), request.getVolume(), request.getDriveType(), deviceId);
+        xml = String.format(xml, request.getVolumeType(), request.getVolume(), deviceId);
         domain.detachDevice(xml);
     }
 
@@ -145,7 +158,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/Nic.xml");
+        String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
         int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
         xml = String.format(xml, request.getMac(), request.getDriveType(), request.getBridgeName(), deviceId);
         domain.attachDevice(xml);
@@ -160,7 +173,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/Nic.xml");
+        String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
         int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
         xml = String.format(xml, request.getMac(), request.getDriveType(), request.getBridgeName(), deviceId);
         domain.detachDevice(xml);
