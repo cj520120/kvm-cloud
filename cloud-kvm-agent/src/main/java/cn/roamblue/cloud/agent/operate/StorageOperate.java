@@ -13,14 +13,17 @@ public interface StorageOperate {
      *
      * @param connect
      * @param request
+     * @return
      * @throws Exception
      */
     StorageModel create(Connect connect, StorageRequest request) throws Exception;
 
     /**
+     * 销毁存储池
      *
      * @param connect
      * @param name
+     * @throws Exception
      */
-    void destroy(Connect connect,String name);
+    void destroy(Connect connect, String name) throws Exception;
 }

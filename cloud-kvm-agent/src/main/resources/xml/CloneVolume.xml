@@ -1,0 +1,14 @@
+<volume type="file">
+    <name>%s</name>
+    <source>
+    </source>
+    <target>
+        <path>%s</path>
+        <format type="%s"/>
+        <permissions>
+            <mode>0600</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </target>
+</volume>

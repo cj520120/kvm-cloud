@@ -87,7 +87,7 @@ public class VolumeRequest {
     public static class CloneVolume {
         private String sourceStorage;
         private String sourceVolume;
-        private String sourceType;
+        private String targetName;
         private String targetStorage;
         private String targetVolume;
         private String targetType;

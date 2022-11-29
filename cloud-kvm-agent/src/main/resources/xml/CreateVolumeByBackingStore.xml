@@ -1,0 +1,26 @@
+<volume type="file">
+  <name>%s</name>
+  <source>
+  </source>
+  <capacity unit="bytes">%d</capacity>
+  <allocation unit="bytes">%d</allocation>
+  <target>
+    <path>%s</path>
+    <format type="%s"/>
+    <permissions>
+      <mode>0600</mode>
+      <owner>0</owner>
+      <group>0</group>
+    </permissions>
+  </target>
+  <backingStore>
+    <path>%s</path>
+    <format type="%s"/>
+    <permissions>
+      <mode>0644</mode>
+      <owner>0</owner>
+      <group>0</group>
+    </permissions>
+  </backingStore>
+</volume>
+

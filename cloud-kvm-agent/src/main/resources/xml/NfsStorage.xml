@@ -1,0 +1,16 @@
+<pool type="netfs">
+    <name>%s</name>
+    <source>
+        <host name="%s"/>
+        <dir path="%s"/>
+        <format type="auto"/>
+    </source>
+    <target>
+        <path>%s</path>
+        <permissions>
+            <mode>0777</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </target>
+</pool>

@@ -1,10 +1,17 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.roamblue.cloud.agent.operate.VolumeOperate;
 import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.agent.VolumeRequest;
 import org.libvirt.Connect;
+import org.libvirt.StoragePool;
+import org.libvirt.StorageVol;
+import org.libvirt.StorageVolInfo;
 
+/**
+ * @author chenjun
+ */
 public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public VolumeModel create(Connect connect, VolumeRequest.CreateVolume request) throws Exception {
@@ -22,7 +29,20 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeModel clone(Connect connect, VolumeRequest.CloneVolume request) throws Exception {
-        return null;
+        StoragePool sourceStoragePool = connect.storagePoolLookupByName(request.getSourceStorage());
+        StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
+        StorageVol sourceVol = sourceStoragePool.storageVolLookupByName(request.getSourceVolume());
+        String xml= ResourceUtil.readUtf8Str("xml/CloneVolume.xml");
+        xml=String.format(xml,request.getTargetName(), request.getTargetVolume(),request.getTargetType());
+        StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
+        StorageVolInfo storageVolInfo = targetVol.getInfo();
+        return VolumeModel.builder().storage(request.getTargetStorage())
+                .name(request.getTargetName())
+                .type(storageVolInfo.type.toString())
+                .path(targetVol.getPath())
+                .capacity(storageVolInfo.capacity)
+                .allocation(storageVolInfo.allocation)
+                .build();
     }
 
     @Override
