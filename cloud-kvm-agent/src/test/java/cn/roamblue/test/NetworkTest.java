@@ -1,10 +1,16 @@
 package cn.roamblue.test;
 
+import cn.hutool.core.util.RuntimeUtil;
 import cn.roamblue.cloud.agent.operate.NetworkOperate;
 import cn.roamblue.cloud.agent.operate.impl.NetworkOperateImpl;
 import cn.roamblue.cloud.common.agent.NetworkRequest;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Command;
+import cn.roamblue.cloud.common.util.ErrorCode;
 import org.libvirt.Connect;
+import org.springframework.util.StringUtils;
+
+import java.net.NetworkInterface;
 
 public class NetworkTest {
     public static void main(String[] args) throws Exception{
