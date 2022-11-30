@@ -74,12 +74,12 @@ public class OsTest {
                 .networkInterfaces(nics)
                 .vncPassword("123456")
                 .build();
-        new OsOperateImpl().start(null, request);
+        new OsOperateImpl().start(connect, request);
     }
 
     public static String randomMacAddress() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             if (sb.length() > 0) {
                 sb.append(":");
             }
@@ -94,6 +94,6 @@ public class OsTest {
             sb.append(element);
         }
 
-        return sb.toString();
+        return "00:"+sb.toString();
     }
 }
