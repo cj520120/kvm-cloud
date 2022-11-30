@@ -17,14 +17,7 @@ public class NetworkRequest {
      * 命令
      */
     private String command;
-    /**
-     * 网路名称
-     */
-    private String name;
-    /**
-     * 网络类型 基础网络、Vlan网络
-     */
-    private String type;
+
     /**
      * 基础网络桥接信息
      */
@@ -78,10 +71,6 @@ public class NetworkRequest {
          */
         private int vlanId;
         /**
-         * vlan网卡名称
-         */
-        private String name;
-        /**
          * vlan 桥接网卡名称
          */
         private String bridge;
@@ -93,5 +82,9 @@ public class NetworkRequest {
          * 子网
          */
         private String netmask;
+        /**
+         * 网关
+         */
+        private String geteway;
     }
 }
