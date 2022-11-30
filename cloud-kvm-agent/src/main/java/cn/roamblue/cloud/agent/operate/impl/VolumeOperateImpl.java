@@ -1,7 +1,6 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.operate.VolumeOperate;
@@ -28,10 +27,10 @@ public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public VolumeModel create(Connect connect, VolumeRequest.CreateVolume request) throws Exception {
         String xml;
-        if(!StringUtils.isEmpty(request.getParentVolume())){
-            xml=ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
-            xml=String.format(xml,request.getTargetName(),request.getTargetSize(),request.getTargetSize(),request.getTargetVolume(),request.getTargetType());
-        }else {
+        if (StringUtils.isEmpty(request.getParentVolume())) {
+            xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolume.xml");
+            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetVolume(), request.getTargetType());
+        } else {
             boolean checkParentSupport = request.getParentType().equals(VolumeType.QCOW) || request.getParentType().equals(VolumeType.QCOW2) || request.getParentType().equals(VolumeType.RAW);
             boolean checkChildSupport = request.getTargetType().equals(VolumeType.QCOW) || request.getTargetType().equals(VolumeType.QCOW2);
             boolean checkSupport = checkParentSupport && checkChildSupport;

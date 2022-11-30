@@ -29,11 +29,14 @@ public class OsRequest {
     public static class Start{
         private String name;
         private String description;
+        private String emulator;
         private Memory memory;
         private Cpu cpu;
-        private List<CdRoom> cdRooms;
+        private CdRoom cdRoom;
+        private String bus;
         private List<Disk> disks;
         private List<Nic> networkInterfaces;
+        private String vncPassword;
 
     }
     @Data
@@ -42,11 +45,10 @@ public class OsRequest {
     @Builder
     public static class Cpu{
         private int number;
-        private int mode;
         private int socket;
         private int core;
         private int thread;
-        private long speed;
+        private int share;
     }
     @Data
     @NoArgsConstructor
@@ -141,7 +143,6 @@ public class OsRequest {
          * 虚拟机名称
          */
         private String name;
-        private int deviceId;
         private String path;
     }
     @Data
@@ -153,7 +154,6 @@ public class OsRequest {
          * 虚拟机名称
          */
         private String name;
-        private String bus;
         private int deviceId;
         private String volume;
         private String volumeType;

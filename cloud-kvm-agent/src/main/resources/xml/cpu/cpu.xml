@@ -1,0 +1,3 @@
+<cpu mode='host-passthrough'>
+    <topology sockets='%d' cores='%d' threads='%d'/>
+</cpu>

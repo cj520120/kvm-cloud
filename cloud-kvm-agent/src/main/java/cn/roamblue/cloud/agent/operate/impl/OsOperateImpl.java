@@ -23,20 +23,26 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class OsOperateImpl implements OsOperate {
-    private final int MAX_DEVICE_COUNT = 10;
-    private final int MIN_CD_ROOM_DEVICE_ID = 0;
-    private final int MIN_DISK_DEVICE_ID = MIN_CD_ROOM_DEVICE_ID + MAX_DEVICE_COUNT;
+    private final int MAX_DEVICE_COUNT = 5;
+    private final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
 
-    @Override
-    public void start(Connect connect, OsRequest.Start request) throws Exception {
-        Domain domain = this.findDomainByName(connect, request.getName());
-        if (domain != null) {
-             if(domain.getInfo().state== DomainInfo.DomainState.VIR_DOMAIN_RUNNING){
-                 return;
-             }
-            domain.destroy();
+    private static String getDiskXml(OsRequest.Disk request, String bus) {
+        String xml;
+        switch (bus) {
+            case OsRequest.Disk.DiskBus.VIRTIO:
+                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
+                break;
+            case OsRequest.Disk.DiskBus.IDE:
+                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
+                break;
+            case OsRequest.Disk.DiskBus.SCSI:
+                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + bus);
         }
+        return xml;
     }
 
     @Override
@@ -77,18 +83,65 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void attachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception {
-        Domain domain = connect.domainLookupByName(request.getName());
-        if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+    public void start(Connect connect, OsRequest.Start request) throws Exception {
+        Domain domain = this.findDomainByName(connect, request.getName());
+        if (domain != null) {
+            if (domain.getInfo().state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
+                return;
+            }
+            domain.destroy();
         }
-        if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大光盘数量");
+        String cpuXml = "";
+        String cdRoomXml = "";
+        String diskXml = "";
+        String nicXml = "";
+        if (request.getCpu().getShare() > 0) {
+            String xml = ResourceUtil.readUtf8Str("xml/cpu/cputune.xml");
+            cpuXml += String.format(xml, request.getCpu().getShare()) + "\r\n";
         }
-        String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
-        int deviceId = request.getDeviceId() + MIN_CD_ROOM_DEVICE_ID;
-        xml = String.format(xml, request.getPath(), request.getDeviceId(), deviceId);
-        domain.updateDeviceFlags(xml, 1);
+        if (request.getCpu().getCore() > 0) {
+            String xml = ResourceUtil.readUtf8Str("xml/cpu/cpu.xml");
+            cpuXml += String.format(xml, request.getCpu().getSocket(), request.getCpu().getCore(), request.getCpu().getThread()) + "\r\n";
+        }
+        if (request.getCdRoom() != null) {
+            OsRequest.CdRoom cd = request.getCdRoom();
+            if (StringUtils.isEmpty(cd.getPath())) {
+                String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
+                cdRoomXml += xml + "\r\n";
+            } else {
+                String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
+                cdRoomXml += String.format(xml, cd.getPath()) + "\r\n";
+            }
+        }
+        for (int i = 0; i < request.getDisks().size(); i++) {
+            OsRequest.Disk disk = request.getDisks().get(i);
+            String xml = getDiskXml(disk, i == 0 ? request.getBus() : OsRequest.Disk.DiskBus.VIRTIO);
+            int deviceId = disk.getDeviceId() + MIN_DISK_DEVICE_ID;
+
+            String dev = "" + (char) ('a' + deviceId);
+            xml = String.format(xml, dev, disk.getVolumeType(), disk.getVolume(), deviceId, deviceId);
+            diskXml += xml + "\r\n";
+        }
+        for (OsRequest.Nic nic : request.getNetworkInterfaces()) {
+            String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+            int deviceId = nic.getDeviceId() + MIN_NIC_DEVICE_ID;
+            xml = String.format(xml, nic.getMac(), nic.getDriveType(), nic.getBridgeName(), deviceId);
+            nicXml += xml + "\r\n";
+        }
+        String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
+        xml = String.format(xml,
+                request.getName(),
+                request.getDescription(),
+                request.getMemory().getMemory(),
+                request.getCpu().getNumber(),
+                cpuXml,
+                request.getEmulator(),
+                cdRoomXml,
+                diskXml,
+                nicXml,
+                request.getName(),
+                request.getVncPassword());
+        connect.domainCreateXML(xml, 1);
     }
 
     @Override
@@ -97,12 +150,18 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大光盘数量");
-        }
         String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
-        int deviceId = request.getDeviceId() + MIN_CD_ROOM_DEVICE_ID;
-        xml = String.format(xml, request.getPath(), request.getDeviceId(), deviceId);
+        domain.updateDeviceFlags(xml, 1);
+    }
+
+    @Override
+    public void attachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception {
+        Domain domain = connect.domainLookupByName(request.getName());
+        if (domain == null) {
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+        }
+        String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
+        xml = String.format(xml, request.getPath());
         domain.updateDeviceFlags(xml, 1);
     }
 
@@ -115,22 +174,11 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml;
-        switch (request.getBus()) {
-            case OsRequest.Disk.DiskBus.VIRTIO:
-                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
-                break;
-            case OsRequest.Disk.DiskBus.IDE:
-                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
-                break;
-            case OsRequest.Disk.DiskBus.SCSI:
-                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
-                break;
-            default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + request.getBus());
-        }
+        String xml = getDiskXml(request, OsRequest.Disk.DiskBus.VIRTIO);
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
-        xml = String.format(xml, request.getVolumeType(), request.getVolume(), deviceId);
+
+        String dev = "" + (char) ('a' + deviceId);
+        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), request.getDeviceId(), deviceId);
         domain.attachDevice(xml);
     }
 
@@ -143,9 +191,10 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
+        String xml = getDiskXml(request, OsRequest.Disk.DiskBus.VIRTIO);
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
-        xml = String.format(xml, request.getVolumeType(), request.getVolume(), deviceId);
+        String dev = "" + (char) ('a' + deviceId);
+        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), request.getDeviceId(), deviceId);
         domain.detachDevice(xml);
     }
 

@@ -1,6 +1,6 @@
 <disk type="file" device="disk" aio='native'>
     <driver name="qemu" type="%s" cache="none" aio='native'/>
+    <target dev="vd%s" bus="ide"/>
     <source file="%s"/>
-    <target dev="hda%d" bus="ide"/>
-    <address type='drive' controller='0' bus='0' target='%d' unit='0'/>
+    <address type='drive' controller='0' bus='1' target='0' unit='0'/>
 </disk>
