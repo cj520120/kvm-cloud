@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
     private String managerUri;
-    private String hostId;
     private String appId;
     private String appSecret;
+    private int taskThreadSize;
 }

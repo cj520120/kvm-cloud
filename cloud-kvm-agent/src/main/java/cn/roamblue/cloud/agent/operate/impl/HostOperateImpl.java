@@ -1,9 +1,9 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.roamblue.cloud.agent.operate.HostOperate;
+import cn.roamblue.cloud.agent.util.HostUtil;
 import cn.roamblue.cloud.common.agent.HostModel;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -21,11 +21,6 @@ import java.util.List;
  */
 @Component
 public class HostOperateImpl implements HostOperate {
-    public static void main(String[] args) throws Exception {
-        String xml = FileUtil.readUtf8String("/Users/chenjun/fsdownload/abc.xml");
-        String emulator = getEmulator(xml);
-        System.out.println(emulator);
-    }
 
     private static String getEmulator(String xml) throws SAXException, DocumentException {
         String emulator = null;
@@ -59,12 +54,12 @@ public class HostOperateImpl implements HostOperate {
         }
         return emulator;
     }
-
     @Override
     public HostModel getHostInfo(Connect connect) throws Exception {
         OsInfo osInfo = SystemUtil.getOsInfo();
         String emulator = getEmulator(connect.getCapabilities());
         return HostModel.builder().hostName(connect.getHostName())
+                .hostId(HostUtil.getHostId())
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(connect.nodeInfo().memory)

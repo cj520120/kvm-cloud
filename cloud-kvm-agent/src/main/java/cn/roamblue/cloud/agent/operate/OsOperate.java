@@ -13,6 +13,7 @@ public interface OsOperate {
 
     /**
      * 获取客户机信息
+     *
      * @param connect
      * @param request
      * @return
@@ -20,14 +21,18 @@ public interface OsOperate {
      */
     VmInfoModel getGustInfo(Connect connect, GuestInfoRequest request) throws Exception;
 
+    List<VmInfoModel> listAllGuestInfo(Connect connect) throws Exception;
+
     /**
      * 批量获取客户机信息
+     *
      * @param connect
      * @param batchRequest
      * @return
      * @throws Exception
      */
     List<VmInfoModel> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception;
+
     /**
      * 启动
      *

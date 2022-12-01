@@ -33,27 +33,43 @@ public class OsOperateImpl implements OsOperate {
     private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
 
     @Override
-   public VmInfoModel getGustInfo(Connect connect,GuestInfoRequest request) throws Exception {
-       Domain domain = this.findDomainByName(connect, request.getName());
-       if (domain != null) {
-           return this.initVmResponse(domain);
-       }else{
-           throw new CodeException(ErrorCode.VM_NOT_FOUND,"虚拟机没有运行:"+request.getName());
-       }
-   }
+    public VmInfoModel getGustInfo(Connect connect, GuestInfoRequest request) throws Exception {
+        Domain domain = this.findDomainByName(connect, request.getName());
+        if (domain != null) {
+            return this.initVmResponse(domain);
+        } else {
+            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+        }
+    }
 
-   @Override
-   public List<VmInfoModel> batchGustInfo(Connect connect,List<GuestInfoRequest> batchRequest) throws Exception{
-       Set<String> names= batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
-       Map<String,VmInfoModel> map=new HashMap<>();
-       List<VmInfoModel> list=new ArrayList<>();
-       int[] ids = connect.listDomains();
-       for (int id : ids) {
-           Domain domain = connect.domainLookupByID(id);
-           if (names.contains(domain.getName())) {
-               map.put(domain.getName(), initVmResponse(domain));
-           }
-       }
+    @Override
+    public List<VmInfoModel> listAllGuestInfo(Connect connect) throws Exception {
+        List<VmInfoModel> list = new ArrayList<>();
+        int[] ids = connect.listDomains();
+        for (int id : ids) {
+            Domain domain = connect.domainLookupByID(id);
+            list.add(initVmResponse(domain));
+        }
+        String[] namesOfDefinedDomain = connect.listDefinedDomains();
+        for (String stopDomain : namesOfDefinedDomain) {
+            Domain domain = connect.domainLookupByName(stopDomain);
+            list.add(initVmResponse(domain));
+        }
+        return list;
+    }
+
+    @Override
+    public List<VmInfoModel> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception {
+        Set<String> names = batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
+        Map<String, VmInfoModel> map = new HashMap<>();
+        List<VmInfoModel> list = new ArrayList<>();
+        int[] ids = connect.listDomains();
+        for (int id : ids) {
+            Domain domain = connect.domainLookupByID(id);
+            if (names.contains(domain.getName())) {
+                map.put(domain.getName(), initVmResponse(domain));
+            }
+        }
        String[] namesOfDefinedDomain = connect.listDefinedDomains();
        for (String stopDomain : namesOfDefinedDomain) {
            Domain domain = connect.domainLookupByName(stopDomain);

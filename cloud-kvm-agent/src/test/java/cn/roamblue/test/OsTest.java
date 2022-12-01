@@ -8,7 +8,7 @@ import cn.roamblue.cloud.common.util.Constant;
 import java.util.*;
 
 public class OsTest {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         getHostInfo();
         createNetwork();
         createStorage();

@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.config.ApplicationConfig;
 import cn.roamblue.cloud.agent.operate.*;
 import cn.roamblue.cloud.agent.service.impl.ConnectPool;
+import cn.roamblue.cloud.agent.util.HostUtil;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
@@ -40,7 +41,6 @@ public class OperateDispatchImpl implements OperateDispatch {
     private OsOperate osOperate;
     @Autowired
     private HostOperate hostOperate;
-
     @Autowired
     private ApplicationConfig config;
     @Autowired
@@ -55,6 +55,7 @@ public class OperateDispatchImpl implements OperateDispatch {
                 ResultUtil result = dispatch(command, data);
                 String nonce = String.valueOf(System.currentTimeMillis());
                 Map<String, Object> map = new HashMap<>(5);
+                map.put("hostId", HostUtil.getHostId());
                 map.put("taskId", taskId);
                 map.put("startTime", taskMap.get(taskId));
                 map.put("data", GsonBuilderUtil.create().toJson(result));
@@ -141,25 +142,29 @@ public class OperateDispatchImpl implements OperateDispatch {
                     result=  (T)this.volumeOperate.snapshot(connect, GsonBuilderUtil.create().fromJson(data, VolumeCreateSnapshotRequest.class));
                     break;
                 case Constant.Command.VOLUME_TEMPLATE:
-                    result= (T) this.volumeOperate.template(connect, GsonBuilderUtil.create().fromJson(data, VolumeCreateTemplateRequest.class));
+                    result = (T) this.volumeOperate.template(connect, GsonBuilderUtil.create().fromJson(data, VolumeCreateTemplateRequest.class));
                     break;
                 case Constant.Command.VOLUME_DOWNLOAD:
-                    result=  (T)this.volumeOperate.download(connect, GsonBuilderUtil.create().fromJson(data, VolumeDownloadRequest.class));
+                    result = (T) this.volumeOperate.download(connect, GsonBuilderUtil.create().fromJson(data, VolumeDownloadRequest.class));
                     break;
                 case Constant.Command.GUEST_DESTROY:
                     this.osOperate.destroy(connect, GsonBuilderUtil.create().fromJson(data, GuestDestroyRequest.class));
                     break;
                 case Constant.Command.GUEST_INFO:
-                    result = (T) this.osOperate.getGustInfo(connect,GsonBuilderUtil.create().fromJson(data, GuestInfoRequest.class));
+                    result = (T) this.osOperate.getGustInfo(connect, GsonBuilderUtil.create().fromJson(data, GuestInfoRequest.class));
+                    break;
+                case Constant.Command.ALL_GUEST_INFO:
+                    result = (T) this.osOperate.listAllGuestInfo(connect);
                     break;
                 case Constant.Command.BATCH_GUEST_INFO:
-                    result = (T) this.osOperate.batchGustInfo(connect,GsonBuilderUtil.create().fromJson(data, new TypeToken<List<GuestInfoRequest>>(){}.getType()));
+                    result = (T) this.osOperate.batchGustInfo(connect, GsonBuilderUtil.create().fromJson(data, new TypeToken<List<GuestInfoRequest>>() {
+                    }.getType()));
                     break;
                 case Constant.Command.GUEST_START:
-                    result = (T) this.osOperate.start(connect,GsonBuilderUtil.create().fromJson(data, GuestStartRequest.class));
+                    result = (T) this.osOperate.start(connect, GsonBuilderUtil.create().fromJson(data, GuestStartRequest.class));
                     break;
                 case Constant.Command.GUEST_REBOOT:
-                    this.osOperate.reboot(connect,GsonBuilderUtil.create().fromJson(data, GuestRebootRequest.class));
+                    this.osOperate.reboot(connect, GsonBuilderUtil.create().fromJson(data, GuestRebootRequest.class));
                     break;
                 case Constant.Command.GUEST_SHUTDOWN:
                     this.osOperate.shutdown(connect, GsonBuilderUtil.create().fromJson(data, GuestShutdownRequest.class));

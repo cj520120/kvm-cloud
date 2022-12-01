@@ -44,6 +44,7 @@ public class Constant {
         public static final String GUEST_START = "StartGuest";
         public static final String GUEST_INFO = "GuestInfo";
         public static final String BATCH_GUEST_INFO = "BatchGuestInfo";
+        public static final String ALL_GUEST_INFO = "AllGuestInfo";
         public static final String GUEST_REBOOT = "RebootGuest";
         public static final String GUEST_SHUTDOWN = "ShutdownGuest";
 
