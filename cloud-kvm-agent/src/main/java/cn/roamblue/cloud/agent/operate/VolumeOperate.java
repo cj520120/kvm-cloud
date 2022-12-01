@@ -4,10 +4,30 @@ import cn.roamblue.cloud.common.agent.VolumeModel;
 import cn.roamblue.cloud.common.bean.*;
 import org.libvirt.Connect;
 
+import java.util.List;
+
 /**
  * @author chenjun
  */
 public interface VolumeOperate {
+    /**
+     * 获取磁盘信息
+     * @param connect
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    VolumeModel getInfo(Connect connect, VolumeInfoRequest request) throws Exception;
+
+    /**
+     * 批量获取磁盘信息
+     * @param connect
+     * @param batchRequest
+     * @return
+     * @throws Exception
+     */
+    List<VolumeModel> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception;
+
     /**
      * 创建磁盘
      *

@@ -24,7 +24,6 @@ public class NetworkOperateImpl implements NetworkOperate {
         addBridge(request.getNic(), request.getBridge(), request.getIp(), request.getNetmask(),request.getGeteway());
 
     }
-
     @Override
     public void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
         shell("modprobe 8021q");

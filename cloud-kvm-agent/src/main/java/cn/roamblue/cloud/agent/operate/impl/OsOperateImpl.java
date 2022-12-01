@@ -22,11 +22,9 @@ import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class OsOperateImpl implements OsOperate {
@@ -34,23 +32,40 @@ public class OsOperateImpl implements OsOperate {
     private final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
 
-    private static String getDiskXml(OsDisk request, String bus) {
-        String xml;
-        switch (bus) {
-            case Constant.DiskBus.VIRTIO:
-                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
-                break;
-            case Constant.DiskBus.IDE:
-                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
-                break;
-            case Constant.DiskBus.SCSI:
-                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
-                break;
-            default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + bus);
-        }
-        return xml;
-    }
+    @Override
+   public VmInfoModel getGustInfo(Connect connect,GuestInfoRequest request) throws Exception {
+       Domain domain = this.findDomainByName(connect, request.getName());
+       if (domain != null) {
+           return this.initVmResponse(domain);
+       }else{
+           throw new CodeException(ErrorCode.VM_NOT_FOUND,"虚拟机没有运行:"+request.getName());
+       }
+   }
+
+   @Override
+   public List<VmInfoModel> batchGustInfo(Connect connect,List<GuestInfoRequest> batchRequest) throws Exception{
+       Set<String> names= batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
+       Map<String,VmInfoModel> map=new HashMap<>();
+       List<VmInfoModel> list=new ArrayList<>();
+       int[] ids = connect.listDomains();
+       for (int id : ids) {
+           Domain domain = connect.domainLookupByID(id);
+           if (names.contains(domain.getName())) {
+               map.put(domain.getName(), initVmResponse(domain));
+           }
+       }
+       String[] namesOfDefinedDomain = connect.listDefinedDomains();
+       for (String stopDomain : namesOfDefinedDomain) {
+           Domain domain = connect.domainLookupByName(stopDomain);
+           if (names.contains(domain.getName())) {
+               map.put(domain.getName(), initVmResponse(domain));
+           }
+       }
+       for (GuestInfoRequest request : batchRequest) {
+           list.add(map.get(request.getName()));
+       }
+       return list;
+   }
 
     @Override
     public void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
@@ -343,6 +358,23 @@ public class OsOperateImpl implements OsOperate {
         }.getType());
         handler = NumberUtil.parseInt(map.get("return").toString());
         return handler;
+    }
+    private static String getDiskXml(OsDisk request, String bus) {
+        String xml;
+        switch (bus) {
+            case Constant.DiskBus.VIRTIO:
+                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
+                break;
+            case Constant.DiskBus.IDE:
+                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
+                break;
+            case Constant.DiskBus.SCSI:
+                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + bus);
+        }
+        return xml;
     }
     private VmInfoModel initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
         DomainInfo domainInfo = domain.getInfo();

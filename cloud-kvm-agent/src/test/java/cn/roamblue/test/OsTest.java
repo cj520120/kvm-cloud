@@ -11,7 +11,7 @@ import java.util.*;
 
 public class OsTest {
     public static void main(String[] args) throws Exception {
-
+        getHostInfo();
         createNetwork();
         createStorage();
         startOs(3,5, Constant.DiskBus.IDE);
@@ -20,9 +20,14 @@ public class OsTest {
         destroyStorage();
         destroyNetwork();
     }
+   public static void getHostInfo(){
 
+       Map<String,Object> map=new HashMap<>();
+       map.put("command",Constant.Command.HOST_INFO);
+       map.put("data", "");
+       System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+   }
     public static void createStorage(){
-        StorageOperate operate = new StorageOperateImpl();
         String name = "TEST_NFS";
         Map<String, Object> param = new HashMap<>();
         param.put("uri", "192.168.1.69");
@@ -38,6 +43,7 @@ public class OsTest {
         map.put("data", GsonBuilderUtil.create().toJson(request));
         System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
     }
+
     public static void destroyStorage(){
         String name = "TEST_NFS";
         StorageDestroyRequest request = StorageDestroyRequest.builder()

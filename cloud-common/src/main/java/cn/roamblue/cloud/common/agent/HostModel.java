@@ -42,7 +42,19 @@ public class HostModel implements Serializable {
      */
     private int cpu;
     /**
+     * 系统架构
+     */
+    private String arch;
+    /**
+     * 系统名称
+     */
+    private String name;
+    /**
      * hypervisor类型
      */
     private String hypervisor;
+    /**
+     * emulator
+     */
+    private String emulator;
 }

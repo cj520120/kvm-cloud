@@ -6,6 +6,7 @@ import cn.roamblue.cloud.agent.operate.StorageOperate;
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.bean.StorageCreateRequest;
 import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
+import cn.roamblue.cloud.common.bean.StorageInfoRequest;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -14,6 +15,8 @@ import org.libvirt.StoragePool;
 import org.libvirt.StoragePoolInfo;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,15 +25,53 @@ import java.util.Objects;
 @Component
 public class StorageOperateImpl implements StorageOperate {
     @Override
+    public StorageModel getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception {
+        StoragePool storagePool = this.findStorage(connect, request.getName());
+        if (storagePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在:" + request.getName());
+        }
+        storagePool.refresh(0);
+        StoragePoolInfo storagePoolInfo = storagePool.getInfo();
+        return StorageModel.builder().name(request.getName())
+                .state(storagePoolInfo.state.toString())
+                .capacity(storagePoolInfo.capacity)
+                .allocation(storagePoolInfo.allocation)
+                .available(storagePoolInfo.available)
+                .build();
+    }
+
+    @Override
+    public List<StorageModel> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
+        List<StorageModel> list = new ArrayList<>();
+        for (StorageInfoRequest request : batchRequest) {
+            StoragePool storagePool = this.findStorage(connect, request.getName());
+            StorageModel model = null;
+            if (storagePool != null) {
+                storagePool.refresh(0);
+                StoragePoolInfo storagePoolInfo = storagePool.getInfo();
+                model = StorageModel.builder().name(request.getName())
+                        .state(storagePoolInfo.state.toString())
+                        .capacity(storagePoolInfo.capacity)
+                        .allocation(storagePoolInfo.allocation)
+                        .available(storagePoolInfo.available)
+                        .build();
+            }
+            list.add(model);
+
+        }
+        return list;
+    }
+
+    @Override
     public StorageModel create(Connect connect, StorageCreateRequest request) throws Exception {
         if (!Objects.equals(Constant.StorageType.NFS, request.getType())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
         }
         StoragePool storagePool = this.findStorage(connect, request.getName());
-        if(storagePool!=null){
+        if (storagePool != null) {
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();
             if (storagePoolInfo.state != StoragePoolInfo.StoragePoolState.VIR_STORAGE_POOL_RUNNING) {
-                 storagePool.destroy();
+                storagePool.destroy();
                  storagePool=null;
             }
         }

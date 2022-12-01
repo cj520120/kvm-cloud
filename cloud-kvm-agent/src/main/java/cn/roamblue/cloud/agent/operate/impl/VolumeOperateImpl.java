@@ -18,7 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -26,6 +27,73 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class VolumeOperateImpl implements VolumeOperate {
+    @Override
+    public VolumeModel getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
+        StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
+        storagePool.refresh(0);
+        String[] names = storagePool.listVolumes();
+        StorageVol findVol = null;
+        for (String name : names) {
+            StorageVol storageVol = storagePool.storageVolLookupByName(name);
+            if (Objects.equals(storageVol.getPath(), request.getSourceVolume())) {
+                findVol = storageVol;
+                break;
+            }
+        }
+        if (findVol == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在:" + request.getSourceName());
+        }
+        StorageVolInfo storageVolInfo = findVol.getInfo();
+        return VolumeModel.builder().storage(request.getSourceStorage())
+                .name(request.getSourceName())
+                .path(findVol.getPath())
+                .type(storageVolInfo.type.toString())
+                .capacity(storageVolInfo.capacity)
+                .allocation(storageVolInfo.allocation)
+                .build();
+    }
+
+    @Override
+    public List<VolumeModel> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
+        Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
+        Map<String, Map<String, VolumeModel>> result = new HashMap<>();
+
+        for (Map.Entry<String, List<VolumeInfoRequest>> entry : list.entrySet()) {
+            String storage = entry.getKey();
+            Map<String, VolumeModel> map = new HashMap<>();
+            Set<String> volumePaths = entry.getValue().stream().map(VolumeInfoRequest::getSourceVolume).collect(Collectors.toSet());
+            StoragePool storagePool = connect.storagePoolLookupByName(storage);
+            storagePool.refresh(0);
+
+            String[] names = storagePool.listVolumes();
+            for (String name : names) {
+                StorageVol storageVol = storagePool.storageVolLookupByName(name);
+
+                if (volumePaths.contains(storageVol.getPath())) {
+                    StorageVolInfo storageVolInfo = storageVol.getInfo();
+                    VolumeModel volume = VolumeModel.builder().storage(storage)
+                            .name("")
+                            .path(storageVol.getPath())
+                            .type(storageVolInfo.type.toString())
+                            .capacity(storageVolInfo.capacity)
+                            .allocation(storageVolInfo.allocation)
+                            .build();
+                    map.put(storageVol.getPath(), volume);
+                }
+            }
+            result.put(storage, map);
+        }
+        List<VolumeModel> modelList = new ArrayList<>();
+        for (VolumeInfoRequest request : batchRequest) {
+            VolumeModel model = result.get(request.getSourceStorage()).get(request.getSourceVolume());
+            if (model != null) {
+                model.setName(request.getSourceName());
+            }
+            modelList.add(model);
+        }
+        return modelList;
+    }
+
     @Override
     public VolumeModel create(Connect connect, VolumeCreateRequest request) throws Exception {
         String xml;
