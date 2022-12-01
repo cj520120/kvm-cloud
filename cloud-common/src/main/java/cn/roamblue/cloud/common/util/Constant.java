@@ -15,6 +15,8 @@ public class Constant {
      * @author chenjun
      */
     public static class Command {
+        public static final String CHECK_TASK = "CheckTask";
+        public static final String SUBMIT_TASK = "SubmitTask";
         public static final String HOST_INFO = "HostInfo";
         public static final String STORAGE_INFO = "StorageInfo";
         public static final String BATCH_STORAGE_INFO = "BatchStorageInfo";

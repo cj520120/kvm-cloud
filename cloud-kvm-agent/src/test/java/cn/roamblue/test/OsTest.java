@@ -1,8 +1,6 @@
 package cn.roamblue.test;
 
 import cn.hutool.http.HttpUtil;
-import cn.roamblue.cloud.agent.operate.StorageOperate;
-import cn.roamblue.cloud.agent.operate.impl.StorageOperateImpl;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.Constant;
@@ -116,7 +114,7 @@ public class OsTest {
                 .name("VM_TEST")
                 .description("测试虚拟机")
                 .bus(diskBus)
-                .osCpu(OsCpu.builder().number(2).core(0).socket(0).thread(0).share(500).build())
+                .osCpu(OsCpu.builder().number(8).core(0).socket(0).thread(0).share(500).build())
                 .osMemory(OsMemory.builder().memory(1024 * 1024).build())
                 .osCdRoom(OsCdRoom.builder()
                         .path("/mnt/TEST_NFS/CentOS-7-x86_64-Minimal-2003.iso")

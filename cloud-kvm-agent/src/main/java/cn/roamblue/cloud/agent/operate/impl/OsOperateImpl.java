@@ -283,7 +283,6 @@ public class OsOperateImpl implements OsOperate {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             domain.destroy();
-            domain.undefine();
         }
     }
 

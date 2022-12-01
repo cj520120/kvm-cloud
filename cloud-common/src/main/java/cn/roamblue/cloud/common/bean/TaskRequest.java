@@ -7,14 +7,16 @@ import lombok.NoArgsConstructor;
 
 /**
  * 基础任务
+ *
  * @author chenjun
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskRequest<T> {
+public class TaskRequest {
     private String taskId;
-    private T param;
+    private String command;
+    private String data;
 
 }

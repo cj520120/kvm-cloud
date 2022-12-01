@@ -6,6 +6,7 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
  * @author chenjun
  */
 public interface OperateDispatch {
+
     /**
      * 操作分发
      * @param command

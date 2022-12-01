@@ -1,22 +1,31 @@
 package cn.roamblue.cloud.agent.operate.impl;
 
+import cn.hutool.http.HttpUtil;
+import cn.roamblue.cloud.agent.config.ApplicationConfig;
 import cn.roamblue.cloud.agent.operate.*;
 import cn.roamblue.cloud.agent.service.impl.ConnectPool;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
+import cn.roamblue.cloud.common.util.AppUtils;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class OperateDispatchImpl implements OperateDispatch {
     @Autowired
@@ -32,15 +41,53 @@ public class OperateDispatchImpl implements OperateDispatch {
     @Autowired
     private HostOperate hostOperate;
 
+    @Autowired
+    private ApplicationConfig config;
+    @Autowired
+    private ThreadPoolExecutor executor;
+    private final ConcurrentHashMap<String, Long> taskMap = new ConcurrentHashMap<>();
+
+
+    private void submitTask(String taskId, String command, String data) {
+        taskMap.put(taskId, System.currentTimeMillis());
+        this.executor.submit(() -> {
+            try {
+                ResultUtil result = dispatch(command, data);
+                String nonce = String.valueOf(System.currentTimeMillis());
+                Map<String, Object> map = new HashMap<>(5);
+                map.put("taskId", taskId);
+                map.put("startTime", taskMap.get(taskId));
+                map.put("data", GsonBuilderUtil.create().toJson(result));
+                map.put("nonce", nonce);
+                String sign = AppUtils.sign(map, config.getAppId(), config.getAppSecret(), nonce);
+                map.put("sign", sign);
+                HttpUtil.post(this.config.getManagerUri() + "/task/report", map);
+            } catch (Exception err) {
+                log.error("执行任务出错.", err);
+            } finally {
+                taskMap.remove(taskId);
+            }
+        });
+    }
+
     @Override
     public <T> ResultUtil<T> dispatch(String command, String data) {
         Connect connect = null;
         try {
-            T result=null;
+            T result = null;
             connect = connectPool.borrowObject();
             switch (command) {
+                case Constant.Command.CHECK_TASK:
+                    result = (T) (Object) taskMap.contains(data);
+                    break;
+
+                case Constant.Command.SUBMIT_TASK:
+                    TaskRequest taskRequest = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
+                    this.submitTask(taskRequest.getTaskId(), taskRequest.getCommand(), taskRequest.getData());
+                    break;
+
                 case Constant.Command.HOST_INFO:
-                    result=(T)hostOperate.getHostInfo(connect);
+                    result = (T) hostOperate.getHostInfo(connect);
                     break;
                 case Constant.Command.NETWORK_CREATE_BASIC:
                     networkOperate.createBasic(connect, GsonBuilderUtil.create().fromJson(data, BasicBridgeNetwork.class));
