@@ -4,23 +4,26 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.roamblue.cloud.agent.operate.StorageOperate;
 import cn.roamblue.cloud.common.agent.StorageModel;
-import cn.roamblue.cloud.common.agent.StorageRequest;
+import cn.roamblue.cloud.common.bean.StorageCreateRequest;
+import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.common.util.StorageType;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
 import org.libvirt.StoragePoolInfo;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 /**
  * @author chenjun
  */
+@Component
 public class StorageOperateImpl implements StorageOperate {
     @Override
-    public StorageModel create(Connect connect, StorageRequest request) throws Exception {
-        if (!Objects.equals(StorageType.NFS, request.getType())) {
+    public StorageModel create(Connect connect, StorageCreateRequest request) throws Exception {
+        if (!Objects.equals(Constant.StorageType.NFS, request.getType())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
         }
         StoragePool storagePool = this.findStorage(connect, request.getName());
@@ -51,9 +54,9 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @Override
-    public void destroy(Connect connect, String name) throws Exception {
+    public void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
 
-        StoragePool storagePool = this.findStorage(connect, name);
+        StoragePool storagePool = this.findStorage(connect, request.getName());
         if (storagePool != null) {
             storagePool.destroy();
         }

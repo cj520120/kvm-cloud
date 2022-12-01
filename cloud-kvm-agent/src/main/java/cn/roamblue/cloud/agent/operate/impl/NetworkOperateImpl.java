@@ -2,10 +2,12 @@ package cn.roamblue.cloud.agent.operate.impl;
 
 import cn.hutool.core.util.RuntimeUtil;
 import cn.roamblue.cloud.agent.operate.NetworkOperate;
-import cn.roamblue.cloud.common.agent.NetworkRequest;
+import cn.roamblue.cloud.common.bean.BasicBridgeNetwork;
+import cn.roamblue.cloud.common.bean.VlanNetwork;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import org.libvirt.Connect;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.net.NetworkInterface;
@@ -13,21 +15,21 @@ import java.net.NetworkInterface;
 /**
  * @author chenjun
  */
+@Component
 public class NetworkOperateImpl implements NetworkOperate {
 
 
     @Override
-    public void createBasic(Connect connect, NetworkRequest request) throws Exception {
-        addBridge(request.getBasicBridge().getNic(), request.getBasicBridge().getBridge(), request.getBasicBridge().getIp(), request.getBasicBridge().getNetmask(),request.getBasicBridge().getGeteway());
+    public void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
+        addBridge(request.getNic(), request.getBridge(), request.getIp(), request.getNetmask(),request.getGeteway());
 
     }
 
     @Override
-    public void createVlan(Connect connect, NetworkRequest request) throws Exception {
+    public void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
         shell("modprobe 8021q");
-        NetworkRequest.Vlan vlan = request.getVlan();
-        NetworkRequest.BasicBridge bridge = request.getBasicBridge();
-        String nic = request.getBasicBridge().getBridge();
+        BasicBridgeNetwork bridge = vlan.getBasic();
+        String nic = bridge.getBridge();
         String vlanNic = nic + "." + vlan.getVlanId();
         if (NetworkInterface.getByName(vlanNic) == null) {
             shell("vconfig add " + bridge.getBridge() + " " + vlan.getVlanId());
@@ -38,8 +40,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     }
 
     @Override
-    public void destroyBasic(Connect connect, NetworkRequest request) throws Exception {
-        NetworkRequest.BasicBridge bridge = request.getBasicBridge();
+    public void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
         if (NetworkInterface.getByName(bridge.getBridge()) != null) {
             shell("ip link set " + bridge.getBridge() + " down");
             shell("brctl delbr " + bridge.getBridge());
@@ -49,9 +50,8 @@ public class NetworkOperateImpl implements NetworkOperate {
     }
 
     @Override
-    public void destroyVlan(Connect connect, NetworkRequest request) throws Exception {
-        NetworkRequest.Vlan vlan = request.getVlan();
-        NetworkRequest.BasicBridge bridge = request.getBasicBridge();
+    public void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
+        BasicBridgeNetwork bridge = vlan.getBasic();
         String vlanNic = bridge.getBridge() + "." + vlan.getVlanId();
         if (NetworkInterface.getByName(bridge.getBridge()) != null) {
             shell("ip link set " + vlan.getBridge() + " down");

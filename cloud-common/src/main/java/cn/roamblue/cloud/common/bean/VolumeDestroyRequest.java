@@ -5,16 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 基础任务
- * @author chenjun
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskRequest<T> {
-    private String taskId;
-    private T param;
-
+public class VolumeDestroyRequest {
+    private String sourceStorage;
+    private String sourceVolume;
+    private String sourceType;
 }

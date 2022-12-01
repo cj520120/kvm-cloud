@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.service.impl;
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.StorageInfo;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
@@ -15,7 +16,6 @@ import cn.roamblue.cloud.management.service.StorageService;
 import cn.roamblue.cloud.management.util.BeanConverter;
 import cn.roamblue.cloud.management.util.HostStatus;
 import cn.roamblue.cloud.management.util.StorageStatus;
-import cn.roamblue.cloud.common.util.StorageType;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +101,7 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
             if (!hostInfo.getHostStatus().equals(HostStatus.READY)) {
                 continue;
             }
-            ResultUtil<StorageModel> addStorageResultUtil = this.agentService.addHostStorage(StorageType.NFS,hostInfo.getHostUri(), entity.getStorageHost(), entity.getStorageSource(), entity.getStorageTarget());
+            ResultUtil<StorageModel> addStorageResultUtil = this.agentService.addHostStorage(Constant.StorageType.NFS,hostInfo.getHostUri(), entity.getStorageHost(), entity.getStorageSource(), entity.getStorageTarget());
             if (addStorageResultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(addStorageResultUtil.getCode(), addStorageResultUtil.getMessage());
             }

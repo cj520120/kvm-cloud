@@ -2,8 +2,8 @@ package cn.roamblue.cloud.management.task;
 
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.common.util.StorageType;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
@@ -71,7 +71,7 @@ public class HostStorageCheckTask extends AbstractTask {
                     StorageModel cloudStorageInfo = map.get(storageEntity.getStorageTarget());
                     if (cloudStorageInfo == null) {
                         log.info("主机存储池未找到，重新初始化.host={} storage={}", hostEntity.getHostName(), storageEntity.getStorageName());
-                        ResultUtil<StorageModel> initStorageInfoResultUtil = agentService.addHostStorage(StorageType.NFS,hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
+                        ResultUtil<StorageModel> initStorageInfoResultUtil = agentService.addHostStorage(Constant.StorageType.NFS,hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
                         if (initStorageInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
                             log.info("主机存储池初始化失败.host={} storage={} msg={}", hostEntity.getHostName(), storageEntity.getStorageName(), initStorageInfoResultUtil.getMessage());
                         } else {

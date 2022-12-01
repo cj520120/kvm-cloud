@@ -1,13 +1,12 @@
 package cn.roamblue.cloud.agent.service.impl.storage.impl;
 
 import cn.roamblue.cloud.agent.service.impl.storage.StorageInitialize;
-import cn.roamblue.cloud.common.util.StorageType;
+import cn.roamblue.cloud.common.util.Constant;
 import org.libvirt.Connect;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * @ClassName: NfsStorageBuilder
@@ -44,6 +43,6 @@ public class NfsStorageInitialize implements StorageInitialize {
     }
     @Override
     public String getType() {
-        return StorageType.NFS;
+        return Constant.StorageType.NFS;
     }
 }

@@ -1,7 +1,8 @@
 package cn.roamblue.cloud.agent.operate;
 
 import cn.roamblue.cloud.common.agent.StorageModel;
-import cn.roamblue.cloud.common.agent.StorageRequest;
+import cn.roamblue.cloud.common.bean.StorageCreateRequest;
+import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
 import org.libvirt.Connect;
 
 /**
@@ -16,14 +17,14 @@ public interface StorageOperate {
      * @return
      * @throws Exception
      */
-    StorageModel create(Connect connect, StorageRequest request) throws Exception;
+    StorageModel create(Connect connect, StorageCreateRequest request) throws Exception;
 
     /**
      * 销毁存储池
      *
      * @param connect
-     * @param name
+     * @param request
      * @throws Exception
      */
-    void destroy(Connect connect, String name) throws Exception;
+    void destroy(Connect connect, StorageDestroyRequest request) throws Exception;
 }

@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.agent.NetworkRequest;
+import cn.roamblue.cloud.common.bean.BasicBridgeNetwork;
+import cn.roamblue.cloud.common.bean.VlanNetwork;
 import org.libvirt.Connect;
 
 /**
@@ -13,7 +14,7 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void createBasic(Connect connect, NetworkRequest request) throws Exception;
+    void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
 
     /**
      * 创建Vlan网络
@@ -22,7 +23,7 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void createVlan(Connect connect, NetworkRequest request) throws Exception;
+    void createVlan(Connect connect, VlanNetwork request) throws Exception;
 
     /**
      * 删除基础网络信息
@@ -30,12 +31,12 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void destroyBasic(Connect connect, NetworkRequest request) throws Exception;
+    void destroyBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
     /**
      * 删除Vlan网络信息
      * @param connect
      * @param request
      * @throws Exception
      */
-    void destroyVlan(Connect connect, NetworkRequest request) throws Exception;
+    void destroyVlan(Connect connect, VlanNetwork request) throws Exception;
 }

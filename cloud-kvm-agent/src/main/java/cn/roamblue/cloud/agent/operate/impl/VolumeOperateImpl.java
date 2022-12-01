@@ -5,15 +5,16 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.operate.VolumeOperate;
 import cn.roamblue.cloud.common.agent.VolumeModel;
-import cn.roamblue.cloud.common.agent.VolumeRequest;
+import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.common.util.VolumeType;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
 import org.libvirt.StorageVolInfo;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -22,20 +23,21 @@ import java.util.Objects;
 /**
  * @author chenjun
  */
+@Component
 @Slf4j
 public class VolumeOperateImpl implements VolumeOperate {
     @Override
-    public VolumeModel create(Connect connect, VolumeRequest.CreateVolume request) throws Exception {
+    public VolumeModel create(Connect connect, VolumeCreateRequest request) throws Exception {
         String xml;
         if (StringUtils.isEmpty(request.getParentVolume())) {
             xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolume.xml");
             xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetVolume(), request.getTargetType());
         } else {
-            boolean checkParentSupport = request.getParentType().equals(VolumeType.QCOW) || request.getParentType().equals(VolumeType.QCOW2) || request.getParentType().equals(VolumeType.RAW);
-            boolean checkChildSupport = request.getTargetType().equals(VolumeType.QCOW) || request.getTargetType().equals(VolumeType.QCOW2);
+            boolean checkParentSupport = request.getParentType().equals(Constant.VolumeType.QCOW) || request.getParentType().equals(Constant.VolumeType.QCOW2) || request.getParentType().equals(Constant.VolumeType.RAW);
+            boolean checkChildSupport = request.getTargetType().equals(Constant.VolumeType.QCOW) || request.getTargetType().equals(Constant.VolumeType.QCOW2);
             boolean checkSupport = checkParentSupport && checkChildSupport;
             if (!checkSupport) {
-                VolumeRequest.CloneVolume cloneVolumeRequest = VolumeRequest.CloneVolume.builder()
+                VolumeCloneRequest volumeCloneRequest = VolumeCloneRequest.builder()
                         .sourceStorage(request.getParentStorage())
                         .sourceVolume(request.getParentVolume())
                         .targetStorage(request.getTargetStorage())
@@ -43,7 +45,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                         .targetName(request.getTargetName())
                         .targetType(request.getTargetType())
                         .build();
-                return this.clone(connect, cloneVolumeRequest);
+                return this.clone(connect, volumeCloneRequest);
             }
             xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
             xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetVolume(), request.getTargetType(), request.getParentVolume(), request.getParentType());
@@ -64,14 +66,13 @@ public class VolumeOperateImpl implements VolumeOperate {
 
 
     @Override
-    public void destroy(Connect connect, VolumeRequest.DestroyVolume request) throws Exception {
+    public void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
         storagePool.refresh(0);
         String[] names=storagePool.listVolumes();
         for (String name : names) {
             StorageVol storageVol = storagePool.storageVolLookupByName(name);
             if(Objects.equals(storageVol.getPath(),request.getSourceVolume())){
-                storageVol.wipe();
                 storageVol.delete(0);
                 break;
             }
@@ -79,7 +80,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel clone(Connect connect, VolumeRequest.CloneVolume request) throws Exception {
+    public VolumeModel clone(Connect connect, VolumeCloneRequest request) throws Exception {
         StoragePool sourceStoragePool = connect.storagePoolLookupByName(request.getSourceStorage());
         StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
         sourceStoragePool.refresh(0);
@@ -99,7 +100,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel resize(Connect connect, VolumeRequest.ResizeVolume request) throws Exception {
+    public VolumeModel resize(Connect connect, VolumeResizeRequest request) throws Exception {
 
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
         storagePool.refresh(0);
@@ -119,8 +120,8 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel snapshot(Connect connect, VolumeRequest.SnapshotVolume request) throws Exception {
-        return clone(connect, VolumeRequest.CloneVolume.builder()
+    public VolumeModel snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception {
+        return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
                 .sourceVolume(request.getSourceVolume())
                 .targetName(request.getTargetName())
@@ -131,9 +132,9 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel template(Connect connect, VolumeRequest.TemplateVolume request) throws Exception {
+    public VolumeModel template(Connect connect, VolumeCreateTemplateRequest request) throws Exception {
 
-        return clone(connect, VolumeRequest.CloneVolume.builder()
+        return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
                 .sourceVolume(request.getSourceVolume())
                 .targetName(request.getTargetName())
@@ -144,12 +145,12 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel download(Connect connect, VolumeRequest.DownloadVolume request) throws Exception {
+    public VolumeModel download(Connect connect, VolumeDownloadRequest request) throws Exception {
         FileUtil.mkParentDirs(request.getTargetVolume());
         String tempFile=request.getTargetVolume()+".data";
         try {
             HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
-            return clone(connect, VolumeRequest.CloneVolume.builder()
+            return clone(connect, VolumeCloneRequest.builder()
                     .sourceStorage(request.getTargetStorage())
                     .sourceVolume(tempFile)
                     .targetName(request.getTargetName())
@@ -163,8 +164,8 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel migrate(Connect connect, VolumeRequest.MigrateVolume request) throws Exception {
-        return clone(connect, VolumeRequest.CloneVolume.builder()
+    public VolumeModel migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
+        return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
                 .sourceVolume(request.getSourceVolume())
                 .targetName(request.getTargetName())

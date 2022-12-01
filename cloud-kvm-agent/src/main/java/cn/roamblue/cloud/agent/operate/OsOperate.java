@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.agent.OsRequest;
+import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.*;
 import org.libvirt.Connect;
 
 /**
@@ -14,7 +15,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void start(Connect connect, OsRequest.Start request) throws Exception;
+    VmInfoModel start(Connect connect, GuestStartRequest request) throws Exception;
 
     /**
      * 关机
@@ -23,7 +24,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void shutdown(Connect connect, OsRequest.Shutdown request) throws Exception;
+    void shutdown(Connect connect, GuestShutdownRequest request) throws Exception;
 
     /**
      * 重启
@@ -32,7 +33,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void reboot(Connect connect, OsRequest.Reboot request) throws Exception;
+    void reboot(Connect connect, GuestRebootRequest request) throws Exception;
 
     /**
      * 挂载光驱
@@ -40,7 +41,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void attachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception;
+    void attachCdRoom(Connect connect, OsCdRoom request) throws Exception;
 
     /**
      * 卸载光驱
@@ -48,7 +49,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void detachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception;
+    void detachCdRoom(Connect connect, OsCdRoom request) throws Exception;
 
     /**
      * 挂载磁盘
@@ -56,7 +57,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void attachDisk(Connect connect, OsRequest.Disk request) throws Exception;
+    void attachDisk(Connect connect, OsDisk request) throws Exception;
 
     /**
      * 卸载磁盘
@@ -64,7 +65,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void detachDisk(Connect connect, OsRequest.Disk request) throws Exception;
+    void detachDisk(Connect connect, OsDisk request) throws Exception;
 
     /**
      * 挂载网卡
@@ -72,7 +73,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void attachNic(Connect connect, OsRequest.Nic request) throws Exception;
+    void attachNic(Connect connect, OsNic request) throws Exception;
 
     /**
      * 卸载网卡
@@ -80,7 +81,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void detachNic(Connect connect, OsRequest.Nic request) throws Exception;
+    void detachNic(Connect connect, OsNic request) throws Exception;
 
 
     /**
@@ -90,7 +91,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void qma(Connect connect, OsRequest.Qma request) throws Exception;
+    void qma(Connect connect, GuestQmaRequest request) throws Exception;
 
     /**
      * 销毁
@@ -99,5 +100,5 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void destroy(Connect connect, OsRequest.Destroy request) throws Exception;
+    void destroy(Connect connect, GuestDestroyRequest request) throws Exception;
 }

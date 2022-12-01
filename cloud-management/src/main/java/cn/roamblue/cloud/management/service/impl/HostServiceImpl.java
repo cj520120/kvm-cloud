@@ -4,6 +4,7 @@ import cn.roamblue.cloud.common.agent.HostModel;
 import cn.roamblue.cloud.common.agent.StorageModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.CalculationSchemeInfo;
 import cn.roamblue.cloud.management.bean.HostInfo;
@@ -20,7 +21,6 @@ import cn.roamblue.cloud.management.service.CalculationSchemeService;
 import cn.roamblue.cloud.management.service.HostService;
 import cn.roamblue.cloud.management.util.BeanConverter;
 import cn.roamblue.cloud.management.util.HostStatus;
-import cn.roamblue.cloud.common.util.StorageType;
 import cn.roamblue.cloud.management.util.VmStatus;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -141,7 +141,7 @@ public class HostServiceImpl extends AbstractService implements HostService {
         HostModel kvmHostInfo = hostInfoResultUtil.getData();
         List<StorageEntity> storageList = this.storageMapper.findByClusterId(clusterId);
         for (StorageEntity storageEntity : storageList) {
-            ResultUtil<StorageModel> resultUtil = this.agentService.addHostStorage(StorageType.NFS,uri, storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
+            ResultUtil<StorageModel> resultUtil = this.agentService.addHostStorage(Constant.StorageType.NFS,uri, storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
             if (resultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
             }

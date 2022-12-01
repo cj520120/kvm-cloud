@@ -1,82 +1,136 @@
 package cn.roamblue.test;
 
-import cn.roamblue.cloud.agent.operate.NetworkOperate;
-import cn.roamblue.cloud.agent.operate.impl.NetworkOperateImpl;
-import cn.roamblue.cloud.agent.operate.impl.OsOperateImpl;
-import cn.roamblue.cloud.common.agent.NetworkRequest;
-import cn.roamblue.cloud.common.agent.OsRequest;
-import cn.roamblue.cloud.common.agent.VolumeRequest;
-import cn.roamblue.cloud.common.util.Command;
-import cn.roamblue.cloud.common.util.VolumeType;
-import org.libvirt.Connect;
+import cn.hutool.http.HttpUtil;
+import cn.roamblue.cloud.agent.operate.StorageOperate;
+import cn.roamblue.cloud.agent.operate.impl.StorageOperateImpl;
+import cn.roamblue.cloud.common.bean.*;
+import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
+import cn.roamblue.cloud.common.util.Constant;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class OsTest {
     public static void main(String[] args) throws Exception {
-        Connect connect = new Connect("qemu:///system");
-        List<String> volumeTypes = Arrays.asList(VolumeType.QCOW2, VolumeType.QCOW, VolumeType.RAW, VolumeType.VDI, VolumeType.VPC, VolumeType.VMDK);
-        List<String> diskBus = Arrays.asList(OsRequest.Disk.DiskBus.SCSI, OsRequest.Disk.DiskBus.IDE, OsRequest.Disk.DiskBus.VIRTIO);
-        StorageTest.createStorage(connect);
-        {
-            NetworkOperate operate = new NetworkOperateImpl();
-            NetworkRequest request = NetworkRequest.builder()
-                    .command(Command.Network.CREATE_BASIC)
-                    .basicBridge(NetworkRequest.BasicBridge.builder().bridge("br0").ip("192.168.1.69").geteway("192.168.1.1").nic("ens20").netmask("255.255.255.0").build())
-                    .vlan(NetworkRequest.Vlan.builder().vlanId(100).bridge("vlan.100").ip("192.168.3.2").netmask("255.255.255.0").geteway("192.168.3.1").build())
+
+        createNetwork();
+        createStorage();
+        startOs(3,5, Constant.DiskBus.IDE);
+        destroyOs();
+        destroyVolume(5);
+        destroyStorage();
+        destroyNetwork();
+    }
+
+    public static void createStorage(){
+        StorageOperate operate = new StorageOperateImpl();
+        String name = "TEST_NFS";
+        Map<String, Object> param = new HashMap<>();
+        param.put("uri", "192.168.1.69");
+        param.put("path", "/data/nfs");
+        param.put("mount", "/mnt/TEST_NFS");
+        StorageCreateRequest request = StorageCreateRequest.builder()
+                .name(name)
+                .type(Constant.StorageType.NFS)
+                .param(param)
+                .build();
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.STORAGE_CREATE);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+    }
+    public static void destroyStorage(){
+        String name = "TEST_NFS";
+        StorageDestroyRequest request = StorageDestroyRequest.builder()
+                .name(name)
+                .build();
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.STORAGE_DESTROY);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+    }
+    public static void createNetwork(){
+        BasicBridgeNetwork request=BasicBridgeNetwork.builder().bridge("br0").ip("192.168.1.69").geteway("192.168.1.1").nic("ens20").netmask("255.255.255.0").build();
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.NETWORK_CREATE_BASIC);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+    }
+    public static void destroyNetwork(){
+        BasicBridgeNetwork request=BasicBridgeNetwork.builder().bridge("br0").ip("192.168.1.69").geteway("192.168.1.1").nic("ens20").netmask("255.255.255.0").build();
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.NETWORK_DESTROY_BASIC);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+    }
+    public static OsDisk createVolume(int index){
+        List<String> volumeTypes = Arrays.asList(Constant.VolumeType.QCOW2, Constant.VolumeType.QCOW, Constant.VolumeType.RAW, Constant.VolumeType.VDI, Constant.VolumeType.VPC, Constant.VolumeType.VMDK);
+        String volumeType = volumeTypes.get(index % volumeTypes.size());
+        VolumeCreateRequest request = VolumeCreateRequest.builder()
+                .targetStorage("TEST_NFS")
+                .targetVolume("/mnt/TEST_NFS/" + "VOL_" + volumeType + "_" + index)
+                .targetName("VOL_" + volumeType + "_" + index)
+                .targetType(volumeType)
+                .targetSize(1024L * 1024 * 1024 * 30)
+                .build();
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.VOLUME_CREATE);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+        return OsDisk.builder()
+                .volume(request.getTargetVolume())
+                .deviceId(index)
+                .volumeType(volumeType).build();
+    }
+    public static void destroyVolume(int number){
+        for(int index=0;index<number;index++){
+            List<String> volumeTypes = Arrays.asList(Constant.VolumeType.QCOW2, Constant.VolumeType.QCOW, Constant.VolumeType.RAW, Constant.VolumeType.VDI, Constant.VolumeType.VPC, Constant.VolumeType.VMDK);
+            String volumeType = volumeTypes.get(index % volumeTypes.size());
+            VolumeDestroyRequest request = VolumeDestroyRequest.builder()
+                    .sourceStorage("TEST_NFS")
+                    .sourceVolume("/mnt/TEST_NFS/" + "VOL_" + volumeType + "_" + index)
+                    .sourceType(volumeType)
                     .build();
-            operate.createBasic(connect, request);
+            Map<String,Object> map=new HashMap<>();
+            map.put("command",Constant.Command.VOLUME_DESTROY);
+            map.put("data", GsonBuilderUtil.create().toJson(request));
+            System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
         }
-
-        List<OsRequest.Disk> disks = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            String volumeType = volumeTypes.get(i % volumeTypes.size());
-            VolumeRequest.CreateVolume request = VolumeRequest.CreateVolume.builder()
-                    .targetStorage("TEST_NFS")
-                    .targetVolume("/mnt/TEST_NFS/" + "VOL_" + volumeType + "_" + i)
-                    .targetName("VOL_" + volumeType + "_" + i)
-                    .targetType(volumeType)
-                    .targetSize(1024L * 1024 * 1024 * 30)
-                    .build();
-            VolumeTest.createVolume(connect, request);
-
-            disks.add(OsRequest.Disk.builder()
-                    .volume(request.getTargetVolume())
-                    .deviceId(i)
-                    .volumeType(volumeType)
-                    .build());
+    }
+    public static void startOs(int networkNumber,int diskNumber,String diskBus){
+        List<OsDisk> osDisks = new ArrayList<>();
+        for (int i = 0; i < diskNumber; i++) {
+            osDisks.add(createVolume(i));
         }
-
-
-        List<OsRequest.Nic> nics = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            nics.add(OsRequest.Nic.builder()
-                    .bridgeName("br0")
-                    .mac(randomMacAddress())
-                    .deviceId(i)
-                    .driveType("virtio")
-                    .build());
+        List<OsNic> networkInterfaces = new ArrayList<>();
+        for (int i = 0; i < networkNumber; i++) {
+            networkInterfaces.add(OsNic.builder().bridgeName("br0").mac(randomMacAddress()).deviceId(i).driveType("virtio").build());
         }
-        OsRequest.Start request = OsRequest.Start.builder()
+        GuestStartRequest request = GuestStartRequest.builder()
                 .emulator("/usr/bin/qemu-system-x86_64")
                 .name("VM_TEST")
                 .description("测试虚拟机")
-                .bus(OsRequest.Disk.DiskBus.IDE)
-                .cpu(OsRequest.Cpu.builder().number(2).core(1).socket(1).thread(1).share(500).build())
-                .memory(OsRequest.Memory.builder().memory(1024 * 1024).build())
-                .cdRoom(OsRequest.CdRoom.builder()
+                .bus(diskBus)
+                .osCpu(OsCpu.builder().number(2).core(0).socket(0).thread(0).share(500).build())
+                .osMemory(OsMemory.builder().memory(1024 * 1024).build())
+                .osCdRoom(OsCdRoom.builder()
                         .path("/mnt/TEST_NFS/CentOS-7-x86_64-Minimal-2003.iso")
                         .build())
-                .disks(disks)
-                .networkInterfaces(nics)
+                .osDisks(osDisks)
+                .networkInterfaces(networkInterfaces)
                 .vncPassword("123456")
                 .build();
-        new OsOperateImpl().start(connect, request);
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.GUEST_START);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
     }
-
+    public static void destroyOs(){
+        GuestDestroyRequest request= GuestDestroyRequest.builder().name("VM_TEST").build();
+        Map<String,Object> map=new HashMap<>();
+        map.put("command",Constant.Command.GUEST_DESTROY);
+        map.put("data", GsonBuilderUtil.create().toJson(request));
+        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+    }
     public static String randomMacAddress() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5; i++) {

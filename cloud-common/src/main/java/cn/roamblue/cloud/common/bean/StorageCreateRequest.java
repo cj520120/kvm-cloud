@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.common.agent;
+package cn.roamblue.cloud.common.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,11 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StorageRequest {
-    /**
-     * 命令
-     */
-    private String command;
+public class StorageCreateRequest {
     /**
      * 存储池名称
      */

@@ -4,16 +4,22 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.roamblue.cloud.agent.operate.OsOperate;
-import cn.roamblue.cloud.common.agent.OsRequest;
+import cn.roamblue.cloud.agent.util.XmlUtil;
+import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.dom4j.DocumentException;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
 import org.libvirt.LibvirtException;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.xml.sax.SAXException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -22,21 +28,22 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class OsOperateImpl implements OsOperate {
     private final int MAX_DEVICE_COUNT = 5;
     private final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
 
-    private static String getDiskXml(OsRequest.Disk request, String bus) {
+    private static String getDiskXml(OsDisk request, String bus) {
         String xml;
         switch (bus) {
-            case OsRequest.Disk.DiskBus.VIRTIO:
+            case Constant.DiskBus.VIRTIO:
                 xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
                 break;
-            case OsRequest.Disk.DiskBus.IDE:
+            case Constant.DiskBus.IDE:
                 xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
                 break;
-            case OsRequest.Disk.DiskBus.SCSI:
+            case Constant.DiskBus.SCSI:
                 xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
                 break;
             default:
@@ -46,7 +53,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void shutdown(Connect connect, OsRequest.Shutdown request) throws Exception {
+    public void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         while (true) {
             Domain domain = this.findDomainByName(connect, request.getName());
             if (domain == null) {
@@ -56,7 +63,6 @@ public class OsOperateImpl implements OsOperate {
                 case VIR_DOMAIN_SHUTDOWN:
                 case VIR_DOMAIN_SHUTOFF:
                     domain.destroy();
-                    domain.undefine();
                 default:
                     ThreadUtil.sleep(1, TimeUnit.SECONDS);
                     break;
@@ -66,7 +72,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void reboot(Connect connect, OsRequest.Reboot request) throws Exception {
+    public void reboot(Connect connect, GuestRebootRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -83,11 +89,11 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void start(Connect connect, OsRequest.Start request) throws Exception {
+    public VmInfoModel start(Connect connect, GuestStartRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             if (domain.getInfo().state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
-                return;
+                return this.initVmResponse(domain);
             }
             domain.destroy();
         }
@@ -95,16 +101,16 @@ public class OsOperateImpl implements OsOperate {
         String cdRoomXml = "";
         String diskXml = "";
         String nicXml = "";
-        if (request.getCpu().getShare() > 0) {
+        if (request.getOsCpu().getShare() > 0) {
             String xml = ResourceUtil.readUtf8Str("xml/cpu/cputune.xml");
-            cpuXml += String.format(xml, request.getCpu().getShare()) + "\r\n";
+            cpuXml += String.format(xml, request.getOsCpu().getShare()) + "\r\n";
         }
-        if (request.getCpu().getCore() > 0) {
+        if (request.getOsCpu().getCore() > 0) {
             String xml = ResourceUtil.readUtf8Str("xml/cpu/cpu.xml");
-            cpuXml += String.format(xml, request.getCpu().getSocket(), request.getCpu().getCore(), request.getCpu().getThread()) + "\r\n";
+            cpuXml += String.format(xml, request.getOsCpu().getSocket(), request.getOsCpu().getCore(), request.getOsCpu().getThread()) + "\r\n";
         }
-        if (request.getCdRoom() != null) {
-            OsRequest.CdRoom cd = request.getCdRoom();
+        if (request.getOsCdRoom() != null) {
+            OsCdRoom cd = request.getOsCdRoom();
             if (StringUtils.isEmpty(cd.getPath())) {
                 String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
                 cdRoomXml += xml + "\r\n";
@@ -113,27 +119,27 @@ public class OsOperateImpl implements OsOperate {
                 cdRoomXml += String.format(xml, cd.getPath()) + "\r\n";
             }
         }
-        for (int i = 0; i < request.getDisks().size(); i++) {
-            OsRequest.Disk disk = request.getDisks().get(i);
-            String xml = getDiskXml(disk, i == 0 ? request.getBus() : OsRequest.Disk.DiskBus.VIRTIO);
-            int deviceId = disk.getDeviceId() + MIN_DISK_DEVICE_ID;
+        for (int i = 0; i < request.getOsDisks().size(); i++) {
+            OsDisk osDisk = request.getOsDisks().get(i);
+            String xml = getDiskXml(osDisk, i == 0 ? request.getBus() : Constant.DiskBus.VIRTIO);
+            int deviceId = osDisk.getDeviceId() + MIN_DISK_DEVICE_ID;
 
             String dev = "" + (char) ('a' + deviceId);
-            xml = String.format(xml, dev, disk.getVolumeType(), disk.getVolume(), deviceId, deviceId);
+            xml = String.format(xml, dev, osDisk.getVolumeType(), osDisk.getVolume(), deviceId, deviceId);
             diskXml += xml + "\r\n";
         }
-        for (OsRequest.Nic nic : request.getNetworkInterfaces()) {
+        for (OsNic osNic : request.getNetworkInterfaces()) {
             String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
-            int deviceId = nic.getDeviceId() + MIN_NIC_DEVICE_ID;
-            xml = String.format(xml, nic.getMac(), nic.getDriveType(), nic.getBridgeName(), deviceId);
+            int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
+            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId);
             nicXml += xml + "\r\n";
         }
         String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
         xml = String.format(xml,
                 request.getName(),
                 request.getDescription(),
-                request.getMemory().getMemory(),
-                request.getCpu().getNumber(),
+                request.getOsMemory().getMemory(),
+                request.getOsCpu().getNumber(),
                 cpuXml,
                 request.getEmulator(),
                 cdRoomXml,
@@ -141,11 +147,12 @@ public class OsOperateImpl implements OsOperate {
                 nicXml,
                 request.getName(),
                 request.getVncPassword());
-        connect.domainCreateXML(xml, 1);
+        domain=connect.domainCreateXML(xml, 0);
+        return this.initVmResponse(domain);
     }
 
     @Override
-    public void detachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception {
+    public void detachCdRoom(Connect connect, OsCdRoom request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -155,7 +162,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void attachCdRoom(Connect connect, OsRequest.CdRoom request) throws Exception {
+    public void attachCdRoom(Connect connect, OsCdRoom request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -166,7 +173,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void attachDisk(Connect connect, OsRequest.Disk request) throws Exception {
+    public void attachDisk(Connect connect, OsDisk request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -174,7 +181,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = getDiskXml(request, OsRequest.Disk.DiskBus.VIRTIO);
+        String xml = getDiskXml(request, Constant.DiskBus.VIRTIO);
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
 
         String dev = "" + (char) ('a' + deviceId);
@@ -183,7 +190,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void detachDisk(Connect connect, OsRequest.Disk request) throws Exception {
+    public void detachDisk(Connect connect, OsDisk request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -191,7 +198,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = getDiskXml(request, OsRequest.Disk.DiskBus.VIRTIO);
+        String xml = getDiskXml(request, Constant.DiskBus.VIRTIO);
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
         String dev = "" + (char) ('a' + deviceId);
         xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), request.getDeviceId(), deviceId);
@@ -199,7 +206,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void attachNic(Connect connect, OsRequest.Nic request) throws Exception {
+    public void attachNic(Connect connect, OsNic request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -214,7 +221,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void detachNic(Connect connect, OsRequest.Nic request) throws Exception {
+    public void detachNic(Connect connect, OsNic request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -229,22 +236,22 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void qma(Connect connect, OsRequest.Qma request) throws Exception {
+    public void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        List<OsRequest.Qma.QmaBody> commands=request.getCommands();
-        for (OsRequest.Qma.QmaBody command : commands) {
+        List<GuestQmaRequest.QmaBody> commands=request.getCommands();
+        for (GuestQmaRequest.QmaBody command : commands) {
             switch (command.getCommand()){
-                case OsRequest.Qma.QmaType.WRITE_FILE:
-                    OsRequest.Qma.WriteFile writeFile=new Gson().fromJson(command.getData(), OsRequest.Qma.WriteFile.class);
+                case GuestQmaRequest.QmaType.WRITE_FILE:
+                    GuestQmaRequest.WriteFile writeFile=new Gson().fromJson(command.getData(), GuestQmaRequest.WriteFile.class);
                     int handler = qmaOpenFile(writeFile.getFileName(), domain);
                     qmaWriteFile(writeFile.getFileBody(), domain,handler);
                     qmaCloseFile(domain,handler);
                     break;
-                case OsRequest.Qma.QmaType.EXECUTE:
-                    OsRequest.Qma.Execute execute=new Gson().fromJson(command.getData(), OsRequest.Qma.Execute.class);
+                case GuestQmaRequest.QmaType.EXECUTE:
+                    GuestQmaRequest.Execute execute=new Gson().fromJson(command.getData(), GuestQmaRequest.Execute.class);
 
                     qmaExecuteShell(request, domain, command, execute);
                     break;
@@ -257,7 +264,7 @@ public class OsOperateImpl implements OsOperate {
 
 
     @Override
-    public void destroy(Connect connect, OsRequest.Destroy request) throws Exception {
+    public void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             domain.destroy();
@@ -283,7 +290,7 @@ public class OsOperateImpl implements OsOperate {
         }
         return null;
     }
-    private static void qmaExecuteShell(OsRequest.Qma request, Domain domain, OsRequest.Qma.QmaBody command, OsRequest.Qma.Execute execute) throws LibvirtException {
+    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
         Gson gson = new Gson();
         Map<String, Object> map = new HashMap<>(2);
         map.put("execute", "guest-exec");
@@ -336,5 +343,22 @@ public class OsOperateImpl implements OsOperate {
         }.getType());
         handler = NumberUtil.parseInt(map.get("return").toString());
         return handler;
+    }
+    private VmInfoModel initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
+        DomainInfo domainInfo = domain.getInfo();
+        VmInfoModel info = VmInfoModel.builder().name(domain.getName())
+                .uuid(domain.getUUIDString())
+                .state(domainInfo.state)
+                .maxMem(domainInfo.maxMem)
+                .memory(domainInfo.memory)
+                .cpuTime(domainInfo.cpuTime)
+                .cpu(domainInfo.nrVirtCpu)
+                .build();
+        if (domainInfo.state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
+            String xml = domain.getXMLDesc(0);
+            info.setVnc(XmlUtil.getVnc(xml));
+            info.setPassword(XmlUtil.getVncPassword(xml));
+        }
+        return info;
     }
 }
