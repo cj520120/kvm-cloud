@@ -21,12 +21,13 @@ public class VolumeEntity {
     @TableId(type = IdType.AUTO)
     @TableField("id")
     private Integer id;
-    private Integer clusterId;
-    private Integer storageId;
+    private int parentId;
+    private int clusterId;
+    private int storageId;
     private String name;
     private String target;
-    private Long capacity;
-    private Long allocation;
+    private long capacity;
+    private long allocation;
     private String type;
     private int status;
 

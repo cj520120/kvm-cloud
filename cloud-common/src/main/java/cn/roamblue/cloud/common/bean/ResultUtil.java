@@ -36,6 +36,11 @@ public class ResultUtil<T> {
         result.setData(data);
         return result;
     }
+    public static   ResultUtil<Void> success() {
+        ResultUtil<Void> result = new ResultUtil<>();
+        result.setCode(ErrorCode.SUCCESS);
+        return result;
+    }
 
     public static <T> ResultUtil<T> error(int code, String message) {
         ResultUtil<T> result = new ResultUtil<>();

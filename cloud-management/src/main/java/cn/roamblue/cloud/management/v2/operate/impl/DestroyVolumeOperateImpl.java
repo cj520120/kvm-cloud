@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * 销毁磁盘
+ *
  * @author chenjun
  */
 public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOperate, ResultUtil<Void>> {
@@ -36,16 +38,20 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         VolumeMapper volumeMapper = SpringContextUtils.getBean(VolumeMapper.class);
         HostMapper hostMapper = SpringContextUtils.getBean(HostMapper.class);
         VolumeEntity volume = volumeMapper.selectById(param.getId());
-        StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", volume.getClusterId()));
-        Collections.shuffle(hosts);
-        HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.v2.util.Constant.HostStatus.READY, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
-        VolumeDestroyRequest request = VolumeDestroyRequest.builder()
-                .sourceStorage(storage.getName())
-                .sourceVolume(volume.getTarget())
-                .sourceType(volume.getType())
-                .build();
-        this.asyncCall(host, param, Constant.Command.VOLUME_DESTROY, request);
+        if (volume.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.VolumeStatus.DESTROY) {
+            StorageEntity storage = storageMapper.selectById(volume.getStorageId());
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", volume.getClusterId()));
+            Collections.shuffle(hosts);
+            HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.v2.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
+            VolumeDestroyRequest request = VolumeDestroyRequest.builder()
+                    .sourceStorage(storage.getName())
+                    .sourceVolume(volume.getTarget())
+                    .sourceType(volume.getType())
+                    .build();
+            this.asyncCall(host, param, Constant.Command.VOLUME_DESTROY, request);
+        } else {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正确:" + volume.getStatus());
+        }
 
 
     }
@@ -59,6 +65,9 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
     @Override
     public void onCallback(String hostId, DestroyVolumeOperate param, ResultUtil<Void> resultUtil) {
         VolumeMapper volumeMapper = SpringContextUtils.getBean(VolumeMapper.class);
-        volumeMapper.deleteById(param.getId());
+        VolumeEntity volume = volumeMapper.selectById(param.getId());
+        if (volume.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.VolumeStatus.DESTROY) {
+            volumeMapper.deleteById(param.getId());
+        }
     }
 }

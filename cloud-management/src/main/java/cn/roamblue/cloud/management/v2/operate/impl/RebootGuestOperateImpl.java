@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.v2.operate.impl;
 
 import cn.roamblue.cloud.common.bean.GuestRebootRequest;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.util.SpringContextUtils;
@@ -14,6 +15,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
+/**
+ * 重启虚拟机
+ */
 public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, ResultUtil<Void>> {
 
     protected RebootGuestOperateImpl() {
@@ -27,8 +31,12 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
         GuestEntity guest = guestMapper.selectById(param.getId());
 
         HostEntity host = hostMapper.selectById(guest.getHostId());
-        GuestRebootRequest request = GuestRebootRequest.builder().name(guest.getName()).build();
-        this.asyncCall(host, param, Constant.Command.GUEST_REBOOT, request);
+        if (guest.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.REBOOT) {
+            GuestRebootRequest request = GuestRebootRequest.builder().name(guest.getName()).build();
+            this.asyncCall(host, param, Constant.Command.GUEST_REBOOT, request);
+        } else {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "客户机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
+        }
     }
 
 
@@ -41,10 +49,14 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
     @Override
     public void onCallback(String hostId, RebootGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
-        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            GuestEntity guest = guestMapper.selectById(param.getId());
-            guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.RUNNING);
-            guestMapper.updateById(guest);
+        GuestEntity guest = guestMapper.selectById(param.getId());
+        if (guest.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.REBOOT) {
+            if (guest.getHostId() > 0) {
+                guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.RUNNING);
+            } else {
+                guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOP);
+                guestMapper.updateById(guest);
+            }
         }
     }
 }

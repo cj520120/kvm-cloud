@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.v2.operate.impl;
 
 import cn.roamblue.cloud.common.bean.*;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.util.SpringContextUtils;
@@ -16,6 +17,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 启动虚拟机
+ */
 public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, ResultUtil<GuestInfo>> {
 
     protected StartGuestOperateImpl() {
@@ -31,11 +35,17 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
         GuestDiskMapper guestDiskMapper = SpringContextUtils.getBean(GuestDiskMapper.class);
         GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
+        if (guest.getStatus() != cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STARTING) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
+        }
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getId()));
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getId()));
         List<OsDisk> disks = new ArrayList<>();
         for (GuestDiskEntity entity : guestDiskEntityList) {
             VolumeEntity volume = volumeMapper.selectById(entity.getVolumeId());
+            if (volume.getStatus() != cn.roamblue.cloud.management.v2.util.Constant.VolumeStatus.READY) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
+            }
             OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(entity.getDeviceId()).volume(volume.getTarget()).volumeType(volume.getType()).build();
             disks.add(disk);
         }
@@ -43,6 +53,15 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
         List<OsNic> networkInterfaces = new ArrayList<>();
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
+            if (network.getStatus() != cn.roamblue.cloud.management.v2.util.Constant.NetworkStatus.READY) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
+            }
+            if (network.getParentId() > 0) {
+                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
+                if (parentNetwork.getStatus() != cn.roamblue.cloud.management.v2.util.Constant.NetworkStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
+                }
+            }
             OsNic nic = OsNic.builder()
                     .mac(entity.getMac())
                     .driveType(entity.getDrive())
@@ -81,11 +100,14 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
     public void onCallback(String hostId, StartGuestOperate param, ResultUtil<GuestInfo> resultUtil) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
-        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.RUNNING);
-        } else {
-            guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOP);
+        if (guest.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STARTING) {
+            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.RUNNING);
+            } else {
+                guest.setHostId(0);
+                guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOP);
+            }
+            guestMapper.updateById(guest);
         }
-        guestMapper.updateById(guest);
     }
 }

@@ -13,6 +13,9 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author chenjun
+ */
 public abstract class AbstractOperate<T extends BaseOperateInfo, V extends ResultUtil> implements Operate<T, V> {
     private final Class<T> paramType;
 
@@ -33,6 +36,7 @@ public abstract class AbstractOperate<T extends BaseOperateInfo, V extends Resul
         String response = HttpUtil.post(uri, map);
         return GsonBuilderUtil.create().fromJson(response, this.getCallResultType());
     }
+
     protected void asyncCall(HostEntity host, T param, String command, Object data) {
         TaskRequest taskRequest = TaskRequest.builder()
                 .command(command)

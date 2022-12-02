@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class ChangeGuestDiskOperate extends BaseOperateInfo {
     private int id;
     private int volumeId;
+    private int guestId;
     private boolean attach;
 }

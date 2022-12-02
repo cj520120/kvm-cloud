@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * 创建网络
+ *
  * @author chenjun
  */
 public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOperate, ResultUtil<Void>> {
@@ -37,7 +39,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", network.getClusterId()));
         ResultUtil<Void> resultUtil=null;
         for (HostEntity host : hosts) {
-            if (Objects.equals(cn.roamblue.cloud.management.v2.util.Constant.HostStatus.READY, host.getStatus())) {
+            if (Objects.equals(cn.roamblue.cloud.management.v2.util.Constant.HostStatus.ONLINE, host.getStatus())) {
                 if (Objects.equals(cn.roamblue.cloud.management.v2.util.Constant.NetworkType.BASIC, network.getType())) {
                     BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                             .bridge(network.getBridge())
@@ -45,7 +47,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
                             .geteway(network.getGateway())
                             .nic(host.getNic())
                             .netmask(network.getMask()).build();
-                    resultUtil=this.call(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
+                    resultUtil = this.call(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
                 } else {
 
                     NetworkEntity basicNetworkEntity = networkMapper.selectById(network.getParentId());

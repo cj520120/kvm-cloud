@@ -4,6 +4,7 @@ import cn.roamblue.cloud.common.bean.GuestDestroyRequest;
 import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.GuestShutdownRequest;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.util.SpringContextUtils;
@@ -16,6 +17,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
+/**
+ * 停止虚拟机
+ */
 public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, ResultUtil<Void>> {
 
     protected StopGuestOperateImpl() {
@@ -27,9 +31,10 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         HostMapper hostMapper = SpringContextUtils.getBean(HostMapper.class);
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
-
+        if (guest.getStatus() != cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOPPING) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "客户机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
+        }
         HostEntity host = hostMapper.selectById(guest.getHostId());
-
         if (param.isForce()) {
             GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).build();
             this.asyncCall(host, param, Constant.Command.GUEST_SHUTDOWN, request);
@@ -49,9 +54,14 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
     public void onCallback(String hostId, StopGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
-        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOP);
+        if (guest.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOPPING) {
+            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                guest.setHostId(0);
+                guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOP);
+            } else {
+                guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.RUNNING);
+            }
+            guestMapper.updateById(guest);
         }
-        guestMapper.updateById(guest);
     }
 }

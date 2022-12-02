@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChangeGuestNetworkInterfaceOperate extends BaseOperateInfo {
     private int id;
-    private int network;
+    private int guestId;
+    private boolean attach;
 }
