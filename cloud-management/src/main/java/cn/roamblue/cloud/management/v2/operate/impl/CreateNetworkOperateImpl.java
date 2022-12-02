@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.v2.operate.impl;
 import cn.roamblue.cloud.common.bean.BasicBridgeNetwork;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VlanNetwork;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.util.GsonBuilderUtil;
@@ -48,10 +49,11 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
                             .nic(host.getNic())
                             .netmask(network.getMask()).build();
                     resultUtil = this.call(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
-                } else {
-
+                } else  if (Objects.equals(cn.roamblue.cloud.management.v2.util.Constant.NetworkType.VLAN, network.getType())) {
                     NetworkEntity basicNetworkEntity = networkMapper.selectById(network.getParentId());
-
+                    if(basicNetworkEntity==null){
+                        throw new CodeException(ErrorCode.SERVER_ERROR,"Vlan的基础网络不存在");
+                    }
                     BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                             .bridge(basicNetworkEntity.getBridge())
                             .ip(host.getIp())
@@ -67,6 +69,8 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
                             .geteway(network.getGateway())
                             .build();
                     resultUtil=this.call(host, param, Constant.Command.NETWORK_CREATE_VLAN, vlan);
+                }else{
+                    throw new CodeException(ErrorCode.SERVER_ERROR,"未知的网络类型:"+network.getType());
                 }
                 if(resultUtil.getCode()!= ErrorCode.SUCCESS){
                     break;
