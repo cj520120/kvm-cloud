@@ -49,7 +49,6 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
 
     @Override
     public void onCallback(String hostId, ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
-        //无论是否成功，将强制变更状态，等待下次重启后生效
         GuestDiskMapper guestDiskMapper = SpringContextUtils.getBean(GuestDiskMapper.class);
         VolumeMapper volumeMapper = SpringContextUtils.getBean(VolumeMapper.class);
         GuestDiskEntity guestDisk = guestDiskMapper.selectById(param.getId());
