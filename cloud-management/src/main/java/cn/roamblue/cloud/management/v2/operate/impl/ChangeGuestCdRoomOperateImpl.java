@@ -35,7 +35,7 @@ public class ChangeGuestCdRoomOperateImpl extends AbstractOperate<ChangeGuestCdR
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
         switch (guest.getStatus()) {
-            case cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STARTING:
+            case cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.ATTACH_CD_ROOM:
             case cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.DETACH_CD_ROOM:
                 if (guest.getHostId() > 0) {
                     HostEntity host = hostMapper.selectById(guest.getHostId());

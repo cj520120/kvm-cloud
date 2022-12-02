@@ -1,16 +1,18 @@
-package cn.roamblue.cloud.common.bean;
+package cn.roamblue.cloud.management.v2.operate.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author chenjun
+ */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VolumeResizeRequest {
-    private String sourceStorage;
-    private String sourceVolume;
+@Builder
+public class ResizeVolumeOperate extends BaseOperateInfo {
+    private int id;
     private long size;
 }

@@ -11,8 +11,7 @@ public class Constant {
     public static class StorageStatus{
         public static final int INIT=0;
         public static final int READY=1;
-        public static final int DISABLE=2;
-        public static final int DESTROY=3;
+        public static final int DESTROY=2;
         public static final int ERROR=3;
     }
     public static class VolumeStatus{
@@ -22,7 +21,7 @@ public class Constant {
         public static final int DETACH_DISK=3;
         public static final int DESTROY=4;
         public static final int CLONE=5;
-        public static final int DOWNLOADING=6;
+        public static final int DOWNLOAD_TEMPLATE=6;
         public static final int CREATE_TEMPLATE=7;
         public static final int SNAPSHOT=8;
         public static final int MIGRATE=9;
@@ -32,10 +31,9 @@ public class Constant {
     public static class NetworkStatus{
         public static final int CREATING=1;
         public static final int READY=2;
-        public static final int STOPPING=3;
-        public static final int STOP=4;
-        public static final int DESTROY=5;
-        public static final int ERROR=6;
+        public static final int STOP=3;
+        public static final int DESTROY=4;
+        public static final int ERROR=5;
     }
     public static class GuestStatus{
 
@@ -50,8 +48,8 @@ public class Constant {
         public static final int DETACH_DISK=8;
         public static final int ATTACH_NIC=9;
         public static final int DETACH_NIC=10;
-        public static final int DESTROY=11;
-        public static final int REBOOT = 12;
+        public static final int REBOOT = 11;
+        public static final int DESTROY=12;
         public static final int ERROR=13;
     }
 

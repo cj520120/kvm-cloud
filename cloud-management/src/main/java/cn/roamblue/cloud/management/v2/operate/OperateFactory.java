@@ -19,6 +19,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class OperateFactory {
     private final static ServiceLoader<Operate> loader = ServiceLoader.load(Operate.class);
 
+    public static void submitTask(BaseOperateInfo param){
+        create(param);
+    }
     public static void create(BaseOperateInfo param) {
         Iterator<Operate> iterator = loader.iterator();
         while (iterator.hasNext()) {

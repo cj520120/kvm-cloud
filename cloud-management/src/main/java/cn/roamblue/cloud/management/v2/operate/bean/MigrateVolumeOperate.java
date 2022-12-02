@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author chenjun
@@ -12,7 +11,11 @@ import lombok.experimental.SuperBuilder;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
-public class DestroyStorageOperate extends BaseOperateInfo {
+@Builder
+public class MigrateVolumeOperate extends BaseOperateInfo {
     private int id;
+    private int targetStorageId;
+    private String targetName;
+    private String targetVolume;
+    private String targetType;
 }
