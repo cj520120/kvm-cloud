@@ -28,7 +28,7 @@ import java.util.Objects;
  */
 public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOperate, ResultUtil<Void>> {
 
-    protected DestroyVolumeOperateImpl() {
+    public DestroyVolumeOperateImpl() {
         super(DestroyVolumeOperate.class);
     }
 

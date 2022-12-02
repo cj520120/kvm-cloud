@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOperate, ResultUtil<Void>> {
 
-    protected DestroyStorageOperateImpl() {
+    public DestroyStorageOperateImpl() {
         super(DestroyStorageOperate.class);
     }
 

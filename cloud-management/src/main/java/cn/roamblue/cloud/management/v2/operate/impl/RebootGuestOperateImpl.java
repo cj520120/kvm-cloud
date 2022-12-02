@@ -17,10 +17,11 @@ import java.lang.reflect.Type;
 
 /**
  * 重启虚拟机
+ * @author chenjun
  */
 public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, ResultUtil<Void>> {
 
-    protected RebootGuestOperateImpl() {
+    public RebootGuestOperateImpl() {
         super(RebootGuestOperate.class);
     }
 

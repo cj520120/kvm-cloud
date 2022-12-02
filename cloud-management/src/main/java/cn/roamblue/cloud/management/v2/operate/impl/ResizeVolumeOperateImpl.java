@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate, ResultUtil<VolumeInfo>> {
 
-    protected ResizeVolumeOperateImpl() {
+    public ResizeVolumeOperateImpl() {
         super(ResizeVolumeOperate.class);
     }
 

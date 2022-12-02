@@ -26,7 +26,7 @@ import java.lang.reflect.Type;
  */
 public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<ChangeGuestNetworkInterfaceOperate, ResultUtil<Void>> {
 
-    protected ChangeGuestNetworkInterfaceOperateImpl() {
+    public ChangeGuestNetworkInterfaceOperateImpl() {
         super(ChangeGuestNetworkInterfaceOperate.class);
     }
 

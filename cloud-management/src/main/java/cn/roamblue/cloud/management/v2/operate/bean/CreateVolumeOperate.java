@@ -1,9 +1,9 @@
 package cn.roamblue.cloud.management.v2.operate.bean;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * @author chenjun
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class CreateVolumeOperate extends BaseOperateInfo {
-    private int id;
+    private int volumeId;
 }

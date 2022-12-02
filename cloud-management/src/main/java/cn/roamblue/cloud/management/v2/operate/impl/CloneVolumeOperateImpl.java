@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, ResultUtil<VolumeInfo>> {
 
-    protected CloneVolumeOperateImpl() {
+    public CloneVolumeOperateImpl() {
         super(CloneVolumeOperate.class);
     }
 

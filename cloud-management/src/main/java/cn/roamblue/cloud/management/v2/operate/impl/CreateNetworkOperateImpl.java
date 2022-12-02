@@ -28,7 +28,7 @@ import java.util.Objects;
  */
 public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOperate, ResultUtil<Void>> {
 
-    protected CreateNetworkOperateImpl() {
+    public CreateNetworkOperateImpl() {
         super(CreateNetworkOperate.class);
     }
 

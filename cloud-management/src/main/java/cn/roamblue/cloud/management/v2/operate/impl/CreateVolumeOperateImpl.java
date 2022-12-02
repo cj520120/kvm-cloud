@@ -27,18 +27,21 @@ import java.util.Objects;
  *
  * @author chenjun
  */
-public class CreateVolumeOperateImpl extends AbstractOperate<CreateVolumeOperate, ResultUtil<VolumeInfo>> {
+public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends AbstractOperate<T, ResultUtil<VolumeInfo>> {
 
-    protected CreateVolumeOperateImpl() {
-        super(CreateVolumeOperate.class);
+    public CreateVolumeOperateImpl(){
+        super((Class<T>) CreateVolumeOperate.class);
+    }
+    public CreateVolumeOperateImpl(Class<T> tClass){
+        super(tClass);
     }
 
     @Override
-    public void operate(CreateVolumeOperate param) {
+    public void operate(T param) {
         StorageMapper storageMapper = SpringContextUtils.getBean(StorageMapper.class);
         VolumeMapper volumeMapper = SpringContextUtils.getBean(VolumeMapper.class);
         HostMapper hostMapper = SpringContextUtils.getBean(HostMapper.class);
-        VolumeEntity volume = volumeMapper.selectById(param.getId());
+        VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.VolumeStatus.CREATING) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
             List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", volume.getClusterId()));
@@ -66,6 +69,8 @@ public class CreateVolumeOperateImpl extends AbstractOperate<CreateVolumeOperate
 
     }
 
+
+
     @Override
     public Type getCallResultType() {
         return new TypeToken<ResultUtil<VolumeInfo>>() {
@@ -73,9 +78,9 @@ public class CreateVolumeOperateImpl extends AbstractOperate<CreateVolumeOperate
     }
 
     @Override
-    public void onCallback(String hostId, CreateVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
+    public void onCallback(String hostId, T param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeMapper volumeMapper = SpringContextUtils.getBean(VolumeMapper.class);
-        VolumeEntity volume = volumeMapper.selectById(param.getId());
+        VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 volume.setAllocation(resultUtil.getData().getAllocation());

@@ -19,22 +19,25 @@ import java.util.List;
 
 /**
  * 启动虚拟机
+ * @author chenjun
  */
-public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, ResultUtil<GuestInfo>> {
+public class StartGuestOperateImpl<T extends StartGuestOperate> extends AbstractOperate<T, ResultUtil<GuestInfo>> {
 
-    protected StartGuestOperateImpl() {
-        super(StartGuestOperate.class);
+    public StartGuestOperateImpl() {
+        super((Class<T>) StartGuestOperate.class);
     }
-
+    public StartGuestOperateImpl(Class<T> tClass) {
+        super(tClass);
+    }
     @Override
-    public void operate(StartGuestOperate param) {
+    public void operate(T param) {
         HostMapper hostMapper = SpringContextUtils.getBean(HostMapper.class);
         NetworkMapper networkMapper = SpringContextUtils.getBean(NetworkMapper.class);
         VolumeMapper volumeMapper = SpringContextUtils.getBean(VolumeMapper.class);
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestDiskMapper guestDiskMapper = SpringContextUtils.getBean(GuestDiskMapper.class);
         GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
-        GuestEntity guest = guestMapper.selectById(param.getId());
+        GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getStatus() != cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STARTING) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
@@ -97,9 +100,9 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
     }
 
     @Override
-    public void onCallback(String hostId, StartGuestOperate param, ResultUtil<GuestInfo> resultUtil) {
+    public void onCallback(String hostId, T param, ResultUtil<GuestInfo> resultUtil) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
-        GuestEntity guest = guestMapper.selectById(param.getId());
+        GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STARTING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.RUNNING);

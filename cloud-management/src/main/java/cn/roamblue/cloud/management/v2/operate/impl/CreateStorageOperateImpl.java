@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOperate, ResultUtil<StorageInfo>> {
 
-    protected CreateStorageOperateImpl() {
+    public CreateStorageOperateImpl() {
         super(CreateStorageOperate.class);
     }
 

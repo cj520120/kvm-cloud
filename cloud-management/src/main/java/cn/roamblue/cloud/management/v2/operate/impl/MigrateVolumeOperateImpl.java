@@ -31,7 +31,7 @@ import java.util.UUID;
  */
 public class MigrateVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, ResultUtil<VolumeInfo>> {
 
-    protected MigrateVolumeOperateImpl() {
+    public MigrateVolumeOperateImpl() {
         super(CloneVolumeOperate.class);
     }
 

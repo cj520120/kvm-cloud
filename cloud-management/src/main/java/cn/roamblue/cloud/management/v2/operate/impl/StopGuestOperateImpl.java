@@ -19,15 +19,19 @@ import java.lang.reflect.Type;
 
 /**
  * 停止虚拟机
+ * @author chenjun
  */
-public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, ResultUtil<Void>> {
+public class StopGuestOperateImpl<T extends StopGuestOperate> extends AbstractOperate<T, ResultUtil<Void>> {
 
-    protected StopGuestOperateImpl() {
-        super(StopGuestOperate.class);
+    public StopGuestOperateImpl() {
+        super((Class<T>) StopGuestOperate.class);
+    }
+    public StopGuestOperateImpl(Class<T> tClass){
+        super(tClass);
     }
 
     @Override
-    public void operate(StopGuestOperate param) {
+    public void operate(T param) {
         HostMapper hostMapper = SpringContextUtils.getBean(HostMapper.class);
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
@@ -51,7 +55,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
     }
 
     @Override
-    public void onCallback(String hostId, StopGuestOperate param, ResultUtil<Void> resultUtil) {
+    public void onCallback(String hostId, T param, ResultUtil<Void> resultUtil) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
         if (guest.getStatus() == cn.roamblue.cloud.management.v2.util.Constant.GuestStatus.STOPPING) {

@@ -28,7 +28,7 @@ import java.lang.reflect.Type;
  */
 public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskOperate, ResultUtil<Void>> {
 
-    protected ChangeGuestDiskOperateImpl() {
+    public ChangeGuestDiskOperateImpl() {
         super(ChangeGuestDiskOperate.class);
     }
 

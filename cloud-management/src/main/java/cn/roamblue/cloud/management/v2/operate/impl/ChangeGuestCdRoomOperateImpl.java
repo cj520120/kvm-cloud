@@ -23,14 +23,16 @@ import java.lang.reflect.Type;
  *
  * @author chenjun
  */
-public class ChangeGuestCdRoomOperateImpl extends AbstractOperate<ChangeGuestCdRoomOperate, ResultUtil<Void>> {
+public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> extends AbstractOperate<T, ResultUtil<Void>> {
 
-    protected ChangeGuestCdRoomOperateImpl() {
-        super(ChangeGuestCdRoomOperate.class);
+    public ChangeGuestCdRoomOperateImpl() {
+        super((Class<T>) ChangeGuestCdRoomOperate.class);
     }
-
+    public ChangeGuestCdRoomOperateImpl(Class<T> tClass){
+        super(tClass);
+    }
     @Override
-    public void operate(ChangeGuestCdRoomOperate param) {
+    public void operate(T param) {
         HostMapper hostMapper = SpringContextUtils.getBean(HostMapper.class);
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
@@ -61,7 +63,7 @@ public class ChangeGuestCdRoomOperateImpl extends AbstractOperate<ChangeGuestCdR
     }
 
     @Override
-    public void onCallback(String hostId, ChangeGuestCdRoomOperate param, ResultUtil<Void> resultUtil) {
+    public void onCallback(String hostId, T param, ResultUtil<Void> resultUtil) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(param.getId());
         switch (guest.getStatus()) {

@@ -28,7 +28,7 @@ import java.util.Objects;
  */
 public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOperate, ResultUtil<Void>> {
 
-    protected DestroyNetworkOperateImpl() {
+    public DestroyNetworkOperateImpl() {
         super(DestroyNetworkOperate.class);
     }
 
