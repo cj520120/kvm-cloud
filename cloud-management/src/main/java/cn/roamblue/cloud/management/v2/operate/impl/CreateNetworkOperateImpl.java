@@ -77,7 +77,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
                 }
             }
         }
-        OperateFactory.onCallback(param,"", GsonBuilderUtil.create().toJson(resultUtil));
+        this.onSubmitCallback(param.getTaskId(),resultUtil);
     }
 
     @Override

@@ -70,7 +70,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
                     }
                 }
             }
-            OperateFactory.onCallback(param, "", GsonBuilderUtil.create().toJson(ResultUtil.builder().build()));
+           this.onSubmitCallback(param.getTaskId(), ResultUtil.<Void>builder().build());
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络[" + network.getName() + "]状态不正确:" + network.getStatus());
         }

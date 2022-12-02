@@ -36,4 +36,6 @@ public interface Operate<T extends BaseOperateInfo, V extends ResultUtil> {
      * @return
      */
     Type getCallResultType();
+
+    void onSubmitCallback(String taskId, V result);
 }

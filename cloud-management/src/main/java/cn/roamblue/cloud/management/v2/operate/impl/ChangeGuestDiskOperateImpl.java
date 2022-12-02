@@ -68,7 +68,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
                 }
                 break;
             default:
-                OperateFactory.onCallback(param, "", GsonBuilderUtil.create().toJson(ResultUtil.success()));
+                this.onSubmitCallback(param.getTaskId(), ResultUtil.<Void>builder().build());
                 break;
         }
     }

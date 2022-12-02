@@ -56,7 +56,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
                     }
                 }
             }
-            OperateFactory.onCallback(param, "", GsonBuilderUtil.create().toJson(resultUtil));
+            this.onSubmitCallback(param.getTaskId(), resultUtil);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
         }

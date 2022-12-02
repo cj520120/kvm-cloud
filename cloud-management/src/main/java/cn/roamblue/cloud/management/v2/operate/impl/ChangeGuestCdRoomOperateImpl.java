@@ -48,7 +48,7 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
                     }
                     this.asyncCall(host, param, command, cdRoom);
                 } else {
-                    OperateFactory.onCallback(param, "", GsonBuilderUtil.create().toJson(ResultUtil.builder().build()));
+                    this.onSubmitCallback(param.getTaskId(), ResultUtil.<Void>builder().build());
                 }
                 break;
             default:

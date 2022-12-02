@@ -47,7 +47,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
                     this.call(host, param, Constant.Command.STORAGE_DESTROY, request);
                 }
             }
-            OperateFactory.onCallback(param, "", GsonBuilderUtil.create().toJson(ResultUtil.builder().build()));
+            this.onSubmitCallback(param.getTaskId(), ResultUtil.<Void>builder().build());
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
         }

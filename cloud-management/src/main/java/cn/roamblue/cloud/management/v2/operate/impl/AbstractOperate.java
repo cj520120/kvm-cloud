@@ -5,13 +5,16 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.TaskRequest;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.Constant;
+import cn.roamblue.cloud.management.util.SpringContextUtils;
 import cn.roamblue.cloud.management.v2.data.entity.HostEntity;
 import cn.roamblue.cloud.management.v2.operate.Operate;
+import cn.roamblue.cloud.management.v2.operate.OperateFactory;
 import cn.roamblue.cloud.management.v2.operate.bean.BaseOperateInfo;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author chenjun
@@ -50,5 +53,11 @@ public abstract class AbstractOperate<T extends BaseOperateInfo, V extends Resul
         GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<Void>>() {
         }.getType());
     }
-
+    @Override
+    public void onSubmitCallback(String taskId,V result){
+        ThreadPoolExecutor executor = SpringContextUtils.getBean(ThreadPoolExecutor.class);
+        executor.submit(()->{
+            OperateFactory.onCallback(taskId, "", cn.roamblue.cloud.management.util.GsonBuilderUtil.create().toJson(result));
+        });
+    }
 }
