@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.management.task;
 
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -61,17 +61,17 @@ public class HostStorageCheckTask extends AbstractTask {
             List<HostEntity> hostList = hostMapper.selectAll().stream().filter(t -> t.getHostStatus().equals(HostStatus.READY)).collect(Collectors.toList());
             List<StorageEntity> storageList = storageMapper.findByClusterId(clusterEntity.getId()).stream().filter(t -> t.getStorageStatus().equals(StorageStatus.READY)).collect(Collectors.toList());
             for (HostEntity hostEntity : hostList) {
-                ResultUtil<List<StorageModel>> resultUtil = agentService.getHostStorage(hostEntity.getHostUri());
+                ResultUtil<List<StorageInfo>> resultUtil = agentService.getHostStorage(hostEntity.getHostUri());
                 if (resultUtil.getCode() != ErrorCode.SUCCESS) {
                     continue;
                 }
-                List<StorageModel> list = resultUtil.getData();
-                Map<String, StorageModel> map = list.stream().collect(Collectors.toMap(StorageModel::getName, Function.identity()));
+                List<StorageInfo> list = resultUtil.getData();
+                Map<String, StorageInfo> map = list.stream().collect(Collectors.toMap(StorageInfo::getName, Function.identity()));
                 for (StorageEntity storageEntity : storageList) {
-                    StorageModel cloudStorageInfo = map.get(storageEntity.getStorageTarget());
+                    StorageInfo cloudStorageInfo = map.get(storageEntity.getStorageTarget());
                     if (cloudStorageInfo == null) {
                         log.info("主机存储池未找到，重新初始化.host={} storage={}", hostEntity.getHostName(), storageEntity.getStorageName());
-                        ResultUtil<StorageModel> initStorageInfoResultUtil = agentService.addHostStorage(Constant.StorageType.NFS,hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
+                        ResultUtil<StorageInfo> initStorageInfoResultUtil = agentService.addHostStorage(Constant.StorageType.NFS,hostEntity.getHostUri(), storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
                         if (initStorageInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
                             log.info("主机存储池初始化失败.host={} storage={} msg={}", hostEntity.getHostName(), storageEntity.getStorageName(), initStorageInfoResultUtil.getMessage());
                         } else {

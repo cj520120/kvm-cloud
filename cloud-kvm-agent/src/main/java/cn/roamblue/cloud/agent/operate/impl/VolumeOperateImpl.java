@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.operate.VolumeOperate;
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class VolumeOperateImpl implements VolumeOperate {
     @Override
-    public VolumeModel getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
+    public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
         storagePool.refresh(0);
         String[] names = storagePool.listVolumes();
@@ -44,7 +44,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在:" + request.getSourceName());
         }
         StorageVolInfo storageVolInfo = findVol.getInfo();
-        return VolumeModel.builder().storage(request.getSourceStorage())
+        return VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(request.getSourceName())
                 .path(findVol.getPath())
                 .type(storageVolInfo.type.toString())
@@ -54,13 +54,13 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public List<VolumeModel> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
+    public List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
         Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
-        Map<String, Map<String, VolumeModel>> result = new HashMap<>();
+        Map<String, Map<String, VolumeInfo>> result = new HashMap<>();
 
         for (Map.Entry<String, List<VolumeInfoRequest>> entry : list.entrySet()) {
             String storage = entry.getKey();
-            Map<String, VolumeModel> map = new HashMap<>();
+            Map<String, VolumeInfo> map = new HashMap<>();
             Set<String> volumePaths = entry.getValue().stream().map(VolumeInfoRequest::getSourceVolume).collect(Collectors.toSet());
             StoragePool storagePool = connect.storagePoolLookupByName(storage);
             storagePool.refresh(0);
@@ -71,7 +71,7 @@ public class VolumeOperateImpl implements VolumeOperate {
 
                 if (volumePaths.contains(storageVol.getPath())) {
                     StorageVolInfo storageVolInfo = storageVol.getInfo();
-                    VolumeModel volume = VolumeModel.builder().storage(storage)
+                    VolumeInfo volume = VolumeInfo.builder().storage(storage)
                             .name("")
                             .path(storageVol.getPath())
                             .type(storageVolInfo.type.toString())
@@ -83,9 +83,9 @@ public class VolumeOperateImpl implements VolumeOperate {
             }
             result.put(storage, map);
         }
-        List<VolumeModel> modelList = new ArrayList<>();
+        List<VolumeInfo> modelList = new ArrayList<>();
         for (VolumeInfoRequest request : batchRequest) {
-            VolumeModel model = result.get(request.getSourceStorage()).get(request.getSourceVolume());
+            VolumeInfo model = result.get(request.getSourceStorage()).get(request.getSourceVolume());
             if (model != null) {
                 model.setName(request.getSourceName());
             }
@@ -95,7 +95,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel create(Connect connect, VolumeCreateRequest request) throws Exception {
+    public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
         String xml;
         if (StringUtils.isEmpty(request.getParentVolume())) {
             xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolume.xml");
@@ -123,7 +123,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
         StorageVolInfo storageVolInfo = storageVol.getInfo();
         storagePool.refresh(0);
-        return VolumeModel.builder().storage(request.getTargetStorage())
+        return VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .path(storageVol.getPath())
                 .type(storageVolInfo.type.toString())
@@ -148,7 +148,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel clone(Connect connect, VolumeCloneRequest request) throws Exception {
+    public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
         StoragePool sourceStoragePool = connect.storagePoolLookupByName(request.getSourceStorage());
         StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
         sourceStoragePool.refresh(0);
@@ -158,7 +158,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         xml = String.format(xml, request.getTargetName(), request.getTargetVolume(), request.getTargetType());
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();
-        return VolumeModel.builder().storage(request.getTargetStorage())
+        return VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .type(storageVolInfo.type.toString())
                 .path(targetVol.getPath())
@@ -168,7 +168,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel resize(Connect connect, VolumeResizeRequest request) throws Exception {
+    public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
 
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
         storagePool.refresh(0);
@@ -178,7 +178,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
         findVol.resize(request.getSize(),1);
         StorageVolInfo storageVolInfo = findVol.getInfo();
-        return VolumeModel.builder().storage(request.getSourceStorage())
+        return VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(findVol.getName())
                 .type(storageVolInfo.type.toString())
                 .path(findVol.getPath())
@@ -188,7 +188,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception {
+    public VolumeInfo snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
                 .sourceVolume(request.getSourceVolume())
@@ -200,7 +200,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel template(Connect connect, VolumeCreateTemplateRequest request) throws Exception {
+    public VolumeInfo template(Connect connect, VolumeCreateTemplateRequest request) throws Exception {
 
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
@@ -213,7 +213,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel download(Connect connect, VolumeDownloadRequest request) throws Exception {
+    public VolumeInfo download(Connect connect, VolumeDownloadRequest request) throws Exception {
         FileUtil.mkParentDirs(request.getTargetVolume());
         String tempFile=request.getTargetVolume()+".data";
         try {
@@ -232,7 +232,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @Override
-    public VolumeModel migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
+    public VolumeInfo migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
                 .sourceVolume(request.getSourceVolume())

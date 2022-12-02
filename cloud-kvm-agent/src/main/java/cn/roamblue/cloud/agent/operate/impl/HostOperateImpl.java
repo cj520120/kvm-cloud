@@ -4,7 +4,7 @@ import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.roamblue.cloud.agent.operate.HostOperate;
 import cn.roamblue.cloud.agent.util.HostUtil;
-import cn.roamblue.cloud.common.agent.HostModel;
+import cn.roamblue.cloud.common.bean.HostInfo;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -55,10 +55,10 @@ public class HostOperateImpl implements HostOperate {
         return emulator;
     }
     @Override
-    public HostModel getHostInfo(Connect connect) throws Exception {
+    public HostInfo getHostInfo(Connect connect) throws Exception {
         OsInfo osInfo = SystemUtil.getOsInfo();
         String emulator = getEmulator(connect.getCapabilities());
-        return HostModel.builder().hostName(connect.getHostName())
+        return HostInfo.builder().hostName(connect.getHostName())
                 .hostId(HostUtil.getHostId())
                 .version(connect.getVersion())
                 .uri(connect.getURI())

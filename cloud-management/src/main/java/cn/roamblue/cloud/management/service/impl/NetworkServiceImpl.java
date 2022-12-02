@@ -5,7 +5,7 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.NetworkInfo;
 import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
-import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.VmNetworkEntity;
 import cn.roamblue.cloud.management.data.mapper.ClusterMapper;
 import cn.roamblue.cloud.management.data.mapper.NetworkMapper;
@@ -39,35 +39,35 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
     @Override
     public List<NetworkInfo> listNetwork() {
 
-        List<NetworkEntity> networkEntityList = networkMapper.selectList(new QueryWrapper<>());
-        List<NetworkInfo> list = BeanConverter.convert(networkEntityList, this::init);
+        List<GuestNetworkEntity> guestNetworkEntityList = networkMapper.selectList(new QueryWrapper<>());
+        List<NetworkInfo> list = BeanConverter.convert(guestNetworkEntityList, this::init);
         return list;
     }
 
     @Override
     public List<NetworkInfo> search(int clusterId) {
 
-        QueryWrapper<NetworkEntity> wrapper = new QueryWrapper<>();
+        QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         if (clusterId > 0) {
             wrapper.eq("cluster_id", clusterId);
         }
-        List<NetworkEntity> networkEntityList = networkMapper.selectList(wrapper);
-        List<NetworkInfo> list = BeanConverter.convert(networkEntityList, this::init);
+        List<GuestNetworkEntity> guestNetworkEntityList = networkMapper.selectList(wrapper);
+        List<NetworkInfo> list = BeanConverter.convert(guestNetworkEntityList, this::init);
         return list;
     }
 
     @Override
     public List<NetworkInfo> listNetworkByClusterId(int clusterId) {
 
-        List<NetworkEntity> networkEntityList = networkMapper.findByClusterId(clusterId);
-        List<NetworkInfo> list = BeanConverter.convert(networkEntityList, this::init);
+        List<GuestNetworkEntity> guestNetworkEntityList = networkMapper.findByClusterId(clusterId);
+        List<NetworkInfo> list = BeanConverter.convert(guestNetworkEntityList, this::init);
         return list;
     }
 
     @Override
     public NetworkInfo findNetworkById(int id) {
 
-        NetworkEntity entity = networkMapper.selectById(id);
+        GuestNetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
@@ -92,7 +92,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
             throw new CodeException(ErrorCode.CLUSTER_NOT_FOUND, "集群不存在");
         }
 
-        NetworkEntity entity = NetworkEntity.builder().networkName(name)
+        GuestNetworkEntity entity = GuestNetworkEntity.builder().networkName(name)
                 .clusterId(clusterId)
                 .networkManagerStartIp(managerStartIp)
                 .networkManagerEndIp(managerEndIp)
@@ -173,7 +173,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
 
     @Override
     public NetworkInfo startNetworkById(int id) {
-        NetworkEntity entity = networkMapper.selectById(id);
+        GuestNetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
@@ -184,7 +184,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
 
     @Override
     public NetworkInfo pauseNetworkById(int id) {
-        NetworkEntity entity = networkMapper.selectById(id);
+        GuestNetworkEntity entity = networkMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
@@ -216,7 +216,7 @@ public class NetworkServiceImpl extends AbstractService implements NetworkServic
                 .build();
     }
 
-    private NetworkInfo init(NetworkEntity entity) {
+    private NetworkInfo init(GuestNetworkEntity entity) {
         return NetworkInfo.builder().id(entity.getId())
                 .name(entity.getNetworkName())
                 .clusterId(entity.getClusterId())

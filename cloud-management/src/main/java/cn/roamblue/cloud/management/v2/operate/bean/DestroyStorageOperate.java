@@ -1,0 +1,17 @@
+package cn.roamblue.cloud.management.v2.operate.bean;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @author chenjun
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DestroyStorageOperate extends BaseOperateInfo {
+    private int id;
+}

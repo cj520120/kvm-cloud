@@ -3,7 +3,7 @@ package cn.roamblue.cloud.agent.operate.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.roamblue.cloud.agent.operate.StorageOperate;
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.StorageCreateRequest;
 import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
 import cn.roamblue.cloud.common.bean.StorageInfoRequest;
@@ -25,14 +25,14 @@ import java.util.Objects;
 @Component
 public class StorageOperateImpl implements StorageOperate {
     @Override
-    public StorageModel getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception {
+    public StorageInfo getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception {
         StoragePool storagePool = this.findStorage(connect, request.getName());
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在:" + request.getName());
         }
         storagePool.refresh(0);
         StoragePoolInfo storagePoolInfo = storagePool.getInfo();
-        return StorageModel.builder().name(request.getName())
+        return StorageInfo.builder().name(request.getName())
                 .state(storagePoolInfo.state.toString())
                 .capacity(storagePoolInfo.capacity)
                 .allocation(storagePoolInfo.allocation)
@@ -41,15 +41,15 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @Override
-    public List<StorageModel> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
-        List<StorageModel> list = new ArrayList<>();
+    public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
+        List<StorageInfo> list = new ArrayList<>();
         for (StorageInfoRequest request : batchRequest) {
             StoragePool storagePool = this.findStorage(connect, request.getName());
-            StorageModel model = null;
+            StorageInfo model = null;
             if (storagePool != null) {
                 storagePool.refresh(0);
                 StoragePoolInfo storagePoolInfo = storagePool.getInfo();
-                model = StorageModel.builder().name(request.getName())
+                model = StorageInfo.builder().name(request.getName())
                         .state(storagePoolInfo.state.toString())
                         .capacity(storagePoolInfo.capacity)
                         .allocation(storagePoolInfo.allocation)
@@ -63,7 +63,7 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @Override
-    public StorageModel create(Connect connect, StorageCreateRequest request) throws Exception {
+    public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
         if (!Objects.equals(Constant.StorageType.NFS, request.getType())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
         }
@@ -86,7 +86,7 @@ public class StorageOperateImpl implements StorageOperate {
         }
         storagePool.refresh(0);
         StoragePoolInfo storagePoolInfo = storagePool.getInfo();
-        return StorageModel.builder().name(request.getName())
+        return StorageInfo.builder().name(request.getName())
                 .state(storagePoolInfo.state.toString())
                 .capacity(storagePoolInfo.capacity)
                 .allocation(storagePoolInfo.allocation)

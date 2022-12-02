@@ -4,7 +4,7 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.CalculationSchemeInfo;
 import cn.roamblue.cloud.management.config.ApplicaionConfig;
-import cn.roamblue.cloud.management.data.entity.CalculationSchemeEntity;
+import cn.roamblue.cloud.management.data.entity.GuestSchemeEntity;
 import cn.roamblue.cloud.management.data.mapper.CalculationSchemeMapper;
 import cn.roamblue.cloud.management.data.mapper.VmMapper;
 import cn.roamblue.cloud.management.service.CalculationSchemeService;
@@ -31,7 +31,7 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
     private ApplicaionConfig config;
     @Override
     public List<CalculationSchemeInfo> listCalculationScheme() {
-        List<CalculationSchemeEntity> entityList = calculationSchemeMapper.selectAll();
+        List<GuestSchemeEntity> entityList = calculationSchemeMapper.selectAll();
         List<CalculationSchemeInfo> list = entityList.stream().map(this::init).collect(Collectors.toList());
         list.add(0, this.getDefaultCalculationScheme());
         Collections.sort(list, Comparator.comparingInt(CalculationSchemeInfo::getCpu).thenComparingLong(CalculationSchemeInfo::getMemory).thenComparingInt(CalculationSchemeInfo::getSpeed));
@@ -43,14 +43,14 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
         if (id <= 0) {
             return this.getDefaultCalculationScheme();
         }
-        CalculationSchemeEntity entity = this.calculationSchemeMapper.selectById(id);
+        GuestSchemeEntity entity = this.calculationSchemeMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.CALCULATION_SCHEME_NOT_FOUND, "计算方案不存在");
         }
         return this.init(entity);
     }
 
-    private CalculationSchemeInfo init(CalculationSchemeEntity entity) {
+    private CalculationSchemeInfo init(GuestSchemeEntity entity) {
         return CalculationSchemeInfo.builder().id(entity.getId())
                 .cpu(entity.getSchemeCpu())
                 .memory(entity.getSchemeMemory())
@@ -79,7 +79,7 @@ public class CalculationSchemeServiceImpl extends AbstractService implements Cal
 
     @Override
     public CalculationSchemeInfo createCalculationScheme(String name, int cpu, int speed, long memory,int socket,int core,int threads) {
-       CalculationSchemeEntity entity = CalculationSchemeEntity.builder()
+       GuestSchemeEntity entity = GuestSchemeEntity.builder()
                 .schemeName(name)
                 .schemeCpu(cpu)
                 .schemeCpuSpeed(speed)

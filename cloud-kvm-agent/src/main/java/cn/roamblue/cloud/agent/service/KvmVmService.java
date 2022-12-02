@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.service;
 
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.agent.VmSnapshotModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
@@ -16,7 +16,7 @@ public interface KvmVmService {
      *
      * @return
      */
-    List<VmInfoModel> listVm();
+    List<GuestInfo> listVm();
 
     /**
      * 获取VM监控指标
@@ -31,7 +31,7 @@ public interface KvmVmService {
      * @param name
      * @return
      */
-    VmInfoModel findByName(String name);
+    GuestInfo findByName(String name);
 
     /**
      * 获取虚拟机快照列表
@@ -109,7 +109,7 @@ public interface KvmVmService {
      * @param info
      * @return
      */
-    VmInfoModel start(VmModel info);
+    GuestInfo start(VmModel info);
 
     /**
      * 更新设备

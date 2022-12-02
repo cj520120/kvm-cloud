@@ -3,7 +3,7 @@ package cn.roamblue.cloud.management.service.impl;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.common.agent.*;
-import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.config.ApplicaionConfig;
@@ -30,49 +30,49 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     private ApplicaionConfig applicaionConfig;
 
     @Override
-    public ResultUtil<HostModel> getHostInfo(String uri) {
+    public ResultUtil<HostInfo> getHostInfo(String uri) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
-            ResultUtil<HostModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/host/info"), new TypeToken<ResultUtil<HostModel>>() {
+            ResultUtil<HostInfo> resultUtil = gson.fromJson(HttpUtil.get(uri + "/host/info"), new TypeToken<ResultUtil<HostInfo>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<List<VmInfoModel>> getInstance(String uri) {
+    public ResultUtil<List<GuestInfo>> getInstance(String uri) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
-            ResultUtil<List<VmInfoModel>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/list"), new TypeToken<ResultUtil<List<VmInfoModel>>>() {
+            ResultUtil<List<GuestInfo>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/list"), new TypeToken<ResultUtil<List<GuestInfo>>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<VmInfoModel> getInstance(String uri, String name) {
+    public ResultUtil<GuestInfo> getInstance(String uri, String name) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(4);
             map.put("name", name);
-            ResultUtil<VmInfoModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/info", map), new TypeToken<ResultUtil<VmInfoModel>>() {
+            ResultUtil<GuestInfo> resultUtil = gson.fromJson(HttpUtil.get(uri + "/vm/info", map), new TypeToken<ResultUtil<GuestInfo>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<List<StorageModel>> getHostStorage(String uri) {
+    public ResultUtil<List<StorageInfo>> getHostStorage(String uri) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
-            ResultUtil<List<StorageModel>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/storage/list"), new TypeToken<ResultUtil<List<StorageModel>>>() {
+            ResultUtil<List<StorageInfo>> resultUtil = gson.fromJson(HttpUtil.get(uri + "/storage/list"), new TypeToken<ResultUtil<List<StorageInfo>>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<StorageModel> addHostStorage(String storageType,String uri, String host, String source, String target) {
+    public ResultUtil<StorageInfo> addHostStorage(String storageType, String uri, String host, String source, String target) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(4);
@@ -82,14 +82,14 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
             map.put("path", source);
             map.put("target", StoragePathUtil.getMountPath(target));
 
-            ResultUtil<StorageModel> resultUtil = gson.fromJson(HttpUtil.post(uri + "/storage/create", map), new TypeToken<ResultUtil<StorageModel>>() {
+            ResultUtil<StorageInfo> resultUtil = gson.fromJson(HttpUtil.post(uri + "/storage/create", map), new TypeToken<ResultUtil<StorageInfo>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<VolumeModel> createVolume(String uri, String storage, String volume, String backingVolume, long size) {
+    public ResultUtil<VolumeInfo> createVolume(String uri, String storage, String volume, String backingVolume, long size) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(5);
@@ -102,21 +102,21 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
             } else {
                 map.put("backingVolume", "");
             }
-            ResultUtil<VolumeModel> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/create", map), new TypeToken<ResultUtil<VolumeModel>>() {
+            ResultUtil<VolumeInfo> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/create", map), new TypeToken<ResultUtil<VolumeInfo>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<VolumeModel> resize(String uri, String storageTarget, String volumeTarget, long size) {
+    public ResultUtil<VolumeInfo> resize(String uri, String storageTarget, String volumeTarget, long size) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(3);
             map.put("storageName", storageTarget);
             map.put("volumeName", volumeTarget);
             map.put("size", size);
-            ResultUtil<VolumeModel> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/resize", map), new TypeToken<ResultUtil<VolumeModel>>() {
+            ResultUtil<VolumeInfo> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/resize", map), new TypeToken<ResultUtil<VolumeInfo>>() {
             }.getType());
             return resultUtil;
         });
@@ -266,21 +266,21 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<VmInfoModel> startVm(String uri, VmModel kvm) {
+    public ResultUtil<GuestInfo> startVm(String uri, VmModel kvm) {
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
             Map<String, String> header = new HashMap<>(0);
             HttpRequest request = HttpUtil.createPost(uri + "/vm/start");
             request.addHeaders(header);
             request.body(gson.toJson(kvm));
-            ResultUtil<VmInfoModel> resultUtil = gson.fromJson(request.execute().body(), new TypeToken<ResultUtil<VmInfoModel>>() {
+            ResultUtil<GuestInfo> resultUtil = gson.fromJson(request.execute().body(), new TypeToken<ResultUtil<GuestInfo>>() {
             }.getType());
             return resultUtil;
         });
     }
 
     @Override
-    public ResultUtil<VolumeModel> cloneVolume(String uri, String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String targetPath) {
+    public ResultUtil<VolumeInfo> cloneVolume(String uri, String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String targetPath) {
 
         return this.call(() -> {
             Gson gson = GsonBuilderUtil.create();
@@ -290,7 +290,7 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
             map.put("targetStorage", targetStorage);
             map.put("targetVolume", targetVolume);
             map.put("targetPath", targetPath);
-            ResultUtil<VolumeModel> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/clone", map), new TypeToken<ResultUtil<VolumeModel>>() {
+            ResultUtil<VolumeInfo> resultUtil = gson.fromJson(HttpUtil.post(uri + "/volume/clone", map), new TypeToken<ResultUtil<VolumeInfo>>() {
             }.getType());
             return resultUtil;
         });
@@ -298,14 +298,14 @@ public class AgentServiceImpl extends AbstractService implements AgentService {
     }
 
     @Override
-    public ResultUtil<VolumeModel> getVolumeInfo(String uri, String storageName, String volumeName) {
+    public ResultUtil<VolumeInfo> getVolumeInfo(String uri, String storageName, String volumeName) {
         return this.call(() -> {
 
             Gson gson = GsonBuilderUtil.create();
             Map<String, Object> map = new HashMap<>(2);
             map.put("storageName", storageName);
             map.put("volumeName", volumeName);
-            ResultUtil<VolumeModel> resultUtil = gson.fromJson(HttpUtil.get(uri + "/volume/info", map), new TypeToken<ResultUtil<VolumeModel>>() {
+            ResultUtil<VolumeInfo> resultUtil = gson.fromJson(HttpUtil.get(uri + "/volume/info", map), new TypeToken<ResultUtil<VolumeInfo>>() {
             }.getType());
             return resultUtil;
         });

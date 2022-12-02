@@ -1,7 +1,7 @@
 package cn.roamblue.cloud.agent.controller;
 
 import cn.roamblue.cloud.agent.service.KvmHostService;
-import cn.roamblue.cloud.common.agent.HostModel;
+import cn.roamblue.cloud.common.bean.HostInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,7 @@ public class HostController {
      * @return
      */
     @GetMapping("/host/info")
-    public ResultUtil<HostModel> getHostInfo() {
-        return ResultUtil.<HostModel>builder().data(hostService.getHostInfo()).build();
+    public ResultUtil<HostInfo> getHostInfo() {
+        return ResultUtil.<HostInfo>builder().data(hostService.getHostInfo()).build();
     }
 }

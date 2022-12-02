@@ -5,4 +5,6 @@ package cn.roamblue.cloud.management.util;
  */
 public class StorageStatus {
     public static final String READY = "Ready";
+    public static final String INIT = "Init";
+    public static final String ERROR = "Error";
 }

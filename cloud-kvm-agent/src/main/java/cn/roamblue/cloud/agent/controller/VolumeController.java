@@ -2,7 +2,7 @@ package cn.roamblue.cloud.agent.controller;
 
 import cn.roamblue.cloud.agent.service.KvmVolumeService;
 import cn.roamblue.cloud.agent.service.KvmVolumeSnapshotService;
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.agent.VolumeSnapshotModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +35,8 @@ public class VolumeController {
      * @return
      */
     @GetMapping("/volume/list")
-    public ResultUtil<List<VolumeModel>> listVolume(@RequestParam("storageName") String storageName) {
-        return ResultUtil.<List<VolumeModel>>builder().data(volumeService.listVolume(storageName)).build();
+    public ResultUtil<List<VolumeInfo>> listVolume(@RequestParam("storageName") String storageName) {
+        return ResultUtil.<List<VolumeInfo>>builder().data(volumeService.listVolume(storageName)).build();
     }
 
     /**
@@ -47,10 +47,10 @@ public class VolumeController {
      * @return
      */
     @GetMapping("/volume/info")
-    public ResultUtil<VolumeModel> getVolume(
+    public ResultUtil<VolumeInfo> getVolume(
             @RequestParam("storageName") String storageName,
             @RequestParam("volumeName") String volumeName) {
-        return ResultUtil.<VolumeModel>builder().data(volumeService.getVolume(storageName, volumeName)).build();
+        return ResultUtil.<VolumeInfo>builder().data(volumeService.getVolume(storageName, volumeName)).build();
     }
 
     /**
@@ -77,11 +77,11 @@ public class VolumeController {
      * @return
      */
     @PostMapping("/volume/resize")
-    public ResultUtil<VolumeModel> resize(
+    public ResultUtil<VolumeInfo> resize(
             @RequestParam("storageName") String storageName,
             @RequestParam("volumeName") String volume,
             @RequestParam("size") long size) {
-        return ResultUtil.<VolumeModel>builder().data(volumeService.reSize(storageName, volume, size)).build();
+        return ResultUtil.<VolumeInfo>builder().data(volumeService.reSize(storageName, volume, size)).build();
     }
 
     /**
@@ -95,13 +95,13 @@ public class VolumeController {
      * @return
      */
     @PostMapping("/volume/create")
-    public ResultUtil<VolumeModel> createVolume(
+    public ResultUtil<VolumeInfo> createVolume(
             @RequestParam("storageName") String storageName,
             @RequestParam("volumeName") String volumeName,
             @RequestParam("path") String path,
             @RequestParam("capacity") long capacity,
             @RequestParam("backingVolume") String backingVolume) {
-        return ResultUtil.<VolumeModel>builder().data(volumeService.createVolume(storageName, volumeName, path, capacity, backingVolume)).build();
+        return ResultUtil.<VolumeInfo>builder().data(volumeService.createVolume(storageName, volumeName, path, capacity, backingVolume)).build();
     }
 
     /**
@@ -115,13 +115,13 @@ public class VolumeController {
      * @return
      */
     @PostMapping("/volume/clone")
-    public ResultUtil<VolumeModel> cloneVolume(
+    public ResultUtil<VolumeInfo> cloneVolume(
             @RequestParam("sourceStorage") String sourceStorage,
             @RequestParam("sourceVolume") String sourceVolume,
             @RequestParam("targetStorage") String targetStorage,
             @RequestParam("targetVolume") String targetVolume,
             @RequestParam("targetPath") String targetPath) {
-        return ResultUtil.<VolumeModel>builder().data(volumeService.cloneVolume(sourceStorage, sourceVolume, targetStorage, targetVolume, targetPath)).build();
+        return ResultUtil.<VolumeInfo>builder().data(volumeService.cloneVolume(sourceStorage, sourceVolume, targetStorage, targetVolume, targetPath)).build();
 
     }
 

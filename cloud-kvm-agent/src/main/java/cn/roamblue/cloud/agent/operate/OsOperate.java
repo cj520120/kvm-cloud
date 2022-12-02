@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.*;
 import org.libvirt.Connect;
 
@@ -19,9 +19,15 @@ public interface OsOperate {
      * @return
      * @throws Exception
      */
-    VmInfoModel getGustInfo(Connect connect, GuestInfoRequest request) throws Exception;
+    GuestInfo getGustInfo(Connect connect, GuestInfoRequest request) throws Exception;
 
-    List<VmInfoModel> listAllGuestInfo(Connect connect) throws Exception;
+    /**
+     * 获取所有客户机
+     * @param connect
+     * @return
+     * @throws Exception
+     */
+    List<GuestInfo> listAllGuestInfo(Connect connect) throws Exception;
 
     /**
      * 批量获取客户机信息
@@ -31,7 +37,7 @@ public interface OsOperate {
      * @return
      * @throws Exception
      */
-    List<VmInfoModel> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception;
+    List<GuestInfo> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception;
 
     /**
      * 启动
@@ -40,7 +46,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    VmInfoModel start(Connect connect, GuestStartRequest request) throws Exception;
+    GuestInfo start(Connect connect, GuestStartRequest request) throws Exception;
 
 
     /**

@@ -1,7 +1,7 @@
 package cn.roamblue.cloud.agent.service.impl;
 
 import cn.roamblue.cloud.agent.service.KvmHostService;
-import cn.roamblue.cloud.common.agent.HostModel;
+import cn.roamblue.cloud.common.bean.HostInfo;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 public class KvmHostServiceImpl extends AbstractKvmService implements KvmHostService {
 
     @Override
-    public HostModel getHostInfo() {
+    public HostInfo getHostInfo() {
 
-        return super.execute(connect -> HostModel.builder().hostName(connect.getHostName())
+        return super.execute(connect -> HostInfo.builder().hostName(connect.getHostName())
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(connect.nodeInfo().memory)

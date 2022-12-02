@@ -1,7 +1,7 @@
 package cn.roamblue.cloud.agent.controller;
 
 import cn.roamblue.cloud.agent.service.KvmStorageService;
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +27,8 @@ public class StorageController {
      * @return
      */
     @GetMapping("/storage/list")
-    public ResultUtil<List<StorageModel>> listStorage() {
-        return ResultUtil.<List<StorageModel>>builder().data(storageService.listStorage()).build();
+    public ResultUtil<List<StorageInfo>> listStorage() {
+        return ResultUtil.<List<StorageInfo>>builder().data(storageService.listStorage()).build();
     }
 
     /**
@@ -37,8 +37,8 @@ public class StorageController {
      * @param name 存储池名称
      * @return
      */
-    public ResultUtil<StorageModel> getStorageInfo(@RequestParam("name") String name) {
-        return ResultUtil.<StorageModel>builder().data(storageService.getStorageInfo(name)).build();
+    public ResultUtil<StorageInfo> getStorageInfo(@RequestParam("name") String name) {
+        return ResultUtil.<StorageInfo>builder().data(storageService.getStorageInfo(name)).build();
     }
 
     /**
@@ -63,8 +63,8 @@ public class StorageController {
      * @return
      */
     @PostMapping("/storage/create")
-    public ResultUtil<StorageModel> createStorage(@RequestParam("type") String type, @RequestParam("name") String name, @RequestParam("uri") String uri, @RequestParam("path") String path, @RequestParam("target") String target) {
-        return ResultUtil.<StorageModel>builder().data(storageService.createStorage(type,name, uri, path, target)).build();
+    public ResultUtil<StorageInfo> createStorage(@RequestParam("type") String type, @RequestParam("name") String name, @RequestParam("uri") String uri, @RequestParam("path") String path, @RequestParam("target") String target) {
+        return ResultUtil.<StorageInfo>builder().data(storageService.createStorage(type,name, uri, path, target)).build();
 
     }
 

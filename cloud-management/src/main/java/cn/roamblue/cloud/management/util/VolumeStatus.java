@@ -7,6 +7,7 @@ public class VolumeStatus {
     public static final String READY = "Ready";
     public static final String DESTROY = "Destroy";
     public static final String TEMPLATE = "Template";
+    public static final String ERROR = "Error";
 
     public static int getCompareValue(String status) {
         switch (status) {

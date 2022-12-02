@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.service;
 
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public interface KvmStorageService {
      *
      * @return
      */
-    List<StorageModel> listStorage();
+    List<StorageInfo> listStorage();
 
     /**
      * 根据ID获取存储池
@@ -21,7 +21,7 @@ public interface KvmStorageService {
      * @param name
      * @return
      */
-    StorageModel getStorageInfo(String name);
+    StorageInfo getStorageInfo(String name);
 
     /**
      * 销毁存储池
@@ -40,5 +40,5 @@ public interface KvmStorageService {
      * @param target
      * @return
      */
-    StorageModel createStorage(String type,String name, String uri, String path, String target);
+    StorageInfo createStorage(String type, String name, String uri, String path, String target);
 }

@@ -2,7 +2,7 @@ package cn.roamblue.cloud.agent.service.impl;
 
 import cn.roamblue.cloud.agent.service.KvmVmService;
 import cn.roamblue.cloud.agent.util.XmlUtil;
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.agent.VmSnapshotModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
@@ -30,10 +30,10 @@ import java.util.*;
 @Service
 public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService {
     @Override
-    public List<VmInfoModel> listVm() {
+    public List<GuestInfo> listVm() {
         return super.execute(connect -> {
             int[] ids = connect.listDomains();
-            List<VmInfoModel> list = new ArrayList<>(ids.length);
+            List<GuestInfo> list = new ArrayList<>(ids.length);
             for (int id : ids) {
                 Domain domain = connect.domainLookupByID(id);
                 if (domain != null) {
@@ -146,7 +146,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     }
 
     @Override
-    public VmInfoModel findByName(String name) {
+    public GuestInfo findByName(String name) {
         return super.execute(connect -> {
             try {
                 Domain domain = connect.domainLookupByName(name);
@@ -293,11 +293,10 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
         }
     }
 
-    private VmInfoModel initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
+    private GuestInfo initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
         DomainInfo domainInfo = domain.getInfo();
-        VmInfoModel info = VmInfoModel.builder().name(domain.getName())
+        GuestInfo info = GuestInfo.builder().name(domain.getName())
                 .uuid(domain.getUUIDString())
-                .state(domainInfo.state)
                 .maxMem(domainInfo.maxMem)
                 .memory(domainInfo.memory)
                 .cpuTime(domainInfo.cpuTime)
@@ -420,7 +419,7 @@ public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService
     }
 
     @Override
-    public VmInfoModel start(VmModel info) {
+    public GuestInfo start(VmModel info) {
         return super.execute(connect -> {
             try {
                 Domain domain = connect.domainLookupByName(info.getName());

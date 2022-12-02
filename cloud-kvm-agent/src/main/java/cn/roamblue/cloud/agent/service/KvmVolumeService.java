@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.service;
 
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface KvmVolumeService {
      * @param storageName
      * @return
      */
-    List<VolumeModel> listVolume(String storageName);
+    List<VolumeInfo> listVolume(String storageName);
 
     /**
      * 获取磁盘信息
@@ -23,7 +23,7 @@ public interface KvmVolumeService {
      * @param volumeName
      * @return
      */
-    VolumeModel getVolume(String storageName, String volumeName);
+    VolumeInfo getVolume(String storageName, String volumeName);
 
     /**
      * 磁盘扩容
@@ -33,7 +33,7 @@ public interface KvmVolumeService {
      * @param size
      * @return
      */
-    VolumeModel reSize(String storageName, String volumeName, long size);
+    VolumeInfo reSize(String storageName, String volumeName, long size);
 
     /**
      * 销毁磁盘
@@ -53,7 +53,7 @@ public interface KvmVolumeService {
      * @param backingStore
      * @return
      */
-    VolumeModel createVolume(String storage, String volume, String path, long capacityGb, String backingStore);
+    VolumeInfo createVolume(String storage, String volume, String path, long capacityGb, String backingStore);
 
     /**
      * 克隆磁盘
@@ -65,7 +65,7 @@ public interface KvmVolumeService {
      * @param path
      * @return
      */
-    VolumeModel cloneVolume(String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String path);
+    VolumeInfo cloneVolume(String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String path);
 
 
 }

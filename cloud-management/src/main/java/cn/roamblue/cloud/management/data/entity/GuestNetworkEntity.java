@@ -19,7 +19,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @TableName("tbl_network_info")
-public class NetworkEntity {
+public class GuestNetworkEntity {
 
     @TableId(type = IdType.AUTO)
     @TableField("id")

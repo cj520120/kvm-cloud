@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.common.agent;
+package cn.roamblue.cloud.common.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StorageModel implements Serializable {
+public class StorageInfo implements Serializable {
     /**
 	 * 
 	 */

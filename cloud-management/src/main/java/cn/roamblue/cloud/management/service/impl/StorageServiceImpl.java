@@ -1,11 +1,10 @@
 package cn.roamblue.cloud.management.service.impl;
 
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
-import cn.roamblue.cloud.management.bean.StorageInfo;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
@@ -46,39 +45,39 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
     private AgentService agentService;
 
     @Override
-    public List<StorageInfo> listStorage() {
+    public List<cn.roamblue.cloud.management.bean.StorageInfo> listStorage() {
 
         List<StorageEntity> storageEntityList = storageMapper.selectAll();
-        List<StorageInfo> list = BeanConverter.convert(storageEntityList, this::init);
+        List<cn.roamblue.cloud.management.bean.StorageInfo> list = BeanConverter.convert(storageEntityList, this::init);
         return list;
     }
 
     @Override
-    public List<StorageInfo> search(int clusterId) {
+    public List<cn.roamblue.cloud.management.bean.StorageInfo> search(int clusterId) {
 
         QueryWrapper<StorageEntity> wrapper = new QueryWrapper<>();
         if (clusterId > 0) {
             wrapper.eq("cluster_id", clusterId);
         }
         List<StorageEntity> storageEntityList = storageMapper.selectList(wrapper);
-        List<StorageInfo> list = BeanConverter.convert(storageEntityList, this::init);
+        List<cn.roamblue.cloud.management.bean.StorageInfo> list = BeanConverter.convert(storageEntityList, this::init);
         return list;
     }
 
 
     @Override
-    public StorageInfo findStorageById(int id) {
+    public cn.roamblue.cloud.management.bean.StorageInfo findStorageById(int id) {
 
         StorageEntity entity = storageMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储不存在");
         }
-        StorageInfo info = init(entity);
+        cn.roamblue.cloud.management.bean.StorageInfo info = init(entity);
         return info;
     }
 
     @Override
-    public StorageInfo createStorage(int clusterId, String name, String uri, String source) {
+    public cn.roamblue.cloud.management.bean.StorageInfo createStorage(int clusterId, String name, String uri, String source) {
 
         ClusterEntity clusterEntity = this.clusterMapper.selectById(clusterId);
         if (clusterEntity == null) {
@@ -101,17 +100,17 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
             if (!hostInfo.getHostStatus().equals(HostStatus.READY)) {
                 continue;
             }
-            ResultUtil<StorageModel> addStorageResultUtil = this.agentService.addHostStorage(Constant.StorageType.NFS,hostInfo.getHostUri(), entity.getStorageHost(), entity.getStorageSource(), entity.getStorageTarget());
+            ResultUtil<StorageInfo> addStorageResultUtil = this.agentService.addHostStorage(Constant.StorageType.NFS,hostInfo.getHostUri(), entity.getStorageHost(), entity.getStorageSource(), entity.getStorageTarget());
             if (addStorageResultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(addStorageResultUtil.getCode(), addStorageResultUtil.getMessage());
             }
-            StorageModel cloudStorageInfo = addStorageResultUtil.getData();
+            StorageInfo cloudStorageInfo = addStorageResultUtil.getData();
             entity.setStorageAllocation(cloudStorageInfo.getAllocation());
             entity.setStorageCapacity(cloudStorageInfo.getCapacity());
             entity.setStorageAvailable(cloudStorageInfo.getAvailable());
         }
         storageMapper.insert(entity);
-        StorageInfo info = init(entity);
+        cn.roamblue.cloud.management.bean.StorageInfo info = init(entity);
         log.info("create storage success.storage={}", info);
         return info;
     }
@@ -145,8 +144,8 @@ public class StorageServiceImpl extends AbstractService implements StorageServic
     }
 
 
-    private StorageInfo init(StorageEntity entity) {
-        return StorageInfo.builder()
+    private cn.roamblue.cloud.management.bean.StorageInfo init(StorageEntity entity) {
+        return cn.roamblue.cloud.management.bean.StorageInfo.builder()
                 .id(entity.getId())
                 .name(entity.getStorageName())
                 .clusterId(entity.getClusterId())

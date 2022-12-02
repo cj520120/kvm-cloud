@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.management.service.impl;
 
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -234,12 +234,12 @@ public abstract class AbstractVmService extends AbstractService implements VmSer
             kvm.setMemory(VmModel.Memory.builder().memory(calculationSchemeInfo.getMemory()).build());
             kvm.setPassword(vm.getVncPassword());
             this.initDeviceInfo(vm, kvm, calculationSchemeInfo);
-            ResultUtil<VmInfoModel> resultUtil = this.agentService.startVm(hostInfo.getHostUri(), kvm);
+            ResultUtil<GuestInfo> resultUtil = this.agentService.startVm(hostInfo.getHostUri(), kvm);
             if (resultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
             }
             try {
-                VmInfoModel response = resultUtil.getData();
+                GuestInfo response = resultUtil.getData();
                 vm.setVncPort(response.getVnc());
 
                 this.onAfterStart(vm, hostInfo);

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.VmEntity;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
@@ -49,11 +49,11 @@ public class VmCheckTask extends AbstractTask {
 		List<HostEntity> list = hostMapper.selectAll();
 		for (HostEntity hostInfo : list) {
 			log.info("开始检测主机VM列表,id={},uri={}",hostInfo.getId(),hostInfo.getHostUri());
-			List<VmInfoModel> vmInfoList = agentService.getInstance(hostInfo.getHostUri()).getData();
+			List<GuestInfo> vmInfoList = agentService.getInstance(hostInfo.getHostUri()).getData();
 			if (vmInfoList == null || vmInfoList.isEmpty()) {
 				continue;
 			}
-			for (VmInfoModel vmInfo : vmInfoList) {
+			for (GuestInfo vmInfo : vmInfoList) {
 				VmEntity vm = vmMapper.findByName(vmInfo.getName());
 				if (vm == null) {
 					agentService.destroyVm(hostInfo.getHostUri(), vmInfo.getName());

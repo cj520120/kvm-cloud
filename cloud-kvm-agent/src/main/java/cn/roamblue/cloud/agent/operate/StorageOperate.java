@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.StorageCreateRequest;
 import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
 import cn.roamblue.cloud.common.bean.StorageInfoRequest;
@@ -19,7 +19,7 @@ public interface StorageOperate {
      * @return
      * @throws Exception
      */
-    StorageModel getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception;
+    StorageInfo getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception;
 
     /**
      * 批量获取存储池信息
@@ -28,7 +28,7 @@ public interface StorageOperate {
      * @return
      * @throws Exception
      */
-    List<StorageModel> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception;
+    List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception;
 
     /**
      * 初始化存储池信息
@@ -38,7 +38,7 @@ public interface StorageOperate {
      * @return
      * @throws Exception
      */
-    StorageModel create(Connect connect, StorageCreateRequest request) throws Exception;
+    StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception;
 
     /**
      * 销毁存储池

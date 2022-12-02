@@ -7,7 +7,7 @@ import cn.roamblue.cloud.management.bean.ClusterInfo;
 import cn.roamblue.cloud.management.bean.NetworkInfo;
 import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
-import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.VmEntity;
 import cn.roamblue.cloud.management.service.NetworkAllocateService;
 import cn.roamblue.cloud.management.service.RouteService;
@@ -54,7 +54,7 @@ public class RouteServiceImpl extends AbstractSystemVmService implements RouteSe
     }
 
     @Override
-    protected String getVmDescription(ClusterInfo clusterInfo, NetworkEntity networkInfo) {
+    protected String getVmDescription(ClusterInfo clusterInfo, GuestNetworkEntity networkInfo) {
         return "Route VM";
     }
 

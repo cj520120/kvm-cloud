@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.*;
 import org.libvirt.Connect;
 
@@ -17,7 +17,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel getInfo(Connect connect, VolumeInfoRequest request) throws Exception;
+    VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception;
 
     /**
      * 批量获取磁盘信息
@@ -26,7 +26,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    List<VolumeModel> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception;
+    List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception;
 
     /**
      * 创建磁盘
@@ -36,7 +36,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel create(Connect connect, VolumeCreateRequest request) throws Exception;
+    VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception;
 
     /**
      * 删除磁盘
@@ -52,7 +52,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel clone(Connect connect, VolumeCloneRequest request) throws Exception;
+    VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception;
     /**
      * 扩容磁盘
      * @param connect
@@ -60,7 +60,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel resize(Connect connect, VolumeResizeRequest request) throws Exception;
+    VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception;
     /**
      * 创建磁盘快照
      * @param connect
@@ -68,7 +68,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception;
+    VolumeInfo snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception;
     /**
      * 创建磁盘模版
      * @param connect
@@ -76,7 +76,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel template(Connect connect, VolumeCreateTemplateRequest request) throws Exception;
+    VolumeInfo template(Connect connect, VolumeCreateTemplateRequest request) throws Exception;
     /**
      * 下载磁盘
      * @param connect
@@ -84,7 +84,7 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel download(Connect connect, VolumeDownloadRequest request) throws Exception;
+    VolumeInfo download(Connect connect, VolumeDownloadRequest request) throws Exception;
     /**
      * 迁移磁盘
      * @param connect
@@ -92,5 +92,5 @@ public interface VolumeOperate {
      * @return
      * @throws Exception
      */
-    VolumeModel migrate(Connect connect, VolumeMigrateRequest request) throws Exception;
+    VolumeInfo migrate(Connect connect, VolumeMigrateRequest request) throws Exception;
 }

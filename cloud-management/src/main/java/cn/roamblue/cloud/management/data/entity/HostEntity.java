@@ -44,4 +44,5 @@ public class HostEntity {
     private Integer hostAllocationCpu;
     @TableField("create_time")
     private Date createTime;
+
 }

@@ -1,13 +1,12 @@
 package cn.roamblue.cloud.management.service.impl;
 
-import cn.roamblue.cloud.common.agent.HostModel;
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.HostInfo;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.CalculationSchemeInfo;
-import cn.roamblue.cloud.management.bean.HostInfo;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
@@ -91,16 +90,16 @@ public class HostServiceImpl extends AbstractService implements HostService {
     }
 
     @Override
-    public List<HostInfo> listHost() {
+    public List<cn.roamblue.cloud.management.bean.HostInfo> listHost() {
 
         List<HostEntity> hostEntityList = hostMapper.selectAll();
         hostEntityList.forEach(this::refreshHost);
-        List<HostInfo> list = BeanConverter.convert(hostEntityList, this::init);
+        List<cn.roamblue.cloud.management.bean.HostInfo> list = BeanConverter.convert(hostEntityList, this::init);
         return list;
     }
 
     @Override
-    public List<HostInfo> search(int clusterId) {
+    public List<cn.roamblue.cloud.management.bean.HostInfo> search(int clusterId) {
 
         QueryWrapper<HostEntity> wrapper = new QueryWrapper<>();
         if (clusterId > 0) {
@@ -109,39 +108,39 @@ public class HostServiceImpl extends AbstractService implements HostService {
         List<HostEntity> hostEntityList = hostMapper.selectList(wrapper);
 
         hostEntityList.forEach(this::refreshHost);
-        List<HostInfo> list = BeanConverter.convert(hostEntityList, this::init);
+        List<cn.roamblue.cloud.management.bean.HostInfo> list = BeanConverter.convert(hostEntityList, this::init);
         return list;
     }
 
 
     @Override
-    public HostInfo findHostById(int id) {
+    public cn.roamblue.cloud.management.bean.HostInfo findHostById(int id) {
 
         HostEntity entity = hostMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
         refreshHost(entity);
-        HostInfo info = init(entity);
+        cn.roamblue.cloud.management.bean.HostInfo info = init(entity);
         return info;
     }
 
     @Override
-    public HostInfo createHost(int clusterId, String name, String ip, String uri) {
+    public cn.roamblue.cloud.management.bean.HostInfo createHost(int clusterId, String name, String ip, String uri) {
 
         QueryWrapper<HostEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("host_ip", ip);
         if (hostMapper.selectCount(queryWrapper) > 0) {
             throw new CodeException(ErrorCode.HOST_EXISTS, "创建主机失败，主机信息已经存在");
         }
-        ResultUtil<HostModel> hostInfoResultUtil = this.agentService.getHostInfo(uri);
+        ResultUtil<HostInfo> hostInfoResultUtil = this.agentService.getHostInfo(uri);
         if (hostInfoResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(hostInfoResultUtil.getCode(), hostInfoResultUtil.getMessage());
         }
-        HostModel kvmHostInfo = hostInfoResultUtil.getData();
+        HostInfo kvmHostInfo = hostInfoResultUtil.getData();
         List<StorageEntity> storageList = this.storageMapper.findByClusterId(clusterId);
         for (StorageEntity storageEntity : storageList) {
-            ResultUtil<StorageModel> resultUtil = this.agentService.addHostStorage(Constant.StorageType.NFS,uri, storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
+            ResultUtil<StorageInfo> resultUtil = this.agentService.addHostStorage(Constant.StorageType.NFS,uri, storageEntity.getStorageHost(), storageEntity.getStorageSource(), storageEntity.getStorageTarget());
             if (resultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
             }
@@ -159,13 +158,13 @@ public class HostServiceImpl extends AbstractService implements HostService {
                 .createTime(new Date())
                 .build();
         hostMapper.insert(entity);
-        HostInfo hostInfo = init(entity);
+        cn.roamblue.cloud.management.bean.HostInfo hostInfo = init(entity);
         log.error("create host success,host={}", name, uri, hostInfo);
         return hostInfo;
     }
 
     @Override
-    public HostInfo updateHostStatusById(int id, String status) {
+    public cn.roamblue.cloud.management.bean.HostInfo updateHostStatusById(int id, String status) {
         HostEntity entity = hostMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
@@ -214,8 +213,8 @@ public class HostServiceImpl extends AbstractService implements HostService {
     }
 
 
-    private HostInfo init(HostEntity entity) {
-        HostInfo info = HostInfo.builder()
+    private cn.roamblue.cloud.management.bean.HostInfo init(HostEntity entity) {
+        cn.roamblue.cloud.management.bean.HostInfo info = cn.roamblue.cloud.management.bean.HostInfo.builder()
                 .id(entity.getId())
                 .name(entity.getHostName())
                 .uri(entity.getHostUri())

@@ -19,7 +19,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @TableName("tbl_calculation_scheme")
-public class CalculationSchemeEntity {
+public class GuestSchemeEntity {
     @TableId(type = IdType.AUTO)
     @TableField("id")
     private Integer id;

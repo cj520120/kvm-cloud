@@ -1,11 +1,10 @@
 package cn.roamblue.cloud.management.service.impl;
 
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.TemplateInfo;
-import cn.roamblue.cloud.management.bean.VolumeInfo;
 import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
@@ -48,7 +47,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
     private TemplateRefMapper templateRefRepository;
 
 
-    private void sort(List<VolumeInfo> list) {
+    private void sort(List<cn.roamblue.cloud.management.bean.VolumeInfo> list) {
         Collections.sort(list, (o1, o2) -> {
             int val1 = VolumeStatus.getCompareValue(o1.getStatus());
             int val2 = VolumeStatus.getCompareValue(o2.getStatus());
@@ -64,15 +63,15 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
     }
 
     @Override
-    public List<VolumeInfo> listVolume() {
+    public List<cn.roamblue.cloud.management.bean.VolumeInfo> listVolume() {
         List<VolumeEntity> entityList = volumeMapper.selectAll();
-        List<VolumeInfo> list = BeanConverter.convert(entityList, this::init);
+        List<cn.roamblue.cloud.management.bean.VolumeInfo> list = BeanConverter.convert(entityList, this::init);
         this.sort(list);
         return list;
     }
 
     @Override
-    public List<VolumeInfo> search(int clusterId, int storageId, int vmId) {
+    public List<cn.roamblue.cloud.management.bean.VolumeInfo> search(int clusterId, int storageId, int vmId) {
 
         QueryWrapper<VolumeEntity> wrapper = new QueryWrapper<>();
         if (clusterId > 0) {
@@ -86,34 +85,34 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         }
         wrapper.orderBy(true, false, "vm_device", "vm_id");
         List<VolumeEntity> entityList = volumeMapper.selectList(wrapper);
-        List<VolumeInfo> list = BeanConverter.convert(entityList, this::init);
+        List<cn.roamblue.cloud.management.bean.VolumeInfo> list = BeanConverter.convert(entityList, this::init);
         this.sort(list);
         return list;
     }
 
 
     @Override
-    public List<VolumeInfo> listVolumeByVmId(int vmId) {
+    public List<cn.roamblue.cloud.management.bean.VolumeInfo> listVolumeByVmId(int vmId) {
 
         List<VolumeEntity> entityList = volumeMapper.findByVmId(vmId);
-        List<VolumeInfo> list = BeanConverter.convert(entityList, this::init);
+        List<cn.roamblue.cloud.management.bean.VolumeInfo> list = BeanConverter.convert(entityList, this::init);
         return list;
     }
 
 
     @Override
-    public VolumeInfo findVolumeById(int id) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo findVolumeById(int id) {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘卷不存在");
         }
-        VolumeInfo info = init(entity);
+        cn.roamblue.cloud.management.bean.VolumeInfo info = init(entity);
         return info;
     }
 
     @Override
-    public VolumeInfo createVolume(int clusterId, String parentVolumePath, int storageId, String name, long size) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo createVolume(int clusterId, String parentVolumePath, int storageId, String name, long size) {
 
         ClusterEntity clusterEntity = this.clusterMapper.selectById(clusterId);
         if (clusterEntity == null) {
@@ -123,11 +122,11 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
 
         HostEntity host = this.allocateService.allocateHost(clusterId, 0, 0, 0);
         String target = UUID.randomUUID().toString().replace("-", "");
-        ResultUtil<VolumeModel> createResultUtil = this.agentService.createVolume(host.getHostUri(), storageEntity.getStorageTarget(), target, parentVolumePath, size);
+        ResultUtil<VolumeInfo> createResultUtil = this.agentService.createVolume(host.getHostUri(), storageEntity.getStorageTarget(), target, parentVolumePath, size);
         if (createResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(createResultUtil.getCode(), createResultUtil.getMessage());
         }
-        VolumeModel kvmVolumeInfo = createResultUtil.getData();
+        VolumeInfo kvmVolumeInfo = createResultUtil.getData();
         VolumeEntity volumeEntity = VolumeEntity.builder()
                 .clusterId(clusterId)
                 .storageId(storageEntity.getId())
@@ -144,13 +143,13 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         volumeEntity.setVolumeCapacity(kvmVolumeInfo.getCapacity());
         volumeEntity.setVolumeStatus(VolumeStatus.READY);
         volumeMapper.insert(volumeEntity);
-        VolumeInfo info = init(volumeEntity);
+        cn.roamblue.cloud.management.bean.VolumeInfo info = init(volumeEntity);
         log.info("create volume success:info={}", kvmVolumeInfo);
         return info;
     }
 
     @Override
-    public VolumeInfo attachVm(int volumeId, int vmId) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo attachVm(int volumeId, int vmId) {
 
         VolumeEntity entity = volumeMapper.selectById(volumeId);
         if (entity == null) {
@@ -176,7 +175,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
     }
 
     @Override
-    public VolumeInfo detachVm(int volumeId, int vmId) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo detachVm(int volumeId, int vmId) {
 
         VolumeEntity entity = volumeMapper.selectById(volumeId);
         if (entity == null) {
@@ -197,7 +196,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
     }
 
     @Override
-    public VolumeInfo resize(int id, long size) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo resize(int id, long size) {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
@@ -216,11 +215,11 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         size = entity.getVolumeCapacity() + size * 1024 * 1024 * 1024;
         HostEntity hostEntity = this.allocateService.allocateHost(entity.getClusterId(), 0, 0, 0);
 
-        ResultUtil<VolumeModel> resizeResultUtil = this.agentService.resize(hostEntity.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), size);
+        ResultUtil<VolumeInfo> resizeResultUtil = this.agentService.resize(hostEntity.getHostUri(), storage.getStorageTarget(), entity.getVolumeTarget(), size);
         if (resizeResultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resizeResultUtil.getCode(), resizeResultUtil.getMessage());
         }
-        VolumeModel kvmVolumeInfo = resizeResultUtil.getData();
+        VolumeInfo kvmVolumeInfo = resizeResultUtil.getData();
         entity.setVolumeAllocation(kvmVolumeInfo.getAllocation());
         entity.setVolumeCapacity(kvmVolumeInfo.getCapacity());
         volumeMapper.updateById(entity);
@@ -229,7 +228,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
     }
 
     @Override
-    public VolumeInfo resume(int id) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo resume(int id) {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
@@ -284,11 +283,11 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
             String targetVolume = UUID.randomUUID().toString().replace("-", "");
             String targetPath = StoragePathUtil.getVolumePath(targetStorage, targetVolume);
 
-            ResultUtil<VolumeModel> cloneResultUtil = this.agentService.cloneVolume(hostEntity.getHostUri(), sourceStorage, sourceVolume, targetStorage, targetVolume, targetPath);
+            ResultUtil<VolumeInfo> cloneResultUtil = this.agentService.cloneVolume(hostEntity.getHostUri(), sourceStorage, sourceVolume, targetStorage, targetVolume, targetPath);
             if (cloneResultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(cloneResultUtil.getCode(), cloneResultUtil.getMessage());
             }
-            VolumeModel cloudVolumeInfo = cloneResultUtil.getData();
+            VolumeInfo cloudVolumeInfo = cloneResultUtil.getData();
             TemplateEntity templateEntity = TemplateEntity.builder()
                     .clusterId(entity.getClusterId()).templateName(name)
                     .templateSize(cloudVolumeInfo.getAllocation())
@@ -326,7 +325,7 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
     }
 
     @Override
-    public VolumeInfo destroyVolumeById(int id) {
+    public cn.roamblue.cloud.management.bean.VolumeInfo destroyVolumeById(int id) {
 
         VolumeEntity entity = volumeMapper.selectById(id);
         if (entity == null) {
@@ -417,8 +416,8 @@ public class VolumeServiceImpl extends AbstractService implements VolumeService 
         }
     }
 
-    private VolumeInfo init(VolumeEntity entity) {
-        return VolumeInfo.builder()
+    private cn.roamblue.cloud.management.bean.VolumeInfo init(VolumeEntity entity) {
+        return cn.roamblue.cloud.management.bean.VolumeInfo.builder()
                 .id(entity.getId())
                 .clusterId(entity.getClusterId())
                 .storageId(entity.getStorageId())

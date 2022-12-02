@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class OsMemory {
-    private int memory;
+    private long memory;
 }

@@ -1,10 +1,9 @@
-package cn.roamblue.cloud.common.agent;
+package cn.roamblue.cloud.common.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.libvirt.DomainInfo;
 
 import java.io.Serializable;
 
@@ -17,7 +16,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VmInfoModel implements Serializable {
+public class GuestInfo implements Serializable {
     /**
 	 * 
 	 */
@@ -54,8 +53,4 @@ public class VmInfoModel implements Serializable {
      * VNC密码
      */
     private String password;
-    /**
-     * 虚拟机状态
-     */
-    private DomainInfo.DomainState state;
 }

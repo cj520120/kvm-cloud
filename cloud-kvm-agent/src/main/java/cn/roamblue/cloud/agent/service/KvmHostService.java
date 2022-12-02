@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.agent.service;
 
-import cn.roamblue.cloud.common.agent.HostModel;
+import cn.roamblue.cloud.common.bean.HostInfo;
 
 /**
  * @author chenjun
@@ -11,5 +11,5 @@ public interface KvmHostService {
      *
      * @return
      */
-    HostModel getHostInfo();
+    HostInfo getHostInfo();
 }

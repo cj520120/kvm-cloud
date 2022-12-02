@@ -1,7 +1,7 @@
 package cn.roamblue.cloud.management.service;
 
 import cn.roamblue.cloud.common.agent.*;
-import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public interface AgentService {
      * @param uri
      * @return
      */
-    ResultUtil<List<StorageModel>> getHostStorage(String uri);
+    ResultUtil<List<StorageInfo>> getHostStorage(String uri);
 
     /**
      * 获取主机信息
@@ -25,7 +25,7 @@ public interface AgentService {
      * @param uri
      * @return
      */
-    ResultUtil<HostModel> getHostInfo(String uri);
+    ResultUtil<HostInfo> getHostInfo(String uri);
 
     /**
      * 获取主机所有实例
@@ -33,7 +33,7 @@ public interface AgentService {
      * @param uri
      * @return
      */
-    ResultUtil<List<VmInfoModel>> getInstance(String uri);
+    ResultUtil<List<GuestInfo>> getInstance(String uri);
 
     /**
      * 获取主机实例信息
@@ -42,7 +42,7 @@ public interface AgentService {
      * @param name
      * @return
      */
-    ResultUtil<VmInfoModel> getInstance(String uri, String name);
+    ResultUtil<GuestInfo> getInstance(String uri, String name);
 
     /**
      * 添加主机存储池
@@ -54,7 +54,7 @@ public interface AgentService {
      * @param target
      * @return
      */
-    ResultUtil<StorageModel> addHostStorage(String storageType,String uri, String host, String source, String target);
+    ResultUtil<StorageInfo> addHostStorage(String storageType, String uri, String host, String source, String target);
 
     /**
      * 创建磁盘卷
@@ -66,7 +66,7 @@ public interface AgentService {
      * @param size
      * @return
      */
-    ResultUtil<VolumeModel> createVolume(String uri, String storage, String volume, String backingVolume, long size);
+    ResultUtil<VolumeInfo> createVolume(String uri, String storage, String volume, String backingVolume, long size);
 
     /**
      * 调整磁盘卷大小
@@ -77,7 +77,7 @@ public interface AgentService {
      * @param size
      * @return
      */
-    ResultUtil<VolumeModel> resize(String uri, String storageTarget, String volumeTarget, long size);
+    ResultUtil<VolumeInfo> resize(String uri, String storageTarget, String volumeTarget, long size);
 
     /**
      * 销毁存储卷
@@ -185,7 +185,7 @@ public interface AgentService {
      * @param kvm
      * @return
      */
-    ResultUtil<VmInfoModel> startVm(String uriInfo, VmModel kvm);
+    ResultUtil<GuestInfo> startVm(String uriInfo, VmModel kvm);
 
     /**
      * 获取磁盘卷信息
@@ -195,7 +195,7 @@ public interface AgentService {
      * @param volumeName
      * @return
      */
-    ResultUtil<VolumeModel> getVolumeInfo(String uri, String storageName, String volumeName);
+    ResultUtil<VolumeInfo> getVolumeInfo(String uri, String storageName, String volumeName);
 
     /**
      * 磁盘卷克隆
@@ -208,7 +208,7 @@ public interface AgentService {
      * @param path
      * @return
      */
-    ResultUtil<VolumeModel> cloneVolume(String uri, String sourceStorage, String sourceVolume, String targetStorage, String targetStorage1, String path);
+    ResultUtil<VolumeInfo> cloneVolume(String uri, String sourceStorage, String sourceVolume, String targetStorage, String targetStorage1, String path);
 
     /**
      * 获取实例监控信息

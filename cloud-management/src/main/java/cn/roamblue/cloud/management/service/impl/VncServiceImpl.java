@@ -50,7 +50,7 @@ public class VncServiceImpl extends AbstractSystemVmService implements VncServic
     }
 
     @Override
-    protected String getVmDescription(ClusterInfo clusterInfo, NetworkEntity networkInfo) {
+    protected String getVmDescription(ClusterInfo clusterInfo, GuestNetworkEntity networkInfo) {
         return "Console VM";
     }
 

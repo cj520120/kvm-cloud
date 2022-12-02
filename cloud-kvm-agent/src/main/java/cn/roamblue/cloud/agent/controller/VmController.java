@@ -3,7 +3,7 @@ package cn.roamblue.cloud.agent.controller;
 import cn.roamblue.cloud.agent.service.CommmandService;
 import cn.roamblue.cloud.agent.service.KvmVmService;
 import cn.roamblue.cloud.agent.util.XmlUtil;
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.agent.VmModel;
 import cn.roamblue.cloud.common.agent.VmSnapshotModel;
 import cn.roamblue.cloud.common.agent.VmStaticsModel;
@@ -36,8 +36,8 @@ public class VmController {
      * @return
      */
     @GetMapping("/vm/list")
-    public ResultUtil<List<VmInfoModel>> listVm() {
-        return ResultUtil.<List<VmInfoModel>>builder().data(vmService.listVm()).build();
+    public ResultUtil<List<GuestInfo>> listVm() {
+        return ResultUtil.<List<GuestInfo>>builder().data(vmService.listVm()).build();
     }
 
     /**
@@ -47,8 +47,8 @@ public class VmController {
      * @return
      */
     @GetMapping("/vm/info")
-    public ResultUtil<VmInfoModel> getVmState(@RequestParam("name") String name) {
-        return ResultUtil.<VmInfoModel>builder().data(vmService.findByName(name)).build();
+    public ResultUtil<GuestInfo> getVmState(@RequestParam("name") String name) {
+        return ResultUtil.<GuestInfo>builder().data(vmService.findByName(name)).build();
     }
 
     /**
@@ -150,8 +150,8 @@ public class VmController {
      * @return
      */
     @PostMapping("/vm/start")
-    public ResultUtil<VmInfoModel> start(@RequestBody VmModel info) {
-        return ResultUtil.<VmInfoModel>builder().data(vmService.start(info)).build();
+    public ResultUtil<GuestInfo> start(@RequestBody VmModel info) {
+        return ResultUtil.<GuestInfo>builder().data(vmService.start(info)).build();
     }
 
     /**

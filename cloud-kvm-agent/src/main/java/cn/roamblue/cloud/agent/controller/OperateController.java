@@ -18,4 +18,5 @@ public class OperateController {
     public <T> ResultUtil<T> execute(@RequestParam("command") String command,@RequestParam("data") String data) {
        return dispatch.dispatch(command,data);
     }
+
 }

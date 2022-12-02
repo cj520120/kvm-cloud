@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
@@ -86,9 +86,9 @@ public class VolumeCheckTask extends AbstractTask {
                     if (storage != null) {
                         Collections.shuffle(hosts);
                         HostEntity host = hosts.get(0);
-                        ResultUtil<VolumeModel> volumeResultUtil = agentService.getVolumeInfo(host.getHostUri(), storage.getStorageTarget(), volume.getVolumeTarget());
+                        ResultUtil<VolumeInfo> volumeResultUtil = agentService.getVolumeInfo(host.getHostUri(), storage.getStorageTarget(), volume.getVolumeTarget());
                         if (volumeResultUtil.getCode() == ErrorCode.SUCCESS) {
-                            VolumeModel cloudVolumeInfo = volumeResultUtil.getData();
+                            VolumeInfo cloudVolumeInfo = volumeResultUtil.getData();
                             VolumeEntity update = VolumeEntity.builder()
                                     .id(volume.getId())
                                     .volumeAllocation(cloudVolumeInfo.getAllocation())

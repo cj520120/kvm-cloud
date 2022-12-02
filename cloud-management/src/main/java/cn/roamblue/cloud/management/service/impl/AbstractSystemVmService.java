@@ -1,12 +1,12 @@
 package cn.roamblue.cloud.management.service.impl;
 
-import cn.roamblue.cloud.common.agent.VmInfoModel;
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.*;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
-import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.SystemVmEntity;
 import cn.roamblue.cloud.management.data.entity.VmEntity;
 import cn.roamblue.cloud.management.data.mapper.NetworkMapper;
@@ -144,8 +144,8 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
             return;
         }
 
-        List<NetworkEntity> networks = networkMapper.findByClusterId(clusterId);
-        for (NetworkEntity network : networks) {
+        List<GuestNetworkEntity> networks = networkMapper.findByClusterId(clusterId);
+        for (GuestNetworkEntity network : networks) {
             if (!network.getNetworkStatus().equals(NetworkStatus.READY)) {
                 continue;
             }
@@ -163,7 +163,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
 
                         log.debug("{}[{}]开始检测系统VM运行状态.Type={} Network={} HostId={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId(), instance.getHostId());
                         HostInfo hostInfo = this.hostService.findHostById(instance.getHostId());
-                        ResultUtil<VmInfoModel> resultUtil = this.agentService.getInstance(hostInfo.getUri(), instance.getVmName());
+                        ResultUtil<GuestInfo> resultUtil = this.agentService.getInstance(hostInfo.getUri(), instance.getVmName());
                         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                             log.debug("{}集群[{}]系统虚拟机成功运行.Type={} Network={}",clusterInfo.getName(),clusterInfo.getId(), this.getType(), network.getId());
                         } else if (resultUtil.getCode() == ErrorCode.AGENT_VM_NOT_FOUND) {
@@ -211,7 +211,7 @@ public abstract class AbstractSystemVmService extends AbstractVmService {
      * @param networkInfo
      * @return
      */
-    protected abstract String getVmDescription(ClusterInfo clusterInfo, NetworkEntity networkInfo);
+    protected abstract String getVmDescription(ClusterInfo clusterInfo, GuestNetworkEntity networkInfo);
 
     /**
      * 获取模版类型

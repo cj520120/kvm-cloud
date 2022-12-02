@@ -5,7 +5,7 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.ClusterInfo;
 import cn.roamblue.cloud.management.data.entity.ClusterEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
-import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.mapper.ClusterMapper;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
@@ -95,7 +95,7 @@ public class ClusterServiceImpl extends AbstractService implements ClusterServic
         if (hostMapper.selectCount( new QueryWrapper<HostEntity>().eq("cluster_id", id)) > 0) {
             throw new CodeException(ErrorCode.HAS_HOST_ERROR, "删除集群前请先删除主机信息");
         }
-        if (networkRepository.selectCount(new QueryWrapper<NetworkEntity>().eq("cluster_id", id)) > 0) {
+        if (networkRepository.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("cluster_id", id)) > 0) {
             throw new CodeException(ErrorCode.HAS_NETWORK_ERROR, "删除集群前请请先删除网络信息");
         }
         if (storageRepository.selectCount(new QueryWrapper<StorageEntity>().eq("cluster_id", id)) > 0) {

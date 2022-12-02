@@ -1,9 +1,8 @@
 package cn.roamblue.cloud.agent.service.impl;
 
 import cn.roamblue.cloud.agent.service.KvmVolumeService;
-import cn.roamblue.cloud.common.agent.VolumeModel;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.anarres.qemu.image.QEmuImage;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
 import org.libvirt.StorageVolInfo;
@@ -20,12 +19,12 @@ import java.util.List;
 @Service
 public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolumeService {
     @Override
-    public List<VolumeModel> listVolume(String storageName) {
+    public List<VolumeInfo> listVolume(String storageName) {
         return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             storagePool.refresh(0);
             String[] volumes = storagePool.listVolumes();
-            List<VolumeModel> list = new ArrayList<>();
+            List<VolumeInfo> list = new ArrayList<>();
             for (String volume : volumes) {
                 list.add(getVolume(storageName, volume));
             }
@@ -34,7 +33,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     }
 
     @Override
-    public VolumeModel getVolume(String storageName, String volumeName) {
+    public VolumeInfo getVolume(String storageName, String volumeName) {
         return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             try {
@@ -46,7 +45,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
                 if (storageVolInfo != null && storageVolInfo.type != null) {
                     type = storageVolInfo.type.toString();
                 }
-                return VolumeModel.builder().storage(storageName)
+                return VolumeInfo.builder().storage(storageName)
                         .name(volumeName)
                         .type(type)
                         .path(storageVol.getPath())
@@ -61,14 +60,14 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     }
 
     @Override
-    public VolumeModel reSize(String storageName, String volumeName, long size) {
+    public VolumeInfo reSize(String storageName, String volumeName, long size) {
 
         return super.execute(connect -> {
             StoragePool storagePool = connect.storagePoolLookupByName(storageName);
             StorageVol storageVol = storagePool.storageVolLookupByName(volumeName);
             storageVol.resize(size, 0);
             StorageVolInfo storageVolInfo = storageVol.getInfo();
-            return VolumeModel.builder().storage(storageName)
+            return VolumeInfo.builder().storage(storageName)
                     .name(volumeName)
                     .type(storageVolInfo.type.toString())
                     .path(storageVol.getPath())
@@ -95,7 +94,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     }
 
     @Override
-    public VolumeModel createVolume(String storage, String volume, String path, long capacityGb, String backingVolume) {
+    public VolumeInfo createVolume(String storage, String volume, String path, long capacityGb, String backingVolume) {
 
         return super.execute(connect -> {
             StringBuilder sb = new StringBuilder();
@@ -132,7 +131,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
             StorageVolInfo storageVolInfo = storageVol.getInfo();
             storagePool.refresh(0);
             log.info("create volume.storage={} volume={} xml={}", storage, volume, sb.toString());
-            return VolumeModel.builder().storage(storage)
+            return VolumeInfo.builder().storage(storage)
                     .name(volume)
                     .path(storageVol.getPath())
                     .type(storageVolInfo.type.toString())
@@ -143,7 +142,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
     }
 
     @Override
-    public VolumeModel cloneVolume(String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String path) {
+    public VolumeInfo cloneVolume(String sourceStorage, String sourceVolume, String targetStorage, String targetVolume, String path) {
         return super.execute(connect -> {
             StoragePool sourceStoragePool = connect.storagePoolLookupByName(sourceStorage);
             StoragePool targetStoragePool = connect.storagePoolLookupByName(targetStorage);
@@ -165,7 +164,7 @@ public class KvmVolumeServiceImpl extends AbstractKvmService implements KvmVolum
 
             StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(sb.toString(), sourceVol, 0);
             StorageVolInfo storageVolInfo = targetVol.getInfo();
-            return VolumeModel.builder().storage(targetStorage)
+            return VolumeInfo.builder().storage(targetStorage)
                     .name(targetVolume)
                     .type(storageVolInfo.type.toString())
                     .path(targetVol.getPath())

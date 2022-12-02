@@ -1,6 +1,6 @@
 package cn.roamblue.cloud.management.task;
 
-import cn.roamblue.cloud.common.agent.HostModel;
+import cn.roamblue.cloud.common.bean.HostInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
@@ -45,9 +45,9 @@ public class HostCheckTask extends AbstractTask {
         List<HostEntity> hosts = hostMapper.selectAll().stream().filter(t -> t.getHostStatus().equals(HostStatus.READY)).collect(Collectors.toList());
         Collections.shuffle(hosts);
         for (HostEntity host : hosts) {
-            ResultUtil<HostModel> resultUtil = agentService.getHostInfo(host.getHostUri());
+            ResultUtil<HostInfo> resultUtil = agentService.getHostInfo(host.getHostUri());
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                HostModel cloudHostInfo = resultUtil.getData();
+                HostInfo cloudHostInfo = resultUtil.getData();
                 if (!host.getHostCpu().equals(cloudHostInfo.getCpu()) || !host.getHostMemory().equals(cloudHostInfo.getMemory())) {
                     HostEntity update = HostEntity.builder()
                             .id(host.getId())

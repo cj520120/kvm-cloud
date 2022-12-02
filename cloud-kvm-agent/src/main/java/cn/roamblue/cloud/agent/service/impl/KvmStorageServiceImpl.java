@@ -2,7 +2,7 @@ package cn.roamblue.cloud.agent.service.impl;
 
 import cn.roamblue.cloud.agent.service.KvmStorageService;
 import cn.roamblue.cloud.agent.service.impl.storage.impl.StorageInitializeFactory;
-import cn.roamblue.cloud.common.agent.StorageModel;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +28,13 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     private StorageInitializeFactory stroageBuilderStrategy;
 
     @Override
-    public List<StorageModel> listStorage() {
+    public List<StorageInfo> listStorage() {
 
         return super.execute(connect -> {
             String[] pools = connect.listStoragePools();
-            List<StorageModel> list = new ArrayList<>(pools.length);
+            List<StorageInfo> list = new ArrayList<>(pools.length);
             for (String pool : pools) {
-                StorageModel storageInfo = this.getStorageInfo(pool);
+                StorageInfo storageInfo = this.getStorageInfo(pool);
                 list.add(storageInfo);
             }
             return list;
@@ -42,12 +42,12 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     }
 
     @Override
-    public StorageModel getStorageInfo(String name) {
+    public StorageInfo getStorageInfo(String name) {
         return super.execute(connect -> {
             try {
                 StoragePool storagePool = connect.storagePoolLookupByName(name);
                 StoragePoolInfo storagePoolInfo = storagePool.getInfo();
-                return StorageModel.builder().name(name)
+                return StorageInfo.builder().name(name)
                         .state(storagePoolInfo.state.toString())
                         .capacity(storagePoolInfo.capacity)
                         .allocation(storagePoolInfo.allocation)
@@ -96,7 +96,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
     }
 
     @Override
-    public StorageModel createStorage(String type,String name, String uri, String path, String target) {
+    public StorageInfo createStorage(String type, String name, String uri, String path, String target) {
 
         return super.execute(connect -> {
             String[] pools = connect.listStoragePools();
@@ -118,7 +118,7 @@ public class KvmStorageServiceImpl extends AbstractKvmService implements KvmStor
             	storagePool.setAutostart(1);
             	storagePool.create(1);
             }
-            return StorageModel.builder().name(name)
+            return StorageInfo.builder().name(name)
                     .state(storagePoolInfo.state.toString())
                     .capacity(storagePoolInfo.capacity)
                     .allocation(storagePoolInfo.allocation)
