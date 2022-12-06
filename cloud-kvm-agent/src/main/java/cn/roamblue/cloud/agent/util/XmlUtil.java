@@ -21,10 +21,41 @@ import java.util.List;
  */
 public final class XmlUtil {
 
+    private static String emulator;
     private XmlUtil() {
 
     }
+    public static void initEmulator(String xml) throws SAXException, DocumentException {
 
+        try (StringReader sr = new StringReader(xml)) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+            String path = "/capabilities/guest";
+            List<Element> nodes = doc.selectNodes(path);
+            for (Element node : nodes) {
+                Object osType = node.selectObject("os_type");
+                Object arch = node.selectObject("arch");
+                boolean isHvm = false;
+                boolean isX86_64 = false;
+                if (osType != null && osType instanceof Element) {
+                    isHvm = "hvm".equals(((Element) osType).getData());
+                }
+                if (arch != null && arch instanceof Element) {
+                    String archValue = ((Element) node.selectObject("arch")).attribute("name").getText();
+                    isX86_64 = "x86_64".equals(archValue);
+                }
+                if (isHvm && isX86_64) {
+                    Object emulatorNode = node.selectObject("arch/emulator");
+                    if (emulatorNode != null && emulatorNode instanceof Element) {
+                        emulator = ((Element) emulatorNode).getTextTrim();
+                        break;
+                    }
+                }
+
+            }
+        }
+    }
     public static String toXml(String cdRoom) {
         StringBuilder sb = new StringBuilder();
         sb.append("<disk type='file' device='cdrom'>");
@@ -120,7 +151,10 @@ public final class XmlUtil {
         sb.append("<on_reboot>restart</on_reboot>");
         sb.append("<on_crash>destroy</on_crash>");
         sb.append("<devices>");
-        if (FileUtil.exist("/usr/libexec/qemu-kvm")) {
+        if(FileUtil.exist(emulator)){
+            sb.append("<emulator>"+emulator+"</emulator>");
+        }
+        else if (FileUtil.exist("/usr/libexec/qemu-kvm")) {
             //centos 系统（已测试centos7）
             sb.append("<emulator>/usr/libexec/qemu-kvm</emulator>");
         } else if (FileUtil.exist("/usr/bin/qemu-system-x86_64")) {

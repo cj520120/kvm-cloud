@@ -16,6 +16,7 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.libvirt.Error;
 import org.libvirt.*;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
@@ -28,7 +29,16 @@ import java.util.*;
  */
 @Slf4j
 @Service
-public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService {
+public class KvmVmServiceImpl extends AbstractKvmService implements KvmVmService, CommandLineRunner {
+    @Override
+    public void run(String... args) throws Exception {
+        super.execute(connect -> {
+            XmlUtil.initEmulator(connect.getCapabilities());
+            return null;
+        });
+
+    }
+
     @Override
     public List<VmInfoModel> listVm() {
         return super.execute(connect -> {
