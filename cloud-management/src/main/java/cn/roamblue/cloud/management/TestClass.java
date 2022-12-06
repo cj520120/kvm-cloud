@@ -73,17 +73,17 @@ public class TestClass {
 //        DownloadTemplateOperate operate=DownloadTemplateOperate.builder().taskId(UUID.randomUUID().toString()).templateVolumeId(templateVolume.getTemplateId()).build();
 //
 // 迁移磁盘
-        VolumeEntity volume=this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().last("limit 0,1"));
-        volume.setStatus(Constant.VolumeStatus.MIGRATE);
-        this.volumeMapper.updateById(volume);
-        MigrateVolumeOperate operate= MigrateVolumeOperate.builder()
-                .taskId(UUID.randomUUID().toString())
-                .sourceVolumeId(volume.getVolumeId())
-                .targetStorageId(1)
-                .targetName(volumeName)
-                .targetPath("/mnt/TEST_NFS"+"/"+volumeName)
-                .targetType(cn.roamblue.cloud.common.util.Constant.VolumeType.RAW)
-                .build();
-        operateTask.addTask(operate);
+//        VolumeEntity volume=this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().last("limit 0,1"));
+//        volume.setStatus(Constant.VolumeStatus.MIGRATE);
+//        this.volumeMapper.updateById(volume);
+//        MigrateVolumeOperate operate= MigrateVolumeOperate.builder()
+//                .taskId(UUID.randomUUID().toString())
+//                .sourceVolumeId(volume.getVolumeId())
+//                .targetStorageId(1)
+//                .targetName(volumeName)
+//                .targetPath("/mnt/TEST_NFS"+"/"+volumeName)
+//                .targetType(cn.roamblue.cloud.common.util.Constant.VolumeType.RAW)
+//                .build();
+//        operateTask.addTask(operate);
     }
 }

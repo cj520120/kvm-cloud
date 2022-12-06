@@ -2,12 +2,9 @@ package cn.roamblue.cloud.management.servcie;
 
 import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
-import cn.roamblue.cloud.management.data.entity.TemplateEntity;
-import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
 import cn.roamblue.cloud.management.data.mapper.StorageMapper;
 import cn.roamblue.cloud.management.data.mapper.TemplateMapper;
@@ -25,6 +22,7 @@ import cn.roamblue.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -44,6 +42,7 @@ public class VolumeService {
     private OperateTask operateTask;
     @Autowired
     private TemplateVolumeMapper templateVolumeMapper;
+
 
     private StorageEntity findStorageById(int clusterId, int storageId) {
         StorageEntity storage;
@@ -71,6 +70,27 @@ public class VolumeService {
         this.volumeMapper.updateById(volume);
         return volume;
     }
+
+
+    private VolumeModel initVolume(VolumeEntity volume) {
+        return new BeanConverter<>(VolumeModel.class).convert(volume, null);
+    }
+
+    public ResultUtil<List<VolumeModel>> listVolumes(int clusterId) {
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq("cluster_id", clusterId));
+        List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
+        return ResultUtil.success(models);
+    }
+
+    public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
+        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+        if (volume == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
+        }
+        return ResultUtil.success(this.initVolume(volume));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> createVolume(int clusterId, int storageId, int templateId, String volumeType, long volumeSize) {
         StorageEntity storage = this.findStorageById(clusterId, storageId);
         String volumeName = UUID.randomUUID().toString();
@@ -92,6 +112,7 @@ public class VolumeService {
         return ResultUtil.success(model);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(int clusterId, int sourceVolumeId, int storageId, String volumeType) {
         StorageEntity storage = this.findStorageById(clusterId, storageId);
         String volumeName = UUID.randomUUID().toString();
@@ -118,6 +139,7 @@ public class VolumeService {
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int clusterId, int sourceVolumeId, int storageId, String volumeType) {
         StorageEntity storage = this.findStorageById(clusterId, storageId);
         String volumeName = UUID.randomUUID().toString();
@@ -144,6 +166,7 @@ public class VolumeService {
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
@@ -163,8 +186,5 @@ public class VolumeService {
         }
     }
 
-    private VolumeModel initVolume(VolumeEntity volume){
-        return new BeanConverter<>(VolumeModel.class).convert(volume, null);
-    }
 }
 
