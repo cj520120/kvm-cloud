@@ -22,26 +22,26 @@ import java.util.Date;
 public class StorageEntity {
 
     @TableId(type = IdType.AUTO)
-    @TableField("id")
-    private Integer id;
+    @TableField("storage_id")
+    private Integer storageId;
     @TableField("cluster_id")
-    private Integer clusterId;
+    private int clusterId;
     @TableField("storage_name")
-    private String storageName;
-    @TableField("storage_host")
-    private String storageHost;
-    @TableField("storage_source")
-    private String storageSource;
-    @TableField("storage_target")
-    private String storageTarget;
-    @TableField("storage_status")
-    private String storageStatus;
+    private String name;
+    @TableField("storage_type")
+    private String type;
+    @TableField("storage_parm")
+    private String param;
+    @TableField("storage_mount_path")
+    private String mountPath;
     @TableField("storage_capacity")
-    private Long storageCapacity;
+    private long capacity;
     @TableField("storage_available")
-    private Long storageAvailable;
+    private long available;
     @TableField("storage_allocation")
-    private Long storageAllocation;
+    private long allocation;
+    @TableField("storage_status")
+    private int status;
     @TableField("create_time")
     private Date createTime;
 }

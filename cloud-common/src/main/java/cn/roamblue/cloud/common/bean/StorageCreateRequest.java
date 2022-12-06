@@ -23,7 +23,10 @@ public class StorageCreateRequest {
      * 存储池类型
      */
     private String type;
-
+    /**
+     * 挂载路径
+     */
+    private String mountPath;
     /**
      * 参数
      */

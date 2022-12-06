@@ -51,8 +51,17 @@ public class OperateDispatchImpl implements OperateDispatch {
     private void submitTask(String taskId, String command, String data) {
         taskMap.put(taskId, System.currentTimeMillis());
         this.executor.submit(() -> {
+            ResultUtil result = null;
             try {
-                ResultUtil result = dispatch(command, data);
+                  result = dispatch(command, data);
+            } catch (CodeException err){
+                result=ResultUtil.error(err.getCode(),err.getMessage());
+            }catch (Exception err) {
+                result=ResultUtil.error(ErrorCode.SERVER_ERROR,err.getMessage());
+                log.error("执行任务出错.", err);
+            } finally {
+                taskMap.remove(taskId);
+
                 String nonce = String.valueOf(System.currentTimeMillis());
                 Map<String, Object> map = new HashMap<>(5);
                 map.put("hostId", HostUtil.getHostId());
@@ -60,13 +69,14 @@ public class OperateDispatchImpl implements OperateDispatch {
                 map.put("startTime", taskMap.get(taskId));
                 map.put("data", GsonBuilderUtil.create().toJson(result));
                 map.put("nonce", nonce);
-                String sign = AppUtils.sign(map, config.getAppId(), config.getAppSecret(), nonce);
+                String sign =null;
+                try {
+                     sign = AppUtils.sign(map, config.getAppId(), config.getAppSecret(), nonce);
+                }catch (Exception err){
+
+                }
                 map.put("sign", sign);
                 HttpUtil.post(this.config.getManagerUri() + "/task/report", map);
-            } catch (Exception err) {
-                log.error("执行任务出错.", err);
-            } finally {
-                taskMap.remove(taskId);
             }
         });
     }

@@ -11,34 +11,25 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-/**
- * @author chenjun
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @TableName("tbl_template_info")
 public class TemplateEntity {
-
     @TableId(type = IdType.AUTO)
-    @TableField("id")
-    private Integer id;
+    @TableField("template_id")
+    private int templateId;
     @TableField("cluster_id")
-    private Integer clusterId;
+    private int clusterId;
     @TableField("template_name")
-    private String templateName;
-    @TableField("template_type")
-    private String templateType;
-    @TableField("template_status")
-    private String templateStatus;
+    private String name;
     @TableField("template_uri")
-    private String templateUri;
-    @TableField("os_category_id")
-    private Integer osCategoryId;
-    @TableField("template_size")
-    private Long templateSize;
+    private String uri;
+    @TableField("template_type")
+    private int type;
+    @TableField("template_status")
+    private int status;
     @TableField("create_time")
     private Date createTime;
-
 }

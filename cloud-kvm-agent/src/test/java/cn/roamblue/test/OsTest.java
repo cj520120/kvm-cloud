@@ -9,14 +9,19 @@ import java.util.*;
 
 public class OsTest {
     public static void main(String[] args) {
-        getHostInfo();
-        createNetwork();
-        createStorage();
-        startOs(3,5, Constant.DiskBus.IDE);
-        destroyOs();
-        destroyVolume(5);
-        destroyStorage();
-        destroyNetwork();
+        Map<String, Object> param = new HashMap<>();
+        param.put("uri", "192.168.1.69");
+        param.put("path", "/data/nfs");
+        param.put("mount", "/mnt/TEST_NFS");
+        System.out.println(GsonBuilderUtil.create().toJson(param));
+//        getHostInfo();
+//        createNetwork();
+//        createStorage();
+//        startOs(3,5, Constant.DiskBus.IDE);
+//        destroyOs();
+//        destroyVolume(5);
+//        destroyStorage();
+//        destroyNetwork();
     }
    public static void getHostInfo(){
 
@@ -30,11 +35,11 @@ public class OsTest {
         Map<String, Object> param = new HashMap<>();
         param.put("uri", "192.168.1.69");
         param.put("path", "/data/nfs");
-        param.put("mount", "/mnt/TEST_NFS");
         StorageCreateRequest request = StorageCreateRequest.builder()
                 .name(name)
                 .type(Constant.StorageType.NFS)
                 .param(param)
+                .mountPath("/mnt/TEST_NFS")
                 .build();
         Map<String,Object> map=new HashMap<>();
         map.put("command",Constant.Command.STORAGE_CREATE);

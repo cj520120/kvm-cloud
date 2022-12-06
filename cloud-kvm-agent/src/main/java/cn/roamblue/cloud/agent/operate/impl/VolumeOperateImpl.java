@@ -120,9 +120,9 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
         FileUtil.mkParentDirs(request.getTargetVolume());
         StoragePool storagePool = connect.storagePoolLookupByName(request.getTargetStorage());
+        storagePool.refresh(0);
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
         StorageVolInfo storageVolInfo = storageVol.getInfo();
-        storagePool.refresh(0);
         return VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .path(storageVol.getPath())
@@ -152,6 +152,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         StoragePool sourceStoragePool = connect.storagePoolLookupByName(request.getSourceStorage());
         StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
         sourceStoragePool.refresh(0);
+        targetStoragePool.refresh(0);
         StorageVol sourceVol = this.findVol(sourceStoragePool, request.getSourceVolume());
         String xml = ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
         FileUtil.mkParentDirs(request.getTargetVolume());

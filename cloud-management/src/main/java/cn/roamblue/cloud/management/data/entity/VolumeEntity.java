@@ -1,6 +1,9 @@
 package cn.roamblue.cloud.management.data.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,28 +22,26 @@ import java.util.Date;
 public class VolumeEntity {
 
     @TableId(type = IdType.AUTO)
-    @TableField("id")
-    private Integer id;
+    @TableField("volume_id")
+    private Integer volumeId;
+    @TableField("template_id")
+    private int templateId;
     @TableField("cluster_id")
-    private Integer clusterId;
+    private int clusterId;
     @TableField("storage_id")
-    private Integer storageId;
-    @TableField("vm_id")
-    private Integer vmId;
-    @TableField("vm_device")
-    private Integer vmDevice;
-    @TableField("volume_target")
-    private String volumeTarget;
+    private int storageId;
     @TableField("volume_name")
-    private String volumeName;
-    @TableField("volume_status")
-    private String volumeStatus;
+    private String name;
+    @TableField("volume_path")
+    private String path;
     @TableField("volume_capacity")
-    private Long volumeCapacity;
+    private long capacity;
     @TableField("volume_allocation")
-    private Long volumeAllocation;
-    @TableField(value = "remove_time", updateStrategy = FieldStrategy.IGNORED, insertStrategy = FieldStrategy.IGNORED)
-    private Date removeTime;
+    private long allocation;
+    @TableField("volume_type")
+    private String type;
+    @TableField("volume_status")
+    private int status;
     @TableField("create_time")
     private Date createTime;
 

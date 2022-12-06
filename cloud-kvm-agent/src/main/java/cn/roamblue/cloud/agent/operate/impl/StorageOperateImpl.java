@@ -78,10 +78,9 @@ public class StorageOperateImpl implements StorageOperate {
         if (storagePool == null) {
             String nfsUri = request.getParam().get("uri").toString();
             String nfsPath = request.getParam().get("path").toString();
-            String mountPath = request.getParam().get("mount").toString();
-            FileUtil.mkdir(mountPath);
+            FileUtil.mkdir(request.getMountPath());
             String xml = ResourceUtil.readUtf8Str("xml/storage/NfsStorage.xml");
-            xml = String.format(xml, request.getName(), nfsUri, nfsPath, mountPath);
+            xml = String.format(xml, request.getName(), nfsUri, nfsPath, request.getMountPath());
             storagePool = connect.storagePoolCreateXML(xml, 0);
         }
         storagePool.refresh(0);
