@@ -38,7 +38,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
         localReportTask.addTaskId(param.getTaskId());
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
         if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.INIT) {
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", storage.getClusterId()));
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
             ResultUtil<StorageInfo> resultUtil = null;
             for (HostEntity host : hosts) {
                 if (Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {

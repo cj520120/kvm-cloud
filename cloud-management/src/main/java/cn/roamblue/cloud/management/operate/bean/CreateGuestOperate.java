@@ -12,6 +12,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class CreateGuestOperate extends BaseOperateParam {
+public class CreateGuestOperate extends CreateVolumeOperate {
     private int guestId;
 }

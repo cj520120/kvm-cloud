@@ -35,7 +35,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
     public void operate(CreateNetworkOperate param) {
         localReportTask.addTaskId(param.getTaskId());
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", network.getClusterId()));
+        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
         ResultUtil<Void> resultUtil = null;
         for (HostEntity host : hosts) {
             if (Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {

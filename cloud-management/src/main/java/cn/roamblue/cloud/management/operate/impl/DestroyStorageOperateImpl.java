@@ -35,7 +35,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
         localReportTask.addTaskId(param.getTaskId());
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
         if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.DESTROY) {
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", storage.getClusterId()));
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
 
             for (HostEntity host : hosts) {
                 if (Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {

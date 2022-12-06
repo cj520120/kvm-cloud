@@ -44,7 +44,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
             throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
         }
-        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", storage.getClusterId()));
+        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
         Collections.shuffle(hosts);
         HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
         StorageEntity targetStorage = storageMapper.selectById(templateVolume.getStorageId());

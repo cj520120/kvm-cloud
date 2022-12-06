@@ -13,10 +13,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 启动虚拟机
@@ -25,17 +23,39 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, ResultUtil<GuestInfo>> {
+public class StartGuestOperateImpl<T extends StartGuestOperate> extends AbstractOperate<T, ResultUtil<GuestInfo>> {
 
     public StartGuestOperateImpl() {
-        super(StartGuestOperate.class);
+        super((Class<T>) StartGuestOperate.class);
     }
 
+    public StartGuestOperateImpl(Class<T> tClass) {
+        super(tClass);
+    }
+    public HostEntity allocateHost(int cpu, long memory, int hostId) {
+        List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>()).stream()
+                .filter(t -> Objects.equals(t.getStatus(), cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE))
+                .filter(t -> (t.getAllocationCpu() + cpu) > t.getTotalCpu() && (t.getAllocationMemory() + memory) > memory)
+                .collect(Collectors.toList());
+        Collections.shuffle(hostList);
+        HostEntity host=hostList.stream().findAny().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_SPACE, "没有可用的主机资源"));
+        return hostList.stream().filter(t->Objects.equals(t.getHostId(),hostId)).findFirst().orElse(host);
+    }
     @Override
-    public void operate(StartGuestOperate param) {
+    public void operate(T param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getStatus() != cn.roamblue.cloud.management.util.Constant.GuestStatus.STARTING) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
+        }
+
+        HostEntity host;
+        if(param.getHostId()>0) {
+            host=this.hostMapper.selectById(param.getHostId());
+        }else{
+            host=this.allocateHost(guest.getCpu(), guest.getMemory(), guest.getLastHostId());
+        }
+        if(host==null){
+            throw new CodeException(ErrorCode.HOST_NOT_SPACE,"没有可用的主机资源");
         }
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
@@ -91,7 +111,8 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
                     .build();
             this.guestVncMapper.insert(guestVncEntity);
         }
-        HostEntity host = hostMapper.selectById(guest.getLastHostId());
+        guest.setHostId(host.getHostId());
+        this.guestMapper.updateById(guest);
         GuestStartRequest request = GuestStartRequest.builder()
                 .emulator(host.getEmulator())
                 .name(guest.getName())
@@ -115,12 +136,11 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
     }
 
     @Override
-    public void onFinish(StartGuestOperate param, ResultUtil<GuestInfo> resultUtil) {
+    public void onFinish(T param, ResultUtil<GuestInfo> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getStatus() == cn.roamblue.cloud.management.util.Constant.GuestStatus.STARTING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
-
                 GuestInfo guestInfo = resultUtil.getData();
                 GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guest.getGuestId());
                 if (guestVncEntity == null) {
@@ -137,7 +157,7 @@ public class StartGuestOperateImpl extends AbstractOperate<StartGuestOperate, Re
                     this.guestVncMapper.updateById(guestVncEntity);
                 }
             } else {
-                guest.setLastHostId(0);
+                guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
             }
             guestMapper.updateById(guest);

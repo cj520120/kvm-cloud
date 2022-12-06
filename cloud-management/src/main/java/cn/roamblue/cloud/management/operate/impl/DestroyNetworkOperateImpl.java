@@ -36,7 +36,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
         localReportTask.addTaskId(param.getTaskId());
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
         if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.DESTROY) {
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", network.getClusterId()));
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : hosts) {
                 if (Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
                     if (Objects.equals(cn.roamblue.cloud.management.util.Constant.NetworkType.BASIC, network.getType())) {

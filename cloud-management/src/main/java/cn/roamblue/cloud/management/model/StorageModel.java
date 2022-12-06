@@ -10,7 +10,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class StorageModel {
     private int storageId;
-    private int clusterId;
     private String name;
     private String type;
     private String param;

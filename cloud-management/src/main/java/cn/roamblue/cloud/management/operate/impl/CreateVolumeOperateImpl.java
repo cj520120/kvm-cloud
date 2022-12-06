@@ -30,21 +30,25 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class CreateVolumeOperateImpl extends AbstractOperate<CreateVolumeOperate, ResultUtil<VolumeInfo>> {
+public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends AbstractOperate<T, ResultUtil<VolumeInfo>> {
 
     public CreateVolumeOperateImpl() {
-        super(CreateVolumeOperate.class);
+        super((Class<T>) CreateVolumeOperate.class);
+    }
+
+    public CreateVolumeOperateImpl(Class<T> tClass) {
+        super(tClass);
     }
 
     @Override
-    public void operate(CreateVolumeOperate param) {
+    public void operate(T param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
+            if (storage.getStatus() != cn.roamblue.cloud.management.util.Constant.StorageStatus.READY) {
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", volume.getClusterId()));
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
             Collections.shuffle(hosts);
             HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
             VolumeCreateRequest request = VolumeCreateRequest.builder()
@@ -82,7 +86,7 @@ public class CreateVolumeOperateImpl extends AbstractOperate<CreateVolumeOperate
     }
 
     @Override
-    public void onFinish(CreateVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
+    public void onFinish(T param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {

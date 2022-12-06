@@ -18,7 +18,6 @@ public class VolumeModel {
 
     private Integer volumeId;
     private int templateId;
-    private int clusterId;
     private int storageId;
     private String name;
     private String path;
@@ -26,6 +25,7 @@ public class VolumeModel {
     private long allocation;
     private String type;
     private int status;
+    private VolumeAttachModel attach;
     private Date createTime;
 
 }

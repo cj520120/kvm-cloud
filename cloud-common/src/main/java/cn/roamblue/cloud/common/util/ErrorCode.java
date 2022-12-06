@@ -52,6 +52,7 @@ public final class ErrorCode {
     public static final int RULE_PERMISSION_NOT_FOUND = BASE_ERROR + 40;
     public static final int LOCAL_USER_NOT_SUPPORT = BASE_ERROR + 41;
     public static final int AGENT_VM_SNAPSHOT_NOT_FOUND = BASE_ERROR + 42;
+    public static final int STORAGE_BUSY = BASE_ERROR + 42;
 
     private ErrorCode() {
 

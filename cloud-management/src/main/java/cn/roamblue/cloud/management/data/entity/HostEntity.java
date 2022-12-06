@@ -19,21 +19,19 @@ import java.util.Date;
 public class HostEntity {
     @TableId(type = IdType.AUTO)
     @TableField("host_id")
-    private int id;
+    private int hostId;
     @TableField("host_display_name")
     private String displayName;
-    @TableField("cluster_id")
-    private int clusterId;
-    @TableId(type = IdType.AUTO)
     @TableField("host_ip")
     private String hostIp;
-    @TableId(type = IdType.AUTO)
     @TableField("host_nic_name")
     private String nic;
-    @TableField("host_key")
-    private String hostKey;
     @TableField("host_uri")
     private String uri;
+    @TableField("host_allocation_memory")
+    private long allocationMemory;
+    @TableField("host_allocation_cpu")
+    private int allocationCpu;
     @TableField("host_total_memory")
     private long totalMemory;
     @TableField("host_total_cpu")

@@ -4,14 +4,13 @@ import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.data.entity.GuestDiskEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
-import cn.roamblue.cloud.management.data.mapper.StorageMapper;
-import cn.roamblue.cloud.management.data.mapper.TemplateMapper;
-import cn.roamblue.cloud.management.data.mapper.TemplateVolumeMapper;
-import cn.roamblue.cloud.management.data.mapper.VolumeMapper;
+import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.CloneModel;
 import cn.roamblue.cloud.management.model.MigrateModel;
+import cn.roamblue.cloud.management.model.VolumeAttachModel;
 import cn.roamblue.cloud.management.model.VolumeModel;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.operate.bean.CloneVolumeOperate;
@@ -24,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,16 +39,19 @@ public class VolumeService {
     @Autowired
     private TemplateVolumeMapper templateVolumeMapper;
 
+    @Autowired
+    private GuestDiskMapper guestDiskMapper;
 
-    private StorageEntity findStorageById(int clusterId, int storageId) {
+
+    public StorageEntity findStorageById(int storageId) {
         StorageEntity storage;
         if (storageId > 0) {
             storage = storageMapper.selectById(storageId);
-            if (storage == null || !Objects.equals(clusterId, storage.getClusterId())) {
+            if (storage == null) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
             }
         } else {
-            List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<StorageEntity>().eq("cluster_id", clusterId));
+            List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
             storageList = storageList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.StorageStatus.READY)).collect(Collectors.toList());
             storage = storageList.stream().sorted((o1, o2) -> Long.compare(o2.getAvailable(), o1.getAvailable())).findFirst().orElse(null);
         }
@@ -73,11 +72,16 @@ public class VolumeService {
 
 
     private VolumeModel initVolume(VolumeEntity volume) {
-        return new BeanConverter<>(VolumeModel.class).convert(volume, null);
+        VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
+        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
+        if (disk != null) {
+            model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
+        }
+        return model;
     }
 
-    public ResultUtil<List<VolumeModel>> listVolumes(int clusterId) {
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq("cluster_id", clusterId));
+    public ResultUtil<List<VolumeModel>> listVolumes() {
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
@@ -89,14 +93,26 @@ public class VolumeService {
         }
         return ResultUtil.success(this.initVolume(volume));
     }
+    public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId){
+        List<GuestDiskEntity> guestDisks=this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id",guestId));
+        List<VolumeModel> models=new ArrayList<>(guestDisks.size());
+        for (GuestDiskEntity disk : guestDisks) {
+            VolumeEntity volume = this.volumeMapper.selectById(disk.getVolumeId());
+            if(volume!=null){
+                VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
+                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
+                models.add(model);
+            }
+        }
+        return ResultUtil.success(models);
+    }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(int clusterId, int storageId, int templateId, String volumeType, long volumeSize) {
-        StorageEntity storage = this.findStorageById(clusterId, storageId);
+    public ResultUtil<VolumeModel> createVolume(int storageId, int templateId, String volumeType, long volumeSize) {
+        StorageEntity storage = this.findStorageById(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storageId)
-                .clusterId(clusterId)
                 .templateId(templateId)
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
@@ -113,13 +129,12 @@ public class VolumeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<CloneModel> cloneVolume(int clusterId, int sourceVolumeId, int storageId, String volumeType) {
-        StorageEntity storage = this.findStorageById(clusterId, storageId);
+    public ResultUtil<CloneModel> cloneVolume(int sourceVolumeId, int storageId, String volumeType) {
+        StorageEntity storage = this.findStorageById(storageId);
         String volumeName = UUID.randomUUID().toString();
-        VolumeEntity volume =  this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
+        VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
         VolumeEntity cloneVolume = VolumeEntity.builder()
                 .storageId(storageId)
-                .clusterId(clusterId)
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
@@ -140,13 +155,12 @@ public class VolumeService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<MigrateModel> migrateVolume(int clusterId, int sourceVolumeId, int storageId, String volumeType) {
-        StorageEntity storage = this.findStorageById(clusterId, storageId);
+    public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
+        StorageEntity storage = this.findStorageById(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
         VolumeEntity migrateVolume = VolumeEntity.builder()
                 .storageId(storageId)
-                .clusterId(clusterId)
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
@@ -172,14 +186,17 @@ public class VolumeService {
         if (volume == null) {
            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND,"磁盘不存在");
         }
-        switch (volume.getStatus()){
-            case  Constant.VolumeStatus.ERROR:
-            case  Constant.VolumeStatus.READY:
+        switch (volume.getStatus()) {
+            case Constant.VolumeStatus.ERROR:
+            case Constant.VolumeStatus.READY:
+                if (guestDiskMapper.selectCount(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId)) > 0) {
+                    throw new CodeException(ErrorCode.VOLUME_ATTACH_ERROR, "当前磁盘被系统挂载");
+                }
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
-                DestroyVolumeOperate operate=DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volumeId).build();
+                DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volumeId).build();
                 operateTask.addTask(operate);
-                VolumeModel source =this.initVolume(volume);
+                VolumeModel source = this.initVolume(volume);
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");

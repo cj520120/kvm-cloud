@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.management.data.entity;
+package cn.roamblue.cloud.management.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -18,34 +18,19 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@TableName("tbl_network_info")
-public class NetworkEntity {
+public class NetworkModel {
 
-    @TableId(type = IdType.AUTO)
-    @TableField("network_id")
-    private Integer networkId;
-    @TableField("network_name")
+    private int networkId;
     private String name;
-    @TableField("network_start_ip")
     private String startIp;
-    @TableField("network_stop_ip")
     private String endIp;
-    @TableField("network_gateway")
     private String gateway;
-    @TableField("network_mask")
     private String mask;
-    @TableField("network_bridge_name")
     private String bridge;
-    @TableField("network_dns")
     private String dns;
-    @TableField("network_type")
-    private int type;
-    @TableField("network_status")
+    private String type;
     private int status;
-    @TableField("network_vlan_id")
     private int vlanId;
-    @TableField("network_basic_network_id")
     private int basicNetworkId;
-    @TableField("create_time")
     private Date createTime;
 }

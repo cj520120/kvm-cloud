@@ -48,7 +48,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             if(targetVolume.getStatus()!= cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING){
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", volume.getClusterId()));
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
             Collections.shuffle(hosts);
             HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
@@ -93,7 +93,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 volumeMapper.insert(targetVolume);
-                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
+                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<>());
                 if (guestDisk != null) {
                     guestDisk.setVolumeId(targetVolume.getVolumeId());
                     guestDiskMapper.updateById(guestDisk);

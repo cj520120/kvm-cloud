@@ -22,8 +22,6 @@ public class TemplateVolumeEntity {
     private Integer templateVolumeId;
     @TableField("template_id")
     private int templateId;
-    @TableField("cluster_id")
-    private int clusterId;
     @TableField("storage_id")
     private int storageId;
     @TableField("template_name")

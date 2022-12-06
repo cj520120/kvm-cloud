@@ -29,7 +29,6 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
     @Override
     public void operate(RebootGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-
         HostEntity host = hostMapper.selectById(guest.getLastHostId());
         if (guest.getStatus() == cn.roamblue.cloud.management.util.Constant.GuestStatus.REBOOT) {
             GuestRebootRequest request = GuestRebootRequest.builder().name(guest.getName()).build();

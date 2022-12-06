@@ -24,8 +24,6 @@ public class StorageEntity {
     @TableId(type = IdType.AUTO)
     @TableField("storage_id")
     private Integer storageId;
-    @TableField("cluster_id")
-    private int clusterId;
     @TableField("storage_name")
     private String name;
     @TableField("storage_type")

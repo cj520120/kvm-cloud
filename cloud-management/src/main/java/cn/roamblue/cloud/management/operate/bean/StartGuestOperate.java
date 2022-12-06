@@ -11,4 +11,5 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class StartGuestOperate extends BaseOperateParam {
     private int guestId;
+    private int hostId;
 }

@@ -20,8 +20,6 @@ public class TemplateEntity {
     @TableId(type = IdType.AUTO)
     @TableField("template_id")
     private int templateId;
-    @TableField("cluster_id")
-    private int clusterId;
     @TableField("template_name")
     private String name;
     @TableField("template_uri")

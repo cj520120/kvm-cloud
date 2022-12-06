@@ -56,7 +56,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getStatus() == cn.roamblue.cloud.management.util.Constant.GuestStatus.STOPPING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                guest.setLastHostId(0);
+                guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
             } else {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
