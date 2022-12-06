@@ -15,8 +15,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class CloneVolumeOperate extends BaseOperateParam {
     private int sourceVolumeId;
-    private int targetStorageId;
-    private String targetName;
-    private String targetPath;
-    private String targetType;
+    private int targetVolumeId;
 }

@@ -10,6 +10,7 @@ import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.CloneVolumeOperate;
+import cn.roamblue.cloud.management.servcie.VolumeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -41,17 +42,21 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
             if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
             }
+            VolumeEntity cloneVolume=volumeMapper.selectById(param.getTargetVolumeId());
+            if(cloneVolume.getStatus()!= cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING){
+                throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
+            }
             List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<HostEntity>().eq("cluster_id", volume.getClusterId()));
             Collections.shuffle(hosts);
             HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
-            StorageEntity targetStorage = storageMapper.selectById(param.getTargetStorageId());
+            StorageEntity targetStorage = storageMapper.selectById(cloneVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceStorage(storage.getName())
                     .sourceVolume(volume.getPath())
                     .targetStorage(targetStorage.getName())
-                    .targetName(param.getTargetName())
-                    .targetVolume(param.getTargetPath())
-                    .targetType(param.getTargetType())
+                    .targetName(cloneVolume.getName())
+                    .targetVolume(cloneVolume.getPath())
+                    .targetType(cloneVolume.getType())
 
                     .build();
 
@@ -72,23 +77,19 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
     public void onFinish(CloneVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.CLONE) {
-            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                VolumeEntity targetVolume = VolumeEntity.builder()
-                        .path(param.getTargetPath())
-                        .clusterId(volume.getClusterId())
-                        .storageId(param.getTargetStorageId())
-                        .type(param.getTargetType())
-                        .path(param.getTargetPath())
-                        .name(param.getTargetName())
-                        .templateId(volume.getTemplateId())
-                        .allocation(resultUtil.getData().getAllocation())
-                        .capacity(resultUtil.getData().getCapacity())
-                        .status(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY)
-                        .build();
-                volumeMapper.insert(targetVolume);
-            }
             volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
+        }
+        VolumeEntity targetVolume=volumeMapper.selectById(param.getTargetVolumeId());
+        if(targetVolume.getStatus()== cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
+            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
+                targetVolume.setAllocation(resultUtil.getData().getAllocation());
+                targetVolume.setCapacity(resultUtil.getData().getCapacity());
+            } else {
+                targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.ERROR);
+            }
+            volumeMapper.updateById(targetVolume);
         }
     }
 }
