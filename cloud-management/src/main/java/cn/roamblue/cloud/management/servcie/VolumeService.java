@@ -23,7 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,19 +96,7 @@ public class VolumeService {
         }
         return ResultUtil.success(this.initVolume(volume));
     }
-    public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId){
-        List<GuestDiskEntity> guestDisks=this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id",guestId));
-        List<VolumeModel> models=new ArrayList<>(guestDisks.size());
-        for (GuestDiskEntity disk : guestDisks) {
-            VolumeEntity volume = this.volumeMapper.selectById(disk.getVolumeId());
-            if(volume!=null){
-                VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
-                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
-                models.add(model);
-            }
-        }
-        return ResultUtil.success(models);
-    }
+
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> createVolume(int storageId, int templateId, String volumeType, long volumeSize) {

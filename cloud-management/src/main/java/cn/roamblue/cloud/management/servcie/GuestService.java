@@ -11,17 +11,17 @@ import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
  * @author chenjun
  */
+@Service
 public class GuestService {
 
     @Autowired
@@ -43,74 +43,28 @@ public class GuestService {
     @Autowired
     private OperateTask operateTask;
 
-
-    private StorageEntity allocateStorage(int storageId) {
-        StorageEntity storage;
-        if (storageId > 0) {
-            storage = storageMapper.selectById(storageId);
-            if (storage == null) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
-            }
-        } else {
-            List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
-            storageList = storageList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.StorageStatus.READY)).collect(Collectors.toList());
-            storage = storageList.stream().sorted((o1, o2) -> Long.compare(o2.getAvailable(), o1.getAvailable())).findFirst().orElse(null);
-        }
-        return storage;
-    }
-
-    private GuestNetworkEntity allocateNetwork(int networkId) {
-        QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("network_id", networkId);
-        wrapper.eq("guest_id", 0);
-        wrapper.last("limit 0,1");
-        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
-        if (guestNetwork == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "没有可用的网络资源");
-        }
-        return guestNetwork;
-    }
-
-    private HostEntity allocateHost(int hostId,int mustHostId,int cpu, long memory) {
-        if(mustHostId>0){
-            HostEntity host= this.hostMapper.selectById(mustHostId);
-            if(host==null||!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)){
-                throw new CodeException(ErrorCode.SERVER_ERROR,"没有可用的主机");
-            }
-            if(host.getTotalMemory()-host.getAllocationMemory()>memory){
-                throw new CodeException(ErrorCode.SERVER_ERROR,"主机当前可用内存不足");
-            }
-            if(host.getTotalCpu()-host.getAllocationCpu()>cpu){
-                throw new CodeException(ErrorCode.SERVER_ERROR,"主机当前可用CPU不足");
-            }
-            return host;
-        }else {
-            List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
-            list = list.stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE))
-                    .filter(t -> t.getTotalCpu() - t.getAllocationCpu() > cpu && t.getTotalMemory() - t.getAllocationMemory() > memory).collect(Collectors.toList());
-            Collections.shuffle(list);
-            HostEntity host = null;
-            if (hostId > 0) {
-                host = list.stream().filter(t -> Objects.equals(t.getHostId(), hostId)).findFirst().orElse(null);
-            }
-            if (host == null) {
-                host = list.stream().findFirst().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_SPACE, "没有可用的主机资源"));
-            }
-            return host;
-        }
-    }
+    @Autowired
+    private AllocateService allocateService;
 
 
     private GuestModel initGuestInfo(GuestEntity entity) {
         return GuestModel.builder().build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
-        return ResultUtil.success(null);
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
+        List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
+        return ResultUtil.success(models);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
-        return ResultUtil.success(null);
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest == null) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机不存在");
+        }
+        return ResultUtil.success(this.initGuestInfo(guest));
     }
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(String description, String busType
@@ -120,7 +74,7 @@ public class GuestService {
 
 
         String uid = UUID.randomUUID().toString().replace("-", "");
-        HostEntity host = this.allocateHost(0,0,cpu, memory);
+        HostEntity host = this.allocateService.allocateHost(0, 0, cpu, memory);
         GuestEntity guest = GuestEntity.builder()
                 .name(uid)
                 .description(description)
@@ -137,12 +91,12 @@ public class GuestService {
         host.setAllocationCpu(host.getAllocationCpu()+cpu);
         host.setAllocationMemory(host.getAllocationCpu()+memory);
         this.hostMapper.updateById(host);
-        GuestNetworkEntity guestNetwork = this.allocateNetwork(networkId);
+        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setGuestId(guest.getGuestId());
         this.guestNetworkMapper.insert(guestNetwork);
-        StorageEntity storage = allocateStorage(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(storageId);
         VolumeEntity volume = VolumeEntity.builder()
                 .capacity(size)
                 .storageId(storage.getStorageId())
@@ -167,6 +121,51 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<GuestModel> start(int guestId, int hostId) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest.getStatus() == Constant.GuestStatus.STOP) {
+            HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
+            guest.setHostId(host.getHostId());
+            guest.setLastHostId(host.getHostId());
+            guest.setStatus(Constant.GuestStatus.STARTING);
+            this.guestMapper.updateById(guest);
+            BaseOperateParam operateParam = ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+            this.operateTask.addTask(operateParam);
+            return ResultUtil.success(this.initGuestInfo(guest));
+        }
+        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<GuestModel> reboot(int guestId) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
+            guest.setStatus(Constant.GuestStatus.REBOOT);
+            this.guestMapper.updateById(guest);
+            BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+            this.operateTask.addTask(operateParam);
+            return ResultUtil.success(this.initGuestInfo(guest));
+        }
+        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<GuestModel> shutdown(int guestId, boolean force) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
+            guest.setStatus(Constant.GuestStatus.STOPPING);
+            this.guestMapper.updateById(guest);
+            BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force).taskId(UUID.randomUUID().toString()).build();
+            this.operateTask.addTask(operateParam);
+            return ResultUtil.success(this.initGuestInfo(guest));
+        }
+        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> modifyGuest(int guestId, String description, String busType, int cpu, int memory) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -180,6 +179,7 @@ public class GuestService {
         this.guestMapper.updateById(guest);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachCdRoom(int guestId, int templateId) {
@@ -269,25 +269,25 @@ public class GuestService {
     @Transactional(rollbackFor = Exception.class)
 
     public ResultUtil<GuestModel> attachNetwork(int guestId, int networkId,String driveType) {
-        GuestEntity guest=this.guestMapper.selectById(guestId);
-        GuestNetworkEntity guestNetwork=this.allocateNetwork(networkId);
-        List<GuestNetworkEntity> guestNetworkList=this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id",guestId));
-        List<Integer> guestNetworkDeviceIds=guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
-        int deviceId=-1;
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+        List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
+        int deviceId = -1;
         for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
-            if(!guestNetworkDeviceIds.contains(i)){
-                deviceId=i;
+            if (!guestNetworkDeviceIds.contains(i)) {
+                deviceId = i;
                 break;
             }
         }
-        if(deviceId<0){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"当前挂载超过最大网卡数量限制");
+        if (deviceId < 0) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大网卡数量限制");
         }
         guestNetwork.setDeviceId(deviceId);
         guestNetwork.setDriveType(driveType);
         guestNetwork.setGuestId(guestId);
         this.guestNetworkMapper.updateById(guestNetwork);
-        BaseOperateParam operateParam= ChangeGuestNetworkInterfaceOperate.builder()
+        BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                 .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
                 .taskId(UUID.randomUUID().toString()).build();
         this.operateTask.addTask(operateParam);
@@ -311,4 +311,5 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+
 }

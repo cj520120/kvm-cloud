@@ -14,6 +14,7 @@ import cn.roamblue.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.roamblue.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.IpCaculate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class NetworkService {
         return new BeanConverter<>(NetworkModel.class).convert(entity, null);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> getNetworkInfo(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
         if (network == null) {
@@ -45,6 +47,7 @@ public class NetworkService {
         return ResultUtil.success(this.initNetwork(network));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<NetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());
         List<NetworkModel> models = networkList.stream().map(this::initNetwork).collect(Collectors.toList());
@@ -66,6 +69,18 @@ public class NetworkService {
                 .basicNetworkId(basicNetworkId)
                 .status(Constant.NetworkStatus.CREATING).build();
         networkMapper.insert(network);
+        List<String> ips = IpCaculate.parseIpRange(startIp, endIp);
+        for (String ip : ips) {
+            GuestNetworkEntity guestNetwork = GuestNetworkEntity.builder()
+                    .guestId(0)
+                    .ip(ip)
+                    .mac(IpCaculate.getMacAddrWithFormat(":"))
+                    .driveType("")
+                    .deviceId(0)
+                    .build();
+            this.guestNetworkMapper.insert(guestNetwork);
+        }
+
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initNetwork(network));

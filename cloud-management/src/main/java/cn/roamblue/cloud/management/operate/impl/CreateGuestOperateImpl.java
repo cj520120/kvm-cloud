@@ -22,12 +22,6 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         super(CreateGuestOperate.class);
     }
 
-
-    @Override
-    public void operate(CreateGuestOperate param) {
-        super.onSubmitFinishEvent(param.getTaskId(), ResultUtil.<VolumeInfo>builder().build());
-    }
-
     @Override
     public void onFinish(CreateGuestOperate param, ResultUtil<VolumeInfo> resultUtil) {
         super.onFinish(param, resultUtil);
