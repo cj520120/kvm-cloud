@@ -27,7 +27,7 @@ public class OsTest {
 
        Map<String,Object> map=new HashMap<>();
        map.put("command",Constant.Command.HOST_INFO);
-       map.put("data", "");
+       map.put("data", "{}");
        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
    }
     public static void createStorage(){
