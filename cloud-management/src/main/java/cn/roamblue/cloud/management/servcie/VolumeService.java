@@ -13,10 +13,7 @@ import cn.roamblue.cloud.management.model.CloneModel;
 import cn.roamblue.cloud.management.model.MigrateModel;
 import cn.roamblue.cloud.management.model.VolumeAttachModel;
 import cn.roamblue.cloud.management.model.VolumeModel;
-import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
-import cn.roamblue.cloud.management.operate.bean.CloneVolumeOperate;
-import cn.roamblue.cloud.management.operate.bean.CreateVolumeOperate;
-import cn.roamblue.cloud.management.operate.bean.DestroyVolumeOperate;
+import cn.roamblue.cloud.management.operate.bean.*;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
@@ -145,6 +142,19 @@ public class VolumeService {
         VolumeModel clone = this.initVolume(cloneVolume);
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<VolumeModel> resizeVolume(int volumeId,long size) {
+        VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.RESIZE);
+
+        BaseOperateParam operateParam = ResizeVolumeOperate.builder().taskId(UUID.randomUUID().toString())
+                .volumeId(volume.getVolumeId())
+                .size(size)
+                .build();
+        operateTask.addTask(operateParam);
+        return ResultUtil.success(this.initVolume(volume));
+    }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
@@ -162,7 +172,7 @@ public class VolumeService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(migrateVolume);
-        BaseOperateParam operateParam = CloneVolumeOperate.builder().taskId(volumeName)
+        BaseOperateParam operateParam = MigrateVolumeOperate.builder().taskId(volumeName)
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(migrateVolume.getVolumeId())
                 .build();

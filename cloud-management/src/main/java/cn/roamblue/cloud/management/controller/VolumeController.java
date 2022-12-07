@@ -49,7 +49,12 @@ public class VolumeController {
             @RequestParam("volumeType") String volumeType) {
         return this.volumeService.migrateVolume(sourceVolumeId, storageId, volumeType);
     }
-
+    @PostMapping("/api/volume/resize")
+    public ResultUtil<VolumeModel> resizeVolume(
+            @RequestParam("volumeId") int volumeId,
+            @RequestParam("size") long size) {
+        return this.volumeService.resizeVolume(volumeId, size);
+    }
     @DeleteMapping("/api/volume/destroy")
     public ResultUtil<VolumeModel> destroyVolume(@RequestParam("volumeId") int volumeId) {
         return this.volumeService.destroyVolume(volumeId);

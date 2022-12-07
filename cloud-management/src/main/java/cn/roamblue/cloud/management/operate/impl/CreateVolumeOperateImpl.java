@@ -56,7 +56,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                     .targetVolume(volume.getPath())
                     .targetName(volume.getName())
                     .targetType(volume.getType())
-                    .targetSize(volume.getAllocation())
+                    .targetSize(volume.getCapacity())
                     .build();
             if (volume.getTemplateId() > 0) {
                 TemplateVolumeMapper templateVolumeMapper = SpringContextUtils.getBean(TemplateVolumeMapper.class);

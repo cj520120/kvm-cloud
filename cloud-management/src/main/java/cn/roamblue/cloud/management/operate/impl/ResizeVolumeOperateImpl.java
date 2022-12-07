@@ -36,7 +36,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
     @Override
     public void operate(ResizeVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.CLONE) {
+        if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.RESIZE) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
             if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
@@ -47,7 +47,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             VolumeResizeRequest request = VolumeResizeRequest.builder()
                     .sourceStorage(storage.getName())
                     .sourceVolume(volume.getPath())
-                    .size(param.getSize())
+                    .size(param.getSize()+volume.getCapacity())
                     .build();
             this.asyncInvoker(host, param, Constant.Command.VOLUME_RESIZE, request);
         } else {

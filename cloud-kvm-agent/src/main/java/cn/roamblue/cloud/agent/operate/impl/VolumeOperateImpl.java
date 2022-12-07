@@ -177,7 +177,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         if(findVol==null){
             throw  new CodeException(ErrorCode.SERVER_ERROR,"磁盘不存在:"+request.getSourceVolume());
         }
-        findVol.resize(request.getSize(),1);
+        findVol.resize(request.getSize(),0);
         StorageVolInfo storageVolInfo = findVol.getInfo();
         return VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(findVol.getName())
