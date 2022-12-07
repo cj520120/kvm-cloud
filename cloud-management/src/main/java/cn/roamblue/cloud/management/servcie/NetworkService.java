@@ -4,6 +4,7 @@ import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.NetworkEntity;
 import cn.roamblue.cloud.management.data.mapper.GuestNetworkMapper;
@@ -15,6 +16,7 @@ import cn.roamblue.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.IpCaculate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,7 @@ public class NetworkService {
     private NetworkModel initNetwork(NetworkEntity entity) {
         return new BeanConverter<>(NetworkModel.class).convert(entity, null);
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> getNetworkInfo(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -46,14 +48,14 @@ public class NetworkService {
         }
         return ResultUtil.success(this.initNetwork(network));
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<NetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());
         List<NetworkModel> models = networkList.stream().map(this::initNetwork).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> createNetwork( String name, String startIp, String endIp, String gateway, String mask, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
         NetworkEntity network = NetworkEntity.builder()
@@ -74,6 +76,7 @@ public class NetworkService {
             GuestNetworkEntity guestNetwork = GuestNetworkEntity.builder()
                     .guestId(0)
                     .ip(ip)
+                    .networkId(network.getNetworkId())
                     .mac(IpCaculate.getMacAddrWithFormat(":"))
                     .driveType("")
                     .deviceId(0)
@@ -85,7 +88,7 @@ public class NetworkService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initNetwork(network));
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> destroyNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -95,12 +98,12 @@ public class NetworkService {
         switch (network.getStatus()) {
             case Constant.NetworkStatus.READY:
             case Constant.NetworkStatus.ERROR:
-                if(guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("network_id",network).ne("guest_id",0))>0){
+                if(guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("network_id",networkId).ne("guest_id",0))>0){
                     throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "当前网络被其他虚拟机引用，请首先删除虚拟机");
                 }
                 network.setStatus(Constant.NetworkStatus.DESTROY);
                 networkMapper.updateById(network);
-                this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id",network));
+                this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id",networkId));
                 BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(networkId).build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initNetwork(network));

@@ -3,12 +3,14 @@ package cn.roamblue.cloud.management.servcie;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.GuestModel;
 import cn.roamblue.cloud.management.operate.bean.*;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,14 +52,14 @@ public class GuestService {
     private GuestModel initGuestInfo(GuestEntity entity) {
         return GuestModel.builder().build();
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -66,6 +68,7 @@ public class GuestService {
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(String description, String busType
             , int cpu, long memory, int networkId, String networkDeviceType,
@@ -121,7 +124,7 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -138,7 +141,7 @@ public class GuestService {
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
 
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> reboot(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -151,7 +154,7 @@ public class GuestService {
         }
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> shutdown(int guestId, boolean force) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -165,7 +168,7 @@ public class GuestService {
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
 
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> modifyGuest(int guestId, String description, String busType, int cpu, int memory) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -180,7 +183,7 @@ public class GuestService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachCdRoom(int guestId, int templateId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -196,7 +199,7 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachCdRoom(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -212,7 +215,7 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachDisk(int guestId, int volumeId) {
         GuestEntity guest=this.guestMapper.selectById(guestId);
@@ -246,8 +249,8 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-
     public ResultUtil<GuestModel> detachDisk(int guestId, int guestDiskId) {
         GuestEntity guest=this.guestMapper.selectById(guestId);
 
@@ -266,8 +269,8 @@ public class GuestService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-
     public ResultUtil<GuestModel> attachNetwork(int guestId, int networkId,String driveType) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
@@ -294,7 +297,7 @@ public class GuestService {
         return ResultUtil.success(this.initGuestInfo(guest));
 
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachNetwork(int guestId, int guestNetworkId) {
         GuestEntity guest=this.guestMapper.selectById(guestId);

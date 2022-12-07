@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.servcie;
 
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
@@ -9,8 +10,10 @@ import cn.roamblue.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.data.mapper.StorageMapper;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Service
 public class AllocateService {
     @Autowired
     private StorageMapper storageMapper;
@@ -26,6 +30,7 @@ public class AllocateService {
     @Autowired
     private HostMapper hostMapper;
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public StorageEntity allocateStorage(int storageId) {
         StorageEntity storage;
@@ -41,7 +46,7 @@ public class AllocateService {
         }
         return storage;
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public GuestNetworkEntity allocateNetwork(int networkId) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
@@ -54,7 +59,7 @@ public class AllocateService {
         }
         return guestNetwork;
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {

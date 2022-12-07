@@ -7,6 +7,7 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.operate.OperateEngine;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class OperateTask implements CommandLineRunner {
     private final static int TASK_TIMEOUT = 3;
@@ -48,23 +50,34 @@ public class OperateTask implements CommandLineRunner {
     }
 
     public void dispatch() {
-        RMap<String, BaseOperateParam> rMap = redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY);
-        for (Map.Entry<String, BaseOperateParam> entry : rMap.entrySet()) {
-            String taskId = entry.getKey();
-            String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
-            RBucket<Long> taskBucket = redis.getBucket(key);
-            if (taskBucket.isExists()) {
-                continue;
-            }
-            String lockKey = key + ".lock";
-            RLock lock = redis.getLock(lockKey);
-            if (lock.isLocked()) {
-                continue;
-            }
-            try {
-                if (lock.tryLock(1, TimeUnit.SECONDS)) {
-                    taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.MINUTES);
+        try {
+            RMap<String, BaseOperateParam> rMap = redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY);
+            for (Map.Entry<String, BaseOperateParam> entry : rMap.entrySet()) {
+                String taskId = entry.getKey();
+                String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
+                RBucket<Long> taskBucket = redis.getBucket(key);
+                if (taskBucket.isExists()) {
+                    continue;
+                }
+                String lockKey = key + ".lock";
+                RLock lock = redis.getLock(lockKey);
+                if (lock.isLocked()) {
+                    continue;
+                }
+                boolean isLock = false;
+                try {
+                    isLock = lock.tryLock(1, TimeUnit.SECONDS);
+                    if (isLock) {
+                        taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.MINUTES);
+                        isLock = true;
+                    }
+                } finally {
+                    if (isLock && lock.isHeldByCurrentThread()) {
+                        lock.unlock();
+                    }
 
+                }
+                if (isLock) {
                     workExecutor.submit(() -> {
                         try {
                             this.operateEngine.process(entry.getValue());
@@ -80,13 +93,9 @@ public class OperateTask implements CommandLineRunner {
                         }
                     });
                 }
-            } catch (InterruptedException err) {
-                //do nothing
-            } finally {
-                if (lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                }
             }
+        } catch (Exception err) {
+            log.error("处理任务失败。", err);
         }
 
     }

@@ -4,6 +4,7 @@ import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestDiskEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
@@ -18,6 +19,7 @@ import cn.roamblue.cloud.management.operate.bean.CreateVolumeOperate;
 import cn.roamblue.cloud.management.operate.bean.DestroyVolumeOperate;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,13 +84,13 @@ public class VolumeService {
         }
         return model;
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
@@ -96,8 +98,7 @@ public class VolumeService {
         }
         return ResultUtil.success(this.initVolume(volume));
     }
-
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> createVolume(int storageId, int templateId, String volumeType, long volumeSize) {
         StorageEntity storage = this.findStorageById(storageId);
@@ -118,7 +119,7 @@ public class VolumeService {
         VolumeModel model =this.initVolume(volume);
         return ResultUtil.success(model);
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(int sourceVolumeId, int storageId, String volumeType) {
         StorageEntity storage = this.findStorageById(storageId);
@@ -144,7 +145,7 @@ public class VolumeService {
         VolumeModel clone = this.initVolume(cloneVolume);
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
         StorageEntity storage = this.findStorageById(storageId);
@@ -170,7 +171,7 @@ public class VolumeService {
         VolumeModel migrate =this.initVolume(migrateVolume);
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
