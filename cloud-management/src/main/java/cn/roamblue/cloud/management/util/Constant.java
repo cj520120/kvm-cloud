@@ -24,12 +24,11 @@ public class Constant {
         public static final int DETACH_DISK = 3;
         public static final int DESTROY = 4;
         public static final int CLONE = 5;
-        public static final int DOWNLOAD_TEMPLATE = 6;
-        public static final int CREATE_TEMPLATE = 7;
-        public static final int SNAPSHOT = 8;
-        public static final int MIGRATE = 9;
-        public static final int RESIZE = 10;
-        public static final int ERROR = 11;
+        public static final int CREATE_TEMPLATE = 6;
+        public static final int SNAPSHOT = 7;
+        public static final int MIGRATE = 8;
+        public static final int RESIZE = 9;
+        public static final int ERROR = 10;
     }
 
     public static class NetworkStatus {
@@ -58,6 +57,7 @@ public class Constant {
 
     public static class TemplateStatus {
         public static final int DOWNLOAD = 0;
+        public static final int CREATING = 0;
         public static final int READY = 1;
         public static final int ERROR = 2;
     }
@@ -72,6 +72,7 @@ public class Constant {
         public static final int ISO = 0;
         public static final int SYSTEM = 1;
         public static final int USER = 2;
+        public static final int VOLUME = 3;
     }
 
     public static class GuestType{

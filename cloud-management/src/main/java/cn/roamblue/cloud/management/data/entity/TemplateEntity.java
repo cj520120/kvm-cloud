@@ -26,6 +26,8 @@ public class TemplateEntity {
     private String uri;
     @TableField("template_type")
     private int type;
+    @TableField("template_volume_type")
+    private String volumeType;
     @TableField("template_status")
     private int status;
     @TableField("create_time")
