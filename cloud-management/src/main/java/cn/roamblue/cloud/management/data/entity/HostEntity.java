@@ -19,9 +19,16 @@ import java.util.Date;
 public class HostEntity {
     @TableId(type = IdType.AUTO)
     @TableField("host_id")
-    private int hostId;
+    private Integer hostId;
     @TableField("host_display_name")
     private String displayName;
+
+    @TableField("client_id")
+    private String clientId;
+
+    @TableField("client_secret")
+    private String clientSecret;
+
     @TableField("host_ip")
     private String hostIp;
     @TableField("host_name")

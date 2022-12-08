@@ -3,7 +3,7 @@ package cn.roamblue.cloud.management.util;
 public class Constant {
     public static int MAX_DEVICE_ID=5;
     public static class HostStatus {
-        public static final int CREATING = 0;
+        public static final int REGISTER = 0;
         public static final int ONLINE = 1;
         public static final int OFFLINE = 2;
         public static final int MAINTENANCE = 3;
