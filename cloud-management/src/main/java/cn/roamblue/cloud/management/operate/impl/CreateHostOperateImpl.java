@@ -1,21 +1,25 @@
 package cn.roamblue.cloud.management.operate.impl;
 
-import cn.roamblue.cloud.common.bean.HostInfo;
-import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.common.bean.VolumeInfo;
+import cn.roamblue.cloud.common.bean.*;
+import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
+import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.operate.bean.CreateHostOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 创建磁盘
@@ -35,7 +39,50 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
     @Override
     public void operate(CreateHostOperate param) {
         HostEntity host = this.hostMapper.selectById(param.getHostId());
-        this.asyncInvoker(host, param, Constant.Command.HOST_INFO, new HashMap<>(0));
+        List<StorageEntity> storageList=this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t-> Objects.equals(cn.roamblue.cloud.management.util.Constant.StorageStatus.READY,t.getStatus())).collect(Collectors.toList());
+        List<NetworkEntity> networkList=this.networkMapper.selectList(new QueryWrapper<>()).stream().filter(t->Objects.equals(cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY,t.getStatus())).collect(Collectors.toList());
+        List<StorageCreateRequest> createStorageRequest=storageList.stream().map(storage->StorageCreateRequest.builder()
+                .name(storage.getName())
+                .type(storage.getType())
+                .param(GsonBuilderUtil.create().fromJson(storage.getParam(),new TypeToken<Map<String,Object>>(){}.getType()))
+                .mountPath(storage.getMountPath())
+                .build()).collect(Collectors.toList());
+        Map<Integer,BasicBridgeNetwork> basicBridgeNetworkMap=new HashMap<>();
+        for (NetworkEntity network : networkList) {
+            if(Objects.equals( cn.roamblue.cloud.management.util.Constant.NetworkType.BASIC,network.getType())){
+                basicBridgeNetworkMap.put(network.getNetworkId(),BasicBridgeNetwork.builder()
+                        .bridge(network.getBridge())
+                        .ip(host.getHostIp())
+                        .geteway(network.getGateway())
+                        .nic(host.getNic())
+                        .netmask(network.getMask()).build());
+            }
+        }
+
+        List<VlanNetwork> vlanNetworkList=new ArrayList<>();
+        for (NetworkEntity network : networkList) {
+            if(Objects.equals( cn.roamblue.cloud.management.util.Constant.NetworkType.VLAN,network.getType())){
+                BasicBridgeNetwork basicBridgeNetwork =basicBridgeNetworkMap.get(network.getBasicNetworkId());
+                if(basicBridgeNetwork!=null){
+                    vlanNetworkList.add( VlanNetwork.builder()
+                            .vlanId(network.getVlanId())
+                            .netmask(network.getMask())
+                            .basic(basicBridgeNetwork)
+                            .ip(null)
+                            .bridge(network.getBridge())
+                            .geteway(network.getGateway())
+                            .build());
+                }
+            }
+        }
+        InitHostRequest request=InitHostRequest.builder()
+                .clientId(host.getClientId())
+                .clientSecret(host.getClientSecret())
+                .storageList(createStorageRequest)
+                .basicBridgeNetworkList(basicBridgeNetworkMap.values().stream().collect(Collectors.toList()))
+                .vlanNetworkList(vlanNetworkList)
+                .build();
+        this.asyncInvoker(host, param, Constant.Command.HOST_INIT, request);
     }
 
     @Override

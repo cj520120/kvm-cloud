@@ -21,45 +21,45 @@ public class NetworkOperateImpl implements NetworkOperate {
 
     @Override
     public void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
-        addBridge(request.getNic(), request.getBridge(), request.getIp(), request.getNetmask(),request.getGeteway());
+//        addBridge(request.getNic(), request.getBridge(), request.getIp(), request.getNetmask(),request.getGeteway());
 
     }
     @Override
     public void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
-        shell("modprobe 8021q");
-        BasicBridgeNetwork bridge = vlan.getBasic();
-        String nic = bridge.getBridge();
-        String vlanNic = nic + "." + vlan.getVlanId();
-        if (NetworkInterface.getByName(vlanNic) == null) {
-            shell("vconfig add " + bridge.getBridge() + " " + vlan.getVlanId());
-            shell("vconfig set_flag " + vlanNic + " 1 1");
-            shell("ip link set " + vlanNic + " up");
-        }
-        addBridge(vlanNic, vlan.getBridge(), vlan.getIp(), vlan.getNetmask(),vlan.getGeteway());
+//        shell("modprobe 8021q");
+//        BasicBridgeNetwork bridge = vlan.getBasic();
+//        String nic = bridge.getBridge();
+//        String vlanNic = nic + "." + vlan.getVlanId();
+//        if (NetworkInterface.getByName(vlanNic) == null) {
+//            shell("vconfig add " + bridge.getBridge() + " " + vlan.getVlanId());
+//            shell("vconfig set_flag " + vlanNic + " 1 1");
+//            shell("ip link set " + vlanNic + " up");
+//        }
+//        addBridge(vlanNic, vlan.getBridge(), vlan.getIp(), vlan.getNetmask(),vlan.getGeteway());
     }
 
     @Override
     public void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
-        if (NetworkInterface.getByName(bridge.getBridge()) != null) {
-            shell("ip link set " + bridge.getBridge() + " down");
-            shell("brctl delbr " + bridge.getBridge());
-            shell("ifconfig " + bridge.getNic() + " " + bridge.getIp() + " netmask " + bridge.getNetmask() + " up");
-            shell("route add default gw " + bridge.getGeteway() + " " + bridge.getNic());
-        }
+//        if (NetworkInterface.getByName(bridge.getBridge()) != null) {
+//            shell("ip link set " + bridge.getBridge() + " down");
+//            shell("brctl delbr " + bridge.getBridge());
+//            shell("ifconfig " + bridge.getNic() + " " + bridge.getIp() + " netmask " + bridge.getNetmask() + " up");
+//            shell("route add default gw " + bridge.getGeteway() + " " + bridge.getNic());
+//        }
     }
 
     @Override
     public void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
-        BasicBridgeNetwork bridge = vlan.getBasic();
-        String vlanNic = bridge.getBridge() + "." + vlan.getVlanId();
-        if (NetworkInterface.getByName(bridge.getBridge()) != null) {
-            shell("ip link set " + vlan.getBridge() + " down");
-            if (NetworkInterface.getByName(vlan.getBridge()) != null) {
-                shell("brctl delbr " + vlan.getBridge());
-            }
-            shell("ip link set " + vlanNic + " down");
-            shell("vconfig rem " + vlanNic);
-        }
+//        BasicBridgeNetwork bridge = vlan.getBasic();
+//        String vlanNic = bridge.getBridge() + "." + vlan.getVlanId();
+//        if (NetworkInterface.getByName(bridge.getBridge()) != null) {
+//            shell("ip link set " + vlan.getBridge() + " down");
+//            if (NetworkInterface.getByName(vlan.getBridge()) != null) {
+//                shell("brctl delbr " + vlan.getBridge());
+//            }
+//            shell("ip link set " + vlanNic + " down");
+//            shell("vconfig rem " + vlanNic);
+//        }
     }
 
     private void addBridge(String nic, String bridge, String ip, String netmask,String gateway) throws Exception {

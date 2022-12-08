@@ -1,29 +1,45 @@
 package cn.roamblue.cloud.agent.util;
 
 import cn.hutool.core.io.FileUtil;
-import lombok.Synchronized;
-import org.apache.commons.lang3.StringUtils;
+import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
+import cn.roamblue.cloud.common.util.AppUtils;
+import com.google.gson.reflect.TypeToken;
+import lombok.Getter;
+import org.springframework.boot.CommandLineRunner;
 
 import java.io.File;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author chenjun
  */
-public class HostUtil {
+@Getter
+public class HostUtil implements CommandLineRunner {
 
-    private static String hostId;
 
-    @Synchronized
-    public static String getHostId() {
-        if (StringUtils.isEmpty(hostId)) {
-            File file = new File("HostId");
-            if (!FileUtil.exist(file)) {
-                FileUtil.writeString(UUID.randomUUID().toString().replace("-", "").toUpperCase(Locale.ROOT), file.getPath(), "UTF-8");
-            }
-            HostUtil.hostId = FileUtil.readUtf8String(file);
+    private String clientId;
+    private String clientSecret;
+
+    public void init(String clientId, String clientSecret) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        Map<String,String> config=new HashMap<>(2);
+        config.put("clientId",clientId);
+        config.put("clientSecret",clientSecret);
+        FileUtil.writeUtf8String(GsonBuilderUtil.create().toJson(config), "config.json");
+    }
+    private void init() throws Exception{
+        File file=new File("config.json");
+        if(file.exists()){
+            Map<String,String> config= GsonBuilderUtil.create().fromJson(FileUtil.readUtf8String(file),new TypeToken<Map<String,Object>>(){}.getType());
+            this.clientId= config.get("clientId");
+            this.clientSecret= config.get("clientSecret");
         }
-        return hostId;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        this.init();
     }
 }

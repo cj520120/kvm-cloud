@@ -3,13 +3,16 @@ package cn.roamblue.cloud.agent.operate.impl;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.roamblue.cloud.agent.operate.HostOperate;
+import cn.roamblue.cloud.agent.operate.NetworkOperate;
+import cn.roamblue.cloud.agent.operate.StorageOperate;
 import cn.roamblue.cloud.agent.util.HostUtil;
-import cn.roamblue.cloud.common.bean.HostInfo;
+import cn.roamblue.cloud.common.bean.*;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -21,7 +24,12 @@ import java.util.List;
  */
 @Component
 public class HostOperateImpl implements HostOperate {
-
+    @Autowired
+    private NetworkOperate networkOperate;
+    @Autowired
+    private StorageOperate storageOperate;
+    @Autowired
+    private HostUtil hostUtil;
     private static String getEmulator(String xml) throws SAXException, DocumentException {
         String emulator = null;
         try (StringReader sr = new StringReader(xml)) {
@@ -68,5 +76,28 @@ public class HostOperateImpl implements HostOperate {
                 .name(osInfo.getName())
                 .emulator(emulator)
                 .build();
+    }
+    @Override
+    public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
+        hostUtil.init(request.getClientId(), request.getClientSecret());
+        List<StorageCreateRequest> storageList=request.getStorageList();
+        if(storageList!=null) {
+            for (StorageCreateRequest storage : storageList) {
+                this.storageOperate.create(connect, storage);
+            }
+        }
+        List<BasicBridgeNetwork> basicBridgeNetworkList=request.getBasicBridgeNetworkList();
+        if(basicBridgeNetworkList!=null) {
+            for (BasicBridgeNetwork basicBridgeNetwork : basicBridgeNetworkList) {
+                this.networkOperate.createBasic(connect, basicBridgeNetwork);
+            }
+        }
+        List<VlanNetwork> vlanNetworkList=request.getVlanNetworkList();
+        if(vlanNetworkList!=null) {
+            for (VlanNetwork vlanNetwork : vlanNetworkList) {
+                this.networkOperate.createVlan(connect, vlanNetwork);
+            }
+        }
+        return this.getHostInfo(connect);
     }
 }

@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.agent.operate;
 
 import cn.roamblue.cloud.common.bean.HostInfo;
+import cn.roamblue.cloud.common.bean.InitHostRequest;
 import org.libvirt.Connect;
 
 public interface HostOperate {
@@ -11,4 +12,6 @@ public interface HostOperate {
      * @throws Exception
      */
     HostInfo getHostInfo(Connect connect) throws Exception;
+
+    HostInfo initHost(Connect connect, InitHostRequest request) throws Exception;
 }

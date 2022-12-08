@@ -23,13 +23,15 @@ public class LockAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Lock lock = signature.getMethod().getAnnotation(Lock.class);
         String key= lock.value();
-        RLock rLock=redisson.getLock(key);
+        RLock rLock = redisson.getLock(key);
+        boolean isLocked = false;
         try {
-            rLock.lock(lock.timeout(),lock.timeUnit());
+            rLock.lock(lock.timeout(), lock.timeUnit());
+            isLocked = true;
             return joinPoint.proceed();
         }finally {
             try {
-                if (rLock.isHeldByCurrentThread()) {
+                if (isLocked && rLock.isHeldByCurrentThread()) {
                     rLock.unlock();
                 }
             }catch (Exception err){

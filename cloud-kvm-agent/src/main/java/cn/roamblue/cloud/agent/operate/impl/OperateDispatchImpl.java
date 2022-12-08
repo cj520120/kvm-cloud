@@ -65,7 +65,6 @@ public class OperateDispatchImpl implements OperateDispatch {
                 taskMap.remove(taskId);
                 String nonce = String.valueOf(System.currentTimeMillis());
                 Map<String, Object> map = new HashMap<>(5);
-                map.put("hostId", HostUtil.getHostId());
                 map.put("taskId", taskId);
                 map.put("startTime", taskMap.get(taskId));
                 map.put("data", GsonBuilderUtil.create().toJson(result));
@@ -102,6 +101,11 @@ public class OperateDispatchImpl implements OperateDispatch {
                 case Constant.Command.HOST_INFO:
                     result = (T) hostOperate.getHostInfo(connect);
                     break;
+
+                case Constant.Command.HOST_INIT:
+                    result = (T) hostOperate.initHost(connect,GsonBuilderUtil.create().fromJson(data, InitHostRequest.class));
+                    break;
+
                 case Constant.Command.NETWORK_CREATE_BASIC:
                     networkOperate.createBasic(connect, GsonBuilderUtil.create().fromJson(data, BasicBridgeNetwork.class));
                     break;
