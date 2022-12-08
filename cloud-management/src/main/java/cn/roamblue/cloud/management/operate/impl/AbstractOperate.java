@@ -9,7 +9,6 @@ import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.operate.Operate;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
-import cn.roamblue.cloud.management.task.LocalReportTask;
 import cn.roamblue.cloud.management.task.OperateTask;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author chenjun
@@ -44,7 +44,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected GuestVncMapper guestVncMapper;
     @Autowired
-    protected LocalReportTask localReportTask;
+    protected SnapshotVolumeMapper snapshotVolumeMapper;
 
     @Autowired
     @Lazy
@@ -62,6 +62,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     protected V syncInvoker(HostEntity host, T param, String command, Object data) {
         Map<String, Object> map = new HashMap<>(2);
         map.put("data", GsonBuilderUtil.create().toJson(data));
+        map.put("taskId", param.getTaskId());
         map.put("command", command);
         String uri = String.format("%s/api/operate", host.getUri());
         String response = HttpUtil.post(uri, map);
@@ -75,6 +76,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
                 .taskId(param.getTaskId()).build();
         Map<String, Object> map = new HashMap<>(2);
         map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
+        map.put("taskId", UUID.randomUUID().toString());
         map.put("command", Constant.Command.SUBMIT_TASK);
         String uri = String.format("%s/api/operate", host.getUri());
         String response = HttpUtil.post(uri, map);

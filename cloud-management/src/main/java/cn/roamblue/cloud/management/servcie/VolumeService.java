@@ -5,14 +5,9 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
-import cn.roamblue.cloud.management.data.entity.GuestDiskEntity;
-import cn.roamblue.cloud.management.data.entity.StorageEntity;
-import cn.roamblue.cloud.management.data.entity.VolumeEntity;
+import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
-import cn.roamblue.cloud.management.model.CloneModel;
-import cn.roamblue.cloud.management.model.MigrateModel;
-import cn.roamblue.cloud.management.model.VolumeAttachModel;
-import cn.roamblue.cloud.management.model.VolumeModel;
+import cn.roamblue.cloud.management.model.*;
 import cn.roamblue.cloud.management.operate.bean.*;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
@@ -40,25 +35,26 @@ public class VolumeService {
     private OperateTask operateTask;
     @Autowired
     private TemplateVolumeMapper templateVolumeMapper;
-
+    @Autowired
+    private SnapshotVolumeMapper snapshotVolumeMapper;
     @Autowired
     private GuestDiskMapper guestDiskMapper;
+    @Autowired
+    private AllocateService allocateService;
 
+    @Autowired
+    private GuestMapper guestMapper;
 
-    public StorageEntity findStorageById(int storageId) {
-        StorageEntity storage;
-        if (storageId > 0) {
-            storage = storageMapper.selectById(storageId);
-            if (storage == null) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
-            }
-        } else {
-            List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
-            storageList = storageList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.StorageStatus.READY)).collect(Collectors.toList());
-            storage = storageList.stream().sorted((o1, o2) -> Long.compare(o2.getAvailable(), o1.getAvailable())).findFirst().orElse(null);
+    private GuestEntity getVolumeGuest(int volumeId) {
+        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+        if (guestDisk == null) {
+            return null;
         }
-        return storage;
+        GuestEntity guest = guestMapper.selectById(guestDisk.getGuestId());
+        return guest;
     }
+
+
     private VolumeEntity findAndUpdateVolumeStatus(int volumeId,int status){
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
@@ -81,6 +77,11 @@ public class VolumeService {
         }
         return model;
     }
+    private SnapshotModel initSnapshot(SnapshotVolumeEntity volume) {
+        SnapshotModel model = new BeanConverter<>(SnapshotModel.class).convert(volume, null);
+
+        return model;
+    }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
@@ -97,12 +98,12 @@ public class VolumeService {
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(int storageId, int templateId, String volumeType, long volumeSize) {
-        StorageEntity storage = this.findStorageById(storageId);
+    public ResultUtil<VolumeModel> createVolume(int storageId, int templateId,int snapshotVolumeId, String volumeType, long volumeSize) {
+        StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storageId)
-                .templateId(templateId)
+                .templateId(0)
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
@@ -111,7 +112,7 @@ public class VolumeService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(volume);
-        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).volumeId(volume.getVolumeId()).build();
+        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
         operateTask.addTask(operateParam);
         VolumeModel model =this.initVolume(volume);
         return ResultUtil.success(model);
@@ -119,9 +120,20 @@ public class VolumeService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(int sourceVolumeId, int storageId, String volumeType) {
-        StorageEntity storage = this.findStorageById(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
+        GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
+        if (guest != null) {
+            switch (guest.getStatus()) {
+                case Constant.GuestStatus.STOP:
+                case Constant.GuestStatus.ERROR:
+                case Constant.GuestStatus.DESTROY:
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+            }
+        }
         VolumeEntity cloneVolume = VolumeEntity.builder()
                 .storageId(storageId)
                 .templateId(volume.getTemplateId())
@@ -158,9 +170,20 @@ public class VolumeService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
-        StorageEntity storage = this.findStorageById(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
+        GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
+        if (guest != null) {
+            switch (guest.getStatus()) {
+                case Constant.GuestStatus.STOP:
+                case Constant.GuestStatus.ERROR:
+                case Constant.GuestStatus.DESTROY:
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+            }
+        }
         VolumeEntity migrateVolume = VolumeEntity.builder()
                 .storageId(storageId)
                 .templateId(volume.getTemplateId())
@@ -186,7 +209,11 @@ public class VolumeService {
     public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
-           return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND,"磁盘不存在");
+            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
+        }
+        GuestEntity guest = this.getVolumeGuest(volumeId);
+        if (guest != null) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘正在被虚拟机挂载，请卸载后重试");
         }
         switch (volume.getStatus()) {
             case Constant.VolumeStatus.ERROR:
@@ -202,6 +229,76 @@ public class VolumeService {
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
+        }
+    }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<SnapshotModel>> listSnapshot(){
+       List<SnapshotVolumeEntity> snapshotVolumeList =this.snapshotVolumeMapper.selectList(new QueryWrapper<>());
+        List<SnapshotModel> models=snapshotVolumeList.stream().map(this::initSnapshot).collect(Collectors.toList());
+        return ResultUtil.success(models);
+    }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<SnapshotModel> getSnapshotInfo(int snapshotVolumeId){
+        SnapshotVolumeEntity snapshotVolume=this.snapshotVolumeMapper.selectById(snapshotVolumeId);
+        if(snapshotVolume==null){
+            throw new CodeException(ErrorCode.SERVER_ERROR,"快照不存在");
+        }
+        return ResultUtil.success(this.initSnapshot(snapshotVolume));
+    }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId,String snapshotName,String snapshotVolumeType) {
+        StorageEntity storage = this.allocateService.allocateStorage(0);
+        VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.CREATE_SNAPSHOT);
+        GuestEntity guest = this.getVolumeGuest(volumeId);
+        if (guest != null) {
+            switch (guest.getStatus()) {
+                case Constant.GuestStatus.STOP:
+                case Constant.GuestStatus.ERROR:
+                case Constant.GuestStatus.DESTROY:
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+            }
+        }
+
+        String volumeName = UUID.randomUUID().toString();
+        SnapshotVolumeEntity snapshotVolume = SnapshotVolumeEntity.builder()
+                .name(snapshotName)
+                .storageId(storage.getStorageId())
+                .volumeName(volumeName)
+                .volumePath(storage.getMountPath() + "/" + volumeName)
+                .type(snapshotVolumeType)
+                .capacity(0)
+                .status(Constant.SnapshotStatus.CREATING)
+                .createTime(new Date())
+                .build();
+        this.snapshotVolumeMapper.insert(snapshotVolume);
+        BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
+        operateTask.addTask(operateParam);
+        SnapshotModel model =this.initSnapshot(snapshotVolume);
+        return ResultUtil.success(model);
+    }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<SnapshotModel> destroySnapshot(int snapshotVolumeId) {
+        SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);
+        if (volume == null) {
+            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "快照不存在");
+        }
+        switch (volume.getStatus()) {
+            case Constant.SnapshotStatus.ERROR:
+            case Constant.SnapshotStatus.READY:
+                volume.setStatus(Constant.SnapshotStatus.DESTROY);
+                this.snapshotVolumeMapper.updateById(volume);
+                BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).snapshotVolumeId(snapshotVolumeId).build();
+                operateTask.addTask(operate);
+                SnapshotModel source = this.initSnapshot(volume);
+                return ResultUtil.success(source);
+            default:
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");
         }
     }
 

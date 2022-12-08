@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.controller;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.model.CloneModel;
 import cn.roamblue.cloud.management.model.MigrateModel;
+import cn.roamblue.cloud.management.model.SnapshotModel;
 import cn.roamblue.cloud.management.model.VolumeModel;
 import cn.roamblue.cloud.management.servcie.VolumeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,10 @@ public class VolumeController {
     @PutMapping("/api/volume/create")
     public ResultUtil<VolumeModel> createVolume(@RequestParam("storageId") int storageId,
                                                 @RequestParam("templateId") int templateId,
+                                                @RequestParam("snapshotVolumeId") int snapshotVolumeId,
                                                 @RequestParam("volumeType") String volumeType,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        return this.volumeService.createVolume(storageId, templateId, volumeType, volumeSize);
+        return this.volumeService.createVolume(storageId, templateId,snapshotVolumeId, volumeType, volumeSize);
     }
 
     @PutMapping("/api/volume/clone")
@@ -59,6 +61,24 @@ public class VolumeController {
     public ResultUtil<VolumeModel> destroyVolume(@RequestParam("volumeId") int volumeId) {
         return this.volumeService.destroyVolume(volumeId);
     }
+    @GetMapping("/api/snapshot/all")
+    public ResultUtil<List<SnapshotModel>> listSnapshot(){
+        return this.volumeService.listSnapshot();
+    }
 
+    @GetMapping("/api/snapshot/info")
+    public ResultUtil<SnapshotModel> getSnapshotInfo(@RequestParam("snapshotVolumeId") int snapshotVolumeId){
+        return this.volumeService.getSnapshotInfo(snapshotVolumeId);
+    }
+    @PutMapping("/api/snapshot/create")
+    public ResultUtil<SnapshotModel> createVolumeSnapshot(@RequestParam("volumeId") int volumeId,
+                                                          @RequestParam("snapshotName") String snapshotName,
+                                                          @RequestParam("snapshotVolumeType") String snapshotVolumeType) {
+        return this.volumeService.createVolumeSnapshot(volumeId, snapshotName, snapshotVolumeType);
+    }
+    @DeleteMapping("/api/snapshot/destroy")
+    public ResultUtil<SnapshotModel> destroySnapshot(@RequestParam("") int snapshotVolumeId) {
+        return this.volumeService.destroySnapshot(snapshotVolumeId);
+    }
 }
 

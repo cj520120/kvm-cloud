@@ -25,7 +25,7 @@ public class TemplateEntity {
     @TableField("template_uri")
     private String uri;
     @TableField("template_type")
-    private int type;
+    private int templateType;
     @TableField("template_volume_type")
     private String volumeType;
     @TableField("template_status")

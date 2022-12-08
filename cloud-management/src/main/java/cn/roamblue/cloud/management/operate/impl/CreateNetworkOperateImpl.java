@@ -33,7 +33,6 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
 
     @Override
     public void operate(CreateNetworkOperate param) {
-        localReportTask.addTaskId(param.getTaskId());
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
         ResultUtil<Void> resultUtil = null;
@@ -86,7 +85,6 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
 
     @Override
     public void onFinish(CreateNetworkOperate param, ResultUtil<Void> resultUtil) {
-        localReportTask.removeTaskId(param.getTaskId());
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY);

@@ -35,7 +35,6 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
 
     @Override
     public void operate(CreateStorageOperate param) {
-        localReportTask.addTaskId(param.getTaskId());
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
         if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.INIT) {
             List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
@@ -71,7 +70,6 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
 
     @Override
     public void onFinish(CreateStorageOperate param, ResultUtil<StorageInfo> resultUtil) {
-        localReportTask.removeTaskId(param.getTaskId());
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
 
         if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.INIT) {

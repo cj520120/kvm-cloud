@@ -12,8 +12,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class CreateVolumeOperate extends BaseOperateParam {
-    private int volumeId;
-    private int templateId;
+public class DestroySnapshotVolumeOperate extends BaseOperateParam {
     private int snapshotVolumeId;
 }

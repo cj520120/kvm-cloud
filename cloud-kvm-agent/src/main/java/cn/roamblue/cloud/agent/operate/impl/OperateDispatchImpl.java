@@ -17,11 +17,13 @@ import org.libvirt.Connect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -53,7 +55,7 @@ public class OperateDispatchImpl implements OperateDispatch {
         this.executor.submit(() -> {
             ResultUtil result = null;
             try {
-                  result = dispatch(command, data);
+                  result = dispatch(taskId,command, data);
             } catch (CodeException err){
                 result=ResultUtil.error(err.getCode(),err.getMessage());
             }catch (Exception err) {
@@ -61,7 +63,6 @@ public class OperateDispatchImpl implements OperateDispatch {
                 log.error("执行任务出错.", err);
             } finally {
                 taskMap.remove(taskId);
-
                 String nonce = String.valueOf(System.currentTimeMillis());
                 Map<String, Object> map = new HashMap<>(5);
                 map.put("hostId", HostUtil.getHostId());
@@ -82,14 +83,15 @@ public class OperateDispatchImpl implements OperateDispatch {
     }
 
     @Override
-    public <T> ResultUtil<T> dispatch(String command, String data) {
+    public <T> ResultUtil<T> dispatch(String taskId,String command, String data) {
+        this.taskMap.put(taskId,System.currentTimeMillis());
         Connect connect = null;
         try {
             T result = null;
             connect = connectPool.borrowObject();
             switch (command) {
                 case Constant.Command.CHECK_TASK:
-                    result = (T) (Object) taskMap.contains(data);
+                    result = (T) taskMap.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
                     break;
 
                 case Constant.Command.SUBMIT_TASK:
@@ -212,6 +214,7 @@ public class OperateDispatchImpl implements OperateDispatch {
             if (connect != null) {
                 connectPool.returnObject(connect);
             }
+            this.taskMap.remove(taskId);
         }
     }
 }

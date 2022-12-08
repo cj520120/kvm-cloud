@@ -15,8 +15,8 @@ public class OperateController {
     @Autowired
     private OperateDispatch dispatch;
     @PostMapping("/api/operate")
-    public <T> ResultUtil<T> execute(@RequestParam("command") String command,@RequestParam("data") String data) {
-       return dispatch.dispatch(command,data);
+    public <T> ResultUtil<T> execute(@RequestParam("taskId") String taskId,@RequestParam("command") String command,@RequestParam("data") String data) {
+       return dispatch.dispatch(taskId,command,data);
     }
 
 }

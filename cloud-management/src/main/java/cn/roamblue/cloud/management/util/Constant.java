@@ -16,7 +16,12 @@ public class Constant {
         public static final int DESTROY = 2;
         public static final int ERROR = 3;
     }
-
+    public static class SnapshotStatus{
+        public static final int CREATING = 0;
+        public static final int READY = 1;
+        public static final int ERROR = 2;
+        public static final int DESTROY = 3;
+    }
     public static class VolumeStatus {
         public static final int CREATING = 0;
         public static final int READY = 1;
@@ -25,7 +30,7 @@ public class Constant {
         public static final int DESTROY = 4;
         public static final int CLONE = 5;
         public static final int CREATE_TEMPLATE = 6;
-        public static final int SNAPSHOT = 7;
+        public static final int CREATE_SNAPSHOT = 7;
         public static final int MIGRATE = 8;
         public static final int RESIZE = 9;
         public static final int ERROR = 10;
@@ -71,8 +76,7 @@ public class Constant {
     public static class TemplateType {
         public static final int ISO = 0;
         public static final int SYSTEM = 1;
-        public static final int USER = 2;
-        public static final int VOLUME = 3;
+        public static final int VOLUME = 2;
     }
 
     public static class GuestType{

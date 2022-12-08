@@ -7,6 +7,7 @@ import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
+import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.DestroyStorageOperate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -32,7 +33,6 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
 
     @Override
     public void operate(DestroyStorageOperate param) {
-        localReportTask.addTaskId(param.getTaskId());
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
         if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.DESTROY) {
             List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
@@ -59,10 +59,10 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
 
     @Override
     public void onFinish(DestroyStorageOperate param, ResultUtil<Void> resultUtil) {
-        localReportTask.removeTaskId(param.getTaskId());
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
         if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.DESTROY) {
             storageMapper.deleteById(param.getStorageId());
+            templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("storage_id", param.getStorageId()));
         }
     }
 }

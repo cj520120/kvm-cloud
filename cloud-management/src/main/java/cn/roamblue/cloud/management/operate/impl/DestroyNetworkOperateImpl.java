@@ -33,7 +33,6 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
 
     @Override
     public void operate(DestroyNetworkOperate param) {
-        localReportTask.addTaskId(param.getTaskId());
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
         if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.DESTROY) {
             List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
@@ -82,7 +81,6 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
 
     @Override
     public void onFinish(DestroyNetworkOperate param, ResultUtil<Void> resultUtil) {
-        localReportTask.removeTaskId(param.getTaskId());
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
         if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.DESTROY) {
             networkMapper.deleteById(param.getNetworkId());

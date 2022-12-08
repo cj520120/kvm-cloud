@@ -11,31 +11,36 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * @author chenjun
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@TableName("tbl_template_volume")
-public class TemplateVolumeEntity {
+@TableName("tbl_snapshot_volume")
+public class SnapshotVolumeEntity {
+
     @TableId(type = IdType.AUTO)
-    @TableField("template_volume_id")
-    private Integer templateVolumeId;
-    @TableField("template_id")
-    private int templateId;
+    @TableField("snapshot_volume_id")
+    private Integer snapshotVolumeId;
+    @TableField("snapshot_name")
+    private String name;
     @TableField("storage_id")
     private int storageId;
-    @TableField("template_name")
-    private String name;
-    @TableField("template_path")
-    private String path;
-    @TableField("template_capacity")
+    @TableField("volume_name")
+    private String volumeName;
+    @TableField("volume_path")
+    private String volumePath;
+    @TableField("volume_capacity")
     private long capacity;
-    @TableField("template_allocation")
+    @TableField("volume_allocation")
     private long allocation;
-    @TableField("template_type")
+    @TableField("volume_type")
     private String type;
-    @TableField("template_status")
+    @TableField("volume_status")
     private int status;
     @TableField("create_time")
     private Date createTime;
+
 }

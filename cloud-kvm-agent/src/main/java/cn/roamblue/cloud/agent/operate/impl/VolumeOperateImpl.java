@@ -218,6 +218,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         FileUtil.mkParentDirs(request.getTargetVolume());
         String tempFile=request.getTargetVolume()+".data";
         try {
+            FileUtil.del(tempFile);
             HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
             return clone(connect, VolumeCloneRequest.builder()
                     .sourceStorage(request.getTargetStorage())
