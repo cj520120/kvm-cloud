@@ -5,14 +5,17 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.ChangeGuestCdRoomOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Type;
@@ -34,6 +37,9 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
     public ChangeGuestCdRoomOperateImpl(Class<T> tClass){
         super(tClass);
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -72,7 +78,8 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
         return new TypeToken<ResultUtil<Void>>() {
         }.getType();
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(T param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());

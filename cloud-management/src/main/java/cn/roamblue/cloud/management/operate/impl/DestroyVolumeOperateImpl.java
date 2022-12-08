@@ -5,14 +5,17 @@ import cn.roamblue.cloud.common.bean.VolumeDestroyRequest;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.DestroyVolumeOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -32,6 +35,8 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         super(DestroyVolumeOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());

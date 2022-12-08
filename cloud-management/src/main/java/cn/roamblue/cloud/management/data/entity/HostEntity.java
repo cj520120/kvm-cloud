@@ -24,6 +24,8 @@ public class HostEntity {
     private String displayName;
     @TableField("host_ip")
     private String hostIp;
+    @TableField("host_name")
+    private String hostName;
     @TableField("host_nic_name")
     private String nic;
     @TableField("host_uri")

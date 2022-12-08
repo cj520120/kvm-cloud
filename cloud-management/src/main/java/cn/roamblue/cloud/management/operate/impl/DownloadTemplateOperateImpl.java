@@ -6,15 +6,18 @@ import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.TemplateEntity;
 import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.DownloadTemplateOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -29,6 +32,8 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         super(DownloadTemplateOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DownloadTemplateOperate param) {
         TemplateVolumeEntity templateVolume = templateVolumeMapper.selectById(param.getTemplateVolumeId());
@@ -68,6 +73,8 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         }.getType();
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DownloadTemplateOperate param, ResultUtil<VolumeInfo> resultUtil) {
         TemplateVolumeEntity templateVolume = templateVolumeMapper.selectById(param.getTemplateVolumeId());

@@ -5,12 +5,15 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.operate.bean.RebootGuestOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -26,6 +29,8 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
         super(RebootGuestOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(RebootGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -45,6 +50,8 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
         }.getType();
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(RebootGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());

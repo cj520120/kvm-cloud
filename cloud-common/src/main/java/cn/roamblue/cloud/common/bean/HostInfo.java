@@ -26,10 +26,6 @@ public class HostInfo implements Serializable {
      */
     private String hostName;
     /**
-     * 主机ID
-     */
-    private String hostId;
-    /**
      * Libvirt版本
      */
     private long version;

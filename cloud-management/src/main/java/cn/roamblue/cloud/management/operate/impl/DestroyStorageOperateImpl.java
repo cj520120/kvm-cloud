@@ -5,14 +5,17 @@ import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.DestroyStorageOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -31,6 +34,8 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
         super(DestroyStorageOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyStorageOperate param) {
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
@@ -57,6 +62,8 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
         }.getType();
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DestroyStorageOperate param, ResultUtil<Void> resultUtil) {
         StorageEntity storage = storageMapper.selectById(param.getStorageId());

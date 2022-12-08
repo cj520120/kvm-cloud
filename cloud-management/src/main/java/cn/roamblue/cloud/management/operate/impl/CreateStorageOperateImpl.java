@@ -7,13 +7,16 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.operate.bean.CreateStorageOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -33,6 +36,8 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
         super(CreateStorageOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CreateStorageOperate param) {
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
@@ -68,6 +73,8 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
         }.getType();
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateStorageOperate param, ResultUtil<StorageInfo> resultUtil) {
         StorageEntity storage = storageMapper.selectById(param.getStorageId());

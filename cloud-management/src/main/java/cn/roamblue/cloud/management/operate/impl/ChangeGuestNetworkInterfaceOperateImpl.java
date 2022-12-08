@@ -3,14 +3,15 @@ package cn.roamblue.cloud.management.operate.impl;
 import cn.roamblue.cloud.common.bean.OsNic;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.Constant;
-import cn.roamblue.cloud.management.data.entity.GuestEntity;
-import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
-import cn.roamblue.cloud.management.data.entity.HostEntity;
-import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.annotation.Lock;
+import cn.roamblue.cloud.management.data.entity.*;
+import cn.roamblue.cloud.management.operate.bean.ChangeGuestDiskOperate;
 import cn.roamblue.cloud.management.operate.bean.ChangeGuestNetworkInterfaceOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -27,6 +28,8 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
         super(ChangeGuestNetworkInterfaceOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ChangeGuestNetworkInterfaceOperate param) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());

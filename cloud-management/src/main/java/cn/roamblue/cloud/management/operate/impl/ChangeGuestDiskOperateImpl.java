@@ -5,14 +5,17 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestDiskEntity;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.ChangeGuestDiskOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -29,6 +32,8 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         super(ChangeGuestDiskOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ChangeGuestDiskOperate param) {
         GuestDiskEntity guestDisk = guestDiskMapper.selectById(param.getGuestDiskId());
@@ -64,7 +69,8 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         return new TypeToken<ResultUtil<Void>>() {
         }.getType();
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
         GuestDiskEntity guestDisk = guestDiskMapper.selectById(param.getGuestDiskId());

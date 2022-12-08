@@ -39,34 +39,38 @@ public class TaskIdSyncTask implements CommandLineRunner {
     }
 
     private void sync() {
-        RBucket<Long> rBucket = redissonClient.getBucket(RedisKeyUtil.TASK_ID_SYNC_KEY);
-        if (rBucket.isExists()) {
-            return;
-        }
-        if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
-            List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
-            for (HostEntity host : hostList) {
-                if (Objects.equals(host.getStatus(), cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE)) {
-                    Map<String, Object> map = new HashMap<>(3);
-                    map.put("command", Constant.Command.CHECK_TASK);
-                    map.put("taskId", UUID.randomUUID().toString());
-                    map.put("data", "{}");
-                    try {
-                        String uri = String.format("%s/api/operate", host.getUri());
-                        String response = HttpUtil.post(uri, map);
-                        ResultUtil<List<String>> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<List<String>>>() {
-                        }.getType());
-                        List<String> taskIds = resultUtil.getData();
-                        if (taskIds != null) {
-                            for (String taskId : taskIds) {
-                                operateTask.keepTask(taskId);
+        try {
+            RBucket<Long> rBucket = redissonClient.getBucket(RedisKeyUtil.TASK_ID_SYNC_KEY);
+            if (rBucket.isExists()) {
+                return;
+            }
+            if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
+                List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
+                for (HostEntity host : hostList) {
+                    if (Objects.equals(host.getStatus(), cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE)) {
+                        Map<String, Object> map = new HashMap<>(3);
+                        map.put("command", Constant.Command.CHECK_TASK);
+                        map.put("taskId", UUID.randomUUID().toString());
+                        map.put("data", "{}");
+                        try {
+                            String uri = String.format("%s/api/operate", host.getUri());
+                            String response = HttpUtil.post(uri, map);
+                            ResultUtil<List<String>> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<List<String>>>() {
+                            }.getType());
+                            List<String> taskIds = resultUtil.getData();
+                            if (taskIds != null) {
+                                for (String taskId : taskIds) {
+                                    operateTask.keepTask(taskId);
+                                }
                             }
-                        }
-                    } catch (Exception err) {
+                        } catch (Exception err) {
 
+                        }
                     }
                 }
             }
+        }catch (Exception err){
+            
         }
     }
 }

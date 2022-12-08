@@ -6,14 +6,17 @@ import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.CloneVolumeOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -33,6 +36,8 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
         super(CloneVolumeOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CloneVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
@@ -71,7 +76,8 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
         return new TypeToken<ResultUtil<VolumeInfo>>() {
         }.getType();
     }
-
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CloneVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());

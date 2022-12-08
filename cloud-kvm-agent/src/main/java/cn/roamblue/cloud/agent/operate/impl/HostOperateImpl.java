@@ -59,7 +59,6 @@ public class HostOperateImpl implements HostOperate {
         OsInfo osInfo = SystemUtil.getOsInfo();
         String emulator = getEmulator(connect.getCapabilities());
         return HostInfo.builder().hostName(connect.getHostName())
-                .hostId(HostUtil.getHostId())
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(connect.nodeInfo().memory)

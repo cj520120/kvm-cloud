@@ -5,14 +5,17 @@ import cn.roamblue.cloud.common.bean.VolumeDestroyRequest;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.SnapshotVolumeEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.operate.bean.DestroySnapshotVolumeOperate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -32,6 +35,8 @@ public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySna
         super(DestroySnapshotVolumeOperate.class);
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroySnapshotVolumeOperate param) {
         SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(param.getSnapshotVolumeId());
@@ -62,6 +67,8 @@ public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySna
         }.getType();
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DestroySnapshotVolumeOperate param, ResultUtil<Void> resultUtil) {
         SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(param.getSnapshotVolumeId());
