@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.servcie;
 
+import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -48,10 +49,16 @@ public class GuestService {
     @Autowired
     private AllocateService allocateService;
 
+    @Autowired
+    private VolumeService volumeService;
+
+    @Autowired
+    private GuestVncMapper guestVncMapper;
 
     private GuestModel initGuestInfo(GuestEntity entity) {
-        return GuestModel.builder().build();
+        return new BeanConverter<>(GuestModel.class).convert(entity, null);
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
@@ -71,28 +78,28 @@ public class GuestService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(String description, String busType
-            , int cpu, long memory, int networkId, String networkDeviceType,
-                                              int cdRoom, int templateId,
+            ,int hostId, int cpu, long memory, int networkId, String networkDeviceType,
+                                              int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                               int storageId, String volumeType, long size) {
 
 
         String uid = UUID.randomUUID().toString().replace("-", "");
-        HostEntity host = this.allocateService.allocateHost(0, 0, cpu, memory);
+        HostEntity host = this.allocateService.allocateHost(hostId, hostId, cpu, memory);
         GuestEntity guest = GuestEntity.builder()
                 .name(uid)
                 .description(description)
                 .busType(busType)
                 .cpu(cpu)
                 .memory(memory)
-                .cdRoom(cdRoom)
+                .cdRoom(isoTemplateId)
                 .hostId(host.getHostId())
                 .lastHostId(host.getHostId())
                 .type(Constant.GuestType.USER)
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        host.setAllocationCpu(host.getAllocationCpu()+cpu);
-        host.setAllocationMemory(host.getAllocationCpu()+memory);
+        host.setAllocationCpu(host.getAllocationCpu() + cpu);
+        host.setAllocationMemory(host.getAllocationCpu() + memory);
         this.hostMapper.updateById(host);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         guestNetwork.setDeviceId(0);
@@ -100,28 +107,50 @@ public class GuestService {
         guestNetwork.setGuestId(guest.getGuestId());
         this.guestNetworkMapper.insert(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
-        VolumeEntity volume = VolumeEntity.builder()
-                .capacity(size)
-                .storageId(storage.getStorageId())
-                .name(uid)
-                .path(storage.getStorageId() + "/" + uid)
-                .type(volumeType)
-                .templateId(templateId)
-                .status(Constant.VolumeStatus.CREATING)
-                .build();
-        this.volumeMapper.insert(volume);
-        GuestDiskEntity guestDisk = GuestDiskEntity.builder()
-                .volumeId(volume.getVolumeId())
-                .guestId(guest.getGuestId())
-                .deviceId(0)
-                .build();
-        this.guestDiskMapper.insert(guestDisk);
-        BaseOperateParam operateParam = CreateGuestOperate.builder()
-                .guestId(guest.getGuestId())
-                .volumeId(volume.getVolumeId())
-                .taskId(uid)
-                .build();
-        this.operateTask.addTask(operateParam);
+        if (volumeId <= 0) {
+            VolumeEntity volume = VolumeEntity.builder()
+                    .capacity(size)
+                    .storageId(storage.getStorageId())
+                    .name(uid)
+                    .path(storage.getStorageId() + "/" + uid)
+                    .type(volumeType)
+                    .templateId(diskTemplateId)
+                    .status(Constant.VolumeStatus.CREATING)
+                    .build();
+            this.volumeMapper.insert(volume);
+            GuestDiskEntity guestDisk = GuestDiskEntity.builder()
+                    .volumeId(volume.getVolumeId())
+                    .guestId(guest.getGuestId())
+                    .deviceId(0)
+                    .build();
+            this.guestDiskMapper.insert(guestDisk);
+            BaseOperateParam operateParam = CreateGuestOperate.builder()
+                    .guestId(guest.getGuestId())
+                    .snapshotVolumeId(snapshotVolumeId)
+                    .templateId(diskTemplateId)
+                    .volumeId(volume.getVolumeId())
+                    .taskId(uid)
+                    .build();
+            this.operateTask.addTask(operateParam);
+        } else {
+            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+            if (guestDisk != null) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
+            }
+            guestDisk = GuestDiskEntity.builder()
+                    .volumeId(volumeId)
+                    .guestId(guest.getGuestId())
+                    .deviceId(0)
+                    .build();
+            this.guestDiskMapper.insert(guestDisk);
+            guest.setStatus(Constant.GuestStatus.STARTING);
+            BaseOperateParam operateParam = StartGuestOperate.builder()
+                    .guestId(guest.getGuestId())
+                    .hostId(host.getHostId())
+                    .taskId(uid)
+                    .build();
+            this.operateTask.addTask(operateParam);
+        }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -308,11 +337,38 @@ public class GuestService {
         guestNetwork.setDeviceId(0);
         guestNetwork.setGuestId(0);
         this.guestNetworkMapper.updateById(guestNetwork);
-        BaseOperateParam operateParam= ChangeGuestNetworkInterfaceOperate.builder()
+        BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                 .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
                 .taskId(UUID.randomUUID().toString()).build();
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<Void> destroyGuest(int guestId) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.ERROR:
+            case Constant.GuestStatus.STOP:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
+        }
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+        for (GuestNetworkEntity guestNetwork : guestNetworkList) {
+            guestNetwork.setGuestId(0);
+            guestNetwork.setDeviceId(0);
+            guestNetwork.setDriveType("");
+            this.guestNetworkMapper.updateById(guestNetwork);
+        }
+        List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
+        for (GuestDiskEntity guestDisk : guestDiskList) {
+            this.guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
+        }
+        List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
+        for (VolumeEntity volume : guestVolumeList) {
+            this.volumeService.destroyVolume(volume.getVolumeId());
+        }
+        this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", guest.getGuestId()));
+        return ResultUtil.success();
+    }
 }

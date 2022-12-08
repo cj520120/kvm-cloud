@@ -8,8 +8,10 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
+import cn.roamblue.cloud.management.data.entity.GuestVncEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.operate.bean.StopGuestOperate;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -58,6 +60,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
+                this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", param.getGuestId()));
             } else {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
             }
