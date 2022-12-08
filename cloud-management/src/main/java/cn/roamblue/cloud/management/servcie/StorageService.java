@@ -67,6 +67,9 @@ public class StorageService {
                 .type(type)
                 .param(param)
                 .mountPath("/mnt/" + UUID.randomUUID().toString().toLowerCase().replace("-", ""))
+                .allocation(0L)
+                .capacity(0L)
+                .available(0L)
                 .status(Constant.StorageStatus.INIT)
                 .build();
         this.storageMapper.insert(storage);

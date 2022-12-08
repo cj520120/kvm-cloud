@@ -22,13 +22,13 @@ import java.util.Date;
 public class GuestDiskEntity {
     @TableId(type = IdType.AUTO)
     @TableField("guest_disk_id")
-    private int guestDiskId;
+    private Integer guestDiskId;
     @TableField("guest_id")
-    private int guestId;
+    private Integer guestId;
     @TableField("volume_id")
-    private int volumeId;
+    private Integer volumeId;
     @TableField("device_id")
-    private int deviceId;
+    private Integer deviceId;
     @TableField("create_time")
     private Date createTime;
 

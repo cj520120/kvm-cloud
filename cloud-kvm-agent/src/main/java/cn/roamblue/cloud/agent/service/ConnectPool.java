@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.agent.service.impl;
+package cn.roamblue.cloud.agent.service;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;

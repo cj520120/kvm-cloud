@@ -19,7 +19,7 @@ import java.util.Date;
 public class GuestEntity {
     @TableId(type = IdType.AUTO)
     @TableField("guest_id")
-    private int guestId;
+    private Integer guestId;
     @TableField("guest_name")
     private String name;
     @TableField("guest_description")
@@ -27,19 +27,19 @@ public class GuestEntity {
     @TableField("guest_bus_type")
     private String busType;
     @TableField("guest_cpu")
-    private int cpu;
+    private Integer cpu;
     @TableField("guest_memory")
-    private long memory;
+    private Long memory;
     @TableField("guest_cd_room")
-    private int cdRoom;
+    private Integer cdRoom;
     @TableField("host_id")
-    private int hostId;
+    private Integer hostId;
     @TableField("last_host_id")
-    private int lastHostId;
+    private Integer lastHostId;
     @TableField("guest_type")
-    private int type;
+    private Integer type;
     @TableField("guest_status")
-    private int status;
+    private Integer status;
     @TableField("create_time")
     private Date createTime;
 

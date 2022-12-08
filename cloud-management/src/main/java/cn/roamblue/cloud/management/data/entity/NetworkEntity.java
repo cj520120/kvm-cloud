@@ -39,13 +39,13 @@ public class NetworkEntity {
     @TableField("network_dns")
     private String dns;
     @TableField("network_type")
-    private int type;
+    private Integer type;
     @TableField("network_status")
-    private int status;
+    private Integer status;
     @TableField("network_vlan_id")
-    private int vlanId;
+    private Integer vlanId;
     @TableField("network_basic_network_id")
-    private int basicNetworkId;
+    private Integer basicNetworkId;
     @TableField("create_time")
     private Date createTime;
 }

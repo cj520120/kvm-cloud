@@ -14,8 +14,8 @@ public class TaskReportController {
     @Autowired
     private OperateTask operateTask;
 
-    @PostMapping("/api/agent/task/report")
-    public ResultUtil<Void> report(@RequestParam("hostKey") String hostKey,
+    @PostMapping("/api/task/report")
+    public ResultUtil<Void> report(@RequestParam("clientId") String clientId,
                                    @RequestParam("taskId") String taskId,
                                    @RequestParam("data") String data,
                                    @RequestParam("nonce") String nonce,

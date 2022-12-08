@@ -108,6 +108,7 @@ public class VolumeService {
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
                 .capacity(volumeSize)
+                .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
                 .createTime(new Date())
                 .build();
@@ -141,6 +142,7 @@ public class VolumeService {
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
                 .capacity(volume.getCapacity())
+                .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
                 .createTime(new Date())
                 .build();
@@ -191,6 +193,7 @@ public class VolumeService {
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
                 .capacity(volume.getCapacity())
+                .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
                 .createTime(new Date())
                 .build();
@@ -271,7 +274,8 @@ public class VolumeService {
                 .volumeName(volumeName)
                 .volumePath(storage.getMountPath() + "/" + volumeName)
                 .type(snapshotVolumeType)
-                .capacity(0)
+                .capacity(0L)
+                .allocation(0L)
                 .status(Constant.SnapshotStatus.CREATING)
                 .createTime(new Date())
                 .build();

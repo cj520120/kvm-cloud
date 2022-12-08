@@ -68,29 +68,29 @@ public class OperateTask extends AbstractTask {
             }
             boolean isLock = false;
             try {
-                isLock = lock.tryLock(1, TimeUnit.SECONDS);
+                isLock = lock.tryLock(1, TimeUnit.MILLISECONDS);
                 if (isLock) {
                     taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.SECONDS);
                     isLock = true;
                 }
-                } finally {
-                    if (isLock && lock.isHeldByCurrentThread()) {
-                        lock.unlock();
-                    }
+            } finally {
+                if (isLock && lock.isHeldByCurrentThread()) {
+                    lock.unlock();
                 }
-                if (isLock) {
-                    workExecutor.submit(() -> {
-                        try {
-                            this.operateEngine.process(entry.getValue());
-                        } catch (Exception err) {
-                            ResultUtil resultUtil;
-                            if (err instanceof CodeException) {
-                                CodeException codeException = (CodeException) err;
-                                resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
-                            } else {
-                                log.error("调用任务出现未知错误.param={}", entry.getValue(), err);
-                                resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
-                            }
+            }
+            if (isLock) {
+                workExecutor.submit(() -> {
+                    try {
+                        this.operateEngine.process(entry.getValue());
+                    } catch (Exception err) {
+                        ResultUtil resultUtil;
+                        if (err instanceof CodeException) {
+                            CodeException codeException = (CodeException) err;
+                            resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
+                        } else {
+                            log.error("调用任务出现未知错误.param={}", entry.getValue(), err);
+                            resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
+                        }
                             this.onTaskFinish(entry.getValue().getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
                         }
                     });

@@ -33,13 +33,13 @@ public class StorageEntity {
     @TableField("storage_mount_path")
     private String mountPath;
     @TableField("storage_capacity")
-    private long capacity;
+    private Long capacity;
     @TableField("storage_available")
-    private long available;
+    private Long available;
     @TableField("storage_allocation")
-    private long allocation;
+    private Long allocation;
     @TableField("storage_status")
-    private int status;
+    private Integer status;
     @TableField("create_time")
     private Date createTime;
 }

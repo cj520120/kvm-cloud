@@ -19,17 +19,17 @@ import java.util.Date;
 public class TemplateEntity {
     @TableId(type = IdType.AUTO)
     @TableField("template_id")
-    private int templateId;
+    private Integer templateId;
     @TableField("template_name")
     private String name;
     @TableField("template_uri")
     private String uri;
     @TableField("template_type")
-    private int templateType;
+    private Integer templateType;
     @TableField("template_volume_type")
     private String volumeType;
     @TableField("template_status")
-    private int status;
+    private Integer status;
     @TableField("create_time")
     private Date createTime;
 }

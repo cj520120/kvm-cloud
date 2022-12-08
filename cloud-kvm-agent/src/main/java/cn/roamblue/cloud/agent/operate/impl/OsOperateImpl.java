@@ -4,7 +4,7 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.roamblue.cloud.agent.operate.OsOperate;
-import cn.roamblue.cloud.agent.util.XmlUtil;
+import cn.roamblue.cloud.agent.util.VncUtil;
 import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -402,8 +402,8 @@ public class OsOperateImpl implements OsOperate {
                 .build();
         if (domainInfo.state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
             String xml = domain.getXMLDesc(0);
-            info.setVnc(XmlUtil.getVnc(xml));
-            info.setPassword(XmlUtil.getVncPassword(xml));
+            info.setVnc(VncUtil.getVnc(xml));
+            info.setPassword(VncUtil.getVncPassword(xml));
         }
         return info;
     }

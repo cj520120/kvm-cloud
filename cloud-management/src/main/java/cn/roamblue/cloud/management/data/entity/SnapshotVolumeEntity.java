@@ -27,19 +27,19 @@ public class SnapshotVolumeEntity {
     @TableField("snapshot_name")
     private String name;
     @TableField("storage_id")
-    private int storageId;
+    private Integer storageId;
     @TableField("volume_name")
     private String volumeName;
     @TableField("volume_path")
     private String volumePath;
     @TableField("volume_capacity")
-    private long capacity;
+    private Long capacity;
     @TableField("volume_allocation")
-    private long allocation;
+    private Long allocation;
     @TableField("volume_type")
     private String type;
     @TableField("volume_status")
-    private int status;
+    private Integer status;
     @TableField("create_time")
     private Date createTime;
 

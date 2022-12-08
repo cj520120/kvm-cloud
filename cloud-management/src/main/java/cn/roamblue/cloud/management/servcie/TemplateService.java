@@ -88,6 +88,8 @@ public class TemplateService {
                         .templateId(template.getTemplateId())
                         .path(storage.getMountPath() + "/" + uid)
                         .type(template.getVolumeType())
+                        .allocation(0L)
+                        .capacity(0L)
                         .status(Constant.TemplateStatus.DOWNLOAD)
                         .build();
                 this.templateVolumeMapper.insert(templateVolume);
@@ -134,6 +136,8 @@ public class TemplateService {
                 .templateId(template.getTemplateId())
                 .path(storage.getMountPath() + "/" + uid)
                 .type(template.getVolumeType())
+                .capacity(0L)
+                .allocation(0L)
                 .status(Constant.TemplateStatus.CREATING)
                 .build();
         this.templateVolumeMapper.insert(templateVolume);

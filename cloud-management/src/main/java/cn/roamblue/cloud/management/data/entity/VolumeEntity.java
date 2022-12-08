@@ -25,21 +25,21 @@ public class VolumeEntity {
     @TableField("volume_id")
     private Integer volumeId;
     @TableField("template_id")
-    private int templateId;
+    private Integer templateId;
     @TableField("storage_id")
-    private int storageId;
+    private Integer storageId;
     @TableField("volume_name")
     private String name;
     @TableField("volume_path")
     private String path;
     @TableField("volume_capacity")
-    private long capacity;
+    private Long capacity;
     @TableField("volume_allocation")
-    private long allocation;
+    private Long allocation;
     @TableField("volume_type")
     private String type;
     @TableField("volume_status")
-    private int status;
+    private Integer status;
     @TableField("create_time")
     private Date createTime;
 

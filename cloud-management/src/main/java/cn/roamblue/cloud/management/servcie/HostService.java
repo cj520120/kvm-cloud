@@ -61,6 +61,10 @@ public class HostService {
                 .uri(uri).arch("").emulator("").nic(nic).hypervisor("")
                 .clientId(clientId)
                 .clientSecret(clientSecret)
+                .totalMemory(0L)
+                .allocationMemory(0L)
+                .totalCpu(0)
+                .allocationCpu(0)
                 .status(Constant.HostStatus.REGISTER).build();
         this.hostMapper.insert(host);
         BaseOperateParam operateParam= CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).build();

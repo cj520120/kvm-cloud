@@ -19,13 +19,13 @@ import java.util.Date;
 public class GuestNetworkEntity {
     @TableId(type = IdType.AUTO)
     @TableField("guest_network_id")
-    private int guestNetworkId;
+    private Integer guestNetworkId;
     @TableField("guest_id")
-    private int guestId;
+    private Integer guestId;
     @TableField("network_id")
-    private int networkId;
+    private Integer networkId;
     @TableField("device_id")
-    private int deviceId;
+    private Integer deviceId;
     @TableField("device_type")
     private String driveType;
     @TableField("network_mac_address")

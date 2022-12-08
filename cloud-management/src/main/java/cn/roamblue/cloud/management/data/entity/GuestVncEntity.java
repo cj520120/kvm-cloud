@@ -19,9 +19,9 @@ import java.util.Date;
 public class GuestVncEntity {
     @TableId(type = IdType.AUTO)
     @TableField("guest_id")
-    private int guestId;
+    private Integer guestId;
     @TableField("vnc_port")
-    private int port;
+    private Integer port;
     @TableField("vnc_password")
     private String password;
     @TableField("vnc_token")

@@ -3,7 +3,7 @@ package cn.roamblue.cloud.agent.operate.impl;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.config.ApplicationConfig;
 import cn.roamblue.cloud.agent.operate.*;
-import cn.roamblue.cloud.agent.service.impl.ConnectPool;
+import cn.roamblue.cloud.agent.service.ConnectPool;
 import cn.roamblue.cloud.agent.util.HostUtil;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -17,7 +17,6 @@ import org.libvirt.Connect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,8 @@ public class OperateDispatchImpl implements OperateDispatch {
     private ApplicationConfig config;
     @Autowired
     private ThreadPoolExecutor executor;
+    @Autowired
+    private HostUtil hostUtil;
     private final ConcurrentHashMap<String, Long> taskMap = new ConcurrentHashMap<>();
 
 
@@ -71,12 +72,12 @@ public class OperateDispatchImpl implements OperateDispatch {
                 map.put("nonce", nonce);
                 String sign =null;
                 try {
-                     sign = AppUtils.sign(map, config.getAppId(), config.getAppSecret(), nonce);
+                     sign = AppUtils.sign(map, hostUtil.getClientId(), hostUtil.getClientSecret(), nonce);
                 }catch (Exception err){
 
                 }
                 map.put("sign", sign);
-                HttpUtil.post(this.config.getManagerUri() + "/task/report", map);
+                HttpUtil.post(this.config.getManagerUri() + "/api/task/report", map);
             }
         });
     }

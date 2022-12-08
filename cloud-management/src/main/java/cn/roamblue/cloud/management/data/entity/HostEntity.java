@@ -38,13 +38,13 @@ public class HostEntity {
     @TableField("host_uri")
     private String uri;
     @TableField("host_allocation_memory")
-    private long allocationMemory;
+    private Long allocationMemory;
     @TableField("host_allocation_cpu")
-    private int allocationCpu;
+    private Integer allocationCpu;
     @TableField("host_total_memory")
-    private long totalMemory;
+    private Long totalMemory;
     @TableField("host_total_cpu")
-    private int totalCpu;
+    private Integer totalCpu;
     @TableField("host_arch")
     private String arch;
     @TableField("host_hypervisor")
@@ -52,7 +52,7 @@ public class HostEntity {
     @TableField("host_emulator")
     private String emulator;
     @TableField("host_status")
-    private int status;
+    private Integer status;
     @TableField("create_time")
     private Date createTime;
 
