@@ -14,7 +14,6 @@ import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -26,14 +25,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class OperateTask implements CommandLineRunner {
-    private final static int TASK_TIMEOUT = 3;
+public class OperateTask extends AbstractTask {
+    private final static int TASK_TIMEOUT = (int)TimeUnit.MINUTES.toSeconds(3);
     @Autowired
     @Qualifier("workExecutorService")
     private ScheduledExecutorService workExecutor;
-    @Autowired
-    @Qualifier("bossExecutorService")
-    private ScheduledExecutorService bossExecutor;
+
     @Autowired
     private RedissonClient redis;
     @Autowired
@@ -49,33 +46,37 @@ public class OperateTask implements CommandLineRunner {
         redis.getBucket(key).set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.MINUTES);
     }
 
-    public void dispatch() {
-        try {
-            RMap<String, BaseOperateParam> rMap = redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY);
-            for (Map.Entry<String, BaseOperateParam> entry : rMap.entrySet()) {
-                String taskId = entry.getKey();
-                String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
-                RBucket<Long> taskBucket = redis.getBucket(key);
-                if (taskBucket.isExists()) {
-                    continue;
+    @Override
+    protected int getPeriodSeconds() {
+        return 1;
+    }
+
+    @Override
+    protected void dispatch() throws Exception {
+        RMap<String, BaseOperateParam> rMap = redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY);
+        for (Map.Entry<String, BaseOperateParam> entry : rMap.entrySet()) {
+            String taskId = entry.getKey();
+            String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
+            RBucket<Long> taskBucket = redis.getBucket(key);
+            if (taskBucket.isExists()) {
+                continue;
+            }
+            String lockKey = key + ".lock";
+            RLock lock = redis.getLock(lockKey);
+            if (lock.isLocked()) {
+                continue;
+            }
+            boolean isLock = false;
+            try {
+                isLock = lock.tryLock(1, TimeUnit.SECONDS);
+                if (isLock) {
+                    taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.SECONDS);
+                    isLock = true;
                 }
-                String lockKey = key + ".lock";
-                RLock lock = redis.getLock(lockKey);
-                if (lock.isLocked()) {
-                    continue;
-                }
-                boolean isLock = false;
-                try {
-                    isLock = lock.tryLock(1, TimeUnit.SECONDS);
-                    if (isLock) {
-                        taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.MINUTES);
-                        isLock = true;
-                    }
                 } finally {
                     if (isLock && lock.isHeldByCurrentThread()) {
                         lock.unlock();
                     }
-
                 }
                 if (isLock) {
                     workExecutor.submit(() -> {
@@ -87,6 +88,7 @@ public class OperateTask implements CommandLineRunner {
                                 CodeException codeException = (CodeException) err;
                                 resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
                             } else {
+                                log.error("调用任务出现未知错误.param={}", entry.getValue(), err);
                                 resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                             }
                             this.onTaskFinish(entry.getValue().getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
@@ -94,9 +96,6 @@ public class OperateTask implements CommandLineRunner {
                     });
                 }
             }
-        } catch (Exception err) {
-            log.error("处理任务失败。", err);
-        }
 
     }
 
@@ -106,13 +105,14 @@ public class OperateTask implements CommandLineRunner {
         rMap.remove(taskId);
         if (operateParam != null) {
             workExecutor.submit(() -> {
-                this.operateEngine.onFinish(operateParam, result);
+                try {
+                    this.operateEngine.onFinish(operateParam, result);
+                } catch (Exception err) {
+                    log.error("任务回调失败.param={} result={}", operateParam, result, err);
+                }
             });
         }
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        this.bossExecutor.scheduleAtFixedRate(this::dispatch, 10, 1, TimeUnit.SECONDS);
-    }
+
 }

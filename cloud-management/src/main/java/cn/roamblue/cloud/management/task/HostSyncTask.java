@@ -14,52 +14,46 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Component
-public class HostSyncTask implements CommandLineRunner {
-    private int TASK_CHECK_TIME=30;
-    @Autowired
-    @Qualifier("bossExecutorService")
-    private ScheduledExecutorService bossExecutor;
+public class HostSyncTask extends AbstractTask {
+    private final int TASK_CHECK_TIME = 30;
     @Autowired
     private RedissonClient redissonClient;
     @Autowired
     private HostMapper hostMapper;
 
-    @Override
-    public void run(String... args) throws Exception {
-        this.bossExecutor.scheduleAtFixedRate(this::sync, 10, 10, TimeUnit.SECONDS);
-    }
 
-    private void sync() {
-        try {
-            RBucket<Long> rBucket = redissonClient.getBucket(RedisKeyUtil.HOST_SYNC_KEY);
-            if (rBucket.isExists()) {
-                return;
-            }
-            if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
-                List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
-                for (HostEntity host : hostList) {
-                    switch (host.getStatus()) {
-                        case cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE:
-                        case cn.roamblue.cloud.management.util.Constant.HostStatus.OFFLINE:
-                            Map<String, Object> map = new HashMap<>(3);
-                            map.put("command", Constant.Command.HOST_INFO);
-                            map.put("taskId", UUID.randomUUID().toString());
-                            map.put("data", "{}");
-                            HostInfo hostInfo = null;
-                            try {
-                                String uri = String.format("%s/api/operate", host.getUri());
-                                String response = HttpUtil.post(uri, map);
-                                ResultUtil<HostInfo> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<HostInfo>>() {
-                                }.getType());
+    @Override
+    protected void dispatch() {
+        RBucket<Long> rBucket = redissonClient.getBucket(RedisKeyUtil.HOST_SYNC_KEY);
+        if (rBucket.isExists()) {
+            return;
+        }
+        if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
+            List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
+            for (HostEntity host : hostList) {
+                switch (host.getStatus()) {
+                    case cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE:
+                    case cn.roamblue.cloud.management.util.Constant.HostStatus.OFFLINE:
+                        Map<String, Object> map = new HashMap<>(3);
+                        map.put("command", Constant.Command.HOST_INFO);
+                        map.put("taskId", UUID.randomUUID().toString());
+                        map.put("data", "{}");
+                        HostInfo hostInfo = null;
+                        try {
+                            String uri = String.format("%s/api/operate", host.getUri());
+                            String response = HttpUtil.post(uri, map);
+                            ResultUtil<HostInfo> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<HostInfo>>() {
+                            }.getType());
                                 hostInfo = resultUtil.getData();
 
                             } catch (Exception err) {
@@ -77,13 +71,10 @@ public class HostSyncTask implements CommandLineRunner {
                             } else {
                                 updateHost.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.OFFLINE);
                             }
-                            hostMapper.updateById(host);
-                            break;
-                    }
+                        hostMapper.updateById(host);
+                        break;
                 }
             }
-        }catch (Exception err){
-            log.error("检测主机状态失败.",err);
         }
     }
 }
