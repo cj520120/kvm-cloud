@@ -57,4 +57,16 @@ public class HostInfo implements Serializable {
      * emulator
      */
     private String emulator;
+    /**
+     * sockets
+     */
+    private Integer sockets;
+    /**
+     * cores
+     */
+    private Integer cores;
+    /**
+     * cores
+     */
+    private Integer threads;
 }

@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,9 @@ public class HostModel {
     private String arch;
     private String hypervisor;
     private String emulator;
+    private int cores;
+    private int threads;
+    private int sockets;
     private int status;
     private Date createTime;
 

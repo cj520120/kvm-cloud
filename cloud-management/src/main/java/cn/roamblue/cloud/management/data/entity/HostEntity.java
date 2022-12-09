@@ -51,8 +51,16 @@ public class HostEntity {
     private String hypervisor;
     @TableField("host_emulator")
     private String emulator;
+    @TableField("host_cpu_cores")
+    private Integer cores;
+    @TableField("host_cpu_threads")
+    private Integer threads;
+    @TableField("host_cpu_sockets")
+    private Integer sockets;
     @TableField("host_status")
     private Integer status;
+
+
     @TableField("create_time")
     private Date createTime;
 

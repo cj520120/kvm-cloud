@@ -65,6 +65,9 @@ public class HostService {
                 .allocationMemory(0L)
                 .totalCpu(0)
                 .allocationCpu(0)
+                .sockets(0)
+                .threads(0)
+                .cores(0)
                 .status(Constant.HostStatus.REGISTER).build();
         this.hostMapper.insert(host);
         BaseOperateParam operateParam= CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).build();

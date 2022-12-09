@@ -67,7 +67,7 @@ public class OperateDispatchImpl implements OperateDispatch {
                 String nonce = String.valueOf(System.currentTimeMillis());
                 Map<String, Object> map = new HashMap<>(5);
                 map.put("taskId", taskId);
-                map.put("startTime", taskMap.get(taskId));
+                map.put("clientId", hostUtil.getClientId());
                 map.put("data", GsonBuilderUtil.create().toJson(result));
                 map.put("nonce", nonce);
                 String sign =null;

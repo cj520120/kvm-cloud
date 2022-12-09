@@ -65,6 +65,9 @@ public class HostSyncTask extends AbstractTask {
                                 updateHost.setTotalCpu(hostInfo.getCpu());
                                 updateHost.setTotalMemory(hostInfo.getMemory());
                                 updateHost.setEmulator(hostInfo.getEmulator());
+                                updateHost.setCores(hostInfo.getCores());
+                                updateHost.setSockets(hostInfo.getSockets());
+                                updateHost.setThreads(hostInfo.getThreads());
                                 updateHost.setArch(hostInfo.getArch());
                                 updateHost.setHypervisor(hostInfo.getHypervisor());
                                 updateHost.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE);

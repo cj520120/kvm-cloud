@@ -95,8 +95,19 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateHostOperate param, ResultUtil<HostInfo> resultUtil) {
-        HostEntity host = this.hostMapper.selectById(param.getHostId());
+        HostEntity host= HostEntity.builder().hostId(param.getHostId()).build();
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+            HostInfo hostInfo=resultUtil.getData();
+            host.setThreads(hostInfo.getThreads());
+            host.setCores(hostInfo.getCores());
+            host.setSockets(hostInfo.getSockets());
+            host.setArch(hostInfo.getArch());
+            host.setHypervisor(hostInfo.getHypervisor());
+            host.setTotalCpu(hostInfo.getCpu());
+            host.setTotalMemory(hostInfo.getMemory());
+            host.setEmulator(hostInfo.getEmulator());
+            host.setHostName(hostInfo.getHostName()); ;
+
             host.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE);
         } else {
             host.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.ERROR);

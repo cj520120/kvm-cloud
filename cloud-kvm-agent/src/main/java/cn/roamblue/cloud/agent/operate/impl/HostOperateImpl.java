@@ -7,17 +7,17 @@ import cn.roamblue.cloud.agent.operate.NetworkOperate;
 import cn.roamblue.cloud.agent.operate.StorageOperate;
 import cn.roamblue.cloud.agent.util.HostUtil;
 import cn.roamblue.cloud.common.bean.*;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
+import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
+import org.libvirt.NodeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import java.io.StringReader;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author chenjun
@@ -30,7 +30,21 @@ public class HostOperateImpl implements HostOperate {
     private StorageOperate storageOperate;
     @Autowired
     private HostUtil hostUtil;
-    private static String getEmulator(String xml) throws SAXException, DocumentException {
+    private static String getArch(String xml) throws SAXException, DocumentException {
+
+        try (StringReader sr = new StringReader(xml)) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+            String path = "/capabilities/host/cpu/arch";
+            Node node = doc.selectSingleNode(path);
+            if(node!=null){
+                return node.getText();
+            }
+            return "x86_64";
+        }
+    }
+    private static String getEmulator(String xml,String hostArch) throws SAXException, DocumentException {
         String emulator = null;
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
@@ -42,19 +56,30 @@ public class HostOperateImpl implements HostOperate {
                 Object osType = node.selectObject("os_type");
                 Object arch = node.selectObject("arch");
                 boolean isHvm = false;
-                boolean isX86_64 = false;
+                boolean isArch = false;
                 if (osType != null && osType instanceof Element) {
                     isHvm = "hvm".equals(((Element) osType).getData());
                 }
                 if (arch != null && arch instanceof Element) {
                     String archValue = ((Element) node.selectObject("arch")).attribute("name").getText();
-                    isX86_64 = "x86_64".equals(archValue);
+                    isArch = Objects.equals(hostArch,archValue);
                 }
-                if (isHvm && isX86_64) {
+                if (isHvm && isArch) {
+
                     Object emulatorNode = node.selectObject("arch/emulator");
                     if (emulatorNode != null && emulatorNode instanceof Element) {
                         emulator = ((Element) emulatorNode).getTextTrim();
-                        break;
+                        //break;
+                    }
+                    List<Element> domainNodes=node.selectNodes("arch/domain");
+                    for (Element domainNode : domainNodes){
+                        Attribute attribute=domainNode.attribute("type");
+                        if(attribute!=null&&Objects.equals(attribute.getValue(),"kvm")){
+                            emulatorNode = domainNode.selectObject("emulator");
+                            if (emulatorNode != null && emulatorNode instanceof Element) {
+                                emulator = ((Element) emulatorNode).getTextTrim();
+                            }
+                        }
                     }
                 }
 
@@ -65,15 +90,21 @@ public class HostOperateImpl implements HostOperate {
     @Override
     public HostInfo getHostInfo(Connect connect) throws Exception {
         OsInfo osInfo = SystemUtil.getOsInfo();
-        String emulator = getEmulator(connect.getCapabilities());
+        String xml=connect.getCapabilities();
+        String arch=getArch(xml);
+        String emulator = getEmulator(xml,arch);
+        NodeInfo nodeInfo=connect.nodeInfo();
         return HostInfo.builder().hostName(connect.getHostName())
                 .version(connect.getVersion())
                 .uri(connect.getURI())
-                .memory(connect.nodeInfo().memory)
-                .cpu(connect.nodeInfo().cpus)
+                .memory(nodeInfo.memory)
+                .cpu(nodeInfo.cpus)
                 .hypervisor(connect.getType())
-                .arch(osInfo.getArch())
+                .arch(arch)
                 .name(osInfo.getName())
+                .cores(nodeInfo.cores)
+                .threads(nodeInfo.threads)
+                .sockets(nodeInfo.sockets)
                 .emulator(emulator)
                 .build();
     }
