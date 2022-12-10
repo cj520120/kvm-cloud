@@ -77,6 +77,27 @@ public class StorageService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initStorageModel(storage));
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<StorageModel> registerStorage(int storageId) {
+        StorageEntity storage = this.storageMapper.selectById(storageId);
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
+        }
+        switch (storage.getStatus()) {
+            case Constant.StorageStatus.READY:
+            case Constant.StorageStatus.INIT:
+            case Constant.StorageStatus.ERROR:
+                storage.setStatus(Constant.StorageStatus.INIT);
+                this.storageMapper.updateById(storage);
+                BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).storageId(storage.getStorageId()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initStorageModel(storage));
+            default:
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池以销毁");
+        }
+    }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> destroyStorage(int storageId) {
@@ -89,9 +110,6 @@ public class StorageService {
             case Constant.StorageStatus.ERROR:
                 if(volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq("storage_id",storageId))>0){
                     throw new CodeException(ErrorCode.STORAGE_BUSY, "当前存储有挂载磁盘，请首先迁移存储文件");
-                }
-                if (this.templateVolumeMapper.selectCount(new QueryWrapper<TemplateVolumeEntity>().eq("storage_id",storageId))>0) {
-                    throw new CodeException(ErrorCode.STORAGE_BUSY, "当前存储有挂载模版文件，请首先迁移模版文件");
                 }
                 storage.setStatus(Constant.StorageStatus.DESTROY);
                 this.storageMapper.updateById(storage);

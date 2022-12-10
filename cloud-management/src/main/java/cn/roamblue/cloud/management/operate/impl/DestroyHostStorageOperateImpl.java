@@ -7,6 +7,7 @@ import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
+import cn.roamblue.cloud.management.data.entity.SnapshotVolumeEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.DestroyHostStorageOperate;
@@ -42,7 +43,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
     public void operate(DestroyHostStorageOperate param) {
 
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
-        if (!Objects.equals(storage.getStatus(), cn.roamblue.cloud.management.util.Constant.StorageStatus.INIT)) {
+        if (!Objects.equals(storage.getStatus(), cn.roamblue.cloud.management.util.Constant.StorageStatus.DESTROY)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
 
         }
@@ -83,6 +84,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                 if (storage.getStatus() == cn.roamblue.cloud.management.util.Constant.StorageStatus.DESTROY) {
                     storageMapper.deleteById(param.getStorageId());
                     templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("storage_id", param.getStorageId()));
+                    snapshotVolumeMapper.delete(new QueryWrapper<SnapshotVolumeEntity>().eq("storage_id", param.getStorageId()));
                 }
             }
         } else {

@@ -37,6 +37,10 @@ public class NetworkController {
         return networkService.createNetwork(name, startIp, endIp, gateway, mask, bridge, dns, type, vlanId, basicNetworkId);
     }
 
+    @PostMapping("/api/network/register")
+    public ResultUtil<NetworkModel> registerNetwork(@RequestParam("networkId") int networkId) {
+        return networkService.registerNetwork(networkId);
+    }
     @DeleteMapping("/api/network/destroy")
     public ResultUtil<NetworkModel> destroyNetwork(@RequestParam("networkId") int networkId) {
         return networkService.destroyNetwork(networkId);
