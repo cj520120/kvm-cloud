@@ -101,6 +101,7 @@ public class NetworkService {
             case Constant.NetworkStatus.STOP:
             case Constant.NetworkStatus.ERROR:
                 network.setStatus(Constant.NetworkStatus.CREATING);
+                this.networkMapper.updateById(network);
                 BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(network.getNetworkId()).build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initNetwork(network));
