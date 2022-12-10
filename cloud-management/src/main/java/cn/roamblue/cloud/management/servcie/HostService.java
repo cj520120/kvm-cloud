@@ -88,4 +88,21 @@ public class HostService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initHost(host));
     }
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<HostModel> maintenanceHost(int hostId){
+        HostEntity host=this.hostMapper.selectById(hostId);
+        if(host==null){
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND,"主机不存在");
+        }
+        switch (host.getStatus()){
+            case Constant.HostStatus.ONLINE:
+            case Constant.HostStatus.OFFLINE:
+                host.setStatus(Constant.HostStatus.MAINTENANCE);
+                this.hostMapper.updateById(host);
+                return ResultUtil.success(this.initHost(host));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR,"主机不是就绪状态");
+        }
+    }
 }
