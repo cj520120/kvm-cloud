@@ -9,6 +9,7 @@ import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.operate.Operate;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
+import cn.roamblue.cloud.management.servcie.AllocateService;
 import cn.roamblue.cloud.management.task.OperateTask;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     protected GuestVncMapper guestVncMapper;
     @Autowired
     protected SnapshotVolumeMapper snapshotVolumeMapper;
+    @Autowired
+    protected AllocateService allocateService;
 
     @Autowired
     @Lazy

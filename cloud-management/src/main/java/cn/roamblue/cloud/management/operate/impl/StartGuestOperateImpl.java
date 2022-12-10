@@ -7,11 +7,13 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.operate.bean.StartGuestOperate;
+import cn.roamblue.cloud.management.servcie.AllocateService;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +37,8 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     public StartGuestOperateImpl(Class<T> tClass) {
         super(tClass);
     }
-    public HostEntity allocateHost(int cpu, long memory, int hostId) {
-        List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>()).stream()
-                .filter(t -> Objects.equals(t.getStatus(), cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE))
-                .filter(t -> (t.getAllocationCpu() + cpu) > t.getTotalCpu() && (t.getAllocationMemory() + memory) > memory)
-                .collect(Collectors.toList());
-        Collections.shuffle(hostList);
-        HostEntity host=hostList.stream().findAny().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_SPACE, "没有可用的主机资源"));
-        return hostList.stream().filter(t->Objects.equals(t.getHostId(),hostId)).findFirst().orElse(host);
-    }
+
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,15 +48,8 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
 
-        HostEntity host;
-        if(param.getHostId()>0) {
-            host=this.hostMapper.selectById(param.getHostId());
-        }else{
-            host=this.allocateHost(guest.getCpu(), guest.getMemory(), guest.getLastHostId());
-        }
-        if(host==null){
-            throw new CodeException(ErrorCode.HOST_NOT_SPACE,"没有可用的主机资源");
-        }
+        HostEntity host =this.allocateService.allocateHost(guest.getLastHostId(),param.getHostId(),guest.getCpu(), guest.getMemory());
+
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
         List<OsDisk> disks = new ArrayList<>();
@@ -109,9 +97,9 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guest.getGuestId());
         if (guestVncEntity == null) {
             guestVncEntity = GuestVncEntity.builder()
-                    .guestId(guestVncEntity.getGuestId())
+                    .guestId(param.getGuestId())
                     .port(0)
-                    .password(RandomStringUtils.randomAlphanumeric(16))
+                    .password(RandomStringUtils.randomAlphanumeric(8))
                     .token(RandomStringUtils.randomAlphanumeric(16))
                     .build();
             this.guestVncMapper.insert(guestVncEntity);
@@ -130,6 +118,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 .networkInterfaces(networkInterfaces)
                 .vncPassword(guestVncEntity.getPassword())
                 .build();
+        this.hostMapper.updateById(host);
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
     }
@@ -160,7 +149,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                     this.guestVncMapper.insert(guestVncEntity);
                 } else {
                     guestVncEntity.setPort(guestInfo.getVnc());
-                    guestVncEntity.setPassword(guestInfo.getPassword());
                     this.guestVncMapper.updateById(guestVncEntity);
                 }
             } else {

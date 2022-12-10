@@ -15,11 +15,12 @@ public class TaskReportController {
     private OperateTask operateTask;
 
     @PostMapping("/api/task/report")
-    public ResultUtil<Void> report(@RequestParam("clientId") String clientId,
+    public ResultUtil<Void> report(
+//            @RequestParam("clientId") String clientId,
                                    @RequestParam("taskId") String taskId,
-                                   @RequestParam("data") String data,
-                                   @RequestParam("nonce") String nonce,
-                                   @RequestParam("sign") String sign
+                                   @RequestParam("data") String data
+//                                   @RequestParam("nonce") String nonce,
+//                                   @RequestParam("sign") String sign
     ) {
         operateTask.onTaskFinish(taskId, data);
         return ResultUtil.success();

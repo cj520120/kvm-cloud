@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
+import java.util.UUID;
 
 /**
  * @author chenjun
@@ -34,16 +35,11 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             guest.setStatus(Constant.GuestStatus.STARTING);
             guestMapper.updateById(guest);
-            StartGuestOperate guestOperate = StartGuestOperate.builder().guestId(param.getGuestId()).build();
+            StartGuestOperate guestOperate = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).hostId(param.getHostId()).guestId(param.getGuestId()).build();
             this.operateTask.addTask(guestOperate);
         } else {
             guest.setStatus(Constant.GuestStatus.ERROR);
             guestMapper.updateById(guest);
         }
-    }
-
-    @Override
-    public Type getCallResultType() {
-        return null;
     }
 }

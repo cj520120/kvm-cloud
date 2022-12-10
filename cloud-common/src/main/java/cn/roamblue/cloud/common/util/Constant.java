@@ -76,4 +76,9 @@ public class Constant {
         public static final String SCSI="scsi";
 
     }
+    public static class NetworkDriver{
+        public static final String VIRTIO="virtio";
+        public static final String RTL8139="rtl8139";
+
+    }
 }

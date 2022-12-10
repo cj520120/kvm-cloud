@@ -32,7 +32,12 @@ public class OperateEngine {
         if (operate == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的任务:" + operate.getParamType());
         }
-        ResultUtil resultUtil = GsonBuilderUtil.create().fromJson(result, operate.getCallResultType());
+        ResultUtil resultUtil;
+        try {
+            resultUtil = GsonBuilderUtil.create().fromJson(result, operate.getCallResultType());
+        }catch (Exception err){
+            resultUtil=ResultUtil.error(ErrorCode.SERVER_ERROR,err.getMessage());
+        }
         operate.onFinish(operateParam, resultUtil);
     }
 

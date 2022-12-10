@@ -77,7 +77,8 @@ public class AllocateService {
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
             list = list.stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE))
-                    .filter(t -> t.getTotalCpu() - t.getAllocationCpu() > cpu && t.getTotalMemory() - t.getAllocationMemory() > memory).collect(Collectors.toList());
+//                    .filter(t -> t.getTotalCpu() - t.getAllocationCpu() > cpu && t.getTotalMemory() - t.getAllocationMemory() > memory)
+                    .collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
             if (hostId > 0) {

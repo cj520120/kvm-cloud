@@ -93,14 +93,11 @@ public class GuestService {
                 .memory(memory)
                 .cdRoom(isoTemplateId)
                 .hostId(host.getHostId())
-                .lastHostId(host.getHostId())
+                .lastHostId(0)
                 .type(Constant.GuestType.USER)
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        host.setAllocationCpu(host.getAllocationCpu() + cpu);
-        host.setAllocationMemory(host.getAllocationCpu() + memory);
-        this.hostMapper.updateById(host);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
@@ -112,9 +109,11 @@ public class GuestService {
                     .capacity(size)
                     .storageId(storage.getStorageId())
                     .name(uid)
-                    .path(storage.getStorageId() + "/" + uid)
+                    .path(storage.getMountPath() + "/" + uid)
                     .type(volumeType)
                     .templateId(diskTemplateId)
+                    .allocation(0L)
+                    .capacity(size)
                     .status(Constant.VolumeStatus.CREATING)
                     .build();
             this.volumeMapper.insert(volume);
@@ -129,6 +128,7 @@ public class GuestService {
                     .snapshotVolumeId(snapshotVolumeId)
                     .templateId(diskTemplateId)
                     .volumeId(volume.getVolumeId())
+                    .hostId(hostId)
                     .taskId(uid)
                     .build();
             this.operateTask.addTask(operateParam);

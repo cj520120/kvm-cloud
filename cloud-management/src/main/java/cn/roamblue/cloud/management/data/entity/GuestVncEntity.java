@@ -17,7 +17,7 @@ import java.util.Date;
 @Builder
 @TableName("tbl_guest_vnc")
 public class GuestVncEntity {
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.INPUT)
     @TableField("guest_id")
     private Integer guestId;
     @TableField("vnc_port")
