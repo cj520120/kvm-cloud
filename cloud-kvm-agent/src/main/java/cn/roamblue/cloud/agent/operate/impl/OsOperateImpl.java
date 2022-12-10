@@ -95,6 +95,7 @@ public class OsOperateImpl implements OsOperate {
                 case VIR_DOMAIN_SHUTOFF:
                     domain.destroy();
                 default:
+                    domain.shutdown();
                     ThreadUtil.sleep(1, TimeUnit.SECONDS);
                     break;
             }

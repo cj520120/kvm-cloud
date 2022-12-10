@@ -21,7 +21,7 @@ SELINUX=permissive
 ```sh
 vim /etc/sysctl.conf 
 net.ipv4.ip_forward=1               # 设置转发并保存
-sysctl –p
+sysctl -p
 ```
 ### 防火墙配置
 ```sh

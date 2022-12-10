@@ -232,7 +232,7 @@ public class GuestService {
             guest.setLastHostId(host.getHostId());
             guest.setStatus(Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+            BaseOperateParam operateParam = StartGuestOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
             this.operateTask.addTask(operateParam);
             return ResultUtil.success(this.initGuestInfo(guest));
         }
@@ -256,14 +256,17 @@ public class GuestService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> shutdown(int guestId, boolean force) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
-            guest.setStatus(Constant.GuestStatus.STOPPING);
-            this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force).taskId(UUID.randomUUID().toString()).build();
-            this.operateTask.addTask(operateParam);
-            return ResultUtil.success(this.initGuestInfo(guest));
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.RUNNING:
+            case Constant.GuestStatus.STOPPING:
+                guest.setStatus(Constant.GuestStatus.STOPPING);
+                this.guestMapper.updateById(guest);
+                BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force).taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
-        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
 
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)

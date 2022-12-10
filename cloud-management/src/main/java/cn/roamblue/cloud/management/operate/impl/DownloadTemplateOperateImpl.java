@@ -83,6 +83,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
             if (templateVolume.getStatus() == cn.roamblue.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
                 templateVolume.setStatus(cn.roamblue.cloud.management.util.Constant.TemplateStatus.READY);
                 templateVolume.setCapacity(resultUtil.getData().getCapacity());
+                templateVolume.setAllocation(resultUtil.getData().getAllocation());
                 templateVolumeMapper.updateById(templateVolume);
             }
             if (template.getStatus() == cn.roamblue.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {

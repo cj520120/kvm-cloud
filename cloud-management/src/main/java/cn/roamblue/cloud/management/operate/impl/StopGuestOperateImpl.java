@@ -42,13 +42,17 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         if (guest.getStatus() != cn.roamblue.cloud.management.util.Constant.GuestStatus.STOPPING) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "客户机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
-        HostEntity host = hostMapper.selectById(guest.getLastHostId());
-        if (param.isForce()) {
-            GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).build();
-            this.asyncInvoker(host, param, Constant.Command.GUEST_SHUTDOWN, request);
-        } else {
-            GuestDestroyRequest request = GuestDestroyRequest.builder().name(guest.getName()).build();
-            this.asyncInvoker(host, param, Constant.Command.GUEST_DESTROY, request);
+        HostEntity host = hostMapper.selectById(guest.getHostId());
+        if(host==null){
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        }else {
+            if (!param.isForce()) {
+                GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).build();
+                this.asyncInvoker(host, param, Constant.Command.GUEST_SHUTDOWN, request);
+            } else {
+                GuestDestroyRequest request = GuestDestroyRequest.builder().name(guest.getName()).build();
+                this.asyncInvoker(host, param, Constant.Command.GUEST_DESTROY, request);
+            }
         }
     }
 
