@@ -98,6 +98,7 @@ public class HostService {
         switch (host.getStatus()){
             case Constant.HostStatus.ONLINE:
             case Constant.HostStatus.OFFLINE:
+            case Constant.HostStatus.MAINTENANCE:
                 host.setStatus(Constant.HostStatus.MAINTENANCE);
                 this.hostMapper.updateById(host);
                 return ResultUtil.success(this.initHost(host));

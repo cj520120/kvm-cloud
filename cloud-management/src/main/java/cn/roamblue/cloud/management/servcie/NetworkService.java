@@ -98,8 +98,7 @@ public class NetworkService {
         switch (network.getStatus()) {
             case Constant.NetworkStatus.CREATING:
             case Constant.NetworkStatus.READY:
-            case Constant.NetworkStatus.STOP:
-            case Constant.NetworkStatus.ERROR:
+            case Constant.NetworkStatus.MAINTENANCE:
                 network.setStatus(Constant.NetworkStatus.CREATING);
                 this.networkMapper.updateById(network);
                 BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(network.getNetworkId()).build();
@@ -109,6 +108,25 @@ public class NetworkService {
                 throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络已销毁");
         }
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<NetworkModel> maintenanceNetwork(int networkId) {
+        NetworkEntity network = this.networkMapper.selectById(networkId);
+        if (network == null) {
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
+        }
+        switch (network.getStatus()) {
+            case Constant.NetworkStatus.READY:
+            case Constant.NetworkStatus.MAINTENANCE:
+                network.setStatus(Constant.NetworkStatus.MAINTENANCE);
+                this.networkMapper.updateById(network);
+                return ResultUtil.success(this.initNetwork(network));
+            default:
+                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络未就绪");
+        }
+    }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> destroyNetwork(int networkId) {

@@ -144,6 +144,7 @@ public class GuestService {
                     .build();
             this.guestDiskMapper.insert(guestDisk);
             guest.setStatus(Constant.GuestStatus.STARTING);
+            this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .hostId(host.getHostId())
@@ -153,6 +154,74 @@ public class GuestService {
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<GuestModel> reInstall(int guestId,int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+                                              int storageId, String volumeType, long size) {
+
+        GuestEntity guest=this.guestMapper.selectById(guestId);
+        if(guest.getStatus()!= Constant.GuestStatus.STOP){
+            throw new CodeException(ErrorCode.SERVER_ERROR,"只能对关机状态对主机进行重装");
+        }
+        String uid = UUID.randomUUID().toString().replace("-", "");
+        HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(),guest.getMemory());
+        guest.setCdRoom(isoTemplateId);
+        host.setAllocationCpu(host.getAllocationCpu() + guest.getCpu());
+        host.setAllocationMemory(host.getAllocationCpu() + guest.getMemory());
+        this.hostMapper.updateById(host);
+        this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id",guestId).eq("device_id",0));
+        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        if (volumeId <= 0) {
+            VolumeEntity volume = VolumeEntity.builder()
+                    .capacity(size)
+                    .storageId(storage.getStorageId())
+                    .name(uid)
+                    .path(storage.getStorageId() + "/" + uid)
+                    .type(volumeType)
+                    .templateId(diskTemplateId)
+                    .status(Constant.VolumeStatus.CREATING)
+                    .build();
+            this.volumeMapper.insert(volume);
+            GuestDiskEntity guestDisk = GuestDiskEntity.builder()
+                    .volumeId(volume.getVolumeId())
+                    .guestId(guest.getGuestId())
+                    .deviceId(0)
+                    .build();
+            this.guestDiskMapper.insert(guestDisk);
+            guest.setStatus(Constant.GuestStatus.CREATING);
+            this.guestMapper.updateById(guest);
+            BaseOperateParam operateParam = CreateGuestOperate.builder()
+                    .guestId(guest.getGuestId())
+                    .snapshotVolumeId(snapshotVolumeId)
+                    .templateId(diskTemplateId)
+                    .volumeId(volume.getVolumeId())
+                    .taskId(uid)
+                    .build();
+            this.operateTask.addTask(operateParam);
+        } else {
+            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+            if (guestDisk != null) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
+            }
+            guestDisk = GuestDiskEntity.builder()
+                    .volumeId(volumeId)
+                    .guestId(guest.getGuestId())
+                    .deviceId(0)
+                    .build();
+            this.guestDiskMapper.insert(guestDisk);
+            guest.setStatus(Constant.GuestStatus.STARTING);
+            this.guestMapper.updateById(guest);
+            BaseOperateParam operateParam = StartGuestOperate.builder()
+                    .guestId(guest.getGuestId())
+                    .hostId(host.getHostId())
+                    .taskId(uid)
+                    .build();
+            this.operateTask.addTask(operateParam);
+        }
+        return ResultUtil.success(this.initGuestInfo(guest));
+    }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
@@ -222,7 +291,6 @@ public class GuestService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
         guest.setCdRoom(templateId);
-        guest.setStatus(Constant.GuestStatus.ATTACH_CD_ROOM);
         this.guestMapper.updateById(guest);
         BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
         this.operateTask.addTask(operateParam);
@@ -238,7 +306,6 @@ public class GuestService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
         guest.setCdRoom(0);
-        guest.setStatus(Constant.GuestStatus.DETACH_CD_ROOM);
         this.guestMapper.updateById(guest);
         BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
         this.operateTask.addTask(operateParam);

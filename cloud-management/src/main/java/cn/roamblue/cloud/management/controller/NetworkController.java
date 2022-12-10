@@ -41,6 +41,12 @@ public class NetworkController {
     public ResultUtil<NetworkModel> registerNetwork(@RequestParam("networkId") int networkId) {
         return networkService.registerNetwork(networkId);
     }
+
+    @PostMapping("/api/network/maintenance")
+    public ResultUtil<NetworkModel> maintenanceNetwork(@RequestParam("networkId") int networkId) {
+        return networkService.maintenanceNetwork(networkId);
+    }
+
     @DeleteMapping("/api/network/destroy")
     public ResultUtil<NetworkModel> destroyNetwork(@RequestParam("networkId") int networkId) {
         return networkService.destroyNetwork(networkId);

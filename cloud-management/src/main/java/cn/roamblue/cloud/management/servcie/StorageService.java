@@ -6,8 +6,6 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
-import cn.roamblue.cloud.management.data.entity.TemplateEntity;
-import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
 import cn.roamblue.cloud.management.data.mapper.StorageMapper;
 import cn.roamblue.cloud.management.data.mapper.TemplateMapper;
@@ -89,6 +87,7 @@ public class StorageService {
             case Constant.StorageStatus.READY:
             case Constant.StorageStatus.INIT:
             case Constant.StorageStatus.ERROR:
+            case Constant.StorageStatus.MAINTENANCE:
                 storage.setStatus(Constant.StorageStatus.INIT);
                 this.storageMapper.updateById(storage);
                 BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).storageId(storage.getStorageId()).build();
@@ -98,6 +97,25 @@ public class StorageService {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池以销毁");
         }
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
+        StorageEntity storage = this.storageMapper.selectById(storageId);
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
+        }
+        switch (storage.getStatus()) {
+            case Constant.StorageStatus.READY:
+            case Constant.StorageStatus.MAINTENANCE:
+                storage.setStatus(Constant.StorageStatus.MAINTENANCE);
+                this.storageMapper.updateById(storage);
+                return ResultUtil.success(this.initStorageModel(storage));
+            default:
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
+        }
+    }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> destroyStorage(int storageId) {

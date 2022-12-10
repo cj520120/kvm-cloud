@@ -29,10 +29,17 @@ public class StorageController {
                                                   @RequestParam("param") String param) {
         return storageService.createStorage(name, type, param);
     }
+
     @PostMapping("/api/storage/register")
     public ResultUtil<StorageModel> registerStorage(int storageId) {
         return storageService.registerStorage(storageId);
     }
+
+    @PostMapping("/api/storage/maintenance")
+    public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
+        return storageService.maintenanceStorage(storageId);
+    }
+
     @DeleteMapping("/api/storage/destroy")
     public ResultUtil<StorageModel> destroyStorage(int storageId) {
         return storageService.destroyStorage(storageId);

@@ -13,8 +13,9 @@ public class Constant {
     public static class StorageStatus {
         public static final int INIT = 0;
         public static final int READY = 1;
-        public static final int DESTROY = 2;
-        public static final int ERROR = 3;
+        public static final int MAINTENANCE = 2;
+        public static final int DESTROY = 3;
+        public static final int ERROR = 4;
     }
     public static class SnapshotStatus{
         public static final int CREATING = 0;
@@ -39,7 +40,7 @@ public class Constant {
     public static class NetworkStatus {
         public static final int CREATING = 1;
         public static final int READY = 2;
-        public static final int STOP = 3;
+        public static final int MAINTENANCE = 3;
         public static final int DESTROY = 4;
         public static final int ERROR = 5;
     }
@@ -51,13 +52,9 @@ public class Constant {
         public static final int RUNNING = 2;
         public static final int STOPPING = 3;
         public static final int STOP = 4;
-        public static final int ATTACH_CD_ROOM = 5;
-        public static final int DETACH_CD_ROOM = 6;
-        public static final int ATTACH_NIC = 9;
-        public static final int DETACH_NIC = 10;
-        public static final int REBOOT = 11;
-        public static final int DESTROY = 12;
-        public static final int ERROR = 13;
+        public static final int REBOOT = 5;
+        public static final int DESTROY = 6;
+        public static final int ERROR = 7;
     }
 
     public static class TemplateStatus {
