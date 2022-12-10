@@ -1,14 +1,11 @@
 package cn.roamblue.cloud.management.operate.impl;
 
-import cn.roamblue.cloud.common.bean.BasicBridgeNetwork;
 import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.common.bean.VlanNetwork;
-import cn.roamblue.cloud.common.error.CodeException;
-import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.NetworkEntity;
+import cn.roamblue.cloud.management.operate.bean.DestroyHostNetworkOperate;
 import cn.roamblue.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -20,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 销毁网络
@@ -38,44 +37,14 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyNetworkOperate param) {
-        NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-        if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.DESTROY) {
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
-            for (HostEntity host : hosts) {
-                if (Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
-                    if (Objects.equals(cn.roamblue.cloud.management.util.Constant.NetworkType.BASIC, network.getType())) {
-                        BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                                .bridge(network.getBridge())
-                                .ip(host.getHostIp())
-                                .geteway(network.getGateway())
-                                .nic(host.getNic())
-                                .netmask(network.getMask()).build();
-                        this.syncInvoker(host, param, Constant.Command.NETWORK_DESTROY_BASIC, basicBridgeNetwork);
-                    } else {
-
-                        NetworkEntity basicNetworkEntity = networkMapper.selectById(network.getBasicNetworkId());
-                        BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                                .bridge(basicNetworkEntity.getBridge())
-                                .ip(host.getHostIp())
-                                .geteway(basicNetworkEntity.getGateway())
-                                .nic(host.getNic())
-                                .netmask(basicNetworkEntity.getMask()).build();
-                        VlanNetwork vlan = VlanNetwork.builder()
-                                .vlanId(network.getVlanId())
-                                .netmask(network.getMask())
-                                .basic(basicBridgeNetwork)
-                                .ip(null)
-                                .bridge(network.getBridge())
-                                .geteway(network.getGateway())
-                                .build();
-                        this.syncInvoker(host, param, Constant.Command.NETWORK_DESTROY_VLAN, vlan);
-                    }
-                }
-            }
-            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.<Void>builder().build());
-        } else {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "网络[" + network.getName() + "]状态不正确:" + network.getStatus());
-        }
+        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
+        List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
+        DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
+                .networkId(param.getNetworkId())
+                .nextHostIds(hostIds)
+                .build();
+        this.operateTask.addTask(operate);
+        this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
     }
 
     @Override
@@ -88,9 +57,11 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DestroyNetworkOperate param, ResultUtil<Void> resultUtil) {
-        NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-        if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.DESTROY) {
-            networkMapper.deleteById(param.getNetworkId());
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            NetworkEntity network = networkMapper.selectById(param.getNetworkId());
+            if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.DESTROY) {
+                networkMapper.deleteById(param.getNetworkId());
+            }
         }
     }
 }

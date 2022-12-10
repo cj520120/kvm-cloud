@@ -59,15 +59,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         return this.paramType;
     }
 
-    protected V syncInvoker(HostEntity host, T param, String command, Object data) {
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("data", GsonBuilderUtil.create().toJson(data));
-        map.put("taskId", param.getTaskId());
-        map.put("command", command);
-        String uri = String.format("%s/api/operate", host.getUri());
-        String response = HttpUtil.post(uri, map);
-        return GsonBuilderUtil.create().fromJson(response, this.getCallResultType());
-    }
 
     protected void asyncInvoker(HostEntity host, T param, String command, Object data) {
         TaskRequest taskRequest = TaskRequest.builder()
