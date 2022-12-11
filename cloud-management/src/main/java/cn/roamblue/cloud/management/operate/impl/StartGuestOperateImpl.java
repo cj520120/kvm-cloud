@@ -76,10 +76,13 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 .osDisks(disks)
                 .networkInterfaces(networkInterfaces)
                 .vncPassword(guestVncEntity.getPassword())
+                .qmaRequest(this.getQmaRequest(guest))
                 .build();
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
     }
+
+
 
 
     @Override
@@ -173,6 +176,9 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             }
         }
         return cdRoom;
+    }
+    protected GuestQmaRequest getQmaRequest(GuestEntity guest) {
+        return null;
     }
 
 }
