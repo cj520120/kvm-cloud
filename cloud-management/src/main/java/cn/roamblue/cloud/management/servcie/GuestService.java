@@ -319,101 +319,124 @@ public class GuestService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachDisk(int guestId, int volumeId) {
-        GuestEntity guest=this.guestMapper.selectById(guestId);
-        VolumeEntity volume=this.volumeMapper.selectById(volumeId);
-        if(volume.getStatus()!= Constant.VolumeStatus.READY){
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.STOP:
+            case Constant.GuestStatus.RUNNING:
+                VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+                if (volume.getStatus() != Constant.VolumeStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
+                }
+                GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume));
+                if (guestDisk != null) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
+                }
+                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
+                List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
+                int deviceId = -1;
+                for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
+                    if (!gustDiskDeviceIds.contains(i)) {
+                        deviceId = i;
+                        break;
+                    }
+                }
+                if (deviceId < 0) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大磁盘数量限制");
+                }
+                guestDisk = GuestDiskEntity.builder().volumeId(volumeId).deviceId(deviceId).build();
+                this.guestDiskMapper.updateById(guestDisk);
+                volume.setStatus(Constant.VolumeStatus.ATTACH_DISK);
+                this.volumeMapper.updateById(volume);
+                BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
+                        .guestDiskId(guestDisk.getGuestDiskId()).attach(true).volumeId(volumeId).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
-        GuestDiskEntity guestDisk=  this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id",volume));
-        if(guestDisk!=null){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"当前磁盘已经被挂载");
-        }
-        List<GuestDiskEntity> guestDiskList=this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id",guestId));
-        List<Integer> gustDiskDeviceIds=guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
-        int deviceId=-1;
-        for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
-            if(!gustDiskDeviceIds.contains(i)){
-                deviceId=i;
-                break;
-            }
-        }
-        if(deviceId<0){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"当前挂载超过最大磁盘数量限制");
-        }
-        guestDisk=GuestDiskEntity.builder().volumeId(volumeId).deviceId(deviceId).build();
-        this.guestDiskMapper.updateById(guestDisk);
-        volume.setStatus(Constant.VolumeStatus.ATTACH_DISK);
-        this.volumeMapper.updateById(volume);
-        BaseOperateParam operateParam= ChangeGuestDiskOperate.builder()
-                .guestDiskId(guestDisk.getGuestDiskId()).attach(true).volumeId(volumeId).guestId(guestId)
-                .taskId(UUID.randomUUID().toString()).build();
-        this.operateTask.addTask(operateParam);
-        return ResultUtil.success(this.initGuestInfo(guest));
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachDisk(int guestId, int guestDiskId) {
-        GuestEntity guest=this.guestMapper.selectById(guestId);
+        GuestEntity guest = this.guestMapper.selectById(guestId);
 
-
-        GuestDiskEntity guestDisk=  this.guestDiskMapper.selectById(guestDiskId);
-        if(guestDisk==null){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"当前磁盘未挂载");
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.STOP:
+            case Constant.GuestStatus.RUNNING:
+                GuestDiskEntity guestDisk = this.guestDiskMapper.selectById(guestDiskId);
+                if (guestDisk == null) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未挂载");
+                }
+                if (guestDisk.getGuestId() != guestId) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未挂载");
+                }
+                this.guestDiskMapper.deleteById(guestDiskId);
+                BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
+                        .guestDiskId(guestDisk.getGuestDiskId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
-        if(guestDisk.getGuestId()!=guestId){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"当前磁盘未挂载");
-        }
-        this.guestDiskMapper.deleteById(guestDiskId);
-        BaseOperateParam operateParam= ChangeGuestDiskOperate.builder()
-                .guestDiskId(guestDisk.getGuestDiskId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
-                .taskId(UUID.randomUUID().toString()).build();
-        this.operateTask.addTask(operateParam);
-        return ResultUtil.success(this.initGuestInfo(guest));
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachNetwork(int guestId, int networkId,String driveType) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
-        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
-        List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
-        int deviceId = -1;
-        for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
-            if (!guestNetworkDeviceIds.contains(i)) {
-                deviceId = i;
-                break;
-            }
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.STOP:
+            case Constant.GuestStatus.RUNNING:
+                GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
+                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+                List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
+                int deviceId = -1;
+                for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
+                    if (!guestNetworkDeviceIds.contains(i)) {
+                        deviceId = i;
+                        break;
+                    }
+                }
+                if (deviceId < 0) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大网卡数量限制");
+                }
+                guestNetwork.setDeviceId(deviceId);
+                guestNetwork.setDriveType(driveType);
+                guestNetwork.setGuestId(guestId);
+                this.guestNetworkMapper.updateById(guestNetwork);
+                BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
+                        .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
-        if (deviceId < 0) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大网卡数量限制");
-        }
-        guestNetwork.setDeviceId(deviceId);
-        guestNetwork.setDriveType(driveType);
-        guestNetwork.setGuestId(guestId);
-        this.guestNetworkMapper.updateById(guestNetwork);
-        BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
-                .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
-                .taskId(UUID.randomUUID().toString()).build();
-        this.operateTask.addTask(operateParam);
-        return ResultUtil.success(this.initGuestInfo(guest));
 
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachNetwork(int guestId, int guestNetworkId) {
-        GuestEntity guest=this.guestMapper.selectById(guestId);
-        GuestNetworkEntity guestNetwork=this.guestNetworkMapper.selectById(guestNetworkId);
-        if(guestNetwork==null||guestNetwork.getGuestId()!=guestId){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"当前网卡未挂载");
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.STOP:
+            case Constant.GuestStatus.RUNNING:
+                GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
+                if (guestNetwork == null || guestNetwork.getGuestId() != guestId) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前网卡未挂载");
+                }
+                guestNetwork.setDeviceId(0);
+                guestNetwork.setGuestId(0);
+                this.guestNetworkMapper.updateById(guestNetwork);
+                BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
+                        .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
-        guestNetwork.setDeviceId(0);
-        guestNetwork.setGuestId(0);
-        this.guestNetworkMapper.updateById(guestNetwork);
-        BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
-                .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
-                .taskId(UUID.randomUUID().toString()).build();
-        this.operateTask.addTask(operateParam);
-        return ResultUtil.success(this.initGuestInfo(guest));
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -423,24 +446,25 @@ public class GuestService {
         switch (guest.getStatus()) {
             case Constant.GuestStatus.ERROR:
             case Constant.GuestStatus.STOP:
+                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+                for (GuestNetworkEntity guestNetwork : guestNetworkList) {
+                    guestNetwork.setGuestId(0);
+                    guestNetwork.setDeviceId(0);
+                    guestNetwork.setDriveType("");
+                    this.guestNetworkMapper.updateById(guestNetwork);
+                }
+                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
+                for (GuestDiskEntity guestDisk : guestDiskList) {
+                    this.guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
+                }
+                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
+                for (VolumeEntity volume : guestVolumeList) {
+                    this.volumeService.destroyVolume(volume.getVolumeId());
+                }
+                this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", guest.getGuestId()));
+                return ResultUtil.success();
+            default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
         }
-        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
-        for (GuestNetworkEntity guestNetwork : guestNetworkList) {
-            guestNetwork.setGuestId(0);
-            guestNetwork.setDeviceId(0);
-            guestNetwork.setDriveType("");
-            this.guestNetworkMapper.updateById(guestNetwork);
-        }
-        List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
-        for (GuestDiskEntity guestDisk : guestDiskList) {
-            this.guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
-        }
-        List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
-        for (VolumeEntity volume : guestVolumeList) {
-            this.volumeService.destroyVolume(volume.getVolumeId());
-        }
-        this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", guest.getGuestId()));
-        return ResultUtil.success();
     }
 }
