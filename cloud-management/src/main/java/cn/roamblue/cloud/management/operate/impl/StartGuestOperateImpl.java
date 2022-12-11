@@ -7,19 +7,19 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.operate.bean.StartGuestOperate;
-import cn.roamblue.cloud.management.servcie.AllocateService;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * 启动虚拟机
@@ -49,7 +49,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
 
         HostEntity host =this.allocateService.allocateHost(guest.getLastHostId(),param.getHostId(),guest.getCpu(), guest.getMemory());
-
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
         List<OsDisk> disks = new ArrayList<>();
@@ -106,6 +105,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
         guest.setHostId(host.getHostId());
         this.guestMapper.updateById(guest);
+        this.allocateService.initHostAllocate();
         GuestStartRequest request = GuestStartRequest.builder()
                 .emulator(host.getEmulator())
                 .name(guest.getName())
@@ -118,7 +118,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 .networkInterfaces(networkInterfaces)
                 .vncPassword(guestVncEntity.getPassword())
                 .build();
-        this.hostMapper.updateById(host);
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
     }
@@ -155,7 +154,8 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
             }
-            guestMapper.updateById(guest);
+            this.guestMapper.updateById(guest);
+            this.allocateService.initHostAllocate();
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }

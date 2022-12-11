@@ -22,9 +22,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -54,9 +51,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             if(targetVolume.getStatus()!= cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING){
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
-            Collections.shuffle(hosts);
-            HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
+            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceStorage(storage.getName())

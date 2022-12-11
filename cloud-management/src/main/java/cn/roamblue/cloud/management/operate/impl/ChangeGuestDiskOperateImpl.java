@@ -42,24 +42,25 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         switch (volume.getStatus()) {
             case cn.roamblue.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
             case cn.roamblue.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
+                GuestEntity guest = guestMapper.selectById(param.getGuestId());
+                if (guest.getHostId() > 0) {
+                    HostEntity host = hostMapper.selectById(guest.getHostId());
+                    OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(guestDisk.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
+                    if (param.isAttach()) {
+                        this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+                    } else {
+                        this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                    }
+
+                } else {
+                    this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+                }
                 break;
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正确:" + volume.getStatus());
 
         }
-        GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getHostId() > 0) {
-            HostEntity host = hostMapper.selectById(guest.getHostId());
-            OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(guestDisk.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
-            if (param.isAttach()) {
-                this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
-            } else {
-                this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
-            }
 
-        } else {
-            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
-        }
     }
 
     @Override

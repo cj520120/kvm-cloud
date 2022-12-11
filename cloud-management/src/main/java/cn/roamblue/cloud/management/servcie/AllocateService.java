@@ -3,9 +3,11 @@ package cn.roamblue.cloud.management.servcie;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
+import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
+import cn.roamblue.cloud.management.data.mapper.GuestMapper;
 import cn.roamblue.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.data.mapper.StorageMapper;
@@ -18,11 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class AllocateService {
+    @Autowired
+    private GuestMapper guestMapper;
     @Autowired
     private StorageMapper storageMapper;
     @Autowired
@@ -64,20 +69,13 @@ public class AllocateService {
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-            if (host == null || !Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机");
-            }
-            if (host.getTotalMemory() - host.getAllocationMemory() > memory) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "主机当前可用内存不足");
-            }
-            if (host.getTotalCpu() - host.getAllocationCpu() > cpu) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "主机当前可用CPU不足");
+            if (!hostVerify(host,cpu,memory)) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }
             return host;
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
-            list = list.stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE))
-//                    .filter(t -> t.getTotalCpu() - t.getAllocationCpu() > cpu && t.getTotalMemory() - t.getAllocationMemory() > memory)
+            list = list.stream().filter(t -> hostVerify(t,cpu,memory))
                     .collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
@@ -90,5 +88,29 @@ public class AllocateService {
             return host;
         }
     }
-
+    private boolean hostVerify(HostEntity host,int cpu,long memory){
+        if(!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)){
+            return false;
+        }
+        int allocateCpu=host.getAllocationCpu()+cpu;
+        long allocationMemory=host.getAllocationMemory()+memory;
+        return host.getTotalCpu()>allocateCpu&&host.getTotalMemory()>allocationMemory;
+    }
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Transactional(rollbackFor = Exception.class)
+    public void initHostAllocate(){
+        List<HostEntity> hosts=this.hostMapper.selectList(new QueryWrapper<>());
+        Map<Integer,List<GuestEntity>> map = guestMapper.selectList(new QueryWrapper<GuestEntity>().gt("host_id",0)).stream().collect(Collectors.groupingBy(GuestEntity::getHostId));
+        for (HostEntity host : hosts) {
+            List<GuestEntity> guestList= map.get(host.getHostId());
+            if(guestList==null) {
+                host.setAllocationCpu(0);
+                host.setAllocationMemory(0L);
+            }else{
+                host.setAllocationCpu(guestList.stream().mapToInt(GuestEntity::getCpu).sum());
+                host.setAllocationMemory(guestList.stream().mapToLong(GuestEntity::getMemory).sum());
+            }
+            this.hostMapper.updateById(host);
+        }
+    }
 }

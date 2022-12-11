@@ -63,6 +63,7 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
             }
             guestMapper.updateById(guest);
+            this.allocateService.initHostAllocate();
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }

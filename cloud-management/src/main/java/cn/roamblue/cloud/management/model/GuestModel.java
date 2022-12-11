@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -23,5 +24,7 @@ public class GuestModel {
     private int lastHostId;
     private int type;
     private int status;
+    private List<VolumeModel> volumes;
+    private List<GuestNetworkModel> networks;
     private Date createTime;
 }

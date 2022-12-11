@@ -8,6 +8,9 @@ import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.GuestModel;
+import cn.roamblue.cloud.management.model.GuestNetworkModel;
+import cn.roamblue.cloud.management.model.VolumeAttachModel;
+import cn.roamblue.cloud.management.model.VolumeModel;
 import cn.roamblue.cloud.management.operate.bean.*;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
@@ -17,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -55,8 +59,25 @@ public class GuestService {
     @Autowired
     private GuestVncMapper guestVncMapper;
 
+    private VolumeModel initVolume(GuestDiskEntity disk) {
+        VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
+        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
+        return model;
+    }
+
+    private GuestNetworkModel initNetwork(GuestNetworkEntity entity) {
+        return new BeanConverter<>(GuestNetworkModel.class).convert(entity, null);
+    }
+
     private GuestModel initGuestInfo(GuestEntity entity) {
-        return new BeanConverter<>(GuestModel.class).convert(entity, null);
+        GuestModel model = new BeanConverter<>(GuestModel.class).convert(entity, null);
+        List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", entity.getGuestId()));
+        diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
+        model.setVolumes(diskList.stream().map(this::initVolume).collect(Collectors.toList()));
+        List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", entity.getGuestId()));
+        networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
+        model.setNetworks(networkList.stream().map(this::initNetwork).collect(Collectors.toList()));
+        return model;
     }
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
@@ -84,7 +105,6 @@ public class GuestService {
 
 
         String uid = UUID.randomUUID().toString().replace("-", "");
-        HostEntity host = this.allocateService.allocateHost(hostId, hostId, cpu, memory);
         GuestEntity guest = GuestEntity.builder()
                 .name(uid)
                 .description(description)
@@ -92,7 +112,7 @@ public class GuestService {
                 .cpu(cpu)
                 .memory(memory)
                 .cdRoom(isoTemplateId)
-                .hostId(host.getHostId())
+                .hostId(0)
                 .lastHostId(0)
                 .type(Constant.GuestType.USER)
                 .status(Constant.GuestStatus.CREATING)
@@ -147,7 +167,7 @@ public class GuestService {
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
-                    .hostId(host.getHostId())
+                    .hostId(hostId)
                     .taskId(uid)
                     .build();
             this.operateTask.addTask(operateParam);
@@ -165,11 +185,7 @@ public class GuestService {
             throw new CodeException(ErrorCode.SERVER_ERROR,"只能对关机状态对主机进行重装");
         }
         String uid = UUID.randomUUID().toString().replace("-", "");
-        HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(),guest.getMemory());
         guest.setCdRoom(isoTemplateId);
-        host.setAllocationCpu(host.getAllocationCpu() + guest.getCpu());
-        host.setAllocationMemory(host.getAllocationCpu() + guest.getMemory());
-        this.hostMapper.updateById(host);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id",guestId).eq("device_id",0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
@@ -214,7 +230,7 @@ public class GuestService {
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
-                    .hostId(host.getHostId())
+                    .hostId(0)
                     .taskId(uid)
                     .build();
             this.operateTask.addTask(operateParam);
@@ -227,12 +243,11 @@ public class GuestService {
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() == Constant.GuestStatus.STOP) {
-            HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
-            guest.setHostId(host.getHostId());
-            guest.setLastHostId(host.getHostId());
+            guest.setHostId(hostId);
             guest.setStatus(Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = StartGuestOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+            this.allocateService.initHostAllocate();
+            BaseOperateParam operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId).taskId(UUID.randomUUID().toString()).build();
             this.operateTask.addTask(operateParam);
             return ResultUtil.success(this.initGuestInfo(guest));
         }

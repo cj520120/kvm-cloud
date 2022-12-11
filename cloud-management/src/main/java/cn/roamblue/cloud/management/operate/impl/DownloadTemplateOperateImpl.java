@@ -14,16 +14,12 @@ import cn.roamblue.cloud.management.data.entity.TemplateEntity;
 import cn.roamblue.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.roamblue.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -50,9 +46,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
             throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
         }
-        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
-        Collections.shuffle(hosts);
-        HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
+        HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
         StorageEntity targetStorage = storageMapper.selectById(templateVolume.getStorageId());
 
         VolumeDownloadRequest request = VolumeDownloadRequest.builder()

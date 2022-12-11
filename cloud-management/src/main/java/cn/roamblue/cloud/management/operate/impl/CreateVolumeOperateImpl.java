@@ -46,10 +46,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             if (storage.getStatus() != cn.roamblue.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
-            Collections.shuffle(hosts);
-            HostEntity host = hosts.stream().filter(h -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, h.getStatus())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "没有可用的主机信息"));
-
+            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             if (param.getTemplateId() > 0) {
                 List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", param.getTemplateId()));
                 Collections.shuffle(templateVolumeList);
