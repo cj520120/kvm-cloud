@@ -5,9 +5,9 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.roamblue.cloud.agent.operate.OsOperate;
 import cn.roamblue.cloud.agent.util.VncUtil;
-import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import com.google.gson.Gson;
@@ -120,67 +120,38 @@ public class OsOperateImpl implements OsOperate {
         }
     }
 
-    @Override
-    public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
-        Domain domain = this.findDomainByName(connect, request.getName());
-        if (domain != null) {
-            if (domain.getInfo().state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
-                return this.initVmResponse(domain);
-            }
-            domain.destroy();
-        }
-        String cpuXml = "";
-        String cdRoomXml = "";
-        String diskXml = "";
-        String nicXml = "";
-        if (request.getOsCpu().getShare() > 0) {
-            String xml = ResourceUtil.readUtf8Str("xml/cpu/cputune.xml");
-            cpuXml += String.format(xml, request.getOsCpu().getShare()) + "\r\n";
-        }
-        if (request.getOsCpu().getCore() > 0) {
-            String xml = ResourceUtil.readUtf8Str("xml/cpu/cpu.xml");
-            cpuXml += String.format(xml, request.getOsCpu().getSocket(), request.getOsCpu().getCore(), request.getOsCpu().getThread()) + "\r\n";
-        }
-        if (request.getOsCdRoom() != null) {
-            OsCdRoom cd = request.getOsCdRoom();
-            if (StringUtils.isEmpty(cd.getPath())) {
-                String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
-                cdRoomXml += xml + "\r\n";
+    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
+        Gson gson = new Gson();
+        Map<String, Object> map = new HashMap<>(2);
+        map.put("execute", "guest-exec");
+        Map<String, Object> arguments = new HashMap<>(3);
+        map.put("arguments", arguments);
+        map.put("path", execute.getCommand());
+        map.put("arg", execute.getArgs());
+        String response = domain.qemuAgentCommand(gson.toJson(command), request.getTimeout(), 0);
+        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
+        }.getType());
+        String pid = ((Map<String, Object>) result.get("retrun")).get("pid").toString();
+        map.clear();
+        map.put("execute", "guest-exec-status");
+        arguments.clear();
+        arguments.put("pid", pid);
+        response = domain.qemuAgentCommand(gson.toJson(command), request.getTimeout(), 0);
+        boolean isExit = false;
+        do {
+            result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
+            }.getType());
+            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("retrun")).get("exited").toString());
+            if (!isExit) {
+                ThreadUtil.sleep(1, TimeUnit.SECONDS);
             } else {
-                String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
-                cdRoomXml += String.format(xml, cd.getPath()) + "\r\n";
+                int exitcode = Integer.parseInt(((Map<String, Object>) result.get("retrun")).get("exitcode").toString());
+                if (exitcode != 0) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败");
+                }
             }
-        }
-        for (int i = 0; i < request.getOsDisks().size(); i++) {
-            OsDisk osDisk = request.getOsDisks().get(i);
-            String xml = getDiskXml(osDisk, i == 0 ? request.getBus() : Constant.DiskBus.VIRTIO);
-            int deviceId = osDisk.getDeviceId() + MIN_DISK_DEVICE_ID;
+        } while (isExit);
 
-            String dev = "" + (char) ('a' + deviceId);
-            xml = String.format(xml, dev, osDisk.getVolumeType(), osDisk.getVolume(), deviceId, deviceId);
-            diskXml += xml + "\r\n";
-        }
-        for (OsNic osNic : request.getNetworkInterfaces()) {
-            String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
-            int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
-            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId);
-            nicXml += xml + "\r\n";
-        }
-        String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
-        xml = String.format(xml,
-                request.getName(),
-                request.getDescription(),
-                request.getOsMemory().getMemory(),
-                request.getOsCpu().getNumber(),
-                cpuXml,
-                request.getEmulator(),
-                cdRoomXml,
-                diskXml,
-                nicXml,
-                request.getName(),
-                request.getVncPassword());
-        domain=connect.domainCreateXML(xml, 0);
-        return this.initVmResponse(domain);
     }
 
     @Override
@@ -268,31 +239,90 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
+    public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
+        Domain domain = this.findDomainByName(connect, request.getName());
+        if (domain != null) {
+            if (domain.getInfo().state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
+                return this.initVmResponse(domain);
+            }
+            domain.destroy();
+        }
+        String cpuXml = "";
+        String cdRoomXml = "";
+        String diskXml = "";
+        String nicXml = "";
+        if (request.getOsCpu().getShare() > 0) {
+            String xml = ResourceUtil.readUtf8Str("xml/cpu/cputune.xml");
+            cpuXml += String.format(xml, request.getOsCpu().getShare()) + "\r\n";
+        }
+        if (request.getOsCpu().getCore() > 0) {
+            String xml = ResourceUtil.readUtf8Str("xml/cpu/cpu.xml");
+            cpuXml += String.format(xml, request.getOsCpu().getSocket(), request.getOsCpu().getCore(), request.getOsCpu().getThread()) + "\r\n";
+        }
+        if (request.getOsCdRoom() != null) {
+            OsCdRoom cd = request.getOsCdRoom();
+            if (StringUtils.isEmpty(cd.getPath())) {
+                String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
+                cdRoomXml += xml + "\r\n";
+            } else {
+                String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
+                cdRoomXml += String.format(xml, cd.getPath()) + "\r\n";
+            }
+        }
+        for (int i = 0; i < request.getOsDisks().size(); i++) {
+            OsDisk osDisk = request.getOsDisks().get(i);
+            String xml = getDiskXml(osDisk, i == 0 ? request.getBus() : Constant.DiskBus.VIRTIO);
+            int deviceId = osDisk.getDeviceId() + MIN_DISK_DEVICE_ID;
+
+            String dev = "" + (char) ('a' + deviceId);
+            xml = String.format(xml, dev, osDisk.getVolumeType(), osDisk.getVolume(), deviceId, deviceId);
+            diskXml += xml + "\r\n";
+        }
+        for (OsNic osNic : request.getNetworkInterfaces()) {
+            String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+            int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
+            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId);
+            nicXml += xml + "\r\n";
+        }
+        String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
+        xml = String.format(xml,
+                request.getName(),
+                request.getDescription(),
+                request.getOsMemory().getMemory(),
+                request.getOsCpu().getNumber(),
+                cpuXml,
+                request.getEmulator(),
+                cdRoomXml,
+                diskXml,
+                nicXml,
+                request.getName(),
+                request.getVncPassword());
+        domain = connect.domainCreateXML(xml, 0);
+
+
+        if (Objects.nonNull(request.getQmaRequest())) {
+            //写入qma
+            try {
+                this.execute_qma(domain, request.getQmaRequest());
+            } catch (CodeException err) {
+                domain.destroy();
+                throw err;
+            } catch (Exception err) {
+                domain.destroy();
+                throw new CodeException(ErrorCode.SERVER_ERROR, err.getMessage());
+            }
+        }
+        return this.initVmResponse(domain);
+    }
+
+    @Override
     public void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        List<GuestQmaRequest.QmaBody> commands=request.getCommands();
-        for (GuestQmaRequest.QmaBody command : commands) {
-            switch (command.getCommand()){
-                case GuestQmaRequest.QmaType.WRITE_FILE:
-                    GuestQmaRequest.WriteFile writeFile=new Gson().fromJson(command.getData(), GuestQmaRequest.WriteFile.class);
-                    int handler = qmaOpenFile(writeFile.getFileName(), domain);
-                    qmaWriteFile(writeFile.getFileBody(), domain,handler);
-                    qmaCloseFile(domain,handler);
-                    break;
-                case GuestQmaRequest.QmaType.EXECUTE:
-                    GuestQmaRequest.Execute execute=new Gson().fromJson(command.getData(), GuestQmaRequest.Execute.class);
-
-                    qmaExecuteShell(request, domain, command, execute);
-                    break;
-                default:
-                    throw new CodeException(ErrorCode.VM_NOT_FOUND, "不支持的QMA操作:" + command.getCommand());
-            }
-        }
+        this.execute_qma(domain, request);
     }
-
 
 
     @Override
@@ -321,18 +351,30 @@ public class OsOperateImpl implements OsOperate {
         }
         return null;
     }
-    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
-        Gson gson = new Gson();
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("execute", "guest-exec");
-        Map<String, Object> arguments = new HashMap<>(3);
-        map.put("arguments", arguments);
-        map.put("path", execute.getCommand());
-        map.put("arg", execute.getArgs());
-        if(null== domain.qemuAgentCommand( gson.toJson(command), request.getTimeout(), 0)){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"执行命令失败");
+
+    private void execute_qma(Domain domain, GuestQmaRequest request) throws LibvirtException {
+        List<GuestQmaRequest.QmaBody> commands = request.getCommands();
+        for (GuestQmaRequest.QmaBody command : commands) {
+            switch (command.getCommand()) {
+                case GuestQmaRequest.QmaType.WRITE_FILE:
+                    GuestQmaRequest.WriteFile writeFile = new Gson().fromJson(command.getData(), GuestQmaRequest.WriteFile.class);
+                    int handler = qmaOpenFile(writeFile.getFileName(), domain);
+                    try {
+                        qmaWriteFile(writeFile.getFileBody(), domain, handler);
+                    } finally {
+                        qmaCloseFile(domain, handler);
+                    }
+                    break;
+                case GuestQmaRequest.QmaType.EXECUTE:
+                    GuestQmaRequest.Execute execute = new Gson().fromJson(command.getData(), GuestQmaRequest.Execute.class);
+                    qmaExecuteShell(request, domain, command, execute);
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的QMA操作:" + command.getCommand());
+            }
         }
     }
+
     private void qmaCloseFile(Domain domain, int handler) throws LibvirtException {
         Map<String, Object> command = new HashMap<>(2);
         command.put("execute", "guest-file-close");
@@ -341,7 +383,7 @@ public class OsOperateImpl implements OsOperate {
         command.put("arguments", arguments);
         String response = domain.qemuAgentCommand(new Gson().toJson(command), 10, 0);
         if (StringUtils.isEmpty(response)) {
-            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "执行失败");
+            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "关闭文件失败");
         }
     }
 
@@ -354,7 +396,7 @@ public class OsOperateImpl implements OsOperate {
         command.put("arguments", arguments);
         String response = domain.qemuAgentCommand(new Gson().toJson(command), 10, 0);
         if (StringUtils.isEmpty(response)) {
-            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "执行失败");
+            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "写入文件失败");
         }
     }
 
@@ -368,7 +410,7 @@ public class OsOperateImpl implements OsOperate {
         command.put("arguments", arguments);
         String response = domain.qemuAgentCommand(new Gson().toJson(command), 10, 0);
         if (StringUtils.isEmpty(response)) {
-            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "执行失败");
+            throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "打开文件失败.path=" + path);
         }
         Map<String, Object> map = new Gson().fromJson(response, new TypeToken<Map<String, Object>>() {
         }.getType());

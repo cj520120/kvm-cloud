@@ -49,50 +49,9 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
 
         HostEntity host =this.allocateService.allocateHost(guest.getLastHostId(),param.getHostId(),guest.getCpu(), guest.getMemory());
-        List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
-        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
-        List<OsDisk> disks = new ArrayList<>();
-        for (GuestDiskEntity entity : guestDiskEntityList) {
-            VolumeEntity volume = volumeMapper.selectById(entity.getVolumeId());
-            if (volume.getStatus() != cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
-            }
-            OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(entity.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
-            disks.add(disk);
-        }
-        Collections.sort(disks, Comparator.comparingInt(OsDisk::getDeviceId));
-        List<OsNic> networkInterfaces = new ArrayList<>();
-        for (GuestNetworkEntity entity : guestNetworkEntityList) {
-            NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
-            if (network.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
-            }
-            if (network.getBasicNetworkId() > 0) {
-                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
-                if (parentNetwork.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
-                }
-            }
-            OsNic nic = OsNic.builder()
-                    .mac(entity.getMac())
-                    .driveType(entity.getDriveType())
-                    .name(guest.getName())
-                    .deviceId(entity.getDeviceId())
-                    .bridgeName(network.getBridge())
-                    .build();
-            networkInterfaces.add(nic);
-        }
-        OsCdRoom cdRoom = OsCdRoom.builder().build();
-        if (guest.getCdRoom() > 0) {
-            List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
-            Collections.shuffle(templateVolumeList);
-            if (templateVolumeList.size() > 0) {
-                TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
-                cdRoom.setPath(templateVolume.getPath());
-            } else {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "光盘镜像未就绪");
-            }
-        }
+        List<OsDisk> disks = getGuestDisk(guest);
+        List<OsNic> networkInterfaces = getGuestNetwork(guest);
+        OsCdRoom cdRoom = getGuestCdRoom(guest);
         GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guest.getGuestId());
         if (guestVncEntity == null) {
             guestVncEntity = GuestVncEntity.builder()
@@ -121,6 +80,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
     }
+
 
     @Override
     public Type getCallResultType() {
@@ -159,4 +119,60 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
+    protected List<OsDisk> getGuestDisk(GuestEntity guest) {
+        List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
+        List<OsDisk> disks = new ArrayList<>();
+        for (GuestDiskEntity entity : guestDiskEntityList) {
+            VolumeEntity volume = volumeMapper.selectById(entity.getVolumeId());
+            if (volume.getStatus() != cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
+            }
+            OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(entity.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
+            disks.add(disk);
+        }
+        Collections.sort(disks, Comparator.comparingInt(OsDisk::getDeviceId));
+        return disks;
+    }
+
+    protected List<OsNic> getGuestNetwork(GuestEntity guest) {
+        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
+        List<OsNic> networkInterfaces = new ArrayList<>();
+        for (GuestNetworkEntity entity : guestNetworkEntityList) {
+            NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
+            if (network.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
+            }
+            if (network.getBasicNetworkId() > 0) {
+                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
+                if (parentNetwork.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
+                }
+            }
+            OsNic nic = OsNic.builder()
+                    .mac(entity.getMac())
+                    .driveType(entity.getDriveType())
+                    .name(guest.getName())
+                    .deviceId(entity.getDeviceId())
+                    .bridgeName(network.getBridge())
+                    .build();
+            networkInterfaces.add(nic);
+        }
+        return networkInterfaces;
+    }
+
+    protected OsCdRoom getGuestCdRoom(GuestEntity guest) {
+        OsCdRoom cdRoom = OsCdRoom.builder().build();
+        if (guest.getCdRoom() > 0) {
+            List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
+            Collections.shuffle(templateVolumeList);
+            if (templateVolumeList.size() > 0) {
+                TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
+                cdRoom.setPath(templateVolume.getPath());
+            } else {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "光盘镜像未就绪");
+            }
+        }
+        return cdRoom;
+    }
+
 }

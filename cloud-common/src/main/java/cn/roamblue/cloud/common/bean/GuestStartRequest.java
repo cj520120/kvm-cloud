@@ -22,5 +22,6 @@ public class GuestStartRequest {
     private List<OsDisk> osDisks;
     private List<OsNic> networkInterfaces;
     private String vncPassword;
+    private GuestQmaRequest qmaRequest;
 
 }
