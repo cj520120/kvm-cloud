@@ -102,7 +102,7 @@ public class VolumeService {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()
-                .storageId(storageId)
+                .storageId(storage.getStorageId())
                 .templateId(0)
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
@@ -136,7 +136,7 @@ public class VolumeService {
             }
         }
         VolumeEntity cloneVolume = VolumeEntity.builder()
-                .storageId(storageId)
+                .storageId(storage.getStorageId())
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
@@ -187,7 +187,7 @@ public class VolumeService {
             }
         }
         VolumeEntity migrateVolume = VolumeEntity.builder()
-                .storageId(storageId)
+                .storageId(storage.getStorageId())
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)

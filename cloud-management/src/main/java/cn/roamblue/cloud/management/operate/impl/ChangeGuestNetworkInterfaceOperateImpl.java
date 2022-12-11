@@ -5,8 +5,10 @@ import cn.roamblue.cloud.common.bean.OsNic;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.management.annotation.Lock;
-import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.operate.bean.ChangeGuestDiskOperate;
+import cn.roamblue.cloud.management.data.entity.GuestEntity;
+import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
+import cn.roamblue.cloud.management.data.entity.HostEntity;
+import cn.roamblue.cloud.management.data.entity.NetworkEntity;
 import cn.roamblue.cloud.management.operate.bean.ChangeGuestNetworkInterfaceOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
@@ -35,8 +37,8 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
     public void operate(ChangeGuestNetworkInterfaceOperate param) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
         GuestEntity guest = guestMapper.selectById(guestNetwork.getGuestId());
-        if (guest.getLastHostId() > 0) {
-            HostEntity host = hostMapper.selectById(guest.getLastHostId());
+        if (guest.getHostId() > 0) {
+            HostEntity host = hostMapper.selectById(guest.getHostId());
             NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
             OsNic nic = OsNic.builder()
                     .mac(guestNetwork.getMac())
@@ -50,8 +52,9 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
             } else {
                 this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_NIC, nic);
             }
+        } else {
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
         }
-        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override
@@ -60,4 +63,15 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
         }.getType();
     }
 
+    @Override
+    public void onFinish(ChangeGuestNetworkInterfaceOperate param, ResultUtil<Void> resultUtil) {
+        if (!param.isAttach()) {
+            GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
+            guestNetwork.setGuestId(0);
+            guestNetwork.setDeviceId(0);
+            guestNetworkMapper.updateById(guestNetwork);
+        }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+
+    }
 }

@@ -217,7 +217,7 @@ public class OsOperateImpl implements OsOperate {
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
 
         String dev = "" + (char) ('a' + deviceId);
-        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), request.getDeviceId(), deviceId);
+        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), deviceId);
         domain.attachDevice(xml);
     }
 
@@ -233,7 +233,7 @@ public class OsOperateImpl implements OsOperate {
         String xml = getDiskXml(request, Constant.DiskBus.VIRTIO);
         int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
         String dev = "" + (char) ('a' + deviceId);
-        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), request.getDeviceId(), deviceId);
+        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), deviceId);
         domain.detachDevice(xml);
     }
 

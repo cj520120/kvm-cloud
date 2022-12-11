@@ -327,7 +327,7 @@ public class GuestService {
                 if (volume.getStatus() != Constant.VolumeStatus.READY) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
                 }
-                GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume));
+                GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
                 if (guestDisk != null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
                 }
@@ -343,8 +343,8 @@ public class GuestService {
                 if (deviceId < 0) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大磁盘数量限制");
                 }
-                guestDisk = GuestDiskEntity.builder().volumeId(volumeId).deviceId(deviceId).build();
-                this.guestDiskMapper.updateById(guestDisk);
+                guestDisk = GuestDiskEntity.builder().guestId(guestId).volumeId(volumeId).deviceId(deviceId).build();
+                this.guestDiskMapper.insert(guestDisk);
                 volume.setStatus(Constant.VolumeStatus.ATTACH_DISK);
                 this.volumeMapper.updateById(volume);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
@@ -371,7 +371,12 @@ public class GuestService {
                 if (guestDisk.getGuestId() != guestId) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未挂载");
                 }
-                this.guestDiskMapper.deleteById(guestDiskId);
+                VolumeEntity volume = this.volumeMapper.selectById(guestDisk.getVolumeId());
+                if (volume.getStatus() != Constant.VolumeStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
+                }
+                volume.setStatus(Constant.VolumeStatus.DETACH_DISK);
+                this.volumeMapper.updateById(volume);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
                         .guestDiskId(guestDisk.getGuestDiskId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
                         .taskId(UUID.randomUUID().toString()).build();
@@ -426,9 +431,6 @@ public class GuestService {
                 if (guestNetwork == null || guestNetwork.getGuestId() != guestId) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前网卡未挂载");
                 }
-                guestNetwork.setDeviceId(0);
-                guestNetwork.setGuestId(0);
-                this.guestNetworkMapper.updateById(guestNetwork);
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
                         .taskId(UUID.randomUUID().toString()).build();

@@ -43,8 +43,8 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
     @Override
     public void operate(T param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getLastHostId() > 0) {
-            HostEntity host = hostMapper.selectById(guest.getLastHostId());
+        if (guest.getHostId() > 0) {
+            HostEntity host = hostMapper.selectById(guest.getHostId());
             OsCdRoom cdRoom = OsCdRoom.builder().name(guest.getName()).build();
             if (guest.getCdRoom() > 0) {
                 List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
@@ -53,17 +53,17 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
                     TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
                     cdRoom.setPath(templateVolume.getPath());
                 } else {
-                            throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "光盘镜像未就绪");
-                        }
-                    }
-                    String command = Constant.Command.GUEST_DETACH_CD_ROOM;
-                    if (guest.getCdRoom() > 0) {
-                        command = Constant.Command.GUEST_ATTACH_CD_ROOM;
-                    }
-                    this.asyncInvoker(host, param, command, cdRoom);
-                } else {
-                    this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.<Void>builder().build());
+                    throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "光盘镜像未就绪");
                 }
+            }
+            String command = Constant.Command.GUEST_DETACH_CD_ROOM;
+            if (guest.getCdRoom() > 0) {
+                command = Constant.Command.GUEST_ATTACH_CD_ROOM;
+            }
+            this.asyncInvoker(host, param, command, cdRoom);
+        } else {
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        }
     }
 
     @Override
@@ -74,6 +74,7 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
 
     @Override
     public void onFinish(T param, ResultUtil<Void> resultUtil) {
+
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }
