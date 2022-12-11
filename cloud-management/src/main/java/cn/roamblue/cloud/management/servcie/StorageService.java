@@ -43,13 +43,13 @@ public class StorageService {
     private StorageModel initStorageModel(StorageEntity entity) {
         return new BeanConverter<>(StorageModel.class).convert(entity, null);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     public ResultUtil<List<StorageModel>> listStorage() {
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>());
         List<StorageModel> models = storageList.stream().map(this::initStorageModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     public ResultUtil<StorageModel> getStorageInfo(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {

@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.VolumeResizeRequest;
@@ -36,7 +37,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
         super(ResizeVolumeOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ResizeVolumeOperate param) {
@@ -80,5 +81,6 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 }

@@ -39,7 +39,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
@@ -157,5 +157,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             }
             guestMapper.updateById(guest);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

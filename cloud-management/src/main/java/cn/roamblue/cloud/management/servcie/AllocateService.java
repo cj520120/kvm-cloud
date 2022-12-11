@@ -30,7 +30,7 @@ public class AllocateService {
     @Autowired
     private HostMapper hostMapper;
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public StorageEntity allocateStorage(int storageId) {
         StorageEntity storage;
@@ -46,7 +46,7 @@ public class AllocateService {
         }
         return storage;
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public GuestNetworkEntity allocateNetwork(int networkId) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
@@ -59,7 +59,7 @@ public class AllocateService {
         }
         return guestNetwork;
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {

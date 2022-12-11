@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.OsNic;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.Constant;
@@ -28,7 +29,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
         super(ChangeGuestNetworkInterfaceOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ChangeGuestNetworkInterfaceOperate param) {
@@ -50,6 +51,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
                 this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_NIC, nic);
             }
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

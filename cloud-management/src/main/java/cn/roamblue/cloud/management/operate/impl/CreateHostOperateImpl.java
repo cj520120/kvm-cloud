@@ -34,7 +34,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         super(CreateHostOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CreateHostOperate param) {
@@ -113,5 +113,8 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
             host.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.ERROR);
         }
         this.hostMapper.updateById(host);
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
+
     }
 }

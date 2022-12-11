@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.OsCdRoom;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -37,7 +38,7 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
         super(tClass);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
@@ -73,6 +74,6 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
 
     @Override
     public void onFinish(T param, ResultUtil<Void> resultUtil) {
-
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

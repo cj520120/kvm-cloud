@@ -36,14 +36,14 @@ public class HostService {
     private HostModel initHost(HostEntity entity){
         return new BeanConverter<>(HostModel.class).convert(entity,null);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<HostModel>> listAllHost(){
         List<HostEntity> hostList=this.hostMapper.selectList(new QueryWrapper<>());
         List<HostModel> models=hostList.stream().map(this::initHost).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> getHostInfo(int hostId){
         HostEntity host=this.hostMapper.selectById(hostId);

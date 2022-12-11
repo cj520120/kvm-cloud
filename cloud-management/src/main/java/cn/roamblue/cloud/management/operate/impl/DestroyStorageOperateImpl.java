@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
@@ -34,7 +35,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
         super(DestroyStorageOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyStorageOperate param) {
@@ -67,5 +68,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
                 storageMapper.updateById(storage);
             }
         }
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getStorageId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
     }
 }

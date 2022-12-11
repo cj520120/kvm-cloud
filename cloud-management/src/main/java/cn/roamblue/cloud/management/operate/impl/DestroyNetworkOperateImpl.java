@@ -1,6 +1,8 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
@@ -33,7 +35,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
         super(DestroyNetworkOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyNetworkOperate param) {
@@ -63,5 +65,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
                 networkMapper.deleteById(param.getNetworkId());
             }
         }
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
     }
 }

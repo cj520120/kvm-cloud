@@ -1,9 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
-import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.common.bean.VolumeCloneRequest;
-import cn.roamblue.cloud.common.bean.VolumeCreateRequest;
-import cn.roamblue.cloud.common.bean.VolumeInfo;
+import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -39,7 +36,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
         super(tClass);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
@@ -127,5 +124,8 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             }
             volumeMapper.updateById(volume);
         }
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+
     }
 }

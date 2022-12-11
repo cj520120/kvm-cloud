@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
+import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,8 @@ public class LockAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Lock lock = signature.getMethod().getAnnotation(Lock.class);
         String key= lock.value();
-        RLock rLock = redisson.getLock(key);
+        RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
+        RLock rLock=lock.write()?readWriteLock.writeLock(): readWriteLock.readLock();
         boolean isLocked = false;
         try {
             rLock.lock(lock.timeout(), lock.timeUnit());

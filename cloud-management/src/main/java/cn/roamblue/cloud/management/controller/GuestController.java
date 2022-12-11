@@ -24,7 +24,7 @@ public class GuestController {
 
     @GetMapping("/api/guest/info")
     public ResultUtil<GuestModel> getGuestInfo(@RequestParam("guestId") int guestId) {
-        return this.getGuestInfo(guestId);
+        return this.guestService.getGuestInfo(guestId);
     }
 
     @PutMapping("/api/guest/create")

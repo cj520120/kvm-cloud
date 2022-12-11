@@ -52,13 +52,13 @@ public class TemplateService {
         GuestEntity guest = guestMapper.selectById(guestDisk.getGuestId());
         return guest;
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     public ResultUtil<List<TemplateModel>> listTemplate(){
         List<TemplateEntity> templateList=this.templateMapper.selectList(new QueryWrapper<>());
         List<TemplateModel> models=templateList.stream().map(this::initTemplateModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId){
         TemplateEntity template=this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id",templateId));
          return ResultUtil.success(this.initTemplateModel(template));

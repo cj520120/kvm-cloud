@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.StorageCreateRequest;
 import cn.roamblue.cloud.common.bean.StorageInfo;
@@ -33,7 +34,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
         super(InitHostStorageOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(InitHostStorageOperate param) {
@@ -103,6 +104,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                 storageMapper.updateById(storage);
             }
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

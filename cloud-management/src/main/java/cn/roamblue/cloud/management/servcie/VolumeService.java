@@ -82,13 +82,13 @@ public class VolumeService {
 
         return model;
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
@@ -234,14 +234,14 @@ public class VolumeService {
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
         }
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<SnapshotModel>> listSnapshot(){
        List<SnapshotVolumeEntity> snapshotVolumeList =this.snapshotVolumeMapper.selectList(new QueryWrapper<>());
         List<SnapshotModel> models=snapshotVolumeList.stream().map(this::initSnapshot).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> getSnapshotInfo(int snapshotVolumeId){
         SnapshotVolumeEntity snapshotVolume=this.snapshotVolumeMapper.selectById(snapshotVolumeId);

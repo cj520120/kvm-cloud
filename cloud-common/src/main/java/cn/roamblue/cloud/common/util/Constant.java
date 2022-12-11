@@ -81,4 +81,13 @@ public class Constant {
         public static final String RTL8139="rtl8139";
 
     }
+    public static class NotifyType{
+        public static final int UPDATE_GUEST=1;
+        public static final int UPDATE_VOLUME=2;
+        public static final int UPDATE_NETWORK=3;
+        public static final int UPDATE_HOST=4;
+        public static final int UPDATE_TEMPLATE=5;
+        public static final int UPDATE_SNAPSHOT=6;
+        public static final int UPDATE_STORAGE = 7;
+    }
 }

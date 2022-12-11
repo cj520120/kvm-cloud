@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -26,7 +27,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         super(CreateGuestOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateGuestOperate param, ResultUtil<VolumeInfo> resultUtil) {
@@ -41,5 +42,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
             guest.setStatus(Constant.GuestStatus.ERROR);
             guestMapper.updateById(guest);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+
     }
 }

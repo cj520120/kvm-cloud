@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.operate.impl;
 
 import cn.roamblue.cloud.common.bean.BasicBridgeNetwork;
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VlanNetwork;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -37,7 +38,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         super(DestroyHostNetworkOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyHostNetworkOperate param) {
@@ -134,5 +135,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
                 networkMapper.updateById(network);
             }
         }
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
     }
 }

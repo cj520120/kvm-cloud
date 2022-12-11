@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.OsDisk;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -32,7 +33,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         super(ChangeGuestDiskOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ChangeGuestDiskOperate param) {
@@ -85,5 +86,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
                 }
                 break;
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 }

@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VolumeCreateTemplateRequest;
 import cn.roamblue.cloud.common.bean.VolumeInfo;
@@ -34,7 +35,7 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
         super(CreateVolumeTemplateOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CreateVolumeTemplateOperate param) {
@@ -102,5 +103,8 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
                 this.templateMapper.updateById(template);
             }
         }
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+
     }
 }

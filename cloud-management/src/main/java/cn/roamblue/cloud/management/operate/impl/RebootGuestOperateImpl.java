@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.operate.impl;
 
 import cn.roamblue.cloud.common.bean.GuestRebootRequest;
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
@@ -29,7 +30,7 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
         super(RebootGuestOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(RebootGuestOperate param) {
@@ -63,5 +64,6 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
             }
             guestMapper.updateById(guest);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.VolumeMigrateRequest;
@@ -39,7 +40,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         super(MigrateVolumeOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(MigrateVolumeOperate param) {
@@ -111,5 +112,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 this.operateTask.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
             }
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyInfo.builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 }

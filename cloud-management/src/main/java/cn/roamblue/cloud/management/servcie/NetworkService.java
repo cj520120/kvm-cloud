@@ -39,7 +39,7 @@ public class NetworkService {
     private NetworkModel initNetwork(NetworkEntity entity) {
         return new BeanConverter<>(NetworkModel.class).convert(entity, null);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> getNetworkInfo(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -48,7 +48,7 @@ public class NetworkService {
         }
         return ResultUtil.success(this.initNetwork(network));
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<NetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());

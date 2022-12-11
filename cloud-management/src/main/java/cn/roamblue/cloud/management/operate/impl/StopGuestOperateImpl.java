@@ -1,9 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
-import cn.roamblue.cloud.common.bean.GuestDestroyRequest;
-import cn.roamblue.cloud.common.bean.GuestInfo;
-import cn.roamblue.cloud.common.bean.GuestShutdownRequest;
-import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -34,7 +31,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         super(StopGuestOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(StopGuestOperate param) {
@@ -77,5 +74,6 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             }
             guestMapper.updateById(guest);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

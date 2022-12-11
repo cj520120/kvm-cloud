@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VolumeDestroyRequest;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -35,7 +36,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         super(DestroyVolumeOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyVolumeOperate param) {
@@ -73,5 +74,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.DESTROY) {
             volumeMapper.deleteById(param.getVolumeId());
         }
+
+        this.notifyService.publish(NotifyInfo.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 }

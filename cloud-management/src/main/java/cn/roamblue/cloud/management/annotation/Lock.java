@@ -19,6 +19,11 @@ public @interface Lock {
     String value();
 
     /**
+     * 是否为写锁
+     * @return
+     */
+    boolean write()default true;
+    /**
      * 超时时间
      * @return
      */

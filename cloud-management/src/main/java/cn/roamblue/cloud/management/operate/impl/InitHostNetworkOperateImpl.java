@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.operate.impl;
 
 import cn.roamblue.cloud.common.bean.BasicBridgeNetwork;
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.VlanNetwork;
 import cn.roamblue.cloud.common.error.CodeException;
@@ -35,7 +36,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         super(InitHostNetworkOperate.class);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(InitHostNetworkOperate param) {
@@ -114,6 +115,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY);
                     networkMapper.updateById(network);
                 }
+                this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
                         .networkId(param.getNetworkId())
@@ -128,6 +130,9 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                 network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.ERROR);
                 networkMapper.updateById(network);
             }
+
+
+            this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
         }
     }
 }

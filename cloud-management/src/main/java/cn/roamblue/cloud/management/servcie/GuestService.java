@@ -59,14 +59,14 @@ public class GuestService {
         return new BeanConverter<>(GuestModel.class).convert(entity, null);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
