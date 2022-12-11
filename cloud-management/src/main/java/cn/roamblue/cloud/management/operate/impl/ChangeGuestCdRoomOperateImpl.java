@@ -16,7 +16,6 @@ import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -57,7 +56,7 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
                         }
                     }
                     String command = Constant.Command.GUEST_DETACH_CD_ROOM;
-                    if (!StringUtils.isEmpty(guest.getCdRoom())) {
+                    if (guest.getCdRoom() > 0) {
                         command = Constant.Command.GUEST_ATTACH_CD_ROOM;
                     }
                     this.asyncInvoker(host, param, command, cdRoom);
@@ -71,16 +70,9 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
         return new TypeToken<ResultUtil<Void>>() {
         }.getType();
     }
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void onFinish(T param, ResultUtil<Void> resultUtil) {
-        GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getHostId() > 0) {
-            guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
-        } else {
-            guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
-        }
-        guestMapper.updateById(guest);
+
     }
 }

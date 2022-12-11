@@ -56,12 +56,12 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
     public void onFinish(RebootGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getStatus() == cn.roamblue.cloud.management.util.Constant.GuestStatus.REBOOT) {
-            if (guest.getLastHostId() > 0) {
+            if (guest.getHostId() > 0) {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
             } else {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
-                guestMapper.updateById(guest);
             }
+            guestMapper.updateById(guest);
         }
     }
 }

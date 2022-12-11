@@ -291,13 +291,14 @@ public class GuestService {
         switch (guest.getStatus() ) {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+                guest.setCdRoom(templateId);
+                this.guestMapper.updateById(guest);
+                BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
-        guest.setCdRoom(templateId);
-        this.guestMapper.updateById(guest);
-        BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
-        this.operateTask.addTask(operateParam);
-        return ResultUtil.success(this.initGuestInfo(guest));
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -306,13 +307,14 @@ public class GuestService {
         switch (guest.getStatus() ) {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
+                guest.setCdRoom(0);
+                this.guestMapper.updateById(guest);
+                BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+                this.operateTask.addTask(operateParam);
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
-        guest.setCdRoom(0);
-        this.guestMapper.updateById(guest);
-        BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
-        this.operateTask.addTask(operateParam);
-        return ResultUtil.success(this.initGuestInfo(guest));
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
