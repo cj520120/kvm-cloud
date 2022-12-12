@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.controller;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.model.GuestModel;
 import cn.roamblue.cloud.management.servcie.GuestService;
+import cn.roamblue.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +45,7 @@ public class GuestController {
                                               @RequestParam("size") long size) {
 
 
-        return this.guestService.createGuest(description, busType, hostId, cpu, memory, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size);
+        return this.guestService.createGuest(Constant.GuestType.USER,description, busType, hostId, cpu, memory, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size,true);
     }
 
     @PostMapping("/api/guest/reinstall")

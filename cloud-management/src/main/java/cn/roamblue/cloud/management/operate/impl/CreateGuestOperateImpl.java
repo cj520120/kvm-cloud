@@ -34,10 +34,18 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         super.onFinish(param, resultUtil);
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            guest.setStatus(Constant.GuestStatus.STARTING);
-            guestMapper.updateById(guest);
-            StartGuestOperate guestOperate = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).hostId(param.getHostId()).guestId(param.getGuestId()).build();
-            this.operateTask.addTask(guestOperate);
+            if(param.isStart()) {
+                guest.setStatus(Constant.GuestStatus.STARTING);
+                guestMapper.updateById(guest);
+                StartGuestOperate guestOperate = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).hostId(param.getHostId()).guestId(param.getGuestId()).build();
+                this.operateTask.addTask(guestOperate);
+            }else{
+                guest.setHostId(0);
+                guest.setLastHostId(0);
+                guest.setStatus(Constant.GuestStatus.STOP);
+                guestMapper.updateById(guest);
+                this.allocateService.initHostAllocate();
+            }
         } else {
             guest.setStatus(Constant.GuestStatus.ERROR);
             guestMapper.updateById(guest);

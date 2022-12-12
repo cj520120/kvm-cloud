@@ -5,21 +5,21 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
+import cn.roamblue.cloud.management.component.ComponentService;
 import cn.roamblue.cloud.management.data.entity.*;
+import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.StartGuestOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * 启动虚拟机
@@ -38,8 +38,12 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         super(tClass);
     }
 
+    @Autowired
+    private List<ComponentService> componentServices;
+    @Autowired
+    private ComponentMapper componentMapper;
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
@@ -48,7 +52,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
 
-        HostEntity host =this.allocateService.allocateHost(guest.getLastHostId(),param.getHostId(),guest.getCpu(), guest.getMemory());
+        HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), param.getHostId(), guest.getCpu(), guest.getMemory());
         List<OsDisk> disks = getGuestDisk(guest);
         List<OsNic> networkInterfaces = getGuestNetwork(guest);
         OsCdRoom cdRoom = getGuestCdRoom(guest);
@@ -119,6 +123,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             }
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
+            //写入系统vnc
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
@@ -137,31 +142,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         return disks;
     }
 
-    protected List<OsNic> getGuestNetwork(GuestEntity guest) {
-        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
-        List<OsNic> networkInterfaces = new ArrayList<>();
-        for (GuestNetworkEntity entity : guestNetworkEntityList) {
-            NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
-            if (network.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
-            }
-            if (network.getBasicNetworkId() > 0) {
-                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
-                if (parentNetwork.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
-                }
-            }
-            OsNic nic = OsNic.builder()
-                    .mac(entity.getMac())
-                    .driveType(entity.getDriveType())
-                    .name(guest.getName())
-                    .deviceId(entity.getDeviceId())
-                    .bridgeName(network.getBridge())
-                    .build();
-            networkInterfaces.add(nic);
-        }
-        return networkInterfaces;
-    }
 
     protected OsCdRoom getGuestCdRoom(GuestEntity guest) {
         OsCdRoom cdRoom = OsCdRoom.builder().build();
@@ -177,8 +157,60 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
         return cdRoom;
     }
+
     protected GuestQmaRequest getQmaRequest(GuestEntity guest) {
+        if (guest.getType() == cn.roamblue.cloud.management.util.Constant.GuestType.USER) {
+            return null;
+        }
+        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
+        if (component == null) {
+            return null;
+        }
+        Optional<ComponentService> optional = componentServices.stream().filter(t -> Objects.equals(t.getType(), component.getComponentType())).findFirst();
+        ComponentService componentService = optional.orElse(null);
+        if (componentService != null) {
+            return componentService.getStartQmaRequest(guest.getGuestId(), component.getNetworkId());
+        }
         return null;
     }
 
+    protected List<OsNic> getGuestNetwork(GuestEntity guest) {
+        List<OsNic> defaultNic = new ArrayList<>();
+        if (guest.getType() == cn.roamblue.cloud.management.util.Constant.GuestType.SYSTEM) {
+
+            ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
+            if (component != null) {
+                Optional<ComponentService> optional = componentServices.stream().filter(t -> Objects.equals(t.getType(), component.getComponentType())).findFirst();
+                ComponentService componentService = optional.orElse(null);
+                if (componentService != null) {
+                    defaultNic = componentService.getDefaultNic(guest.getGuestId(), component.getNetworkId());
+                }
+            }
+        }
+        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
+        List<OsNic> networkInterfaces = new ArrayList<>();
+        networkInterfaces.addAll(defaultNic);
+        int baseDeviceId = networkInterfaces.size();
+        for (GuestNetworkEntity entity : guestNetworkEntityList) {
+            NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
+            if (network.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
+            }
+            if (network.getBasicNetworkId() > 0) {
+                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
+                if (parentNetwork.getStatus() != cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
+                }
+            }
+            OsNic nic = OsNic.builder()
+                    .mac(entity.getMac())
+                    .driveType(entity.getDriveType())
+                    .name(guest.getName())
+                    .deviceId(baseDeviceId + entity.getDeviceId())
+                    .bridgeName(network.getBridge())
+                    .build();
+            networkInterfaces.add(nic);
+        }
+        return networkInterfaces;
+    }
 }

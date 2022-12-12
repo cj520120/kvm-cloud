@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 public class TaskIdSyncTask extends AbstractTask {
     private final int TASK_CHECK_TIME = 10;
     @Autowired
-    @Qualifier("bossExecutorService")
-    private ScheduledExecutorService bossExecutor;
-    @Autowired
     private RedissonClient redissonClient;
     @Autowired
     private HostMapper hostMapper;

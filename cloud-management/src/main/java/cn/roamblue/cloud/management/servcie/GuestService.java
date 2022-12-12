@@ -98,10 +98,10 @@ public class GuestService {
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(String description, String busType
+    public ResultUtil<GuestModel> createGuest(int guestType,String description, String busType
             ,int hostId, int cpu, long memory, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, long size) {
+                                              int storageId, String volumeType, long size,boolean autoStart) {
 
 
         String uid = UUID.randomUUID().toString().replace("-", "");
@@ -114,7 +114,7 @@ public class GuestService {
                 .cdRoom(isoTemplateId)
                 .hostId(0)
                 .lastHostId(0)
-                .type(Constant.GuestType.USER)
+                .type(guestType)
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
@@ -148,6 +148,7 @@ public class GuestService {
                     .snapshotVolumeId(snapshotVolumeId)
                     .templateId(diskTemplateId)
                     .volumeId(volume.getVolumeId())
+                    .start(autoStart)
                     .hostId(hostId)
                     .taskId(uid)
                     .build();
@@ -163,14 +164,19 @@ public class GuestService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
-            guest.setStatus(Constant.GuestStatus.STARTING);
-            this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = StartGuestOperate.builder()
-                    .guestId(guest.getGuestId())
-                    .hostId(hostId)
-                    .taskId(uid)
-                    .build();
-            this.operateTask.addTask(operateParam);
+            if(autoStart) {
+                guest.setStatus(Constant.GuestStatus.STARTING);
+                this.guestMapper.updateById(guest);
+                BaseOperateParam operateParam = StartGuestOperate.builder()
+                        .guestId(guest.getGuestId())
+                        .hostId(hostId)
+                        .taskId(uid)
+                        .build();
+                this.operateTask.addTask(operateParam);
+            }else{
+                guest.setStatus(Constant.GuestStatus.STOP);
+                this.guestMapper.updateById(guest);
+            }
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }

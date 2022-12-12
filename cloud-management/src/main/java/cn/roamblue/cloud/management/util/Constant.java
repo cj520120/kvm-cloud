@@ -76,8 +76,13 @@ public class Constant {
         public static final int VOLUME = 2;
     }
 
-    public static class GuestType{
-        public static final int SYSTEM=0;
-        public static final int USER=1;
+    public static class GuestType {
+        public static final int SYSTEM = 0;
+        public static final int USER = 1;
+    }
+
+    public static class ComponentType {
+        public static final int ROUTE = 1;
+        public static final int VNC = 2;
     }
 }

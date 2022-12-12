@@ -16,7 +16,7 @@ public class GuestQmaRequest {
      * 虚拟机名称
      */
     private String name;
-    private int timeout;
+    private long timeout;
     private List<QmaBody> commands;
 
     public static class QmaType {
