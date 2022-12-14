@@ -95,7 +95,7 @@ public class TemplateService {
                 this.templateVolumeMapper.insert(templateVolume);
                 template.setStatus(Constant.TemplateStatus.DOWNLOAD);
                 this.templateMapper.updateById(template);
-                BaseOperateParam operateParam = DownloadTemplateOperate.builder().taskId(uid).templateVolumeId(templateVolume.getTemplateVolumeId()).build();
+                BaseOperateParam operateParam = DownloadTemplateOperate.builder().taskId(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initTemplateModel(template));
 
@@ -146,6 +146,7 @@ public class TemplateService {
                 .taskId(uid)
                 .sourceVolumeId(volumeId)
                 .targetTemplateVolumeId(templateVolume.getTemplateVolumeId())
+                .title("创建磁盘模版[" + template.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
         return ResultUtil.success(this.initTemplateModel(template));

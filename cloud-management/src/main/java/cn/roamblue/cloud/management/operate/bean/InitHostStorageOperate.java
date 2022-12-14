@@ -1,8 +1,7 @@
 package cn.roamblue.cloud.management.operate.bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -10,11 +9,18 @@ import java.util.List;
 /**
  * @author chenjun
  */
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 public class InitHostStorageOperate extends BaseOperateParam {
     private int storageId;
     private List<Integer> nextHostIds;
+
+    @Override
+    public String toString() {
+        return GsonBuilderUtil.create().toJson(this);
+    }
 }

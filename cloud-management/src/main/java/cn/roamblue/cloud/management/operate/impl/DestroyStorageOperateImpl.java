@@ -43,6 +43,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
                 .stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)).collect(Collectors.toList());
         List<Integer> hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         DestroyHostStorageOperate operate = DestroyHostStorageOperate.builder().taskId(UUID.randomUUID().toString())
+                .title(param.getTitle())
                 .storageId(param.getStorageId())
                 .nextHostIds(hostIds)
                 .build();

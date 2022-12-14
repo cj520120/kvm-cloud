@@ -1,10 +1,14 @@
 package cn.roamblue.cloud.management.operate.bean;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 @SuperBuilder
 @NoArgsConstructor
 public class StartComponentGuestOperate extends StartGuestOperate {

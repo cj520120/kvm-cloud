@@ -69,7 +69,6 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
                 guest.setLastHostId(guest.getHostId());
                 guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
-                this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", param.getGuestId()));
 
             } else {
                 guest.setLastHostId(guest.getHostId());

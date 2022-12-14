@@ -71,7 +71,7 @@ public class StorageService {
                 .status(Constant.StorageStatus.INIT)
                 .build();
         this.storageMapper.insert(storage);
-        BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).storageId(storage.getStorageId()).build();
+        BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initStorageModel(storage));
     }
@@ -90,7 +90,7 @@ public class StorageService {
             case Constant.StorageStatus.MAINTENANCE:
                 storage.setStatus(Constant.StorageStatus.INIT);
                 this.storageMapper.updateById(storage);
-                BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).storageId(storage.getStorageId()).build();
+                BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).title("注册存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
@@ -131,7 +131,7 @@ public class StorageService {
                 }
                 storage.setStatus(Constant.StorageStatus.DESTROY);
                 this.storageMapper.updateById(storage);
-                BaseOperateParam operateParam = DestroyStorageOperate.builder().taskId(UUID.randomUUID().toString()).storageId(storage.getStorageId()).build();
+                BaseOperateParam operateParam = DestroyStorageOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initStorageModel(storage));
             default:

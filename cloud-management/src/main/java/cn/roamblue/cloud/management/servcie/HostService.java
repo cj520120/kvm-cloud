@@ -6,6 +6,7 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.AppUtils;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
+import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.mapper.GuestMapper;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
@@ -70,21 +71,24 @@ public class HostService {
                 .cores(0)
                 .status(Constant.HostStatus.REGISTER).build();
         this.hostMapper.insert(host);
-        BaseOperateParam operateParam= CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).build();
+        BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
+                .title("添加主机[" + host.getDisplayName() + "]")
+                .build();
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initHost(host));
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> registerHost(int hostId){
-        HostEntity host=this.hostMapper.selectById(hostId);
+    public ResultUtil<HostModel> registerHost(int hostId) {
+        HostEntity host = this.hostMapper.selectById(hostId);
         host.setStatus(Constant.HostStatus.REGISTER);
-        if(StringUtils.isEmpty(host.getClientId())){
+        if (StringUtils.isEmpty(host.getClientId())) {
             host.setClientId(AppUtils.getAppId());
             host.setClientSecret(AppUtils.getAppSecret(host.getClientId()));
         }
         this.hostMapper.updateById(host);
-        BaseOperateParam operateParam= CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).build();
+        BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
+                .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initHost(host));
     }
@@ -103,7 +107,18 @@ public class HostService {
                 this.hostMapper.updateById(host);
                 return ResultUtil.success(this.initHost(host));
             default:
-                throw new CodeException(ErrorCode.SERVER_ERROR,"主机不是就绪状态");
+                throw new CodeException(ErrorCode.SERVER_ERROR, "主机不是就绪状态");
         }
+    }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<Void> destroyHost(int hostId) {
+        HostEntity host = this.hostMapper.selectById(hostId);
+        if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq("host_id", host)) > 0) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
+        }
+        this.hostMapper.deleteById(hostId);
+        return ResultUtil.success();
     }
 }

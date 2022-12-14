@@ -2,11 +2,11 @@ package cn.roamblue.cloud.management.operate.impl;
 
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.common.bean.OsNic;
+import cn.roamblue.cloud.management.component.AbstractComponentService;
 import cn.roamblue.cloud.management.data.entity.ComponentEntity;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.StartComponentGuestOperate;
-import cn.roamblue.cloud.management.servcie.ComponentService;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.IpCaculate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -30,7 +30,7 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     @Autowired
     private ComponentMapper componentMapper;
     @Autowired
-    private List<ComponentService> componentServices;
+    private List<AbstractComponentService> componentServices;
 
     public StartComponentGuestOperateImpl() {
         super( StartComponentGuestOperate.class);
@@ -61,7 +61,7 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     @Override
     protected GuestQmaRequest getQmaRequest(GuestEntity guest) {
         ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
-        Optional<ComponentService> componentService = componentServices.stream().filter(t -> Objects.equals(t.getComponentType(), component.getComponentType())).findFirst();
+        Optional<AbstractComponentService> componentService = componentServices.stream().filter(t -> Objects.equals(t.getComponentType(), component.getComponentType())).findFirst();
         if (componentService.isPresent()) {
             return componentService.get().getQmaRequest(guest.getGuestId());
         }

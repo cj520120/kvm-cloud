@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.management.servcie;
+package cn.roamblue.cloud.management.component;
 
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.management.annotation.Lock;
@@ -7,6 +7,8 @@ import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.operate.bean.CreateGuestOperate;
 import cn.roamblue.cloud.management.operate.bean.StartComponentGuestOperate;
+import cn.roamblue.cloud.management.servcie.AllocateService;
+import cn.roamblue.cloud.management.servcie.GuestService;
 import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
@@ -23,7 +25,7 @@ import java.util.UUID;
 /**
  * @author chenjun
  */
-public abstract class ComponentService {
+public abstract class AbstractComponentService {
     @Autowired
     protected NetworkMapper networkMapper;
     @Autowired
@@ -75,8 +77,8 @@ public abstract class ComponentService {
                 //
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 guestMapper.updateById(guest);
-                HostEntity host=this.allocateService.allocateHost(guest.getLastHostId(),0,guest.getCpu(),guest.getMemory());
-                BaseOperateParam operateParam= StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).guestId(guest.getGuestId()).hostId(host.getHostId()).build();
+                HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(), guest.getMemory());
+                BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
                 this.operateTask.addTask(operateParam);
 
             }
@@ -141,6 +143,7 @@ public abstract class ComponentService {
                     .start(false)
                     .hostId(0)
                     .taskId(uid)
+                    .title("创建系统主机[" + this.getComponentName() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
         }

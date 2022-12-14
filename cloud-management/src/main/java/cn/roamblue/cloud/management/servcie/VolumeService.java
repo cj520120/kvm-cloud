@@ -113,7 +113,7 @@ public class VolumeService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(volume);
-        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
+        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
         operateTask.addTask(operateParam);
         VolumeModel model =this.initVolume(volume);
         return ResultUtil.success(model);
@@ -150,6 +150,7 @@ public class VolumeService {
         BaseOperateParam operateParam = CloneVolumeOperate.builder().taskId(volumeName)
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(cloneVolume.getVolumeId())
+                .title("克隆磁盘[" + volume.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
@@ -163,6 +164,7 @@ public class VolumeService {
         VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.RESIZE);
 
         BaseOperateParam operateParam = ResizeVolumeOperate.builder().taskId(UUID.randomUUID().toString())
+                .title("更改磁盘大小[" + volume.getName() + "]")
                 .volumeId(volume.getVolumeId())
                 .size(size)
                 .build();
@@ -199,6 +201,7 @@ public class VolumeService {
                 .build();
         this.volumeMapper.insert(migrateVolume);
         BaseOperateParam operateParam = MigrateVolumeOperate.builder().taskId(volumeName)
+                .title("迁移磁盘[" + volume.getName() + "]")
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(migrateVolume.getVolumeId())
                 .build();
@@ -226,7 +229,7 @@ public class VolumeService {
                 }
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
-                DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volumeId).build();
+                DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate);
                 VolumeModel source = this.initVolume(volume);
                 return ResultUtil.success(source);
@@ -280,7 +283,7 @@ public class VolumeService {
                 .createTime(new Date())
                 .build();
         this.snapshotVolumeMapper.insert(snapshotVolume);
-        BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
+        BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).title("创建磁盘快照[" + snapshotVolume.getName() + "]").sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
         operateTask.addTask(operateParam);
         SnapshotModel model =this.initSnapshot(snapshotVolume);
         return ResultUtil.success(model);
@@ -297,7 +300,7 @@ public class VolumeService {
             case Constant.SnapshotStatus.READY:
                 volume.setStatus(Constant.SnapshotStatus.DESTROY);
                 this.snapshotVolumeMapper.updateById(volume);
-                BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).snapshotVolumeId(snapshotVolumeId).build();
+                BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("删除磁盘快照[" + volume.getName() + "]").snapshotVolumeId(snapshotVolumeId).build();
                 operateTask.addTask(operate);
                 SnapshotModel source = this.initSnapshot(volume);
                 return ResultUtil.success(source);

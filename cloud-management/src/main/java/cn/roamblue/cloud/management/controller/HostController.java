@@ -35,8 +35,14 @@ public class HostController {
     public ResultUtil<HostModel> registerHost(@RequestParam("hostId") int hostId) {
         return hostService.registerHost(hostId);
     }
+
     @PostMapping("/api/host/maintenance")
     public ResultUtil<HostModel> maintenanceHost(@RequestParam("hostId") int hostId) {
         return hostService.maintenanceHost(hostId);
+    }
+
+    @DeleteMapping("/api/host/destroy")
+    public ResultUtil<Void> destroyHost(@RequestParam("hostId") int hostId) {
+        return hostService.destroyHost(hostId);
     }
 }

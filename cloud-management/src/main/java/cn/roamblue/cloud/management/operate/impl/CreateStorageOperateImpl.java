@@ -43,6 +43,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
                 .stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)).collect(Collectors.toList());
         List<Integer> hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         InitHostStorageOperate operate = InitHostStorageOperate.builder().taskId(UUID.randomUUID().toString())
+                .title(param.getTitle())
                 .storageId(param.getStorageId())
                 .nextHostIds(hostIds)
                 .build();

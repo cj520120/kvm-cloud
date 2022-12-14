@@ -42,12 +42,12 @@ public class OperateEngine {
     }
 
     public void process(BaseOperateParam operateParam) {
+        log.info("process type={} param={}", operateParam.getClass().getName(), operateParam);
         Operate operate = this.operateHandlerMap.get(operateParam.getClass());
         if (operate == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的任务:" + operate.getParamType());
         }
         operate.operate(operateParam);
-        log.info("process type={} param={}",operateParam.getClass().getName(),operateParam);
 
     }
 

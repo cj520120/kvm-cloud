@@ -42,6 +42,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
         List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
         DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
+                .title(param.getTitle())
                 .networkId(param.getNetworkId())
                 .nextHostIds(hostIds)
                 .build();

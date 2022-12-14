@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.management.servcie;
+package cn.roamblue.cloud.management.component;
 
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class VncService extends ComponentService{
+public class VncServiceAbstract extends AbstractComponentService {
     @Autowired
     private GuestVncMapper guestVncMapper;
 
@@ -89,6 +89,7 @@ public class VncService extends ComponentService{
         }
         //重启网卡
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "network"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).build())).build());
         return request;
     }
 }

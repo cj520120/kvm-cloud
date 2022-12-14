@@ -84,7 +84,7 @@ public class NetworkService {
             this.guestNetworkMapper.insert(guestNetwork);
         }
 
-        BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(network.getNetworkId()).build();
+        BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initNetwork(network));
     }
@@ -101,7 +101,7 @@ public class NetworkService {
             case Constant.NetworkStatus.MAINTENANCE:
                 network.setStatus(Constant.NetworkStatus.CREATING);
                 this.networkMapper.updateById(network);
-                BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(network.getNetworkId()).build();
+                BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initNetwork(network));
             default:
@@ -143,7 +143,7 @@ public class NetworkService {
                 network.setStatus(Constant.NetworkStatus.DESTROY);
                 networkMapper.updateById(network);
                 this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id",networkId));
-                BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).networkId(networkId).build();
+                BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initNetwork(network));
             default:

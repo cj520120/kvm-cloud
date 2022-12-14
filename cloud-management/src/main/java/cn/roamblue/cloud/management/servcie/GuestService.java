@@ -5,6 +5,7 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
+import cn.roamblue.cloud.management.component.VncServiceAbstract;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.GuestModel;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,7 @@ public class GuestService {
     private GuestVncMapper guestVncMapper;
     @Autowired
     @Lazy
-    private VncService vncService;
+    private VncServiceAbstract vncService;
 
     private VolumeModel initVolume(GuestDiskEntity disk) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
@@ -100,12 +102,13 @@ public class GuestService {
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(int guestType,String description, String busType
-            ,int hostId, int cpu, long memory, int networkId, String networkDeviceType,
+    public ResultUtil<GuestModel> createGuest(String description, String busType
+            , int hostId, int cpu, long memory, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, long size,boolean autoStart) {
+                                              int storageId, String volumeType, long size) {
 
 
         String uid = UUID.randomUUID().toString().replace("-", "");
@@ -118,7 +121,7 @@ public class GuestService {
                 .cdRoom(isoTemplateId)
                 .hostId(0)
                 .lastHostId(0)
-                .type(guestType)
+                .type(Constant.GuestType.USER)
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
@@ -152,9 +155,10 @@ public class GuestService {
                     .snapshotVolumeId(snapshotVolumeId)
                     .templateId(diskTemplateId)
                     .volumeId(volume.getVolumeId())
-                    .start(autoStart)
+                    .start(true)
                     .hostId(hostId)
                     .taskId(uid)
+                    .title("创建客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
         } else {
@@ -168,19 +172,15 @@ public class GuestService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
-            if(autoStart) {
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 this.guestMapper.updateById(guest);
                 BaseOperateParam operateParam = StartGuestOperate.builder()
                         .guestId(guest.getGuestId())
                         .hostId(hostId)
                         .taskId(uid)
+                        .title("启动客户机[" + guest.getDescription() + "]")
                         .build();
                 this.operateTask.addTask(operateParam);
-            }else{
-                guest.setStatus(Constant.GuestStatus.STOP);
-                this.guestMapper.updateById(guest);
-            }
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
@@ -223,6 +223,7 @@ public class GuestService {
                     .templateId(diskTemplateId)
                     .volumeId(volume.getVolumeId())
                     .taskId(uid)
+                    .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
         } else {
@@ -242,6 +243,7 @@ public class GuestService {
                     .guestId(guest.getGuestId())
                     .hostId(0)
                     .taskId(uid)
+                    .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
         }
@@ -257,7 +259,16 @@ public class GuestService {
             guest.setStatus(Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
-            BaseOperateParam operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+            BaseOperateParam operateParam;
+            if (Objects.equals(guest.getType(), Constant.GuestType.SYSTEM)) {
+                operateParam = StartComponentGuestOperate.builder().hostId(hostId).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString())
+                        .title("启动系统主机[" + guest.getDescription() + "]").build();
+            } else {
+                operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString())
+                        .title("启动客户机[" + guest.getDescription() + "]").build();
+            }
             this.operateTask.addTask(operateParam);
             return ResultUtil.success(this.initGuestInfo(guest));
         }
@@ -271,7 +282,9 @@ public class GuestService {
         if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
             guest.setStatus(Constant.GuestStatus.REBOOT);
             this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+            BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId)
+                    .taskId(UUID.randomUUID().toString())
+                    .title("重启客户机[" + guest.getDescription() + "]").build();
             this.operateTask.addTask(operateParam);
             return ResultUtil.success(this.initGuestInfo(guest));
         }
@@ -286,7 +299,9 @@ public class GuestService {
             case Constant.GuestStatus.STOPPING:
                 guest.setStatus(Constant.GuestStatus.STOPPING);
                 this.guestMapper.updateById(guest);
-                BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force).taskId(UUID.randomUUID().toString()).build();
+                BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force)
+                        .taskId(UUID.randomUUID().toString())
+                        .title("关闭客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -318,7 +333,9 @@ public class GuestService {
             case Constant.GuestStatus.RUNNING:
                 guest.setCdRoom(templateId);
                 this.guestMapper.updateById(guest);
-                BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+                BaseOperateParam operateParam = ChangeGuestCdRoomOperate.builder().guestId(guestId)
+                        .taskId(UUID.randomUUID().toString())
+                        .title("挂载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -334,7 +351,9 @@ public class GuestService {
             case Constant.GuestStatus.RUNNING:
                 guest.setCdRoom(0);
                 this.guestMapper.updateById(guest);
-                BaseOperateParam operateParam= ChangeGuestCdRoomOperate.builder().guestId(guestId).taskId(UUID.randomUUID().toString()).build();
+                BaseOperateParam operateParam = ChangeGuestCdRoomOperate.builder().guestId(guestId)
+                        .taskId(UUID.randomUUID().toString())
+                        .title("卸载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -374,7 +393,8 @@ public class GuestService {
                 this.volumeMapper.updateById(volume);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
                         .guestDiskId(guestDisk.getGuestDiskId()).attach(true).volumeId(volumeId).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString()).build();
+                        .taskId(UUID.randomUUID().toString())
+                        .title("挂载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -404,7 +424,8 @@ public class GuestService {
                 this.volumeMapper.updateById(volume);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
                         .guestDiskId(guestDisk.getGuestDiskId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString()).build();
+                        .taskId(UUID.randomUUID().toString())
+                        .title("卸载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -437,7 +458,8 @@ public class GuestService {
                 this.guestNetworkMapper.updateById(guestNetwork);
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString()).build();
+                        .taskId(UUID.randomUUID().toString())
+                        .title("挂载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -458,7 +480,8 @@ public class GuestService {
                 }
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString()).build();
+                        .taskId(UUID.randomUUID().toString())
+                        .title("卸载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
@@ -489,7 +512,6 @@ public class GuestService {
                     this.volumeService.destroyVolume(volume.getVolumeId());
                 }
                 this.vncService.destroyGuest(guestId);
-                this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", guest.getGuestId()));
                 return ResultUtil.success();
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");

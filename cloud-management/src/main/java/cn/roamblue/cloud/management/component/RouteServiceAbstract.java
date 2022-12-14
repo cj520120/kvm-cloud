@@ -1,4 +1,4 @@
-package cn.roamblue.cloud.management.servcie;
+package cn.roamblue.cloud.management.component;
 
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class RouteService extends ComponentService {
+public class RouteServiceAbstract extends AbstractComponentService {
     @Override
     public int getComponentType() {
         return Constant.ComponentType.ROUTE;
@@ -59,7 +59,8 @@ public class RouteService extends ComponentService {
         dhcp.append("listen-address=").append(defaultGuestNetwork.getIp()).append("\r\n");
         dhcp.append("no-dhcp-interface=").append("\r\n");
         dhcp.append("dhcp-range=").append(defaultNetwork.getStartIp()).append(",").append(defaultNetwork.getEndIp()).append(",").append("24h").append("\r\n");
-        for (GuestNetworkEntity guestNetwork : guestNetworkList) {
+        List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("network_id", component.getNetworkId()));
+        for (GuestNetworkEntity guestNetwork : allGuestNetwork) {
             //写入网卡
             dhcp.append("dhcp-host=").append(guestNetwork.getMac()).append(",").append(guestNetwork.getIp()).append("\r\n");
         }
@@ -74,6 +75,7 @@ public class RouteService extends ComponentService {
         //启动dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "dnsmasq"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "dnsmasq"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).build())).build());
         return request;
     }
 }

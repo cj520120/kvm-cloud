@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Type;
 import java.util.UUID;
 
 /**
@@ -37,7 +36,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
             if(param.isStart()) {
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 guestMapper.updateById(guest);
-                StartGuestOperate guestOperate = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).hostId(param.getHostId()).guestId(param.getGuestId()).build();
+                StartGuestOperate guestOperate = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).title(param.getTitle()).hostId(param.getHostId()).guestId(param.getGuestId()).build();
                 this.operateTask.addTask(guestOperate);
             }else{
                 guest.setHostId(0);
