@@ -5,21 +5,22 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
-import cn.roamblue.cloud.management.component.ComponentService;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.StartGuestOperate;
+import cn.roamblue.cloud.management.servcie.VncService;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * 启动虚拟机
@@ -37,11 +38,8 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     public StartGuestOperateImpl(Class<T> tClass) {
         super(tClass);
     }
-
     @Autowired
-    private List<ComponentService> componentServices;
-    @Autowired
-    private ComponentMapper componentMapper;
+    private VncService vncService;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
@@ -56,16 +54,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         List<OsDisk> disks = getGuestDisk(guest);
         List<OsNic> networkInterfaces = getGuestNetwork(guest);
         OsCdRoom cdRoom = getGuestCdRoom(guest);
-        GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guest.getGuestId());
-        if (guestVncEntity == null) {
-            guestVncEntity = GuestVncEntity.builder()
-                    .guestId(param.getGuestId())
-                    .port(0)
-                    .password(RandomStringUtils.randomAlphanumeric(8))
-                    .token(RandomStringUtils.randomAlphanumeric(16))
-                    .build();
-            this.guestVncMapper.insert(guestVncEntity);
-        }
+        GuestVncEntity guestVncEntity =  this.vncService.getGuestVnc(param.getGuestId());
         guest.setHostId(host.getHostId());
         this.guestMapper.updateById(guest);
         this.allocateService.initHostAllocate();
@@ -104,19 +93,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
                 GuestInfo guestInfo = resultUtil.getData();
-                GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guest.getGuestId());
-                if (guestVncEntity == null) {
-                    guestVncEntity = GuestVncEntity.builder()
-                            .guestId(guestVncEntity.getGuestId())
-                            .port(guestInfo.getVnc())
-                            .password(guestInfo.getPassword())
-                            .token(RandomStringUtils.randomAlphanumeric(16))
-                            .build();
-                    this.guestVncMapper.insert(guestVncEntity);
-                } else {
-                    guestVncEntity.setPort(guestInfo.getVnc());
-                    this.guestVncMapper.updateById(guestVncEntity);
-                }
+                this.vncService.updateVncPort(param.getGuestId(),guestInfo.getVnc());
             } else {
                 guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
@@ -159,34 +136,13 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
     protected GuestQmaRequest getQmaRequest(GuestEntity guest) {
-        if (guest.getType() == cn.roamblue.cloud.management.util.Constant.GuestType.USER) {
-            return null;
-        }
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
-        if (component == null) {
-            return null;
-        }
-        Optional<ComponentService> optional = componentServices.stream().filter(t -> Objects.equals(t.getType(), component.getComponentType())).findFirst();
-        ComponentService componentService = optional.orElse(null);
-        if (componentService != null) {
-            return componentService.getStartQmaRequest(guest.getGuestId(), component.getNetworkId());
-        }
+
         return null;
     }
 
     protected List<OsNic> getGuestNetwork(GuestEntity guest) {
         List<OsNic> defaultNic = new ArrayList<>();
-        if (guest.getType() == cn.roamblue.cloud.management.util.Constant.GuestType.SYSTEM) {
 
-            ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
-            if (component != null) {
-                Optional<ComponentService> optional = componentServices.stream().filter(t -> Objects.equals(t.getType(), component.getComponentType())).findFirst();
-                ComponentService componentService = optional.orElse(null);
-                if (componentService != null) {
-                    defaultNic = componentService.getDefaultNic(guest.getGuestId(), component.getNetworkId());
-                }
-            }
-        }
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
         List<OsNic> networkInterfaces = new ArrayList<>();
         networkInterfaces.addAll(defaultNic);

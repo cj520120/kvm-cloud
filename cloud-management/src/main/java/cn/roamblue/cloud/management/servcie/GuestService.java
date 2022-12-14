@@ -122,7 +122,7 @@ public class GuestService {
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setGuestId(guest.getGuestId());
-        this.guestNetworkMapper.insert(guestNetwork);
+        this.guestNetworkMapper.updateById(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
             VolumeEntity volume = VolumeEntity.builder()

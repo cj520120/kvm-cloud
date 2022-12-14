@@ -1,8 +1,8 @@
 package cn.roamblue.cloud.management.task;
 
-import cn.roamblue.cloud.management.component.ComponentService;
 import cn.roamblue.cloud.management.data.entity.NetworkEntity;
-import cn.roamblue.cloud.management.data.mapper.*;
+import cn.roamblue.cloud.management.data.mapper.NetworkMapper;
+import cn.roamblue.cloud.management.servcie.ComponentService;
 import cn.roamblue.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class ComponentCheckTask extends AbstractTask {
         for (NetworkEntity network : networkList) {
             if (network.getStatus() == Constant.NetworkStatus.READY) {
                 for (ComponentService componentService : this.componentServiceList) {
-                    componentService.init(network.getNetworkId());
+                    componentService.create(network.getNetworkId());
                 }
             }
         }
