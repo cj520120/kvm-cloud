@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.servcie;
 
+import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
@@ -12,6 +13,7 @@ import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -143,6 +145,40 @@ public abstract class ComponentService {
             this.operateTask.addTask(operateParam);
         }
     }
-    protected abstract int getComponentType();
-    protected abstract String getComponentName();
+
+    protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("TYPE=Ethernet").append("\r\n");
+        sb.append("BROWSER_ONLY=no").append("\r\n");
+        sb.append("BOOTPROTO=static").append("\r\n");
+        sb.append("DEFROUTE=yes").append("\r\n");
+        sb.append("IPV4_FAILURE_FATAL=no").append("\r\n");
+        sb.append("NAME=eth").append(index).append("\r\n");
+        sb.append("DEVICE=eth").append(index).append("\r\n");
+        sb.append("ONBOOT=yes").append("\r\n");
+        if (!StringUtils.isEmpty(ip)) {
+            sb.append("IPADDR=").append(ip).append("\r\n");
+        }
+        if (!StringUtils.isEmpty(netmask)) {
+            sb.append("NETMASK=").append(netmask).append("\r\n");
+        }
+        if (!StringUtils.isEmpty(gateway)) {
+            sb.append("GATEWAY=").append(gateway).append("\r\n");
+        }
+        if (!StringUtils.isEmpty(dns)) {
+            for (String s : dns.split(",")) {
+                String dnsStr = s.trim();
+                if (!StringUtils.isEmpty(dnsStr)) {
+                    sb.append("DNS1=").append(dnsStr).append("\r\n");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    public abstract int getComponentType();
+
+    public abstract String getComponentName();
+
+    public abstract GuestQmaRequest getQmaRequest(int guestId);
 }

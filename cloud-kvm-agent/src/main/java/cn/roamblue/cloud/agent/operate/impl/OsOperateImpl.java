@@ -128,29 +128,31 @@ public class OsOperateImpl implements OsOperate {
         map.put("arguments", arguments);
         map.put("path", execute.getCommand());
         map.put("arg", execute.getArgs());
-        String response = domain.qemuAgentCommand(gson.toJson(command), request.getTimeout(), 0);
+        String response = domain.qemuAgentCommand(gson.toJson(map), request.getTimeout(), 0);
         Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
         }.getType());
-        String pid = ((Map<String, Object>) result.get("retrun")).get("pid").toString();
+        String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
         map.clear();
-        map.put("execute", "guest-exec-status");
         arguments.clear();
-        arguments.put("pid", pid);
-        response = domain.qemuAgentCommand(gson.toJson(command), request.getTimeout(), 0);
-        boolean isExit = false;
+        arguments.put("pid", NumberUtil.parseInt(pid));
+        map.put("execute", "guest-exec-status");
+        map.put("arguments", arguments);
+        String statusRequest=gson.toJson(map);
+        boolean isExit;
         do {
+            response = domain.qemuAgentCommand(statusRequest, request.getTimeout(), 0);
             result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
             }.getType());
-            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("retrun")).get("exited").toString());
+            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
             if (!isExit) {
                 ThreadUtil.sleep(1, TimeUnit.SECONDS);
             } else {
-                int exitcode = Integer.parseInt(((Map<String, Object>) result.get("retrun")).get("exitcode").toString());
-                if (exitcode != 0) {
+                int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
+                if (code != 0) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败");
                 }
             }
-        } while (isExit);
+        } while (!isExit);
 
     }
 
@@ -301,6 +303,21 @@ public class OsOperateImpl implements OsOperate {
 
 
         if (Objects.nonNull(request.getQmaRequest())) {
+            long start = System.currentTimeMillis();
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("execute", "guest-info");
+            Gson gson = new Gson();
+            String checkQmaReadyCommand = gson.toJson(map);
+            while ((System.currentTimeMillis() - start) < TimeUnit.SECONDS.toMillis(request.getQmaRequest().getTimeout())) {
+                try {
+                    String response = domain.qemuAgentCommand(checkQmaReadyCommand, request.getQmaRequest().getTimeout(), 0);
+                    if (!StringUtils.isEmpty(response)) {
+                        break;
+                    }
+                } catch (Exception err) {
+                    ThreadUtil.sleep(5,TimeUnit.SECONDS);
+                }
+            }
             //写入qma
             try {
                 this.execute_qma(domain, request.getQmaRequest());

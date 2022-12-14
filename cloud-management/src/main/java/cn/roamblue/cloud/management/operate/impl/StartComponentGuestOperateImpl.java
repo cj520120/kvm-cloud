@@ -6,7 +6,7 @@ import cn.roamblue.cloud.management.data.entity.ComponentEntity;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.StartComponentGuestOperate;
-import cn.roamblue.cloud.management.servcie.RouteService;
+import cn.roamblue.cloud.management.servcie.ComponentService;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.IpCaculate;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 启动虚拟机
@@ -27,9 +28,9 @@ import java.util.Objects;
 public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartComponentGuestOperate> {
 
     @Autowired
-    private RouteService routeService;
-    @Autowired
     private ComponentMapper componentMapper;
+    @Autowired
+    private List<ComponentService> componentServices;
 
     public StartComponentGuestOperateImpl() {
         super( StartComponentGuestOperate.class);
@@ -59,9 +60,10 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
 
     @Override
     protected GuestQmaRequest getQmaRequest(GuestEntity guest) {
-        ComponentEntity component= componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id",guest.getGuestId()));
-        if(component!=null&&Objects.equals(component.getComponentType(), Constant.ComponentType.ROUTE)){
-
+        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
+        Optional<ComponentService> componentService = componentServices.stream().filter(t -> Objects.equals(t.getComponentType(), component.getComponentType())).findFirst();
+        if (componentService.isPresent()) {
+            return componentService.get().getQmaRequest(guest.getGuestId());
         }
         return null;
     }

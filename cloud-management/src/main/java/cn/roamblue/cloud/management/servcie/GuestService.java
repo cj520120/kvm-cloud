@@ -17,6 +17,7 @@ import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +59,9 @@ public class GuestService {
 
     @Autowired
     private GuestVncMapper guestVncMapper;
+    @Autowired
+    @Lazy
+    private VncService vncService;
 
     private VolumeModel initVolume(GuestDiskEntity disk) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
@@ -484,6 +488,7 @@ public class GuestService {
                 for (VolumeEntity volume : guestVolumeList) {
                     this.volumeService.destroyVolume(volume.getVolumeId());
                 }
+                this.vncService.destroyGuest(guestId);
                 this.guestVncMapper.delete(new QueryWrapper<GuestVncEntity>().eq("guest_id", guest.getGuestId()));
                 return ResultUtil.success();
             default:

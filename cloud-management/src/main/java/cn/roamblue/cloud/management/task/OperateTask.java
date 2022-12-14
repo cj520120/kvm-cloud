@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class OperateTask extends AbstractTask {
-    private final static int TASK_TIMEOUT = (int)TimeUnit.MINUTES.toSeconds(3);
+    private final static int TASK_TIMEOUT = (int) TimeUnit.MINUTES.toSeconds(3);
     @Autowired
     @Qualifier("workExecutorService")
     private ScheduledExecutorService workExecutor;
@@ -91,11 +91,11 @@ public class OperateTask extends AbstractTask {
                             log.error("调用任务出现未知错误.param={}", entry.getValue(), err);
                             resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                         }
-                            this.onTaskFinish(entry.getValue().getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
-                        }
-                    });
-                }
+                        this.onTaskFinish(entry.getValue().getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
+                    }
+                });
             }
+        }
 
     }
 

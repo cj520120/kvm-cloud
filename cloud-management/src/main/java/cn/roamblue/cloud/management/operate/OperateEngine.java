@@ -27,7 +27,7 @@ public class OperateEngine {
     }
 
     public void onFinish(BaseOperateParam operateParam, String result) {
-
+        log.info("onFinish type={} param={} result={}",operateParam.getClass().getName(),operateParam,result);
         Operate operate = this.operateHandlerMap.get(operateParam.getClass());
         if (operate == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的任务:" + operate.getParamType());
@@ -47,7 +47,7 @@ public class OperateEngine {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的任务:" + operate.getParamType());
         }
         operate.operate(operateParam);
-
+        log.info("process type={} param={}",operateParam.getClass().getName(),operateParam);
 
     }
 
