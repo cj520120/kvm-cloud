@@ -57,14 +57,6 @@ public class VncService extends AbstractComponentService {
         if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机所在网络VNC未初始化完成");
         }
-//        HostEntity host = this.hostMapper.selectById(guest.getHostId());
-//        if (host == null) {
-//            throw new CodeException(ErrorCode.SERVER_ERROR, "VNC所在宿主机不存在");
-//        }
-//        if(Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)){
-//            throw new CodeException(ErrorCode.SERVER_ERROR, "VNC所在宿主机未就绪");
-//        }
-//        //host vnc
         return guest;
     }
 

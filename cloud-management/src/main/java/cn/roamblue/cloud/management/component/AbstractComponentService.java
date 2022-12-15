@@ -68,21 +68,24 @@ public abstract class AbstractComponentService {
             }
         }
         if(!componentList.isEmpty()){
-            ComponentEntity component=componentList.get(0);
-            GuestEntity guest=this.guestMapper.selectById(component.getGuestId());
-            if(guest==null){
+            ComponentEntity component = componentList.get(0);
+            GuestEntity guest = this.guestMapper.selectById(component.getGuestId());
+            if (guest == null) {
                 componentMapper.deleteById(component.getComponentId());
+                return;
             }
-            else if(Objects.equals(Constant.GuestStatus.STOP,guest.getStatus())){
-                //
-                guest.setStatus(Constant.GuestStatus.STARTING);
-                guestMapper.updateById(guest);
-                HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(), guest.getMemory());
-
-                this.componentMapper.updateById(component);
-                BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
-                this.operateTask.addTask(operateParam);
-
+            switch (guest.getStatus()) {
+                case Constant.GuestStatus.STOP:
+                    guest.setStatus(Constant.GuestStatus.STARTING);
+                    guestMapper.updateById(guest);
+                    HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(), guest.getMemory());
+                    this.componentMapper.updateById(component);
+                    BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
+                    this.operateTask.addTask(operateParam);
+                    break;
+                case Constant.GuestStatus.ERROR:
+                    this.guestService.destroyGuest(guest.getGuestId());
+                    break;
             }
         }else{
             List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<TemplateEntity>().eq("template_type", Constant.TemplateType.SYSTEM).eq("template_status", Constant.TemplateStatus.READY));
