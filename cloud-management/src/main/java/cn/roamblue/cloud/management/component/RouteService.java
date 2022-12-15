@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class RouteServiceAbstract extends AbstractComponentService {
+public class RouteService extends AbstractComponentService {
     @Override
     public int getComponentType() {
         return Constant.ComponentType.ROUTE;

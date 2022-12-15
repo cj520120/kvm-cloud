@@ -5,7 +5,7 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
-import cn.roamblue.cloud.management.component.VncServiceAbstract;
+import cn.roamblue.cloud.management.component.VncService;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.GuestModel;
@@ -63,7 +63,7 @@ public class GuestService {
     private GuestVncMapper guestVncMapper;
     @Autowired
     @Lazy
-    private VncServiceAbstract vncService;
+    private VncService vncService;
 
     private VolumeModel initVolume(GuestDiskEntity disk) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
@@ -494,6 +494,7 @@ public class GuestService {
     public ResultUtil<Void> destroyGuest(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
+
             case Constant.GuestStatus.ERROR:
             case Constant.GuestStatus.STOP:
                 List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));

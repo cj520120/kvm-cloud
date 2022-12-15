@@ -1,7 +1,11 @@
 package cn.roamblue.cloud.management.operate.impl;
 
+import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.common.bean.OsNic;
+import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.component.AbstractComponentService;
 import cn.roamblue.cloud.management.data.entity.ComponentEntity;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
@@ -9,10 +13,12 @@ import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.IpCaculate;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -66,5 +72,13 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
             return componentService.get().getQmaRequest(guest.getGuestId());
         }
         return null;
+    }
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void onFinish(StartComponentGuestOperate param, ResultUtil<GuestInfo> resultUtil) {
+        super.onFinish(param, resultUtil);
+
     }
 }

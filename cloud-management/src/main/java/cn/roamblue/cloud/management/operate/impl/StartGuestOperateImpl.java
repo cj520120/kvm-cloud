@@ -5,7 +5,7 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
-import cn.roamblue.cloud.management.component.VncServiceAbstract;
+import cn.roamblue.cloud.management.component.VncService;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.operate.bean.StartGuestOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
@@ -40,7 +40,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
     @Autowired
-    private VncServiceAbstract vncService;
+    private VncService vncService;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)

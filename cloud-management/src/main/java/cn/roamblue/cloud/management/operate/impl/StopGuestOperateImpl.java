@@ -31,6 +31,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         super(StopGuestOperate.class);
     }
 
+
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -75,6 +76,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             }
             guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
+
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }

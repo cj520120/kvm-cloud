@@ -9,8 +9,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StopGuestOperate extends BaseOperateParam {
+public class VncUpdateOperate extends BaseOperateParam {
     private int guestId;
-    private boolean force;
-    private boolean destroy;
+    private String token;
+    private String ip;
+    private int port;
 }

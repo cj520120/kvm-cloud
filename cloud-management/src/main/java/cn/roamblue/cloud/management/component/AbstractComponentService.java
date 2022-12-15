@@ -78,6 +78,8 @@ public abstract class AbstractComponentService {
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 guestMapper.updateById(guest);
                 HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(), guest.getMemory());
+
+                this.componentMapper.updateById(component);
                 BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
                 this.operateTask.addTask(operateParam);
 
@@ -103,7 +105,6 @@ public abstract class AbstractComponentService {
                     .status(Constant.GuestStatus.CREATING)
                     .build();
             this.guestMapper.insert(guest);
-            componentMapper.insert(ComponentEntity.builder().guestId(guest.getGuestId()).componentType(this.getComponentType()).networkId(networkId).build());
             StorageEntity storage=this.allocateService.allocateStorage(0);
             VolumeEntity volume = VolumeEntity.builder()
                     .capacity(0L)
@@ -135,6 +136,7 @@ public abstract class AbstractComponentService {
                 guestNetwork.setGuestId(guest.getGuestId());
                 this.guestNetworkMapper.updateById(guestNetwork);
             }
+            componentMapper.insert(ComponentEntity.builder().guestId(guest.getGuestId()).componentType(this.getComponentType()).networkId(networkId).build());
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .snapshotVolumeId(0)
