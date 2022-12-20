@@ -24,11 +24,11 @@ public class HostController {
     }
 
     @PutMapping("/api/host/create")
-    public ResultUtil<HostModel> createHost(@RequestParam("name") String name,
-                                            @RequestParam("ip") String ip,
+    public ResultUtil<HostModel> createHost(@RequestParam("displayName") String displayName,
+                                            @RequestParam("hostIp") String hostIp,
                                             @RequestParam("uri") String uri,
                                             @RequestParam("nic") String nic) {
-        return hostService.createHost(name, ip, uri, nic);
+        return hostService.createHost(displayName, hostIp, uri, nic);
     }
 
     @PostMapping("/api/host/register")

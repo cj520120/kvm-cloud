@@ -95,27 +95,22 @@ public class HostService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> maintenanceHost(int hostId){
-        HostEntity host=this.hostMapper.selectById(hostId);
-        if(host==null){
-            throw new CodeException(ErrorCode.HOST_NOT_FOUND,"主机不存在");
+        HostEntity host = this.hostMapper.selectById(hostId);
+        if (host == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
-        switch (host.getStatus()){
-            case Constant.HostStatus.ONLINE:
-            case Constant.HostStatus.OFFLINE:
-            case Constant.HostStatus.MAINTENANCE:
-                host.setStatus(Constant.HostStatus.MAINTENANCE);
-                this.hostMapper.updateById(host);
-                return ResultUtil.success(this.initHost(host));
-            default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "主机不是就绪状态");
-        }
+
+        host.setStatus(Constant.HostStatus.MAINTENANCE);
+        this.hostMapper.updateById(host);
+        return ResultUtil.success(this.initHost(host));
+
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyHost(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);
-        if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq("host_id", host)) > 0) {
+        if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq("host_id", hostId)) > 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         this.hostMapper.deleteById(hostId);

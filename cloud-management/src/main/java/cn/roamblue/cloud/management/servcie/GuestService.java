@@ -133,6 +133,7 @@ public class GuestService {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
             VolumeEntity volume = VolumeEntity.builder()
+                    .description("ROOT-"+guest.getGuestId())
                     .capacity(size)
                     .storageId(storage.getStorageId())
                     .name(uid)
@@ -200,6 +201,7 @@ public class GuestService {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
             VolumeEntity volume = VolumeEntity.builder()
+                    .description("ROOT-"+guest.getGuestId())
                     .capacity(size)
                     .storageId(storage.getStorageId())
                     .name(uid)

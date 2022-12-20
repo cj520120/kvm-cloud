@@ -110,6 +110,7 @@ public abstract class AbstractComponentService {
             this.guestMapper.insert(guest);
             StorageEntity storage=this.allocateService.allocateStorage(0);
             VolumeEntity volume = VolumeEntity.builder()
+                    .description("ROOT-"+guest.getGuestId())
                     .capacity(0L)
                     .storageId(storage.getStorageId())
                     .name(uid)

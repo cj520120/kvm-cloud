@@ -94,7 +94,7 @@ public class StorageService {
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池以销毁");
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
         }
     }
 
@@ -108,11 +108,12 @@ public class StorageService {
         switch (storage.getStatus()) {
             case Constant.StorageStatus.READY:
             case Constant.StorageStatus.MAINTENANCE:
+            case Constant.StorageStatus.ERROR:
                 storage.setStatus(Constant.StorageStatus.MAINTENANCE);
                 this.storageMapper.updateById(storage);
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
         }
     }
 
@@ -135,7 +136,7 @@ public class StorageService {
                 this.operateTask.addTask(operateParam);
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池状态未就绪");
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
         }
     }
 }

@@ -28,7 +28,7 @@ public class NetworkModel {
     private String mask;
     private String bridge;
     private String dns;
-    private String type;
+    private int type;
     private int status;
     private int vlanId;
     private int basicNetworkId;

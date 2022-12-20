@@ -95,18 +95,11 @@ public class NetworkService {
         if (network == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
-        switch (network.getStatus()) {
-            case Constant.NetworkStatus.CREATING:
-            case Constant.NetworkStatus.READY:
-            case Constant.NetworkStatus.MAINTENANCE:
-                network.setStatus(Constant.NetworkStatus.CREATING);
-                this.networkMapper.updateById(network);
-                BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
-                this.operateTask.addTask(operateParam);
-                return ResultUtil.success(this.initNetwork(network));
-            default:
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络已销毁");
-        }
+        network.setStatus(Constant.NetworkStatus.CREATING);
+        this.networkMapper.updateById(network);
+        BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
+        this.operateTask.addTask(operateParam);
+        return ResultUtil.success(this.initNetwork(network));
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -116,15 +109,9 @@ public class NetworkService {
         if (network == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
-        switch (network.getStatus()) {
-            case Constant.NetworkStatus.READY:
-            case Constant.NetworkStatus.MAINTENANCE:
-                network.setStatus(Constant.NetworkStatus.MAINTENANCE);
-                this.networkMapper.updateById(network);
-                return ResultUtil.success(this.initNetwork(network));
-            default:
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络未就绪");
-        }
+        network.setStatus(Constant.NetworkStatus.MAINTENANCE);
+        this.networkMapper.updateById(network);
+        return ResultUtil.success(this.initNetwork(network));
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -134,20 +121,15 @@ public class NetworkService {
         if (network == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
-        switch (network.getStatus()) {
-            case Constant.NetworkStatus.READY:
-            case Constant.NetworkStatus.ERROR:
-                if(guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("network_id",networkId).ne("guest_id",0))>0){
-                    throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "当前网络被其他虚拟机引用，请首先删除虚拟机");
-                }
-                network.setStatus(Constant.NetworkStatus.DESTROY);
-                networkMapper.updateById(network);
-                this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id",networkId));
-                BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
-                this.operateTask.addTask(operateParam);
-                return ResultUtil.success(this.initNetwork(network));
-            default:
-                throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络未就绪");
+
+        if (guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId).ne("guest_id", 0)) > 0) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "当前网络被其他虚拟机引用，请首先删除虚拟机");
         }
+        network.setStatus(Constant.NetworkStatus.DESTROY);
+        networkMapper.updateById(network);
+        this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId));
+        BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
+        this.operateTask.addTask(operateParam);
+        return ResultUtil.success(this.initNetwork(network));
     }
 }

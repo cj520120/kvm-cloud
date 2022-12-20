@@ -28,20 +28,19 @@ public class VolumeController {
     }
 
     @PutMapping("/api/volume/create")
-    public ResultUtil<VolumeModel> createVolume(@RequestParam("storageId") int storageId,
-                                                @RequestParam("templateId") int templateId,
-                                                @RequestParam("snapshotVolumeId") int snapshotVolumeId,
+    public ResultUtil<VolumeModel> createVolume(@RequestParam("description") String description,
+                                                @RequestParam("storageId") int storageId,
                                                 @RequestParam("volumeType") String volumeType,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        return this.volumeService.createVolume(storageId, templateId,snapshotVolumeId, volumeType, volumeSize);
+        return this.volumeService.createVolume(description, storageId, 0, 0, volumeType, volumeSize * 1024 * 1024 * 1024);
     }
 
     @PutMapping("/api/volume/clone")
-    public ResultUtil<CloneModel> cloneVolume(
-            @RequestParam("sourceVolumeId") int sourceVolumeId,
-            @RequestParam("storageId") int storageId,
-            @RequestParam("volumeType") String volumeType) {
-        return this.volumeService.cloneVolume(sourceVolumeId, storageId, volumeType);
+    public ResultUtil<CloneModel> cloneVolume(@RequestParam("description") String description,
+                                              @RequestParam("sourceVolumeId") int sourceVolumeId,
+                                              @RequestParam("storageId") int storageId,
+                                              @RequestParam("volumeType") String volumeType) {
+        return this.volumeService.cloneVolume(description, sourceVolumeId, storageId, volumeType);
     }
 
     @PutMapping("/api/volume/migrate")
@@ -55,7 +54,7 @@ public class VolumeController {
     public ResultUtil<VolumeModel> resizeVolume(
             @RequestParam("volumeId") int volumeId,
             @RequestParam("size") long size) {
-        return this.volumeService.resizeVolume(volumeId, size);
+        return this.volumeService.resizeVolume(volumeId, size * 1024 * 1024 * 1024);
     }
     @DeleteMapping("/api/volume/destroy")
     public ResultUtil<VolumeModel> destroyVolume(@RequestParam("volumeId") int volumeId) {
@@ -70,14 +69,16 @@ public class VolumeController {
     public ResultUtil<SnapshotModel> getSnapshotInfo(@RequestParam("snapshotVolumeId") int snapshotVolumeId){
         return this.volumeService.getSnapshotInfo(snapshotVolumeId);
     }
+
     @PutMapping("/api/snapshot/create")
     public ResultUtil<SnapshotModel> createVolumeSnapshot(@RequestParam("volumeId") int volumeId,
                                                           @RequestParam("snapshotName") String snapshotName,
                                                           @RequestParam("snapshotVolumeType") String snapshotVolumeType) {
         return this.volumeService.createVolumeSnapshot(volumeId, snapshotName, snapshotVolumeType);
     }
+
     @DeleteMapping("/api/snapshot/destroy")
-    public ResultUtil<SnapshotModel> destroySnapshot(@RequestParam("") int snapshotVolumeId) {
+    public ResultUtil<SnapshotModel> destroySnapshot(@RequestParam("snapshotVolumeId") int snapshotVolumeId) {
         return this.volumeService.destroySnapshot(snapshotVolumeId);
     }
 }

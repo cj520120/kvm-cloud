@@ -81,7 +81,6 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
     @Override
     public void onFinish(MigrateVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
-
         VolumeEntity targetVolume=volumeMapper.selectById(param.getTargetVolumeId());
         if(targetVolume.getStatus()== cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
@@ -96,7 +95,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 volumeMapper.insert(targetVolume);
-                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<>());
+                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id",volume.getVolumeId()));
                 if (guestDisk != null) {
                     guestDisk.setVolumeId(targetVolume.getVolumeId());
                     guestDiskMapper.updateById(guestDisk);

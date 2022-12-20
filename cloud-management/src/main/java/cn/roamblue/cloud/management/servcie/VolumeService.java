@@ -72,8 +72,11 @@ public class VolumeService {
     private VolumeModel initVolume(VolumeEntity volume) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
         GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
-        if (disk != null) {
-            model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
+        if (disk != null&&disk.getGuestId()!=0) {
+            GuestEntity guest= this.guestMapper.selectById(disk.getGuestId());
+            if(guest!=null) {
+                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).description(guest.getDescription()).build());
+            }
         }
         return model;
     }
@@ -98,12 +101,13 @@ public class VolumeService {
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(int storageId, int templateId,int snapshotVolumeId, String volumeType, long volumeSize) {
+    public ResultUtil<VolumeModel> createVolume(String description,int storageId, int templateId,int snapshotVolumeId, String volumeType, long volumeSize) {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .templateId(0)
+                .description(description)
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
@@ -120,7 +124,7 @@ public class VolumeService {
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<CloneModel> cloneVolume(int sourceVolumeId, int storageId, String volumeType) {
+    public ResultUtil<CloneModel> cloneVolume(String description,int sourceVolumeId, int storageId, String volumeType) {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
@@ -135,10 +139,13 @@ public class VolumeService {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
+        volume.setStatus(Constant.VolumeStatus.CLONE);
+        this.volumeMapper.updateById(volume);
         VolumeEntity cloneVolume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
+                .description(description)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
                 .capacity(volume.getCapacity())
@@ -162,7 +169,9 @@ public class VolumeService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> resizeVolume(int volumeId,long size) {
         VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.RESIZE);
-
+        volume.setCapacity(volume.getCapacity()+size);
+        volume.setStatus(Constant.VolumeStatus.RESIZE);
+        this.volumeMapper.updateById(volume);
         BaseOperateParam operateParam = ResizeVolumeOperate.builder().taskId(UUID.randomUUID().toString())
                 .title("更改磁盘大小[" + volume.getName() + "]")
                 .volumeId(volume.getVolumeId())
@@ -188,7 +197,10 @@ public class VolumeService {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
+        volume.setStatus(Constant.VolumeStatus.MIGRATE);
+        this.volumeMapper.updateById(volume);
         VolumeEntity migrateVolume = VolumeEntity.builder()
+                .description(volume.getDescription())
                 .storageId(storage.getStorageId())
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
@@ -249,7 +261,7 @@ public class VolumeService {
     public ResultUtil<SnapshotModel> getSnapshotInfo(int snapshotVolumeId){
         SnapshotVolumeEntity snapshotVolume=this.snapshotVolumeMapper.selectById(snapshotVolumeId);
         if(snapshotVolume==null){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"快照不存在");
+            throw new CodeException(ErrorCode.SNAPSHOT_NOT_FOUND,"快照不存在");
         }
         return ResultUtil.success(this.initSnapshot(snapshotVolume));
     }
@@ -269,7 +281,8 @@ public class VolumeService {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
-
+        volume.setStatus(Constant.VolumeStatus.CREATE_SNAPSHOT);
+        this.volumeMapper.updateById(volume);
         String volumeName = UUID.randomUUID().toString();
         SnapshotVolumeEntity snapshotVolume = SnapshotVolumeEntity.builder()
                 .name(snapshotName)
@@ -293,7 +306,7 @@ public class VolumeService {
     public ResultUtil<SnapshotModel> destroySnapshot(int snapshotVolumeId) {
         SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);
         if (volume == null) {
-            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "快照不存在");
+            return ResultUtil.error(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
         }
         switch (volume.getStatus()) {
             case Constant.SnapshotStatus.ERROR:

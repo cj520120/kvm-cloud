@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+import javax.websocket.Session;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,12 +24,14 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyI
     @Autowired
     private RedissonClient redissonClient;
 
+    private static final Set<Session> clientSessions = Collections.synchronizedSet(new HashSet<>());
+
     private RTopic topic;
 
     @Override
     public void run(String... args) throws Exception {
-        topic= redissonClient.getTopic(RedisKeyUtil.GLOBAL_NOTIFY_KET);
-        topic.addListener(NotifyInfo.class,this);
+        topic = redissonClient.getTopic(RedisKeyUtil.GLOBAL_NOTIFY_KET);
+        topic.addListener(NotifyInfo.class, this);
     }
 
     @Override
@@ -33,7 +39,7 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyI
         RLock rLock=redissonClient.getReadWriteLock(RedisKeyUtil.GLOBAL_LOCK_KEY).readLock();
         try{
             if(rLock.tryLock(1, TimeUnit.MINUTES)){
-                System.out.println(msg.toString());
+                WebSocketServerOne.sendNotify(msg);
             }
         }catch (Exception err){
 
@@ -50,4 +56,6 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyI
     public void publish(NotifyInfo notify){
         this.topic.publish(notify);
     }
+
+
 }

@@ -99,6 +99,7 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
         }
 
         this.notifyService.publish(NotifyInfo.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyInfo.builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
     }
 }

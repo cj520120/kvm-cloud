@@ -28,12 +28,12 @@ public class Constant {
         public static final int READY = 1;
         public static final int ATTACH_DISK = 2;
         public static final int DETACH_DISK = 3;
-        public static final int DESTROY = 4;
-        public static final int CLONE = 5;
-        public static final int CREATE_TEMPLATE = 6;
-        public static final int CREATE_SNAPSHOT = 7;
-        public static final int MIGRATE = 8;
-        public static final int RESIZE = 9;
+        public static final int CLONE = 4;
+        public static final int CREATE_TEMPLATE = 5;
+        public static final int CREATE_SNAPSHOT = 6;
+        public static final int MIGRATE = 7;
+        public static final int RESIZE =8;
+        public static final int DESTROY = 9;
         public static final int ERROR = 10;
     }
 
@@ -58,10 +58,10 @@ public class Constant {
     }
 
     public static class TemplateStatus {
-        public static final int DOWNLOAD = 0;
         public static final int CREATING = 0;
-        public static final int READY = 1;
-        public static final int ERROR = 2;
+        public static final int DOWNLOAD = 1;
+        public static final int READY = 2;
+        public static final int ERROR = 3;
     }
 
     public static class NetworkType {

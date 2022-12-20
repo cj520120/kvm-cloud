@@ -17,6 +17,7 @@ import java.util.Date;
 public class VolumeModel {
 
     private Integer volumeId;
+    private String description;
     private int templateId;
     private int storageId;
     private String name;

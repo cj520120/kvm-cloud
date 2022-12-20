@@ -30,6 +30,8 @@ public class VolumeEntity {
     private Integer storageId;
     @TableField("volume_name")
     private String name;
+    @TableField("volume_description")
+    private String description;
     @TableField("volume_path")
     private String path;
     @TableField("volume_capacity")

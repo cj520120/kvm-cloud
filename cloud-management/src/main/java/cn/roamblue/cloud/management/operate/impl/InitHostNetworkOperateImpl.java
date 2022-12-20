@@ -46,8 +46,12 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             return;
         }
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-        if (!Objects.equals(cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING, network.getStatus())) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "网络状态不是创建状态");
+        switch (network.getStatus()){
+            case cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
+            case cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "网络状态不是创建状态");
         }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
         if (host == null || !Objects.equals(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
@@ -111,7 +115,9 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             }
             if (hostIds.isEmpty()) {
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-                if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING) {
+                switch (network.getStatus() ) {
+                    case  cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
+                    case  cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
                     network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY);
                     networkMapper.updateById(network);
                 }
@@ -126,9 +132,11 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (network.getStatus() == cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING) {
-                network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.ERROR);
-                networkMapper.updateById(network);
+            switch (network.getStatus() ) {
+                case cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
+                case cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
+                    network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.ERROR);
+                    networkMapper.updateById(network);
             }
 
 
