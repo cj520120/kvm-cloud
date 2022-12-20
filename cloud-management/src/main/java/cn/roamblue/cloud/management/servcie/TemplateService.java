@@ -1,17 +1,14 @@
 package cn.roamblue.cloud.management.servcie;
 
-import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.TemplateModel;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.roamblue.cloud.management.operate.bean.DownloadTemplateOperate;
-import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -23,26 +20,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 @Service
-public class TemplateService {
-    @Autowired
-    private TemplateMapper templateMapper;
+public class TemplateService extends AbstractService {
+
     @Autowired
     private AllocateService allocateService;
-    @Autowired
-    private OperateTask operateTask;
-    @Autowired
-    private TemplateVolumeMapper templateVolumeMapper;
-    @Autowired
-    private VolumeMapper volumeMapper;
-    @Autowired
-    private GuestMapper guestMapper;
-    @Autowired
-    private GuestDiskMapper guestDiskMapper;
-
-    private TemplateModel initTemplateModel(TemplateEntity entity) {
-        return new BeanConverter<>(TemplateModel.class).convert(entity, null);
-
-    }
 
     private GuestEntity getVolumeGuest(int volumeId) {
         GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));

@@ -1,16 +1,13 @@
 package cn.roamblue.cloud.management.servcie;
 
-import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.SchemeEntity;
-import cn.roamblue.cloud.management.data.mapper.SchemeMapper;
 import cn.roamblue.cloud.management.model.SchemeModel;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class SchemeService {
-    @Autowired
-    private SchemeMapper schemeMapper;
+public class SchemeService extends AbstractService {
 
-    private SchemeModel initScheme(SchemeEntity entity) {
-        return new BeanConverter<>(SchemeModel.class).convert(entity, null);
-    }
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)

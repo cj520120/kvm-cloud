@@ -5,24 +5,16 @@ import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
-import cn.roamblue.cloud.management.component.VncService;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.GuestModel;
-import cn.roamblue.cloud.management.model.GuestNetworkModel;
-import cn.roamblue.cloud.management.model.VolumeAttachModel;
-import cn.roamblue.cloud.management.model.VolumeModel;
 import cn.roamblue.cloud.management.operate.bean.*;
-import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -32,57 +24,14 @@ import java.util.stream.Collectors;
  * @author chenjun
  */
 @Service
-public class GuestService {
+public class GuestService extends AbstractService {
 
-    @Autowired
-    private GuestMapper guestMapper;
-    @Autowired
-    private VolumeMapper volumeMapper;
-    @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private GuestDiskMapper guestDiskMapper;
-    @Autowired
-    private NetworkMapper networkMapper;
-    @Autowired
-    private GuestNetworkMapper guestNetworkMapper;
-    @Autowired
-    private HostMapper hostMapper;
-    @Autowired
-    private TemplateMapper templateMapper;
-    @Autowired
-    private OperateTask operateTask;
 
     @Autowired
     private AllocateService allocateService;
 
-    @Autowired
-    private VolumeService volumeService;
-
-    @Autowired
-    private GuestVncMapper guestVncMapper;
-    @Autowired
-    @Lazy
-    private VncService vncService;
-
-    private VolumeModel initVolume(GuestDiskEntity disk) {
-        VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
-        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
-        return model;
-    }
-
-    private GuestNetworkModel initNetwork(GuestNetworkEntity entity) {
-        return new BeanConverter<>(GuestNetworkModel.class).convert(entity, null);
-    }
-
     private GuestModel initGuestInfo(GuestEntity entity) {
         GuestModel model = new BeanConverter<>(GuestModel.class).convert(entity, null);
-        List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", entity.getGuestId()));
-        diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
-        model.setVolumes(diskList.stream().map(this::initVolume).collect(Collectors.toList()));
-        List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", entity.getGuestId()));
-        networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
-        model.setNetworks(networkList.stream().map(this::initNetwork).collect(Collectors.toList()));
         return model;
     }
 
@@ -106,26 +55,30 @@ public class GuestService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(String description, String busType
-            , int hostId, int cpu, long memory, int networkId, String networkDeviceType,
+            , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                               int storageId, String volumeType, long size) {
 
-
+        SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
+        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         String uid = UUID.randomUUID().toString().replace("-", "");
         GuestEntity guest = GuestEntity.builder()
                 .name(uid)
                 .description(description)
                 .busType(busType)
-                .cpu(cpu)
-                .memory(memory)
+                .cpu(scheme.getCpu())
+                .speed(scheme.getSpeed())
+                .memory(scheme.getMemory())
                 .cdRoom(isoTemplateId)
                 .hostId(0)
                 .lastHostId(0)
+                .schemeId(schemeId)
+                .guestIp(guestNetwork.getIp())
+                .networkId(networkId)
                 .type(Constant.GuestType.USER)
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setGuestId(guest.getGuestId());
@@ -173,35 +126,35 @@ public class GuestService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
-                guest.setStatus(Constant.GuestStatus.STARTING);
-                this.guestMapper.updateById(guest);
-                BaseOperateParam operateParam = StartGuestOperate.builder()
-                        .guestId(guest.getGuestId())
-                        .hostId(hostId)
-                        .taskId(uid)
-                        .title("启动客户机[" + guest.getDescription() + "]")
-                        .build();
-                this.operateTask.addTask(operateParam);
+            guest.setStatus(Constant.GuestStatus.STARTING);
+            this.guestMapper.updateById(guest);
+            BaseOperateParam operateParam = StartGuestOperate.builder()
+                    .guestId(guest.getGuestId())
+                    .hostId(hostId)
+                    .taskId(uid)
+                    .title("启动客户机[" + guest.getDescription() + "]")
+                    .build();
+            this.operateTask.addTask(operateParam);
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId,int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, long size) {
+    public ResultUtil<GuestModel> reInstall(int guestId, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+                                            int storageId, String volumeType, long size) {
 
-        GuestEntity guest=this.guestMapper.selectById(guestId);
-        if(guest.getStatus()!= Constant.GuestStatus.STOP){
-            throw new CodeException(ErrorCode.SERVER_ERROR,"只能对关机状态对主机进行重装");
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest.getStatus() != Constant.GuestStatus.STOP) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态对主机进行重装");
         }
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
-        this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id",guestId).eq("device_id",0));
+        this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId).eq("device_id", 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
             VolumeEntity volume = VolumeEntity.builder()
-                    .description("ROOT-"+guest.getGuestId())
+                    .description("ROOT-" + guest.getGuestId())
                     .capacity(size)
                     .storageId(storage.getStorageId())
                     .name(uid)
@@ -496,7 +449,6 @@ public class GuestService {
     public ResultUtil<Void> destroyGuest(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
-
             case Constant.GuestStatus.ERROR:
             case Constant.GuestStatus.STOP:
                 List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
@@ -512,7 +464,10 @@ public class GuestService {
                 }
                 List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
                 for (VolumeEntity volume : guestVolumeList) {
-                    this.volumeService.destroyVolume(volume.getVolumeId());
+                    volume.setStatus(Constant.VolumeStatus.DESTROY);
+                    volumeMapper.updateById(volume);
+                    DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
+                    operateTask.addTask(operate);
                 }
                 this.vncService.destroyGuest(guestId);
                 return ResultUtil.success();

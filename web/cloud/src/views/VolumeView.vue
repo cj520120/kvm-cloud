@@ -1,240 +1,247 @@
 <template>
 	<div>
-		<NavViewVue current="Volume" />
-		<el-card class="box-card" v-if="this.show_type === 0">
-			<el-row slot="header" class="clearfix" style="height: 20px">
-				<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_volume">创建磁盘</el-button>
-			</el-row>
-			<el-row>
-				<el-table :v-loading="data_loading" :data="volumes" style="width: 100%">
-					<el-table-column label="ID" prop="volumeId" width="80" />
-					<el-table-column label="名称" prop="description" />
-					<el-table-column label="磁盘类型" prop="type" width="100">
-						<template #default="scope">
-							<el-tag>{{ scope.row.type }}</el-tag>
-						</template>
-					</el-table-column>
-					<el-table-column label="磁盘空间" prop="capacity" width="100">
-						<template #default="scope">
-							{{ get_volume_desplay_size(scope.row.capacity) }}
-						</template>
-					</el-table-column>
-					<el-table-column label="物理空间" prop="allocation" width="150">
-						<template #default="scope">
-							{{ get_volume_desplay_size(scope.row.allocation) }}
-						</template>
-					</el-table-column>
-					<el-table-column label="挂载主机" prop="allocation" width="200">
-						<template #default="scope">
-							<el-link type="primary" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-link>
-							<span v-if="!scope.row.attach">{{ scope.row.attach ? scope.row.attach.description : '-' }}</span>
-						</template>
-					</el-table-column>
-					<el-table-column label="状态" prop="status" width="100">
-						<template #default="scope">
-							<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_volume_status(scope.row) }}</el-tag>
-						</template>
-					</el-table-column>
-					<el-table-column label="操作" width="200">
-						<template #default="scope">
-							<el-dropdown size="small" split-button placement="bottom-end" type="primary" @command="menu_command_click">
-								磁盘管理
-								<el-dropdown-menu slot="dropdown">
-									<el-dropdown-item :command="{ volume: scope.row, command: 'info' }">磁盘详情</el-dropdown-item>
-									<el-dropdown-item :command="{ volume: scope.row, command: 'resize' }" divided>扩容磁盘</el-dropdown-item>
-									<el-dropdown-item :command="{ volume: scope.row, command: 'clone' }">克隆磁盘</el-dropdown-item>
-									<el-dropdown-item :command="{ volume: scope.row, command: 'migrate' }">迁移磁盘</el-dropdown-item>
-									<el-dropdown-item :command="{ volume: scope.row, command: 'snapshote' }" divided>创建快照</el-dropdown-item>
-									<el-dropdown-item :command="{ volume: scope.row, command: 'template' }">创建模版</el-dropdown-item>
-									<el-dropdown-item :command="{ volume: scope.row, command: 'destroy' }" divided>销毁磁盘</el-dropdown-item>
-								</el-dropdown-menu>
-							</el-dropdown>
-						</template>
-					</el-table-column>
-				</el-table>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 1">
-			<el-row slot="header">
-				<el-page-header @back="show_volume_list" content="磁盘详情"></el-page-header>
-			</el-row>
-			<el-row style="text-align: left; margin: 20px 0">
-				<el-button @click="show_create_volume()" type="primary" size="mini">创建磁盘</el-button>
-				<el-button @click="show_resize_volume_click(show_volume)" type="primary" size="mini">扩容磁盘</el-button>
-				<el-button @click="show_clone_volume_click(show_volume)" type="primary" size="mini">克隆磁盘</el-button>
-				<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
-				<el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button>
-				<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
-				<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
-			</el-row>
-			<el-row>
-				<el-descriptions :column="2" size="medium" border>
-					<el-descriptions-item label="ID">{{ show_volume.volumeId }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘名">{{ show_volume.description }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘类型">{{ show_volume.type }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘路径">{{ show_volume.path }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘模版">{{ show_volume.template ? show_volume.template.name : '-' }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘存储池">{{ get_storage_name(show_volume.storageId) }}</el-descriptions-item>
-					<el-descriptions-item label="挂载主机">{{ show_volume.attach ? show_volume.attach.description : '-' }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘容量">{{ get_volume_desplay_size(show_volume.capacity) }}</el-descriptions-item>
-					<el-descriptions-item label="物理占用">{{ get_volume_desplay_size(show_volume.allocation) }}</el-descriptions-item>
-					<el-descriptions-item label="状态">
-						<el-tag :type="show_volume.status === 1 ? 'success' : 'danger'">{{ get_volume_status(show_volume) }}</el-tag>
-					</el-descriptions-item>
-				</el-descriptions>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 2">
-			<el-row slot="header">
-				<el-page-header @back="show_volume_list()" content="创建磁盘" style="color: #409eff"></el-page-header>
-			</el-row>
-			<el-row>
-				<el-form ref="createForm" :model="create_volume" label-width="100px" class="demo-ruleForm">
-					<el-form-item label="名称" prop="description">
-						<el-input v-model="create_volume.description"></el-input>
-					</el-form-item>
-					<el-form-item label="存储池" prop="type">
-						<el-select v-model="create_volume.storageId" style="width: 100%">
-							<el-option label="随机" :value="0"></el-option>
-							<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
-						</el-select>
-					</el-form-item>
-					<el-form-item label="磁盘类型" prop="volumeType">
-						<el-select v-model="create_volume.volumeType" style="width: 100%">
-							<el-option label="raw" value="raw"></el-option>
-							<el-option label="qcow" value="qcow"></el-option>
-							<el-option label="qcow2" value="qcow2"></el-option>
-							<el-option label="vdi" value="vdi"></el-option>
-							<el-option label="vmdk" value="vmdk"></el-option>
-							<el-option label="vpc" value="vpc"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item label="磁盘大小(GB)" prop="volumeSize">
-						<el-input v-model="create_volume.volumeSize"></el-input>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="create_volume_click">立即创建</el-button>
-						<el-button @click="show_volume_list">取消</el-button>
-					</el-form-item>
-				</el-form>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 3">
-			<el-row slot="header">
-				<el-page-header @back="show_volume_list()" content="克隆磁盘" style="color: #409eff"></el-page-header>
-			</el-row>
-			<el-row>
-				<el-form ref="createForm" :model="clone_volume" label-width="100px" class="demo-ruleForm">
-					<el-form-item label="名称" prop="description">
-						<el-input v-model="clone_volume.description"></el-input>
-					</el-form-item>
-					<el-form-item label="存储池" prop="type">
-						<el-select v-model="clone_volume.storageId" style="width: 100%">
-							<el-option label="随机" :value="0"></el-option>
-							<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
-						</el-select>
-					</el-form-item>
-					<el-form-item label="磁盘类型" prop="volumeType">
-						<el-select v-model="clone_volume.volumeType" style="width: 100%">
-							<el-option label="raw" value="raw"></el-option>
-							<el-option label="qcow" value="qcow"></el-option>
-							<el-option label="qcow2" value="qcow2"></el-option>
-							<el-option label="vdi" value="vdi"></el-option>
-							<el-option label="vmdk" value="vmdk"></el-option>
-							<el-option label="vpc" value="vpc"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="clone_volume_click">克隆</el-button>
-						<el-button @click="show_volume_list">取消</el-button>
-					</el-form-item>
-				</el-form>
-			</el-row>
-		</el-card>
+		<HeadViewVue />
+		<el-container>
+			<el-aside width="200px"><NavViewVue current="Volume" /></el-aside>
+			<el-main>
+				<el-card class="box-card" v-if="this.show_type === 0">
+					<el-row slot="header" class="clearfix" style="height: 20px">
+						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_volume">创建磁盘</el-button>
+					</el-row>
+					<el-row>
+						<el-table :v-loading="data_loading" :data="volumes" style="width: 100%">
+							<el-table-column label="ID" prop="volumeId" width="80" />
+							<el-table-column label="名称" prop="description" />
+							<el-table-column label="磁盘类型" prop="type" width="100">
+								<template #default="scope">
+									<el-tag>{{ scope.row.type }}</el-tag>
+								</template>
+							</el-table-column>
+							<el-table-column label="磁盘空间" prop="capacity" width="100">
+								<template #default="scope">
+									{{ get_volume_desplay_size(scope.row.capacity) }}
+								</template>
+							</el-table-column>
+							<el-table-column label="物理空间" prop="allocation" width="150">
+								<template #default="scope">
+									{{ get_volume_desplay_size(scope.row.allocation) }}
+								</template>
+							</el-table-column>
+							<el-table-column label="挂载主机" prop="allocation" width="200">
+								<template #default="scope">
+									<el-link type="primary" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-link>
+									<span v-if="!scope.row.attach">{{ scope.row.attach ? scope.row.attach.description : '-' }}</span>
+								</template>
+							</el-table-column>
+							<el-table-column label="状态" prop="status" width="100">
+								<template #default="scope">
+									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_volume_status(scope.row) }}</el-tag>
+								</template>
+							</el-table-column>
+							<el-table-column label="操作" width="200">
+								<template #default="scope">
+									<el-dropdown size="small" split-button placement="bottom-end" type="primary" @command="menu_command_click">
+										磁盘管理
+										<el-dropdown-menu slot="dropdown">
+											<el-dropdown-item :command="{ volume: scope.row, command: 'info' }">磁盘详情</el-dropdown-item>
+											<el-dropdown-item :command="{ volume: scope.row, command: 'resize' }" divided>扩容磁盘</el-dropdown-item>
+											<el-dropdown-item :command="{ volume: scope.row, command: 'clone' }">克隆磁盘</el-dropdown-item>
+											<el-dropdown-item :command="{ volume: scope.row, command: 'migrate' }">迁移磁盘</el-dropdown-item>
+											<el-dropdown-item :command="{ volume: scope.row, command: 'snapshote' }" divided>创建快照</el-dropdown-item>
+											<el-dropdown-item :command="{ volume: scope.row, command: 'template' }">创建模版</el-dropdown-item>
+											<el-dropdown-item :command="{ volume: scope.row, command: 'destroy' }" divided>销毁磁盘</el-dropdown-item>
+										</el-dropdown-menu>
+									</el-dropdown>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 1">
+					<el-row slot="header">
+						<el-page-header @back="show_volume_list" content="磁盘详情"></el-page-header>
+					</el-row>
+					<el-row style="text-align: left; margin: 20px 0">
+						<el-button @click="show_create_volume()" type="primary" size="mini">创建磁盘</el-button>
+						<el-button @click="show_resize_volume_click(show_volume)" type="primary" size="mini">扩容磁盘</el-button>
+						<el-button @click="show_clone_volume_click(show_volume)" type="primary" size="mini">克隆磁盘</el-button>
+						<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
+						<el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button>
+						<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
+						<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
+					</el-row>
+					<el-row>
+						<el-descriptions :column="2" size="medium" border>
+							<el-descriptions-item label="ID">{{ show_volume.volumeId }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘名">{{ show_volume.description }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘类型">{{ show_volume.type }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘路径">{{ show_volume.path }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘模版">{{ show_volume.template ? show_volume.template.name : '-' }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘存储池">{{ get_storage_name(show_volume.storageId) }}</el-descriptions-item>
+							<el-descriptions-item label="挂载主机">{{ show_volume.attach ? show_volume.attach.description : '-' }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘容量">{{ get_volume_desplay_size(show_volume.capacity) }}</el-descriptions-item>
+							<el-descriptions-item label="物理占用">{{ get_volume_desplay_size(show_volume.allocation) }}</el-descriptions-item>
+							<el-descriptions-item label="状态">
+								<el-tag :type="show_volume.status === 1 ? 'success' : 'danger'">{{ get_volume_status(show_volume) }}</el-tag>
+							</el-descriptions-item>
+						</el-descriptions>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 2">
+					<el-row slot="header">
+						<el-page-header @back="show_volume_list()" content="创建磁盘" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form ref="createForm" :model="create_volume" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="名称" prop="description">
+								<el-input v-model="create_volume.description"></el-input>
+							</el-form-item>
+							<el-form-item label="存储池" prop="type">
+								<el-select v-model="create_volume.storageId" style="width: 100%">
+									<el-option label="随机" :value="0"></el-option>
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+								</el-select>
+							</el-form-item>
+							<el-form-item label="磁盘类型" prop="volumeType">
+								<el-select v-model="create_volume.volumeType" style="width: 100%">
+									<el-option label="raw" value="raw"></el-option>
+									<el-option label="qcow" value="qcow"></el-option>
+									<el-option label="qcow2" value="qcow2"></el-option>
+									<el-option label="vdi" value="vdi"></el-option>
+									<el-option label="vmdk" value="vmdk"></el-option>
+									<el-option label="vpc" value="vpc"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="磁盘大小(GB)" prop="volumeSize">
+								<el-input v-model="create_volume.volumeSize"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="create_volume_click">立即创建</el-button>
+								<el-button @click="show_volume_list">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 3">
+					<el-row slot="header">
+						<el-page-header @back="show_volume_list()" content="克隆磁盘" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form ref="createForm" :model="clone_volume" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="名称" prop="description">
+								<el-input v-model="clone_volume.description"></el-input>
+							</el-form-item>
+							<el-form-item label="存储池" prop="type">
+								<el-select v-model="clone_volume.storageId" style="width: 100%">
+									<el-option label="随机" :value="0"></el-option>
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+								</el-select>
+							</el-form-item>
+							<el-form-item label="磁盘类型" prop="volumeType">
+								<el-select v-model="clone_volume.volumeType" style="width: 100%">
+									<el-option label="raw" value="raw"></el-option>
+									<el-option label="qcow" value="qcow"></el-option>
+									<el-option label="qcow2" value="qcow2"></el-option>
+									<el-option label="vdi" value="vdi"></el-option>
+									<el-option label="vmdk" value="vmdk"></el-option>
+									<el-option label="vpc" value="vpc"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="clone_volume_click">克隆</el-button>
+								<el-button @click="show_volume_list">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
 
-		<el-card class="box-card" v-if="this.show_type === 4">
-			<el-row slot="header">
-				<el-page-header @back="show_volume_list()" content="迁移磁盘" style="color: #409eff"></el-page-header>
-			</el-row>
-			<el-row>
-				<el-form :model="migrate_volume" label-width="100px" class="demo-ruleForm">
-					<el-form-item label="存储池" prop="type">
-						<el-select v-model="migrate_volume.storageId" style="width: 100%">
-							<el-option label="随机" :value="0"></el-option>
-							<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
-						</el-select>
-					</el-form-item>
-					<el-form-item label="磁盘类型" prop="volumeType">
-						<el-select v-model="migrate_volume.volumeType" style="width: 100%">
-							<el-option label="raw" value="raw"></el-option>
-							<el-option label="qcow" value="qcow"></el-option>
-							<el-option label="qcow2" value="qcow2"></el-option>
-							<el-option label="vdi" value="vdi"></el-option>
-							<el-option label="vmdk" value="vmdk"></el-option>
-							<el-option label="vpc" value="vpc"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="migrate_volume_click">迁移</el-button>
-						<el-button @click="show_volume_list">取消</el-button>
-					</el-form-item>
-				</el-form>
-			</el-row>
-		</el-card>
+				<el-card class="box-card" v-if="this.show_type === 4">
+					<el-row slot="header">
+						<el-page-header @back="show_volume_list()" content="迁移磁盘" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form :model="migrate_volume" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="存储池" prop="type">
+								<el-select v-model="migrate_volume.storageId" style="width: 100%">
+									<el-option label="随机" :value="0"></el-option>
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+								</el-select>
+							</el-form-item>
+							<el-form-item label="磁盘类型" prop="volumeType">
+								<el-select v-model="migrate_volume.volumeType" style="width: 100%">
+									<el-option label="raw" value="raw"></el-option>
+									<el-option label="qcow" value="qcow"></el-option>
+									<el-option label="qcow2" value="qcow2"></el-option>
+									<el-option label="vdi" value="vdi"></el-option>
+									<el-option label="vmdk" value="vmdk"></el-option>
+									<el-option label="vpc" value="vpc"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="migrate_volume_click">迁移</el-button>
+								<el-button @click="show_volume_list">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
 
-		<el-dialog title="磁盘扩容" :visible.sync="resize_dialog_visiable" width="300px">
-			<el-form :model="resize_volume" label-width="100px">
-				<el-form-item label="磁盘大小(GB)">
-					<el-input v-model="resize_volume.size" placeholder="请输入磁盘大小(GB)"></el-input>
-				</el-form-item>
-			</el-form>
-			<span slot="footer" class="dialog-footer">
-				<el-button @click="resize_dialog_visiable = false">取 消</el-button>
-				<el-button type="primary" @click="resize_volume_click">确 定</el-button>
-			</span>
-		</el-dialog>
-		<el-dialog title="创建模版" :visible.sync="template_dialog_visiable" width="400px">
-			<el-form :model="resize_volume" label-width="100px">
-				<el-form-item label="模版名称">
-					<el-input v-model="template_volume.name" placeholder="请输入模版名称"></el-input>
-				</el-form-item>
-			</el-form>
-			<span slot="footer" class="dialog-footer">
-				<el-button @click="template_dialog_visiable = false">取 消</el-button>
-				<el-button type="primary" @click="create_volume_template_click">确 定</el-button>
-			</span>
-		</el-dialog>
-		<el-dialog title="创建快照" :visible.sync="snapshot_dialog_visiable" width="400px">
-			<el-form :model="snapshot_volume" label-width="100px">
-				<el-form-item label="快照名称">
-					<el-input v-model="snapshot_volume.snapshotName" placeholder="请输入快照名称"></el-input>
-				</el-form-item>
-				<el-form-item label="磁盘类型" prop="volumeType">
-					<el-select v-model="snapshot_volume.snapshotVolumeType" style="width: 100%">
-						<el-option label="raw" value="raw"></el-option>
-						<el-option label="qcow" value="qcow"></el-option>
-						<el-option label="qcow2" value="qcow2"></el-option>
-						<el-option label="vdi" value="vdi"></el-option>
-						<el-option label="vmdk" value="vmdk"></el-option>
-						<el-option label="vpc" value="vpc"></el-option>
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<span slot="footer" class="dialog-footer">
-				<el-button @click="snapshot_dialog_visiable = false">取 消</el-button>
-				<el-button type="primary" @click="create_volume_snapshot_click">确 定</el-button>
-			</span>
-		</el-dialog>
+				<el-dialog title="磁盘扩容" :visible.sync="resize_dialog_visiable" width="300px">
+					<el-form :model="resize_volume" label-width="100px">
+						<el-form-item label="磁盘大小(GB)">
+							<el-input v-model="resize_volume.size" placeholder="请输入磁盘大小(GB)"></el-input>
+						</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="resize_dialog_visiable = false">取 消</el-button>
+						<el-button type="primary" @click="resize_volume_click">确 定</el-button>
+					</span>
+				</el-dialog>
+				<el-dialog title="创建模版" :visible.sync="template_dialog_visiable" width="400px">
+					<el-form :model="resize_volume" label-width="100px">
+						<el-form-item label="模版名称">
+							<el-input v-model="template_volume.name" placeholder="请输入模版名称"></el-input>
+						</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="template_dialog_visiable = false">取 消</el-button>
+						<el-button type="primary" @click="create_volume_template_click">确 定</el-button>
+					</span>
+				</el-dialog>
+				<el-dialog title="创建快照" :visible.sync="snapshot_dialog_visiable" width="400px">
+					<el-form :model="snapshot_volume" label-width="100px">
+						<el-form-item label="快照名称">
+							<el-input v-model="snapshot_volume.snapshotName" placeholder="请输入快照名称"></el-input>
+						</el-form-item>
+						<el-form-item label="磁盘类型" prop="volumeType">
+							<el-select v-model="snapshot_volume.snapshotVolumeType" style="width: 100%">
+								<el-option label="raw" value="raw"></el-option>
+								<el-option label="qcow" value="qcow"></el-option>
+								<el-option label="qcow2" value="qcow2"></el-option>
+								<el-option label="vdi" value="vdi"></el-option>
+								<el-option label="vmdk" value="vmdk"></el-option>
+								<el-option label="vpc" value="vpc"></el-option>
+							</el-select>
+						</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="snapshot_dialog_visiable = false">取 消</el-button>
+						<el-button type="primary" @click="create_volume_snapshot_click">确 定</el-button>
+					</span>
+				</el-dialog>
+			</el-main>
+		</el-container>
 	</div>
 </template>
 <script>
 import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, getTemplateInfo, cloneVolume, migrateVolume, resizeVolume, createVolumeTemplate, createSnapshot } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
+import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'volumeView',
 	components: {
-		NavViewVue
+		NavViewVue,
+		HeadViewVue
 	},
 	data() {
 		return {

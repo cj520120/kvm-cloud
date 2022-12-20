@@ -1,25 +1,18 @@
 package cn.roamblue.cloud.management.servcie;
 
-import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.data.entity.VolumeEntity;
-import cn.roamblue.cloud.management.data.mapper.StorageMapper;
-import cn.roamblue.cloud.management.data.mapper.TemplateMapper;
-import cn.roamblue.cloud.management.data.mapper.TemplateVolumeMapper;
-import cn.roamblue.cloud.management.data.mapper.VolumeMapper;
 import cn.roamblue.cloud.management.model.StorageModel;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.operate.bean.CreateStorageOperate;
 import cn.roamblue.cloud.management.operate.bean.DestroyStorageOperate;
-import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,28 +21,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class StorageService {
-    @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private OperateTask operateTask;
-    @Autowired
-    private VolumeMapper volumeMapper;
-    @Autowired
-    private TemplateVolumeMapper templateVolumeMapper;
-    @Autowired
-    private TemplateMapper templateMapper;
+public class StorageService extends AbstractService {
 
-    private StorageModel initStorageModel(StorageEntity entity) {
-        return new BeanConverter<>(StorageModel.class).convert(entity, null);
-    }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<List<StorageModel>> listStorage() {
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>());
         List<StorageModel> models = storageList.stream().map(this::initStorageModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<StorageModel> getStorageInfo(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {
@@ -57,9 +39,10 @@ public class StorageService {
         }
         return ResultUtil.success(this.initStorageModel(storage));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> createStorage( String name, String type, String param) {
+    public ResultUtil<StorageModel> createStorage(String name, String type, String param) {
         StorageEntity storage = StorageEntity.builder()
                 .name(name)
                 .type(type)

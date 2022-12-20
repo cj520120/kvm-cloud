@@ -1,15 +1,15 @@
 package cn.roamblue.cloud.management.servcie;
 
-import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.data.mapper.*;
-import cn.roamblue.cloud.management.model.*;
+import cn.roamblue.cloud.management.model.CloneModel;
+import cn.roamblue.cloud.management.model.MigrateModel;
+import cn.roamblue.cloud.management.model.SnapshotModel;
+import cn.roamblue.cloud.management.model.VolumeModel;
 import cn.roamblue.cloud.management.operate.bean.*;
-import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,33 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class VolumeService {
-    @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private VolumeMapper volumeMapper;
-    @Autowired
-    private TemplateMapper templateMapper;
-    @Autowired
-    private OperateTask operateTask;
-    @Autowired
-    private TemplateVolumeMapper templateVolumeMapper;
-    @Autowired
-    private SnapshotVolumeMapper snapshotVolumeMapper;
-    @Autowired
-    private GuestDiskMapper guestDiskMapper;
-    @Autowired
-    private AllocateService allocateService;
+public class VolumeService extends AbstractService {
 
     @Autowired
-    private GuestMapper guestMapper;
+    private AllocateService allocateService;
 
     private GuestEntity getVolumeGuest(int volumeId) {
         GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
@@ -69,29 +50,23 @@ public class VolumeService {
     }
 
 
-    private VolumeModel initVolume(VolumeEntity volume) {
-        VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
-        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
-        if (disk != null&&disk.getGuestId()!=0) {
-            GuestEntity guest= this.guestMapper.selectById(disk.getGuestId());
-            if(guest!=null) {
-                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).description(guest.getDescription()).build());
-            }
-        }
-        return model;
-    }
-    private SnapshotModel initSnapshot(SnapshotVolumeEntity volume) {
-        SnapshotModel model = new BeanConverter<>(SnapshotModel.class).convert(volume, null);
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
+        List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
+        diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
+        List<VolumeModel> models = diskList.stream().map(this::initVolume).collect(Collectors.toList());
+        return ResultUtil.success(models);
 
-        return model;
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
@@ -99,9 +74,10 @@ public class VolumeService {
         }
         return ResultUtil.success(this.initVolume(volume));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(String description,int storageId, int templateId,int snapshotVolumeId, String volumeType, long volumeSize) {
+    public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, String volumeType, long volumeSize) {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()

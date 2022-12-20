@@ -43,8 +43,9 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     protected TemplateVolumeMapper templateVolumeMapper;
     @Autowired
     protected VolumeMapper volumeMapper;
+
     @Autowired
-    protected GuestVncMapper guestVncMapper;
+    protected SchemeMapper schemeMapper;
     @Autowired
     protected SnapshotVolumeMapper snapshotVolumeMapper;
     @Autowired

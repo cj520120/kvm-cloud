@@ -2,7 +2,11 @@ package cn.roamblue.cloud.management.controller;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.management.model.GuestModel;
+import cn.roamblue.cloud.management.model.GuestNetworkModel;
+import cn.roamblue.cloud.management.model.VolumeModel;
 import cn.roamblue.cloud.management.servcie.GuestService;
+import cn.roamblue.cloud.management.servcie.NetworkService;
+import cn.roamblue.cloud.management.servcie.VolumeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +20,10 @@ public class GuestController {
 
     @Autowired
     private GuestService guestService;
+    @Autowired
+    private NetworkService networkService;
+    @Autowired
+    private VolumeService volumeService;
 
     @GetMapping("/api/guest/all")
     public ResultUtil<List<GuestModel>> listGuests() {
@@ -27,12 +35,21 @@ public class GuestController {
         return this.guestService.getGuestInfo(guestId);
     }
 
+    @GetMapping("/api/guest/network")
+    public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(@RequestParam("guestId") int guestId) {
+        return this.networkService.listGuestNetworks(guestId);
+    }
+
+    @GetMapping("/api/guest/volume")
+    public ResultUtil<List<VolumeModel>> listGuestVolumes(@RequestParam("guestId") int guestId) {
+        return this.volumeService.listGuestVolumes(guestId);
+    }
+
     @PutMapping("/api/guest/create")
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
                                               @RequestParam("busType") String busType,
                                               @RequestParam("hostId") int hostId,
-                                              @RequestParam("cpu") int cpu,
-                                              @RequestParam("memory") long memory,
+                                              @RequestParam("schemeId") int schemeId,
                                               @RequestParam("networkId") int networkId,
                                               @RequestParam("networkDeviceType") String networkDeviceType,
                                               @RequestParam("isoTemplateId") int isoTemplateId,
@@ -44,7 +61,7 @@ public class GuestController {
                                               @RequestParam("size") long size) {
 
 
-        return this.guestService.createGuest(description, busType, hostId, cpu, memory, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size);
+        return this.guestService.createGuest(description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size);
     }
 
     @PostMapping("/api/guest/reinstall")
@@ -133,4 +150,5 @@ public class GuestController {
     public ResultUtil<Void> destroyGuest(@RequestParam("guestId") int guestId) {
         return this.guestService.destroyGuest(guestId);
     }
+
 }

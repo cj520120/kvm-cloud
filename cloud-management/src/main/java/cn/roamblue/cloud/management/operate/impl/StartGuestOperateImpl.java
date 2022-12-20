@@ -55,16 +55,23 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         List<OsDisk> disks = getGuestDisk(guest);
         List<OsNic> networkInterfaces = getGuestNetwork(guest);
         OsCdRoom cdRoom = getGuestCdRoom(guest);
-        GuestVncEntity guestVncEntity =  this.vncService.getGuestVnc(param.getGuestId());
+        GuestVncEntity guestVncEntity = this.vncService.getGuestVnc(param.getGuestId());
         guest.setHostId(host.getHostId());
         this.guestMapper.updateById(guest);
         this.allocateService.initHostAllocate();
+        SchemeEntity scheme = this.schemeMapper.selectById(guest.getSchemeId());
+        OsCpu cpu = OsCpu.builder().number(guest.getCpu()).share(guest.getSpeed()).build();
+        if (scheme != null) {
+            cpu.setCore(scheme.getCores());
+            cpu.setThread(scheme.getThreads());
+            cpu.setSocket(scheme.getSockets());
+        }
         GuestStartRequest request = GuestStartRequest.builder()
                 .emulator(host.getEmulator())
                 .name(guest.getName())
                 .description(guest.getDescription())
                 .bus(guest.getBusType())
-                .osCpu(OsCpu.builder().number(guest.getCpu()).build())
+                .osCpu(cpu)
                 .osMemory(OsMemory.builder().memory(guest.getMemory()).build())
                 .osCdRoom(cdRoom)
                 .osDisks(disks)

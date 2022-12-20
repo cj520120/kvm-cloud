@@ -7,8 +7,6 @@ import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.data.mapper.GuestVncMapper;
-import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.operate.bean.VncUpdateOperate;
 import cn.roamblue.cloud.management.util.Constant;
@@ -16,7 +14,6 @@ import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class VncService extends AbstractComponentService {
-    @Autowired
-    private GuestVncMapper guestVncMapper;
-    @Autowired
-    private HostMapper hostMapper;
+
 
     @Override
     public int getComponentType() {
@@ -43,21 +37,18 @@ public class VncService extends AbstractComponentService {
 
     public GuestEntity getGuestVncServer(int guestId) {
         //获取到客户机默认网络
-        GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId).eq("device_id", 0));
-        if (guestNetwork == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机默认网络不存在");
-        }
+        GuestEntity guest = this.guestMapper.selectById(guestId);
         //获取网络对应的组件
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", guestNetwork.getNetworkId()).eq("component_type", Constant.ComponentType.VNC).last("limit 0,1"));
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", guest.getNetworkId()).eq("component_type", Constant.ComponentType.VNC).last("limit 0,1"));
         if (component == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机所在网络VNC未初始化完成");
         }
-        //获取改组件对应的虚拟机
-        GuestEntity guest = this.guestMapper.selectById(component.getGuestId());
-        if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
+        //获取该组件对应的虚拟机
+        GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
+        if (vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机所在网络VNC未初始化完成");
         }
-        return guest;
+        return vncGuest;
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)

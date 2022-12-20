@@ -1,130 +1,138 @@
 <template>
 	<div>
-		<NavViewVue current="Scheme" />
-		<el-card class="box-card" v-if="this.show_type === 0">
-			<el-row slot="header" class="clearfix" style="height: 20px">
-				<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_scheme">创建计算方案</el-button>
-			</el-row>
-			<el-row>
-				<el-table :v-loading="data_loading" :data="schemes" style="width: 100%">
-					<el-table-column label="ID" prop="schemeId" width="80" />
-					<el-table-column label="名称" prop="name" width="300" />
-					<el-table-column label="CPU" prop="cpu" width="120" />
-					<el-table-column label="内存" prop="memory" width="200">
-						<template #default="scope">
-							{{ get_memory_desplay(scope.row.memory) }}
-						</template>
-					</el-table-column>
-					<el-table-column label="操作" min-width="380">
-						<template #default="scope">
-							<el-button @click="show_scheme_info(scope.row)" type="" size="mini">详情</el-button>
-							<el-button @click="show_modify_scheme(scope.row)" type="" size="mini">修改</el-button>
-							<el-button @click="destroy_scheme(scope.row)" type="danger" size="mini">删除</el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 1">
-			<el-row slot="header">
-				<el-page-header @back="show_scheme_list" content="计算方案详情"></el-page-header>
-			</el-row>
-			<el-row style="text-align: left; margin: 20px 0">
-				<el-button @click="destroy_scheme(show_scheme)" type="danger" size="mini">删除</el-button>
-			</el-row>
-			<el-row>
-				<el-descriptions :column="2" size="medium" border>
-					<el-descriptions-item label="ID">{{ show_scheme.schemeId }}</el-descriptions-item>
-					<el-descriptions-item label="名称">{{ show_scheme.name }}</el-descriptions-item>
-					<el-descriptions-item label="配额">{{ show_scheme.speed }}</el-descriptions-item>
-					<el-descriptions-item label="CPU">{{ show_scheme.cpu }}</el-descriptions-item>
-					<el-descriptions-item label="内存">{{ get_memory_desplay(show_scheme.memory) }}</el-descriptions-item>
-					<el-descriptions-item label="Cores">{{ show_scheme.cores }}</el-descriptions-item>
-					<el-descriptions-item label="Sockets">{{ show_scheme.sockets }}</el-descriptions-item>
-					<el-descriptions-item label="Threads">{{ show_scheme.threads }}</el-descriptions-item>
-				</el-descriptions>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 2">
-			<el-row slot="header">
-				<el-page-header @back="show_scheme_list()" content="创建计算方案" style="color: #409eff"></el-page-header>
-			</el-row>
-			<el-row>
-				<el-form ref="createForm" :model="create_scheme" label-width="100px" class="demo-ruleForm">
-					<el-form-item label="名称" prop="name">
-						<el-input v-model="create_scheme.name"></el-input>
-					</el-form-item>
-					<el-form-item label="CPU" prop="cpu">
-						<el-input v-model="create_scheme.cpu"></el-input>
-					</el-form-item>
-					<el-form-item label="内存(MB)" prop="memory">
-						<el-input v-model="create_scheme.memory"></el-input>
-					</el-form-item>
+		<HeadViewVue />
+		<el-container>
+			<el-aside width="200px">
+				<NavViewVue current="Scheme" />
+			</el-aside>
+			<el-main>
+				<el-card class="box-card" v-if="this.show_type === 0">
+					<el-row slot="header" class="clearfix" style="height: 20px">
+						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_scheme">创建计算方案</el-button>
+					</el-row>
+					<el-row>
+						<el-table :v-loading="data_loading" :data="schemes" style="width: 100%">
+							<el-table-column label="ID" prop="schemeId" width="80" />
+							<el-table-column label="名称" prop="name" width="300" />
+							<el-table-column label="CPU" prop="cpu" width="120" />
+							<el-table-column label="内存" prop="memory" width="200">
+								<template #default="scope">
+									{{ get_memory_desplay(scope.row.memory) }}
+								</template>
+							</el-table-column>
+							<el-table-column label="操作" min-width="380">
+								<template #default="scope">
+									<el-button @click="show_scheme_info(scope.row)" type="" size="mini">详情</el-button>
+									<el-button @click="show_modify_scheme(scope.row)" type="" size="mini">修改</el-button>
+									<el-button @click="destroy_scheme(scope.row)" type="danger" size="mini">删除</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 1">
+					<el-row slot="header">
+						<el-page-header @back="show_scheme_list" content="计算方案详情"></el-page-header>
+					</el-row>
+					<el-row style="text-align: left; margin: 20px 0">
+						<el-button @click="destroy_scheme(show_scheme)" type="danger" size="mini">删除</el-button>
+					</el-row>
+					<el-row>
+						<el-descriptions :column="2" size="medium" border>
+							<el-descriptions-item label="ID">{{ show_scheme.schemeId }}</el-descriptions-item>
+							<el-descriptions-item label="名称">{{ show_scheme.name }}</el-descriptions-item>
+							<el-descriptions-item label="配额">{{ show_scheme.speed }}</el-descriptions-item>
+							<el-descriptions-item label="CPU">{{ show_scheme.cpu }}</el-descriptions-item>
+							<el-descriptions-item label="内存">{{ get_memory_desplay(show_scheme.memory) }}</el-descriptions-item>
+							<el-descriptions-item label="Cores">{{ show_scheme.cores }}</el-descriptions-item>
+							<el-descriptions-item label="Sockets">{{ show_scheme.sockets }}</el-descriptions-item>
+							<el-descriptions-item label="Threads">{{ show_scheme.threads }}</el-descriptions-item>
+						</el-descriptions>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 2">
+					<el-row slot="header">
+						<el-page-header @back="show_scheme_list()" content="创建计算方案" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form ref="createForm" :model="create_scheme" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="名称" prop="name">
+								<el-input v-model="create_scheme.name"></el-input>
+							</el-form-item>
+							<el-form-item label="CPU" prop="cpu">
+								<el-input v-model="create_scheme.cpu"></el-input>
+							</el-form-item>
+							<el-form-item label="内存(MB)" prop="memory">
+								<el-input v-model="create_scheme.memory"></el-input>
+							</el-form-item>
 
-					<el-form-item label="配额" prop="speed">
-						<el-input v-model="create_scheme.speed"></el-input>
-					</el-form-item>
-					<el-form-item label="Cores" prop="cores">
-						<el-input v-model="create_scheme.cores"></el-input>
-					</el-form-item>
-					<el-form-item label="Sockets" prop="sockets">
-						<el-input v-model="create_scheme.sockets"></el-input>
-					</el-form-item>
-					<el-form-item label="Threads" prop="threads">
-						<el-input v-model="create_scheme.threads"></el-input>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="create_scheme_click">立即创建</el-button>
-						<el-button @click="show_scheme_list">取消</el-button>
-					</el-form-item>
-				</el-form>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 3">
-			<el-row slot="header">
-				<el-page-header @back="show_scheme_list()" content="修改计算方案" style="color: #409eff"></el-page-header>
-			</el-row>
-			<el-row>
-				<el-form :model="modify_scheme" label-width="100px" class="demo-ruleForm">
-					<el-form-item label="名称" prop="name">
-						<el-input v-model="modify_scheme.name"></el-input>
-					</el-form-item>
-					<el-form-item label="CPU" prop="cpu">
-						<el-input v-model="modify_scheme.cpu"></el-input>
-					</el-form-item>
-					<el-form-item label="内存(MB)" prop="memory">
-						<el-input v-model="modify_scheme.memory"></el-input>
-					</el-form-item>
+							<el-form-item label="配额" prop="speed">
+								<el-input v-model="create_scheme.speed"></el-input>
+							</el-form-item>
+							<el-form-item label="Cores" prop="cores">
+								<el-input v-model="create_scheme.cores"></el-input>
+							</el-form-item>
+							<el-form-item label="Sockets" prop="sockets">
+								<el-input v-model="create_scheme.sockets"></el-input>
+							</el-form-item>
+							<el-form-item label="Threads" prop="threads">
+								<el-input v-model="create_scheme.threads"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="create_scheme_click">立即创建</el-button>
+								<el-button @click="show_scheme_list">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 3">
+					<el-row slot="header">
+						<el-page-header @back="show_scheme_list()" content="修改计算方案" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form :model="modify_scheme" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="名称" prop="name">
+								<el-input v-model="modify_scheme.name"></el-input>
+							</el-form-item>
+							<el-form-item label="CPU" prop="cpu">
+								<el-input v-model="modify_scheme.cpu"></el-input>
+							</el-form-item>
+							<el-form-item label="内存(MB)" prop="memory">
+								<el-input v-model="modify_scheme.memory"></el-input>
+							</el-form-item>
 
-					<el-form-item label="配额" prop="speed">
-						<el-input v-model="modify_scheme.speed"></el-input>
-					</el-form-item>
-					<el-form-item label="Cores" prop="cores">
-						<el-input v-model="modify_scheme.cores"></el-input>
-					</el-form-item>
-					<el-form-item label="Sockets" prop="sockets">
-						<el-input v-model="modify_scheme.sockets"></el-input>
-					</el-form-item>
-					<el-form-item label="Threads" prop="threads">
-						<el-input v-model="modify_scheme.threads"></el-input>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="modify_scheme_click">修改</el-button>
-						<el-button @click="show_type = 0">取消</el-button>
-					</el-form-item>
-				</el-form>
-			</el-row>
-		</el-card>
+							<el-form-item label="配额" prop="speed">
+								<el-input v-model="modify_scheme.speed"></el-input>
+							</el-form-item>
+							<el-form-item label="Cores" prop="cores">
+								<el-input v-model="modify_scheme.cores"></el-input>
+							</el-form-item>
+							<el-form-item label="Sockets" prop="sockets">
+								<el-input v-model="modify_scheme.sockets"></el-input>
+							</el-form-item>
+							<el-form-item label="Threads" prop="threads">
+								<el-input v-model="modify_scheme.threads"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="modify_scheme_click">修改</el-button>
+								<el-button @click="show_type = 0">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
+			</el-main>
+		</el-container>
 	</div>
 </template>
 <script>
 import { getSchemeList, destroyScheme, createScheme, moidfyScheme } from '@/api/api'
 
 import NavViewVue from './NavView.vue'
+import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'schemeView',
 	components: {
-		NavViewVue
+		NavViewVue,HeadViewVue
 	},
 	data() {
 		return {
@@ -221,9 +229,9 @@ export default {
 		},
 		get_memory_desplay(memory) {
 			if (memory > 1024 * 1024) {
-				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
+				return parseInt(memory / (1024 * 1024)) + ' GB'
 			} else if (memory > 1024) {
-				return (memory / 1024).toFixed(2) + '  MB'
+				return parseInt(memory / 1024) + '  MB'
 			}
 		},
 		destroy_scheme(scheme) {

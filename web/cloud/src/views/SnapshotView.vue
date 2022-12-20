@@ -1,68 +1,76 @@
 <template>
 	<div>
-		<NavViewVue current="Snapshot" />
-		<el-card class="box-card" v-if="this.show_type === 0">
-			<el-row>
-				<el-table :v-loading="data_loading" :data="snapshots" style="width: 100%">
-					<el-table-column label="ID" prop="snapshotVolumeId" width="80" />
-					<el-table-column label="名称" prop="name" width="300" />
-					<el-table-column label="磁盘类型" prop="type" width="100" />
-					<el-table-column label="磁盘空间" prop="capacity" width="100">
-						<template #default="scope">
-							{{ get_volume_desplay_size(scope.row.capacity) }}
-						</template>
-					</el-table-column>
-					<el-table-column label="物理空间" prop="allocation" width="100">
-						<template #default="scope">
-							{{ get_volume_desplay_size(scope.row.allocation) }}
-						</template>
-					</el-table-column>
-					<el-table-column label="状态" prop="status" width="100">
-						<template #default="scope">
-							<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_snapshot_status(scope.row) }}</el-tag>
-						</template>
-					</el-table-column>
-					<el-table-column label="操作" min-width="380">
-						<template #default="scope">
-							<el-button @click="show_snapshot_info(scope.row)" type="" size="mini">快照详情</el-button>
-							<el-button @click="destroy_snapshot(scope.row)" type="danger" size="mini">销毁快照</el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 1">
-			<el-row slot="header">
-				<el-page-header @back="show_snapshot_list" content="快照详情"></el-page-header>
-			</el-row>
-			<el-row style="text-align: left; margin: 20px 0">
-				<el-button @click="destroy_snapshot(show_snapshot)" type="danger" size="mini">销毁快照</el-button>
-			</el-row>
-			<el-row>
-				<el-descriptions :column="2" size="medium" border>
-					<el-descriptions-item label="ID">{{ show_snapshot.snapshotVolumeId }}</el-descriptions-item>
-					<el-descriptions-item label="快照名">{{ show_snapshot.name }}</el-descriptions-item>
-					<el-descriptions-item label="快照路径">{{ show_snapshot.volumePath }}</el-descriptions-item>
-					<el-descriptions-item label="快照容量">{{ get_volume_desplay_size(show_snapshot.capacity) }}</el-descriptions-item>
-					<el-descriptions-item label="物理占有">{{ get_volume_desplay_size(show_snapshot.allocation) }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘类型">{{ show_snapshot.type }}</el-descriptions-item>
-					<el-descriptions-item label="存储池">{{ get_storage_name(show_snapshot.storageId) }}</el-descriptions-item>
-					<el-descriptions-item label="状态">
-						<el-tag :type="show_snapshot.status === 1 ? 'success' : 'danger'">{{ get_snapshot_status(show_snapshot) }}</el-tag>
-					</el-descriptions-item>
-				</el-descriptions>
-			</el-row>
-		</el-card>
+		<HeadViewVue />
+		<el-container>
+			<el-aside width="200px">
+				<NavViewVue current="Snapshot" />
+			</el-aside>
+			<el-main>
+				<el-card class="box-card" v-if="this.show_type === 0">
+					<el-row>
+						<el-table :v-loading="data_loading" :data="snapshots" style="width: 100%">
+							<el-table-column label="ID" prop="snapshotVolumeId" width="80" />
+							<el-table-column label="名称" prop="name" width="300" />
+							<el-table-column label="磁盘类型" prop="type" width="100" />
+							<el-table-column label="磁盘空间" prop="capacity" width="100">
+								<template #default="scope">
+									{{ get_volume_desplay_size(scope.row.capacity) }}
+								</template>
+							</el-table-column>
+							<el-table-column label="物理空间" prop="allocation" width="100">
+								<template #default="scope">
+									{{ get_volume_desplay_size(scope.row.allocation) }}
+								</template>
+							</el-table-column>
+							<el-table-column label="状态" prop="status" width="100">
+								<template #default="scope">
+									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_snapshot_status(scope.row) }}</el-tag>
+								</template>
+							</el-table-column>
+							<el-table-column label="操作" min-width="380">
+								<template #default="scope">
+									<el-button @click="show_snapshot_info(scope.row)" type="" size="mini">快照详情</el-button>
+									<el-button @click="destroy_snapshot(scope.row)" type="danger" size="mini">销毁快照</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 1">
+					<el-row slot="header">
+						<el-page-header @back="show_snapshot_list" content="快照详情"></el-page-header>
+					</el-row>
+					<el-row style="text-align: left; margin: 20px 0">
+						<el-button @click="destroy_snapshot(show_snapshot)" type="danger" size="mini">销毁快照</el-button>
+					</el-row>
+					<el-row>
+						<el-descriptions :column="2" size="medium" border>
+							<el-descriptions-item label="ID">{{ show_snapshot.snapshotVolumeId }}</el-descriptions-item>
+							<el-descriptions-item label="快照名">{{ show_snapshot.name }}</el-descriptions-item>
+							<el-descriptions-item label="快照路径">{{ show_snapshot.volumePath }}</el-descriptions-item>
+							<el-descriptions-item label="快照容量">{{ get_volume_desplay_size(show_snapshot.capacity) }}</el-descriptions-item>
+							<el-descriptions-item label="物理占有">{{ get_volume_desplay_size(show_snapshot.allocation) }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘类型">{{ show_snapshot.type }}</el-descriptions-item>
+							<el-descriptions-item label="存储池">{{ get_storage_name(show_snapshot.storageId) }}</el-descriptions-item>
+							<el-descriptions-item label="状态">
+								<el-tag :type="show_snapshot.status === 1 ? 'success' : 'danger'">{{ get_snapshot_status(show_snapshot) }}</el-tag>
+							</el-descriptions-item>
+						</el-descriptions>
+					</el-row>
+				</el-card>
+			</el-main>
+		</el-container>
 	</div>
 </template>
 <script>
 import { getSnapshotList, getSnapshotInfo, destroySnapshot, getStorageList } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
+import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'snapshotView',
 	components: {
-		NavViewVue
+		NavViewVue,HeadViewVue
 	},
 	data() {
 		return {

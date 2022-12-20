@@ -1,103 +1,111 @@
 <template>
 	<div>
-		<NavViewVue current="Template" />
-		<el-card class="box-card" v-if="this.show_type === 0">
-			<el-row slot="header" class="clearfix" style="height: 20px">
-				<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_template">创建模版</el-button>
-			</el-row>
-			<el-row>
-				<el-table :v-loading="data_loading" :data="templates" style="width: 100%">
-					<el-table-column label="ID" prop="templateId" width="80" />
-					<el-table-column label="名称" prop="name" width="300" />
-					<el-table-column label="磁盘类型" prop="volumeType" width="120" />
-					<el-table-column label="类型" prop="type" width="100">
-						<template #default="scope">
-							<el-tag>{{ get_template_type(scope.row) }}</el-tag>
-						</template>
-					</el-table-column>
-					<el-table-column label="状态" prop="status" width="100">
-						<template #default="scope">
-							<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_template_status(scope.row) }}</el-tag>
-						</template>
-					</el-table-column>
-					<el-table-column label="操作" min-width="380">
-						<template #default="scope">
-							<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>
-							<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.templateType === 0 || scope.row.templateType === 1">重新下载</el-button>
-							<el-button @click="destroy_template(scope.row)" type="danger" size="mini">销毁模版</el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 1">
-			<el-row slot="header">
-				<el-page-header @back="show_template_list" content="模版详情"></el-page-header>
-			</el-row>
-			<el-row style="text-align: left; margin: 20px 0">
-				<el-button @click="download_template(show_template)" type="warning" size="mini" v-if="show_template.templateType === 0 || show_template.templateType === 1">重新下载</el-button>
-				<el-button @click="destroy_template(show_template)" type="danger" size="mini">销毁模版</el-button>
-			</el-row>
-			<el-row>
-				<el-descriptions :column="2" size="medium" border>
-					<el-descriptions-item label="ID">{{ show_template.templateId }}</el-descriptions-item>
-					<el-descriptions-item label="模版名">{{ show_template.name }}</el-descriptions-item>
-					<el-descriptions-item label="下载地址" v-if="show_template.uri.indexOf('http') === 0">{{ show_template.uri }}</el-descriptions-item>
-					<el-descriptions-item label="模版类型">
-						<el-tag>{{ get_template_type(show_template) }}</el-tag>
-					</el-descriptions-item>
-					<el-descriptions-item label="状态">
-						<el-tag :type="show_template.status === 2 ? 'success' : 'danger'">{{ get_template_status(show_template) }}</el-tag>
-					</el-descriptions-item>
-				</el-descriptions>
-			</el-row>
-		</el-card>
-		<el-card class="box-card" v-if="this.show_type === 2">
-			<el-row slot="header">
-				<el-page-header @back="show_template_list()" content="创建模版" style="color: #409eff"></el-page-header>
-			</el-row>
-			<el-row>
-				<el-form ref="createForm" :model="create_template" label-width="100px" class="demo-ruleForm">
-					<el-form-item label="名称" prop="name">
-						<el-input v-model="create_template.name"></el-input>
-					</el-form-item>
-					<el-form-item label="模版类型" prop="templateType">
-						<el-select v-model="create_template.templateType" style="width: 100%">
-							<el-option label="ISO" :value="0"></el-option>
-							<el-option label="系统模版" :value="1"></el-option>
-							<el-option label="用户模版" :value="2"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item label="磁盘类型" prop="volumeType" v-if="create_template.templateType === 2">
-						<el-select v-model="create_template.volumeType" style="width: 100%">
-							<el-option label="raw" value="raw"></el-option>
-							<el-option label="qcow" value="qcow"></el-option>
-							<el-option label="qcow2" value="qcow2"></el-option>
-							<el-option label="vdi" value="vdi"></el-option>
-							<el-option label="vmdk" value="vmdk"></el-option>
-							<el-option label="vpc" value="vpc"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item label=" 下载地址" prop="uri">
-						<el-input v-model="create_template.uri"></el-input>
-					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="create_template_click">立即创建</el-button>
-						<el-button @click="show_template_list">取消</el-button>
-					</el-form-item>
-				</el-form>
-			</el-row>
-		</el-card>
+		<HeadViewVue />
+		<el-container>
+			<el-aside width="200px">
+				<NavViewVue current="Template" />
+			</el-aside>
+			<el-main>
+				<el-card class="box-card" v-if="this.show_type === 0">
+					<el-row slot="header" class="clearfix" style="height: 20px">
+						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_template">创建模版</el-button>
+					</el-row>
+					<el-row>
+						<el-table :v-loading="data_loading" :data="templates" style="width: 100%">
+							<el-table-column label="ID" prop="templateId" width="80" />
+							<el-table-column label="名称" prop="name" width="300" />
+							<el-table-column label="磁盘类型" prop="volumeType" width="120" />
+							<el-table-column label="类型" prop="type" width="100">
+								<template #default="scope">
+									<el-tag>{{ get_template_type(scope.row) }}</el-tag>
+								</template>
+							</el-table-column>
+							<el-table-column label="状态" prop="status" width="100">
+								<template #default="scope">
+									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_template_status(scope.row) }}</el-tag>
+								</template>
+							</el-table-column>
+							<el-table-column label="操作" min-width="380">
+								<template #default="scope">
+									<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>
+									<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.templateType === 0 || scope.row.templateType === 1">重新下载</el-button>
+									<el-button @click="destroy_template(scope.row)" type="danger" size="mini">销毁模版</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 1">
+					<el-row slot="header">
+						<el-page-header @back="show_template_list" content="模版详情"></el-page-header>
+					</el-row>
+					<el-row style="text-align: left; margin: 20px 0">
+						<el-button @click="download_template(show_template)" type="warning" size="mini" v-if="show_template.templateType === 0 || show_template.templateType === 1">重新下载</el-button>
+						<el-button @click="destroy_template(show_template)" type="danger" size="mini">销毁模版</el-button>
+					</el-row>
+					<el-row>
+						<el-descriptions :column="2" size="medium" border>
+							<el-descriptions-item label="ID">{{ show_template.templateId }}</el-descriptions-item>
+							<el-descriptions-item label="模版名">{{ show_template.name }}</el-descriptions-item>
+							<el-descriptions-item label="下载地址" v-if="show_template.uri.indexOf('http') === 0">{{ show_template.uri }}</el-descriptions-item>
+							<el-descriptions-item label="模版类型">
+								<el-tag>{{ get_template_type(show_template) }}</el-tag>
+							</el-descriptions-item>
+							<el-descriptions-item label="状态">
+								<el-tag :type="show_template.status === 2 ? 'success' : 'danger'">{{ get_template_status(show_template) }}</el-tag>
+							</el-descriptions-item>
+						</el-descriptions>
+					</el-row>
+				</el-card>
+				<el-card class="box-card" v-if="this.show_type === 2">
+					<el-row slot="header">
+						<el-page-header @back="show_template_list()" content="创建模版" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form ref="createForm" :model="create_template" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="名称" prop="name">
+								<el-input v-model="create_template.name"></el-input>
+							</el-form-item>
+							<el-form-item label="模版类型" prop="templateType">
+								<el-select v-model="create_template.templateType" style="width: 100%">
+									<el-option label="ISO" :value="0"></el-option>
+									<el-option label="系统模版" :value="1"></el-option>
+									<el-option label="用户模版" :value="2"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="磁盘类型" prop="volumeType" v-if="create_template.templateType === 2">
+								<el-select v-model="create_template.volumeType" style="width: 100%">
+									<el-option label="raw" value="raw"></el-option>
+									<el-option label="qcow" value="qcow"></el-option>
+									<el-option label="qcow2" value="qcow2"></el-option>
+									<el-option label="vdi" value="vdi"></el-option>
+									<el-option label="vmdk" value="vmdk"></el-option>
+									<el-option label="vpc" value="vpc"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label=" 下载地址" prop="uri">
+								<el-input v-model="create_template.uri"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="create_template_click">立即创建</el-button>
+								<el-button @click="show_template_list">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
+			</el-main>
+		</el-container>
 	</div>
 </template>
 <script>
 import { getTemplateList, getTemplateInfo, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
+import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'templateView',
 	components: {
-		NavViewVue
+		NavViewVue,HeadViewVue
 	},
 	data() {
 		return {

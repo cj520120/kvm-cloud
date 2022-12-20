@@ -7,14 +7,9 @@ import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.entity.StorageEntity;
-import cn.roamblue.cloud.management.data.mapper.GuestMapper;
-import cn.roamblue.cloud.management.data.mapper.GuestNetworkMapper;
-import cn.roamblue.cloud.management.data.mapper.HostMapper;
-import cn.roamblue.cloud.management.data.mapper.StorageMapper;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +20,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class AllocateService {
-    @Autowired
-    private GuestMapper guestMapper;
-    @Autowired
-    private StorageMapper storageMapper;
-    @Autowired
-    private GuestNetworkMapper guestNetworkMapper;
-    @Autowired
-    private HostMapper hostMapper;
+public class AllocateService extends AbstractService {
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public StorageEntity allocateStorage(int storageId) {
         StorageEntity storage;

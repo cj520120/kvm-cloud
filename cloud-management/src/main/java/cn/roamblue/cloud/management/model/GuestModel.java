@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -19,12 +18,14 @@ public class GuestModel {
     private String busType;
     private int cpu;
     private long memory;
+    private int speed;
     private int cdRoom;
     private int hostId;
+    private int schemeId;
     private int lastHostId;
     private int type;
+    private int networkId;
     private int status;
-    private List<VolumeModel> volumes;
-    private List<GuestNetworkModel> networks;
+    private String guestIp;
     private Date createTime;
 }

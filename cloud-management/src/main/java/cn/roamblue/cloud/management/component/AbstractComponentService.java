@@ -3,13 +3,13 @@ package cn.roamblue.cloud.management.component;
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.data.mapper.*;
+import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.BaseOperateParam;
 import cn.roamblue.cloud.management.operate.bean.CreateGuestOperate;
 import cn.roamblue.cloud.management.operate.bean.StartComponentGuestOperate;
+import cn.roamblue.cloud.management.servcie.AbstractService;
 import cn.roamblue.cloud.management.servcie.AllocateService;
 import cn.roamblue.cloud.management.servcie.GuestService;
-import cn.roamblue.cloud.management.task.OperateTask;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -25,29 +25,14 @@ import java.util.UUID;
 /**
  * @author chenjun
  */
-public abstract class AbstractComponentService {
-    @Autowired
-    protected NetworkMapper networkMapper;
-    @Autowired
-    protected GuestNetworkMapper guestNetworkMapper;
-    @Autowired
-    protected StorageMapper storageMapper;
-    @Autowired
-    protected VolumeMapper volumeMapper;
+public abstract class AbstractComponentService extends AbstractService {
+
     @Autowired
     protected AllocateService allocateService;
-    @Autowired
-    protected TemplateMapper templateMapper;
     @Autowired
     protected ComponentMapper componentMapper;
     @Autowired
     protected GuestService guestService;
-    @Autowired
-    protected GuestMapper guestMapper;
-    @Autowired
-    protected GuestDiskMapper guestDiskMapper;
-    @Autowired
-    protected OperateTask operateTask;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -79,6 +64,7 @@ public abstract class AbstractComponentService {
                     guest.setStatus(Constant.GuestStatus.STARTING);
                     guestMapper.updateById(guest);
                     HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), 0, guest.getCpu(), guest.getMemory());
+
                     this.componentMapper.updateById(component);
                     BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
                     this.operateTask.addTask(operateParam);
@@ -100,10 +86,14 @@ public abstract class AbstractComponentService {
                     .description(this.getComponentName())
                     .busType(cn.roamblue.cloud.common.util.Constant.DiskBus.VIRTIO)
                     .cpu(1)
-                    .memory(500*1024L)
+                    .speed(500)
+                    .memory(512 * 1024L)
                     .cdRoom(0)
                     .hostId(0)
                     .lastHostId(0)
+                    .schemeId(0)
+                    .guestIp("")
+                    .networkId(networkId)
                     .type(Constant.GuestType.SYSTEM)
                     .status(Constant.GuestStatus.CREATING)
                     .build();
@@ -133,13 +123,16 @@ public abstract class AbstractComponentService {
             guestNetwork.setDriveType(cn.roamblue.cloud.common.util.Constant.NetworkDriver.VIRTIO);
             guestNetwork.setGuestId(guest.getGuestId());
             this.guestNetworkMapper.updateById(guestNetwork);
+            guest.setGuestIp(guestNetwork.getIp());
             if (network.getBasicNetworkId()>0){
                 guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
                 guestNetwork.setDeviceId(1);
                 guestNetwork.setDriveType(cn.roamblue.cloud.common.util.Constant.NetworkDriver.VIRTIO);
                 guestNetwork.setGuestId(guest.getGuestId());
                 this.guestNetworkMapper.updateById(guestNetwork);
+                guest.setGuestIp(guestNetwork.getIp() + "," + guest.getGuestIp());
             }
+            this.guestMapper.updateById(guest);
             componentMapper.insert(ComponentEntity.builder().guestId(guest.getGuestId()).componentType(this.getComponentType()).networkId(networkId).build());
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())

@@ -28,6 +28,8 @@ public class GuestEntity {
     private String busType;
     @TableField("guest_cpu")
     private Integer cpu;
+    @TableField("guest_cpu_speed")
+    private Integer speed;
     @TableField("guest_memory")
     private Long memory;
     @TableField("guest_cd_room")
@@ -36,6 +38,12 @@ public class GuestEntity {
     private Integer hostId;
     @TableField("last_host_id")
     private Integer lastHostId;
+    @TableField("scheme_id")
+    private Integer schemeId;
+    @TableField("network_id")
+    private Integer networkId;
+    @TableField("guest_ip")
+    private String guestIp;
     @TableField("guest_type")
     private Integer type;
     @TableField("guest_status")
