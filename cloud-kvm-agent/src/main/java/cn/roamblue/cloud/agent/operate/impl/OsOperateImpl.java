@@ -90,7 +90,7 @@ public class OsOperateImpl implements OsOperate {
         if (domain != null) {
             return this.initVmResponse(domain);
         } else {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
     }
 
@@ -166,7 +166,7 @@ public class OsOperateImpl implements OsOperate {
     public void reboot(Connect connect, GuestRebootRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         switch (domain.getInfo().state) {
             case VIR_DOMAIN_SHUTDOWN:
@@ -183,7 +183,7 @@ public class OsOperateImpl implements OsOperate {
     public void detachCdRoom(Connect connect, OsCdRoom request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
         domain.updateDeviceFlags(xml, 1);
@@ -193,7 +193,7 @@ public class OsOperateImpl implements OsOperate {
     public void attachCdRoom(Connect connect, OsCdRoom request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
         xml = String.format(xml, request.getPath());
@@ -204,7 +204,7 @@ public class OsOperateImpl implements OsOperate {
     public void attachDisk(Connect connect, OsDisk request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
@@ -221,7 +221,7 @@ public class OsOperateImpl implements OsOperate {
     public void detachDisk(Connect connect, OsDisk request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
@@ -237,7 +237,7 @@ public class OsOperateImpl implements OsOperate {
     public void attachNic(Connect connect, OsNic request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
@@ -252,7 +252,7 @@ public class OsOperateImpl implements OsOperate {
     public void detachNic(Connect connect, OsNic request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
@@ -359,7 +359,7 @@ public class OsOperateImpl implements OsOperate {
     public void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
-            throw new CodeException(ErrorCode.VM_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         this.execute_qma(domain, request);
     }

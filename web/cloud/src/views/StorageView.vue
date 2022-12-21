@@ -15,7 +15,6 @@
 							<el-table-column label="ID" prop="storageId" width="80" />
 							<el-table-column label="名称" prop="name" width="120" />
 							<el-table-column label="类型" prop="type" width="120" />
-							<el-table-column label="挂载路径" prop="mountPath" width="350" />
 							<el-table-column label="容量" prop="capacity" width="180">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
@@ -28,7 +27,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_storage_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" min-width="380">
+							<el-table-column label="操作">
 								<template #default="scope">
 									<el-button @click="show_storage_info(scope.row)" type="" size="mini">存储池详情</el-button>
 									<el-button @click="register_storage(scope.row)" type="success" size="mini">重新注册</el-button>

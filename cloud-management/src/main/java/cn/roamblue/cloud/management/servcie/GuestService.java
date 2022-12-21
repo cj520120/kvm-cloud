@@ -276,7 +276,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> modifyGuest(int guestId, String description, String busType, int cpu, long memory) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() != Constant.GuestStatus.STOP) {
-            throw new CodeException(ErrorCode.VM_NOT_STOP, "请首先停止系统");
+            throw new CodeException(ErrorCode.GUEST_NOT_STOP, "请首先停止系统");
         }
         guest.setCpu(cpu);
         guest.setMemory(memory);

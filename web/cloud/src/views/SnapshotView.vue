@@ -27,7 +27,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_snapshot_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" min-width="380">
+							<el-table-column label="操作">
 								<template #default="scope">
 									<el-button @click="show_snapshot_info(scope.row)" type="" size="mini">快照详情</el-button>
 									<el-button @click="destroy_snapshot(scope.row)" type="danger" size="mini">销毁快照</el-button>

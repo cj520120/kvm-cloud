@@ -383,6 +383,7 @@ export default {
 			if (this.show_volume && this.show_volume.volumeId === volume.volumeId) {
 				this.show_volume = volume
 			}
+			this.update_show_page()
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 2) {

@@ -34,7 +34,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_host_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" min-width="380">
+							<el-table-column label="操作">
 								<template #default="scope">
 									<el-button @click="show_host_info(scope.row)" type="" size="mini">主机详情</el-button>
 									<el-button @click="register_host(scope.row)" type="success" size="mini">重新注册</el-button>

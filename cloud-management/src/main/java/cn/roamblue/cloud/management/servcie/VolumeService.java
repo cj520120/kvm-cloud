@@ -216,7 +216,7 @@ public class VolumeService extends AbstractService {
             case Constant.VolumeStatus.ERROR:
             case Constant.VolumeStatus.READY:
                 if (guestDiskMapper.selectCount(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId)) > 0) {
-                    throw new CodeException(ErrorCode.VOLUME_ATTACH_ERROR, "当前磁盘被系统挂载");
+                    throw new CodeException(ErrorCode.GUEST_VOLUME_ATTACH_ERROR, "当前磁盘被系统挂载");
                 }
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);

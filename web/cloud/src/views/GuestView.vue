@@ -11,10 +11,10 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="show_table_guests" style="width: 100%">
 							<el-table-column label="ID" prop="guestId" width="80" />
-							<el-table-column label="实例名" prop="name" width="300" />
+							<el-table-column label="实例名" prop="name" width="200" />
 							<el-table-column label="标签" prop="description" width="200" />
-							<el-table-column label="IP地址" prop="guestIp" width="200" />
-							<el-table-column label="配置" prop="guestIp" width="200">
+							<el-table-column label="IP地址" prop="guestIp" width="150" />
+							<el-table-column label="配置" prop="cpu" width="150">
 								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_desplay(scope.row.memory) }}</template>
 							</el-table-column>
 							<el-table-column label="状态" prop="status" width="100">
@@ -68,7 +68,9 @@
 							<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 							<el-descriptions-item label="运行主机">{{ show_guest_info.host.displayName }}</el-descriptions-item>
 							<el-descriptions-item label="架构方案">{{ show_guest_info.scheme.name }}</el-descriptions-item>
-							<el-descriptions-item label="虚拟机类型">{{ show_guest_info.current_guest.type }}</el-descriptions-item>
+							<el-descriptions-item label="虚拟机类型">
+								<el-tag>{{ show_guest_info.current_guest.type === 0 ? '系统' : '用户' }}</el-tag>
+							</el-descriptions-item>
 							<el-descriptions-item label="虚拟机IP">{{ show_guest_info.current_guest.guestIp }}</el-descriptions-item>
 							<el-descriptions-item label="状态">
 								<el-tag :type="show_guest_info.current_guest.status === 2 ? 'success' : 'danger'">{{ get_guest_status(show_guest_info.current_guest) }}</el-tag>
