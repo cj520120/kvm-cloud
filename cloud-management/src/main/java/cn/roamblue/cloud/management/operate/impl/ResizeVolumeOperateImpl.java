@@ -33,7 +33,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
         super(ResizeVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ResizeVolumeOperate param) {

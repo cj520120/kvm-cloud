@@ -10,11 +10,13 @@ import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 @Aspect
 @Component
 public class LockAspect {
     @Autowired
     private RedissonClient redisson;
+
     @Pointcut("@annotation(cn.roamblue.cloud.management.annotation.Lock)")
     public void preLock() {
     }
@@ -23,20 +25,20 @@ public class LockAspect {
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Lock lock = signature.getMethod().getAnnotation(Lock.class);
-        String key= lock.value();
+        String key = lock.value();
         RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
-        RLock rLock=lock.write()?readWriteLock.writeLock(): readWriteLock.readLock();
+        RLock rLock = lock.write() ? readWriteLock.writeLock() : readWriteLock.readLock();
         boolean isLocked = false;
         try {
             rLock.lock(lock.timeout(), lock.timeUnit());
             isLocked = true;
             return joinPoint.proceed();
-        }finally {
+        } finally {
             try {
                 if (isLocked && rLock.isHeldByCurrentThread()) {
                     rLock.unlock();
                 }
-            }catch (Exception err){
+            } catch (Exception err) {
                 err.printStackTrace();
             }
         }

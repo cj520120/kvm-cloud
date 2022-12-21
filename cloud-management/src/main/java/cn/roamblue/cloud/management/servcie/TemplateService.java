@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 @Service
 public class TemplateService extends AbstractService {
 
@@ -33,17 +34,20 @@ public class TemplateService extends AbstractService {
         GuestEntity guest = guestMapper.selectById(guestDisk.getGuestId());
         return guest;
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
-    public ResultUtil<List<TemplateModel>> listTemplate(){
-        List<TemplateEntity> templateList=this.templateMapper.selectList(new QueryWrapper<>());
-        List<TemplateModel> models=templateList.stream().map(this::initTemplateModel).collect(Collectors.toList());
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    public ResultUtil<List<TemplateModel>> listTemplate() {
+        List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<>());
+        List<TemplateModel> models = templateList.stream().map(this::initTemplateModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
-    public ResultUtil<TemplateModel> getTemplateInfo(int templateId){
-        TemplateEntity template=this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id",templateId));
-         return ResultUtil.success(this.initTemplateModel(template));
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
+        TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id", templateId));
+        return ResultUtil.success(this.initTemplateModel(template));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createTemplate(String name, String uri, int templateType, String volumeType) {
@@ -84,9 +88,10 @@ public class TemplateService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "模版未就绪.");
         }
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId,String name) {
+    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘状态未就绪");
@@ -133,11 +138,12 @@ public class TemplateService extends AbstractService {
         return ResultUtil.success(this.initTemplateModel(template));
 
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> destroyTemplate(int templateId){
+    public ResultUtil<Void> destroyTemplate(int templateId) {
         this.templateMapper.deleteById(templateId);
-        this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("template_id",templateId));
+        this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", templateId));
         return ResultUtil.success();
     }
 

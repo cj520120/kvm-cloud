@@ -37,15 +37,15 @@ public abstract class AbstractComponentService extends AbstractService {
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public void create(int networkId){
+    public void create(int networkId) {
         NetworkEntity network = networkMapper.selectById(networkId);
-        if(network==null){
+        if (network == null) {
             return;
         }
-        if(!Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)){
+        if (!Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)) {
             return;
         }
-        List<ComponentEntity> componentList = componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq("network_id", networkId).eq("component_type",this.getComponentType()));
+        List<ComponentEntity> componentList = componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq("network_id", networkId).eq("component_type", this.getComponentType()));
         while (componentList.size() > 1) {
             for (ComponentEntity component : componentList) {
                 guestService.destroyGuest(component.getGuestId());
@@ -53,7 +53,7 @@ public abstract class AbstractComponentService extends AbstractService {
                 return;
             }
         }
-        if(!componentList.isEmpty()){
+        if (!componentList.isEmpty()) {
             ComponentEntity component = componentList.get(0);
             GuestEntity guest = this.guestMapper.selectById(component.getGuestId());
             if (guest == null) {
@@ -74,7 +74,7 @@ public abstract class AbstractComponentService extends AbstractService {
                     this.guestService.destroyGuest(guest.getGuestId());
                     break;
             }
-        }else{
+        } else {
             List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<TemplateEntity>().eq("template_type", Constant.TemplateType.SYSTEM).eq("template_status", Constant.TemplateStatus.READY));
             if (templateList.isEmpty()) {
                 return;
@@ -99,9 +99,9 @@ public abstract class AbstractComponentService extends AbstractService {
                     .status(Constant.GuestStatus.CREATING)
                     .build();
             this.guestMapper.insert(guest);
-            StorageEntity storage=this.allocateService.allocateStorage(0);
+            StorageEntity storage = this.allocateService.allocateStorage(0);
             VolumeEntity volume = VolumeEntity.builder()
-                    .description("ROOT-"+guest.getGuestId())
+                    .description("ROOT-" + guest.getGuestId())
                     .capacity(0L)
                     .storageId(storage.getStorageId())
                     .name(uid)
@@ -125,7 +125,7 @@ public abstract class AbstractComponentService extends AbstractService {
             guestNetwork.setGuestId(guest.getGuestId());
             this.guestNetworkMapper.updateById(guestNetwork);
             guest.setGuestIp(guestNetwork.getIp());
-            if (network.getBasicNetworkId()>0){
+            if (network.getBasicNetworkId() > 0) {
                 guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
                 guestNetwork.setDeviceId(1);
                 guestNetwork.setDriveType(cn.roamblue.cloud.common.util.Constant.NetworkDriver.VIRTIO);

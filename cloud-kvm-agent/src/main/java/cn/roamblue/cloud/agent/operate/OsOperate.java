@@ -1,6 +1,5 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.*;
 import org.libvirt.Connect;
 
@@ -23,6 +22,7 @@ public interface OsOperate {
 
     /**
      * 获取所有客户机
+     *
      * @param connect
      * @return
      * @throws Exception
@@ -69,6 +69,7 @@ public interface OsOperate {
 
     /**
      * 挂载光驱
+     *
      * @param connect
      * @param request
      * @throws Exception
@@ -77,6 +78,7 @@ public interface OsOperate {
 
     /**
      * 卸载光驱
+     *
      * @param connect
      * @param request
      * @throws Exception
@@ -85,6 +87,7 @@ public interface OsOperate {
 
     /**
      * 挂载磁盘
+     *
      * @param connect
      * @param request
      * @throws Exception
@@ -93,6 +96,7 @@ public interface OsOperate {
 
     /**
      * 卸载磁盘
+     *
      * @param connect
      * @param request
      * @throws Exception
@@ -101,6 +105,7 @@ public interface OsOperate {
 
     /**
      * 挂载网卡
+     *
      * @param connect
      * @param request
      * @throws Exception
@@ -109,6 +114,7 @@ public interface OsOperate {
 
     /**
      * 卸载网卡
+     *
      * @param connect
      * @param request
      * @throws Exception

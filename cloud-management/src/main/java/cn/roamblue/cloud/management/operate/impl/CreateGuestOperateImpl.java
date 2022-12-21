@@ -26,19 +26,19 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         super(CreateGuestOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateGuestOperate param, ResultUtil<VolumeInfo> resultUtil) {
         super.onFinish(param, resultUtil);
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            if(param.isStart()) {
+            if (param.isStart()) {
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 guestMapper.updateById(guest);
                 StartGuestOperate guestOperate = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).title(param.getTitle()).hostId(param.getHostId()).guestId(param.getGuestId()).build();
                 this.operateTask.addTask(guestOperate);
-            }else{
+            } else {
                 guest.setHostId(0);
                 guest.setLastHostId(0);
                 guest.setStatus(Constant.GuestStatus.STOP);

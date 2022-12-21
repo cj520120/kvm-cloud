@@ -14,23 +14,28 @@ import java.util.concurrent.TimeUnit;
 public @interface Lock {
     /**
      * key
+     *
      * @return
      */
     String value();
 
     /**
      * 是否为写锁
+     *
      * @return
      */
-    boolean write()default true;
+    boolean write() default true;
+
     /**
      * 超时时间
+     *
      * @return
      */
     int timeout() default 5;
 
     /**
      * 超时单位
+     *
      * @return
      */
     TimeUnit timeUnit() default TimeUnit.SECONDS;

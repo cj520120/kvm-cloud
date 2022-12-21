@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 
 /**
  * 重启虚拟机
+ *
  * @author chenjun
  */
 @Component
@@ -30,7 +31,7 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
         super(RebootGuestOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(RebootGuestOperate param) {

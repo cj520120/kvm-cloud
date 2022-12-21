@@ -1,6 +1,5 @@
 package cn.roamblue.cloud.management.model;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

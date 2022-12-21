@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.agent.operate.VolumeOperate;
-import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
@@ -138,10 +137,10 @@ public class VolumeOperateImpl implements VolumeOperate {
     public void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
         storagePool.refresh(0);
-        String[] names=storagePool.listVolumes();
+        String[] names = storagePool.listVolumes();
         for (String name : names) {
             StorageVol storageVol = storagePool.storageVolLookupByName(name);
-            if(Objects.equals(storageVol.getPath(),request.getSourceVolume())){
+            if (Objects.equals(storageVol.getPath(), request.getSourceVolume())) {
                 storageVol.delete(0);
                 break;
             }
@@ -176,10 +175,10 @@ public class VolumeOperateImpl implements VolumeOperate {
         StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
         storagePool.refresh(0);
         StorageVol findVol = this.findVol(storagePool, request.getSourceVolume());
-        if(findVol==null){
-            throw  new CodeException(ErrorCode.SERVER_ERROR,"磁盘不存在:"+request.getSourceVolume());
+        if (findVol == null) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘不存在:" + request.getSourceVolume());
         }
-        findVol.resize(request.getSize(),0);
+        findVol.resize(request.getSize(), 0);
         StorageVolInfo storageVolInfo = findVol.getInfo();
         return VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(findVol.getName())
@@ -218,7 +217,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public VolumeInfo download(Connect connect, VolumeDownloadRequest request) throws Exception {
         FileUtil.mkParentDirs(request.getTargetVolume());
-        String tempFile=request.getTargetVolume()+".data";
+        String tempFile = request.getTargetVolume() + ".data";
         try {
             FileUtil.del(tempFile);
             HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
@@ -230,7 +229,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                     .targetVolume(request.getTargetVolume())
                     .targetType(request.getTargetType())
                     .build());
-        }finally {
+        } finally {
             FileUtil.del(tempFile);
         }
     }

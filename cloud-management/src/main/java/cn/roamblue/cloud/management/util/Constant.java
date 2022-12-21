@@ -1,7 +1,8 @@
 package cn.roamblue.cloud.management.util;
 
 public class Constant {
-    public static int MAX_DEVICE_ID=5;
+    public static int MAX_DEVICE_ID = 5;
+
     public static class HostStatus {
         public static final int REGISTER = 0;
         public static final int ONLINE = 1;
@@ -17,12 +18,14 @@ public class Constant {
         public static final int DESTROY = 3;
         public static final int ERROR = 4;
     }
-    public static class SnapshotStatus{
+
+    public static class SnapshotStatus {
         public static final int CREATING = 0;
         public static final int READY = 1;
         public static final int ERROR = 2;
         public static final int DESTROY = 3;
     }
+
     public static class VolumeStatus {
         public static final int CREATING = 0;
         public static final int READY = 1;
@@ -32,7 +35,7 @@ public class Constant {
         public static final int CREATE_TEMPLATE = 5;
         public static final int CREATE_SNAPSHOT = 6;
         public static final int MIGRATE = 7;
-        public static final int RESIZE =8;
+        public static final int RESIZE = 8;
         public static final int DESTROY = 9;
         public static final int ERROR = 10;
     }

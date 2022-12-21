@@ -31,6 +31,9 @@ import java.util.List;
 @Slf4j
 public class StartGuestOperateImpl<T extends StartGuestOperate> extends AbstractOperate<T, ResultUtil<GuestInfo>> {
 
+    @Autowired
+    private VncService vncService;
+
     public StartGuestOperateImpl() {
         super((Class<T>) StartGuestOperate.class);
     }
@@ -38,9 +41,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     public StartGuestOperateImpl(Class<T> tClass) {
         super(tClass);
     }
-
-    @Autowired
-    private VncService vncService;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
@@ -84,8 +84,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
 
-
-
     @Override
     public Type getCallResultType() {
         return new TypeToken<ResultUtil<GuestInfo>>() {
@@ -101,7 +99,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
                 GuestInfo guestInfo = resultUtil.getData();
-                this.vncService.updateVncPort(param.getGuestId(),guestInfo.getVnc());
+                this.vncService.updateVncPort(param.getGuestId(), guestInfo.getVnc());
             } else {
                 guest.setHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
@@ -112,6 +110,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
+
     protected List<OsDisk> getGuestDisk(GuestEntity guest) {
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
         List<OsDisk> disks = new ArrayList<>();

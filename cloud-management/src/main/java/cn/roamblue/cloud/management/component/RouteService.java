@@ -45,7 +45,7 @@ public class RouteService extends AbstractComponentService {
         for (int i = 0; i < guestNetworkList.size(); i++) {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
-            int index=guestNetwork.getDeviceId()+1;
+            int index = guestNetwork.getDeviceId() + 1;
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
             if (Objects.equals(network.getNetworkId(), component.getNetworkId())) {
                 defaultNetwork = network;

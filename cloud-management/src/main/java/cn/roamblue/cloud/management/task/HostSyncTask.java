@@ -54,26 +54,26 @@ public class HostSyncTask extends AbstractTask {
                             String response = HttpUtil.post(uri, map);
                             ResultUtil<HostInfo> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<HostInfo>>() {
                             }.getType());
-                                hostInfo = resultUtil.getData();
+                            hostInfo = resultUtil.getData();
 
-                            } catch (Exception err) {
-                               log.error("检测主机[{}]状态失败.",host.getDisplayName(),err);
-                            }
-                            HostEntity updateHost= HostEntity.builder().hostId(host.getHostId()).build();
-                            if (hostInfo != null) {
-                                updateHost.setHostName(hostInfo.getHostName());
-                                updateHost.setTotalCpu(hostInfo.getCpu());
-                                updateHost.setTotalMemory(hostInfo.getMemory());
-                                updateHost.setEmulator(hostInfo.getEmulator());
-                                updateHost.setCores(hostInfo.getCores());
-                                updateHost.setSockets(hostInfo.getSockets());
-                                updateHost.setThreads(hostInfo.getThreads());
-                                updateHost.setArch(hostInfo.getArch());
-                                updateHost.setHypervisor(hostInfo.getHypervisor());
-                                updateHost.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE);
-                            } else {
-                                updateHost.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.OFFLINE);
-                            }
+                        } catch (Exception err) {
+                            log.error("检测主机[{}]状态失败.", host.getDisplayName(), err);
+                        }
+                        HostEntity updateHost = HostEntity.builder().hostId(host.getHostId()).build();
+                        if (hostInfo != null) {
+                            updateHost.setHostName(hostInfo.getHostName());
+                            updateHost.setTotalCpu(hostInfo.getCpu());
+                            updateHost.setTotalMemory(hostInfo.getMemory());
+                            updateHost.setEmulator(hostInfo.getEmulator());
+                            updateHost.setCores(hostInfo.getCores());
+                            updateHost.setSockets(hostInfo.getSockets());
+                            updateHost.setThreads(hostInfo.getThreads());
+                            updateHost.setArch(hostInfo.getArch());
+                            updateHost.setHypervisor(hostInfo.getHypervisor());
+                            updateHost.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.ONLINE);
+                        } else {
+                            updateHost.setStatus(cn.roamblue.cloud.management.util.Constant.HostStatus.OFFLINE);
+                        }
                         hostMapper.updateById(host);
                         break;
                 }

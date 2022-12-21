@@ -24,6 +24,7 @@ public class NetworkOperateImpl implements NetworkOperate {
 //        addBridge(request.getNic(), request.getBridge(), request.getIp(), request.getNetmask(),request.getGeteway());
 
     }
+
     @Override
     public void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
 //        shell("modprobe 8021q");
@@ -62,7 +63,7 @@ public class NetworkOperateImpl implements NetworkOperate {
 //        }
     }
 
-    private void addBridge(String nic, String bridge, String ip, String netmask,String gateway) throws Exception {
+    private void addBridge(String nic, String bridge, String ip, String netmask, String gateway) throws Exception {
         if (NetworkInterface.getByName(bridge) == null) {
             shell("modprobe br_netfilter || true");
             shell("echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables");
@@ -74,43 +75,44 @@ public class NetworkOperateImpl implements NetworkOperate {
             shell("ip link set " + bridge + " up");
             shell("brctl addif " + bridge + " " + nic);
             //切换mac地址
-            shell(String.format("mac=`ip link show %s|grep ether|awk '{print $2}'`;ip link set %s address $mac", nic,bridge));
+            shell(String.format("mac=`ip link show %s|grep ether|awk '{print $2}'`;ip link set %s address $mac", nic, bridge));
 
-            String[] routes=shellForStr(String.format("ip route show dev %s | grep via | sed 's/onlink//g'", nic)).split("\n");
+            String[] routes = shellForStr(String.format("ip route show dev %s | grep via | sed 's/onlink//g'", nic)).split("\n");
             for (String route : routes) {
-                if(!StringUtils.isEmpty(route)) {
+                if (!StringUtils.isEmpty(route)) {
                     shell(String.format("ip route del %s", route));
                 }
             }
-            shell(String.format("ifconfig %s 0.0.0.0",nic));
-            if(!StringUtils.isEmpty(ip)) {
+            shell(String.format("ifconfig %s 0.0.0.0", nic));
+            if (!StringUtils.isEmpty(ip)) {
                 shell(String.format("ip addr add %s/%s dev %s", ip, netmask, bridge));
             }
 
             for (String route : routes) {
-                if(!StringUtils.isEmpty(route)) {
+                if (!StringUtils.isEmpty(route)) {
                     shell(String.format("ip route add %s", route));
                 }
             }
-        };
+        }
     }
 
     private void shell(String command) {
-        Process process = RuntimeUtil.exec(new String[]{"sh","-c",command});
+        Process process = RuntimeUtil.exec("sh", "-c", command);
         try {
             process.waitFor();
             int code = process.exitValue();
             if (code != 0) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "执行网络命令失败:" + command);
             }
-        } catch (Exception err){
-            throw new CodeException(ErrorCode.SERVER_ERROR, "执行网络命令失败:" + command,err);
-        }finally {
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "执行网络命令失败:" + command, err);
+        } finally {
             process.destroy();
         }
     }
-    private String shellForStr(String command){
-        return RuntimeUtil.execForStr(new String[]{"sh","-c",command});
+
+    private String shellForStr(String command) {
+        return RuntimeUtil.execForStr("sh", "-c", command);
     }
 
 }

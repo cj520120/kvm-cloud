@@ -13,11 +13,8 @@ import cn.roamblue.cloud.common.util.ErrorCode;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.dom4j.DocumentException;
-import org.libvirt.Connect;
-import org.libvirt.Domain;
-import org.libvirt.DomainInfo;
 import org.libvirt.Error;
-import org.libvirt.LibvirtException;
+import org.libvirt.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
@@ -32,6 +29,60 @@ public class OsOperateImpl implements OsOperate {
     private final int MAX_DEVICE_COUNT = 5;
     private final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
+
+    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
+        Gson gson = new Gson();
+        Map<String, Object> map = new HashMap<>(2);
+        map.put("execute", "guest-exec");
+        Map<String, Object> arguments = new HashMap<>(3);
+        map.put("arguments", arguments);
+        map.put("path", execute.getCommand());
+        map.put("arg", execute.getArgs());
+        String response = domain.qemuAgentCommand(gson.toJson(map), request.getTimeout(), 0);
+        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
+        }.getType());
+        String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
+        map.clear();
+        arguments.clear();
+        arguments.put("pid", NumberUtil.parseInt(pid));
+        map.put("execute", "guest-exec-status");
+        map.put("arguments", arguments);
+        String statusRequest = gson.toJson(map);
+        boolean isExit;
+        do {
+            response = domain.qemuAgentCommand(statusRequest, request.getTimeout(), 0);
+            result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
+            }.getType());
+            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
+            if (!isExit) {
+                ThreadUtil.sleep(1, TimeUnit.SECONDS);
+            } else {
+                int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
+                if (code != 0) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败");
+                }
+            }
+        } while (!isExit);
+
+    }
+
+    private static String getDiskXml(OsDisk request, String bus) {
+        String xml;
+        switch (bus) {
+            case Constant.DiskBus.VIRTIO:
+                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
+                break;
+            case Constant.DiskBus.IDE:
+                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
+                break;
+            case Constant.DiskBus.SCSI:
+                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + bus);
+        }
+        return xml;
+    }
 
     @Override
     public GuestInfo getGustInfo(Connect connect, GuestInfoRequest request) throws Exception {
@@ -71,18 +122,18 @@ public class OsOperateImpl implements OsOperate {
                 map.put(domain.getName(), initVmResponse(domain));
             }
         }
-       String[] namesOfDefinedDomain = connect.listDefinedDomains();
-       for (String stopDomain : namesOfDefinedDomain) {
-           Domain domain = connect.domainLookupByName(stopDomain);
-           if (names.contains(domain.getName())) {
-               map.put(domain.getName(), initVmResponse(domain));
-           }
-       }
-       for (GuestInfoRequest request : batchRequest) {
-           list.add(map.get(request.getName()));
-       }
-       return list;
-   }
+        String[] namesOfDefinedDomain = connect.listDefinedDomains();
+        for (String stopDomain : namesOfDefinedDomain) {
+            Domain domain = connect.domainLookupByName(stopDomain);
+            if (names.contains(domain.getName())) {
+                map.put(domain.getName(), initVmResponse(domain));
+            }
+        }
+        for (GuestInfoRequest request : batchRequest) {
+            list.add(map.get(request.getName()));
+        }
+        return list;
+    }
 
     @Override
     public void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
@@ -101,7 +152,7 @@ public class OsOperateImpl implements OsOperate {
                         ThreadUtil.sleep(1, TimeUnit.SECONDS);
                         break;
                 }
-            }catch (LibvirtException err){
+            } catch (LibvirtException err) {
                 if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
                     break;
                 }
@@ -126,42 +177,6 @@ public class OsOperateImpl implements OsOperate {
                 domain.reboot(1);
                 break;
         }
-    }
-
-    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
-        Gson gson = new Gson();
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("execute", "guest-exec");
-        Map<String, Object> arguments = new HashMap<>(3);
-        map.put("arguments", arguments);
-        map.put("path", execute.getCommand());
-        map.put("arg", execute.getArgs());
-        String response = domain.qemuAgentCommand(gson.toJson(map), request.getTimeout(), 0);
-        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
-        }.getType());
-        String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
-        map.clear();
-        arguments.clear();
-        arguments.put("pid", NumberUtil.parseInt(pid));
-        map.put("execute", "guest-exec-status");
-        map.put("arguments", arguments);
-        String statusRequest=gson.toJson(map);
-        boolean isExit;
-        do {
-            response = domain.qemuAgentCommand(statusRequest, request.getTimeout(), 0);
-            result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
-            }.getType());
-            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
-            if (!isExit) {
-                ThreadUtil.sleep(1, TimeUnit.SECONDS);
-            } else {
-                int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
-                if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败");
-                }
-            }
-        } while (!isExit);
-
     }
 
     @Override
@@ -323,7 +338,7 @@ public class OsOperateImpl implements OsOperate {
                         break;
                     }
                 } catch (Exception err) {
-                    ThreadUtil.sleep(5,TimeUnit.SECONDS);
+                    ThreadUtil.sleep(5, TimeUnit.SECONDS);
                 }
             }
             //写入qma
@@ -348,7 +363,6 @@ public class OsOperateImpl implements OsOperate {
         }
         this.execute_qma(domain, request);
     }
-
 
     @Override
     public void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
@@ -442,23 +456,7 @@ public class OsOperateImpl implements OsOperate {
         handler = NumberUtil.parseInt(map.get("return").toString());
         return handler;
     }
-    private static String getDiskXml(OsDisk request, String bus) {
-        String xml;
-        switch (bus) {
-            case Constant.DiskBus.VIRTIO:
-                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
-                break;
-            case Constant.DiskBus.IDE:
-                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
-                break;
-            case Constant.DiskBus.SCSI:
-                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
-                break;
-            default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + bus);
-        }
-        return xml;
-    }
+
     private GuestInfo initVmResponse(Domain domain) throws LibvirtException, SAXException, DocumentException {
         DomainInfo domainInfo = domain.getInfo();
         GuestInfo info = GuestInfo.builder().name(domain.getName())

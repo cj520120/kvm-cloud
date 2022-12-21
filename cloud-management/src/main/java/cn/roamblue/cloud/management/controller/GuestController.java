@@ -32,10 +32,12 @@ public class GuestController {
     public ResultUtil<GuestModel> getGuestInfo(@RequestParam("guestId") int guestId) {
         return this.guestService.getGuestInfo(guestId);
     }
+
     @GetMapping("/api/guest/vnc/password")
-    public ResultUtil<String> getVncPassword(@RequestParam("guestId") int guestId){
+    public ResultUtil<String> getVncPassword(@RequestParam("guestId") int guestId) {
         return this.guestService.getVncPassword(guestId);
     }
+
     @GetMapping("/api/guest/network")
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(@RequestParam("guestId") int guestId) {
         return this.networkService.listGuestNetworks(guestId);

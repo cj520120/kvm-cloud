@@ -39,7 +39,8 @@ public class AllocateService extends AbstractService {
         }
         return storage;
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public GuestNetworkEntity allocateNetwork(int networkId) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
@@ -52,18 +53,19 @@ public class AllocateService extends AbstractService {
         }
         return guestNetwork;
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-            if (!hostVerify(host,cpu,memory)) {
+            if (!hostVerify(host, cpu, memory)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }
             return host;
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
-            list = list.stream().filter(t -> hostVerify(t,cpu,memory))
+            list = list.stream().filter(t -> hostVerify(t, cpu, memory))
                     .collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
@@ -76,25 +78,27 @@ public class AllocateService extends AbstractService {
             return host;
         }
     }
-    private boolean hostVerify(HostEntity host,int cpu,long memory){
-        if(!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)){
+
+    private boolean hostVerify(HostEntity host, int cpu, long memory) {
+        if (!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
             return false;
         }
-        int allocateCpu=host.getAllocationCpu()+cpu;
-        long allocationMemory=host.getAllocationMemory()+memory;
-        return host.getTotalCpu()>allocateCpu&&host.getTotalMemory()>allocationMemory;
+        int allocateCpu = host.getAllocationCpu() + cpu;
+        long allocationMemory = host.getAllocationMemory() + memory;
+        return host.getTotalCpu() > allocateCpu && host.getTotalMemory() > allocationMemory;
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
-    public void initHostAllocate(){
-        List<HostEntity> hosts=this.hostMapper.selectList(new QueryWrapper<>());
-        Map<Integer,List<GuestEntity>> map = guestMapper.selectList(new QueryWrapper<GuestEntity>().gt("host_id",0)).stream().collect(Collectors.groupingBy(GuestEntity::getHostId));
+    public void initHostAllocate() {
+        List<HostEntity> hosts = this.hostMapper.selectList(new QueryWrapper<>());
+        Map<Integer, List<GuestEntity>> map = guestMapper.selectList(new QueryWrapper<GuestEntity>().gt("host_id", 0)).stream().collect(Collectors.groupingBy(GuestEntity::getHostId));
         for (HostEntity host : hosts) {
-            List<GuestEntity> guestList= map.get(host.getHostId());
-            if(guestList==null) {
+            List<GuestEntity> guestList = map.get(host.getHostId());
+            if (guestList == null) {
                 host.setAllocationCpu(0);
                 host.setAllocationMemory(0L);
-            }else{
+            } else {
                 host.setAllocationCpu(guestList.stream().mapToInt(GuestEntity::getCpu).sum());
                 host.setAllocationMemory(guestList.stream().mapToLong(GuestEntity::getMemory).sum());
             }

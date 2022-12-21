@@ -21,11 +21,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class NotifyService implements CommandLineRunner, MessageListener<NotifyInfo> {
+    private static final Set<Session> clientSessions = Collections.synchronizedSet(new HashSet<>());
     @Autowired
     private RedissonClient redissonClient;
-
-    private static final Set<Session> clientSessions = Collections.synchronizedSet(new HashSet<>());
-
     private RTopic topic;
 
     @Override
@@ -36,24 +34,25 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyI
 
     @Override
     public void onMessage(CharSequence channel, NotifyInfo msg) {
-        RLock rLock=redissonClient.getReadWriteLock(RedisKeyUtil.GLOBAL_LOCK_KEY).readLock();
-        try{
-            if(rLock.tryLock(1, TimeUnit.MINUTES)){
+        RLock rLock = redissonClient.getReadWriteLock(RedisKeyUtil.GLOBAL_LOCK_KEY).readLock();
+        try {
+            if (rLock.tryLock(1, TimeUnit.MINUTES)) {
                 WebSocketServerOne.sendNotify(msg);
             }
-        }catch (Exception err){
+        } catch (Exception err) {
 
-        }finally {
+        } finally {
             try {
                 if (rLock.isHeldByCurrentThread()) {
                     rLock.unlock();
                 }
-            }catch (Exception err){
+            } catch (Exception err) {
 
             }
         }
     }
-    public void publish(NotifyInfo notify){
+
+    public void publish(NotifyInfo notify) {
         this.topic.publish(notify);
     }
 

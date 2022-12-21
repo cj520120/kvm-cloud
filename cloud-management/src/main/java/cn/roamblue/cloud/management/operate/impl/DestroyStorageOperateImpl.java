@@ -35,7 +35,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
         super(DestroyStorageOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyStorageOperate param) {

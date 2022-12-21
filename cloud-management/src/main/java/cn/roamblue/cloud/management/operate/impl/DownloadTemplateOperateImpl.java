@@ -29,7 +29,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         super(DownloadTemplateOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DownloadTemplateOperate param) {
@@ -43,8 +43,8 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         }
 
         StorageEntity storage = storageMapper.selectById(templateVolume.getStorageId());
-        if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
-            throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
+        if (storage.getStatus() != cn.roamblue.cloud.management.util.Constant.StorageStatus.READY) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
         }
         HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
         StorageEntity targetStorage = storageMapper.selectById(templateVolume.getStorageId());

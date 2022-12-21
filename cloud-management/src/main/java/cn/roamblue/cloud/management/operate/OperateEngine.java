@@ -27,7 +27,7 @@ public class OperateEngine {
     }
 
     public void onFinish(BaseOperateParam operateParam, String result) {
-        log.info("onFinish type={} param={} result={}",operateParam.getClass().getName(),operateParam,result);
+        log.info("onFinish type={} param={} result={}", operateParam.getClass().getName(), operateParam, result);
         Operate operate = this.operateHandlerMap.get(operateParam.getClass());
         if (operate == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的任务:" + operate.getParamType());
@@ -35,8 +35,8 @@ public class OperateEngine {
         ResultUtil resultUtil;
         try {
             resultUtil = GsonBuilderUtil.create().fromJson(result, operate.getCallResultType());
-        }catch (Exception err){
-            resultUtil=ResultUtil.error(ErrorCode.SERVER_ERROR,err.getMessage());
+        } catch (Exception err) {
+            resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         }
         operate.onFinish(operateParam, resultUtil);
     }

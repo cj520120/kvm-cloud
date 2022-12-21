@@ -32,7 +32,7 @@ public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySna
         super(DestroySnapshotVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroySnapshotVolumeOperate param) {

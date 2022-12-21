@@ -1,8 +1,8 @@
 package cn.roamblue.cloud.agent.operate;
 
-import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.StorageCreateRequest;
 import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.StorageInfoRequest;
 import org.libvirt.Connect;
 
@@ -14,6 +14,7 @@ import java.util.List;
 public interface StorageOperate {
     /**
      * 获取存储池信息
+     *
      * @param connect
      * @param request
      * @return
@@ -23,6 +24,7 @@ public interface StorageOperate {
 
     /**
      * 批量获取存储池信息
+     *
      * @param connect
      * @param batchRequest
      * @return

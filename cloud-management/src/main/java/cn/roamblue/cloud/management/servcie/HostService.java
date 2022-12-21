@@ -44,10 +44,10 @@ public class HostService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> createHost(String name,String ip ,String uri,String nic){
-        String clientId= AppUtils.getAppId();
-        String clientSecret=AppUtils.getAppSecret(clientId);
-        HostEntity host= HostEntity.builder().hostIp(ip).displayName(name)
+    public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic) {
+        String clientId = AppUtils.getAppId();
+        String clientSecret = AppUtils.getAppSecret(clientId);
+        HostEntity host = HostEntity.builder().hostIp(ip).displayName(name)
                 .uri(uri).arch("").emulator("").nic(nic).hypervisor("")
                 .clientId(clientId)
                 .clientSecret(clientSecret)
@@ -66,6 +66,7 @@ public class HostService extends AbstractService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initHost(host));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> registerHost(int hostId) {
@@ -81,9 +82,10 @@ public class HostService extends AbstractService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initHost(host));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> maintenanceHost(int hostId){
+    public ResultUtil<HostModel> maintenanceHost(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);
         if (host == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");

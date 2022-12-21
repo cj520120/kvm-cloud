@@ -37,18 +37,18 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         super(MigrateVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(MigrateVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
+            if (storage.getStatus() != cn.roamblue.cloud.management.util.Constant.StorageStatus.READY) {
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            VolumeEntity targetVolume=volumeMapper.selectById(param.getTargetVolumeId());
-            if(targetVolume.getStatus()!= cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING){
+            VolumeEntity targetVolume = volumeMapper.selectById(param.getTargetVolumeId());
+            if (targetVolume.getStatus() != cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
             HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
@@ -81,8 +81,8 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
     @Override
     public void onFinish(MigrateVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
-        VolumeEntity targetVolume=volumeMapper.selectById(param.getTargetVolumeId());
-        if(targetVolume.getStatus()== cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
+        VolumeEntity targetVolume = volumeMapper.selectById(param.getTargetVolumeId());
+        if (targetVolume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
@@ -94,7 +94,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         }
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id",volume.getVolumeId()));
+                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
                 if (guestDisk != null) {
                     guestDisk.setVolumeId(targetVolume.getVolumeId());
                     guestDiskMapper.updateById(guestDisk);
@@ -103,7 +103,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 this.operateTask.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
-            }else{
+            } else {
                 volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
                 volumeMapper.updateById(volume);
             }

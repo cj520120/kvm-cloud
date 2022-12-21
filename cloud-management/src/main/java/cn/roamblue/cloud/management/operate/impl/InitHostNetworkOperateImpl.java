@@ -36,7 +36,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         super(InitHostNetworkOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(InitHostNetworkOperate param) {
@@ -46,7 +46,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             return;
         }
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-        switch (network.getStatus()){
+        switch (network.getStatus()) {
             case cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
             case cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
                 break;
@@ -115,11 +115,11 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             }
             if (hostIds.isEmpty()) {
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-                switch (network.getStatus() ) {
-                    case  cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
-                    case  cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                    network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY);
-                    networkMapper.updateById(network);
+                switch (network.getStatus()) {
+                    case cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
+                    case cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
+                        network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.READY);
+                        networkMapper.updateById(network);
                 }
                 this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             } else {
@@ -132,7 +132,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            switch (network.getStatus() ) {
+            switch (network.getStatus()) {
                 case cn.roamblue.cloud.management.util.Constant.NetworkStatus.CREATING:
                 case cn.roamblue.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
                     network.setStatus(cn.roamblue.cloud.management.util.Constant.NetworkStatus.ERROR);

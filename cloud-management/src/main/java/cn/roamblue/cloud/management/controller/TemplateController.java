@@ -12,6 +12,7 @@ import java.util.List;
 public class TemplateController {
     @Autowired
     private TemplateService templateService;
+
     @GetMapping("/api/template/all")
     public ResultUtil<List<TemplateModel>> listTemplate() {
         return templateService.listTemplate();

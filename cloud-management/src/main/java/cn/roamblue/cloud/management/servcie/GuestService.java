@@ -38,14 +38,15 @@ public class GuestService extends AbstractService {
         return model;
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -89,7 +90,7 @@ public class GuestService extends AbstractService {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
             VolumeEntity volume = VolumeEntity.builder()
-                    .description("ROOT-"+guest.getGuestId())
+                    .description("ROOT-" + guest.getGuestId())
                     .capacity(size)
                     .storageId(storage.getStorageId())
                     .name(uid)
@@ -233,6 +234,7 @@ public class GuestService extends AbstractService {
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
 
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> reboot(int guestId) {
@@ -248,6 +250,7 @@ public class GuestService extends AbstractService {
         }
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> shutdown(int guestId, boolean force) {
@@ -267,6 +270,7 @@ public class GuestService extends AbstractService {
         }
 
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> modifyGuest(int guestId, String description, String busType, int cpu, long memory) {
@@ -286,7 +290,7 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachCdRoom(int guestId, int templateId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        switch (guest.getStatus() ) {
+        switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
                 guest.setCdRoom(templateId);
@@ -300,11 +304,12 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachCdRoom(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        switch (guest.getStatus() ) {
+        switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
                 guest.setCdRoom(0);
@@ -318,6 +323,7 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId) {
@@ -359,6 +365,7 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachDisk(int guestId, int guestDiskId) {
@@ -390,9 +397,10 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<AttachGuestNetworkModel> attachNetwork(int guestId, int networkId,String driveType) {
+    public ResultUtil<AttachGuestNetworkModel> attachNetwork(int guestId, int networkId, String driveType) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -421,13 +429,13 @@ public class GuestService extends AbstractService {
                 this.operateTask.addTask(operateParam);
 
 
-
-                return ResultUtil.success( AttachGuestNetworkModel.builder().guest(this.initGuestInfo(guest)).network(this.initGuestNetwork(guestNetwork)).build());
+                return ResultUtil.success(AttachGuestNetworkModel.builder().guest(this.initGuestInfo(guest)).network(this.initGuestNetwork(guestNetwork)).build());
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
 
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachNetwork(int guestId, int guestNetworkId) {
@@ -481,11 +489,12 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
         }
     }
-    public ResultUtil<String> getVncPassword(int guestId){
-       GuestVncEntity guestVnc= this.guestVncMapper.selectById(guestId);
-       if(guestVnc==null){
-           throw new CodeException(ErrorCode.SERVER_ERROR,"虚拟机没有启动");
-       }
-       return ResultUtil.success(guestVnc.getPassword());
+
+    public ResultUtil<String> getVncPassword(int guestId) {
+        GuestVncEntity guestVnc = this.guestVncMapper.selectById(guestId);
+        if (guestVnc == null) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机没有启动");
+        }
+        return ResultUtil.success(guestVnc.getPassword());
     }
 }

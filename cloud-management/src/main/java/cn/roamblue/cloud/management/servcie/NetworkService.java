@@ -83,6 +83,7 @@ public class NetworkService extends AbstractService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success(this.initGuestNetwork(network));
     }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> registerNetwork(int networkId) {

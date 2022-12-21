@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
-
 @RestController
 public class TaskReportController {
     @Autowired
@@ -17,8 +15,8 @@ public class TaskReportController {
     @PostMapping("/api/task/report")
     public ResultUtil<Void> report(
 //            @RequestParam("clientId") String clientId,
-                                   @RequestParam("taskId") String taskId,
-                                   @RequestParam("data") String data
+            @RequestParam("taskId") String taskId,
+            @RequestParam("data") String data
 //                                   @RequestParam("nonce") String nonce,
 //                                   @RequestParam("sign") String sign
     ) {

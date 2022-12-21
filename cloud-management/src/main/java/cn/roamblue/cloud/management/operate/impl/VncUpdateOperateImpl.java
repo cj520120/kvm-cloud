@@ -2,7 +2,6 @@ package cn.roamblue.cloud.management.operate.impl;
 
 import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
-import cn.roamblue.cloud.common.bean.GuestShutdownRequest;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.Constant;
@@ -43,8 +42,8 @@ public class VncUpdateOperateImpl extends AbstractOperate<VncUpdateOperate, Resu
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(VncUpdateOperate param) {
-        GuestEntity vncGuest= this.vncService.getGuestVncServer(param.getGuestId());
-        HostEntity host=this.hostMapper.selectById(vncGuest.getHostId());
+        GuestEntity vncGuest = this.vncService.getGuestVncServer(param.getGuestId());
+        HostEntity host = this.hostMapper.selectById(vncGuest.getHostId());
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         GuestQmaRequest request = GuestQmaRequest.builder().build();
         request.setName(vncGuest.getName());

@@ -36,7 +36,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
         super(tClass);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
@@ -64,8 +64,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
 
-            }
-            else if (param.getSnapshotVolumeId() > 0) {
+            } else if (param.getSnapshotVolumeId() > 0) {
                 SnapshotVolumeEntity snapshotVolume = snapshotVolumeMapper.selectById(param.getSnapshotVolumeId());
                 if (snapshotVolume.getStatus() != cn.roamblue.cloud.management.util.Constant.SnapshotStatus.READY) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前快照未就绪");
@@ -81,7 +80,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
 
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
-            }else{
+            } else {
                 VolumeCreateRequest request = VolumeCreateRequest.builder()
                         .targetStorage(storage.getName())
                         .targetVolume(volume.getPath())
@@ -96,7 +95,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
         }
 
     }
-
 
 
     @Override

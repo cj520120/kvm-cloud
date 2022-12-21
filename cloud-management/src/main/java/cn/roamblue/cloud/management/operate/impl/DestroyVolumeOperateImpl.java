@@ -32,15 +32,15 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         super(DestroyVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.DESTROY) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if(storage.getStatus()!= cn.roamblue.cloud.management.util.Constant.StorageStatus.READY){
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY,"存储池未就绪");
+            if (storage.getStatus() != cn.roamblue.cloud.management.util.Constant.StorageStatus.READY) {
+                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
             HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             VolumeDestroyRequest request = VolumeDestroyRequest.builder()

@@ -110,7 +110,7 @@ public class StorageService extends AbstractService {
         switch (storage.getStatus()) {
             case Constant.StorageStatus.READY:
             case Constant.StorageStatus.ERROR:
-                if(volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq("storage_id",storageId))>0){
+                if (volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq("storage_id", storageId)) > 0) {
                     throw new CodeException(ErrorCode.STORAGE_BUSY, "当前存储有挂载磁盘，请首先迁移存储文件");
                 }
                 storage.setStatus(Constant.StorageStatus.DESTROY);

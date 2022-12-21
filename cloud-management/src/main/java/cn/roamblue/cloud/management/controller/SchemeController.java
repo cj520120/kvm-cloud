@@ -31,7 +31,7 @@ public class SchemeController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.schemeService.createScheme(name, cpu, memory*1024, speed, sockets, cores, threads);
+        return this.schemeService.createScheme(name, cpu, memory * 1024, speed, sockets, cores, threads);
     }
 
 
@@ -44,7 +44,7 @@ public class SchemeController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.schemeService.updateScheme(schemeId, name, cpu, memory*1024, speed, sockets, cores, threads);
+        return this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, speed, sockets, cores, threads);
     }
 
 

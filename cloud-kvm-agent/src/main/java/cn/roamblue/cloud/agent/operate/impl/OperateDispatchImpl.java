@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class OperateDispatchImpl implements OperateDispatch {
+    private final ConcurrentHashMap<String, Long> taskMap = new ConcurrentHashMap<>();
     @Autowired
     private ConnectPool connectPool;
     @Autowired
@@ -48,19 +49,17 @@ public class OperateDispatchImpl implements OperateDispatch {
     private ThreadPoolExecutor executor;
     @Autowired
     private HostUtil hostUtil;
-    private final ConcurrentHashMap<String, Long> taskMap = new ConcurrentHashMap<>();
-
 
     private void submitTask(String taskId, String command, String data) {
         taskMap.put(taskId, System.currentTimeMillis());
         this.executor.submit(() -> {
             ResultUtil result = null;
             try {
-                  result = dispatch(taskId,command, data);
-            } catch (CodeException err){
-                result=ResultUtil.error(err.getCode(),err.getMessage());
-            }catch (Exception err) {
-                result=ResultUtil.error(ErrorCode.SERVER_ERROR,err.getMessage());
+                result = dispatch(taskId, command, data);
+            } catch (CodeException err) {
+                result = ResultUtil.error(err.getCode(), err.getMessage());
+            } catch (Exception err) {
+                result = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                 log.error("执行任务出错.", err);
             } finally {
                 taskMap.remove(taskId);
@@ -70,10 +69,10 @@ public class OperateDispatchImpl implements OperateDispatch {
                 map.put("clientId", hostUtil.getClientId());
                 map.put("data", GsonBuilderUtil.create().toJson(result));
                 map.put("nonce", nonce);
-                String sign =null;
+                String sign = null;
                 try {
-                     sign = AppUtils.sign(map, hostUtil.getClientId(), hostUtil.getClientSecret(), nonce);
-                }catch (Exception err){
+                    sign = AppUtils.sign(map, hostUtil.getClientId(), hostUtil.getClientSecret(), nonce);
+                } catch (Exception err) {
 
                 }
                 map.put("sign", sign);
@@ -83,8 +82,8 @@ public class OperateDispatchImpl implements OperateDispatch {
     }
 
     @Override
-    public <T> ResultUtil<T> dispatch(String taskId,String command, String data) {
-        this.taskMap.put(taskId,System.currentTimeMillis());
+    public <T> ResultUtil<T> dispatch(String taskId, String command, String data) {
+        this.taskMap.put(taskId, System.currentTimeMillis());
         Connect connect = null;
         try {
             T result = null;
@@ -104,7 +103,7 @@ public class OperateDispatchImpl implements OperateDispatch {
                     break;
 
                 case Constant.Command.HOST_INIT:
-                    result = (T) hostOperate.initHost(connect,GsonBuilderUtil.create().fromJson(data, InitHostRequest.class));
+                    result = (T) hostOperate.initHost(connect, GsonBuilderUtil.create().fromJson(data, InitHostRequest.class));
                     break;
 
                 case Constant.Command.NETWORK_CREATE_BASIC:
@@ -150,13 +149,13 @@ public class OperateDispatchImpl implements OperateDispatch {
                     result = (T) this.volumeOperate.resize(connect, GsonBuilderUtil.create().fromJson(data, VolumeResizeRequest.class));
                     break;
                 case Constant.Command.VOLUME_CLONE:
-                    result=  (T)this.volumeOperate.clone(connect, GsonBuilderUtil.create().fromJson(data, VolumeCloneRequest.class));
+                    result = (T) this.volumeOperate.clone(connect, GsonBuilderUtil.create().fromJson(data, VolumeCloneRequest.class));
                     break;
                 case Constant.Command.VOLUME_MIGRATE:
-                    result=  (T)this.volumeOperate.migrate(connect, GsonBuilderUtil.create().fromJson(data, VolumeMigrateRequest.class));
+                    result = (T) this.volumeOperate.migrate(connect, GsonBuilderUtil.create().fromJson(data, VolumeMigrateRequest.class));
                     break;
                 case Constant.Command.VOLUME_SNAPSHOT:
-                    result=  (T)this.volumeOperate.snapshot(connect, GsonBuilderUtil.create().fromJson(data, VolumeCreateSnapshotRequest.class));
+                    result = (T) this.volumeOperate.snapshot(connect, GsonBuilderUtil.create().fromJson(data, VolumeCreateSnapshotRequest.class));
                     break;
                 case Constant.Command.VOLUME_TEMPLATE:
                     result = (T) this.volumeOperate.template(connect, GsonBuilderUtil.create().fromJson(data, VolumeCreateTemplateRequest.class));
@@ -205,10 +204,10 @@ public class OperateDispatchImpl implements OperateDispatch {
                     this.osOperate.detachNic(connect, GsonBuilderUtil.create().fromJson(data, OsNic.class));
                     break;
                 case Constant.Command.GUEST_QMA:
-                    this.osOperate.qma(connect,GsonBuilderUtil.create().fromJson(data, GuestQmaRequest.class));
+                    this.osOperate.qma(connect, GsonBuilderUtil.create().fromJson(data, GuestQmaRequest.class));
                     break;
                 default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的操作:" +command);
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的操作:" + command);
             }
             return ResultUtil.<T>builder().data(result).build();
         } catch (CodeException err) {

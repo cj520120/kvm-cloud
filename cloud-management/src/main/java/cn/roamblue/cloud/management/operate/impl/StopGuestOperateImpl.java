@@ -6,11 +6,9 @@ import cn.roamblue.cloud.common.util.Constant;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
-import cn.roamblue.cloud.management.data.entity.GuestVncEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.operate.bean.StopGuestOperate;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,7 +30,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
     }
 
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY,write = false)
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(StopGuestOperate param) {
@@ -41,9 +39,9 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             throw new CodeException(ErrorCode.SERVER_ERROR, "客户机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
         HostEntity host = hostMapper.selectById(guest.getHostId());
-        if(host==null){
+        if (host == null) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
-        }else {
+        } else {
             if (!param.isForce()) {
                 GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).build();
                 this.asyncInvoker(host, param, Constant.Command.GUEST_SHUTDOWN, request);

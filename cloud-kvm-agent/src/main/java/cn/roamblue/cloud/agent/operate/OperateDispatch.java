@@ -9,11 +9,12 @@ public interface OperateDispatch {
 
     /**
      * 操作分发
+     *
      * @param taskId
      * @param command
      * @param data
-     * @return
      * @param <T>
+     * @return
      */
-    <T> ResultUtil<T> dispatch(String taskId,String command,String data);
+    <T> ResultUtil<T> dispatch(String taskId, String command, String data);
 }

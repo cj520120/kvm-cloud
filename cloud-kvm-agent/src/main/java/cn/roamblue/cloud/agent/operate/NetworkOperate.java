@@ -10,6 +10,7 @@ import org.libvirt.Connect;
 public interface NetworkOperate {
     /**
      * 创建基础网络
+     *
      * @param connect
      * @param request
      * @throws Exception
@@ -27,13 +28,16 @@ public interface NetworkOperate {
 
     /**
      * 删除基础网络信息
+     *
      * @param connect
      * @param request
      * @throws Exception
      */
     void destroyBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
+
     /**
      * 删除Vlan网络信息
+     *
      * @param connect
      * @param request
      * @throws Exception

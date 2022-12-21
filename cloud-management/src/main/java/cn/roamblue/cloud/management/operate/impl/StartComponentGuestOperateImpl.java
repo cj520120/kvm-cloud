@@ -4,7 +4,6 @@ import cn.roamblue.cloud.common.bean.GuestInfo;
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.common.bean.OsNic;
 import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.component.AbstractComponentService;
 import cn.roamblue.cloud.management.data.entity.ComponentEntity;
@@ -39,18 +38,18 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     private List<AbstractComponentService> componentServices;
 
     public StartComponentGuestOperateImpl() {
-        super( StartComponentGuestOperate.class);
+        super(StartComponentGuestOperate.class);
     }
 
     @Override
     protected List<OsNic> getGuestNetwork(GuestEntity guest) {
-        List<OsNic> nicList= super.getGuestNetwork(guest);
-        ComponentEntity component= componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id",guest.getGuestId()));
-        if(component!=null&&Objects.equals(component.getComponentType(), Constant.ComponentType.ROUTE)){
+        List<OsNic> nicList = super.getGuestNetwork(guest);
+        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
+        if (component != null && Objects.equals(component.getComponentType(), Constant.ComponentType.ROUTE)) {
             for (OsNic osNic : nicList) {
-                osNic.setDeviceId(osNic.getDeviceId()+1);
+                osNic.setDeviceId(osNic.getDeviceId() + 1);
             }
-            if(!nicList.isEmpty()) {
+            if (!nicList.isEmpty()) {
                 OsNic metaServiceNic = OsNic.builder()
                         .deviceId(0)
                         .name("")
@@ -58,7 +57,7 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
                         .bridgeName(nicList.get(0).getBridgeName())
                         .driveType(cn.roamblue.cloud.common.util.Constant.NetworkDriver.VIRTIO)
                         .build();
-                nicList.add(0,metaServiceNic);
+                nicList.add(0, metaServiceNic);
             }
         }
         return nicList;

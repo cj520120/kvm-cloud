@@ -3,9 +3,9 @@ package cn.roamblue.cloud.agent.operate.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.roamblue.cloud.agent.operate.StorageOperate;
-import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.StorageCreateRequest;
 import cn.roamblue.cloud.common.bean.StorageDestroyRequest;
+import cn.roamblue.cloud.common.bean.StorageInfo;
 import cn.roamblue.cloud.common.bean.StorageInfoRequest;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.Constant;
@@ -72,7 +72,7 @@ public class StorageOperateImpl implements StorageOperate {
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();
             if (storagePoolInfo.state != StoragePoolInfo.StoragePoolState.VIR_STORAGE_POOL_RUNNING) {
                 storagePool.destroy();
-                 storagePool=null;
+                storagePool = null;
             }
         }
         if (storagePool == null) {

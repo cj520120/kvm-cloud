@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-    @TableName("tbl_component_info")
+@TableName("tbl_component_info")
 public class ComponentEntity {
 
     @TableId(type = IdType.AUTO)
