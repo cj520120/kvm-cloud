@@ -18,8 +18,8 @@
 							<el-table-column label="挂载路径" prop="mountPath" width="350" />
 							<el-table-column label="容量" prop="capacity" width="180">
 								<template #default="scope">
-									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_storage_desplay(scope.row.available) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
-										<el-progress color="#67C23A" :percentage="parseInt((scope.row.available * 100) / scope.row.capacity)"></el-progress>
+									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
+										<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
