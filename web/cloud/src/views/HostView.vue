@@ -182,17 +182,22 @@ export default {
 			this.show_host = host
 			this.show_type = 1
 		},
+		update_host_info(host) {
+			let findIndex = this.hosts.findIndex((item) => item.hostId === host.hostId)
+			if (findIndex >= 0) {
+				this.$set(this.hosts, findIndex, host)
+			} else {
+				this.hosts.push(host)
+			}
+			if (this.show_host && this.show_host.hostId === host.hostId) {
+				this.show_host = host
+			}
+		},
 		handle_notify_message(notify) {
 			if (notify.type === 4) {
 				getHostInfo({ hostId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						let update_data = res.data
-						let findIndex = this.hosts.findIndex((item) => item.hostId === update_data.hostId)
-						if (findIndex >= 0) {
-							this.$set(this.hosts, findIndex, update_data)
-						} else {
-							this.hosts.push(update_data)
-						}
+						this.update_host_info(res.data)
 					}
 				})
 			}
@@ -200,7 +205,7 @@ export default {
 		create_host_click() {
 			createHost(this.create_host).then((res) => {
 				if (res.code === 0) {
-					this.hosts.push(res.data)
+					this.update_host_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -220,7 +225,7 @@ export default {
 		pasue_host(host) {
 			pauseHost({ hostId: host.hostId }).then((res) => {
 				if (res.code === 0) {
-					host.status = 3
+					this.update_host_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',
@@ -232,7 +237,7 @@ export default {
 		register_host(host) {
 			registerHost({ hostId: host.hostId }).then((res) => {
 				if (res.code === 0) {
-					host.status = 0
+					this.update_host_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',

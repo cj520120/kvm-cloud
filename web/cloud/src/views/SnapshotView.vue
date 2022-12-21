@@ -70,7 +70,8 @@ import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'snapshotView',
 	components: {
-		NavViewVue,HeadViewVue
+		NavViewVue,
+		HeadViewVue
 	},
 	data() {
 		return {
@@ -142,17 +143,22 @@ export default {
 			this.show_snapshot = snapshot
 			this.show_type = 1
 		},
+		update_snapshot_info(snapshot) {
+			let findIndex = this.snapshots.findIndex((item) => item.snapshotVolumeId === snapshot.snapshotVolumeId)
+			if (findIndex >= 0) {
+				this.$set(this.snapshots, findIndex, snapshot)
+			} else {
+				this.snapshots.push(snapshot)
+			}
+			if (this.show_snapshot && this.show_snapshot.snapshotVolumeId === snapshot.snapshotVolumeId) {
+				this.show_snapshot = snapshot
+			}
+		},
 		handle_notify_message(notify) {
 			if (notify.type === 6) {
 				getSnapshotInfo({ snapshotVolumeId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						let update_data = res.data
-						let findIndex = this.snapshots.findIndex((item) => item.snapshotVolumeId === update_data.snapshotVolumeId)
-						if (findIndex >= 0) {
-							this.$set(this.snapshots, findIndex, update_data)
-						} else {
-							this.snapshots.push(update_data)
-						}
+						this.update_snapshot_info(res.data)
 					}
 				})
 			}

@@ -132,7 +132,8 @@ import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'schemeView',
 	components: {
-		NavViewVue,HeadViewVue
+		NavViewVue,
+		HeadViewVue
 	},
 	data() {
 		return {
@@ -198,10 +199,21 @@ export default {
 			this.show_scheme = scheme
 			this.show_type = 1
 		},
+		update_scheme_info(scheme) {
+			let findIndex = this.schemes.findIndex((item) => item.schemeId === scheme.schemeId)
+			if (findIndex >= 0) {
+				this.$set(this.schemes, findIndex, scheme)
+			} else {
+				this.schemes.push(scheme)
+			}
+			if (this.show_scheme && this.show_scheme.schemeId === scheme.schemeId) {
+				this.show_scheme = scheme
+			}
+		},
 		create_scheme_click() {
 			createScheme(this.create_scheme).then((res) => {
 				if (res.code === 0) {
-					this.schemes.push(res.data)
+					this.update_scheme_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -214,10 +226,7 @@ export default {
 		modify_scheme_click() {
 			moidfyScheme(this.modify_scheme).then((res) => {
 				if (res.code === 0) {
-					let findIndex = this.schemes.findIndex((item) => item.schemeId === res.data.schemeId)
-					if (findIndex >= 0) {
-						this.$set(this.schemes, findIndex, res.data)
-					}
+					this.update_scheme_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({

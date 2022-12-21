@@ -156,17 +156,22 @@ export default {
 					return `未知状态[${storage.status}]`
 			}
 		},
+		update_storate_info(storage) {
+			let findIndex = this.storages.findIndex((item) => item.storageId === storage.storageId)
+			if (findIndex >= 0) {
+				this.$set(this.storages, findIndex, storage)
+			} else {
+				this.storages.push(storage)
+			}
+			if (this.show_storage && this.show_storage.storageId === storage.storageId) {
+				this.show_storage = storage
+			}
+		},
 		handle_notify_message(notify) {
 			if (notify.type === 7) {
 				getStorageInfo({ storageId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						let update_storage = res.data
-						let findIndex = this.storages.findIndex((item) => item.storageId === update_storage.storageId)
-						if (findIndex >= 0) {
-							this.$set(this.storages, findIndex, update_storage)
-						} else {
-							this.storages.push(update_storage)
-						}
+						this.update_storate_info(res.data)
 					}
 				})
 			}
@@ -204,7 +209,7 @@ export default {
 			}
 			createStorage(data).then((res) => {
 				if (res.code === 0) {
-					this.storages.push(res.data)
+					this.update_storate_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -230,7 +235,7 @@ export default {
 		pasue_storage(storage) {
 			pauseStorage({ storageId: storage.storageId }).then((res) => {
 				if (res.code === 0) {
-					storage.status = 2
+					this.update_storate_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',

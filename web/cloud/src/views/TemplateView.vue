@@ -105,7 +105,8 @@ import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'templateView',
 	components: {
-		NavViewVue,HeadViewVue
+		NavViewVue,
+		HeadViewVue
 	},
 	data() {
 		return {
@@ -178,17 +179,22 @@ export default {
 			this.show_template = template
 			this.show_type = 1
 		},
+		update_template_info(template) {
+			let findIndex = this.templates.findIndex((item) => item.templateId === template.templateId)
+			if (findIndex >= 0) {
+				this.$set(this.templates, findIndex, template)
+			} else {
+				this.templates.push(template)
+			}
+			if (this.show_template && this.show_template.templateId === template.templateId) {
+				this.show_template = template
+			}
+		},
 		handle_notify_message(notify) {
 			if (notify.type === 5) {
 				getTemplateInfo({ templateId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						let update_data = res.data
-						let findIndex = this.templates.findIndex((item) => item.templateId === update_data.templateId)
-						if (findIndex >= 0) {
-							this.$set(this.templates, findIndex, update_data)
-						} else {
-							this.templates.push(update_data)
-						}
+						this.update_template_info(res.data)
 					}
 				})
 			}
@@ -207,7 +213,7 @@ export default {
 			}
 			createTemplate(data).then((res) => {
 				if (res.code === 0) {
-					this.templates.push(res.data)
+					this.update_template_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -220,7 +226,7 @@ export default {
 		download_template(template) {
 			downloadTemplate({ templateId: template.templateId }).then((res) => {
 				if (res.code === 0) {
-					template.status = 1
+					this.update_template_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',

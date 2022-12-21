@@ -373,17 +373,22 @@ export default {
 					return `未知状态[${volume.status}]`
 			}
 		},
+		update_volume_info(volume) {
+			let findIndex = this.volumes.findIndex((item) => item.volumeId === volume.volumeId)
+			if (findIndex >= 0) {
+				this.$set(this.volumes, findIndex, volume)
+			} else {
+				this.volumes.push(volume)
+			}
+			if (this.show_volume && this.show_volume.volumeId === volume.volumeId) {
+				this.show_volume = volume
+			}
+		},
 		handle_notify_message(notify) {
 			if (notify.type === 2) {
 				getVolumeInfo({ volumeId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						let update_volume = res.data
-						let findIndex = this.volumes.findIndex((item) => item.volumeId === update_volume.volumeId)
-						if (findIndex >= 0) {
-							this.$set(this.volumes, findIndex, update_volume)
-						} else {
-							this.volumes.push(update_volume)
-						}
+						this.update_volume_info(res.data)
 					}
 				})
 			}
@@ -415,7 +420,7 @@ export default {
 		create_volume_click() {
 			createVolume(this.create_volume).then((res) => {
 				if (res.code === 0) {
-					this.volumes.push(res.data)
+					this.update_volume_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -490,11 +495,8 @@ export default {
 		clone_volume_click() {
 			cloneVolume(this.clone_volume).then((res) => {
 				if (res.code === 0) {
-					this.volumes.push(res.data.clone)
-					let findIndex = this.volumes.findIndex((item) => item.volumeId === this.clone_volume.sourceVolumeId)
-					if (findIndex >= 0) {
-						this.$set(this.volumes, findIndex, res.data.source)
-					}
+					this.update_volume_info(res.data.clone)
+					this.update_volume_info(res.data.source)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -507,11 +509,8 @@ export default {
 		migrate_volume_click() {
 			migrateVolume(this.migrate_volume).then((res) => {
 				if (res.code === 0) {
-					this.volumes.push(res.data.migrate)
-					let findIndex = this.volumes.findIndex((item) => item.volumeId === this.migrate_volume.sourceVolumeId)
-					if (findIndex >= 0) {
-						this.$set(this.volumes, findIndex, res.data.source)
-					}
+					this.update_volume_info(res.data.migrate)
+					this.update_volume_info(res.data.source)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -524,10 +523,7 @@ export default {
 		resize_volume_click() {
 			resizeVolume(this.resize_volume).then((res) => {
 				if (res.code === 0) {
-					let findIndex = this.volumes.findIndex((item) => item.volumeId === res.data.volumeId)
-					if (findIndex >= 0) {
-						this.$set(this.volumes, findIndex, res.data)
-					}
+					this.update_volume_info(res.data)
 					this.resize_dialog_visiable = false
 				} else {
 					this.$notify.error({
@@ -579,7 +575,7 @@ export default {
 		destroy_volume(volume) {
 			destroyVolume({ volumeId: volume.volumeId }).then((res) => {
 				if (res.code === 0) {
-					volume.status = 9
+					this.update_volume_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',

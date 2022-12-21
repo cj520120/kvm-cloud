@@ -149,7 +149,8 @@ import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'NetworkView',
 	components: {
-		NavViewVue,HeadViewVue
+		NavViewVue,
+		HeadViewVue
 	},
 	data() {
 		return {
@@ -219,17 +220,22 @@ export default {
 			let find = this.networks.find((v) => v.networkId === network.basicNetworkId)
 			return find || { name: '-' }
 		},
+		update_network_info(network) {
+			let findIndex = this.networks.findIndex((item) => item.networkId === network.networkId)
+			if (findIndex >= 0) {
+				this.$set(this.networks, findIndex, network)
+			} else {
+				this.networks.push(network)
+			}
+			if (this.show_network && this.show_network.networId === network.networId) {
+				this.show_network = network
+			}
+		},
 		handle_notify_message(notify) {
 			if (notify.type === 3) {
 				getNetworkInfo({ networkId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						let update_data = res.data
-						let findIndex = this.networks.findIndex((item) => item.networkId === update_data.networkId)
-						if (findIndex >= 0) {
-							this.$set(this.networks, findIndex, update_data)
-						} else {
-							this.networks.push(update_data)
-						}
+						this.update_network_info(res.data)
 					}
 				})
 			}
@@ -254,7 +260,7 @@ export default {
 			}
 			createNetwork(this.create_network).then((res) => {
 				if (res.code === 0) {
-					this.networks.push(res.data)
+					this.update_network_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -267,7 +273,7 @@ export default {
 		pasue_network(network) {
 			pauseNetwork({ networkId: network.networkId }).then((res) => {
 				if (res.code === 0) {
-					network.status = 3
+					this.update_network_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',
@@ -279,7 +285,7 @@ export default {
 		register_network(network) {
 			registerNetwork({ networkId: network.networkId }).then((res) => {
 				if (res.code === 0) {
-					network.status = 1
+					this.update_network_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',
@@ -291,7 +297,7 @@ export default {
 		destroy_network(network) {
 			destroyNetwork({ networkId: network.networkId }).then((res) => {
 				if (res.code === 0) {
-					network.status = 4
+					this.update_network_info(res.data)
 				} else {
 					this.$notify.error({
 						title: '错误',
