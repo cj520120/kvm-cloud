@@ -16,6 +16,7 @@ import org.dom4j.DocumentException;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
+import org.libvirt.Error;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -86,18 +87,25 @@ public class OsOperateImpl implements OsOperate {
     @Override
     public void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         while (true) {
-            Domain domain = this.findDomainByName(connect, request.getName());
-            if (domain == null) {
-                break;
-            }
-            switch (domain.getInfo().state) {
-                case VIR_DOMAIN_SHUTDOWN:
-                case VIR_DOMAIN_SHUTOFF:
-                    domain.destroy();
-                default:
-                    domain.shutdown();
-                    ThreadUtil.sleep(1, TimeUnit.SECONDS);
+            try {
+                Domain domain = this.findDomainByName(connect, request.getName());
+                if (domain == null) {
                     break;
+                }
+                switch (domain.getInfo().state) {
+                    case VIR_DOMAIN_SHUTDOWN:
+                    case VIR_DOMAIN_SHUTOFF:
+                        domain.destroy();
+                    default:
+                        domain.shutdown();
+                        ThreadUtil.sleep(1, TimeUnit.SECONDS);
+                        break;
+                }
+            }catch (LibvirtException err){
+                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                    break;
+                }
+                throw err;
             }
         }
 
