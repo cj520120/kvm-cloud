@@ -63,7 +63,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
 
                     .build();
 
-            this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
+            this.asyncInvoker(host, param, Constant.Command.VOLUME_MIGRATE, request);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
         }
@@ -94,7 +94,6 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         }
         if (volume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                volumeMapper.insert(targetVolume);
                 GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id",volume.getVolumeId()));
                 if (guestDisk != null) {
                     guestDisk.setVolumeId(targetVolume.getVolumeId());
@@ -104,6 +103,9 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 this.operateTask.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
+            }else{
+                volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
+                volumeMapper.updateById(volume);
             }
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());

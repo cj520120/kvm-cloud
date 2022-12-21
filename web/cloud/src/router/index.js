@@ -7,9 +7,21 @@ import TemplateView from "../views/TemplateView.vue";
 import SnapshotView from "../views/SnapshotView.vue";
 import VolumeView from "../views/VolumeView.vue";
 import SchemeView from "../views/SchemeView.vue";
+import GuestView from "../views/GuestView.vue";
+import VncView from "../views/VncView.vue";
 Vue.use(VueRouter);
 
 const routes = [
+  {
+    path: "/Vnc",
+    name: "Vnc",
+    component: VncView,
+  },
+  {
+    path: "/Guest",
+    name: "Guest",
+    component: GuestView,
+  },
   {
     path: "/",
     name: "Network",

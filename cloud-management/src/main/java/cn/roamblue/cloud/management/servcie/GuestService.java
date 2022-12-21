@@ -6,9 +6,12 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
+import cn.roamblue.cloud.management.model.AttachGuestNetworkModel;
+import cn.roamblue.cloud.management.model.AttachGuestVolumeModel;
 import cn.roamblue.cloud.management.model.GuestModel;
 import cn.roamblue.cloud.management.operate.bean.*;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.GuestNameUtil;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +66,7 @@ public class GuestService extends AbstractService {
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         String uid = UUID.randomUUID().toString().replace("-", "");
         GuestEntity guest = GuestEntity.builder()
-                .name(uid)
+                .name(GuestNameUtil.getName())
                 .description(description)
                 .busType(busType)
                 .cpu(scheme.getCpu())
@@ -317,7 +320,7 @@ public class GuestService extends AbstractService {
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> attachDisk(int guestId, int volumeId) {
+    public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -351,7 +354,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                return ResultUtil.success(this.initGuestInfo(guest));
+                return ResultUtil.success(AttachGuestVolumeModel.builder().guest(this.initGuestInfo(guest)).volume(this.initVolume(volume)).build());
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
@@ -389,7 +392,7 @@ public class GuestService extends AbstractService {
     }
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> attachNetwork(int guestId, int networkId,String driveType) {
+    public ResultUtil<AttachGuestNetworkModel> attachNetwork(int guestId, int networkId,String driveType) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -416,7 +419,10 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                return ResultUtil.success(this.initGuestInfo(guest));
+
+
+
+                return ResultUtil.success( AttachGuestNetworkModel.builder().guest(this.initGuestInfo(guest)).network(this.initGuestNetwork(guestNetwork)).build());
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
         }
@@ -474,5 +480,12 @@ public class GuestService extends AbstractService {
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
         }
+    }
+    public ResultUtil<String> getVncPassword(int guestId){
+       GuestVncEntity guestVnc= this.guestVncMapper.selectById(guestId);
+       if(guestVnc==null){
+           throw new CodeException(ErrorCode.SERVER_ERROR,"虚拟机没有启动");
+       }
+       return ResultUtil.success(guestVnc.getPassword());
     }
 }

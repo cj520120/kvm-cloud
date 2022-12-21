@@ -1,9 +1,7 @@
 package cn.roamblue.cloud.management.controller;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
-import cn.roamblue.cloud.management.model.GuestModel;
-import cn.roamblue.cloud.management.model.GuestNetworkModel;
-import cn.roamblue.cloud.management.model.VolumeModel;
+import cn.roamblue.cloud.management.model.*;
 import cn.roamblue.cloud.management.servcie.GuestService;
 import cn.roamblue.cloud.management.servcie.NetworkService;
 import cn.roamblue.cloud.management.servcie.VolumeService;
@@ -34,7 +32,10 @@ public class GuestController {
     public ResultUtil<GuestModel> getGuestInfo(@RequestParam("guestId") int guestId) {
         return this.guestService.getGuestInfo(guestId);
     }
-
+    @GetMapping("/api/guest/vnc/password")
+    public ResultUtil<String> getVncPassword(@RequestParam("guestId") int guestId){
+        return this.guestService.getVncPassword(guestId);
+    }
     @GetMapping("/api/guest/network")
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(@RequestParam("guestId") int guestId) {
         return this.networkService.listGuestNetworks(guestId);
@@ -119,8 +120,8 @@ public class GuestController {
     }
 
     @PostMapping("/api/guest/disk/attach")
-    public ResultUtil<GuestModel> attachDisk(@RequestParam("guestId") int guestId,
-                                             @RequestParam("volumeId") int volumeId) {
+    public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
+                                                         @RequestParam("volumeId") int volumeId) {
         return this.guestService.attachDisk(guestId, volumeId);
     }
 
@@ -132,9 +133,9 @@ public class GuestController {
 
     @PostMapping("/api/guest/network/attach")
 
-    public ResultUtil<GuestModel> attachNetwork(@RequestParam("guestId") int guestId,
-                                                @RequestParam("networkId") int networkId,
-                                                @RequestParam("driveType") String driveType) {
+    public ResultUtil<AttachGuestNetworkModel> attachNetwork(@RequestParam("guestId") int guestId,
+                                                             @RequestParam("networkId") int networkId,
+                                                             @RequestParam("driveType") String driveType) {
         return this.guestService.attachNetwork(guestId, networkId, driveType);
 
     }
@@ -146,7 +147,7 @@ public class GuestController {
         return this.guestService.detachNetwork(guestId, guestNetworkId);
     }
 
-    @PostMapping("/api/guest/destroy")
+    @DeleteMapping("/api/guest/destroy")
     public ResultUtil<Void> destroyGuest(@RequestParam("guestId") int guestId) {
         return this.guestService.destroyGuest(guestId);
     }

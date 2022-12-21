@@ -9,7 +9,7 @@
 						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_volume">创建磁盘</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="volumes" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="show_table_volumes" style="width: 100%">
 							<el-table-column label="ID" prop="volumeId" width="80" />
 							<el-table-column label="名称" prop="description" />
 							<el-table-column label="磁盘类型" prop="type" width="100">
@@ -55,6 +55,7 @@
 								</template>
 							</el-table-column>
 						</el-table>
+						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
 					</el-row>
 				</el-card>
 				<el-card class="box-card" v-if="this.show_type === 1">
@@ -282,13 +283,23 @@ export default {
 				snapshotVolumeType: 'qcow2'
 			},
 			volumes: [],
-			storages: []
+			storages: [],
+			current_page: 1,
+			page_size: 10,
+			total_size: 0
 		}
 	},
 	mixins: [Notify],
 	created() {
 		this.init_view()
 		this.init_notify()
+	},
+	computed: {
+		show_table_volumes() {
+			return this.volumes.filter((v) => {
+				return v.isShow === undefined || v.isShow
+			})
+		}
 	},
 	methods: {
 		async init_view() {
@@ -302,11 +313,33 @@ export default {
 				.then((res) => {
 					if (res.code == 0) {
 						this.volumes = res.data
+						this.update_show_page()
 					}
 				})
 				.finally(() => {
 					this.data_loading = false
 				})
+		},
+		on_current_page_change(current_page) {
+			this.current_page = current_page
+			this.update_show_page()
+		},
+		on_page_size_change(page_size) {
+			this.page_size = page_size
+			this.update_show_page()
+		},
+		update_show_page() {
+			let nCount = 0
+			this.volumes.forEach((item, index) => {
+				nCount++
+				if (nCount <= this.page_size * (this.current_page - 1) || nCount > this.page_size * this.current_page) {
+					item.isShow = false
+				} else {
+					item.isShow = true
+				}
+				this.$set(this.volumes, index, item)
+			})
+			this.total_size = nCount
 		},
 		get_storage_name(storageId) {
 			let findStorage = this.storages.find((item) => item.storageId === storageId) || { name: '-' }

@@ -304,3 +304,111 @@ export const getGuestInfo = (params = {}) => {
     params,
   });
 };
+export const getGuestVncPassword = (params = {}) => {
+  return axios.request({
+    url: "/api/guest/vnc/password",
+    params,
+  });
+};
+export const getGuestVolumes = (params = {}) => {
+  return axios.request({
+    url: "/api/guest/volume",
+    params,
+  });
+};
+export const getGuestNetworks = (params = {}) => {
+  return axios.request({
+    url: "/api/guest/network",
+    params,
+  });
+};
+export const getGuestList = (params = {}) => {
+  return axios.request({
+    url: "/api/guest/all",
+    params,
+  });
+};
+export const destroyGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/destroy",
+    data,
+    method: "DELETE",
+  });
+};
+export const createGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/create",
+    data,
+    method: "PUT",
+  });
+};
+export const startGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/start",
+    data,
+    method: "POST",
+  });
+};
+export const stopGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/shutdown",
+    data,
+    method: "POST",
+  });
+};
+export const rebootGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/reboot",
+    data,
+    method: "POST",
+  });
+};
+export const modifyGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/modify",
+    data,
+    method: "POST",
+  });
+};
+export const attachGuestCdRoom = (data = {}) => {
+  return axios.request({
+    url: "api/guest/cd/attach",
+    data,
+    method: "POST",
+  });
+};
+export const detachGuestCdRoom = (data = {}) => {
+  return axios.request({
+    url: "api/guest/cd/detach",
+    data,
+    method: "POST",
+  });
+};
+export const attachGuestDisk = (data = {}) => {
+  return axios.request({
+    url: "api/guest/disk/attach",
+    data,
+    method: "POST",
+  });
+};
+export const detachGuestDisk = (data = {}) => {
+  return axios.request({
+    url: "api/guest/disk/detach",
+    data,
+    method: "POST",
+  });
+};
+export const attachGuestNetwork = (data = {}) => {
+  return axios.request({
+    url: "api/guest/network/attach",
+    data,
+    method: "POST",
+  });
+};
+export const detachGuestNetwork = (data = {}) => {
+  return axios.request({
+    url: "api/guest/network/detach",
+    data,
+    method: "POST",
+  });
+};

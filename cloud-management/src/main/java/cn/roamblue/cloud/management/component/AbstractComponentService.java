@@ -11,6 +11,7 @@ import cn.roamblue.cloud.management.servcie.AbstractService;
 import cn.roamblue.cloud.management.servcie.AllocateService;
 import cn.roamblue.cloud.management.servcie.GuestService;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.GuestNameUtil;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public abstract class AbstractComponentService extends AbstractService {
             int diskTemplateId = templateList.get(0).getTemplateId();
             String uid = UUID.randomUUID().toString().replace("-", "");
             GuestEntity guest = GuestEntity.builder()
-                    .name(uid)
+                    .name(GuestNameUtil.getName())
                     .description(this.getComponentName())
                     .busType(cn.roamblue.cloud.common.util.Constant.DiskBus.VIRTIO)
                     .cpu(1)
