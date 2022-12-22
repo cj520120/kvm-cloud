@@ -390,6 +390,11 @@ export default {
 				getVolumeInfo({ volumeId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_volume_info(res.data)
+					} else if (res.code == 4000001) {
+						let findIndex = this.volumes.findIndex((v) => v.volumeId === notify.id)
+						if (findIndex >= 0) {
+							this.volumes.splice(findIndex, 1)
+						}
 					}
 				})
 			}

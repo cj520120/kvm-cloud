@@ -198,6 +198,11 @@ export default {
 				getHostInfo({ hostId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_host_info(res.data)
+					}else if (res.code == 7000001) {
+						let findIndex = this.hosts.findIndex((v) => v.hostId ===notify.id)
+						if (findIndex >= 0) {
+							this.hosts.splice(findIndex, 1)
+						}
 					}
 				})
 			}

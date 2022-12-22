@@ -81,7 +81,7 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
         TemplateVolumeEntity targetVolume = this.templateVolumeMapper.selectById(param.getTargetTemplateVolumeId());
         if (targetVolume.getStatus() == cn.roamblue.cloud.management.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
+                targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.TemplateStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
                 this.templateVolumeMapper.updateById(targetVolume);
@@ -89,7 +89,7 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
                 template.setStatus(cn.roamblue.cloud.management.util.Constant.TemplateStatus.READY);
                 this.templateMapper.updateById(template);
             } else {
-                targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.ERROR);
+                targetVolume.setStatus(cn.roamblue.cloud.management.util.Constant.TemplateStatus.ERROR);
                 this.templateVolumeMapper.deleteById(param.getTargetTemplateVolumeId());
 
                 TemplateEntity template = this.templateMapper.selectById(targetVolume.getTemplateId());

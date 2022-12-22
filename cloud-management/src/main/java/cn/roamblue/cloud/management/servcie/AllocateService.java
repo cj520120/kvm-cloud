@@ -3,6 +3,7 @@ package cn.roamblue.cloud.management.servcie;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
+import cn.roamblue.cloud.management.config.ApplicationConfig;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
@@ -10,6 +11,7 @@ import cn.roamblue.cloud.management.data.entity.StorageEntity;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +23,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class AllocateService extends AbstractService {
-
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
@@ -65,6 +68,10 @@ public class AllocateService extends AbstractService {
             return host;
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
+            for (HostEntity host : list) {
+                host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
+                host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
+            }
             list = list.stream().filter(t -> hostVerify(t, cpu, memory))
                     .collect(Collectors.toList());
             Collections.shuffle(list);

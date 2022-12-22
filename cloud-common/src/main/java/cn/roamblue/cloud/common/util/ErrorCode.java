@@ -46,7 +46,8 @@ public final class ErrorCode {
     /**
      * Template
      */
-    public static final int TEMPLATE_NOT_READY = BASE_TEMPLATE_ERROR + 1;
+    public static final int TEMPLATE_NOT_FOUND = BASE_TEMPLATE_ERROR + 1;
+    public static final int TEMPLATE_NOT_READY = BASE_TEMPLATE_ERROR +2;
     /**
      * HOst
      */

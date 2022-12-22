@@ -159,6 +159,11 @@ export default {
 				getSnapshotInfo({ snapshotVolumeId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_snapshot_info(res.data)
+					} else if (res.code == 6000001) {
+						let findIndex = this.snapshots.findIndex((v) => v.snapshotVolumeId === notify.id)
+						if (findIndex >= 0) {
+							this.snapshots.splice(findIndex, 1)
+						}
 					}
 				})
 			}

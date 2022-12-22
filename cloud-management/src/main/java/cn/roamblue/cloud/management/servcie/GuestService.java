@@ -51,7 +51,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机不存在");
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
@@ -463,14 +463,17 @@ public class GuestService extends AbstractService {
                 for (GuestDiskEntity guestDisk : guestDiskList) {
                     this.guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
                 }
-                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
-                for (VolumeEntity volume : guestVolumeList) {
-                    volume.setStatus(Constant.VolumeStatus.DESTROY);
-                    volumeMapper.updateById(volume);
-                    DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
-                    operateTask.addTask(operate);
+                if (!guestDiskList.isEmpty()) {
+                    List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
+                    for (VolumeEntity volume : guestVolumeList) {
+                        volume.setStatus(Constant.VolumeStatus.DESTROY);
+                        volumeMapper.updateById(volume);
+                        DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
+                        operateTask.addTask(operate);
+                    }
                 }
                 this.vncService.destroyGuest(guestId);
+                this.guestMapper.deleteById(guestId);
                 return ResultUtil.success();
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");

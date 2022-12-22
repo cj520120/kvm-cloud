@@ -56,8 +56,7 @@ public class Constant {
         public static final int STOPPING = 3;
         public static final int STOP = 4;
         public static final int REBOOT = 5;
-        public static final int DESTROY = 6;
-        public static final int ERROR = 7;
+        public static final int ERROR = 6;
     }
 
     public static class TemplateStatus {

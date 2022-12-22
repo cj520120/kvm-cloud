@@ -45,6 +45,9 @@ public class TemplateService extends AbstractService {
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
         TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id", templateId));
+        if (template == null) {
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+        }
         return ResultUtil.success(this.initTemplateModel(template));
     }
 
@@ -101,7 +104,6 @@ public class TemplateService extends AbstractService {
             switch (guest.getStatus()) {
                 case Constant.GuestStatus.STOP:
                 case Constant.GuestStatus.ERROR:
-                case Constant.GuestStatus.DESTROY:
                     break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");

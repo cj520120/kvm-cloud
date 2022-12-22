@@ -2,6 +2,7 @@ package cn.roamblue.cloud.management.servcie;
 
 import cn.hutool.core.convert.impl.BeanConverter;
 import cn.roamblue.cloud.management.component.VncService;
+import cn.roamblue.cloud.management.config.ApplicationConfig;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.model.*;
@@ -34,8 +35,8 @@ public abstract class AbstractService {
     @Autowired
     @Lazy
     protected OperateTask operateTask;
-
-
+    @Autowired
+    protected ApplicationConfig applicationConfig;
     @Autowired
     protected GuestVncMapper guestVncMapper;
     @Autowired
@@ -67,6 +68,9 @@ public abstract class AbstractService {
     }
 
     protected HostModel initHost(HostEntity entity) {
+
+        entity.setTotalCpu((int) (entity.getTotalCpu() * applicationConfig.getOverCpu()));
+        entity.setTotalMemory((long) (entity.getTotalMemory() * applicationConfig.getOverMemory()));
         return new BeanConverter<>(HostModel.class).convert(entity, null);
     }
 

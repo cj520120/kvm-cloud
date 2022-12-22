@@ -171,6 +171,11 @@ export default {
 				getStorageInfo({ storageId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_storate_info(res.data)
+					} else if (res.code == 3000001) {
+						let findIndex = this.storages.findIndex((v) => v.storageId === notify.id)
+						if (findIndex >= 0) {
+							this.storages.splice(findIndex, 1)
+						}
 					}
 				})
 			}

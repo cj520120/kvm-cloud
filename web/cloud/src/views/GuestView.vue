@@ -54,7 +54,7 @@
 					</el-row>
 					<el-row style="text-align: left; margin: 20px 0">
 						<el-button @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
-						<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">停止虚拟机</el-button>
+						<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini">停止虚拟机</el-button>
 						<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">重启虚拟机</el-button>
 
 						<el-button @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-if="show_guest_info.current_guest.type !== 0">修改配置</el-button>
@@ -132,8 +132,114 @@
 					</el-row>
 					<el-row>
 						<el-form ref="createForm" :model="create_guest" label-width="100px" class="demo-ruleForm">
-							<el-form-item label="名称" prop="description">
-								<el-input v-model="create_guest.description"></el-input>
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="名称" prop="description">
+										<el-input v-model="create_guest.description"></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="总线方式">
+										<el-select v-model="create_guest.busType" style="width: 100%" placeholder="总线方式">
+											<el-option label="virtio" value="virtio" />
+											<el-option label="ide" value="ide" />
+											<el-option label="scsi" value="scsi" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="运行主机">
+										<el-select v-model="create_guest.hostId" style="width: 100%">
+											<el-option label="随机" :value="0"></el-option>
+											<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="架构">
+										<el-select v-model="create_guest.schemeId" style="width: 100%" placeholder="请选择架构">
+											<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="网络">
+										<el-select v-model="create_guest.networkId" style="width: 100%" placeholder="请选择网络">
+											<el-option v-for="item in this.networks" :key="item.networkId" :label="item.name" :value="item.networkId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="网络驱动">
+										<el-select v-model="create_guest.networkDeviceType" style="width: 100%" placeholder="请选择网卡驱动">
+											<el-option label="virtio" value="virtio" />
+											<el-option label="rtl8139" value="rtl8139" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="安装方式">
+										<el-select v-model="create_guest.type" style="width: 100%" placeholder="请选择安装方式">
+											<el-option label="ISO镜像" :value="0" />
+											<el-option label="模版安装" :value="1" />
+											<el-option label="快照安装" :value="2" />
+											<el-option label="现有磁盘" :value="3" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="磁盘类型" v-if="create_guest.type !== 3">
+										<el-select v-model="create_guest.volumeType" style="width: 100%">
+											<el-option label="raw" value="raw"></el-option>
+											<el-option label="qcow" value="qcow"></el-option>
+											<el-option label="qcow2" value="qcow2"></el-option>
+											<el-option label="vdi" value="vdi"></el-option>
+											<el-option label="vmdk" value="vmdk"></el-option>
+											<el-option label="vpc" value="vpc"></el-option>
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="ISO模版" v-if="create_guest.type === 0">
+										<el-select v-model="create_guest.isoTemplateId" style="width: 100%" placeholder="请选择光盘镜像">
+											<el-option v-for="item in this.iso_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="系统模版" v-if="create_guest.type === 1">
+										<el-select v-model="create_guest.diskTemplateId" style="width: 100%" placeholder="请选择模版">
+											<el-option v-for="item in this.disk_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="快照模版" v-if="create_guest.type === 2">
+										<el-select v-model="create_guest.snapshotVolumeId" style="width: 100%" placeholder="请选择系统快照">
+											<el-option v-for="item in this.snapshot_template" :key="item.snapshotVolumeId" :label="item.name" :value="item.snapshotVolumeId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="可用磁盘" v-if="create_guest.type === 3">
+										<el-select v-model="create_guest.volumeId" style="width: 100%" placeholder="请选择系统磁盘">
+											<el-option v-for="item in this.attach_volumes" :key="item.volumeId" :label="item.description" :value="item.volumeId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="存储池" v-if="create_guest.type !== 3">
+										<el-select v-model="create_guest.storageId" style="width: 100%">
+											<el-option label="随机" :value="0"></el-option>
+											<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
+								<el-input v-model="create_guest.size"></el-input>
 							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="create_guest_click">立即创建</el-button>
@@ -168,7 +274,7 @@
 		</el-dialog>
 		<el-dialog title="挂载光驱" :visible.sync="attach_cd_room_dialog_visiable" width="400px">
 			<el-select v-model="attach_cd_room_guest.templateId" style="width: 100%" placeholder="请选择光盘镜像">
-				<el-option v-for="item in this.cd_rooms" :key="item.templateId" :label="item.name" :value="item.templateId" />
+				<el-option v-for="item in this.iso_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
 			</el-select>
 			<span slot="footer" class="dialog-footer">
 				<el-button @click="attach_cd_room_dialog_visiable = false">取 消</el-button>
@@ -219,8 +325,8 @@
 						<el-option label="scsi" value="scsi" />
 					</el-select>
 				</el-form-item>
-				<el-form-item label="架构">
-					<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择架构">
+				<el-form-item label="计算方案">
+					<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择计算方案">
 						<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
 					</el-select>
 				</el-form-item>
@@ -233,7 +339,7 @@
 	</div>
 </template>
 <script>
-import { getGuestList, getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork, getNotAttachVolumeList, attachGuestDisk, detachGuestDisk, modifyGuest, getSchemeList } from '@/api/api'
+import { getGuestList, getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork, getNotAttachVolumeList, attachGuestDisk, detachGuestDisk, modifyGuest, getSchemeList, getSnapshotList } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
 import HeadViewVue from './HeadView.vue'
@@ -274,10 +380,20 @@ export default {
 				networks: []
 			},
 			create_guest: {
+				type: 0,
 				description: '',
+				busType: 'virtio',
+				hostId: 0,
+				schemeId: '',
+				networkId: '',
+				networkDeviceType: 'virtio',
+				volumeType: 'qcow2',
+				isoTemplateId: '',
+				diskTemplateId: '',
+				snapshotVolumeId: '',
+				volumeId: '',
 				storageId: 0,
-				guestType: 'qcow2',
-				guestSize: 100
+				size: 100
 			},
 			start_guest: {
 				hostId: 0,
@@ -310,7 +426,9 @@ export default {
 			storages: [],
 			hosts: [],
 			networks: [],
-			cd_rooms: [],
+			iso_template: [],
+			disk_template: [],
+			snapshot_template: [],
 			attach_volumes: [],
 			schemes: [],
 			current_page: 1,
@@ -333,11 +451,6 @@ export default {
 	methods: {
 		async init_view() {
 			this.data_loading = true
-			await getStorageList().then((res) => {
-				if (res.code == 0) {
-					this.storages = res.data
-				}
-			})
 			await getGuestList()
 				.then((res) => {
 					if (res.code == 0) {
@@ -370,10 +483,25 @@ export default {
 				}
 			})
 		},
-		async load_all_cd_rooms() {
+		async load_all_template() {
 			await getTemplateList().then((res) => {
 				if (res.code === 0) {
-					this.cd_rooms = res.data.filter((v) => v.templateType == 0 && v.status === 2)
+					this.iso_template = res.data.filter((v) => v.templateType == 0 && v.status === 2)
+					this.disk_template = res.data.filter((v) => v.templateType == 2 && v.status === 2)
+				}
+			})
+		},
+		async load_all_storage() {
+			await getStorageList().then((res) => {
+				if (res.code == 0) {
+					this.storages = res.data.filter((v) => v.status == 1)
+				}
+			})
+		},
+		async load_all_snapshot() {
+			await getSnapshotList().then((res) => {
+				if (res.code == 0) {
+					this.snapshot_template = res.data.filter((v) => v.status == 1)
 				}
 			})
 		},
@@ -511,8 +639,6 @@ export default {
 				case 5:
 					return '重启中'
 				case 6:
-					return '正在销毁'
-				case 7:
 					return '虚拟机错误'
 				default:
 					return `未知状态[${guest.status}]`
@@ -523,6 +649,11 @@ export default {
 				getGuestInfo({ guestId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_guest_info(res.data)
+					} else if (res.code == 2000001) {
+						let findIndex = this.guests.findIndex((v) => v.guestId ===notify.id)
+						if (findIndex >= 0) {
+							this.guests.splice(findIndex, 1)
+						}
 					}
 				})
 			}
@@ -530,16 +661,51 @@ export default {
 		show_guest_list_page() {
 			this.show_type = 0
 		},
-		show_create_guest_click() {
-			if (this.$refs['createForm']) {
-				this.$refs['createForm'].resetFields()
-			}
+		async show_create_guest_click() {
+			this.load_all_attach_volumes()
+			this.load_all_host()
+			this.load_all_template()
+			this.load_all_storage()
+			this.load_all_schemes()
+			this.load_all_networks()
+			this.load_all_snapshot()
+
+			this.create_guest.isoTemplateId = ''
+			this.create_guest.diskTemplateId = ''
+			this.create_guest.snapshotVolumeId = ''
+			this.create_guest.volumeId = ''
+			this.create_guest.type = 0
 			this.show_type = 2
 		},
 		create_guest_click() {
+			switch (this.create_guest.type) {
+				case 0:
+					this.create_guest.diskTemplateId = 0
+					this.create_guest.snapshotVolumeId = 0
+					this.create_guest.volumeId = 0
+					break
+				case 1:
+					this.create_guest.isoTemplateId = 0
+					this.create_guest.snapshotVolumeId = 0
+					this.create_guest.volumeId = 0
+					this.create_guest.size = 0
+					break
+				case 2:
+					this.create_guest.isoTemplateId = 0
+					this.create_guest.diskTemplateId = 0
+					this.create_guest.volumeId = 0
+					this.create_guest.size = 0
+					break
+				case 3:
+					this.create_guest.isoTemplateId = 0
+					this.create_guest.diskTemplateId = 0
+					this.create_guest.snapshotVolumeId = 0
+					this.create_guest.size = 0
+					break
+			}
 			createGuest(this.create_guest).then((res) => {
 				if (res.code === 0) {
-					this.guests.push(res.data)
+					this.update_guest_info(res.data)
 					this.show_type = 0
 				} else {
 					this.$notify.error({
@@ -749,7 +915,7 @@ export default {
 			this.stop_dialog_visiable = true
 		},
 		show_attach_cd_room_click(guest) {
-			this.load_all_cd_rooms()
+			this.load_all_template()
 			this.attach_cd_room_guest.guestId = guest.guestId
 			this.attach_cd_room_guest.templateId = ''
 			this.attach_cd_room_dialog_visiable = true
@@ -769,7 +935,13 @@ export default {
 		destroy_guest(guest) {
 			destroyGuest({ guestId: guest.guestId }).then((res) => {
 				if (res.code === 0) {
-					guest.status = 9
+					let findIndex = this.guests.findIndex((v) => v.guestId === guest.guestId)
+					if (findIndex >= 0) {
+						this.guests.splice(findIndex, 1)
+					}
+					if (this.show_type === 1) {
+						this.show_type = 0
+					}
 				} else {
 					this.$notify.error({
 						title: '错误',

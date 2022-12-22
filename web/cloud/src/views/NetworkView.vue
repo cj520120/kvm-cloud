@@ -236,6 +236,11 @@ export default {
 				getNetworkInfo({ networkId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_network_info(res.data)
+					} else if (res.code == 1000001) {
+						let findIndex = this.networks.findIndex((v) => v.networkId === notify.id)
+						if (findIndex >= 0) {
+							this.networks.splice(findIndex, 1)
+						}
 					}
 				})
 			}

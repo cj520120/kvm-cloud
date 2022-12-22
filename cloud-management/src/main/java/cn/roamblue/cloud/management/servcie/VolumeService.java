@@ -116,7 +116,6 @@ public class VolumeService extends AbstractService {
             switch (guest.getStatus()) {
                 case Constant.GuestStatus.STOP:
                 case Constant.GuestStatus.ERROR:
-                case Constant.GuestStatus.DESTROY:
                     break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
@@ -175,7 +174,6 @@ public class VolumeService extends AbstractService {
             switch (guest.getStatus()) {
                 case Constant.GuestStatus.STOP:
                 case Constant.GuestStatus.ERROR:
-                case Constant.GuestStatus.DESTROY:
                     break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
@@ -263,7 +261,6 @@ public class VolumeService extends AbstractService {
             switch (guest.getStatus()) {
                 case Constant.GuestStatus.STOP:
                 case Constant.GuestStatus.ERROR:
-                case Constant.GuestStatus.DESTROY:
                     break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");

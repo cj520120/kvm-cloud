@@ -195,6 +195,11 @@ export default {
 				getTemplateInfo({ templateId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_template_info(res.data)
+					}else if (res.code == 5000001) {
+						let findIndex = this.templates.findIndex((v) => v.templateId === notify.id)
+						if (findIndex >= 0) {
+							this.templates.splice(findIndex, 1)
+						}
 					}
 				})
 			}

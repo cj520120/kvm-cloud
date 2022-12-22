@@ -55,12 +55,12 @@ public class GuestController {
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("networkId") int networkId,
                                               @RequestParam("networkDeviceType") String networkDeviceType,
+                                              @RequestParam("volumeType") String volumeType,
                                               @RequestParam("isoTemplateId") int isoTemplateId,
                                               @RequestParam("diskTemplateId") int diskTemplateId,
                                               @RequestParam("snapshotVolumeId") int snapshotVolumeId,
                                               @RequestParam("volumeId") int volumeId,
                                               @RequestParam("storageId") int storageId,
-                                              @RequestParam("volumeType") String volumeType,
                                               @RequestParam("size") long size) {
 
 
