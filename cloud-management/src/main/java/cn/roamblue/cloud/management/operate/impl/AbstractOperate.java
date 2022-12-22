@@ -3,8 +3,12 @@ package cn.roamblue.cloud.management.operate.impl;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.bean.TaskRequest;
+import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
+import cn.roamblue.cloud.common.util.AppUtils;
 import cn.roamblue.cloud.common.util.Constant;
+import cn.roamblue.cloud.common.util.ErrorCode;
+import cn.roamblue.cloud.management.config.ApplicationConfig;
 import cn.roamblue.cloud.management.data.entity.HostEntity;
 import cn.roamblue.cloud.management.data.mapper.*;
 import cn.roamblue.cloud.management.operate.Operate;
@@ -55,7 +59,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     @Lazy
     protected OperateTask operateTask;
-
+    @Autowired
+    protected ApplicationConfig applicationConfig;
     protected AbstractOperate(Class<T> paramType) {
         this.paramType = paramType;
     }
@@ -71,10 +76,19 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
                 .command(command)
                 .data(GsonBuilderUtil.create().toJson(data))
                 .taskId(param.getTaskId()).build();
-        Map<String, Object> map = new HashMap<>(2);
+        String nonce = String.valueOf(System.nanoTime());
+        Map<String, Object> map = new HashMap<>(6);
         map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
         map.put("taskId", UUID.randomUUID().toString());
         map.put("command", Constant.Command.SUBMIT_TASK);
+        map.put("clientId", host.getClientId());
+        map.put("nonce", nonce);
+        try {
+            String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+            map.put("sign", sign);
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
+        }
         String uri = String.format("%s/api/operate", host.getUri());
         String response = HttpUtil.post(uri, map);
         GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<Void>>() {

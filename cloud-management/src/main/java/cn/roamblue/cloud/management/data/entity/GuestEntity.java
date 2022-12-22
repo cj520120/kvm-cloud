@@ -48,6 +48,8 @@ public class GuestEntity {
     private Integer type;
     @TableField("guest_status")
     private Integer status;
+    @TableField("last_start_time")
+    private Date lastStartTime;
     @TableField("create_time")
     private Date createTime;
 

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
-    private float overCpu=1.0f;
+    private String managerUri;
+    private float overCpu = 1.0f;
     private float overMemory=1.0f;
 }

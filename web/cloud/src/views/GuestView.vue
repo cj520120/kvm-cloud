@@ -6,7 +6,8 @@
 			<el-main>
 				<el-card class="box-card" v-if="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_guest_click">创建虚拟机</el-button>
+						<el-col :span="12"><el-button style="float: left; padding: 3px 0" type="text" @click="show_create_guest_click">创建虚拟机</el-button></el-col>
+						<el-col :span="12"><el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_guest_show_page"></el-input></el-col>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="show_table_guests" style="width: 100%">
@@ -422,6 +423,7 @@ export default {
 				description: '',
 				schemeId: ''
 			},
+			keyword: '',
 			guests: [],
 			storages: [],
 			hosts: [],
@@ -580,11 +582,20 @@ export default {
 		update_guest_show_page() {
 			let nCount = 0
 			this.guests.forEach((item, index) => {
-				nCount++
-				if (nCount <= this.page_size * (this.current_page - 1) || nCount > this.page_size * this.current_page) {
-					item.isShow = false
+				let hasKeyword = true
+				let searchKeyword = this.keyword.trim().toLowerCase()
+				if (searchKeyword !== '') {
+					hasKeyword = '' + item.guestId === searchKeyword || item.description.toLowerCase().indexOf(searchKeyword) >= 0 || item.name.toLowerCase().indexOf(searchKeyword) >= 0 || item.guestIp.toLowerCase().indexOf(searchKeyword) >= 0
+				}
+				if (hasKeyword) {
+					nCount++
+					if (nCount <= this.page_size * (this.current_page - 1) || nCount > this.page_size * this.current_page) {
+						item.isShow = false
+					} else {
+						item.isShow = true
+					}
 				} else {
-					item.isShow = true
+					item.isShow = false
 				}
 				this.$set(this.guests, index, item)
 			})
@@ -650,7 +661,7 @@ export default {
 					if (res.code == 0) {
 						this.update_guest_info(res.data)
 					} else if (res.code == 2000001) {
-						let findIndex = this.guests.findIndex((v) => v.guestId ===notify.id)
+						let findIndex = this.guests.findIndex((v) => v.guestId === notify.id)
 						if (findIndex >= 0) {
 							this.guests.splice(findIndex, 1)
 						}

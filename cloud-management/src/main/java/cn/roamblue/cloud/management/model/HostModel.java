@@ -29,6 +29,8 @@ public class HostModel {
     private int threads;
     private int sockets;
     private int status;
+    private String clientId;
+    private String clientSecret;
     private Date createTime;
 
 }

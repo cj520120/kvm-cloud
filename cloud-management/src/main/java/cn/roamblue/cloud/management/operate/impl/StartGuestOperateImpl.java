@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * 启动虚拟机
@@ -57,6 +54,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         OsCdRoom cdRoom = getGuestCdRoom(guest);
         GuestVncEntity guestVncEntity = this.vncService.getGuestVnc(param.getGuestId());
         guest.setHostId(host.getHostId());
+        guest.setLastStartTime(new Date());
         this.guestMapper.updateById(guest);
         this.allocateService.initHostAllocate();
         SchemeEntity scheme = this.schemeMapper.selectById(guest.getSchemeId());

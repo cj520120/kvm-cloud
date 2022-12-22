@@ -114,7 +114,7 @@ public class HostOperateImpl implements HostOperate {
 
     @Override
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
-        hostUtil.init(request.getClientId(), request.getClientSecret());
+        hostUtil.init(request.getManagerUri(), request.getClientId(), request.getClientSecret());
         List<StorageCreateRequest> storageList = request.getStorageList();
         if (storageList != null) {
             for (StorageCreateRequest storage : storageList) {

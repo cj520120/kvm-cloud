@@ -11,6 +11,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
-    private String managerUri;
     private int taskThreadSize;
 }

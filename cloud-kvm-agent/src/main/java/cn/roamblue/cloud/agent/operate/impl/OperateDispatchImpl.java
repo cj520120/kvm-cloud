@@ -63,20 +63,19 @@ public class OperateDispatchImpl implements OperateDispatch {
                 log.error("执行任务出错.", err);
             } finally {
                 taskMap.remove(taskId);
-                String nonce = String.valueOf(System.currentTimeMillis());
+                String nonce = String.valueOf(System.nanoTime());
                 Map<String, Object> map = new HashMap<>(5);
                 map.put("taskId", taskId);
                 map.put("clientId", hostUtil.getClientId());
                 map.put("data", GsonBuilderUtil.create().toJson(result));
                 map.put("nonce", nonce);
-                String sign = null;
                 try {
-                    sign = AppUtils.sign(map, hostUtil.getClientId(), hostUtil.getClientSecret(), nonce);
+                    String sign = AppUtils.sign(map, hostUtil.getClientId(), hostUtil.getClientSecret(), nonce);
+                    map.put("sign", sign);
                 } catch (Exception err) {
-
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名出错");
                 }
-                map.put("sign", sign);
-                HttpUtil.post(this.config.getManagerUri() + "/api/task/report", map);
+                HttpUtil.post(hostUtil.getManagerUri() + "api/agent/task/report", map);
             }
         });
     }

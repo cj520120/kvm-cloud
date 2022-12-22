@@ -42,6 +42,16 @@ public class HostService extends AbstractService {
         return ResultUtil.success(this.initHost(host));
     }
 
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<HostModel> getHostInfoByClientId(String clientId) {
+        HostEntity host = this.hostMapper.selectOne(new QueryWrapper<HostEntity>().eq("client_id", clientId));
+        if (host == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+        }
+        return ResultUtil.success(this.initHost(host));
+    }
+
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic) {

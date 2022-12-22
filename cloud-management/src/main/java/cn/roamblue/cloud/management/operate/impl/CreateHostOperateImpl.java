@@ -76,6 +76,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
             }
         }
         InitHostRequest request = InitHostRequest.builder()
+                .managerUri(this.applicationConfig.getManagerUri())
                 .clientId(host.getClientId())
                 .clientSecret(host.getClientSecret())
                 .storageList(createStorageRequest)
