@@ -65,7 +65,13 @@ public class VolumeService extends AbstractService {
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
-
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
+        List<Integer> volumeIds= this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn("volume_id",volumeIds));
+        List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
+        return ResultUtil.success(models);
+    }
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);

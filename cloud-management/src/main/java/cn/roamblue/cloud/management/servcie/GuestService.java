@@ -271,20 +271,6 @@ public class GuestService extends AbstractService {
 
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> modifyGuest(int guestId, String description, String busType, int cpu, long memory) {
-        GuestEntity guest = this.guestMapper.selectById(guestId);
-        if (guest.getStatus() != Constant.GuestStatus.STOP) {
-            throw new CodeException(ErrorCode.GUEST_NOT_STOP, "请首先停止系统");
-        }
-        guest.setCpu(cpu);
-        guest.setMemory(memory);
-        guest.setBusType(busType);
-        guest.setDescription(description);
-        this.guestMapper.updateById(guest);
-        return ResultUtil.success(this.initGuestInfo(guest));
-    }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -356,7 +342,7 @@ public class GuestService extends AbstractService {
                 volume.setStatus(Constant.VolumeStatus.ATTACH_DISK);
                 this.volumeMapper.updateById(volume);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
-                        .guestDiskId(guestDisk.getGuestDiskId()).attach(true).volumeId(volumeId).guestId(guestId)
+                        .deviceId(guestDisk.getDeviceId()).attach(true).volumeId(volumeId).guestId(guestId)
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
@@ -387,8 +373,9 @@ public class GuestService extends AbstractService {
                 }
                 volume.setStatus(Constant.VolumeStatus.DETACH_DISK);
                 this.volumeMapper.updateById(volume);
+                this.guestDiskMapper.deleteById(guestDiskId);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
-                        .guestDiskId(guestDisk.getGuestDiskId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
+                        .deviceId(guestDisk.getDeviceId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
@@ -497,4 +484,27 @@ public class GuestService extends AbstractService {
         }
         return ResultUtil.success(guestVnc.getPassword());
     }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<GuestModel> modifyGuest(int guestId,String busType, String description, int schemeId) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.CREATING:
+            case Constant.GuestStatus.STOPPING:
+            case Constant.GuestStatus.RUNNING:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不允许变更配置.");
+            default:
+                SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
+                guest.setDescription(description);
+                guest.setBusType(busType);
+                guest.setSchemeId(scheme.getSchemeId());
+                guest.setCpu(scheme.getCpu());
+                guest.setMemory(scheme.getMemory());
+                guest.setSpeed(scheme.getSpeed());
+                this.guestMapper.updateById(guest);
+                return ResultUtil.success(this.initGuestInfo(guest));
+        }
+    }
+
 }

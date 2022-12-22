@@ -219,6 +219,12 @@ export const getVolumeList = (params = {}) => {
     params,
   });
 };
+export const getNotAttachVolumeList = (params = {}) => {
+  return axios.request({
+    url: "/api/volume/not/attach/all",
+    params,
+  });
+};
 export const getVolumeInfo = (params = {}) => {
   return axios.request({
     url: "/api/volume/info",
@@ -411,4 +417,5 @@ export const detachGuestNetwork = (data = {}) => {
     data,
     method: "POST",
   });
-};
+}; 
+

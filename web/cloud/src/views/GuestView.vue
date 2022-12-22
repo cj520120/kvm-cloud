@@ -17,6 +17,11 @@
 							<el-table-column label="配置" prop="cpu" width="150">
 								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_desplay(scope.row.memory) }}</template>
 							</el-table-column>
+							<el-table-column label="类型" width="100">
+								<template #default="scope">
+									<el-tag>{{ scope.row.type === 0 ? '系统主机' : '用户主机' }}</el-tag>
+								</template>
+							</el-table-column>
 							<el-table-column label="状态" prop="status" width="100">
 								<template #default="scope">
 									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
@@ -24,7 +29,7 @@
 							</el-table-column>
 							<el-table-column label="操作">
 								<template #default="scope">
-									<el-dropdown size="small" split-button placement="bottom-end" type="primary" @command="menu_command_click">
+									<el-dropdown size="small" @click="show_guest_info_click(scope.row)" split-button placement="bottom-end" type="primary" @command="menu_command_click">
 										虚拟机管理
 										<el-dropdown-menu slot="dropdown">
 											<el-dropdown-item :command="{ guest: scope.row, command: 'info' }">虚拟机详情</el-dropdown-item>
@@ -32,8 +37,8 @@
 											<el-dropdown-item :command="{ guest: scope.row, command: 'stop' }" :disabled="scope.row.status !== 2">停止虚拟机</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'vnc' }" :disabled="scope.row.status !== 2">远程桌面</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'reboot' }" :disabled="scope.row.status !== 2">重启虚拟机</el-dropdown-item>
-											<el-dropdown-item :command="{ guest: scope.row, command: 'attach_cd' }" :disabled="scope.row.cdRoom !== 0">挂载光驱</el-dropdown-item>
-											<el-dropdown-item :command="{ guest: scope.row, command: 'detach_cd' }" :disabled="scope.row.cdRoom === 0">卸载光驱</el-dropdown-item>
+											<el-dropdown-item :command="{ guest: scope.row, command: 'attach_cd' }" :disabled="scope.row.cdRoom !== 0" v-if="scope.row.type !== 0">挂载光驱</el-dropdown-item>
+											<el-dropdown-item :command="{ guest: scope.row, command: 'detach_cd' }" :disabled="scope.row.cdRoom === 0" v-if="scope.row.type !== 0">卸载光驱</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'destroy' }" divided>销毁虚拟机</el-dropdown-item>
 										</el-dropdown-menu>
 									</el-dropdown>
@@ -51,10 +56,14 @@
 						<el-button @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
 						<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">停止虚拟机</el-button>
 						<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">重启虚拟机</el-button>
+
+						<el-button @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-if="show_guest_info.current_guest.type !== 0">修改配置</el-button>
 						<el-button @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini">远程桌面</el-button>
-						<el-button @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0">挂载光驱</el-button>
-						<el-button @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0">卸载光驱</el-button>
-						<el-button @click="show_attach_network_click(show_guest_info.current_guest)" type="primary" size="mini">添加网卡</el-button>
+						<el-button @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-if="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
+						<el-button @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-if="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>
+						<el-button @click="show_attach_network_click(show_guest_info.current_guest)" type="primary" size="mini" v-if="show_guest_info.current_guest.type !== 0">添加网卡</el-button>
+						<el-button @click="show_attach_volume_click(show_guest_info.current_guest)" type="primary" size="mini" v-if="show_guest_info.current_guest.type !== 0">挂载磁盘</el-button>
+
 						<el-button @click="destroy_guest(show_guest_info.current_guest)" type="danger" size="mini">销毁虚拟机</el-button>
 					</el-row>
 					<el-row>
@@ -97,7 +106,7 @@
 									<el-table-column label="路径" prop="path" />
 									<el-table-column label="操作" width="100">
 										<template #default="scope">
-											<el-link type="danger" @click="detatch_disk_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-link>
+											<el-link type="danger" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-link>
 										</template>
 									</el-table-column>
 								</el-table>
@@ -185,10 +194,46 @@
 				<el-button type="primary" @click="attach_network_click">确 定</el-button>
 			</span>
 		</el-dialog>
+		<el-dialog title="挂载磁盘" :visible.sync="attach_volume_dialog_visiable" width="400px">
+			<el-form :model="start_guest" label-width="100px">
+				<el-form-item label="磁盘">
+					<el-select v-model="attach_volume_guest.volumeId" style="width: 100%" placeholder="请选择磁盘">
+						<el-option v-for="item in this.attach_volumes" :key="item.volumeId" :label="item.description" :value="item.volumeId" />
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="attach_volume_dialog_visiable = false">取 消</el-button>
+				<el-button type="primary" @click="attach_volume_click">确 定</el-button>
+			</span>
+		</el-dialog>
+		<el-dialog title="修改配置" :visible.sync="modify_guest_dialog_visiable" width="400px">
+			<el-form :model="start_guest" label-width="100px">
+				<el-form-item label="名称" prop="description">
+					<el-input v-model="modify_guest.description"></el-input>
+				</el-form-item>
+				<el-form-item label="总线方式">
+					<el-select v-model="modify_guest.busType" style="width: 100%" placeholder="总线方式">
+						<el-option label="virtio" value="virtio" />
+						<el-option label="ide" value="ide" />
+						<el-option label="scsi" value="scsi" />
+					</el-select>
+				</el-form-item>
+				<el-form-item label="架构">
+					<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择架构">
+						<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="modify_guest_dialog_visiable = false">取 消</el-button>
+				<el-button type="primary" @click="modify_guest_click">确 定</el-button>
+			</span>
+		</el-dialog>
 	</div>
 </template>
 <script>
-import { getGuestList, getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork } from '@/api/api'
+import { getGuestList, getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork, getNotAttachVolumeList, attachGuestDisk, detachGuestDisk, modifyGuest, getSchemeList } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
 import HeadViewVue from './HeadView.vue'
@@ -205,6 +250,8 @@ export default {
 			stop_dialog_visiable: false,
 			attach_cd_room_dialog_visiable: false,
 			attach_network_dialog_visiable: false,
+			attach_volume_dialog_visiable: false,
+			modify_guest_dialog_visiable: false,
 			show_type: 0,
 			show_guest_info: {
 				guestId: 0,
@@ -249,11 +296,23 @@ export default {
 				networkId: '',
 				driveType: 'virtio'
 			},
+			attach_volume_guest: {
+				guestId: 0,
+				volumeId: ''
+			},
+			modify_guest: {
+				guestId: 0,
+				busType: '',
+				description: '',
+				schemeId: ''
+			},
 			guests: [],
 			storages: [],
 			hosts: [],
 			networks: [],
 			cd_rooms: [],
+			attach_volumes: [],
+			schemes: [],
 			current_page: 1,
 			page_size: 10,
 			total_size: 0
@@ -289,6 +348,20 @@ export default {
 				.finally(() => {
 					this.data_loading = false
 				})
+		},
+		async load_all_schemes() {
+			await getSchemeList().then((res) => {
+				if (res.code === 0) {
+					this.schemes = res.data
+				}
+			})
+		},
+		async load_all_attach_volumes() {
+			await getNotAttachVolumeList().then((res) => {
+				if (res.code === 0) {
+					this.attach_volumes = res.data
+				}
+			})
 		},
 		async load_all_host() {
 			await getHostList().then((res) => {
@@ -557,7 +630,7 @@ export default {
 		detach_network_click(guestNetwork) {
 			detachGuestNetwork({ guestId: guestNetwork.guestId, guestNetworkId: guestNetwork.guestNetworkId }).then((res) => {
 				if (res.code === 0) {
-					this.update_guest_info(res.data.guest)
+					this.update_guest_info(res.data)
 					let findIndex = this.show_guest_info.networks.findIndex((item) => item.guestNetworkId === guestNetwork.guestNetworkId)
 					if (findIndex >= 0) {
 						this.show_guest_info.networks.splice(findIndex, 1)
@@ -566,6 +639,50 @@ export default {
 					this.$notify.error({
 						title: '错误',
 						message: `虚拟机附加网卡失败:${res.message}`
+					})
+				}
+			})
+		},
+		detach_volume_click(guestVolume) {
+			let attach = guestVolume.attach
+			detachGuestDisk({ guestId: attach.guestId, guestDiskId: attach.guestDiskId }).then((res) => {
+				if (res.code === 0) {
+					this.update_guest_info(res.data)
+					let findIndex = this.show_guest_info.volumes.findIndex((v) => v.attach.guestDiskId === attach.guestDiskId)
+					if (findIndex >= 0) {
+						this.show_guest_info.volumes.splice(findIndex, 1)
+					}
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: `卸载磁盘失败:${res.message}`
+					})
+				}
+			})
+		},
+		attach_volume_click() {
+			attachGuestDisk(this.attach_volume_guest).then((res) => {
+				if (res.code === 0) {
+					this.update_guest_info(res.data.guest)
+					this.show_guest_info.volumes.push(res.data.volume)
+					this.attach_volume_dialog_visiable = false
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: ` 挂载磁盘失败:${res.message}`
+					})
+				}
+			})
+		},
+		modify_guest_click() {
+			modifyGuest(this.modify_guest).then((res) => {
+				if (res.code === 0) {
+					this.update_guest_info(res.data)
+					this.modify_guest_dialog_visiable = false
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: ` 修改主机信息失败:${res.message}`
 					})
 				}
 			})
@@ -620,6 +737,12 @@ export default {
 			this.attach_network_guest.networkId = ''
 			this.attach_network_dialog_visiable = true
 		},
+		async show_attach_volume_click(guest) {
+			await this.load_all_attach_volumes()
+			this.attach_volume_guest.guestId = guest.guestId
+			this.attach_volume_guest.volumeId = ''
+			this.attach_volume_dialog_visiable = true
+		},
 		show_stop_guest_click(guest) {
 			this.stop_guest.guestId = guest.guestId
 			this.stop_guest.force = false
@@ -630,6 +753,14 @@ export default {
 			this.attach_cd_room_guest.guestId = guest.guestId
 			this.attach_cd_room_guest.templateId = ''
 			this.attach_cd_room_dialog_visiable = true
+		},
+		show_modify_guest_click(guest) {
+			this.load_all_schemes()
+			this.modify_guest.guestId = guest.guestId
+			this.modify_guest.description = guest.description
+			this.modify_guest.schemeId = guest.schemeId
+			this.modify_guest.busType = guest.busType
+			this.modify_guest_dialog_visiable = true
 		},
 		vnc_click(guest) {
 			let { href } = this.$router.resolve({ path: '/Vnc', query: { id: guest.guestId, description: guest.description } })

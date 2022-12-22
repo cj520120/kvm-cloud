@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChangeGuestDiskOperate extends BaseOperateParam {
-    private int guestDiskId;
+    private int deviceId;
     private int volumeId;
     private int guestId;
     private boolean attach;

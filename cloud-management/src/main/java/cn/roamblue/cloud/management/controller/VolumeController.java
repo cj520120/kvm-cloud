@@ -21,7 +21,10 @@ public class VolumeController {
     public ResultUtil<List<VolumeModel>> listVolumes() {
         return this.volumeService.listVolumes();
     }
-
+    @GetMapping("/api/volume/not/attach/all")
+    public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
+        return this.volumeService.listNoAttachVolumes();
+    }
     @GetMapping("/api/volume/info")
     public ResultUtil<VolumeModel> getVolumeInfo(@RequestParam("volumeId") int volumeId) {
         return this.volumeService.getVolumeInfo(volumeId);

@@ -37,7 +37,6 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ChangeGuestDiskOperate param) {
-        GuestDiskEntity guestDisk = guestDiskMapper.selectById(param.getGuestDiskId());
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         switch (volume.getStatus()) {
             case cn.roamblue.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
@@ -45,11 +44,11 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
                 GuestEntity guest = guestMapper.selectById(param.getGuestId());
                 if (guest.getHostId() > 0) {
                     HostEntity host = hostMapper.selectById(guest.getHostId());
-                    OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(guestDisk.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
+                    OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(param.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
                     if (param.isAttach()) {
-                        this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+                         this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
                     } else {
-                        this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                         this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
                     }
 
                 } else {
@@ -73,16 +72,12 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
-        GuestDiskEntity guestDisk = guestDiskMapper.selectById(param.getGuestDiskId());
-        VolumeEntity volume = volumeMapper.selectById(guestDisk.getVolumeId());
+        VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         switch (volume.getStatus()) {
             case cn.roamblue.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
             case cn.roamblue.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
                 volume.setStatus(cn.roamblue.cloud.management.util.Constant.VolumeStatus.READY);
                 volumeMapper.updateById(volume);
-                if (!param.isAttach()) {
-                    guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
-                }
                 break;
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());

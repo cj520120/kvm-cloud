@@ -54,7 +54,7 @@ public abstract class AbstractService {
 
     protected VolumeModel initVolume(GuestDiskEntity disk) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
-        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).build());
+        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).guestDiskId(disk.getGuestDiskId()).build());
         return model;
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractService {
         if (disk != null && disk.getGuestId() != 0) {
             GuestEntity guest = this.guestMapper.selectById(disk.getGuestId());
             if (guest != null) {
-                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).description(guest.getDescription()).build());
+                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).description(guest.getDescription()).guestDiskId(disk.getGuestDiskId()).build());
             }
         }
         return model;

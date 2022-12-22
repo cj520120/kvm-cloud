@@ -99,17 +99,6 @@ public class GuestController {
         return this.guestService.shutdown(guestId, force);
 
     }
-
-    @PostMapping("/api/guest/modify")
-    public ResultUtil<GuestModel> modifyGuest(@RequestParam("guestId") int guestId,
-                                              @RequestParam("description") String description,
-                                              @RequestParam("busType") String busType,
-                                              @RequestParam("cpu") int cpu,
-                                              @RequestParam("memory") long memory) {
-
-        return this.guestService.modifyGuest(guestId, description, busType, cpu, memory);
-    }
-
     @PostMapping("/api/guest/cd/attach")
     public ResultUtil<GuestModel> attachCdRoom(@RequestParam("guestId") int guestId,
                                                @RequestParam("templateId") int templateId) {
@@ -148,7 +137,13 @@ public class GuestController {
                                                 @RequestParam("guestNetworkId") int guestNetworkId) {
         return this.guestService.detachNetwork(guestId, guestNetworkId);
     }
-
+    @PostMapping("/api/guest/modify")
+    public ResultUtil<GuestModel> updateGuest(@RequestParam("guestId")int guestId,
+                                              @RequestParam("busType") String busType,
+                                              @RequestParam("description") String description,
+                                              @RequestParam("schemeId")int schemeId){
+        return this.guestService.modifyGuest(guestId,busType, description, schemeId);
+    }
     @DeleteMapping("/api/guest/destroy")
     public ResultUtil<Void> destroyGuest(@RequestParam("guestId") int guestId) {
         return this.guestService.destroyGuest(guestId);

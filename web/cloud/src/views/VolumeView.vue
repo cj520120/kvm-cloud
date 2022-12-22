@@ -40,7 +40,7 @@
 							</el-table-column>
 							<el-table-column label="操作" width="200">
 								<template #default="scope">
-									<el-dropdown size="small" split-button placement="bottom-end" type="primary" @command="menu_command_click">
+									<el-dropdown size="small" @click="show_volume_info(scope.row)" split-button placement="bottom-end" type="primary" @command="menu_command_click">
 										磁盘管理
 										<el-dropdown-menu slot="dropdown">
 											<el-dropdown-item :command="{ volume: scope.row, command: 'info' }">磁盘详情</el-dropdown-item>
