@@ -49,8 +49,4 @@ public class GuestInfo implements Serializable {
      * VNC端口号
      */
     private int vnc;
-    /**
-     * VNC密码
-     */
-    private String password;
 }

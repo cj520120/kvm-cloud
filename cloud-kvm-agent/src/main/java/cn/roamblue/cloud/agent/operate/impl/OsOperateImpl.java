@@ -469,7 +469,6 @@ public class OsOperateImpl implements OsOperate {
         if (domainInfo.state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
             String xml = domain.getXMLDesc(0);
             info.setVnc(VncUtil.getVnc(xml));
-            info.setPassword(VncUtil.getVncPassword(xml));
         }
         return info;
     }
