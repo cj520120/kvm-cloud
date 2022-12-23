@@ -7,6 +7,7 @@ import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
+import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.model.AttachGuestNetworkModel;
 import cn.roamblue.cloud.management.model.AttachGuestVolumeModel;
 import cn.roamblue.cloud.management.model.GuestModel;
@@ -35,6 +36,26 @@ public class GuestService extends AbstractService {
 
     @Autowired
     private AllocateService allocateService;
+    @Autowired
+    protected ComponentMapper componentMapper;
+
+    private boolean checkSystemComponent(int networkId, int componentType) {
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", componentType).eq("network_id", networkId).last("limit 0 ,1"));
+        if (component == null) {
+            return false;
+        }
+        GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
+        return vncGuest != null && Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING);
+    }
+
+    private void checkSystemComponent(int networkId) {
+        if (!this.checkSystemComponent(networkId, Constant.ComponentType.VNC)) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "网络Vnc服务未初始化完成,请稍后重试");
+        }
+        if (!this.checkSystemComponent(networkId, Constant.ComponentType.ROUTE)) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "网络路由服务未初始化完成,请稍后重试");
+        }
+    }
 
     private GuestModel initGuestInfo(GuestEntity entity) {
         GuestModel model = new BeanConverter<>(GuestModel.class).convert(entity, null);
@@ -99,6 +120,7 @@ public class GuestService extends AbstractService {
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
         }
+        this.checkSystemComponent(networkId);
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         String uid = UUID.randomUUID().toString().replace("-", "");
@@ -193,6 +215,7 @@ public class GuestService extends AbstractService {
         if (guest.getStatus() != Constant.GuestStatus.STOP) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态对主机进行重装");
         }
+        this.checkSystemComponent(guest.getNetworkId());
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId).eq("device_id", 0));
@@ -289,6 +312,7 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
+        this.checkSystemComponent(guest.getNetworkId());
         if (guest.getStatus() == Constant.GuestStatus.STOP) {
             guest.setHostId(hostId);
             guest.setStatus(Constant.GuestStatus.STARTING);

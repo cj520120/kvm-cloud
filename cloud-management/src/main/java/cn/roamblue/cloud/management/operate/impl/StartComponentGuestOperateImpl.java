@@ -8,6 +8,7 @@ import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.component.AbstractComponentService;
 import cn.roamblue.cloud.management.data.entity.ComponentEntity;
 import cn.roamblue.cloud.management.data.entity.GuestEntity;
+import cn.roamblue.cloud.management.data.entity.NetworkEntity;
 import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
 import cn.roamblue.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.roamblue.cloud.management.util.Constant;
@@ -44,6 +45,8 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     @Override
     protected List<OsNic> getGuestNetwork(GuestEntity guest) {
         List<OsNic> nicList = super.getGuestNetwork(guest);
+
+        NetworkEntity network = this.networkMapper.selectById(guest.getNetworkId());
         ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
         if (component != null && Objects.equals(component.getComponentType(), Constant.ComponentType.ROUTE)) {
             for (OsNic osNic : nicList) {
@@ -54,7 +57,21 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
                         .deviceId(0)
                         .name("")
                         .mac(IpCaculate.getMacAddrWithFormat(":"))
-                        .bridgeName(nicList.get(0).getBridgeName())
+                        .bridgeName(network.getBridge())
+                        .driveType(cn.roamblue.cloud.common.util.Constant.NetworkDriver.VIRTIO)
+                        .build();
+                nicList.add(0, metaServiceNic);
+            }
+            //如果是vlan，则写入网关地址的网卡
+            if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
+                for (OsNic osNic : nicList) {
+                    osNic.setDeviceId(osNic.getDeviceId() + 1);
+                }
+                OsNic metaServiceNic = OsNic.builder()
+                        .deviceId(0)
+                        .name("")
+                        .mac(IpCaculate.getMacAddrWithFormat(":"))
+                        .bridgeName(network.getBridge())
                         .driveType(cn.roamblue.cloud.common.util.Constant.NetworkDriver.VIRTIO)
                         .build();
                 nicList.add(0, metaServiceNic);

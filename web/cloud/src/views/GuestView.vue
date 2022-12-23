@@ -18,8 +18,8 @@
 						<el-table :v-loading="data_loading" :data="show_table_guests" style="width: 100%" @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="guestId" width="80" />
-							<el-table-column label="实例名" prop="name" width="200" />
-							<el-table-column label="标签" prop="description" width="200" />
+							<el-table-column label="实例名" prop="name" width="180" />
+							<el-table-column label="标签" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="配置" prop="cpu" width="150">
 								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_desplay(scope.row.memory) }}</template>

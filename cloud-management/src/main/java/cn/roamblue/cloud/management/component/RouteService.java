@@ -2,12 +2,16 @@ package cn.roamblue.cloud.management.component;
 
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
+import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.ComponentEntity;
+import cn.roamblue.cloud.management.data.entity.GuestEntity;
 import cn.roamblue.cloud.management.data.entity.GuestNetworkEntity;
 import cn.roamblue.cloud.management.data.entity.NetworkEntity;
 import cn.roamblue.cloud.management.util.Constant;
+import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,21 @@ public class RouteService extends AbstractComponentService {
         return "System Route";
     }
 
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void create(int networkId) {
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", Constant.ComponentType.VNC).eq("network_id", networkId).last("limit 0 ,1"));
+        if (component == null) {
+            return;
+        }
+        GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
+        if (vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING)) {
+            return;
+        }
+        super.create(networkId);
+    }
+
     @Override
     public GuestQmaRequest getQmaRequest(int guestId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
@@ -41,14 +60,19 @@ public class RouteService extends AbstractComponentService {
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth0").fileBody(this.getNicConfig(0, "169.254.254.254", null, null, null)).build())).build());
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         GuestNetworkEntity defaultGuestNetwork = null;
-        NetworkEntity defaultNetwork = null;
+        NetworkEntity defaultNetwork = this.networkMapper.selectById(component.getNetworkId());
+        int startNetworkDeviceId = 1;
+        if (Objects.equals(defaultNetwork.getType(), Constant.NetworkType.VLAN)) {
+            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth1").fileBody(this.getNicConfig(1, defaultNetwork.getGateway(), defaultNetwork.getMask(), defaultNetwork.getGateway(), defaultNetwork.getDns())).build())).build());
+            startNetworkDeviceId = 2;
+        }
         for (int i = 0; i < guestNetworkList.size(); i++) {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
-            int index = guestNetwork.getDeviceId() + 1;
+            int index = guestNetwork.getDeviceId() + startNetworkDeviceId;
+
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
             if (Objects.equals(network.getNetworkId(), component.getNetworkId())) {
-                defaultNetwork = network;
                 defaultGuestNetwork = guestNetwork;
             }
         }

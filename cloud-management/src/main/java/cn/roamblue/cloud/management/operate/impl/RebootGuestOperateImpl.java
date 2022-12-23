@@ -61,6 +61,7 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
             if (guest.getHostId() > 0) {
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.RUNNING);
             } else {
+                guest.setLastHostId(0);
                 guest.setStatus(cn.roamblue.cloud.management.util.Constant.GuestStatus.STOP);
             }
             guestMapper.updateById(guest);

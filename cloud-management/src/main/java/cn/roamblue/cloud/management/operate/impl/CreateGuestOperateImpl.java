@@ -46,8 +46,10 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
                 this.allocateService.initHostAllocate();
             }
         } else {
+            guest.setLastHostId(0);
             guest.setStatus(Constant.GuestStatus.ERROR);
             guestMapper.updateById(guest);
+            this.allocateService.initHostAllocate();
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
