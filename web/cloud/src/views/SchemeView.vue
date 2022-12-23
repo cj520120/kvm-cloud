@@ -6,9 +6,9 @@
 				<NavViewVue current="Scheme" />
 			</el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_scheme">创建计算方案</el-button>
+						<el-button style="float: left; padding: 3px 0" type="text" @click="show_crate_scheme_info_click">创建计算方案</el-button>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="schemes" style="width: 100%">
@@ -22,7 +22,7 @@
 							</el-table-column>
 							<el-table-column label="操作" min-width="380">
 								<template #default="scope">
-									<el-button @click="show_scheme_info(scope.row)" type="" size="mini">详情</el-button>
+									<el-button @click="show_scheme_info_click(scope.row)" type="" size="mini">详情</el-button>
 									<el-button @click="show_modify_scheme(scope.row)" type="" size="mini">修改</el-button>
 									<el-button @click="destroy_scheme(scope.row)" type="danger" size="mini">删除</el-button>
 								</template>
@@ -30,7 +30,7 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 1">
+				<el-card class="box-card" v-show="this.show_type === 1">
 					<el-row slot="header">
 						<el-page-header @back="show_scheme_list" content="计算方案详情"></el-page-header>
 					</el-row>
@@ -50,7 +50,7 @@
 						</el-descriptions>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 2">
+				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_scheme_list()" content="创建计算方案" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -85,7 +85,7 @@
 						</el-form>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 3">
+				<el-card class="box-card" v-show="this.show_type === 3">
 					<el-row slot="header">
 						<el-page-header @back="show_scheme_list()" content="修改计算方案" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -125,8 +125,8 @@
 	</div>
 </template>
 <script>
-import { getSchemeList, destroyScheme, createScheme, moidfyScheme } from '@/api/api'
-
+import { getSchemeList, destroyScheme, createScheme, moidfyScheme, getSchemeInfo } from '@/api/api'
+import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
 import HeadViewVue from './HeadView.vue'
 export default {
@@ -138,7 +138,9 @@ export default {
 	data() {
 		return {
 			data_loading: false,
-			show_type: 0,
+			current_loading: false,
+			current_scheme_id: 0,
+			show_type: -1,
 			show_scheme: {},
 			create_scheme: {
 				name: '',
@@ -162,7 +164,33 @@ export default {
 			schemes: []
 		}
 	},
-	created() {
+	mixins: [Notify],
+	mounted() {
+		this.current_scheme_id = this.$route.query.id
+		if (this.current_scheme_id) {
+			this.show_type == 2
+			this.current_loading = true
+			getSchemeInfo({ schemeId: this.current_scheme_id })
+				.then((res) => {
+					if (res.code === 0) {
+						this.show_scheme_info_click(res.data)
+					} else {
+						this.$alert(`获取计算方案信息失败:${res.message}`, '提示', {
+							dangerouslyUseHTMLString: true,
+							confirmButtonText: '返回',
+							type: 'error'
+						}).then(() => {
+							this.show_type = 0
+						})
+					}
+				})
+				.finally(() => {
+					this.current_loading = false
+				})
+		} else {
+			this.show_type = 0
+		}
+		this.init_notify()
 		this.init_view()
 	},
 	methods: {
@@ -178,10 +206,40 @@ export default {
 					this.data_loading = false
 				})
 		},
+		update_scheme_info(scheme) {
+			let findIndex = this.schemes.findIndex((item) => item.schemeId === scheme.schemeId)
+			if (findIndex >= 0) {
+				this.$set(this.schemes, findIndex, scheme)
+			} else {
+				this.schemes.push(scheme)
+			}
+			if (this.show_scheme && this.show_scheme.schemeId === scheme.schemeId) {
+				this.show_scheme = scheme
+			}
+			this.$forceUpdate()
+		},
+		handle_notify_message(notify) {
+			if (notify.type === 8) {
+				getSchemeInfo({ schemeId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.update_scheme_info(res.data)
+					} else if (res.code == 8000001) {
+						let findIndex = this.schemes.findIndex((v) => v.networkId === notify.id)
+						if (findIndex >= 0) {
+							this.schemes.splice(findIndex, 1)
+						}
+					}
+					this.$forceUpdate()
+				})
+			}
+		},
 		show_scheme_list() {
 			this.show_type = 0
 		},
-		show_create_scheme() {
+		show_crate_scheme_info_click() {
+			if (this.$refs['createForm']) {
+				this.$refs['createForm'].resetFields()
+			}
 			this.show_type = 2
 		},
 		show_modify_scheme(scheme) {
@@ -195,20 +253,9 @@ export default {
 			this.modify_scheme.threads = scheme.threads
 			this.show_type = 3
 		},
-		show_scheme_info(scheme) {
+		show_scheme_info_click(scheme) {
 			this.show_scheme = scheme
 			this.show_type = 1
-		},
-		update_scheme_info(scheme) {
-			let findIndex = this.schemes.findIndex((item) => item.schemeId === scheme.schemeId)
-			if (findIndex >= 0) {
-				this.$set(this.schemes, findIndex, scheme)
-			} else {
-				this.schemes.push(scheme)
-			}
-			if (this.show_scheme && this.show_scheme.schemeId === scheme.schemeId) {
-				this.show_scheme = scheme
-			}
 		},
 		create_scheme_click() {
 			createScheme(this.create_scheme).then((res) => {
@@ -224,17 +271,25 @@ export default {
 			})
 		},
 		modify_scheme_click() {
-			moidfyScheme(this.modify_scheme).then((res) => {
-				if (res.code === 0) {
-					this.update_scheme_info(res.data)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `修改计算方案失败:${res.message}`
-					})
-				}
+			this.$confirm('修改计算方案, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					moidfyScheme(this.modify_scheme).then((res) => {
+						if (res.code === 0) {
+							this.update_scheme_info(res.data)
+							this.show_type = 0
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `修改计算方案失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		get_memory_desplay(memory) {
 			if (memory > 1024 * 1024) {
@@ -244,19 +299,27 @@ export default {
 			}
 		},
 		destroy_scheme(scheme) {
-			destroyScheme({ schemeId: scheme.schemeId }).then((res) => {
-				if (res.code === 0) {
-					let findIndex = this.schemes.findIndex((item) => item.schemeId === scheme.schemeId)
-					if (findIndex >= 0) {
-						this.schemes.splice(findIndex, 1)
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除计算方案失败:${res.message}`
-					})
-				}
+			this.$confirm('删除计算方案, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroyScheme({ schemeId: scheme.schemeId }).then((res) => {
+						if (res.code === 0) {
+							let findIndex = this.schemes.findIndex((item) => item.schemeId === scheme.schemeId)
+							if (findIndex >= 0) {
+								this.schemes.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除计算方案失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

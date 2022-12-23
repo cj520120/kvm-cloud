@@ -9,9 +9,15 @@ import VolumeView from "../views/VolumeView.vue";
 import SchemeView from "../views/SchemeView.vue";
 import GuestView from "../views/GuestView.vue";
 import VncView from "../views/VncView.vue";
+import HomeView from "../views/HomeView.vue";
 Vue.use(VueRouter);
 
 const routes = [
+  {
+    path: "/",
+    name: "Home",
+    component: HomeView,
+  },
   {
     path: "/Vnc",
     name: "Vnc",
@@ -21,11 +27,6 @@ const routes = [
     path: "/Guest",
     name: "Guest",
     component: GuestView,
-  },
-  {
-    path: "/",
-    name: "Network",
-    component: NetworkView,
   },
   {
     path: "/Network",

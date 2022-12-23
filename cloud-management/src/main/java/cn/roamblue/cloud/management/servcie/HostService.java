@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.servcie;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.AppUtils;
@@ -55,6 +56,18 @@ public class HostService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic) {
+        if (StringUtils.isEmpty(name)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入主机名称");
+        }
+        if (StringUtils.isEmpty(ip)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的主机ip");
+        }
+        if (StringUtils.isEmpty(uri)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的主机通信地址");
+        }
+        if (StringUtils.isEmpty(nic)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入主机网卡名称");
+        }
         String clientId = AppUtils.getAppId();
         String clientSecret = AppUtils.getAppSecret(clientId);
         HostEntity host = HostEntity.builder().hostIp(ip).displayName(name)
@@ -74,6 +87,7 @@ public class HostService extends AbstractService {
                 .title("添加主机[" + host.getDisplayName() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(host.getHostId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
     }
 
@@ -90,6 +104,7 @@ public class HostService extends AbstractService {
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
                 .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(host.getHostId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
     }
 
@@ -103,6 +118,7 @@ public class HostService extends AbstractService {
 
         host.setStatus(Constant.HostStatus.MAINTENANCE);
         this.hostMapper.updateById(host);
+        this.notifyService.publish(NotifyInfo.builder().id(host.getHostId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
 
     }
@@ -115,6 +131,7 @@ public class HostService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         this.hostMapper.deleteById(hostId);
+        this.notifyService.publish(NotifyInfo.builder().id(host.getHostId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success();
     }
 }

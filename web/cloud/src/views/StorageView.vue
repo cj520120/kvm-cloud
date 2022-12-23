@@ -6,7 +6,7 @@
 				<NavViewVue current="Storage" />
 			</el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
 						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_storage">创建存储池</el-button>
 					</el-row>
@@ -29,7 +29,7 @@
 							</el-table-column>
 							<el-table-column label="操作">
 								<template #default="scope">
-									<el-button @click="show_storage_info(scope.row)" type="" size="mini">存储池详情</el-button>
+									<el-button @click="show_storage_info_click(scope.row)" type="" size="mini">存储池详情</el-button>
 									<el-button @click="register_storage(scope.row)" type="success" size="mini">重新注册</el-button>
 									<el-button @click="pasue_storage(scope.row)" type="warning" size="mini" v-if="scope.row.status !== 2">开始维护</el-button>
 									<el-button @click="destroy_storage(scope.row)" type="danger" size="mini">销毁存储池</el-button>
@@ -38,7 +38,7 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 1">
+				<el-card class="box-card" v-show="this.show_type === 1">
 					<el-row slot="header">
 						<el-page-header @back="show_storage_list" content="存储池详情"></el-page-header>
 					</el-row>
@@ -64,7 +64,7 @@
 						</el-descriptions>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 2">
+				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_storage_list()" content="创建存储池" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -109,7 +109,9 @@ export default {
 	data() {
 		return {
 			data_loading: false,
-			show_type: 0,
+			current_loading: false,
+			current_network_id: 0,
+			show_type: -1,
 			show_storage: {},
 			create_storage: {
 				name: '',
@@ -122,7 +124,31 @@ export default {
 		}
 	},
 	mixins: [Notify],
-	created() {
+	mounted() {
+		this.current_storage_id = this.$route.query.id
+		if (this.current_storage_id) {
+			this.show_type == 2
+			this.current_loading = true
+			getStorageInfo({ storageId: this.current_storage_id })
+				.then((res) => {
+					if (res.code === 0) {
+						this.show_storage_info_click(res.data)
+					} else {
+						this.$alert(`获取存储池信息失败:${res.message}`, '提示', {
+							dangerouslyUseHTMLString: true,
+							confirmButtonText: '返回',
+							type: 'error'
+						}).then(() => {
+							this.show_type = 0
+						})
+					}
+				})
+				.finally(() => {
+					this.current_loading = false
+				})
+		} else {
+			this.show_type = 0
+		}
 		this.init_view()
 		this.init_notify()
 	},
@@ -189,7 +215,7 @@ export default {
 			}
 			this.show_type = 2
 		},
-		show_storage_info(storage) {
+		show_storage_info_click(storage) {
 			this.show_storage = storage
 			this.show_type = 1
 		},
@@ -237,40 +263,64 @@ export default {
 			}
 		},
 		pasue_storage(storage) {
-			pauseStorage({ storageId: storage.storageId }).then((res) => {
-				if (res.code === 0) {
-					this.update_storate_info(res.data)
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `暂停存储池失败:${res.message}`
-					})
-				}
+			this.$confirm('暂停存储池, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					pauseStorage({ storageId: storage.storageId }).then((res) => {
+						if (res.code === 0) {
+							this.update_storate_info(res.data)
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `暂停存储池失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		register_storage(storage) {
-			registerStorage({ storageId: storage.storageId }).then((res) => {
-				if (res.code === 0) {
-					storage.status = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `注册存储池失败:${res.message}`
-					})
-				}
+			this.$confirm('重新注册存储池, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					registerStorage({ storageId: storage.storageId }).then((res) => {
+						if (res.code === 0) {
+							storage.status = 0
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `注册存储池失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		destroy_storage(storage) {
-			destroyStorage({ storageId: storage.storageId }).then((res) => {
-				if (res.code === 0) {
-					storage.status = 3
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除存储池失败:${res.message}`
-					})
-				}
+			this.$confirm('删除存储池, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroyStorage({ storageId: storage.storageId }).then((res) => {
+						if (res.code === 0) {
+							storage.status = 3
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除存储池失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

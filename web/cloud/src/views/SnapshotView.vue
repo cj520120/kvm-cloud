@@ -6,7 +6,7 @@
 				<NavViewVue current="Snapshot" />
 			</el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row>
 						<el-table :v-loading="data_loading" :data="snapshots" style="width: 100%">
 							<el-table-column label="ID" prop="snapshotVolumeId" width="80" />
@@ -36,7 +36,7 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 1">
+				<el-card class="box-card" v-show="this.show_type === 1">
 					<el-row slot="header">
 						<el-page-header @back="show_snapshot_list" content="快照详情"></el-page-header>
 					</el-row>
@@ -169,19 +169,27 @@ export default {
 			}
 		},
 		destroy_snapshot(snapshot) {
-			destroySnapshot({ snapshotVolumeId: snapshot.snapshotVolumeId }).then((res) => {
-				if (res.code === 0) {
-					let findIndex = this.snapshots.findIndex((item) => item.snapshotId === snapshot.snapshotId)
-					if (findIndex >= 0) {
-						this.snapshots.splice(findIndex, 1)
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除快照失败:${res.message}`
-					})
-				}
+			this.$confirm('删除快照, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroySnapshot({ snapshotVolumeId: snapshot.snapshotVolumeId }).then((res) => {
+						if (res.code === 0) {
+							let findIndex = this.snapshots.findIndex((item) => item.snapshotId === snapshot.snapshotId)
+							if (findIndex >= 0) {
+								this.snapshots.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除快照失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

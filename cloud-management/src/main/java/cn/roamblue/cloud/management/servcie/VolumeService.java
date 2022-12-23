@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.servcie;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -16,6 +17,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -84,6 +86,12 @@ public class VolumeService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, String volumeType, long volumeSize) {
+        if (StringUtils.isEmpty(description)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
+        }
+        if (StringUtils.isEmpty(volumeType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择磁盘类型");
+        }
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()
@@ -102,12 +110,16 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
         operateTask.addTask(operateParam);
         VolumeModel model = this.initVolume(volume);
+        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(model);
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId, String volumeType) {
+        if (StringUtils.isEmpty(volumeType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择磁盘类型");
+        }
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
@@ -144,12 +156,18 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
         VolumeModel clone = this.initVolume(cloneVolume);
+        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyInfo.builder().id(cloneVolume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) {
+
+        if (size <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入新增的磁盘大小");
+        }
         VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.RESIZE);
         volume.setCapacity(volume.getCapacity() + size);
         volume.setStatus(Constant.VolumeStatus.RESIZE);
@@ -160,12 +178,16 @@ public class VolumeService extends AbstractService {
                 .size(size)
                 .build();
         operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(this.initVolume(volume));
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
+        if (StringUtils.isEmpty(volumeType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择迁移后磁盘类型");
+        }
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
@@ -202,7 +224,23 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
         VolumeModel migrate = this.initVolume(migrateVolume);
+        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyInfo.builder().id(migrate.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
+    }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<VolumeModel>> batchDestroyVolume(List<Integer> volumeIds) {
+        List<VolumeModel> models = new ArrayList<>(volumeIds.size());
+        for (Integer volumeId : volumeIds) {
+            try {
+                models.add(this.destroyVolume(volumeId).getData());
+            } catch (Exception err) {
+
+            }
+        }
+        return ResultUtil.success(models);
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -227,6 +265,7 @@ public class VolumeService extends AbstractService {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate);
                 VolumeModel source = this.initVolume(volume);
+                this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
@@ -248,12 +287,19 @@ public class VolumeService extends AbstractService {
         if (snapshotVolume == null) {
             throw new CodeException(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
         }
+        this.notifyService.publish(NotifyInfo.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
         return ResultUtil.success(this.initSnapshot(snapshotVolume));
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId, String snapshotName, String snapshotVolumeType) {
+        if (StringUtils.isEmpty(snapshotName)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择快照类型");
+        }
+        if (StringUtils.isEmpty(snapshotVolumeType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择快照磁盘类型");
+        }
         StorageEntity storage = this.allocateService.allocateStorage(0);
         VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.CREATE_SNAPSHOT);
         GuestEntity guest = this.getVolumeGuest(volumeId);
@@ -284,8 +330,10 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).title("创建磁盘快照[" + snapshotVolume.getName() + "]").sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
         operateTask.addTask(operateParam);
         SnapshotModel model = this.initSnapshot(snapshotVolume);
+        this.notifyService.publish(NotifyInfo.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
         return ResultUtil.success(model);
     }
+
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -302,6 +350,7 @@ public class VolumeService extends AbstractService {
                 BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("删除磁盘快照[" + volume.getName() + "]").snapshotVolumeId(snapshotVolumeId).build();
                 operateTask.addTask(operate);
                 SnapshotModel source = this.initSnapshot(volume);
+                this.notifyService.publish(NotifyInfo.builder().id(snapshotVolumeId).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");

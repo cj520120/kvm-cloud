@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.servcie;
 
 import cn.hutool.core.convert.impl.BeanConverter;
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -17,7 +18,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -48,6 +51,22 @@ public class GuestService extends AbstractService {
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<GuestModel>> listUserGuests() {
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("guest_type", Constant.GuestType.USER));
+        List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
+        return ResultUtil.success(models);
+    }
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<GuestModel>> listSystemGuests(int networkId) {
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("network_id", networkId).eq("guest_type", Constant.GuestType.SYSTEM));
+        List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
+        return ResultUtil.success(models);
+    }
+
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest == null) {
@@ -62,7 +81,24 @@ public class GuestService extends AbstractService {
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                               int storageId, String volumeType, long size) {
-
+        if (StringUtils.isEmpty(description)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
+        }
+        if (StringUtils.isEmpty(busType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择总线方式");
+        }
+        if (StringUtils.isEmpty(networkDeviceType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择网卡驱动");
+        }
+        if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
+        }
+        if (schemeId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择架构方案");
+        }
+        if (isoTemplateId > 0 && size <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
+        }
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         String uid = UUID.randomUUID().toString().replace("-", "");
@@ -119,6 +155,7 @@ public class GuestService extends AbstractService {
                     .title("创建客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
+            this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
             if (guestDisk != null) {
@@ -140,6 +177,7 @@ public class GuestService extends AbstractService {
                     .build();
             this.operateTask.addTask(operateParam);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
@@ -148,6 +186,9 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> reInstall(int guestId, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
 
+        if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() != Constant.GuestStatus.STOP) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态对主机进行重装");
@@ -162,9 +203,11 @@ public class GuestService extends AbstractService {
                     .capacity(size)
                     .storageId(storage.getStorageId())
                     .name(uid)
-                    .path(storage.getStorageId() + "/" + uid)
+                    .path(storage.getMountPath() + "/" + uid)
                     .type(volumeType)
                     .templateId(diskTemplateId)
+                    .allocation(0L)
+                    .capacity(0L)
                     .status(Constant.VolumeStatus.CREATING)
                     .build();
             this.volumeMapper.insert(volume);
@@ -182,9 +225,11 @@ public class GuestService extends AbstractService {
                     .templateId(diskTemplateId)
                     .volumeId(volume.getVolumeId())
                     .taskId(uid)
+                    .start(true)
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
+            this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
             if (guestDisk != null) {
@@ -206,7 +251,38 @@ public class GuestService extends AbstractService {
                     .build();
             this.operateTask.addTask(operateParam);
         }
+        this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         return ResultUtil.success(this.initGuestInfo(guest));
+    }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<GuestModel>> batchStart(List<Integer> guestIds) {
+        List<GuestModel> models = new ArrayList<>(guestIds.size());
+        for (Integer guestId : guestIds) {
+            try {
+                GuestModel model = this.start(guestId, 0).getData();
+                models.add(model);
+            } catch (Exception er) {
+
+            }
+        }
+        return ResultUtil.success(models);
+    }
+
+    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<GuestModel>> batchStop(List<Integer> guestIds) {
+        List<GuestModel> models = new ArrayList<>(guestIds.size());
+        for (Integer guestId : guestIds) {
+            try {
+                GuestModel model = this.shutdown(guestId, false).getData();
+                models.add(model);
+            } catch (Exception er) {
+
+            }
+        }
+        return ResultUtil.success(models);
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -229,6 +305,7 @@ public class GuestService extends AbstractService {
                         .title("启动客户机[" + guest.getDescription() + "]").build();
             }
             this.operateTask.addTask(operateParam);
+            this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
             return ResultUtil.success(this.initGuestInfo(guest));
         }
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -246,6 +323,7 @@ public class GuestService extends AbstractService {
                     .taskId(UUID.randomUUID().toString())
                     .title("重启客户机[" + guest.getDescription() + "]").build();
             this.operateTask.addTask(operateParam);
+            this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
             return ResultUtil.success(this.initGuestInfo(guest));
         }
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -264,6 +342,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("关闭客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -275,6 +354,9 @@ public class GuestService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachCdRoom(int guestId, int templateId) {
+        if (templateId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择光盘");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -285,6 +367,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -304,6 +387,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -313,6 +397,9 @@ public class GuestService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId) {
+        if (volumeId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要挂载的磁盘");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -346,6 +433,8 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(AttachGuestVolumeModel.builder().guest(this.initGuestInfo(guest)).volume(this.initVolume(volume)).build());
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
@@ -355,6 +444,9 @@ public class GuestService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachDisk(int guestId, int guestDiskId) {
+        if (guestDiskId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要卸载的磁盘");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
 
         switch (guest.getStatus()) {
@@ -379,6 +471,8 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
@@ -388,6 +482,12 @@ public class GuestService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<AttachGuestNetworkModel> attachNetwork(int guestId, int networkId, String driveType) {
+        if (networkId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要挂载的网络");
+        }
+        if (StringUtils.isEmpty(driveType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要网络驱动");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -415,6 +515,7 @@ public class GuestService extends AbstractService {
                         .title("挂载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
 
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
                 return ResultUtil.success(AttachGuestNetworkModel.builder().guest(this.initGuestInfo(guest)).network(this.initGuestNetwork(guestNetwork)).build());
             default:
@@ -426,6 +527,9 @@ public class GuestService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachNetwork(int guestId, int guestNetworkId) {
+        if (guestNetworkId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要卸载的网卡");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -439,6 +543,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
@@ -470,10 +575,12 @@ public class GuestService extends AbstractService {
                         volumeMapper.updateById(volume);
                         DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
                         operateTask.addTask(operate);
+                        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                     }
                 }
                 this.vncService.destroyGuest(guestId);
                 this.guestMapper.deleteById(guestId);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success();
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
@@ -491,6 +598,15 @@ public class GuestService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> modifyGuest(int guestId,String busType, String description, int schemeId) {
+        if (StringUtils.isEmpty(description)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的描述信息");
+        }
+        if (StringUtils.isEmpty(busType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择总线方式");
+        }
+        if (schemeId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择架构方案");
+        }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
             case Constant.GuestStatus.CREATING:
@@ -506,6 +622,7 @@ public class GuestService extends AbstractService {
                 guest.setMemory(scheme.getMemory());
                 guest.setSpeed(scheme.getSpeed());
                 this.guestMapper.updateById(guest);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
         }
     }

@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.servcie;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -17,9 +18,11 @@ import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,6 +56,31 @@ public class NetworkService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
+
+        if (StringUtils.isEmpty(name)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");
+        }
+        if (StringUtils.isEmpty(startIp)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入开始IP");
+        }
+        if (StringUtils.isEmpty(endIp)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入结束IP");
+        }
+        if (StringUtils.isEmpty(gateway)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网关地址");
+        }
+        if (StringUtils.isEmpty(mask)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入子网掩码");
+        }
+        if (StringUtils.isEmpty(bridge)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入桥接网卡名称");
+        }
+        if (StringUtils.isEmpty(dns)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入DNS信息");
+        }
+        if (Objects.equals(Constant.NetworkType.VLAN, type) && vlanId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
+        }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
                 .startIp(startIp)
@@ -81,6 +109,7 @@ public class NetworkService extends AbstractService {
 
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(network.getNetworkId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -95,6 +124,7 @@ public class NetworkService extends AbstractService {
         this.networkMapper.updateById(network);
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(network.getNetworkId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -107,6 +137,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(Constant.NetworkStatus.MAINTENANCE);
         this.networkMapper.updateById(network);
+        this.notifyService.publish(NotifyInfo.builder().id(network.getNetworkId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -126,6 +157,7 @@ public class NetworkService extends AbstractService {
         this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId));
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(network.getNetworkId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 }

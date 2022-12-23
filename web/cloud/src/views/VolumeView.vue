@@ -4,17 +4,19 @@
 		<el-container>
 			<el-aside width="200px"><NavViewVue current="Volume" /></el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
 						<el-col :span="12">
-							<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_volume">创建磁盘</el-button>
+							<el-link type="primary" @click="show_create_volume">创建磁盘</el-link>
+							<el-link style="padding: 0 10px" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-link>
 						</el-col>
 						<el-col :span="12">
 							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_show_page"></el-input>
 						</el-col>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="show_table_volumes" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange">
+							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="volumeId" width="80" />
 							<el-table-column label="名称" prop="description" />
 							<el-table-column label="磁盘类型" prop="type" width="100">
@@ -34,7 +36,7 @@
 							</el-table-column>
 							<el-table-column label="挂载主机" prop="allocation" width="200">
 								<template #default="scope">
-									<el-link type="primary" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-link>
+									<el-link type="primary" :href="`/#/Guest?id=${scope.row.attach.guestId}`" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-link>
 									<span v-if="!scope.row.attach">{{ scope.row.attach ? scope.row.attach.description : '-' }}</span>
 								</template>
 							</el-table-column>
@@ -63,7 +65,7 @@
 						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 1">
+				<el-card class="box-card" v-show="this.show_type === 1">
 					<el-row slot="header">
 						<el-page-header @back="show_volume_list" content="磁盘详情"></el-page-header>
 					</el-row>
@@ -83,8 +85,17 @@
 							<el-descriptions-item label="磁盘类型">{{ show_volume.type }}</el-descriptions-item>
 							<el-descriptions-item label="磁盘路径">{{ show_volume.path }}</el-descriptions-item>
 							<el-descriptions-item label="磁盘模版">{{ show_volume.template ? show_volume.template.name : '-' }}</el-descriptions-item>
-							<el-descriptions-item label="磁盘存储池">{{ get_storage_name(show_volume.storageId) }}</el-descriptions-item>
-							<el-descriptions-item label="挂载主机">{{ show_volume.attach ? show_volume.attach.description : '-' }}</el-descriptions-item>
+							<el-descriptions-item label="磁盘存储池">
+								<el-link type="primary" :href="`/#/Storage?id=${show_volume.storageId}`" :underline="false">
+									{{ get_storage_name(show_volume.storageId) }}
+								</el-link>
+							</el-descriptions-item>
+							<el-descriptions-item label="挂载主机">
+								<el-link type="primary" :href="`/#/Guest?id=${show_volume.attach.guestId}`" :underline="false" v-if="show_volume.attach">
+									{{ show_volume.attach.description }}
+								</el-link>
+								<span v-if="!show_volume.attach">-</span>
+							</el-descriptions-item>
 							<el-descriptions-item label="磁盘容量">{{ get_volume_desplay_size(show_volume.capacity) }}</el-descriptions-item>
 							<el-descriptions-item label="物理占用">{{ get_volume_desplay_size(show_volume.allocation) }}</el-descriptions-item>
 							<el-descriptions-item label="状态">
@@ -93,7 +104,7 @@
 						</el-descriptions>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 2">
+				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_volume_list()" content="创建磁盘" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -128,16 +139,16 @@
 						</el-form>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 3">
+				<el-card class="box-card" v-show="this.show_type === 3">
 					<el-row slot="header">
 						<el-page-header @back="show_volume_list()" content="克隆磁盘" style="color: #409eff"></el-page-header>
 					</el-row>
 					<el-row>
-						<el-form ref="createForm" :model="clone_volume" label-width="100px" class="demo-ruleForm">
+						<el-form ref="cloneForm" :model="clone_volume" label-width="100px" class="demo-ruleForm">
 							<el-form-item label="名称" prop="description">
 								<el-input v-model="clone_volume.description"></el-input>
 							</el-form-item>
-							<el-form-item label="存储池" prop="type">
+							<el-form-item label="存储池" prop="storageId">
 								<el-select v-model="clone_volume.storageId" style="width: 100%">
 									<el-option label="随机" :value="0"></el-option>
 									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
@@ -161,7 +172,7 @@
 					</el-row>
 				</el-card>
 
-				<el-card class="box-card" v-if="this.show_type === 4">
+				<el-card class="box-card" v-show="this.show_type === 4">
 					<el-row slot="header">
 						<el-page-header @back="show_volume_list()" content="迁移磁盘" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -239,7 +250,7 @@
 	</div>
 </template>
 <script>
-import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, getTemplateInfo, cloneVolume, migrateVolume, resizeVolume, createVolumeTemplate, createSnapshot } from '@/api/api'
+import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, getTemplateInfo, cloneVolume, migrateVolume, resizeVolume, createVolumeTemplate, createSnapshot, batchDestroyVolume } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
 import HeadViewVue from './HeadView.vue'
@@ -255,7 +266,9 @@ export default {
 			resize_dialog_visiable: false,
 			template_dialog_visiable: false,
 			snapshot_dialog_visiable: false,
-			show_type: 0,
+			current_volume_id: 0,
+			current_loading: false,
+			show_type: -1,
 			show_volume: {},
 			create_volume: {
 				description: '',
@@ -290,13 +303,38 @@ export default {
 			keyword: '',
 			volumes: [],
 			storages: [],
+			select_volumes: [],
 			current_page: 1,
 			page_size: 10,
 			total_size: 0
 		}
 	},
 	mixins: [Notify],
-	created() {
+	mounted() {
+		this.current_volume_id = this.$route.query.id
+		if (this.current_volume_id) {
+			this.show_type == 2
+			this.current_loading = true
+			getVolumeInfo({ volumeId: this.current_volume_id })
+				.then((res) => {
+					if (res.code === 0) {
+						this.show_volume_info(res.data)
+					} else {
+						this.$alert(`获取磁盘信息失败:${res.message}`, '提示', {
+							dangerouslyUseHTMLString: true,
+							confirmButtonText: '返回',
+							type: 'error'
+						}).then(() => {
+							this.show_type = 0
+						})
+					}
+				})
+				.finally(() => {
+					this.current_loading = false
+				})
+		} else {
+			this.show_type = 0
+		}
 		this.init_view()
 		this.init_notify()
 	},
@@ -308,6 +346,9 @@ export default {
 		}
 	},
 	methods: {
+		handleSelectionChange(val) {
+			this.select_volumes = val
+		},
 		async init_view() {
 			this.data_loading = true
 			await getStorageList().then((res) => {
@@ -394,12 +435,14 @@ export default {
 			if (findIndex >= 0) {
 				this.$set(this.volumes, findIndex, volume)
 			} else {
-				this.volumes.push(volume)
+				let index = this.page_size * (this.current_page - 1)
+				this.volumes.splice(index, 0, volume)
 			}
 			if (this.show_volume && this.show_volume.volumeId === volume.volumeId) {
 				this.show_volume = volume
 			}
 			this.update_show_page()
+			this.$forceUpdate()
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 2) {
@@ -515,71 +558,111 @@ export default {
 		},
 
 		clone_volume_click() {
-			cloneVolume(this.clone_volume).then((res) => {
-				if (res.code === 0) {
-					this.update_volume_info(res.data.clone)
-					this.update_volume_info(res.data.source)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `克隆磁盘失败:${res.message}`
-					})
-				}
+			this.$confirm('克隆磁盘, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					cloneVolume(this.clone_volume).then((res) => {
+						if (res.code === 0) {
+							this.update_volume_info(res.data.clone)
+							this.update_volume_info(res.data.source)
+							this.show_type = 0
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `克隆磁盘失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		migrate_volume_click() {
-			migrateVolume(this.migrate_volume).then((res) => {
-				if (res.code === 0) {
-					this.update_volume_info(res.data.migrate)
-					this.update_volume_info(res.data.source)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `迁移磁盘失败:${res.message}`
-					})
-				}
+			this.$confirm('迁移磁盘, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					migrateVolume(this.migrate_volume).then((res) => {
+						if (res.code === 0) {
+							this.update_volume_info(res.data.migrate)
+							this.update_volume_info(res.data.source)
+							this.show_type = 0
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `迁移磁盘失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		resize_volume_click() {
-			resizeVolume(this.resize_volume).then((res) => {
-				if (res.code === 0) {
-					this.update_volume_info(res.data)
-					this.resize_dialog_visiable = false
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `迁移磁盘失败:${res.message}`
-					})
-				}
+			this.$confirm('扩容磁盘, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					resizeVolume(this.resize_volume).then((res) => {
+						if (res.code === 0) {
+							this.update_volume_info(res.data)
+							this.resize_dialog_visiable = false
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `扩容磁盘失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		create_volume_template_click() {
-			createVolumeTemplate(this.template_volume).then((res) => {
-				if (res.code === 0) {
-					this.update_volume_status(this.template_volume.volumeId, 5)
-					this.template_dialog_visiable = false
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建磁盘模版失败:${res.message}`
-					})
-				}
+			this.$confirm('创建磁盘模版, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					createVolumeTemplate(this.template_volume).then((res) => {
+						if (res.code === 0) {
+							this.update_volume_status(this.template_volume.volumeId, 5)
+							this.template_dialog_visiable = false
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `创建磁盘模版失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		create_volume_snapshot_click() {
-			createSnapshot(this.snapshot_volume).then((res) => {
-				if (res.code === 0) {
-					this.update_volume_status(this.snapshot_volume.volumeId, 6)
-					this.snapshot_dialog_visiable = false
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建磁盘快照失败:${res.message}`
-					})
-				}
+			this.$confirm('创建磁盘快照, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					createSnapshot(this.snapshot_volume).then((res) => {
+						if (res.code === 0) {
+							this.update_volume_status(this.snapshot_volume.volumeId, 6)
+							this.snapshot_dialog_visiable = false
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `创建磁盘快照失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		get_volume_desplay_size(size) {
 			if (size > 1024 * 1024 * 1024 * 1024) {
@@ -595,16 +678,47 @@ export default {
 			}
 		},
 		destroy_volume(volume) {
-			destroyVolume({ volumeId: volume.volumeId }).then((res) => {
-				if (res.code === 0) {
-					this.update_volume_info(res.data)
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除磁盘失败:${res.message}`
-					})
-				}
+			this.$confirm('删除磁盘, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroyVolume({ volumeId: volume.volumeId }).then((res) => {
+						if (res.code === 0) {
+							this.update_volume_info(res.data)
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除磁盘失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
+		},
+		batch_destroy_volume_click() {
+			this.$confirm('批量删除所选磁盘, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			})
+				.then(() => {
+					let volumeIds = this.select_volumes.map((v) => v.volumeId).join(',')
+					batchDestroyVolume({ volumeIds: volumeIds }).then((res) => {
+						if (res.code === 0) {
+							res.data.filter((guest) => {
+								this.update_volume_info(guest)
+							})
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `批量删除磁盘:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

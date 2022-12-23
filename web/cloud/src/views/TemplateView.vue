@@ -6,7 +6,7 @@
 				<NavViewVue current="Template" />
 			</el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
 						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_template">创建模版</el-button>
 					</el-row>
@@ -35,7 +35,7 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 1">
+				<el-card class="box-card" v-show="this.show_type === 1">
 					<el-row slot="header">
 						<el-page-header @back="show_template_list" content="模版详情"></el-page-header>
 					</el-row>
@@ -47,7 +47,7 @@
 						<el-descriptions :column="2" size="medium" border>
 							<el-descriptions-item label="ID">{{ show_template.templateId }}</el-descriptions-item>
 							<el-descriptions-item label="模版名">{{ show_template.name }}</el-descriptions-item>
-							<el-descriptions-item label="下载地址" v-if="show_template.uri.indexOf('http') === 0">{{ show_template.uri }}</el-descriptions-item>
+							<el-descriptions-item label="下载地址" v-if="show_template.uri && show_template.uri.indexOf('http') === 0">{{ show_template.uri }}</el-descriptions-item>
 							<el-descriptions-item label="模版类型">
 								<el-tag>{{ get_template_type(show_template) }}</el-tag>
 							</el-descriptions-item>
@@ -57,7 +57,7 @@
 						</el-descriptions>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 2">
+				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_template_list()" content="创建模版" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -195,7 +195,7 @@ export default {
 				getTemplateInfo({ templateId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_template_info(res.data)
-					}else if (res.code == 5000001) {
+					} else if (res.code == 5000001) {
 						let findIndex = this.templates.findIndex((v) => v.templateId === notify.id)
 						if (findIndex >= 0) {
 							this.templates.splice(findIndex, 1)
@@ -229,31 +229,47 @@ export default {
 			})
 		},
 		download_template(template) {
-			downloadTemplate({ templateId: template.templateId }).then((res) => {
-				if (res.code === 0) {
-					this.update_template_info(res.data)
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `暂停模版失败:${res.message}`
-					})
-				}
+			this.$confirm('重新下载模版, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					downloadTemplate({ templateId: template.templateId }).then((res) => {
+						if (res.code === 0) {
+							this.update_template_info(res.data)
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `重新下载模版失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		destroy_template(template) {
-			destroyTemplate({ templateId: template.templateId }).then((res) => {
-				if (res.code === 0) {
-					let findIndex = this.templates.findIndex((item) => item.templateId === template.templateId)
-					if (findIndex >= 0) {
-						this.templates.splice(findIndex, 1)
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除模版失败:${res.message}`
-					})
-				}
+			this.$confirm('删除模版, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroyTemplate({ templateId: template.templateId }).then((res) => {
+						if (res.code === 0) {
+							let findIndex = this.templates.findIndex((item) => item.templateId === template.templateId)
+							if (findIndex >= 0) {
+								this.templates.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除模版失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

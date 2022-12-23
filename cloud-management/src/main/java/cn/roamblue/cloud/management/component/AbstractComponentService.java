@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.component;
 
 import cn.roamblue.cloud.common.bean.GuestQmaRequest;
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.ComponentMapper;
@@ -69,6 +70,7 @@ public abstract class AbstractComponentService extends AbstractService {
                     this.componentMapper.updateById(component);
                     BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
                     this.operateTask.addTask(operateParam);
+                    this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                     break;
                 case Constant.GuestStatus.ERROR:
                     this.guestService.destroyGuest(guest.getGuestId());
@@ -145,6 +147,7 @@ public abstract class AbstractComponentService extends AbstractService {
                     .taskId(uid)
                     .title("创建系统主机[" + this.getComponentName() + "]")
                     .build();
+            this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
             this.operateTask.addTask(operateParam);
         }
     }

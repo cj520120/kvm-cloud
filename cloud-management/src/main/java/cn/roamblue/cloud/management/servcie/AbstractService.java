@@ -44,6 +44,8 @@ public abstract class AbstractService {
     protected VncService vncService;
     @Autowired
     protected SchemeMapper schemeMapper;
+    @Autowired
+    protected NotifyService notifyService;
 
     protected StorageModel initStorageModel(StorageEntity entity) {
         return new BeanConverter<>(StorageModel.class).convert(entity, null);

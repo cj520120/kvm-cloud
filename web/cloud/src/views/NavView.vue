@@ -13,6 +13,7 @@ export default {
 		return {
 			path: '',
 			nav_menu_data: [
+				{ path: '/', title: '主页', icon: 'el-icon-house' },
 				{ path: '/Guest', title: '虚拟机管理', icon: 'el-icon-s-platform' },
 				{ path: '/Volume', title: '磁盘管理', icon: 'el-icon-bank-card' },
 				{ path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },

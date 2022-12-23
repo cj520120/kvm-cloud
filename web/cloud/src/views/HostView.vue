@@ -6,7 +6,7 @@
 				<NavViewVue current="Host" />
 			</el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
 						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_host">创建主机</el-button>
 					</el-row>
@@ -18,14 +18,14 @@
 							<el-table-column label="CPU" prop="hostIp" width="180">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
-										<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
+										<el-progress color="#67C23A" :percentage="Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
 							<el-table-column label="内存" prop="hostIp" width="180">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
-										<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
+										<el-progress color="#67C23A" :percentage="Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
@@ -36,7 +36,7 @@
 							</el-table-column>
 							<el-table-column label="操作">
 								<template #default="scope">
-									<el-button @click="show_host_info(scope.row)" type="" size="mini">主机详情</el-button>
+									<el-button @click="show_host_info_click(scope.row)" type="" size="mini">主机详情</el-button>
 									<el-button @click="register_host(scope.row)" type="success" size="mini">重新注册</el-button>
 									<el-button @click="pasue_host(scope.row)" type="warning" size="mini" v-if="scope.row.status !== 3">开始维护</el-button>
 									<el-button @click="destroy_host(scope.row)" type="danger" size="mini">销毁主机</el-button>
@@ -66,12 +66,12 @@
 							<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 							<el-descriptions-item label="内存">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(show_host.allocationMemory) + ' / 总共:' + get_memory_desplay(show_host.totalMemory)" placement="top">
-									<el-progress color="#67C23A" :percentage="parseInt((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
+									<el-progress color="#67C23A" :percentage="Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
 								</el-tooltip>
 							</el-descriptions-item>
 							<el-descriptions-item label="CPU">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + show_host.allocationCpu + '核 / 总共:' + show_host.totalCpu + '核'" placement="top" style="width: 150px">
-									<el-progress color="#67C23A" :percentage="parseInt((show_host.allocationCpu * 100) / show_host.totalCpu)"></el-progress>
+									<el-progress color="#67C23A" :percentage="Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu)"></el-progress>
 								</el-tooltip>
 							</el-descriptions-item>
 							<el-descriptions-item label="Cores">{{ show_host.cores }}</el-descriptions-item>
@@ -84,7 +84,7 @@
 						</el-descriptions>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 2">
+				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_host_list()" content="创建主机" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -124,7 +124,9 @@ export default {
 	data() {
 		return {
 			data_loading: false,
-			show_type: 0,
+			current_loading: false,
+			current_host_id: 0,
+			show_type: -1,
 			show_host: {},
 			create_host: {
 				displayName: '',
@@ -136,7 +138,32 @@ export default {
 		}
 	},
 	mixins: [Notify],
-	created() {
+
+	mounted() {
+		this.current_host_id = this.$route.query.id
+		if (this.current_host_id) {
+			this.show_type == 2
+			this.current_loading = true
+			getHostInfo({ hostId: this.current_host_id })
+				.then((res) => {
+					if (res.code === 0) {
+						this.show_host_info_click(res.data)
+					} else {
+						this.$alert(`获取主机信息失败:${res.message}`, '提示', {
+							dangerouslyUseHTMLString: true,
+							confirmButtonText: '返回',
+							type: 'error'
+						}).then(() => {
+							this.show_type = 0
+						})
+					}
+				})
+				.finally(() => {
+					this.current_loading = false
+				})
+		} else {
+			this.show_type = 0
+		}
 		this.init_view()
 		this.init_notify()
 	},
@@ -178,7 +205,7 @@ export default {
 			}
 			this.show_type = 2
 		},
-		show_host_info(host) {
+		show_host_info_click(host) {
 			this.show_host = host
 			this.show_type = 1
 		},
@@ -198,8 +225,8 @@ export default {
 				getHostInfo({ hostId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.update_host_info(res.data)
-					}else if (res.code == 7000001) {
-						let findIndex = this.hosts.findIndex((v) => v.hostId ===notify.id)
+					} else if (res.code == 7000001) {
+						let findIndex = this.hosts.findIndex((v) => v.hostId === notify.id)
 						if (findIndex >= 0) {
 							this.hosts.splice(findIndex, 1)
 						}
@@ -228,43 +255,67 @@ export default {
 			}
 		},
 		pasue_host(host) {
-			pauseHost({ hostId: host.hostId }).then((res) => {
-				if (res.code === 0) {
-					this.update_host_info(res.data)
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `暂停主机失败:${res.message}`
-					})
-				}
+			this.$confirm('维护主机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					pauseHost({ hostId: host.hostId }).then((res) => {
+						if (res.code === 0) {
+							this.update_host_info(res.data)
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `暂停主机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		register_host(host) {
-			registerHost({ hostId: host.hostId }).then((res) => {
-				if (res.code === 0) {
-					this.update_host_info(res.data)
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `注册主机失败:${res.message}`
-					})
-				}
+			this.$confirm('重新注册主机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					registerHost({ hostId: host.hostId }).then((res) => {
+						if (res.code === 0) {
+							this.update_host_info(res.data)
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `注册主机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		destroy_host(host) {
-			destroyHost({ hostId: host.hostId }).then((res) => {
-				if (res.code === 0) {
-					let findIndex = this.hosts.findIndex((item) => item.hostId === host.hostId)
-					if (findIndex >= 0) {
-						this.hosts.splice(findIndex, 1)
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除主机失败:${res.message}`
-					})
-				}
+			this.$confirm('删除当前主机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroyHost({ hostId: host.hostId }).then((res) => {
+						if (res.code === 0) {
+							let findIndex = this.hosts.findIndex((item) => item.hostId === host.hostId)
+							if (findIndex >= 0) {
+								this.hosts.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除主机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

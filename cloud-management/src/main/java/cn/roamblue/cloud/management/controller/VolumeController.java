@@ -9,7 +9,9 @@ import cn.roamblue.cloud.management.servcie.VolumeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class VolumeController {
@@ -64,6 +66,12 @@ public class VolumeController {
     @DeleteMapping("/api/volume/destroy")
     public ResultUtil<VolumeModel> destroyVolume(@RequestParam("volumeId") int volumeId) {
         return this.volumeService.destroyVolume(volumeId);
+    }
+
+    @DeleteMapping("/api/volume/destroy/batch")
+    public ResultUtil<List<VolumeModel>> batchDestroyVolume(@RequestParam("volumeIds") String volumeIdsStr) {
+        List<Integer> volumeIds = Arrays.asList(volumeIdsStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
+        return this.volumeService.batchDestroyVolume(volumeIds);
     }
 
     @GetMapping("/api/snapshot/all")

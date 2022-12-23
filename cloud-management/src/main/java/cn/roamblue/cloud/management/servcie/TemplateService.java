@@ -1,5 +1,6 @@
 package cn.roamblue.cloud.management.servcie;
 
+import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.util.ErrorCode;
@@ -15,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,8 +56,18 @@ public class TemplateService extends AbstractService {
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createTemplate(String name, String uri, int templateType, String volumeType) {
+        if (StringUtils.isEmpty(name)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版名称");
+        }
+        if (StringUtils.isEmpty(uri)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版地址");
+        }
+        if (StringUtils.isEmpty(volumeType)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘类型");
+        }
         TemplateEntity template = TemplateEntity.builder().uri(uri).name(name).templateType(templateType).volumeType(volumeType).status(Constant.TemplateStatus.DOWNLOAD).build();
         this.templateMapper.insert(template);
+        this.notifyService.publish(NotifyInfo.builder().id(template.getTemplateId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
     }
 
@@ -85,6 +97,7 @@ public class TemplateService extends AbstractService {
                 this.templateMapper.updateById(template);
                 BaseOperateParam operateParam = DownloadTemplateOperate.builder().taskId(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(template.getTemplateId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(this.initTemplateModel(template));
 
             default:
@@ -137,6 +150,7 @@ public class TemplateService extends AbstractService {
                 .title("创建磁盘模版[" + template.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyInfo.builder().id(template.getTemplateId()).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return ResultUtil.success(this.initTemplateModel(template));
 
     }
@@ -146,6 +160,7 @@ public class TemplateService extends AbstractService {
     public ResultUtil<Void> destroyTemplate(int templateId) {
         this.templateMapper.deleteById(templateId);
         this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", templateId));
+        this.notifyService.publish(NotifyInfo.builder().id(templateId).type(cn.roamblue.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return ResultUtil.success();
     }
 

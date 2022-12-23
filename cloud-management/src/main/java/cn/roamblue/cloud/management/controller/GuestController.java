@@ -8,7 +8,9 @@ import cn.roamblue.cloud.management.servcie.VolumeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -26,6 +28,16 @@ public class GuestController {
     @GetMapping("/api/guest/all")
     public ResultUtil<List<GuestModel>> listGuests() {
         return this.guestService.listGuests();
+    }
+
+    @GetMapping("/api/guest/system")
+    public ResultUtil<List<GuestModel>> listSystemGuests(@RequestParam("networkId") int networkId) {
+        return this.guestService.listSystemGuests(networkId);
+    }
+
+    @GetMapping("/api/guest/user")
+    public ResultUtil<List<GuestModel>> listUserGuests() {
+        return this.guestService.listUserGuests();
     }
 
     @GetMapping("/api/guest/info")
@@ -81,6 +93,12 @@ public class GuestController {
         return this.guestService.reInstall(guestId, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size);
     }
 
+    @PostMapping("/api/guest/start/batch")
+    public ResultUtil<List<GuestModel>> batchStart(@RequestParam("guestIds") String guestIdsStr) {
+        List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+        return this.guestService.batchStart(guestIds);
+    }
+
     @PostMapping("/api/guest/start")
     public ResultUtil<GuestModel> start(@RequestParam("guestId") int guestId,
                                         @RequestParam("hostId") int hostId) {
@@ -93,12 +111,19 @@ public class GuestController {
         return this.guestService.reboot(guestId);
     }
 
+    @PostMapping("/api/guest/shutdown/batch")
+    public ResultUtil<List<GuestModel>> batchStop(@RequestParam("guestIds") String guestIdsStr) {
+        List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+        return this.guestService.batchStop(guestIds);
+    }
+
     @PostMapping("/api/guest/shutdown")
     public ResultUtil<GuestModel> shutdown(@RequestParam("guestId") int guestId,
                                            @RequestParam("force") boolean force) {
         return this.guestService.shutdown(guestId, force);
 
     }
+
     @PostMapping("/api/guest/cd/attach")
     public ResultUtil<GuestModel> attachCdRoom(@RequestParam("guestId") int guestId,
                                                @RequestParam("templateId") int templateId) {

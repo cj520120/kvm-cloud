@@ -4,13 +4,19 @@
 		<el-container>
 			<el-aside width="200px"><NavViewVue current="Guest" /></el-aside>
 			<el-main>
-				<el-card class="box-card" v-if="this.show_type === 0">
+				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-col :span="12"><el-button style="float: left; padding: 3px 0" type="text" @click="show_create_guest_click">创建虚拟机</el-button></el-col>
-						<el-col :span="12"><el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_guest_show_page"></el-input></el-col>
+						<el-col :span="14">
+							<el-link type="primary" @click="show_create_guest_click">创建虚拟机</el-link>
+
+							<el-link style="padding: 0 10px" :disabled="!select_guests.length" type="primary" @click="batch_start_guest_click">批量启动</el-link>
+							<el-link :disabled="!select_guests.length" type="danger" @click="batch_stop_guest_click">批量停止</el-link>
+						</el-col>
+						<el-col :span="10"><el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_guest_show_page"></el-input></el-col>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="show_table_guests" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="show_table_guests" style="width: 100%" @selection-change="handleSelectionChange">
+							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="guestId" width="80" />
 							<el-table-column label="实例名" prop="name" width="200" />
 							<el-table-column label="标签" prop="description" width="200" />
@@ -49,14 +55,15 @@
 						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 1">
+				<el-card class="box-card" v-show="this.show_type === 1">
 					<el-row slot="header">
 						<el-page-header @back="show_guest_list_page" content="虚拟机详情"></el-page-header>
 					</el-row>
 					<el-row style="text-align: left; margin: 20px 0">
 						<el-button @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
 						<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini">停止虚拟机</el-button>
-						<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">重启虚拟机</el-button>
+						<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2" v-if="show_guest_info.current_guest.type !== 0">重启虚拟机</el-button>
+						<el-button @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-if="show_guest_info.current_guest.type !== 0">重装系统</el-button>
 
 						<el-button @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-if="show_guest_info.current_guest.type !== 0">修改配置</el-button>
 						<el-button @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini">远程桌面</el-button>
@@ -76,8 +83,14 @@
 							<el-descriptions-item label="内存">{{ get_memory_desplay(show_guest_info.current_guest.memory) }}</el-descriptions-item>
 							<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
 							<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
-							<el-descriptions-item label="运行主机">{{ show_guest_info.host.displayName }}</el-descriptions-item>
-							<el-descriptions-item label="架构方案">{{ show_guest_info.scheme.name }}</el-descriptions-item>
+							<el-descriptions-item label="运行主机">
+								<el-link :href="`/#/Host?id=${show_guest_info.host.hostId}`" type="primary" v-if="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-link>
+								<span v-if="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
+							</el-descriptions-item>
+							<el-descriptions-item label="架构方案">
+								<el-link :href="`/#/Scheme?id=${show_guest_info.scheme.schemeId}`" type="primary" v-if="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-link>
+								<span v-if="show_guest_info.scheme.schemeId === 0" :underline="false">{{ show_guest_info.scheme.name }}</span>
+							</el-descriptions-item>
 							<el-descriptions-item label="虚拟机类型">
 								<el-tag>{{ show_guest_info.current_guest.type === 0 ? '系统' : '用户' }}</el-tag>
 							</el-descriptions-item>
@@ -104,10 +117,11 @@
 											{{ get_volume_desplay_size(scope.row.allocation) }}
 										</template>
 									</el-table-column>
-									<el-table-column label="路径" prop="path" />
-									<el-table-column label="操作" width="100">
+									<el-table-column label="路径" prop="path" show-overflow-tooltip />
+									<el-table-column label="操作" width="180">
 										<template #default="scope">
-											<el-link type="danger" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-link>
+											<el-link type="primary" :href="`/#/Volume?id=${scope.row.volumeId}`">详情</el-link>
+											<el-link style="margin-left: 10px" type="danger" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-link>
 										</template>
 									</el-table-column>
 								</el-table>
@@ -127,7 +141,7 @@
 						</el-tabs>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-if="this.show_type === 2">
+				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_guest_list_page()" content="创建虚拟机" style="color: #409eff"></el-page-header>
 					</el-row>
@@ -249,6 +263,79 @@
 						</el-form>
 					</el-row>
 				</el-card>
+
+				<el-card class="box-card" v-show="this.show_type === 3">
+					<el-row slot="header">
+						<el-page-header @back="show_guest_list_page()" content="重装虚拟机" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form ref="reInstallForm" :model="reinstall_guest" label-width="100px" class="demo-ruleForm">
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="安装方式">
+										<el-select v-model="reinstall_guest.type" style="width: 100%" placeholder="请选择安装方式">
+											<el-option label="ISO镜像" :value="0" />
+											<el-option label="模版安装" :value="1" />
+											<el-option label="快照安装" :value="2" />
+											<el-option label="现有磁盘" :value="3" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="磁盘类型" v-if="reinstall_guest.type !== 3">
+										<el-select v-model="reinstall_guest.volumeType" style="width: 100%">
+											<el-option label="raw" value="raw"></el-option>
+											<el-option label="qcow" value="qcow"></el-option>
+											<el-option label="qcow2" value="qcow2"></el-option>
+											<el-option label="vdi" value="vdi"></el-option>
+											<el-option label="vmdk" value="vmdk"></el-option>
+											<el-option label="vpc" value="vpc"></el-option>
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="12">
+									<el-form-item label="ISO模版" v-if="reinstall_guest.type === 0">
+										<el-select v-model="reinstall_guest.isoTemplateId" style="width: 100%" placeholder="请选择光盘镜像">
+											<el-option v-for="item in this.iso_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="系统模版" v-if="reinstall_guest.type === 1">
+										<el-select v-model="reinstall_guest.diskTemplateId" style="width: 100%" placeholder="请选择模版">
+											<el-option v-for="item in this.disk_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="快照模版" v-if="reinstall_guest.type === 2">
+										<el-select v-model="reinstall_guest.snapshotVolumeId" style="width: 100%" placeholder="请选择系统快照">
+											<el-option v-for="item in this.snapshot_template" :key="item.snapshotVolumeId" :label="item.name" :value="item.snapshotVolumeId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="可用磁盘" v-if="reinstall_guest.type === 3">
+										<el-select v-model="reinstall_guest.volumeId" style="width: 100%" placeholder="请选择系统磁盘">
+											<el-option v-for="item in this.attach_volumes" :key="item.volumeId" :label="item.description" :value="item.volumeId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="存储池" v-if="reinstall_guest.type !== 3">
+										<el-select v-model="reinstall_guest.storageId" style="width: 100%">
+											<el-option label="随机" :value="0"></el-option>
+											<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+										</el-select>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
+								<el-input v-model="reinstall_guest.size"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="reinstall_guest_click">立即重装</el-button>
+								<el-button @click="show_guest_list_page">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
 			</el-main>
 		</el-container>
 
@@ -340,7 +427,7 @@
 	</div>
 </template>
 <script>
-import { getGuestList, getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork, getNotAttachVolumeList, attachGuestDisk, detachGuestDisk, modifyGuest, getSchemeList, getSnapshotList } from '@/api/api'
+import { getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork, getNotAttachVolumeList, attachGuestDisk, detachGuestDisk, modifyGuest, getSchemeList, getSnapshotList, reInstallGuest, getUserGuestList, batchStoptGuest, batchStartGuest } from '@/api/api'
 import Notify from '@/api/notify'
 import NavViewVue from './NavView.vue'
 import HeadViewVue from './HeadView.vue'
@@ -352,6 +439,7 @@ export default {
 	},
 	data() {
 		return {
+			current_guest_id: 0,
 			data_loading: false,
 			start_dialog_visiable: false,
 			stop_dialog_visiable: false,
@@ -359,12 +447,13 @@ export default {
 			attach_network_dialog_visiable: false,
 			attach_volume_dialog_visiable: false,
 			modify_guest_dialog_visiable: false,
-			show_type: 0,
+			current_loading: false,
+			show_type: -1,
 			show_guest_info: {
 				guestId: 0,
 				volume_loading: false,
 				network_loading: false,
-				guest: {},
+				current_guest: {},
 				host: {
 					hostId: 0,
 					displayName: '-'
@@ -388,6 +477,17 @@ export default {
 				schemeId: '',
 				networkId: '',
 				networkDeviceType: 'virtio',
+				volumeType: 'qcow2',
+				isoTemplateId: '',
+				diskTemplateId: '',
+				snapshotVolumeId: '',
+				volumeId: '',
+				storageId: 0,
+				size: 100
+			},
+			reinstall_guest: {
+				guestId: 0,
+				type: 0,
 				volumeType: 'qcow2',
 				isoTemplateId: '',
 				diskTemplateId: '',
@@ -433,13 +533,39 @@ export default {
 			snapshot_template: [],
 			attach_volumes: [],
 			schemes: [],
+			select_guests: [],
 			current_page: 1,
 			page_size: 10,
 			total_size: 0
 		}
 	},
 	mixins: [Notify],
-	created() {
+
+	mounted() {
+		this.current_guest_id = this.$route.query.id
+		if (this.current_guest_id) {
+			this.show_type == 2
+			this.current_loading = true
+			getGuestInfo({ guestId: this.current_guest_id })
+				.then((res) => {
+					if (res.code === 0) {
+						this.show_guest_info_click(res.data)
+					} else {
+						this.$alert(`获取虚拟机信息失败:${res.message}`, '提示', {
+							dangerouslyUseHTMLString: true,
+							confirmButtonText: '返回',
+							type: 'error'
+						}).then(() => {
+							this.show_type = 0
+						})
+					}
+				})
+				.finally(() => {
+					this.current_loading = false
+				})
+		} else {
+			this.show_type = 0
+		}
 		this.init_view()
 		this.init_notify()
 	},
@@ -451,9 +577,12 @@ export default {
 		}
 	},
 	methods: {
+		handleSelectionChange(val) {
+			this.select_guests = val
+		},
 		async init_view() {
 			this.data_loading = true
-			await getGuestList()
+			await getUserGuestList()
 				.then((res) => {
 					if (res.code == 0) {
 						this.guests = res.data
@@ -605,14 +734,18 @@ export default {
 			let findIndex = this.guests.findIndex((item) => item.guestId === guest.guestId)
 			if (findIndex >= 0) {
 				this.$set(this.guests, findIndex, guest)
-			} else {
-				this.guests.push(guest)
+			} else if (guest.type === 1) {
+				//只处理用户系统
+				let index = this.page_size * (this.current_page - 1)
+				this.guests.splice(index, 0, guest)
 			}
 			if (this.show_guest_info.guestId === guest.guestId) {
+				console.log('update guest', guest.status)
 				this.show_guest_info.current_guest = guest
 				await this.load_current_guest_template(guest)
 				await this.load_current_guest_host(guest)
 				await this.load_current_guest_scheme(guest)
+				this.$forceUpdate()
 			}
 		},
 		get_memory_desplay(memory) {
@@ -681,6 +814,9 @@ export default {
 			this.load_all_networks()
 			this.load_all_snapshot()
 
+			if (this.$refs['createForm']) {
+				this.$refs['createForm'].resetFields()
+			}
 			this.create_guest.isoTemplateId = ''
 			this.create_guest.diskTemplateId = ''
 			this.create_guest.snapshotVolumeId = ''
@@ -726,17 +862,71 @@ export default {
 				}
 			})
 		},
-		reboot_guest_click(guest) {
-			rebootGuest({ guestId: guest.guestId }).then((res) => {
-				if (res.code === 0) {
-					this.update_guest_info(res.data)
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建虚拟机失败:${res.message}`
-					})
-				}
+		reinstall_guest_click() {
+			switch (this.reinstall_guest.type) {
+				case 0:
+					this.reinstall_guest.diskTemplateId = 0
+					this.reinstall_guest.snapshotVolumeId = 0
+					this.reinstall_guest.volumeId = 0
+					break
+				case 1:
+					this.reinstall_guest.isoTemplateId = 0
+					this.reinstall_guest.snapshotVolumeId = 0
+					this.reinstall_guest.volumeId = 0
+					this.reinstall_guest.size = 0
+					break
+				case 2:
+					this.reinstall_guest.isoTemplateId = 0
+					this.reinstall_guest.diskTemplateId = 0
+					this.reinstall_guest.volumeId = 0
+					this.reinstall_guest.size = 0
+					break
+				case 3:
+					this.reinstall_guest.isoTemplateId = 0
+					this.reinstall_guest.diskTemplateId = 0
+					this.reinstall_guest.snapshotVolumeId = 0
+					this.reinstall_guest.size = 0
+					break
+			}
+			this.$confirm('重装虚拟机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					reInstallGuest(this.reinstall_guest).then((res) => {
+						if (res.code === 0) {
+							this.update_guest_info(res.data)
+							this.show_type = 0
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `重装虚拟机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
+		},
+		reboot_guest_click(guest) {
+			this.$confirm('重启当前虚拟机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			})
+				.then(() => {
+					rebootGuest({ guestId: guest.guestId }).then((res) => {
+						if (res.code === 0) {
+							this.update_guest_info(res.data)
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `重启虚拟机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		start_guest_click() {
 			startGuest(this.start_guest).then((res) => {
@@ -752,17 +942,25 @@ export default {
 			})
 		},
 		stop_guest_click() {
-			stopGuest(this.stop_guest).then((res) => {
-				if (res.code === 0) {
-					this.update_guest_info(res.data)
-					this.stop_dialog_visiable = false
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `启动虚拟机失败:${res.message}`
-					})
-				}
+			this.$confirm('停止当前虚拟机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					stopGuest(this.stop_guest).then((res) => {
+						if (res.code === 0) {
+							this.update_guest_info(res.data)
+							this.stop_dialog_visiable = false
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `启动虚拟机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		detach_guest_cd_room_click(guest) {
 			detachGuestCdRoom({ guestId: guest.guestId }).then((res) => {
@@ -805,37 +1003,53 @@ export default {
 			})
 		},
 		detach_network_click(guestNetwork) {
-			detachGuestNetwork({ guestId: guestNetwork.guestId, guestNetworkId: guestNetwork.guestNetworkId }).then((res) => {
-				if (res.code === 0) {
-					this.update_guest_info(res.data)
-					let findIndex = this.show_guest_info.networks.findIndex((item) => item.guestNetworkId === guestNetwork.guestNetworkId)
-					if (findIndex >= 0) {
-						this.show_guest_info.networks.splice(findIndex, 1)
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `虚拟机附加网卡失败:${res.message}`
-					})
-				}
+			this.$confirm('卸载当前挂载网卡, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					detachGuestNetwork({ guestId: guestNetwork.guestId, guestNetworkId: guestNetwork.guestNetworkId }).then((res) => {
+						if (res.code === 0) {
+							this.update_guest_info(res.data)
+							let findIndex = this.show_guest_info.networks.findIndex((item) => item.guestNetworkId === guestNetwork.guestNetworkId)
+							if (findIndex >= 0) {
+								this.show_guest_info.networks.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `虚拟机附加网卡失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		detach_volume_click(guestVolume) {
-			let attach = guestVolume.attach
-			detachGuestDisk({ guestId: attach.guestId, guestDiskId: attach.guestDiskId }).then((res) => {
-				if (res.code === 0) {
-					this.update_guest_info(res.data)
-					let findIndex = this.show_guest_info.volumes.findIndex((v) => v.attach.guestDiskId === attach.guestDiskId)
-					if (findIndex >= 0) {
-						this.show_guest_info.volumes.splice(findIndex, 1)
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `卸载磁盘失败:${res.message}`
-					})
-				}
+			this.$confirm('卸载当前挂载磁盘, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					let attach = guestVolume.attach
+					detachGuestDisk({ guestId: attach.guestId, guestDiskId: attach.guestDiskId }).then((res) => {
+						if (res.code === 0) {
+							this.update_guest_info(res.data)
+							let findIndex = this.show_guest_info.volumes.findIndex((v) => v.attach.guestDiskId === attach.guestDiskId)
+							if (findIndex >= 0) {
+								this.show_guest_info.volumes.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `卸载磁盘失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		},
 		attach_volume_click() {
 			attachGuestDisk(this.attach_volume_guest).then((res) => {
@@ -902,6 +1116,22 @@ export default {
 			await this.load_current_guest_network(guest)
 			this.show_type = 1
 		},
+		async show_reinstall_guest_click(guest) {
+			this.load_all_attach_volumes()
+			this.load_all_template()
+			this.load_all_storage()
+			this.load_all_snapshot()
+			if (this.$refs['reInstallForm']) {
+				this.$refs['reInstallForm'].resetFields()
+			}
+			this.reinstall_guest.guestId = guest.guestId
+			this.reinstall_guest.isoTemplateId = ''
+			this.reinstall_guest.diskTemplateId = ''
+			this.reinstall_guest.snapshotVolumeId = ''
+			this.reinstall_guest.volumeId = ''
+			this.reinstall_guest.type = 0
+			this.show_type = 3
+		},
 		async show_start_guest_click(guest) {
 			await this.load_all_host()
 			this.start_guest.guestId = guest.guestId
@@ -944,22 +1174,76 @@ export default {
 			window.open(href, '_blank')
 		},
 		destroy_guest(guest) {
-			destroyGuest({ guestId: guest.guestId }).then((res) => {
-				if (res.code === 0) {
-					let findIndex = this.guests.findIndex((v) => v.guestId === guest.guestId)
-					if (findIndex >= 0) {
-						this.guests.splice(findIndex, 1)
-					}
-					if (this.show_type === 1) {
-						this.show_type = 0
-					}
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `删除虚拟机失败:${res.message}`
-					})
-				}
+			this.$confirm('删除当前虚拟机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
 			})
+				.then(() => {
+					destroyGuest({ guestId: guest.guestId }).then((res) => {
+						if (res.code === 0) {
+							let findIndex = this.guests.findIndex((v) => v.guestId === guest.guestId)
+							if (findIndex >= 0) {
+								this.guests.splice(findIndex, 1)
+							}
+							if (this.show_type === 1) {
+								this.show_type = 0
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除虚拟机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
+		},
+		batch_start_guest_click() {
+			this.$confirm('启动所选虚拟机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			})
+				.then(() => {
+					let guestIds = this.select_guests.map((v) => v.guestId).join(',')
+					batchStartGuest({ guestIds: guestIds }).then((res) => {
+						if (res.code === 0) {
+							res.data.filter((guest) => {
+								this.update_guest_info(guest)
+							})
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `批量启动虚拟机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
+		},
+		batch_stop_guest_click() {
+			this.$confirm('停止所选虚拟机, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			})
+				.then(() => {
+					let guestIds = this.select_guests.map((v) => v.guestId).join(',')
+					batchStoptGuest({ guestIds: guestIds }).then((res) => {
+						if (res.code === 0) {
+							res.data.filter((guest) => {
+								this.update_guest_info(guest)
+							})
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `批量停止虚拟机失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
 		}
 	}
 }

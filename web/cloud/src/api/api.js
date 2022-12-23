@@ -267,6 +267,13 @@ export const destroyVolume = (data = {}) => {
     method: "DELETE",
   });
 };
+export const batchDestroyVolume = (data = {}) => {
+  return axios.request({
+    url: "api/volume/destroy/batch",
+    data,
+    method: "DELETE",
+  });
+};
 /** Scheme */
 export const getSchemeList = (params = {}) => {
   return axios.request({
@@ -334,6 +341,18 @@ export const getGuestList = (params = {}) => {
     params,
   });
 };
+export const getSystemGuestList = (params = {}) => {
+  return axios.request({
+    url: "/api/guest/system",
+    params,
+  });
+};
+export const getUserGuestList = (params = {}) => {
+  return axios.request({
+    url: "/api/guest/user",
+    params,
+  });
+};
 export const destroyGuest = (data = {}) => {
   return axios.request({
     url: "api/guest/destroy",
@@ -348,6 +367,13 @@ export const createGuest = (data = {}) => {
     method: "PUT",
   });
 };
+export const reInstallGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/reinstall",
+    data,
+    method: "POST",
+  });
+};
 export const startGuest = (data = {}) => {
   return axios.request({
     url: "api/guest/start",
@@ -355,9 +381,23 @@ export const startGuest = (data = {}) => {
     method: "POST",
   });
 };
+export const batchStartGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/start/batch",
+    data,
+    method: "POST",
+  });
+};
 export const stopGuest = (data = {}) => {
   return axios.request({
     url: "api/guest/shutdown",
+    data,
+    method: "POST",
+  });
+};
+export const batchStoptGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/shutdown/batch",
     data,
     method: "POST",
   });
@@ -417,5 +457,4 @@ export const detachGuestNetwork = (data = {}) => {
     data,
     method: "POST",
   });
-}; 
-
+};
