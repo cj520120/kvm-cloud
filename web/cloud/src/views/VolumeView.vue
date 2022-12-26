@@ -6,7 +6,8 @@
 					<el-row slot="header" class="clearfix" style="height: 20px">
 						<el-col :span="12">
 							<el-link type="primary" @click="show_create_volume">创建磁盘</el-link>
-							<el-link style="padding: 0 10px" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-link>
+							<el-link style="margin: 0 10px" type="primary" @click="show_upload_volume">导入磁盘</el-link>
+							<el-link :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-link>
 						</el-col>
 						<el-col :span="12">
 							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_show_page"></el-input>
@@ -74,6 +75,7 @@
 						<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
 						<el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button>
 						<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
+						<el-button @click="show_download_volume_click(show_volume)" type="primary" size="mini">下载磁盘</el-button>
 						<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
 					</el-row>
 					<el-row>
@@ -243,6 +245,62 @@
 						<el-button type="primary" @click="create_volume_snapshot_click">确 定</el-button>
 					</span>
 				</el-dialog>
+
+				<el-dialog title="下载磁盘" :visible.sync="download_dialog_visiable" width="400px">
+					<el-form :model="download_volume" label-width="100px">
+						<el-form-item label="磁盘类型" prop="volumeType">
+							<el-select v-model="download_volume.volumeType" style="width: 100%">
+								<el-option label="raw" value="raw"></el-option>
+								<el-option label="qcow" value="qcow"></el-option>
+								<el-option label="qcow2" value="qcow2"></el-option>
+								<el-option label="vdi" value="vdi"></el-option>
+								<el-option label="vmdk" value="vmdk"></el-option>
+								<el-option label="vpc" value="vpc"></el-option>
+							</el-select>
+						</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="download_dialog_visiable = false">取 消</el-button>
+						<el-button type="primary" @click="download_volume_click">下载</el-button>
+					</span>
+				</el-dialog>
+				<el-card class="box-card" v-show="this.show_type === 5">
+					<el-row slot="header">
+						<el-page-header @back="show_volume_list()" content="上传磁盘" style="color: #409eff"></el-page-header>
+					</el-row>
+					<el-row>
+						<el-form ref="uploadForm" :model="upload_volume" label-width="100px" class="demo-ruleForm">
+							<el-form-item label="名称" prop="description">
+								<el-input v-model="upload_volume.description"></el-input>
+							</el-form-item>
+							<el-form-item label="存储池" prop="storageId">
+								<el-select v-model="upload_volume.storageId" style="width: 100%">
+									<el-option label="随机" :value="0"></el-option>
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+								</el-select>
+							</el-form-item>
+							<el-form-item label="目标磁盘类型" prop="volumeType">
+								<el-select v-model="upload_volume.volumeType" style="width: 100%">
+									<el-option label="raw" value="raw"></el-option>
+									<el-option label="qcow" value="qcow"></el-option>
+									<el-option label="qcow2" value="qcow2"></el-option>
+									<el-option label="vdi" value="vdi"></el-option>
+									<el-option label="vmdk" value="vmdk"></el-option>
+									<el-option label="vpc" value="vpc"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item>
+								<el-upload style="max-width: 300px" ref="upload" class="upload-demo" :action="get_upload_uri()" :limit="1" :on-success="on_upload_success" :on-error="on_upload_error" name="volume" :data="upload_volume" :file-list="upload_file_list" :auto-upload="false" :show-file-list="true">
+									<el-button slot="trigger" size="small" type="primary">选择磁盘</el-button>
+								</el-upload>
+							</el-form-item>
+							<el-form-item>
+								<el-button type="primary" @click="upload_volume_click">导入</el-button>
+								<el-button @click="show_volume_list">取消</el-button>
+							</el-form-item>
+						</el-form>
+					</el-row>
+				</el-card>
 			</el-main>
 		</el-container>
 	</div>
@@ -259,6 +317,7 @@ export default {
 			resize_dialog_visiable: false,
 			template_dialog_visiable: false,
 			snapshot_dialog_visiable: false,
+			download_dialog_visiable: false,
 			current_volume_id: 0,
 			current_loading: false,
 			show_type: -1,
@@ -268,6 +327,17 @@ export default {
 				storageId: 0,
 				volumeType: 'qcow2',
 				volumeSize: 100
+			},
+			upload_file_list: [],
+			upload_volume: {
+				description: '',
+				storageId: 0,
+				volumeType: 'qcow2',
+				volumeSize: 100
+			},
+			download_volume: {
+				volumeType: 'qcow2',
+				volumeId: 0
 			},
 			clone_volume: {
 				sourceVolumeId: 0,
@@ -342,6 +412,9 @@ export default {
 		handleSelectionChange(val) {
 			this.select_volumes = val
 		},
+		get_upload_uri() {
+			return process.env.NODE_ENV === 'production' ? './api/volume/upload' : 'http://localhost:8080/api/volume/upload'
+		},
 		async init_view() {
 			this.data_loading = true
 			await getStorageList().then((res) => {
@@ -368,6 +441,7 @@ export default {
 			this.page_size = page_size
 			this.update_show_page()
 		},
+
 		update_show_page() {
 			let nCount = 0
 			this.volumes.forEach((item, index) => {
@@ -460,6 +534,16 @@ export default {
 			}
 			this.show_type = 2
 		},
+		show_upload_volume() {
+			if (this.$refs['uploadForm']) {
+				this.$refs['uploadForm'].resetFields()
+			}
+			this.upload_file_list = []
+			this.show_type = 5
+		},
+		upload_volume_click() {
+			this.$refs.upload.submit()
+		},
 		async show_volume_info(volume) {
 			this.show_volume = volume
 			await this.init_volume_template(volume)
@@ -518,6 +602,11 @@ export default {
 					this.destroy_volume(data.volume)
 					break
 			}
+		},
+		show_download_volume_click(volume) {
+			this.download_volume.volumeId = volume.volumeId
+			this.clone_volume.volumeType = volume.type
+			this.download_dialog_visiable = true
 		},
 		show_clone_volume_click(volume) {
 			this.clone_volume.sourceVolumeId = volume.volumeId
@@ -677,6 +766,7 @@ export default {
 				type: 'warning'
 			})
 				.then(() => {
+					console.log(volume)
 					destroyVolume({ volumeId: volume.volumeId }).then((res) => {
 						if (res.code === 0) {
 							this.update_volume_info(res.data)
@@ -712,6 +802,31 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		on_upload_success(response) {
+			console.log(response)
+			if (response.code === 0) {
+				this.update_volume_info(response.data)
+				this.show_type = 0
+				this.upload_file_list = []
+			} else {
+				this.upload_file_list = []
+				this.$notify.error({
+					title: '错误',
+					message: `上传磁盘失败:${response.message}`
+				})
+			}
+		},
+		on_upload_error() {
+			this.$notify.error({
+				title: '错误',
+				message: `磁盘上传失败。`
+			})
+		},
+		download_volume_click() {
+			let uri = process.env.NODE_ENV === 'production' ? `./api/volume/download?volumeId=${this.download_volume.volumeId}&volumeType=${this.download_volume.volumeType}` : `http://localhost:8080/api/volume/download?volumeId=${this.download_volume.volumeId}&volumeType=${this.download_volume.volumeType}`
+			window.open(uri, '_blank')
+			this.download_dialog_visiable = false
 		}
 	}
 }

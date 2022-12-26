@@ -2,23 +2,30 @@ package cn.roamblue.cloud.management.servcie;
 
 import cn.roamblue.cloud.common.bean.NotifyInfo;
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.common.bean.VolumeInfo;
 import cn.roamblue.cloud.common.error.CodeException;
+import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.annotation.Lock;
 import cn.roamblue.cloud.management.data.entity.*;
-import cn.roamblue.cloud.management.model.CloneModel;
-import cn.roamblue.cloud.management.model.MigrateModel;
-import cn.roamblue.cloud.management.model.SnapshotModel;
-import cn.roamblue.cloud.management.model.VolumeModel;
+import cn.roamblue.cloud.management.model.*;
 import cn.roamblue.cloud.management.operate.bean.*;
 import cn.roamblue.cloud.management.util.Constant;
 import cn.roamblue.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +34,8 @@ public class VolumeService extends AbstractService {
 
     @Autowired
     private AllocateService allocateService;
+    @Autowired
+    private RestTemplate restTemplate;
 
     private GuestEntity getVolumeGuest(int volumeId) {
         GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
@@ -74,6 +83,7 @@ public class VolumeService extends AbstractService {
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
+
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
@@ -81,6 +91,64 @@ public class VolumeService extends AbstractService {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
         }
         return ResultUtil.success(this.initVolume(volume));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<VolumeModel> uploadVolume(String description, int storageId, String volumeType, File file) {
+        if (StringUtils.isEmpty(description)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
+        }
+        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+        String volumeName = UUID.randomUUID().toString();
+        String uploadPath = storage.getMountPath() + "/" + volumeName;
+        String uploadUri = String.format("%s/api/upload", host.getUri());
+
+        FileSystemResource resource = new FileSystemResource(file);
+        MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
+        param.add("volumeType", volumeType);
+        param.add("path", uploadPath);
+        param.add("storage", storage.getName());
+        param.add("volume", resource);
+        param.add("name", volumeName);
+        org.springframework.http.HttpEntity<MultiValueMap<String, Object>> httpEntity = new org.springframework.http.HttpEntity<>(param);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(uploadUri, HttpMethod.POST, httpEntity, String.class);
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "上传失败");
+        }
+        ResultUtil<VolumeInfo> resultUtil = GsonBuilderUtil.create().fromJson(responseEntity.getBody(), new TypeToken<ResultUtil<VolumeInfo>>() {
+        }.getType());
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
+        VolumeInfo volumeInfo = resultUtil.getData();
+        VolumeEntity volume = VolumeEntity.builder()
+                .storageId(storage.getStorageId())
+                .templateId(0)
+                .description(description)
+                .name(volumeName)
+                .path(storage.getMountPath() + "/" + volumeName)
+                .type(volumeType)
+                .capacity(volumeInfo.getCapacity())
+                .allocation(volumeInfo.getAllocation())
+                .status(Constant.VolumeStatus.READY)
+                .createTime(new Date())
+                .build();
+        this.volumeMapper.insert(volume);
+        return ResultUtil.success(this.initVolume(volume));
+    }
+
+    public ResultUtil<DownloadModel> getDownloadUri(int volumeId) {
+        HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+        StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
+
+        return ResultUtil.success(DownloadModel.builder().storage(storage.getName())
+                .host(host.getUri())
+                .name(volume.getName())
+                .path(volume.getPath())
+                .build());
+
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
