@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,6 +60,7 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate httpsRestTemplate(HttpComponentsClientHttpRequestFactory httpsFactory) {
+        httpsFactory.setBufferRequestBody(false);
         RestTemplate restTemplate = new RestTemplate(httpsFactory);
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override

@@ -142,7 +142,19 @@ public class VolumeService extends AbstractService {
         HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
-
+        if(!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)){
+            throw new CodeException(ErrorCode.SERVER_ERROR,"磁盘未就绪");
+        }
+        GuestEntity guest = this.getVolumeGuest(volumeId);
+        if (guest != null) {
+            switch (guest.getStatus()) {
+                case Constant.GuestStatus.STOP:
+                case Constant.GuestStatus.ERROR:
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+            }
+        }
         return ResultUtil.success(DownloadModel.builder().storage(storage.getName())
                 .host(host.getUri())
                 .name(volume.getName())

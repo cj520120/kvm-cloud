@@ -1,9 +1,9 @@
 <template>
 	<div id="app">
-		<HeadViewVue />
+		<HeadViewVue v-if="!isFullScreen" />
 		<el-container>
-			<NavViewVue />
-			<el-main class="main-container">
+			<NavViewVue v-if="!isFullScreen" />
+			<el-main class="main-container" :class="isFullScreen ? 'full_screen_class' : ''">
 				<router-view></router-view>
 			</el-main>
 		</el-container>
@@ -16,6 +16,18 @@ export default {
 	components: {
 		NavViewVue,
 		HeadViewVue
+	},
+	provide() {
+		return {
+			check_full_screen: (isFullScreen) => {
+				this.isFullScreen = isFullScreen
+			}
+		}
+	},
+	data() {
+		return {
+			isFullScreen: false
+		}
 	}
 }
 </script>
@@ -40,5 +52,10 @@ html,
 .main-container {
 	overflow: hidden !important;
 	max-height: calc(100vh - 60px) !important;
+}
+.full_screen_class {
+	padding: 0 !important;
+	height: 100vh !important;
+	max-height: none !important;
 }
 </style>

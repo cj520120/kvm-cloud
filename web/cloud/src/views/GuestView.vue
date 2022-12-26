@@ -1164,6 +1164,7 @@ export default {
 		},
 		vnc_click(guest) {
 			let { href } = this.$router.resolve({ path: '/Vnc', query: { id: guest.guestId, description: guest.description } })
+			
 			window.open(href, '_blank')
 		},
 		destroy_guest(guest) {

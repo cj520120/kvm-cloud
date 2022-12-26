@@ -13,6 +13,7 @@ import RFB from '@novnc/novnc/core/rfb'
 import { getGuestVncPassword } from '@/api/api'
 export default {
 	name: 'VncView',
+	inject: ['check_full_screen'],
 	data() {
 		return {
 			id: 0,
@@ -23,6 +24,7 @@ export default {
 		}
 	},
 	mounted() {
+		this.check_full_screen(true)
 		this.id = this.$route.query.id
 		this.description = this.$route.query.description
 		let protocol
@@ -34,6 +36,9 @@ export default {
 		this.status = `正在连接[${this.description}]...`
 		this.url = process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}/api/vnc/${this.id}` : `${protocol}://localhost:8080/api/vnc/${this.id}`
 		this.connect()
+	},
+	beforeDestroy() {
+		this.check_full_screen(false)
 	},
 	methods: {
 		connect() {
