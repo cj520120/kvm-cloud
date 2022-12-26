@@ -295,7 +295,7 @@
 								</el-upload>
 							</el-form-item>
 							<el-form-item>
-								<el-button type="primary" @click="upload_volume_click">导入</el-button>
+								<el-button type="primary" @click="upload_volume_click" :loading="uploading">导入</el-button>
 								<el-button @click="show_volume_list">取消</el-button>
 							</el-form-item>
 						</el-form>
@@ -320,6 +320,7 @@ export default {
 			download_dialog_visiable: false,
 			current_volume_id: 0,
 			current_loading: false,
+			uploading: false,
 			show_type: -1,
 			show_volume: {},
 			create_volume: {
@@ -542,6 +543,7 @@ export default {
 			this.show_type = 5
 		},
 		upload_volume_click() {
+			this.uploading = true
 			this.$refs.upload.submit()
 		},
 		async show_volume_info(volume) {
@@ -804,7 +806,7 @@ export default {
 				.catch(() => {})
 		},
 		on_upload_success(response) {
-			console.log(response)
+			this.uploading = false
 			if (response.code === 0) {
 				this.update_volume_info(response.data)
 				this.show_type = 0
