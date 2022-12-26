@@ -1,17 +1,23 @@
 <template>
-	<el-menu class="el-menu-vertical-demo" :default-active="this.$route.path" router background-color="rgb(52, 73, 94)" text-color="#fff" active-text-color="#ffd04b">
-		<el-menu-item v-for="(item, i) in nav_menu_data" :key="i" :index="item.path">
-			<i :class="item.icon"></i>
-			{{ item.title }}
-		</el-menu-item>
-	</el-menu>
+	<div id="LayoutLeft" class="layout-left">
+		<div @click="shrinkMenu" class="shrink">
+			<i :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
+		</div>
+		<el-menu :collapse="isCollapse" class="el-menu-vertical-demo" :default-active="this.$route.path" router :collapse-transition="false" background-color="rgb(52, 73, 94)" text-color="#fff" active-text-color="#ffd04b">
+			<el-menu-item v-for="(item, i) in nav_menu_data" :key="i" :index="item.path">
+				<i :class="item.icon"></i>
+				<span slot="title">{{ item.title }}</span>
+			</el-menu-item>
+		</el-menu>
+	</div>
 </template>
-  
+// 
 <script>
 export default {
 	data() {
 		return {
 			path: '',
+			isCollapse: true,
 			nav_menu_data: [
 				{ path: '/', title: '主页', icon: 'el-icon-house' },
 				{ path: '/Guest', title: '虚拟机管理', icon: 'el-icon-s-platform' },
@@ -24,11 +30,31 @@ export default {
 				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' }
 			]
 		}
+	},
+	methods: {
+		shrinkMenu() {
+			this.isCollapse = !this.isCollapse
+		}
 	}
 }
 </script> 
 <style scoped>
 .el-menu-vertical-demo {
 	height: calc(100vh - 60px);
+	overflow: hidden auto;
+}
+.layout-left {
+	position: relative;
+}
+.shrink {
+	height: 30px;
+	background: rgb(37, 38, 45);
+	color: white;
+	width: calc(100% - 1px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	z-index: 9999;
 }
 </style>

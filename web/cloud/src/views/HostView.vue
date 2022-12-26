@@ -1,10 +1,6 @@
 <template>
-	<div>
-		<HeadViewVue />
-		<el-container>
-			<el-aside width="200px">
-				<NavViewVue current="Host" />
-			</el-aside>
+	<div> 
+		<el-container> 
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
@@ -112,14 +108,10 @@
 </template>
 <script>
 import { getHostList, getHostInfo, pauseHost, registerHost, destroyHost, createHost } from '@/api/api'
-import Notify from '@/api/notify'
-import NavViewVue from './NavView.vue'
-import HeadViewVue from './HeadView.vue'
+import Notify from '@/api/notify' 
 export default {
 	name: 'hostView',
-	components: {
-		NavViewVue,
-		HeadViewVue
+	components: { 
 	},
 	data() {
 		return {

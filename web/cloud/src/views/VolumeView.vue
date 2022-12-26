@@ -1,8 +1,6 @@
 <template>
 	<div>
-		<HeadViewVue />
 		<el-container>
-			<el-aside width="200px"><NavViewVue current="Volume" /></el-aside>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
@@ -252,14 +250,9 @@
 <script>
 import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, getTemplateInfo, cloneVolume, migrateVolume, resizeVolume, createVolumeTemplate, createSnapshot, batchDestroyVolume } from '@/api/api'
 import Notify from '@/api/notify'
-import NavViewVue from './NavView.vue'
-import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'volumeView',
-	components: {
-		NavViewVue,
-		HeadViewVue
-	},
+	components: {},
 	data() {
 		return {
 			data_loading: false,

@@ -1,10 +1,6 @@
 <template>
-	<div>
-		<HeadViewVue />
-		<el-container>
-			<el-aside width="200px">
-				<NavViewVue current="Snapshot" />
-			</el-aside>
+	<div> 
+		<el-container> 
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row>
@@ -64,14 +60,10 @@
 </template>
 <script>
 import { getSnapshotList, getSnapshotInfo, destroySnapshot, getStorageList } from '@/api/api'
-import Notify from '@/api/notify'
-import NavViewVue from './NavView.vue'
-import HeadViewVue from './HeadView.vue'
+import Notify from '@/api/notify' 
 export default {
 	name: 'snapshotView',
-	components: {
-		NavViewVue,
-		HeadViewVue
+	components: { 
 	},
 	data() {
 		return {

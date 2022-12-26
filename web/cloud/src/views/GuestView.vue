@@ -1,8 +1,6 @@
 <template>
 	<div>
-		<HeadViewVue />
 		<el-container>
-			<el-aside width="200px"><NavViewVue current="Guest" /></el-aside>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
@@ -429,14 +427,9 @@
 <script>
 import { getStorageList, getGuestInfo, destroyGuest, createGuest, startGuest, rebootGuest, stopGuest, getHostList, detachGuestCdRoom, getTemplateList, attachGuestCdRoom, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestNetworks, getGuestVolumes, getNetworkList, attachGuestNetwork, detachGuestNetwork, getNotAttachVolumeList, attachGuestDisk, detachGuestDisk, modifyGuest, getSchemeList, getSnapshotList, reInstallGuest, getUserGuestList, batchStoptGuest, batchStartGuest } from '@/api/api'
 import Notify from '@/api/notify'
-import NavViewVue from './NavView.vue'
-import HeadViewVue from './HeadView.vue'
 export default {
 	name: 'guestView',
-	components: {
-		NavViewVue,
-		HeadViewVue
-	},
+	components: {},
 	data() {
 		return {
 			current_guest_id: 0,

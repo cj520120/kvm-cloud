@@ -1,10 +1,6 @@
 <template>
-	<div>
-		<HeadViewVue />
-		<el-container>
-			<el-aside width="200px">
-				<NavViewVue current="Template" />
-			</el-aside>
+	<div> 
+		<el-container> 
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
@@ -99,14 +95,10 @@
 </template>
 <script>
 import { getTemplateList, getTemplateInfo, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
-import Notify from '@/api/notify'
-import NavViewVue from './NavView.vue'
-import HeadViewVue from './HeadView.vue'
+import Notify from '@/api/notify' 
 export default {
 	name: 'templateView',
-	components: {
-		NavViewVue,
-		HeadViewVue
+	components: { 
 	},
 	data() {
 		return {
