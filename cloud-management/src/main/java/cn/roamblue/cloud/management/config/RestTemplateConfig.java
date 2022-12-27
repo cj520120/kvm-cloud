@@ -80,7 +80,7 @@ public class RestTemplateConfig {
     public HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory() throws Exception {
         CloseableHttpClient httpClient = acceptsUntrustedCertsHttpClient();
         HttpComponentsClientHttpRequestFactory httpsFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        httpsFactory.setReadTimeout(40000);
+        httpsFactory.setReadTimeout(0);
         httpsFactory.setConnectTimeout(40000);
         return httpsFactory;
     }
