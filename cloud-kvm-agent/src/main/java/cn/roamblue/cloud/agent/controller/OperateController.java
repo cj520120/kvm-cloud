@@ -120,6 +120,7 @@ public class OperateController {
             String body = GsonBuilderUtil.create().toJson(ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage()));
             @Cleanup
             OutputStream outputStream = response.getOutputStream();
+            outputStream.write(body.getBytes());
         } finally {
             file.deleteOnExit();
         }
