@@ -3,7 +3,6 @@ package cn.roamblue.cloud.management.service.impl;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.common.agent.*;
-import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.common.util.ErrorCode;
 import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 import cn.roamblue.cloud.management.config.ApplicaionConfig;

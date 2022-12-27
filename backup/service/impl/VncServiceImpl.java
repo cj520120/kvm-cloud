@@ -8,7 +8,6 @@ import cn.roamblue.cloud.management.bean.ClusterInfo;
 import cn.roamblue.cloud.management.bean.NetworkInfo;
 import cn.roamblue.cloud.management.bean.VmNetworkInfo;
 import cn.roamblue.cloud.management.bean.VncInfo;
-import cn.roamblue.cloud.management.data.entity.*;
 import cn.roamblue.cloud.management.data.mapper.HostMapper;
 import cn.roamblue.cloud.management.data.mapper.VncMapper;
 import cn.roamblue.cloud.management.service.NetworkAllocateService;

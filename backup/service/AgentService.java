@@ -1,7 +1,6 @@
 package cn.roamblue.cloud.management.service;
 
 import cn.roamblue.cloud.common.agent.*;
-import cn.roamblue.cloud.common.bean.*;
 import cn.roamblue.cloud.management.bean.VolumeSnapshot;
 
 import java.util.List;
