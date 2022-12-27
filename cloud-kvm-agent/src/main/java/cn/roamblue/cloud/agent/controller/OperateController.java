@@ -48,29 +48,25 @@ public class OperateController {
                                                @RequestParam("volumeType") String volumeType,
                                                @RequestParam("volume") MultipartFile multipartFile) throws IOException {
 
-        File file = new File(path + ".temp");
+        String sub = "." + System.nanoTime();
+        String tempPath = name + sub;
+        File file = new File(tempPath);
         try {
             file.createNewFile();
-            try (InputStream inputStream = multipartFile.getInputStream()) {
-                byte[] buffer = new byte[2048];
-                int len = 0;
-                try (OutputStream out = new FileOutputStream(file)) {
-                    while ((len = inputStream.read(buffer)) > 0) {
-                        out.write(buffer, 0, len);
-                    }
-                }
-            }
+            multipartFile.transferTo(file);
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceStorage(storage)
-                    .sourceVolume(file.getPath())
+                    .sourceVolume(tempPath)
                     .targetStorage(storage)
                     .targetName(name)
                     .targetVolume(path)
                     .targetType(volumeType)
                     .build();
             return this.dispatch.dispatch(UUID.randomUUID().toString(), Constant.Command.VOLUME_MIGRATE, GsonBuilderUtil.create().toJson(request));
+        } catch (Exception err) {
+            return ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         } finally {
-            file.delete();
+            file.deleteOnExit();
         }
     }
 

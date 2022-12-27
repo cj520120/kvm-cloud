@@ -333,8 +333,7 @@ export default {
 			upload_volume: {
 				description: '',
 				storageId: 0,
-				volumeType: 'qcow2',
-				volumeSize: 100
+				volumeType: 'qcow2'
 			},
 			download_volume: {
 				volumeType: 'qcow2',
@@ -539,6 +538,7 @@ export default {
 			if (this.$refs['uploadForm']) {
 				this.$refs['uploadForm'].resetFields()
 			}
+			this.uploading = false
 			this.upload_file_list = []
 			this.show_type = 5
 		},
@@ -820,6 +820,8 @@ export default {
 			}
 		},
 		on_upload_error() {
+			this.uploading = false
+			this.upload_file_list = []
 			this.$notify.error({
 				title: '错误',
 				message: `磁盘上传失败。`

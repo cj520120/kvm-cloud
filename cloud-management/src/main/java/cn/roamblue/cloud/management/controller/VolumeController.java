@@ -1,7 +1,6 @@
 package cn.roamblue.cloud.management.controller;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.http.HttpUtil;
 import cn.roamblue.cloud.common.bean.ResultUtil;
 import cn.roamblue.cloud.common.error.CodeException;
 import cn.roamblue.cloud.common.gson.GsonBuilderUtil;
@@ -13,13 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -60,19 +60,12 @@ public class VolumeController {
                                                 @RequestParam("storageId") int storageId,
                                                 @RequestParam("volumeType") String volumeType,
                                                 @RequestParam("volume") MultipartFile multipartFile) throws IOException {
+
         File parentPath = FileUtil.mkdir("./upload");
         File file = new File(parentPath.getPath() + "/" + UUID.randomUUID());
         file.createNewFile();
         try {
-            try (InputStream inputStream = multipartFile.getInputStream()) {
-                byte[] buffer = new byte[2048];
-                int len = 0;
-                try (OutputStream out = new FileOutputStream(file)) {
-                    while ((len = inputStream.read(buffer)) > 0) {
-                        out.write(buffer, 0, len);
-                    }
-                }
-            }
+            multipartFile.transferTo(file);
             return this.volumeService.uploadVolume(description, storageId, volumeType, file);
         } finally {
             file.deleteOnExit();

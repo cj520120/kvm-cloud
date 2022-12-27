@@ -106,10 +106,10 @@ public class VolumeService extends AbstractService {
 
         FileSystemResource resource = new FileSystemResource(file);
         MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
-        param.add("volumeType", volumeType);
         param.add("path", uploadPath);
         param.add("storage", storage.getName());
         param.add("volume", resource);
+        param.add("volumeType", volumeType);
         param.add("name", volumeName);
         org.springframework.http.HttpEntity<MultiValueMap<String, Object>> httpEntity = new org.springframework.http.HttpEntity<>(param);
         ResponseEntity<String> responseEntity = restTemplate.exchange(uploadUri, HttpMethod.POST, httpEntity, String.class);
