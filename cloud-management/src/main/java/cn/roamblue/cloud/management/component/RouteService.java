@@ -57,7 +57,7 @@ public class RouteService extends AbstractComponentService {
         request.setTimeout((int) TimeUnit.MINUTES.toSeconds(5));
         request.setCommands(commands);
         //写入默认网卡
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth0").fileBody(this.getNicConfig(0, "169.254.254.254", null, null, null)).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth0").fileBody(this.getNicConfig(0, "169.254.169.254", null, null, null)).build())).build());
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         GuestNetworkEntity defaultGuestNetwork = null;
         NetworkEntity defaultNetwork = this.networkMapper.selectById(component.getNetworkId());
@@ -91,7 +91,7 @@ public class RouteService extends AbstractComponentService {
         dhcp.append("dhcp-option=option:router,").append(defaultNetwork.getGateway()).append("\r\n");
         dhcp.append("dhcp-option=option:netmask,").append(defaultNetwork.getMask()).append("\r\n");
         dhcp.append("dhcp-option=option:dns-server,").append(defaultNetwork.getDns()).append("\r\n");
-        dhcp.append("dhcp-option=option:classless-static-route,169.254.254.254/32,").append(defaultGuestNetwork.getIp()).append("\r\n");
+        dhcp.append("dhcp-option=option:classless-static-route,169.254.169.254/32,").append(defaultGuestNetwork.getIp()).append("\r\n");
         //下载dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "dnsmasq"}).build())).build());
         //写入dnsmasq

@@ -62,6 +62,8 @@ public class AllocateService extends AbstractService {
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
+            host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
+            host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
             if (!hostVerify(host, cpu, memory)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }

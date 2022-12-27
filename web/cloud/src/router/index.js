@@ -10,6 +10,8 @@ import SchemeView from "../views/SchemeView.vue";
 import GuestView from "../views/GuestView.vue";
 import VncView from "../views/VncView.vue";
 import HomeView from "../views/HomeView.vue";
+import UserView from "../views/UserView.vue";
+import LoginView from "../views/LoginView.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -62,6 +64,16 @@ const routes = [
     path: "/Scheme",
     name: "Scheme",
     component: SchemeView,
+  },
+  {
+    path: "/User",
+    name: "User",
+    component: UserView,
+  },
+  {
+    path: "/Login",
+    name: "Login",
+    component: LoginView,
   },
 ];
 

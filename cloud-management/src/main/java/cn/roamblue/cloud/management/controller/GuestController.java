@@ -1,6 +1,7 @@
 package cn.roamblue.cloud.management.controller;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.model.*;
 import cn.roamblue.cloud.management.servcie.GuestService;
 import cn.roamblue.cloud.management.servcie.NetworkService;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
+@Login
 @RestController
 public class GuestController {
 

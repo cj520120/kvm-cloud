@@ -1,13 +1,14 @@
 package cn.roamblue.cloud.management.controller;
 
 import cn.roamblue.cloud.common.bean.ResultUtil;
+import cn.roamblue.cloud.management.annotation.Login;
 import cn.roamblue.cloud.management.model.TemplateModel;
 import cn.roamblue.cloud.management.servcie.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@Login
 @RestController
 public class TemplateController {
     @Autowired

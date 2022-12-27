@@ -1,7 +1,6 @@
 <template>
 	<div>
-		<HeadViewVue />
-		<el-container> 
+		<el-container>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
@@ -123,11 +122,10 @@
 </template>
 <script>
 import { getSchemeList, destroyScheme, createScheme, moidfyScheme, getSchemeInfo } from '@/api/api'
-import Notify from '@/api/notify' 
+import Notify from '@/api/notify'
 export default {
 	name: 'schemeView',
-	components: { 
-	},
+	components: {},
 	data() {
 		return {
 			data_loading: false,

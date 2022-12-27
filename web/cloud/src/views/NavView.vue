@@ -27,13 +27,18 @@ export default {
 				{ path: '/Host', title: '主机管理', icon: 'el-icon-monitor' },
 				{ path: '/Storage', title: '存储池管理', icon: 'el-icon-coin' },
 				{ path: '/Template', title: '模版管理', icon: 'el-icon-price-tag' },
-				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' }
+				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' },
+				{ path: '/User', title: '用户管理', icon: 'el-icon-s-custom' }
 			]
 		}
+	},
+	created() {
+		this.isCollapse = localStorage.getItem('menu_is_collapse') === '0' ? false : true
 	},
 	methods: {
 		shrinkMenu() {
 			this.isCollapse = !this.isCollapse
+			localStorage.setItem('menu_is_collapse', this.isCollapse ? '1' : '0')
 		}
 	}
 }

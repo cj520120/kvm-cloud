@@ -413,7 +413,7 @@ export default {
 			this.select_volumes = val
 		},
 		get_upload_uri() {
-			return process.env.NODE_ENV === 'production' ? './api/volume/upload' : 'http://localhost:8080/api/volume/upload'
+			return process.env.NODE_ENV === 'production' ? './api/volume/upload' : 'http://192.168.2.107:8080/api/volume/upload'
 		},
 		async init_view() {
 			this.data_loading = true
@@ -828,7 +828,7 @@ export default {
 			})
 		},
 		download_volume_click() {
-			let uri = process.env.NODE_ENV === 'production' ? `./api/volume/download?volumeId=${this.download_volume.volumeId}&volumeType=${this.download_volume.volumeType}` : `http://localhost:8080/api/volume/download?volumeId=${this.download_volume.volumeId}&volumeType=${this.download_volume.volumeType}`
+			let uri = process.env.NODE_ENV === 'production' ? `./api/volume/download?volumeId=${this.download_volume.volumeId}&volumeType=${this.download_volume.volumeType}` : `http://192.168.2.107:8080/api/volume/download?volumeId=${this.download_volume.volumeId}&volumeType=${this.download_volume.volumeType}`
 			window.open(uri, '_blank')
 			this.download_dialog_visiable = false
 		}

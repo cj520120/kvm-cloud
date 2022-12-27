@@ -7,9 +7,7 @@ public final class ErrorCode {
     public static final int SUCCESS = 0;
     public static final int PARAM_ERROR = 300;
     public static final int SERVER_ERROR = 500;
-    public static final int LOCK_TIMEOUT = 504;
     public static final int NO_LOGIN_ERROR = 401;
-    public static final int NOT_SUPPORTED = 404;
     public static final int BASE_ERROR = 1000000;
     public static final int BASE_NETWORK_ERROR = BASE_ERROR;
     public static final int BASE_GUEST_ERROR = BASE_ERROR * 2;
@@ -19,6 +17,7 @@ public final class ErrorCode {
     public static final int BASE_SNAPSHOT_ERROR = BASE_ERROR * 6;
     public static final int BASE_HOST_ERROR = BASE_ERROR * 7;
     public static final int BASE_SCHEME_ERROR = BASE_ERROR * 8;
+    public static final int BASE_USER_ERROR = BASE_ERROR *9;
 
     /**
      * GUEST
@@ -66,6 +65,9 @@ public final class ErrorCode {
      * Scheme
      */
     public static final int SCHEME_NOT_FOUND = BASE_SCHEME_ERROR + 1;
+    public static final int USER_LOGIN_NAME_OR_PASSWORD_ERROR = BASE_USER_ERROR+1;
+    public static final int USER_FORBID_ERROR = BASE_USER_ERROR+2;
+    public static final int PERMISSION_ERROR =BASE_USER_ERROR+3 ;
 
     private ErrorCode() {
 

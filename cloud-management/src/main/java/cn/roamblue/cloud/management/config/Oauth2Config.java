@@ -1,0 +1,29 @@
+package cn.roamblue.cloud.management.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author chenjun
+ */
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "oauth2")
+@Component
+public class Oauth2Config {
+    private String title="Roamblue 统一登录";
+    private boolean enable=false;
+    private String clientId = "clientId";
+    private String clientSecret = "clientSecret";
+    private String authUri = "http://127.0.0.1:8081/oauth2/authorize";
+    private String tokenUri = "http://127.0.0.1:8081/oauth2/token";
+    private String userUri = "http://127.0.0.1:8081/oauth2/user/info";
+    private String redirectUri = "http://127.0.0.1:8080/#/login";
+    private List<String> idPath= Arrays.asList("userId");
+    private List<String> authoritiesPath= Arrays.asList("authorities");
+}

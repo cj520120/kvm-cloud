@@ -34,7 +34,7 @@ export default {
 			protocol = 'ws'
 		}
 		this.status = `正在连接[${this.description}]...`
-		this.url = process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}/api/vnc/${this.id}` : `${protocol}://localhost:8080/api/vnc/${this.id}`
+		this.url = process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}/api/vnc/${this.id}` : `${protocol}://192.168.2.107:8080/api/vnc/${this.id}`
 		this.connect()
 	},
 	beforeDestroy() {

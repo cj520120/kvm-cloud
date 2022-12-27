@@ -458,3 +458,86 @@ export const detachGuestNetwork = (data = {}) => {
     method: "POST",
   });
 };
+// User
+
+export const oauth2Login = (data = {}) => {
+  return axios.request({
+    url: "api/user/oauth2/login",
+    data,
+    method: "POST",
+  });
+};
+export const loginUser = (data = {}) => {
+  return axios.request({
+    url: "/api/user/login",
+    data,
+    method: "POST",
+  });
+};
+export const getUserList = (data = {}) => {
+  return axios.request({
+    url: "api/user/list",
+    data,
+    method: "GET",
+  });
+};
+export const registerUser = (data = {}) => {
+  return axios.request({
+    url: "api/user/register",
+    data,
+    method: "PUT",
+  });
+};
+export const updateUserState = (data = {}) => {
+  return axios.request({
+    url: "api/user/state/update",
+    data,
+    method: "POST",
+  });
+};
+
+export const resetUserPassword = (data = {}) => {
+  return axios.request({
+    url: "api/user/password/reset",
+    data,
+    method: "POST",
+  });
+};
+
+export const modifyUserPassword = (data = {}) => {
+  return axios.request({
+    url: "api/user/password/modify",
+    data,
+    method: "POST",
+  });
+};
+
+export const destroyUser = (data = {}) => {
+  return axios.request({
+    url: "api/user/destroy",
+    data,
+    method: "DELETE",
+  });
+};
+
+export const getLoginSignature = (params = {}) => {
+  return axios.request({
+    url: "api/user/login/signature",
+    params,
+  });
+};
+export const getCurrentLoginSignature = (params = {}) => {
+  return axios.request({
+    url: "api/user/signature",
+    params,
+  });
+};
+//config
+
+export const getSystemConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config",
+    data,
+    method: "GET",
+  });
+};
