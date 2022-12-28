@@ -16,5 +16,7 @@ public class DownloadModel {
     private String storage;
     private String name;
     private String host;
+    private String clientId;
+    private String clientSecret;
     private String path;
 }

@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.annotation;
+package cn.chenjun.cloud.agent.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NoLogin {
+public @interface SignRequire {
+    int timeout() default 60000;
 }

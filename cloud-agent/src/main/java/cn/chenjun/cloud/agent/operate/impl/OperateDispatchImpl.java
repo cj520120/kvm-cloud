@@ -3,7 +3,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.*;
 import cn.chenjun.cloud.agent.service.ConnectPool;
-import cn.chenjun.cloud.agent.util.HostUtil;
+import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -48,7 +48,7 @@ public class OperateDispatchImpl implements OperateDispatch {
     @Autowired
     private ThreadPoolExecutor executor;
     @Autowired
-    private HostUtil hostUtil;
+    private ClientService clientService;
 
     private void submitTask(String taskId, String command, String data) {
         taskMap.put(taskId, System.currentTimeMillis());
@@ -66,16 +66,15 @@ public class OperateDispatchImpl implements OperateDispatch {
                 String nonce = String.valueOf(System.nanoTime());
                 Map<String, Object> map = new HashMap<>(5);
                 map.put("taskId", taskId);
-                map.put("clientId", hostUtil.getClientId());
                 map.put("data", GsonBuilderUtil.create().toJson(result));
-                map.put("nonce", nonce);
+                map.put("timestamp", System.currentTimeMillis());
                 try {
-                    String sign = AppUtils.sign(map, hostUtil.getClientId(), hostUtil.getClientSecret(), nonce);
+                    String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
                     map.put("sign", sign);
                 } catch (Exception err) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名出错");
                 }
-                HttpUtil.post(hostUtil.getManagerUri() + "api/agent/task/report", map);
+                HttpUtil.post(clientService.getManagerUri() + "api/agent/task/report", map);
             }
         });
     }

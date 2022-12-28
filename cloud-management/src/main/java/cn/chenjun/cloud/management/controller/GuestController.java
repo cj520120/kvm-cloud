@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.annotation.Login;
+import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.servcie.NetworkService;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
-@Login
+@LoginRequire
 @RestController
 public class GuestController {
 

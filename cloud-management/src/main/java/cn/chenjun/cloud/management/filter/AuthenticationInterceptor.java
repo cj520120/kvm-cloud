@@ -2,8 +2,9 @@ package cn.chenjun.cloud.management.filter;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Login;
-import cn.chenjun.cloud.management.annotation.NoLogin;
+import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.NoLoginRequire;
+import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.util.RequestContext;
 import com.google.gson.Gson;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
@@ -25,14 +27,18 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private HostMapper hostMapper;
+
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
-            boolean needLogin = method.isAnnotationPresent(Login.class);
-            if (!needLogin && !method.isAnnotationPresent(NoLogin.class)) {
-                needLogin = method.getDeclaringClass().isAnnotationPresent(Login.class);
+
+            boolean needLogin = method.isAnnotationPresent(LoginRequire.class);
+            if (!needLogin && !method.isAnnotationPresent(NoLoginRequire.class)) {
+                needLogin = method.getDeclaringClass().isAnnotationPresent(LoginRequire.class);
             }
             if (needLogin && null == RequestContext.getCurrent().getSelf()) {
                 httpServletResponse.setContentType("application/json; charset=utf-8");

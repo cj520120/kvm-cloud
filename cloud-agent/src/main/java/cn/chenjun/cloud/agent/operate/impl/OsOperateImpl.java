@@ -38,8 +38,8 @@ public class OsOperateImpl implements OsOperate {
         map.put("execute", "guest-exec");
         Map<String, Object> arguments = new HashMap<>(3);
         map.put("arguments", arguments);
-        map.put("path", execute.getCommand());
-        map.put("arg", execute.getArgs());
+        arguments.put("path", execute.getCommand());
+        arguments.put("arg", execute.getArgs());
         String response = domain.qemuAgentCommand(gson.toJson(map), request.getTimeout(), 0);
         Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
         }.getType());

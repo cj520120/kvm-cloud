@@ -15,11 +15,18 @@ import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.task.OperateTask;
-import cn.hutool.http.HttpUtil;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,6 +68,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     protected OperateTask operateTask;
     @Autowired
     protected ApplicationConfig applicationConfig;
+    @Autowired
+    protected RestTemplate restTemplate;
 
     protected AbstractOperate(Class<T> paramType) {
         this.paramType = paramType;
@@ -82,8 +91,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
         map.put("taskId", UUID.randomUUID().toString());
         map.put("command", Constant.Command.SUBMIT_TASK);
-        map.put("clientId", host.getClientId());
-        map.put("nonce", nonce);
+        map.put("timestamp", System.currentTimeMillis());
         try {
             String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
             map.put("sign", sign);
@@ -91,9 +99,24 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
             throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
         }
         String uri = String.format("%s/api/operate", host.getUri());
-        String response = HttpUtil.post(uri, map);
-        GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<Void>>() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
+        map.forEach((k, v) -> requestMap.add(k, v.toString()));
+        RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
+                .post(URI.create(uri))
+                .headers(httpHeaders)
+                .body(requestMap);
+        ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "请求出错.status=" + responseEntity.getStatusCode());
+        }
+        String response = responseEntity.getBody();
+        ResultUtil<Void> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<Void>>() {
         }.getType());
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
     }
 
     @Override

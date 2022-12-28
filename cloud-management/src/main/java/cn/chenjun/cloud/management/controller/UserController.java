@@ -2,8 +2,8 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Login;
-import cn.chenjun.cloud.management.annotation.NoLogin;
+import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.NoLoginRequire;
 import cn.chenjun.cloud.management.model.LoginSignatureModel;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.model.TokenModel;
@@ -21,14 +21,14 @@ import java.util.List;
  *
  * @author chenjun
  */
-@Login
+@LoginRequire
 @RestController
 @ResponseBody
 public class UserController {
     @Autowired
     private UserService userUiService;
 
-    @NoLogin
+    @NoLoginRequire
     @PostMapping("/api/user/login")
     public ResultUtil<TokenModel> login(@RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("nonce") String nonce) {
 
@@ -49,7 +49,7 @@ public class UserController {
         return userUiService.refreshToken(loginUser);
     }
 
-    @NoLogin
+    @NoLoginRequire
     @GetMapping("/api/user/login/signature")
     public ResultUtil<LoginSignatureModel> getSignature(@RequestParam("loginName") String loginName) {
         return userUiService.getSignature(loginName);
@@ -73,7 +73,7 @@ public class UserController {
 
 
     @PostMapping("/api/user/state/update")
-    @Login
+    @LoginRequire
     public ResultUtil<UserInfoModel> updateUserState(@RequestParam("userId") int userId, @RequestParam("state") short state) {
 
         return userUiService.updateUserState(userId, state);
@@ -87,7 +87,7 @@ public class UserController {
     }
 
     @PostMapping("/api/user/password/reset")
-    @Login
+    @LoginRequire
     public ResultUtil<UserInfoModel> resetPassword(@RequestParam("userId") int userId, @RequestParam("password") String password) {
         return userUiService.resetPassword(userId, password);
     }

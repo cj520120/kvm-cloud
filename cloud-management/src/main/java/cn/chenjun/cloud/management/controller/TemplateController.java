@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.annotation.Login;
+import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.servcie.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author chenjun
  */
-@Login
+@LoginRequire
 @RestController
 public class TemplateController {
     @Autowired

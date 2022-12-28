@@ -16,8 +16,9 @@ sudo mount -o resvport -o nolock -t nfs 192.168.1.69:/data/nfs ~/Code/nfs
 rm -rf  ~/Code/nfs/code/gitee-kvm-cloud/cloud-kvm-agent/
 rm -rf  ~/Code/nfs/code/gitee-kvm-cloud/cloud-common/
 rm -rf  ~/Code/nfs/code/gitee-kvm-cloud/cloud-management/
-cp -r ./gitee-kvm-cloud/cloud-kvm-agent ~/Code/nfs/code/gitee-kvm-cloud/
+cp -r ./gitee-kvm-cloud/cloud-agent ~/Code/nfs/code/gitee-kvm-cloud/
 cp -r ./gitee-kvm-cloud/cloud-common ~/Code/nfs/code/gitee-kvm-cloud/
 cp -r ./gitee-kvm-cloud/cloud-management ~/Code/nfs/code/gitee-kvm-cloud/
+cp  ./gitee-kvm-cloud/pom.xml ~/Code/nfs/code/gitee-kvm-cloud/
 
 

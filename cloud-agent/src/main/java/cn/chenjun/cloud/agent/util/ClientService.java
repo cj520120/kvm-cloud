@@ -22,14 +22,20 @@ import java.util.Map;
  */
 @Component
 @Getter
-public class HostUtil implements CommandLineRunner {
+public class ClientService implements CommandLineRunner {
 
 
     private String clientId;
     private String clientSecret;
     private String managerUri;
 
-    public void init(String managerUri, String clientId, String clientSecret) {
+    public ResultUtil<Void> init(String managerUri, String clientId, String clientSecret) {
+        if (!StringUtils.isEmpty(this.clientId) && !this.clientId.equalsIgnoreCase(clientId)) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "节点已经被添加到其他集群");
+        }
+        if (!StringUtils.isEmpty(this.clientSecret) && !this.clientSecret.equalsIgnoreCase(clientSecret)) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "节点已经被添加到其他集群");
+        }
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.managerUri = managerUri;
@@ -39,6 +45,7 @@ public class HostUtil implements CommandLineRunner {
         config.put("managerUri", managerUri);
         File configFile = new File("./config.json");
         FileUtil.writeUtf8String(GsonBuilderUtil.create().toJson(config), configFile);
+        return ResultUtil.success();
     }
 
     private void init() throws Exception {
@@ -53,8 +60,7 @@ public class HostUtil implements CommandLineRunner {
         if (!StringUtils.isEmpty(this.clientId) && !StringUtils.isEmpty(this.clientSecret) && !StringUtils.isEmpty(this.managerUri)) {
             String nonce = String.valueOf(System.nanoTime());
             Map<String, Object> map = new HashMap<>(2);
-            map.put("clientId", this.clientId);
-            map.put("nonce", nonce);
+            map.put("timestamp", System.currentTimeMillis());
             String sign = AppUtils.sign(map, this.clientId, this.clientSecret, nonce);
             map.put("sign", sign);
             String response = HttpUtil.post(this.managerUri + "api/agent/register", map);

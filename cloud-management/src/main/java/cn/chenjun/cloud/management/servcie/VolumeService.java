@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -104,14 +105,26 @@ public class VolumeService extends AbstractService {
         String volumeName = UUID.randomUUID().toString();
         String uploadPath = storage.getMountPath() + "/" + volumeName;
         String uploadUri = String.format("%s/api/upload", host.getUri());
+        long timestamp = System.currentTimeMillis();
+
+        String nonce = String.valueOf(System.nanoTime());
+        Map<String, Object> map = new HashMap<>(6);
+        map.put("path", uploadPath);
+        map.put("storage", storage.getName());
+        map.put("volumeType", volumeType);
+        map.put("name", volumeName);
+        map.put("timestamp", timestamp);
+        try {
+            String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+            map.put("sign", sign);
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
+        }
 
         FileSystemResource resource = new FileSystemResource(file);
         MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
-        param.add("path", uploadPath);
-        param.add("storage", storage.getName());
+        map.forEach((k, v) -> param.add(k, v.toString()));
         param.add("volume", resource);
-        param.add("volumeType", volumeType);
-        param.add("name", volumeName);
         org.springframework.http.HttpEntity<MultiValueMap<String, Object>> httpEntity = new org.springframework.http.HttpEntity<>(param);
         ResponseEntity<String> responseEntity = restTemplate.exchange(uploadUri, HttpMethod.POST, httpEntity, String.class);
         if (!responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -158,6 +171,8 @@ public class VolumeService extends AbstractService {
         }
         return ResultUtil.success(DownloadModel.builder().storage(storage.getName())
                 .host(host.getUri())
+                .clientId(host.getClientId())
+                .clientSecret(host.getClientSecret())
                 .name(volume.getName())
                 .path(volume.getPath())
                 .build());

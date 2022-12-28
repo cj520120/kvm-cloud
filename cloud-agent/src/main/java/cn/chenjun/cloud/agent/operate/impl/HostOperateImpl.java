@@ -3,7 +3,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.operate.HostOperate;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
-import cn.chenjun.cloud.agent.util.HostUtil;
+import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.*;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
@@ -29,7 +29,7 @@ public class HostOperateImpl implements HostOperate {
     @Autowired
     private StorageOperate storageOperate;
     @Autowired
-    private HostUtil hostUtil;
+    private ClientService clientService;
 
     private static String getArch(String xml) throws SAXException, DocumentException {
 
@@ -114,7 +114,7 @@ public class HostOperateImpl implements HostOperate {
 
     @Override
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
-        hostUtil.init(request.getManagerUri(), request.getClientId(), request.getClientSecret());
+
         List<StorageCreateRequest> storageList = request.getStorageList();
         if (storageList != null) {
             for (StorageCreateRequest storage : storageList) {

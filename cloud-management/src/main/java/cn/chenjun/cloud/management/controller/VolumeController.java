@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.VolumeService;
@@ -23,9 +24,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -83,7 +82,30 @@ public class VolumeController {
         try {
             ResultUtil<DownloadModel> resultUtil = this.volumeService.getDownloadUri(volumeId);
             DownloadModel model = resultUtil.getData();
-            String uri = String.format("%s/api/download?storage=%s&name=%s&path=%s&volumeType=%s", model.getHost(), URLEncoder.encode(model.getStorage(), "utf-8"), URLEncoder.encode(model.getName(), "utf-8"), URLEncoder.encode(model.getPath(), "utf-8"), URLEncoder.encode(volumeType, "utf-8"));
+            long timestamp = System.currentTimeMillis();
+            String sign = "";
+            String nonce = String.valueOf(System.nanoTime());
+            Map<String, Object> map = new HashMap<>(6);
+            map.put("storage", model.getStorage());
+            map.put("name", model.getName());
+            map.put("path", model.getPath());
+            map.put("volumeType", volumeType);
+            map.put("timestamp", timestamp);
+            try {
+                sign = AppUtils.sign(map, model.getClientId(), model.getClientSecret(), nonce);
+            } catch (Exception err) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
+            }
+            String uri = String.format("%s/api/download?storage=%s&name=%s&path=%s&volumeType=%s&clientId=%s&nonce=%s&timestamp=%d&sign=%s",
+                    model.getHost(),
+                    URLEncoder.encode(model.getStorage(), "utf-8"),
+                    URLEncoder.encode(model.getName(), "utf-8"),
+                    URLEncoder.encode(model.getPath(), "utf-8"),
+                    URLEncoder.encode(volumeType, "utf-8"),
+                    model.getClientId(),
+                    nonce,
+                    timestamp,
+                    sign);
             URL url = new URL(uri);
             response.setStatus(HttpStatus.OK.value());
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);

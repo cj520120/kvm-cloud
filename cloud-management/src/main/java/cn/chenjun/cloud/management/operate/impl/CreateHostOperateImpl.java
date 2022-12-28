@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -13,10 +14,17 @@ import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,10 +83,28 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
                 }
             }
         }
+        String uri = String.format("%s/api/init", host.getUri());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
+        requestMap.add("managerUri", this.applicationConfig.getManagerUri());
+        requestMap.add("clientId", host.getClientId());
+        requestMap.add("clientSecret", host.getClientSecret());
+        RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
+                .post(URI.create(uri))
+                .headers(httpHeaders)
+                .body(requestMap);
+        ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "初始化主机出错.status=" + responseEntity.getStatusCode());
+        }
+        ResultUtil<Void> resultUtil = GsonBuilderUtil.create().fromJson(responseEntity.getBody(), new TypeToken<ResultUtil<Void>>() {
+        }.getType());
+        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
+        }
+
         InitHostRequest request = InitHostRequest.builder()
-                .managerUri(this.applicationConfig.getManagerUri())
-                .clientId(host.getClientId())
-                .clientSecret(host.getClientSecret())
                 .storageList(createStorageRequest)
                 .basicBridgeNetworkList(basicBridgeNetworkMap.values().stream().collect(Collectors.toList()))
                 .vlanNetworkList(vlanNetworkList)

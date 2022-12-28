@@ -93,7 +93,7 @@ public class AppUtils {
 
     public static String sign(Map<String, Object> map, String appId, String appSecret, String nonce) throws InvalidKeyException, NoSuchAlgorithmException {
         StringBuilder sb = new StringBuilder();
-        map.put("appId", appId);
+        map.put("clientId", appId);
         map.put("nonce", nonce);
         map.keySet().stream().sorted(String::compareTo).forEach(key -> sb.append(key).append("=").append(map.get(key)).append("&"));
         sb.deleteCharAt(sb.length() - 1);

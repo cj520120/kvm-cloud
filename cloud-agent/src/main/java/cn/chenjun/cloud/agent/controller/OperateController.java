@@ -1,7 +1,9 @@
 package cn.chenjun.cloud.agent.controller;
 
+import cn.chenjun.cloud.agent.annotation.SignRequire;
 import cn.chenjun.cloud.agent.operate.OperateDispatch;
 import cn.chenjun.cloud.agent.operate.VolumeOperate;
+import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
@@ -35,12 +37,24 @@ public class OperateController {
 
     @Autowired
     private VolumeOperate volumeOperate;
+    @Autowired
+    private ClientService clientService;
 
+
+    @PostMapping("/api/init")
+    public ResultUtil<Void> initHost(@RequestParam("managerUri") String managerUri,
+                                     @RequestParam("clientId") String clientId,
+                                     @RequestParam("clientSecret") String clientSecret) {
+        return this.clientService.init(managerUri, clientId, clientSecret);
+    }
+
+    @SignRequire
     @PostMapping("/api/operate")
     public <T> ResultUtil<T> execute(@RequestParam("taskId") String taskId, @RequestParam("command") String command, @RequestParam("data") String data) {
         return dispatch.dispatch(taskId, command, data);
     }
 
+    @SignRequire(timeout = 86400000)
     @PostMapping("/api/upload")
     public ResultUtil<VolumeInfo> uploadVolume(@RequestParam("name") String name,
                                                @RequestParam("path") String path,
@@ -49,7 +63,7 @@ public class OperateController {
                                                @RequestParam("volume") MultipartFile multipartFile) throws IOException {
 
         String sub = "." + System.nanoTime();
-        String tempPath = name + sub;
+        String tempPath = path + sub;
         File file = new File(tempPath);
         try {
             file.createNewFile();
@@ -70,6 +84,7 @@ public class OperateController {
         }
     }
 
+    @SignRequire
     @GetMapping(value = "/api/download",
             produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public void downloadVolume(@RequestParam("name") String name,
