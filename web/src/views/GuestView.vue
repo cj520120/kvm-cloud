@@ -742,20 +742,22 @@ export default {
 			}
 		},
 		get_memory_desplay(memory) {
-			if (memory > 1024 * 1024) {
+			if (memory >= 1024 * 1024) {
 				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
-			} else if (memory > 1024) {
+			} else if (memory >= 1024) {
 				return (memory / 1024).toFixed(2) + '  MB'
+			} else {
+				return memory + ' KB'
 			}
 		},
 		get_volume_desplay_size(size) {
-			if (size > 1024 * 1024 * 1024 * 1024) {
+			if (size >= 1024 * 1024 * 1024 * 1024) {
 				return (size / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB'
-			} else if (size > 1024 * 1024 * 1024) {
+			} else if (size >= 1024 * 1024 * 1024) {
 				return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
-			} else if (size > 1024 * 1024) {
+			} else if (size >= 1024 * 1024) {
 				return (size / (1024 * 1024)).toFixed(2) + ' MB'
-			} else if (size > 1024) {
+			} else if (size >= 1024) {
 				return (size / 1024).toFixed(2) + '  KB'
 			} else {
 				return size + '  bytes'

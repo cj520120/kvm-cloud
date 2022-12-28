@@ -14,14 +14,14 @@
 							<el-table-column label="CPU" prop="hostIp" width="180">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
-										<el-progress color="#67C23A" :percentage="Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
 							<el-table-column label="内存" prop="hostIp" width="180">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
-										<el-progress color="#67C23A" :percentage="Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
@@ -62,12 +62,12 @@
 							<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 							<el-descriptions-item label="内存">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(show_host.allocationMemory) + ' / 总共:' + get_memory_desplay(show_host.totalMemory)" placement="top">
-									<el-progress color="#67C23A" :percentage="Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
+									<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
 								</el-tooltip>
 							</el-descriptions-item>
 							<el-descriptions-item label="CPU">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + show_host.allocationCpu + '核 / 总共:' + show_host.totalCpu + '核'" placement="top" style="width: 150px">
-									<el-progress color="#67C23A" :percentage="Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu)"></el-progress>
+									<el-progress color="#67C23A" :percentage="show_host.totalCpu <= 0 ? 0 : Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu)"></el-progress>
 								</el-tooltip>
 							</el-descriptions-item>
 							<el-descriptions-item label="Cores">{{ show_host.cores }}</el-descriptions-item>
@@ -243,6 +243,8 @@ export default {
 				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
 			} else if (memory > 1024) {
 				return (memory / 1024).toFixed(2) + '  MB'
+			} else {
+				return memory + ' KB'
 			}
 		},
 		pasue_host(host) {

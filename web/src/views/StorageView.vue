@@ -14,11 +14,11 @@
 							<el-table-column label="容量" prop="capacity" width="180">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
-										<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							<el-table-column label="状态" prop="status" width="100">
+							<el-table-column label="状态" prop="status" width="110">
 								<template #default="scope">
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_storage_status(scope.row) }}</el-tag>
 								</template>
@@ -241,13 +241,13 @@ export default {
 			})
 		},
 		get_storage_desplay(size) {
-			if (size > 1024 * 1024 * 1024 * 1024) {
+			if (size >= 1024 * 1024 * 1024 * 1024) {
 				return (size / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB'
-			} else if (size > 1024 * 1024 * 1024) {
+			} else if (size >= 1024 * 1024 * 1024) {
 				return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
-			} else if (size > 1024 * 1024) {
+			} else if (size >= 1024 * 1024) {
 				return (size / (1024 * 1024)).toFixed(2) + ' MB'
-			} else if (size > 1024) {
+			} else if (size >= 1024) {
 				return (size / 1024).toFixed(2) + '  KB'
 			} else {
 				return size + '  bytes'

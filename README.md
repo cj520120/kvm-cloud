@@ -9,6 +9,11 @@
     7、简单群组功能
     8、虚拟机IP自动管理
     9、多网卡支持
+    10、支持磁盘导入导出
+    11、支持 raw、qcow、qcow2、vdi、vmdk、vpc磁盘格式
+    12、磁盘快照支持
+### 关于升级
+    目前不支持V1、V2升级到最新版本
 ### 操作系统
 Linux
 ### SELinux配置
@@ -154,60 +159,48 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 4、平台登陆账号默认用户名/密码:admin/111111
 
-5、创建集群
+
+5、创建基础网络
+
+> **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突**
+
+![](images/network.png)
 
 
-![](images/cluster.png)
+6、创建主机
 
-6、下载系统Route-VM与Console-VM
+
+![](images/host.png)
+
+
+7、创建存储池(只支持nfs)
+
+
+![](images/storage.png)
+
+8、下载基础模版
 
 > **链接: https://pan.baidu.com/s/1c7Fvenhp9WfrdaqrBkbd8A 提取码: pw3g**
 
 
-7、安装nginx，配置Route-VM和Console-VM下载地址,并在页面完成模版配置
+9、安装nginx，配置基础下载地址,并在页面完成模版配置
 
 
 ![](images/template.png)
 
  
 
-8、创建网络
-
-> **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突** 
-
-![](images/network.png)
 
 
-9、创建主机
+10、等待系统模版下载完成，并初始化系统VM成功
 
+11、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动 
 
-![](images/host.png)
-
-
-10、创建存储池(只支持nfs)
-
-
-![](images/storage.png)
-
-
-11、等待系统模版下载完成，并初始化系统VM成功
-
-12、Console VM	负责Vnc连接、Route VM负责DHCP下发
-
-
-
-![](images/route.png)
-
-
-13、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动
-
-14、系统VM用户名密码均为root/123456，请自行修改相关密码
-
-15、上传ISO系统镜像
+12、上传ISO系统镜像
 
 > **配置镜像时需要指定系统类型**
 
-16、创建VM
+13、创建VM
 
 
 ![](images/create-vm.png)

@@ -283,9 +283,9 @@ export default {
 				.catch(() => {})
 		},
 		get_memory_desplay(memory) {
-			if (memory > 1024 * 1024) {
+			if (memory >= 1024 * 1024) {
 				return parseInt(memory / (1024 * 1024)) + ' GB'
-			} else if (memory > 1024) {
+			} else if (memory >= 1024) {
 				return parseInt(memory / 1024) + '  MB'
 			}
 		},

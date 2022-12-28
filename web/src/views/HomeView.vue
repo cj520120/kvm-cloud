@@ -59,14 +59,14 @@
 									<el-table-column label="CPU" prop="hostIp" min-width="150">
 										<template #default="scope">
 											<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
-												<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
+												<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
 											</el-tooltip>
 										</template>
 									</el-table-column>
 									<el-table-column label="内存" prop="hostIp" min-width="150">
 										<template #default="scope">
 											<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
-												<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
+												<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
 											</el-tooltip>
 										</template>
 									</el-table-column>
@@ -93,7 +93,7 @@
 									<el-table-column label="容量" prop="capacity" width="180">
 										<template #default="scope">
 											<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
-												<el-progress color="#67C23A" :percentage="parseInt((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
+												<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
 											</el-tooltip>
 										</template>
 									</el-table-column>
@@ -132,8 +132,8 @@ export default {
 			getHostList().then((res) => {
 				if (res.code === 0) {
 					this.hosts = res.data
-					this.totalCpuPercentage = Math.floor((this.get_allocat_cpu() * 100) / this.get_total_cpu())
-					this.totalMemoryePercentage = Math.floor((this.get_allocat_memory() * 100) / this.get_total_memory())
+					this.totalCpuPercentage = this.get_total_cpu() <= 0 ? 0 : Math.floor((this.get_allocat_cpu() * 100) / this.get_total_cpu())
+					this.totalMemoryePercentage = this.get_total_memory() <= 0 ? 0 : Math.floor((this.get_allocat_memory() * 100) / this.get_total_memory())
 				}
 			})
 			getNetworkList().then((res) => {
@@ -159,7 +159,7 @@ export default {
 			getStorageList().then((res) => {
 				if (res.code === 0) {
 					this.storages = res.data
-					this.totalStoragePercentage = parseInt((this.get_allocat_storage() * 100) / this.get_total_capacity())
+					this.totalStoragePercentage = this.get_total_capacity() <= 0 ? 0 : parseInt((this.get_allocat_storage() * 100) / this.get_total_capacity())
 				}
 			})
 		},
