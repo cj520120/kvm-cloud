@@ -9,7 +9,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="storages" style="width: 100%">
 							<el-table-column label="ID" prop="storageId" width="80" />
-							<el-table-column label="名称" prop="name" width="120" />
+							<el-table-column label="名称" prop="description" width="120" show-overflow-tooltip />
 							<el-table-column label="类型" prop="type" width="120" />
 							<el-table-column label="容量" prop="capacity" width="180">
 								<template #default="scope">
@@ -66,8 +66,8 @@
 					</el-row>
 					<el-row>
 						<el-form ref="createForm" :model="create_storage" label-width="100px" class="demo-ruleForm">
-							<el-form-item label="名称" prop="name">
-								<el-input v-model="create_storage.name"></el-input>
+							<el-form-item label="名称" prop="description">
+								<el-input v-model="create_storage.description"></el-input>
 							</el-form-item>
 							<el-form-item label="存储池类型" prop="type">
 								<el-select v-model="create_storage.type" style="width: 100%">
@@ -105,7 +105,7 @@ export default {
 			show_type: -1,
 			show_storage: {},
 			create_storage: {
-				name: '',
+				description: '',
 				type: 'nfs',
 				param: '',
 				path: '',

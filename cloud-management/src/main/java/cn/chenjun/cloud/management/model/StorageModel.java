@@ -14,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class StorageModel {
     private int storageId;
+    private String description;
     private String name;
     private String type;
     private String param;

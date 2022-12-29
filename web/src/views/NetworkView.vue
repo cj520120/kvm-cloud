@@ -9,7 +9,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="networks" style="width: 100%">
 							<el-table-column label="ID" prop="networkId" width="80" />
-							<el-table-column label="名称" prop="name" width="120" />
+							<el-table-column label="名称" prop="name" width="120" show-overflow-tooltip />
 							<el-table-column label="桥接网卡" prop="bridge" width="120" />
 							<el-table-column label="网络类型" prop="type" width="100">
 								<template #default="scope">

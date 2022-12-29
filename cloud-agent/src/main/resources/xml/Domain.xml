@@ -47,11 +47,11 @@
 
         <video>
             <model type="cirrus" vram="16384" heads="1" primary="yes"/>
-            <address type="pci" domain="0x0000" bus="0x00" slot="0x1A" function="0x0"/>
+            <address type="pci" domain="0x0000" bus="0x00" slot="0x02" function="0x0"/>
         </video>
         <memballoon model="virtio">
             <stats period="10"/>
-            <address type="pci" domain="0x0000" bus="0x00" slot="0x1B" function="0x0"/>
+            <address type="pci" domain="0x0000" bus="0x00" slot="0x04" function="0x0"/>
         </memballoon>
     </devices>
 </domain>

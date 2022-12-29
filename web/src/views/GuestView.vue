@@ -3,20 +3,31 @@
 		<el-container>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
-					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-col :span="14">
-							<el-link type="primary" @click="show_create_guest_click">创建虚拟机</el-link>
-
-							<el-link style="padding: 0 10px" :disabled="!select_guests.length" type="primary" @click="batch_start_guest_click">批量启动</el-link>
-							<el-link :disabled="!select_guests.length" type="danger" @click="batch_stop_guest_click">批量停止</el-link>
-						</el-col>
-						<el-col :span="10"><el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_guest_show_page"></el-input></el-col>
+					<el-row slot="header" class="clearfix" style="height: 30px">
+						<div style="float: left">
+							<el-form :inline="true" class="demo-form-inline">
+								<el-form-item>
+									<el-link type="primary" @click="show_create_guest_click">创建虚拟机</el-link>
+								</el-form-item>
+								<el-form-item><el-link style="padding: 0 10px" :disabled="!select_guests.length" type="primary" @click="batch_start_guest_click">批量启动</el-link></el-form-item>
+								<el-form-item><el-link :disabled="!select_guests.length" type="danger" @click="batch_stop_guest_click">批量停止</el-link></el-form-item>
+								<el-form-item label="运行主机">
+									<el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
+										<el-option label="全部" :value="0"></el-option>
+										<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+									</el-select>
+								</el-form-item>
+							</el-form>
+						</div>
+						<div>
+							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_guest_show_page"></el-input>
+						</div>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="show_table_guests" style="width: 100%" @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="guestId" width="80" />
-							<el-table-column label="实例名" prop="name" width="180" />
+							<el-table-column label="实例名" prop="name" width="180" show-overflow-tooltip />
 							<el-table-column label="标签" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="配置" prop="cpu" width="150">
@@ -75,7 +86,8 @@
 					<el-row>
 						<el-descriptions :column="2" size="medium" border>
 							<el-descriptions-item label="ID">{{ show_guest_info.current_guest.guestId }}</el-descriptions-item>
-							<el-descriptions-item label="虚拟机名">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
+							<el-descriptions-item label="实例名">{{ show_guest_info.current_guest.name }}</el-descriptions-item>
+							<el-descriptions-item label="标签">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
 							<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
 							<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 							<el-descriptions-item label="内存">{{ get_memory_desplay(show_guest_info.current_guest.memory) }}</el-descriptions-item>
@@ -147,7 +159,7 @@
 						<el-form ref="createForm" :model="create_guest" label-width="100px" class="demo-ruleForm">
 							<el-row>
 								<el-col :span="12">
-									<el-form-item label="名称" prop="description">
+									<el-form-item label="标签" prop="description">
 										<el-input v-model="create_guest.description"></el-input>
 									</el-form-item>
 								</el-col>
@@ -246,7 +258,7 @@
 									<el-form-item label="存储池" v-if="create_guest.type !== 3">
 										<el-select v-model="create_guest.storageId" style="width: 100%">
 											<el-option label="随机" :value="0"></el-option>
-											<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+											<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 										</el-select>
 									</el-form-item>
 								</el-col>
@@ -319,7 +331,7 @@
 									<el-form-item label="存储池" v-if="reinstall_guest.type !== 3">
 										<el-select v-model="reinstall_guest.storageId" style="width: 100%">
 											<el-option label="随机" :value="0"></el-option>
-											<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+											<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 										</el-select>
 									</el-form-item>
 								</el-col>
@@ -441,6 +453,7 @@ export default {
 			attach_volume_dialog_visiable: false,
 			modify_guest_dialog_visiable: false,
 			current_loading: false,
+			select_host_id: 0,
 			show_type: -1,
 			show_guest_info: {
 				guestId: 0,
@@ -585,6 +598,7 @@ export default {
 				.finally(() => {
 					this.data_loading = false
 				})
+			await this.load_all_host()
 		},
 		async load_all_schemes() {
 			await getSchemeList().then((res) => {
@@ -709,7 +723,11 @@ export default {
 				if (searchKeyword !== '') {
 					hasKeyword = '' + item.guestId === searchKeyword || item.description.toLowerCase().indexOf(searchKeyword) >= 0 || item.name.toLowerCase().indexOf(searchKeyword) >= 0 || item.guestIp.toLowerCase().indexOf(searchKeyword) >= 0
 				}
-				if (hasKeyword) {
+				let isHost = true
+				if (this.select_host_id > 0) {
+					isHost = item.hostId === this.select_host_id
+				}
+				if (hasKeyword && isHost) {
 					nCount++
 					if (nCount <= this.page_size * (this.current_page - 1) || nCount > this.page_size * this.current_page) {
 						item.isShow = false

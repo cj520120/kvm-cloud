@@ -52,6 +52,7 @@ public class OperateDispatchImpl implements OperateDispatch {
 
     private void submitTask(String taskId, String command, String data) {
         taskMap.put(taskId, System.currentTimeMillis());
+        log.info("提交异步任务:taskId={},command={},data={}", taskId, command, data);
         this.executor.submit(() -> {
             ResultUtil result = null;
             try {
@@ -62,25 +63,30 @@ public class OperateDispatchImpl implements OperateDispatch {
                 result = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                 log.error("执行任务出错.", err);
             } finally {
-                taskMap.remove(taskId);
-                String nonce = String.valueOf(System.nanoTime());
-                Map<String, Object> map = new HashMap<>(5);
-                map.put("taskId", taskId);
-                map.put("data", GsonBuilderUtil.create().toJson(result));
-                map.put("timestamp", System.currentTimeMillis());
+
                 try {
+                    String nonce = String.valueOf(System.nanoTime());
+                    Map<String, Object> map = new HashMap<>(5);
+                    map.put("taskId", taskId);
+                    map.put("data", GsonBuilderUtil.create().toJson(result));
+                    map.put("timestamp", System.currentTimeMillis());
                     String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
                     map.put("sign", sign);
+                    HttpUtil.post(clientService.getManagerUri() + "api/agent/task/report", map);
                 } catch (Exception err) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名出错");
+                }finally {
+                    taskMap.remove(taskId);
+                    log.info("移除异步任务:{}",taskId);
                 }
-                HttpUtil.post(clientService.getManagerUri() + "api/agent/task/report", map);
+
             }
         });
     }
 
     @Override
     public <T> ResultUtil<T> dispatch(String taskId, String command, String data) {
+
         this.taskMap.put(taskId, System.currentTimeMillis());
         Connect connect = null;
         try {
@@ -94,6 +100,7 @@ public class OperateDispatchImpl implements OperateDispatch {
                 case Constant.Command.SUBMIT_TASK:
                     TaskRequest taskRequest = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
                     this.submitTask(taskRequest.getTaskId(), taskRequest.getCommand(), taskRequest.getData());
+
                     break;
 
                 case Constant.Command.HOST_INFO:
@@ -213,10 +220,10 @@ public class OperateDispatchImpl implements OperateDispatch {
         } catch (Exception err) {
             throw new CodeException(ErrorCode.SERVER_ERROR, err);
         } finally {
+            this.taskMap.remove(taskId);
             if (connect != null) {
                 connectPool.returnObject(connect);
             }
-            this.taskMap.remove(taskId);
         }
     }
 }

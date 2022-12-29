@@ -6,7 +6,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="snapshots" style="width: 100%">
 							<el-table-column label="ID" prop="snapshotVolumeId" width="80" />
-							<el-table-column label="名称" prop="name" width="300" />
+							<el-table-column label="名称" prop="name" width="300" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="type" width="100" />
 							<el-table-column label="磁盘空间" prop="capacity" width="100">
 								<template #default="scope">

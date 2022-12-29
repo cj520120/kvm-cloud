@@ -9,7 +9,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="schemes" style="width: 100%">
 							<el-table-column label="ID" prop="schemeId" width="80" />
-							<el-table-column label="名称" prop="name" width="300" />
+							<el-table-column label="名称" prop="name" width="300" show-overflow-tooltip />
 							<el-table-column label="CPU" prop="cpu" width="120" />
 							<el-table-column label="内存" prop="memory" width="200">
 								<template #default="scope">

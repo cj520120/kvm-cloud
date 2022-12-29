@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.util;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,22 +123,16 @@ public class IpCaculate {
         return startIp.toString();
     }
 
-    public static String getBroadcastAddr(String subnet) {
-        String broadcast = "";
-        String[] addresses = subnet.split("/")[0].split("\\.");
-        String netMask = getNetMask(subnet.split("/")[1]);
-        if (netMask == null) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "subnet error.subnet=" + subnet);
-        }
-        String[] masks = netMask.split("\\.");
-        for (int i = 0; i < 4; i++) {
-            int opmaskSegement = ~Integer.parseInt(masks[i]) & 0xFF;
-            int netSegment = Integer.parseInt(addresses[i]) & Integer.parseInt(masks[i]);
-            broadcast += (opmaskSegement | netSegment) + ".";
-        }
-        return broadcast.substring(0, broadcast.length() - 1);
+    public static String getBroadcastByIp(String ip) {
+        String[] temp = ip.split("\\.");
+        temp[3]="255";
+        return StringUtils.join(temp,".");
     }
-
+    public static String getSubnetByIp(String ip) {
+        String[] temp = ip.split("\\.");
+        temp[3]="0";
+        return StringUtils.join(temp,".");
+    }
     /**
      * 根据网段计算结束IP
      *

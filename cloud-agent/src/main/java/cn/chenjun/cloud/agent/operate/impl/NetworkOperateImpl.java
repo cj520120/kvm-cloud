@@ -65,34 +65,34 @@ public class NetworkOperateImpl implements NetworkOperate {
 
     private void addBridge(String nic, String bridge, String ip, String netmask, String gateway) throws Exception {
         if (NetworkInterface.getByName(bridge) == null) {
-            shell("modprobe br_netfilter || true");
-            shell("echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables");
-            shell("echo 1 > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged");
-            shell("echo 1 > /proc/sys/net/ipv4/conf/default/forwarding");
-            shell("brctl addbr " + bridge);
-            shell("brctl setfd " + bridge + " 0");
-            shell("brctl stp " + bridge + " off");
-            shell("ip link set " + bridge + " up");
-            shell("brctl addif " + bridge + " " + nic);
-            //切换mac地址
-            shell(String.format("mac=`ip link show %s|grep ether|awk '{print $2}'`;ip link set %s address $mac", nic, bridge));
-
-            String[] routes = shellForStr(String.format("ip route show dev %s | grep via | sed 's/onlink//g'", nic)).split("\n");
-            for (String route : routes) {
-                if (!StringUtils.isEmpty(route)) {
-                    shell(String.format("ip route del %s", route));
-                }
-            }
-            shell(String.format("ifconfig %s 0.0.0.0", nic));
-            if (!StringUtils.isEmpty(ip)) {
-                shell(String.format("ip addr add %s/%s dev %s", ip, netmask, bridge));
-            }
-
-            for (String route : routes) {
-                if (!StringUtils.isEmpty(route)) {
-                    shell(String.format("ip route add %s", route));
-                }
-            }
+//            shell("modprobe br_netfilter || true");
+//            shell("echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables");
+//            shell("echo 1 > /proc/sys/net/bridge/bridge-nf-filter-vlan-tagged");
+//            shell("echo 1 > /proc/sys/net/ipv4/conf/default/forwarding");
+//            shell("brctl addbr " + bridge);
+//            shell("brctl setfd " + bridge + " 0");
+//            shell("brctl stp " + bridge + " off");
+//            shell("ip link set " + bridge + " up");
+//            shell("brctl addif " + bridge + " " + nic);
+//            //切换mac地址
+//            shell(String.format("mac=`ip link show %s|grep ether|awk '{print $2}'`;ip link set %s address $mac", nic, bridge));
+//
+//            String[] routes = shellForStr(String.format("ip route show dev %s | grep via | sed 's/onlink//g'", nic)).split("\n");
+//            for (String route : routes) {
+//                if (!StringUtils.isEmpty(route)) {
+//                    shell(String.format("ip route del %s", route));
+//                }
+//            }
+//            shell(String.format("ifconfig %s 0.0.0.0", nic));
+//            if (!StringUtils.isEmpty(ip)) {
+//                shell(String.format("ip addr add %s/%s dev %s", ip, netmask, bridge));
+//            }
+//
+//            for (String route : routes) {
+//                if (!StringUtils.isEmpty(route)) {
+//                    shell(String.format("ip route add %s", route));
+//                }
+//            }
         }
     }
 

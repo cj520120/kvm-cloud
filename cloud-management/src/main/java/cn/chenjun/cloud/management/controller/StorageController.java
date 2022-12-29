@@ -29,10 +29,10 @@ public class StorageController {
     }
 
     @PutMapping("/api/storage/create")
-    public ResultUtil<StorageModel> createStorage(@RequestParam("name") String name,
+    public ResultUtil<StorageModel> createStorage(@RequestParam("description") String description,
                                                   @RequestParam("type") String type,
                                                   @RequestParam("param") String param) {
-        return storageService.createStorage(name, type, param);
+        return storageService.createStorage(description, type, param);
     }
 
     @PostMapping("/api/storage/register")

@@ -12,6 +12,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
 import org.libvirt.Error;
 import org.libvirt.*;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class OsOperateImpl implements OsOperate {
     private final int MAX_DEVICE_COUNT = 5;
@@ -324,6 +326,7 @@ public class OsOperateImpl implements OsOperate {
                 nicXml,
                 request.getName(),
                 request.getVncPassword());
+        log.info("create vm={}",xml);
         domain = connect.domainCreateXML(xml, 0);
 
 

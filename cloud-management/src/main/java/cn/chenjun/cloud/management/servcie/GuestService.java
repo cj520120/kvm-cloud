@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -62,11 +59,13 @@ public class GuestService extends AbstractService {
         return model;
     }
 
+
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
+
         return ResultUtil.success(models);
     }
 
@@ -75,6 +74,21 @@ public class GuestService extends AbstractService {
     public ResultUtil<List<GuestModel>> listUserGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("guest_type", Constant.GuestType.USER));
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
+        Collections.sort(models, new Comparator<GuestModel>() {
+            @Override
+            public int compare(GuestModel o1, GuestModel o2) {
+                if (o1.getStatus() == o2.getStatus()) {
+                    return Integer.compare(o1.getGuestId(), o2.getGuestId());
+                }
+                if (o1.getStatus() == Constant.GuestStatus.RUNNING) {
+                    return -1;
+                }
+                if (o2.getStatus() == Constant.GuestStatus.RUNNING) {
+                    return 1;
+                }
+                return Integer.compare(o1.getStatus(), o2.getStatus());
+            }
+        });
         return ResultUtil.success(models);
     }
 

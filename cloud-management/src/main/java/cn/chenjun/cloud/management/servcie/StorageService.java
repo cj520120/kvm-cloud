@@ -44,8 +44,8 @@ public class StorageService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> createStorage(String name, String type, String param) {
-        if (StringUtils.isEmpty(name)) {
+    public ResultUtil<StorageModel> createStorage(String description, String type, String param) {
+        if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入存储池名称");
         }
         if (StringUtils.isEmpty(type)) {
@@ -54,11 +54,13 @@ public class StorageService extends AbstractService {
         if (StringUtils.isEmpty(param)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "存储池参数不正确");
         }
+        String storageName= UUID.randomUUID().toString().toLowerCase().replace("-", "");
         StorageEntity storage = StorageEntity.builder()
-                .name(name)
+                .description(description)
+                .name(storageName)
                 .type(type)
                 .param(param)
-                .mountPath("/mnt/" + UUID.randomUUID().toString().toLowerCase().replace("-", ""))
+                .mountPath("/mnt/" +storageName)
                 .allocation(0L)
                 .capacity(0L)
                 .available(0L)

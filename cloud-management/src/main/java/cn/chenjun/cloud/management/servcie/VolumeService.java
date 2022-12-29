@@ -67,6 +67,21 @@ public class VolumeService extends AbstractService {
         List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
         diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
         List<VolumeModel> models = diskList.stream().map(this::initVolume).collect(Collectors.toList());
+        Collections.sort(models, new Comparator<VolumeModel>() {
+            @Override
+            public int compare(VolumeModel o1, VolumeModel o2) {
+                if (o1.getStatus() == o2.getStatus()) {
+                    return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
+                }
+                if (o1.getStatus() == Constant.VolumeStatus.READY) {
+                    return -1;
+                }
+                if (o2.getStatus() == Constant.VolumeStatus.READY) {
+                    return 1;
+                }
+                return Integer.compare(o1.getStatus(), o2.getStatus());
+            }
+        });
         return ResultUtil.success(models);
 
     }

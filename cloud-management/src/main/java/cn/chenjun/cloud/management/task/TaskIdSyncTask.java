@@ -1,22 +1,21 @@
 package cn.chenjun.cloud.management.task;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
+import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.management.operate.bean.SyncHostTaskIdOperate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
-import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author chenjun
@@ -44,28 +43,15 @@ public class TaskIdSyncTask extends AbstractTask {
         if (rBucket.isExists()) {
             return;
         }
-        if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
+        if (rBucket.setIfAbsent(System.currentTimeMillis(), Duration.ofSeconds(TASK_CHECK_TIME))) {
             List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : hostList) {
+                if(host.getHostId()!=83){
+                    continue;
+                }
                 if (Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
-                    Map<String, Object> map = new HashMap<>(3);
-                    map.put("command", Constant.Command.CHECK_TASK);
-                    map.put("taskId", UUID.randomUUID().toString());
-                    map.put("data", "{}");
-                    try {
-                        String uri = String.format("%s/api/operate", host.getUri());
-                        String response = HttpUtil.post(uri, map);
-                        ResultUtil<List<String>> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<List<String>>>() {
-                        }.getType());
-                        List<String> taskIds = resultUtil.getData();
-                        if (taskIds != null) {
-                            for (String taskId : taskIds) {
-                                operateTask.keepTask(taskId);
-                            }
-                        }
-                    } catch (Exception err) {
-                        log.error("同步主机任务失败.hostId={}", host.getHostId(), err);
-                    }
+                    BaseOperateParam operateParam= SyncHostTaskIdOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).title("同步主机任务列表").build();
+                    this.operateTask.addTask(operateParam);
                 }
             }
         }

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,7 @@ public class HostGuestSyncTask extends AbstractTask {
         if (rBucket.isExists()) {
             return;
         }
-        if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
+        if (rBucket.setIfAbsent(System.currentTimeMillis(), Duration.ofSeconds(TASK_CHECK_TIME))) {
             List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : hostList) {
                 if (host.getStatus() == Constant.HostStatus.ONLINE) {

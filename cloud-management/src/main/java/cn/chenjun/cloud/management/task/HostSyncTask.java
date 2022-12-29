@@ -4,6 +4,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.HostCheckOperate;
+import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -33,14 +35,15 @@ public class HostSyncTask extends AbstractTask {
     @Lazy
     private OperateTask operateTask;
 
-
+@Autowired
+private AllocateService allocateService;
     @Override
     protected void dispatch() {
         RBucket<Long> rBucket = redissonClient.getBucket(RedisKeyUtil.HOST_SYNC_KEY);
         if (rBucket.isExists()) {
             return;
         }
-        if (rBucket.trySet(System.currentTimeMillis(), TASK_CHECK_TIME, TimeUnit.SECONDS)) {
+        if (rBucket.setIfAbsent(System.currentTimeMillis(), Duration.ofSeconds(TASK_CHECK_TIME))) {
             List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : hostList) {
                 switch (host.getStatus()) {

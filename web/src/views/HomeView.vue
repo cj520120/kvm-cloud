@@ -88,7 +88,7 @@
 							</div>
 							<div>
 								<el-table :data="storages">
-									<el-table-column label="名称" prop="name" width="120" />
+									<el-table-column label="名称" prop="description" width="120" />
 									<el-table-column label="类型" prop="type" width="120" />
 									<el-table-column label="容量" prop="capacity" width="180">
 										<template #default="scope">

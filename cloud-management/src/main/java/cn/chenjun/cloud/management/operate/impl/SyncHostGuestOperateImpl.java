@@ -61,6 +61,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             return;
         }
+        this.allocateService.initHostAllocate();
         List<GuestInfo> guestList = resultUtil.getData();
         List<String> guestNames = guestList.stream().map(GuestInfo::getName).collect(Collectors.toList());
         if (!guestNames.isEmpty()) {

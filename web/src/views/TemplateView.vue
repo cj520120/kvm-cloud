@@ -9,7 +9,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="templates" style="width: 100%">
 							<el-table-column label="ID" prop="templateId" width="80" />
-							<el-table-column label="名称" prop="name" width="300" />
+							<el-table-column label="名称" prop="name" width="300" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="volumeType" width="120" />
 							<el-table-column label="类型" prop="type" width="100">
 								<template #default="scope">

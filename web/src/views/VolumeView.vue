@@ -3,21 +3,30 @@
 		<el-container>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
-					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-col :span="12">
-							<el-link type="primary" @click="show_create_volume">创建磁盘</el-link>
-							<el-link style="margin: 0 10px" type="primary" @click="show_upload_volume">导入磁盘</el-link>
-							<el-link :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-link>
-						</el-col>
-						<el-col :span="12">
+					<el-row slot="header" class="clearfix" style="height: 30px">
+						<div style="float: left">
+							<el-form :inline="true" class="demo-form-inline">
+								<el-form-item><el-link type="primary" @click="show_create_volume">创建磁盘</el-link></el-form-item>
+								<el-form-item><el-link style="margin: 0 10px" type="primary" @click="show_upload_volume">导入磁盘</el-link></el-form-item>
+								<el-form-item><el-link :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-link></el-form-item>
+
+								<el-form-item label="存储池">
+									<el-select v-model="select_storage_id" style="width: 100%" @change="update_show_page">
+										<el-option label="全部" :value="0"></el-option>
+										<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
+									</el-select>
+								</el-form-item>
+							</el-form>
+						</div>
+						<div>
 							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_show_page"></el-input>
-						</el-col>
+						</div>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="volumeId" width="80" />
-							<el-table-column label="名称" prop="description" />
+							<el-table-column label="名称" prop="description" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ scope.row.type }}</el-tag>
@@ -116,7 +125,7 @@
 							<el-form-item label="存储池" prop="type">
 								<el-select v-model="create_volume.storageId" style="width: 100%">
 									<el-option label="随机" :value="0"></el-option>
-									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 								</el-select>
 							</el-form-item>
 							<el-form-item label="磁盘类型" prop="volumeType">
@@ -151,7 +160,7 @@
 							<el-form-item label="存储池" prop="storageId">
 								<el-select v-model="clone_volume.storageId" style="width: 100%">
 									<el-option label="随机" :value="0"></el-option>
-									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 								</el-select>
 							</el-form-item>
 							<el-form-item label="磁盘类型" prop="volumeType">
@@ -181,7 +190,7 @@
 							<el-form-item label="存储池" prop="type">
 								<el-select v-model="migrate_volume.storageId" style="width: 100%">
 									<el-option label="随机" :value="0"></el-option>
-									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 								</el-select>
 							</el-form-item>
 							<el-form-item label="磁盘类型" prop="volumeType">
@@ -276,7 +285,7 @@
 							<el-form-item label="存储池" prop="storageId">
 								<el-select v-model="upload_volume.storageId" style="width: 100%">
 									<el-option label="随机" :value="0"></el-option>
-									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.name" :value="item.storageId" />
+									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 								</el-select>
 							</el-form-item>
 							<el-form-item label="目标磁盘类型" prop="volumeType">
@@ -322,6 +331,7 @@ export default {
 			current_loading: false,
 			uploading: false,
 			show_type: -1,
+			select_storage_id: 0,
 			show_volume: {},
 			create_volume: {
 				description: '',
@@ -451,7 +461,11 @@ export default {
 					let attachDescription = item.attach ? item.attach.description.toLowerCase() : ''
 					hasKeyword = '' + item.volumeId === searchKeyword || item.description.toLowerCase().indexOf(searchKeyword) >= 0 || attachDescription.indexOf(searchKeyword) >= 0
 				}
-				if (hasKeyword) {
+				let isStorage = true
+				if (this.select_storage_id > 0) {
+					isStorage = item.storageId === this.select_storage_id
+				}
+				if (hasKeyword && isStorage) {
 					nCount++
 					if (nCount <= this.page_size * (this.current_page - 1) || nCount > this.page_size * this.current_page) {
 						item.isShow = false
@@ -466,8 +480,8 @@ export default {
 			this.total_size = nCount
 		},
 		get_storage_name(storageId) {
-			let findStorage = this.storages.find((item) => item.storageId === storageId) || { name: '-' }
-			return findStorage.name
+			let findStorage = this.storages.find((item) => item.storageId === storageId) || { description: '-' }
+			return findStorage.description
 		},
 		get_volume_status(volume) {
 			switch (volume.status) {

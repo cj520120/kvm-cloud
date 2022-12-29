@@ -9,7 +9,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="hosts" style="width: 100%">
 							<el-table-column label="ID" prop="hostId" width="80" />
-							<el-table-column label="名称" prop="displayName" width="120" />
+							<el-table-column label="名称" prop="displayName" width="120" show-overflow-tooltip />
 							<el-table-column label="主机IP" prop="hostIp" width="120" />
 							<el-table-column label="CPU" prop="hostIp" width="180">
 								<template #default="scope">
@@ -242,7 +242,7 @@ export default {
 			if (memory > 1024 * 1024) {
 				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
 			} else if (memory > 1024) {
-				return (memory / 1024).toFixed(2) + '  MB'
+				return (memory / 1024).toFixed(0) + '  MB'
 			} else {
 				return memory + ' KB'
 			}

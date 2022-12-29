@@ -170,6 +170,7 @@ DROP TABLE IF EXISTS `tbl_snapshot_volume`;
 CREATE TABLE `tbl_snapshot_volume` (
   `snapshot_volume_id` int(11) NOT NULL AUTO_INCREMENT,
   `snapshot_name` varchar(45) NOT NULL,
+  `storage_description` varchar(45) NOT NULL,
   `storage_id` int(11) NOT NULL,
   `volume_name` varchar(45) NOT NULL,
   `volume_path` varchar(1024) NOT NULL,
