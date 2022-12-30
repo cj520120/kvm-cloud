@@ -77,7 +77,8 @@
 									</el-table-column>
 									<el-table-column label="操作">
 										<template #default="scope">
-											<el-link type="primary" :href="`/#/Guest?id=${scope.row.guestId}`">详情</el-link>
+											<el-link type="primary" @click="go_guest_info(scope.row.guestId)">详情</el-link>
+											<!-- :href="`/#/Guest?id=${scope.row.guestId}`" -->
 										</template>
 									</el-table-column>
 								</el-table>
@@ -156,16 +157,18 @@
 						</el-form>
 					</el-row>
 				</el-card>
+				<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_type = 1" @onGuestUpdate="update_guest_info" v-show="this.show_type === 3" />
 			</el-main>
 		</el-container>
 	</div>
 </template>
 <script>
 import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, createNetwork, getSystemGuestList, getGuestInfo } from '@/api/api'
+import GuestInfoComponent from '@/components/GuestInfoComponent.vue'
 import Notify from '@/api/notify'
 export default {
 	name: 'NetworkView',
-	components: {},
+	components: { GuestInfoComponent },
 	data() {
 		return {
 			data_loading: false,
@@ -239,6 +242,22 @@ export default {
 					this.system_guests = res.data
 				}
 			})
+		},
+		update_guest_info(guest) {
+			if (guest.type === 0 && guest.networkId === this.show_network.networkId) {
+				let findIndex = this.system_guests.findIndex((item) => item.guestId === guest.guestId)
+				if (findIndex >= 0) {
+					this.$set(this.system_guests, findIndex, guest)
+				} else {
+					this.system_guests.push(guest)
+				}
+				this.$forceUpdate()
+			}
+			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
+		},
+		go_guest_info(guestId) {
+			this.show_type = 3
+			this.$refs.GuestInfoComponentRef.initGuestId(guestId)
 		},
 		get_network_status(network) {
 			switch (network.status) {
@@ -317,15 +336,7 @@ export default {
 			} else if (notify.type === 1) {
 				getGuestInfo({ guestId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						if (res.data.type === 0 && res.data.networkId === this.show_network.networkId) {
-							let findIndex = this.system_guests.findIndex((item) => item.guestId === res.data.guestId)
-							if (findIndex >= 0) {
-								this.$set(this.system_guests, findIndex, res.data)
-							} else {
-								this.system_guests.push(res.data)
-							}
-						}
-						this.$forceUpdate()
+						this.update_guest_info(res.data)
 					} else if (res.code == 2000001) {
 						let findIndex = this.system_guests.findIndex((v) => v.guestId === notify.id)
 						if (findIndex >= 0) {

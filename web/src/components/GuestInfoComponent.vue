@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-card class="box-card" v-show="this.show_type === 0">
+		<el-card class="box-card" v-show="this.show_type === 0" v-loading="guest_loading">
 			<el-row slot="header">
 				<el-page-header @back="on_back_click" content="虚拟机详情"></el-page-header>
 			</el-row>
@@ -103,7 +103,7 @@ import ModifyGuestComponent from '@/components/ModifyGuestComponent.vue'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
 import ReInstallComponentVue from './ReInstallComponent.vue'
-import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk } from '@/api/api'
+import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 export default {
 	components: {
 		AttachDiskComponent,
@@ -117,11 +117,28 @@ export default {
 	data() {
 		return {
 			show_type: 0,
+			guest_loading: false,
 			show_guest_info: {
 				guestId: 0,
 				volume_loading: false,
 				network_loading: false,
-				current_guest: {},
+				guest_loading: true,
+				current_guest: {
+					guestId: 0,
+					name: '',
+					description: '',
+					busType: 'virtio',
+					cpu: 1,
+					memory: 524288,
+					speed: 500,
+					cdRoom: 0,
+					hostId: 0,
+					schemeId: 0,
+					type: 0,
+					networkId: 0,
+					status: 1,
+					guestIp: ''
+				},
 				host: {
 					hostId: 0,
 					displayName: '-'
@@ -163,6 +180,8 @@ export default {
 			this.on_notify_update_guest_info(guest)
 		},
 		async init(guest) {
+			this.show_type = 0
+			this.guest_loading = false
 			this.show_guest_info.guestId = guest.guestId
 			this.show_guest_info.current_guest = guest
 			await this.load_current_guest_template(guest)
@@ -170,6 +189,31 @@ export default {
 			await this.load_current_guest_scheme(guest)
 			await this.load_current_guest_volume(guest)
 			await this.load_current_guest_network(guest)
+		},
+		async initGuestId(guestId) {
+			this.show_type = 0
+			this.guest_loading = true
+			await getGuestInfo({ guestId: guestId })
+				.then((res) => {
+					if (res.code === 0) {
+						this.init(res.data)
+					} else {
+						this.$alert(`获取虚拟机信息失败:${res.message}`, '提示', {
+							dangerouslyUseHTMLString: true,
+							confirmButtonText: '返回',
+							type: 'error'
+						})
+							.then(() => {
+								this.on_back_click()
+							})
+							.catch(() => {
+								this.on_back_click()
+							})
+					}
+				})
+				.finally(() => {
+					this.guest_loading = false
+				})
 		},
 		async load_current_guest_template(guest) {
 			this.show_guest_info.template.templateId = guest.cdRoom
