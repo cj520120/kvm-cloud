@@ -23,7 +23,7 @@
 						</div>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange">
+						<el-table ref="volumeTable" :v-loading="true" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="volumeId" width="80" />
 							<el-table-column label="名称" prop="description" show-overflow-tooltip />
@@ -512,6 +512,7 @@ export default {
 			}
 		},
 		update_volume_info(volume) {
+			let select_volume_ids = this.select_volumes.map((v) => v.volumeId)
 			let findIndex = this.volumes.findIndex((item) => item.volumeId === volume.volumeId)
 			if (findIndex >= 0) {
 				this.$set(this.volumes, findIndex, volume)
@@ -523,7 +524,13 @@ export default {
 				this.show_volume = volume
 			}
 			this.update_show_page()
-			this.$forceUpdate()
+			this.$nextTick(() => {
+				this.volumes.forEach((v) => {
+					if (select_volume_ids.includes(v.volumeId) && v.isShow) {
+						this.$refs.volumeTable.toggleRowSelection(v)
+					}
+				})
+			})
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 2) {
@@ -531,10 +538,18 @@ export default {
 					if (res.code == 0) {
 						this.update_volume_info(res.data)
 					} else if (res.code == 4000001) {
+						let select_volume_ids = this.select_volumes.map((v) => v.volumeId)
 						let findIndex = this.volumes.findIndex((v) => v.volumeId === notify.id)
 						if (findIndex >= 0) {
 							this.volumes.splice(findIndex, 1)
 						}
+						this.$nextTick(() => {
+							this.volumes.forEach((v) => {
+								if (select_volume_ids.includes(v.volumeId) && v.isShow) {
+									this.$refs.volumeTable.toggleRowSelection(v)
+								}
+							})
+						})
 					}
 				})
 			}

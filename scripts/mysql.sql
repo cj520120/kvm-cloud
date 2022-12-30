@@ -136,6 +136,8 @@ CREATE TABLE `tbl_network_info` (
   `network_stop_ip` varchar(20) NOT NULL,
   `network_gateway` varchar(20) NOT NULL,
   `network_mask` varchar(20) NOT NULL,
+  `network_subnet` varchar(20) NOT NULL,
+  `network_broadcast` varchar(20) NOT NULL,
   `network_bridge_name` varchar(20) NOT NULL,
   `network_dns` varchar(20) NOT NULL,
   `network_vlan_id` int(11) NOT NULL,

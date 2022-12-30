@@ -142,7 +142,7 @@ public abstract class AbstractComponentService extends AbstractService {
                     .snapshotVolumeId(0)
                     .templateId(diskTemplateId)
                     .volumeId(volume.getVolumeId())
-                    .start(false)
+                    .start(true)
                     .hostId(0)
                     .taskId(uid)
                     .title("创建系统主机[" + this.getComponentName() + "]")

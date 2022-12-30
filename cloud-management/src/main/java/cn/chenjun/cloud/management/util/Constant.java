@@ -119,8 +119,4 @@ public class Constant {
 
     }
 
-    public class RouteType {
-        public final static String DNSMASQ = "dnsmasq";
-        public final static String DHCP = "dhcp";
-    }
 }

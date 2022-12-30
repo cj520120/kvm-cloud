@@ -50,17 +50,7 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
         ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
         if (component != null && Objects.equals(component.getComponentType(), Constant.ComponentType.ROUTE)) {
             for (OsNic osNic : nicList) {
-                osNic.setDeviceId(osNic.getDeviceId() + 1);
-            }
-            if (!nicList.isEmpty()) {
-                OsNic metaServiceNic = OsNic.builder()
-                        .deviceId(0)
-                        .name("")
-                        .mac(IpCaculate.getMacAddrWithFormat(":"))
-                        .bridgeName(network.getBridge())
-                        .driveType(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO)
-                        .build();
-                nicList.add(0, metaServiceNic);
+                osNic.setDeviceId(osNic.getDeviceId());
             }
             //如果是vlan，则写入网关地址的网卡
             if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {

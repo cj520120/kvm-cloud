@@ -152,7 +152,7 @@ mvn clean package
 
 3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
 ```
-管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.properties
+管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
  --spring.config.location 是可选项，用于指定配置文件，如果不需要修改，可以去掉,配置文件为各自模块下的src/main/resources/application.properties文件
 ```

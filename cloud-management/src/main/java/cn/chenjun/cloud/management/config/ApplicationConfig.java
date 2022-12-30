@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.config;
 
-import cn.chenjun.cloud.management.util.Constant;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
     private String managerUri;
-    private String routeType= Constant.RouteType.DNSMASQ;
     private float overCpu = 1.0f;
     private float overMemory = 1.0f;
     /**
