@@ -42,7 +42,8 @@ public class OsOperateImpl implements OsOperate {
         map.put("arguments", arguments);
         arguments.put("path", execute.getCommand());
         arguments.put("arg", execute.getArgs());
-        String response = domain.qemuAgentCommand(gson.toJson(map), request.getTimeout(), 0);
+        String commandBody = gson.toJson(map);
+        String response = domain.qemuAgentCommand(commandBody, request.getTimeout(), 0);
         Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
         }.getType());
         String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
@@ -63,7 +64,7 @@ public class OsOperateImpl implements OsOperate {
             } else {
                 int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
                 if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败");
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:" + commandBody);
                 }
             }
         } while (!isExit);
