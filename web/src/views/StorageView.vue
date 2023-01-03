@@ -9,9 +9,9 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="storages" style="width: 100%">
 							<el-table-column label="ID" prop="storageId" width="80" />
-							<el-table-column label="名称" prop="description" width="120" show-overflow-tooltip />
+							<el-table-column label="名称" prop="description" show-overflow-tooltip />
 							<el-table-column label="类型" prop="type" width="120" />
-							<el-table-column label="容量" prop="capacity" width="180">
+							<el-table-column label="容量" prop="capacity" width="120">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
@@ -23,7 +23,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_storage_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作">
+							<el-table-column label="操作" width="400">
 								<template #default="scope">
 									<el-button @click="show_storage_info_click(scope.row)" type="" size="mini">存储池详情</el-button>
 									<el-button @click="register_storage(scope.row)" type="success" size="mini">重新注册</el-button>

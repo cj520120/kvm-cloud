@@ -9,19 +9,19 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="templates" style="width: 100%">
 							<el-table-column label="ID" prop="templateId" width="80" />
-							<el-table-column label="名称" prop="name" width="300" show-overflow-tooltip />
+							<el-table-column label="名称" prop="name" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="volumeType" width="120" />
 							<el-table-column label="类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ get_template_type(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="状态" prop="status" width="100">
+							<el-table-column label="状态" prop="status" width="120">
 								<template #default="scope">
 									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_template_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" min-width="380">
+							<el-table-column label="操作" min-width="200">
 								<template #default="scope">
 									<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>
 									<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.templateType === 0 || scope.row.templateType === 1">重新下载</el-button>

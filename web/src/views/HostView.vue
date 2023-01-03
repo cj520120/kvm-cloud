@@ -9,16 +9,16 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="hosts" style="width: 100%">
 							<el-table-column label="ID" prop="hostId" width="80" />
-							<el-table-column label="名称" prop="displayName" width="120" show-overflow-tooltip />
+							<el-table-column label="名称" prop="displayName" show-overflow-tooltip />
 							<el-table-column label="主机IP" prop="hostIp" width="120" />
-							<el-table-column label="CPU" prop="hostIp" width="180">
+							<el-table-column label="CPU" prop="hostIp" width="120">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							<el-table-column label="内存" prop="hostIp" width="180">
+							<el-table-column label="内存" prop="hostIp" width="120">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
@@ -30,7 +30,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_host_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作">
+							<el-table-column label="操作" width="400">
 								<template #default="scope">
 									<el-button @click="show_host_info_click(scope.row)" type="" size="mini">主机详情</el-button>
 									<el-button @click="register_host(scope.row)" type="success" size="mini">重新注册</el-button>

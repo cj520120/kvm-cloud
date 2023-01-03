@@ -42,7 +42,7 @@
 									{{ get_volume_desplay_size(scope.row.allocation) }}
 								</template>
 							</el-table-column>
-							<el-table-column label="挂载主机" prop="allocation" width="200">
+							<el-table-column label="挂载主机" prop="allocation" width="120" show-overflow-tooltip>
 								<template #default="scope">
 									<el-link type="primary" :href="`/#/Guest?id=${scope.row.attach.guestId}`" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-link>
 									<span v-if="!scope.row.attach">{{ scope.row.attach ? scope.row.attach.description : '-' }}</span>
@@ -53,7 +53,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_volume_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" width="200">
+							<el-table-column label="操作" width="250">
 								<template #default="scope">
 									<el-dropdown size="small" @click="show_volume_info(scope.row)" split-button placement="bottom-end" type="primary" @command="menu_command_click">
 										磁盘管理

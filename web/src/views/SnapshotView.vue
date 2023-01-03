@@ -6,7 +6,7 @@
 					<el-row>
 						<el-table :v-loading="data_loading" :data="snapshots" style="width: 100%">
 							<el-table-column label="ID" prop="snapshotVolumeId" width="80" />
-							<el-table-column label="名称" prop="name" width="300" show-overflow-tooltip />
+							<el-table-column label="名称" prop="name" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="type" width="100" />
 							<el-table-column label="磁盘空间" prop="capacity" width="100">
 								<template #default="scope">
@@ -23,7 +23,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_snapshot_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作">
+							<el-table-column label="操作" width="300">
 								<template #default="scope">
 									<el-button @click="show_snapshot_info(scope.row)" type="" size="mini">快照详情</el-button>
 									<el-button @click="destroy_snapshot(scope.row)" type="danger" size="mini">销毁快照</el-button>
