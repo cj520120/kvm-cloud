@@ -49,6 +49,8 @@
 							<el-descriptions-item label="结束IP">{{ show_network.endIp }}</el-descriptions-item>
 							<el-descriptions-item label="网关地址">{{ show_network.gateway }}</el-descriptions-item>
 							<el-descriptions-item label="子网掩码">{{ show_network.mask }}</el-descriptions-item>
+							<el-descriptions-item label="子网地址">{{ show_network.subnet }}</el-descriptions-item>
+							<el-descriptions-item label="官博地址">{{ show_network.broadcast }}</el-descriptions-item>
 							<el-descriptions-item label="DNS">{{ show_network.dns }}</el-descriptions-item>
 							<el-descriptions-item label="桥接网卡">{{ show_network.bridge }}</el-descriptions-item>
 							<el-descriptions-item label="网络类型">{{ get_network_type(show_network) }}</el-descriptions-item>
@@ -78,7 +80,6 @@
 									<el-table-column label="操作">
 										<template #default="scope">
 											<el-link type="primary" @click="go_guest_info(scope.row.guestId)">详情</el-link>
-											<!-- :href="`/#/Guest?id=${scope.row.guestId}`" -->
 										</template>
 									</el-table-column>
 								</el-table>
@@ -118,6 +119,14 @@
 								</el-col>
 							</el-row>
 
+							<el-row :gutter="24">
+								<el-col :span="12">
+									<el-form-item label="子网地址" prop="subnet"><el-input v-model="create_network.subnet"></el-input></el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="广播地址" prop="broadcast"><el-input v-model="create_network.broadcast"></el-input></el-form-item>
+								</el-col>
+							</el-row>
 							<el-row :gutter="24">
 								<el-col :span="24">
 									<el-form-item label="DNS" prop="dns"><el-input v-model="create_network.dns"></el-input></el-form-item>
@@ -184,6 +193,8 @@ export default {
 				endIp: '',
 				gateway: '',
 				mask: '',
+				subnet: '',
+				broadcast: '',
 				bridge: '',
 				dns: '',
 				type: 0,

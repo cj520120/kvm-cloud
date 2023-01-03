@@ -35,11 +35,13 @@ public class NetworkController {
                                                   @RequestParam("gateway") String gateway,
                                                   @RequestParam("mask") String mask,
                                                   @RequestParam("bridge") String bridge,
+                                                  @RequestParam("subnet") String subnet,
+                                                  @RequestParam("broadcast") String broadcast,
                                                   @RequestParam("dns") String dns,
                                                   @RequestParam("type") int type,
                                                   @RequestParam("vlanId") int vlanId,
                                                   @RequestParam("basicNetworkId") int basicNetworkId) {
-        return networkService.createNetwork(name, startIp, endIp, gateway, mask, bridge, dns, type, vlanId, basicNetworkId);
+        return networkService.createNetwork(name, startIp, endIp, gateway, mask,subnet,broadcast, bridge, dns, type, vlanId, basicNetworkId);
     }
 
     @PostMapping("/api/network/register")

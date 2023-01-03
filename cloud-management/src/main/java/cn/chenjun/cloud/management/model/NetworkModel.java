@@ -22,6 +22,8 @@ public class NetworkModel {
     private String endIp;
     private String gateway;
     private String mask;
+    private String subnet;
+    private String broadcast;
     private String bridge;
     private String dns;
     private int type;

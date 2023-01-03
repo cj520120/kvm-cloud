@@ -29,7 +29,7 @@
 					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
 					<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 					<el-descriptions-item label="运行主机">
-						<el-link :href="`/#/Host?id=${show_guest_info.host.hostId}`" type="primary" v-if="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-link>
+						<el-link @click="show_host_info(show_guest_info.host.hostId)" type="primary" v-if="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-link>
 						<span v-if="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
 					</el-descriptions-item>
 					<el-descriptions-item label="架构方案">
@@ -87,6 +87,7 @@
 			</el-row>
 		</el-card>
 		<ReInstallComponentVue ref="ReInstallComponentVueRef" @back="show_type = 0" @finish="on_finish_reinstall" v-show="show_type === 1" />
+		<HostInfoComponent ref="HostInfoComponentRef" v-show="this.show_type === 2" @back="show_host_return" />
 		<AttachDiskComponent ref="AttachDiskComponentRef" @onVoumeAttachCallBack="on_volume_attach_callback" />
 		<AttachCdRoomComponent ref="AttachCdRoomComponentRef" @onGuestUpdate="on_notify_update_guest_info" />
 		<AttachNetworkComponent ref="AttachNetworkComponentRef" @onGuestAttachCallback="on_network_attach_callback" />
@@ -103,6 +104,7 @@ import ModifyGuestComponent from '@/components/ModifyGuestComponent.vue'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
 import ReInstallComponentVue from './ReInstallComponent.vue'
+import HostInfoComponent from '@/components/HostInfoComponent.vue'
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 export default {
 	components: {
@@ -112,7 +114,8 @@ export default {
 		ModifyGuestComponent,
 		StartGuestComponent,
 		StopGuestComponent,
-		ReInstallComponentVue
+		ReInstallComponentVue,
+		HostInfoComponent
 	},
 	data() {
 		return {
@@ -165,6 +168,13 @@ export default {
 			this.update_guest_info(guest)
 			this.show_guest_info.networks.push(network)
 		},
+		show_host_return() {
+			this.show_type = 0
+		},
+		show_host_info(hostId) {
+			this.show_type = 2
+			this.$refs.HostInfoComponentRef.init(hostId)
+		},
 		on_back_click() {
 			this.$emit('back')
 		},
@@ -178,6 +188,9 @@ export default {
 		on_finish_reinstall(guest) {
 			this.show_type = 0
 			this.on_notify_update_guest_info(guest)
+		},
+		refresh_host(host) {
+			this.$refs.HostInfoComponentRef.refresh_host(host)
 		},
 		async init(guest) {
 			this.show_type = 0

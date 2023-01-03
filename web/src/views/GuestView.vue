@@ -75,7 +75,7 @@
 	</div>
 </template>
 <script>
-import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest } from '@/api/api'
+import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getHostInfo } from '@/api/api'
 import Notify from '@/api/notify'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
@@ -273,10 +273,21 @@ export default {
 						})
 					}
 				})
+			} else if (notify.type === 4) {
+				if (notify.type === 4) {
+					getHostInfo({ hostId: notify.id }).then((res) => {
+						if (res.code == 0) {
+							this.$refs.GuestInfoComponentRef.refresh_host(res.data)
+						}
+					})
+				}
 			}
 		},
 		show_guest_list_page() {
 			this.show_type = 0
+		},
+		show_host_back() {
+			this.show_type = 1
 		},
 		async show_create_guest_click() {
 			this.$refs.CreateGuestComponentRef.init()

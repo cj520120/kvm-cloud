@@ -34,6 +34,10 @@ public class NetworkEntity {
     private String gateway;
     @TableField("network_mask")
     private String mask;
+    @TableField("network_subnet")
+    private String subnet;
+    @TableField("network_broadcast")
+    private String broadcast;
     @TableField("network_bridge_name")
     private String bridge;
     @TableField("network_dns")

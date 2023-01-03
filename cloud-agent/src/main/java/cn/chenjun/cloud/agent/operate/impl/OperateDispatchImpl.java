@@ -63,7 +63,6 @@ public class OperateDispatchImpl implements OperateDispatch {
                 result = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                 log.error("执行任务出错.", err);
             } finally {
-
                 try {
                     String nonce = String.valueOf(System.nanoTime());
                     Map<String, Object> map = new HashMap<>(5);
@@ -74,7 +73,7 @@ public class OperateDispatchImpl implements OperateDispatch {
                     map.put("sign", sign);
                     HttpUtil.post(clientService.getManagerUri() + "api/agent/task/report", map);
                 } catch (Exception err) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名出错");
+                    log.error("上报任务出现异常。command={} param={} result={}",command,data,result,err);
                 }finally {
                     taskMap.remove(taskId);
                     log.info("移除异步任务:{}",taskId);

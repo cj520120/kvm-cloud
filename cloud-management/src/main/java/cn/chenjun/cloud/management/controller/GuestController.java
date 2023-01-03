@@ -78,7 +78,7 @@ public class GuestController {
                                               @RequestParam("size") long size) {
 
 
-        return this.guestService.createGuest(description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size);
+        return this.guestService.createGuest(description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024);
     }
 
     @PostMapping("/api/guest/reinstall")

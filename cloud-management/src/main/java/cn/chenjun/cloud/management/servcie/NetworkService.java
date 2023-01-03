@@ -55,7 +55,7 @@ public class NetworkService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
+    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask,String subnet,String broadcast, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
 
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");
@@ -78,6 +78,12 @@ public class NetworkService extends AbstractService {
         if (StringUtils.isEmpty(dns)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入DNS信息");
         }
+        if (StringUtils.isEmpty(subnet)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入子网信息");
+        }
+        if (StringUtils.isEmpty(broadcast)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入广播地址");
+        }
         if (Objects.equals(Constant.NetworkType.VLAN, type) && vlanId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
         }
@@ -87,6 +93,8 @@ public class NetworkService extends AbstractService {
                 .endIp(endIp)
                 .gateway(gateway)
                 .mask(mask)
+                .subnet(subnet)
+                .broadcast(broadcast)
                 .bridge(bridge)
                 .dns(dns)
                 .type(type)
