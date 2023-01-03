@@ -50,7 +50,7 @@
 							<el-descriptions-item label="网关地址">{{ show_network.gateway }}</el-descriptions-item>
 							<el-descriptions-item label="子网掩码">{{ show_network.mask }}</el-descriptions-item>
 							<el-descriptions-item label="子网地址">{{ show_network.subnet }}</el-descriptions-item>
-							<el-descriptions-item label="官博地址">{{ show_network.broadcast }}</el-descriptions-item>
+							<el-descriptions-item label="广播地址">{{ show_network.broadcast }}</el-descriptions-item>
 							<el-descriptions-item label="DNS">{{ show_network.dns }}</el-descriptions-item>
 							<el-descriptions-item label="桥接网卡">{{ show_network.bridge }}</el-descriptions-item>
 							<el-descriptions-item label="网络类型">{{ get_network_type(show_network) }}</el-descriptions-item>
