@@ -10,16 +10,16 @@ app:
       size: 4
 
 oauth2:
-  auth-uri: https://oauth.roamblue.cn/oauth2/authorize
+  auth-uri: https://192.168.1.2:8083/oauth2/authorize
   client-id: NLMAv72e
   client-secret: fd74a2cb8b62d4011ff5945b0204d07f68366848
-  enable: true
+  enable: false
   id-path:
     - userId
   redirect-uri: http://192.168.2.107:8081/#/Login
   title: Oauth2 Login
-  token-uri: https://oauth.roamblue.cn/oauth2/token
-  user-uri: https://oauth.roamblue.cn/oauth2/user/info
+  token-uri: https://192.168.1.2:8083/oauth2/token
+  user-uri: https://192.168.1.2:8083/oauth2/user/info
 server:
   port: 8080
   servlet:
@@ -44,7 +44,7 @@ spring:
       validation-query: SELECT 1
     password: amigo123
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://127.0.0.1:3306/roamblue_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&system_time_zone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&useSSL=false&useUnicode=true
+    url: jdbc:mysql://127.0.0.1:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&system_time_zone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&useSSL=false&useUnicode=true
     username: root
   servlet:
     multipart:

@@ -21,5 +21,5 @@ public class ApplicationConfig {
     /**
      * ISSUser
      */
-    private String jwtIssuer = "Roamblue Cloud Management";
+    private String jwtIssuer = "CJ Cloud Management";
 }

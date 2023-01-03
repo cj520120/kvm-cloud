@@ -16,7 +16,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "oauth2")
 @Component
 public class Oauth2Config {
-    private String title = "Roamblue 统一登录";
+    private String title = "CJ Oauth2 Login";
     private boolean enable = false;
     private String clientId = "clientId";
     private String clientSecret = "clientSecret";

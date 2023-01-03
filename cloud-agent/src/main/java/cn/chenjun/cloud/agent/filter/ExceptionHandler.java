@@ -4,15 +4,14 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author chenjun
  */
 @ControllerAdvice
-public class RoamblueExceptionHandler {
-    @ExceptionHandler(value = Exception.class)
+public class ExceptionHandler {
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = Exception.class)
     @ResponseBody
     public ResultUtil<Exception> exceptionHandler(Exception error) {
         if (error instanceof CodeException) {

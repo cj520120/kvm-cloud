@@ -4,7 +4,7 @@ Navicat MySQL Data Transfer
 Source Server         : 192.168.2.107
 Source Server Version : 50722
 Source Host           : 192.168.2.107:3306
-Source Database       : roamblue_kvm_cloud
+Source Database       : cj_kvm_cloud
 
 Target Server Type    : MYSQL
 Target Server Version : 50722
@@ -12,8 +12,8 @@ File Encoding         : 65001
 
 Date: 2022-12-28 18:01:35
 */
-CREATE DATABASE `roamblue_kvm_cloud` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
-use roamblue_kvm_cloud;
+CREATE DATABASE `cj_kvm_cloud` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+use cj_kvm_cloud;
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------

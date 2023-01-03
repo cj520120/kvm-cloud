@@ -1,4 +1,4 @@
-package cn.roamblue.test;
+package cn.chenjun.cloud.test;
 
 import cn.chenjun.cloud.common.bean.*;
 import cn.hutool.http.HttpUtil;
