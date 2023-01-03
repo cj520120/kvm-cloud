@@ -41,7 +41,7 @@ public class NetworkController {
                                                   @RequestParam("type") int type,
                                                   @RequestParam("vlanId") int vlanId,
                                                   @RequestParam("basicNetworkId") int basicNetworkId) {
-        return networkService.createNetwork(name, startIp, endIp, gateway, mask,subnet,broadcast, bridge, dns, type, vlanId, basicNetworkId);
+        return networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, type, vlanId, basicNetworkId);
     }
 
     @PostMapping("/api/network/register")

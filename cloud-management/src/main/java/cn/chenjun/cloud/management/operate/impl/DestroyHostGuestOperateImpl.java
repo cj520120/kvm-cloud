@@ -17,8 +17,6 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 
 /**
- *
- *
  * @author chenjun
  */
 @Component

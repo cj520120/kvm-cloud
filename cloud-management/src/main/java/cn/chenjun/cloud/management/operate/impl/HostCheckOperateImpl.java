@@ -16,8 +16,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 
 /**
- *
- *
  * @author chenjun
  */
 @Component

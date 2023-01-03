@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
@@ -35,8 +34,9 @@ public class HostSyncTask extends AbstractTask {
     @Lazy
     private OperateTask operateTask;
 
-@Autowired
-private AllocateService allocateService;
+    @Autowired
+    private AllocateService allocateService;
+
     @Override
     protected void dispatch() {
         RBucket<Long> rBucket = redissonClient.getBucket(RedisKeyUtil.HOST_SYNC_KEY);

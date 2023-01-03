@@ -109,8 +109,7 @@ export default {
 			}
 		},
 		async init(hostId) {
-			this.host_loading = true
-			console.log(hostId)
+			this.host_loading = true 
 			await getHostInfo({ hostId: hostId })
 				.then((res) => {
 					console.log(res)

@@ -26,26 +26,7 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-show="this.show_type === 1">
-					<el-row slot="header">
-						<el-page-header @back="show_scheme_list" content="计算方案详情"></el-page-header>
-					</el-row>
-					<el-row style="text-align: left; margin: 20px 0">
-						<el-button @click="destroy_scheme(show_scheme)" type="danger" size="mini">删除</el-button>
-					</el-row>
-					<el-row>
-						<el-descriptions :column="2" size="medium" border>
-							<el-descriptions-item label="ID">{{ show_scheme.schemeId }}</el-descriptions-item>
-							<el-descriptions-item label="名称">{{ show_scheme.name }}</el-descriptions-item>
-							<el-descriptions-item label="配额">{{ show_scheme.speed }}</el-descriptions-item>
-							<el-descriptions-item label="CPU">{{ show_scheme.cpu }}</el-descriptions-item>
-							<el-descriptions-item label="内存">{{ get_memory_desplay(show_scheme.memory) }}</el-descriptions-item>
-							<el-descriptions-item label="Cores">{{ show_scheme.cores }}</el-descriptions-item>
-							<el-descriptions-item label="Sockets">{{ show_scheme.sockets }}</el-descriptions-item>
-							<el-descriptions-item label="Threads">{{ show_scheme.threads }}</el-descriptions-item>
-						</el-descriptions>
-					</el-row>
-				</el-card>
+				<SchemeInfoComponent ref="SchemeInfoComponentRef" @back="show_scheme_list()" @onHostUpdate="update_scheme_info" v-show="this.show_type === 1" />
 				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_scheme_list()" content="创建计算方案" style="color: #409eff"></el-page-header>
@@ -122,14 +103,14 @@
 </template>
 <script>
 import { getSchemeList, destroyScheme, createScheme, moidfyScheme, getSchemeInfo } from '@/api/api'
+import SchemeInfoComponent from '@/components/SchemeInfoComponent.vue'
 import Notify from '@/api/notify'
 export default {
 	name: 'schemeView',
-	components: {},
+	components: { SchemeInfoComponent },
 	data() {
 		return {
 			data_loading: false,
-			current_loading: false,
 			current_scheme_id: 0,
 			show_type: -1,
 			show_scheme: {},
@@ -157,30 +138,7 @@ export default {
 	},
 	mixins: [Notify],
 	mounted() {
-		this.current_scheme_id = this.$route.query.id
-		if (this.current_scheme_id) {
-			this.show_type == 2
-			this.current_loading = true
-			getSchemeInfo({ schemeId: this.current_scheme_id })
-				.then((res) => {
-					if (res.code === 0) {
-						this.show_scheme_info_click(res.data)
-					} else {
-						this.$alert(`获取计算方案信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						}).then(() => {
-							this.show_type = 0
-						})
-					}
-				})
-				.finally(() => {
-					this.current_loading = false
-				})
-		} else {
-			this.show_type = 0
-		}
+		this.show_type = 0
 		this.init_notify()
 		this.init_view()
 	},
@@ -204,9 +162,7 @@ export default {
 			} else {
 				this.schemes.push(scheme)
 			}
-			if (this.show_scheme && this.show_scheme.schemeId === scheme.schemeId) {
-				this.show_scheme = scheme
-			}
+			this.$refs.SchemeInfoComponentRef.init_scheme(scheme)
 			this.$forceUpdate()
 		},
 		handle_notify_message(notify) {
@@ -246,6 +202,7 @@ export default {
 		},
 		show_scheme_info_click(scheme) {
 			this.show_scheme = scheme
+			this.$refs.SchemeInfoComponentRef.init_scheme(scheme)
 			this.show_type = 1
 		},
 		create_scheme_click() {

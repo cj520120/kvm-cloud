@@ -54,13 +54,13 @@ public class StorageService extends AbstractService {
         if (StringUtils.isEmpty(param)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "存储池参数不正确");
         }
-        String storageName= UUID.randomUUID().toString().toLowerCase().replace("-", "");
+        String storageName = UUID.randomUUID().toString().toLowerCase().replace("-", "");
         StorageEntity storage = StorageEntity.builder()
                 .description(description)
                 .name(storageName)
                 .type(type)
                 .param(param)
-                .mountPath("/mnt/" +storageName)
+                .mountPath("/mnt/" + storageName)
                 .allocation(0L)
                 .capacity(0L)
                 .available(0L)

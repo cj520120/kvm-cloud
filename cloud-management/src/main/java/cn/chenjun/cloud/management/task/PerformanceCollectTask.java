@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @Slf4j
-public class  PerformanceCollectTask {
+public class PerformanceCollectTask {
     @Autowired
     private ThreadPoolExecutor threadPoolExecutor;
 

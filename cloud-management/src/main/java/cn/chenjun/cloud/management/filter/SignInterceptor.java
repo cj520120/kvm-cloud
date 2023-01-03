@@ -23,7 +23,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
@@ -42,7 +41,7 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
             if (method.isAnnotationPresent(SignRequire.class)) {
-                SignRequire require=method.getAnnotation(SignRequire.class);
+                SignRequire require = method.getAnnotation(SignRequire.class);
                 Map<String, Object> map = new HashMap<>(5);
                 Enumeration<String> it = httpServletRequest.getParameterNames();
                 while (it.hasMoreElements()) {

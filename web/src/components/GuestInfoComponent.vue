@@ -33,7 +33,7 @@
 						<span v-if="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
 					</el-descriptions-item>
 					<el-descriptions-item label="架构方案">
-						<el-link :href="`/#/Scheme?id=${show_guest_info.scheme.schemeId}`" type="primary" v-if="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-link>
+						<el-link @click="show_scheme_info(show_guest_info.scheme.schemeId)" type="primary" v-if="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-link>
 						<span v-if="show_guest_info.scheme.schemeId === 0" :underline="false">{{ show_guest_info.scheme.name }}</span>
 					</el-descriptions-item>
 					<el-descriptions-item label="虚拟机类型">
@@ -88,6 +88,8 @@
 		</el-card>
 		<ReInstallComponentVue ref="ReInstallComponentVueRef" @back="show_type = 0" @finish="on_finish_reinstall" v-show="show_type === 1" />
 		<HostInfoComponent ref="HostInfoComponentRef" v-show="this.show_type === 2" @back="show_host_return" />
+
+		<SchemeInfoComponent ref="SchemeInfoComponentRef" v-show="this.show_type === 3" @back="show_scheme_return" />
 		<AttachDiskComponent ref="AttachDiskComponentRef" @onVoumeAttachCallBack="on_volume_attach_callback" />
 		<AttachCdRoomComponent ref="AttachCdRoomComponentRef" @onGuestUpdate="on_notify_update_guest_info" />
 		<AttachNetworkComponent ref="AttachNetworkComponentRef" @onGuestAttachCallback="on_network_attach_callback" />
@@ -105,6 +107,7 @@ import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
 import ReInstallComponentVue from './ReInstallComponent.vue'
 import HostInfoComponent from '@/components/HostInfoComponent.vue'
+import SchemeInfoComponent from './SchemeInfoComponent.vue'
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 export default {
 	components: {
@@ -115,7 +118,8 @@ export default {
 		StartGuestComponent,
 		StopGuestComponent,
 		ReInstallComponentVue,
-		HostInfoComponent
+		HostInfoComponent,
+		SchemeInfoComponent
 	},
 	data() {
 		return {
@@ -171,9 +175,16 @@ export default {
 		show_host_return() {
 			this.show_type = 0
 		},
+		show_scheme_return() {
+			this.show_type = 0
+		},
 		show_host_info(hostId) {
 			this.show_type = 2
 			this.$refs.HostInfoComponentRef.init(hostId)
+		},
+		show_scheme_info(schemeId) {
+			this.show_type = 3
+			this.$refs.SchemeInfoComponentRef.init(schemeId)
 		},
 		on_back_click() {
 			this.$emit('back')
@@ -191,6 +202,9 @@ export default {
 		},
 		refresh_host(host) {
 			this.$refs.HostInfoComponentRef.refresh_host(host)
+		},
+		refresh_scheme(scheme) {
+			this.$refs.SchemeInfoComponentRef.refresh_scheme(scheme)
 		},
 		async init(guest) {
 			this.show_type = 0

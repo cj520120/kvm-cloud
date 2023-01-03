@@ -55,7 +55,7 @@ public class NetworkService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask,String subnet,String broadcast, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
+    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
 
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");

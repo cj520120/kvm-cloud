@@ -22,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Type;
 
 /**
- *
- *
  * @author chenjun
  */
 @Component

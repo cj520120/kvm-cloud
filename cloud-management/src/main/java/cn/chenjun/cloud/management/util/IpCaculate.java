@@ -125,14 +125,16 @@ public class IpCaculate {
 
     public static String getBroadcastByIp(String ip) {
         String[] temp = ip.split("\\.");
-        temp[3]="255";
-        return StringUtils.join(temp,".");
+        temp[3] = "255";
+        return StringUtils.join(temp, ".");
     }
+
     public static String getSubnetByIp(String ip) {
         String[] temp = ip.split("\\.");
-        temp[3]="0";
-        return StringUtils.join(temp,".");
+        temp[3] = "0";
+        return StringUtils.join(temp, ".");
     }
+
     /**
      * 根据网段计算结束IP
      *

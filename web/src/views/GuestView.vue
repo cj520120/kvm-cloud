@@ -75,7 +75,7 @@
 	</div>
 </template>
 <script>
-import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getHostInfo } from '@/api/api'
+import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getHostInfo, getSchemeInfo } from '@/api/api'
 import Notify from '@/api/notify'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
@@ -93,9 +93,7 @@ export default {
 	},
 	data() {
 		return {
-			current_guest_id: 0,
 			data_loading: false,
-			current_loading: false,
 			select_host_id: 0,
 			show_type: -1,
 			keyword: '',
@@ -111,30 +109,7 @@ export default {
 	mixins: [Notify],
 
 	mounted() {
-		this.current_guest_id = this.$route.query.id
-		if (this.current_guest_id) {
-			this.show_type == 2
-			this.current_loading = true
-			getGuestInfo({ guestId: this.current_guest_id })
-				.then((res) => {
-					if (res.code === 0) {
-						this.show_guest_info_click(res.data)
-					} else {
-						this.$alert(`获取虚拟机信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						}).then(() => {
-							this.show_type = 0
-						})
-					}
-				})
-				.finally(() => {
-					this.current_loading = false
-				})
-		} else {
-			this.show_type = 0
-		}
+		this.show_type = 0
 		this.init_view()
 		this.init_notify()
 	},
@@ -281,6 +256,12 @@ export default {
 						}
 					})
 				}
+			} else if (notify.type === 8) {
+				getSchemeInfo({ schemeId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.$refs.GuestInfoComponentRef.refresh_scheme(res.data)
+					}
+				})
 			}
 		},
 		show_guest_list_page() {

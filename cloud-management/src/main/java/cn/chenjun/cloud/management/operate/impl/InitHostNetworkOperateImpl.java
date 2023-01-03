@@ -24,8 +24,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- *
- *
  * @author chenjun
  */
 @Component
