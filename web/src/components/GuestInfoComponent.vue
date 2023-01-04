@@ -25,7 +25,7 @@
 					<el-descriptions-item label="标签">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
-					<el-descriptions-item label="内存">{{ get_memory_desplay(show_guest_info.current_guest.memory) }}</el-descriptions-item>
+					<el-descriptions-item label="内存">{{ get_memory_desplay_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
 					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
 					<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 					<el-descriptions-item label="运行主机">
@@ -65,7 +65,7 @@
 							<el-table-column label="路径" prop="path" show-overflow-tooltip />
 							<el-table-column label="操作" width="180">
 								<template #default="scope">
-									<el-link type="primary" :href="`/#/Volume?id=${scope.row.volumeId}`">详情</el-link>
+									<!-- <el-link type="primary" @click="show_volume_info(scope.row.volumeId)">详情</el-link> -->
 									<el-link style="margin-left: 10px" type="danger" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-link>
 								</template>
 							</el-table-column>
@@ -88,8 +88,8 @@
 		</el-card>
 		<ReInstallComponentVue ref="ReInstallComponentVueRef" @back="show_type = 0" @finish="on_finish_reinstall" v-show="show_type === 1" />
 		<HostInfoComponent ref="HostInfoComponentRef" v-show="this.show_type === 2" @back="show_host_return" />
-
 		<SchemeInfoComponent ref="SchemeInfoComponentRef" v-show="this.show_type === 3" @back="show_scheme_return" />
+		<!-- <VolumeInfoComponent ref="VolumeInfoComponentRef" v-show="this.show_type === 4" @back="show_volume_return" /> -->
 		<AttachDiskComponent ref="AttachDiskComponentRef" @onVoumeAttachCallBack="on_volume_attach_callback" />
 		<AttachCdRoomComponent ref="AttachCdRoomComponentRef" @onGuestUpdate="on_notify_update_guest_info" />
 		<AttachNetworkComponent ref="AttachNetworkComponentRef" @onGuestAttachCallback="on_network_attach_callback" />
@@ -99,6 +99,7 @@
 	</div>
 </template>
 <script>
+import util from '@/api/util'
 import AttachDiskComponent from '@/components/AttachDiskComponent.vue'
 import AttachCdRoomComponent from '@/components/AttachCdRoomComponent.vue'
 import AttachNetworkComponent from '@/components/AttachNetworkComponent'
@@ -108,7 +109,10 @@ import StopGuestComponent from '@/components/StopGuestComponent.vue'
 import ReInstallComponentVue from './ReInstallComponent.vue'
 import HostInfoComponent from '@/components/HostInfoComponent.vue'
 import SchemeInfoComponent from './SchemeInfoComponent.vue'
+// const VolumeInfoComponent = () => import('@/components/VolumeInfoComponent')
+
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
+
 export default {
 	components: {
 		AttachDiskComponent,
@@ -120,7 +124,12 @@ export default {
 		ReInstallComponentVue,
 		HostInfoComponent,
 		SchemeInfoComponent
+		// VolumeInfoComponent
 	},
+	beforeCreate() {
+		// this.$options.components.VolumeInfoComponent = require('./VolumeInfoComponent.vue').default
+	},
+	mixins: [util],
 	data() {
 		return {
 			show_type: 0,
@@ -178,6 +187,9 @@ export default {
 		show_scheme_return() {
 			this.show_type = 0
 		},
+		show_volume_return() {
+			this.show_type = 0
+		},
 		show_host_info(hostId) {
 			this.show_type = 2
 			this.$refs.HostInfoComponentRef.init(hostId)
@@ -185,6 +197,11 @@ export default {
 		show_scheme_info(schemeId) {
 			this.show_type = 3
 			this.$refs.SchemeInfoComponentRef.init(schemeId)
+		},
+		show_volume_info(volumeId) {
+			// this.show_type = 4
+			console.log(volumeId)
+			// this.$refs.VolumeInfoComponentRef.init(volumeId)
 		},
 		on_back_click() {
 			this.$emit('back')
@@ -306,48 +323,6 @@ export default {
 				await this.load_current_guest_host(guest)
 				await this.load_current_guest_scheme(guest)
 				this.$forceUpdate()
-			}
-		},
-		get_memory_desplay(memory) {
-			if (memory >= 1024 * 1024) {
-				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
-			} else if (memory >= 1024) {
-				return (memory / 1024).toFixed(2) + '  MB'
-			} else {
-				return memory + ' KB'
-			}
-		},
-		get_volume_desplay_size(size) {
-			if (size >= 1024 * 1024 * 1024 * 1024) {
-				return (size / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB'
-			} else if (size >= 1024 * 1024 * 1024) {
-				return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
-			} else if (size >= 1024 * 1024) {
-				return (size / (1024 * 1024)).toFixed(2) + ' MB'
-			} else if (size >= 1024) {
-				return (size / 1024).toFixed(2) + '  KB'
-			} else {
-				return size + '  bytes'
-			}
-		},
-		get_guest_status(guest) {
-			switch (guest.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '正在启动'
-				case 2:
-					return '正在运行'
-				case 3:
-					return '正在停止'
-				case 4:
-					return '已停止'
-				case 5:
-					return '重启中'
-				case 6:
-					return '虚拟机错误'
-				default:
-					return `未知状态[${guest.status}]`
 			}
 		},
 		show_start_guest_click(guest) {

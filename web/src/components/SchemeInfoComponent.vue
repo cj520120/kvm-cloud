@@ -12,7 +12,7 @@
 				<el-descriptions-item label="名称">{{ show_scheme.name }}</el-descriptions-item>
 				<el-descriptions-item label="配额">{{ show_scheme.speed }}</el-descriptions-item>
 				<el-descriptions-item label="CPU">{{ show_scheme.cpu }}</el-descriptions-item>
-				<el-descriptions-item label="内存">{{ get_memory_desplay(show_scheme.memory) }}</el-descriptions-item>
+				<el-descriptions-item label="内存">{{ get_memory_desplay_size(show_scheme.memory) }}</el-descriptions-item>
 				<el-descriptions-item label="Cores">{{ show_scheme.cores }}</el-descriptions-item>
 				<el-descriptions-item label="Sockets">{{ show_scheme.sockets }}</el-descriptions-item>
 				<el-descriptions-item label="Threads">{{ show_scheme.threads }}</el-descriptions-item>
@@ -22,6 +22,7 @@
 </template>
 <script>
 import { destroyScheme, getSchemeInfo } from '@/api/api'
+import util from '@/api/util'
 export default {
 	data() {
 		return {
@@ -29,6 +30,7 @@ export default {
 			show_scheme: { schemeId: 0, name: '-', cpu: 0, memory: 0, speed: 0, sockets: 0, cores: 0, threads: 0 }
 		}
 	},
+	mixins: [util],
 	methods: {
 		on_back_click() {
 			this.$emit('back')
@@ -45,13 +47,6 @@ export default {
 		init_scheme(scheme) {
 			this.show_scheme = scheme
 			this.schme_loading = false
-		},
-		get_memory_desplay(memory) {
-			if (memory >= 1024 * 1024) {
-				return parseInt(memory / (1024 * 1024)) + ' GB'
-			} else if (memory >= 1024) {
-				return parseInt(memory / 1024) + '  MB'
-			}
 		},
 		async init(schemeId) {
 			this.schme_loading = true

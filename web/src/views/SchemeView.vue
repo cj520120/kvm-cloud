@@ -13,7 +13,7 @@
 							<el-table-column label="CPU" prop="cpu" width="120" />
 							<el-table-column label="内存" prop="memory" width="200">
 								<template #default="scope">
-									{{ get_memory_desplay(scope.row.memory) }}
+									{{ get_memory_desplay_size(scope.row.memory) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="操作" min-width="380">
@@ -105,6 +105,7 @@
 import { getSchemeList, destroyScheme, createScheme, moidfyScheme, getSchemeInfo } from '@/api/api'
 import SchemeInfoComponent from '@/components/SchemeInfoComponent.vue'
 import Notify from '@/api/notify'
+import util from '@/api/util'
 export default {
 	name: 'schemeView',
 	components: { SchemeInfoComponent },
@@ -136,7 +137,7 @@ export default {
 			schemes: []
 		}
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 	mounted() {
 		this.show_type = 0
 		this.init_notify()
@@ -238,13 +239,6 @@ export default {
 					})
 				})
 				.catch(() => {})
-		},
-		get_memory_desplay(memory) {
-			if (memory >= 1024 * 1024) {
-				return parseInt(memory / (1024 * 1024)) + ' GB'
-			} else if (memory >= 1024) {
-				return parseInt(memory / 1024) + '  MB'
-			}
 		},
 		destroy_scheme(scheme) {
 			this.$confirm('删除计算方案, 是否继续?', '提示', {

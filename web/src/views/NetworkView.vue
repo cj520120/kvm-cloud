@@ -32,61 +32,8 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-show="this.show_type === 1">
-					<el-row slot="header">
-						<el-page-header @back="show_network_list" content="网络详情"></el-page-header>
-					</el-row>
-					<el-row style="text-align: left; margin: 20px 0">
-						<el-button @click="register_network(show_network)" type="success" size="mini">重新注册</el-button>
-						<el-button @click="pasue_network(show_network)" type="warning" size="mini" v-if="show_network.status !== 3">开始维护</el-button>
-						<el-button @click="destroy_network(show_network)" type="danger" size="mini">销毁网络</el-button>
-					</el-row>
-					<el-row>
-						<el-descriptions :column="2" size="medium" border>
-							<el-descriptions-item label="ID">{{ show_network.networkId }}</el-descriptions-item>
-							<el-descriptions-item label="名称">{{ show_network.name }}</el-descriptions-item>
-							<el-descriptions-item label="起始IP">{{ show_network.startIp }}</el-descriptions-item>
-							<el-descriptions-item label="结束IP">{{ show_network.endIp }}</el-descriptions-item>
-							<el-descriptions-item label="网关地址">{{ show_network.gateway }}</el-descriptions-item>
-							<el-descriptions-item label="子网掩码">{{ show_network.mask }}</el-descriptions-item>
-							<el-descriptions-item label="子网地址">{{ show_network.subnet }}</el-descriptions-item>
-							<el-descriptions-item label="广播地址">{{ show_network.broadcast }}</el-descriptions-item>
-							<el-descriptions-item label="DNS">{{ show_network.dns }}</el-descriptions-item>
-							<el-descriptions-item label="桥接网卡">{{ show_network.bridge }}</el-descriptions-item>
-							<el-descriptions-item label="网络类型">{{ get_network_type(show_network) }}</el-descriptions-item>
-							<el-descriptions-item label="VLAN ID" v-if="show_network.type === 1">{{ show_network.vlanId }}</el-descriptions-item>
-							<el-descriptions-item label="基础网络" v-if="show_network.type === 1">
-								<el-link type="primary">{{ get_parent_network(show_network).name }}</el-link>
-							</el-descriptions-item>
-							<el-descriptions-item label="网络状态">
-								<el-tag :type="show_network.status === 2 ? 'success' : 'danger'">{{ get_network_status(show_network) }}</el-tag>
-							</el-descriptions-item>
-						</el-descriptions>
+				<NetworkInfoComponent ref="NetworkInfoComponentRef" @onNetworkUpdate="update_network_info" @back="show_network_list()" v-show="this.show_type === 1" />
 
-						<br />
-						<el-tabs type="border-card">
-							<el-tab-pane label="系统组件">
-								<el-table :data="system_guests" style="width: 100%">
-									<el-table-column label="ID" prop="guestId" width="80" />
-									<el-table-column label="实例名" prop="name" width="200" />
-									<el-table-column label="标签" prop="description" width="200" />
-									<el-table-column label="IP地址" prop="guestIp" width="150" />
-
-									<el-table-column label="状态" prop="status" width="100">
-										<template #default="scope">
-											<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
-										</template>
-									</el-table-column>
-									<el-table-column label="操作">
-										<template #default="scope">
-											<el-link type="primary" @click="go_guest_info(scope.row.guestId)">详情</el-link>
-										</template>
-									</el-table-column>
-								</el-table>
-							</el-tab-pane>
-						</el-tabs>
-					</el-row>
-				</el-card>
 				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_network_list()" content="创建网络" style="color: #409eff"></el-page-header>
@@ -97,6 +44,14 @@
 								<el-col :span="12">
 									<el-form-item label="网络名称" prop="name">
 										<el-input v-model="create_network.name"></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="12">
+									<el-form-item label="网络类型" prop="type">
+										<el-select v-model="create_network.type" style="width: 100%">
+											<el-option label="基础网络" :value="0"></el-option>
+											<!-- <el-option label="Vlan网络" :value="1"></el-option> -->
+										</el-select>
 									</el-form-item>
 								</el-col>
 							</el-row>
@@ -137,14 +92,6 @@
 								<el-col :span="12">
 									<el-form-item label="桥接网卡" prop="bridge"><el-input v-model="create_network.bridge"></el-input></el-form-item>
 								</el-col>
-								<el-col :span="12">
-									<el-form-item label="网络类型" prop="type">
-										<el-select v-model="create_network.type" style="width: 100%">
-											<el-option label="基础网络" :value="0"></el-option>
-											<el-option label="Vlan网络" :value="1"></el-option>
-										</el-select>
-									</el-form-item>
-								</el-col>
 							</el-row>
 
 							<el-row :gutter="24" v-if="create_network.type === 1">
@@ -166,27 +113,23 @@
 						</el-form>
 					</el-row>
 				</el-card>
-				<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_type = 1" @onGuestUpdate="update_guest_info" v-show="this.show_type === 3" />
 			</el-main>
 		</el-container>
 	</div>
 </template>
 <script>
-import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, createNetwork, getSystemGuestList, getGuestInfo } from '@/api/api'
-import GuestInfoComponent from '@/components/GuestInfoComponent.vue'
+import util from '@/api/util'
+import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, createNetwork, getGuestInfo } from '@/api/api'
+
+import NetworkInfoComponent from '@/components/NetworkInfoComponent'
 import Notify from '@/api/notify'
 export default {
 	name: 'NetworkView',
-	components: { GuestInfoComponent },
+	components: { NetworkInfoComponent },
 	data() {
 		return {
 			data_loading: false,
-
-			current_loading: false,
-			current_network_id: 0,
 			show_type: -1,
-			show_network: {},
-			system_guests: [],
 			create_network: {
 				name: '',
 				startIp: '',
@@ -205,34 +148,11 @@ export default {
 		}
 	},
 	mounted() {
-		this.current_network_id = this.$route.query.id
-		if (this.current_network_id) {
-			this.show_type == 2
-			this.current_loading = true
-			getNetworkInfo({ networkId: this.current_network_id })
-				.then((res) => {
-					if (res.code === 0) {
-						this.show_network_info_click(res.data)
-					} else {
-						this.$alert(`获取网络信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						}).then(() => {
-							this.show_type = 0
-						})
-					}
-				})
-				.finally(() => {
-					this.current_loading = false
-				})
-		} else {
-			this.show_type = 0
-		}
+		this.show_type = 0
 		this.init_view()
 		this.init_notify()
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 	methods: {
 		async init_view() {
 			this.data_loading = true
@@ -246,76 +166,6 @@ export default {
 					this.data_loading = false
 				})
 		},
-		async load_system_guest(network) {
-			this.system_guests = []
-			await getSystemGuestList({ networkId: network.networkId }).then((res) => {
-				if (res.code === 0) {
-					this.system_guests = res.data
-				}
-			})
-		},
-		update_guest_info(guest) {
-			if (guest.type === 0 && guest.networkId === this.show_network.networkId) {
-				let findIndex = this.system_guests.findIndex((item) => item.guestId === guest.guestId)
-				if (findIndex >= 0) {
-					this.$set(this.system_guests, findIndex, guest)
-				} else {
-					this.system_guests.push(guest)
-				}
-				this.$forceUpdate()
-			}
-			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
-		},
-		go_guest_info(guestId) {
-			this.show_type = 3
-			this.$refs.GuestInfoComponentRef.initGuestId(guestId)
-		},
-		get_network_status(network) {
-			switch (network.status) {
-				case 1:
-					return '正在注册'
-				case 2:
-					return '已就绪'
-				case 3:
-					return '正在维护'
-				case 4:
-					return '正在销毁'
-				case 5:
-					return '网络错误'
-				default:
-					return `未知状态[${network.status}]`
-			}
-		},
-		get_network_type(network) {
-			switch (network.type) {
-				case 0:
-					return '基础网络'
-				case 1:
-					return 'Vlan网络'
-				default:
-					return `未知类型[${network.type}]`
-			}
-		},
-		get_guest_status(guest) {
-			switch (guest.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '正在启动'
-				case 2:
-					return '正在运行'
-				case 3:
-					return '正在停止'
-				case 4:
-					return '已停止'
-				case 5:
-					return '重启中'
-				case 6:
-					return '虚拟机错误'
-				default:
-					return `未知状态[${guest.status}]`
-			}
-		},
 		get_parent_network(network) {
 			let find = this.networks.find((v) => v.networkId === network.basicNetworkId)
 			return find || { name: '-' }
@@ -327,9 +177,8 @@ export default {
 			} else {
 				this.networks.push(network)
 			}
-			if (this.show_network && this.show_network.networId === network.networId) {
-				this.show_network = network
-			}
+
+			this.$refs.NetworkInfoComponentRef.refresh_network(network)
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 3) {
@@ -347,12 +196,9 @@ export default {
 			} else if (notify.type === 1) {
 				getGuestInfo({ guestId: notify.id }).then((res) => {
 					if (res.code == 0) {
-						this.update_guest_info(res.data)
+						this.$refs.NetworkInfoComponentRef.update_guest_info(res.data)
 					} else if (res.code == 2000001) {
-						let findIndex = this.system_guests.findIndex((v) => v.guestId === notify.id)
-						if (findIndex >= 0) {
-							this.system_guests.splice(findIndex, 1)
-						}
+						this.$refs.NetworkInfoComponentRef.delete_guest(res.data)
 					}
 				})
 			}
@@ -367,8 +213,7 @@ export default {
 			this.show_type = 2
 		},
 		show_network_info_click(network) {
-			this.show_network = network
-			this.load_system_guest(network)
+			this.$refs.NetworkInfoComponentRef.init_network(network)
 			this.show_type = 1
 		},
 		create_network_click() {

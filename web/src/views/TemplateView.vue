@@ -96,6 +96,7 @@
 <script>
 import { getTemplateList, getTemplateInfo, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
 import Notify from '@/api/notify'
+import util from '@/api/util'
 export default {
 	name: 'templateView',
 	components: {},
@@ -113,7 +114,7 @@ export default {
 			templates: []
 		}
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 	created() {
 		this.init_view()
 		this.init_notify()
@@ -130,32 +131,6 @@ export default {
 				.finally(() => {
 					this.data_loading = false
 				})
-		},
-		get_template_status(template) {
-			switch (template.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '下载中'
-				case 2:
-					return '已就绪'
-				case 3:
-					return '模版错误'
-				default:
-					return `未知状态[${template.status}]`
-			}
-		},
-		get_template_type(template) {
-			switch (template.templateType) {
-				case 0:
-					return 'IOS 文件'
-				case 1:
-					return '系统模版'
-				case 2:
-					return '用户模版'
-				default:
-					return `未知模版[${template.templateType}]`
-			}
 		},
 		show_template_list() {
 			this.show_type = 0

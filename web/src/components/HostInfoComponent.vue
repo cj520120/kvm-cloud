@@ -19,7 +19,7 @@
 				<el-descriptions-item label="主机架构">{{ show_host.arch }}</el-descriptions-item>
 				<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 				<el-descriptions-item label="内存">
-					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(show_host.allocationMemory) + ' / 总共:' + get_memory_desplay(show_host.totalMemory)" placement="top">
+					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay_size(show_host.allocationMemory) + ' / 总共:' + get_memory_desplay_size(show_host.totalMemory)" placement="top">
 						<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
 					</el-tooltip>
 				</el-descriptions-item>
@@ -40,6 +40,7 @@
 	</el-card>
 </template>
 <script>
+import util from '@/api/util'
 import { getHostInfo, pauseHost, registerHost, destroyHost } from '@/api/api'
 export default {
 	data() {
@@ -66,6 +67,7 @@ export default {
 			}
 		}
 	},
+	mixins: [util],
 	methods: {
 		on_back_click() {
 			this.$emit('back')
@@ -73,31 +75,6 @@ export default {
 		on_notify_update_host_info(host) {
 			this.refresh_host(host)
 			this.$emit('onHostUpdate', host)
-		},
-		get_host_status(host) {
-			switch (host.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '在线'
-				case 2:
-					return '离线'
-				case 3:
-					return '正在维护'
-				case 4:
-					return '主机错误'
-				default:
-					return `未知状态[${host.status}]`
-			}
-		},
-		get_memory_desplay(memory) {
-			if (memory > 1024 * 1024) {
-				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
-			} else if (memory > 1024) {
-				return (memory / 1024).toFixed(0) + '  MB'
-			} else {
-				return memory + ' KB'
-			}
 		},
 		init_host(host) {
 			this.show_host = host
@@ -109,7 +86,7 @@ export default {
 			}
 		},
 		async init(hostId) {
-			this.host_loading = true 
+			this.host_loading = true
 			await getHostInfo({ hostId: hostId })
 				.then((res) => {
 					console.log(res)

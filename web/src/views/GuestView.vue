@@ -31,7 +31,7 @@
 							<el-table-column label="标签" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="配置" prop="cpu" width="150">
-								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_desplay(scope.row.memory) }}</template>
+								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_desplay_size(scope.row.memory) }}</template>
 							</el-table-column>
 							<el-table-column label="类型" width="100">
 								<template #default="scope">
@@ -82,6 +82,7 @@ import StopGuestComponent from '@/components/StopGuestComponent.vue'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
 import CreateGuestComponent from '@/components/CreateGuestComponent'
 import AttachCdRoomComponent from '@/components/AttachCdRoomComponent'
+import util from '@/api/util'
 export default {
 	name: 'guestView',
 	components: {
@@ -106,7 +107,7 @@ export default {
 			total_size: 0
 		}
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 
 	mounted() {
 		this.show_type = 0
@@ -198,35 +199,6 @@ export default {
 				})
 			})
 			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
-		},
-		get_memory_desplay(memory) {
-			if (memory >= 1024 * 1024) {
-				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
-			} else if (memory >= 1024) {
-				return (memory / 1024).toFixed(2) + '  MB'
-			} else {
-				return memory + ' KB'
-			}
-		},
-		get_guest_status(guest) {
-			switch (guest.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '正在启动'
-				case 2:
-					return '正在运行'
-				case 3:
-					return '正在停止'
-				case 4:
-					return '已停止'
-				case 5:
-					return '重启中'
-				case 6:
-					return '虚拟机错误'
-				default:
-					return `未知状态[${guest.status}]`
-			}
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 1) {

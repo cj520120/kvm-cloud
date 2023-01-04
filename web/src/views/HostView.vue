@@ -20,7 +20,7 @@
 							</el-table-column>
 							<el-table-column label="内存" prop="hostIp" width="120">
 								<template #default="scope">
-									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
+									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay_size(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay_size(scope.row.totalMemory)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
 									</el-tooltip>
 								</template>
@@ -69,6 +69,7 @@
 	</div>
 </template>
 <script>
+import util from '@/api/util'
 import HostInfoComponent from '@/components/HostInfoComponent'
 import { getHostList, getHostInfo, pauseHost, registerHost, destroyHost, createHost } from '@/api/api'
 import Notify from '@/api/notify'
@@ -78,8 +79,6 @@ export default {
 	data() {
 		return {
 			data_loading: false,
-			current_loading: false,
-			current_host_id: 0,
 			show_type: -1,
 			create_host: {
 				displayName: '',
@@ -90,33 +89,10 @@ export default {
 			hosts: []
 		}
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 
 	mounted() {
-		this.current_host_id = this.$route.query.id
-		if (this.current_host_id) {
-			this.show_type == 2
-			this.current_loading = true
-			getHostInfo({ hostId: this.current_host_id })
-				.then((res) => {
-					if (res.code === 0) {
-						this.show_host_info_click(res.data)
-					} else {
-						this.$alert(`获取主机信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						}).then(() => {
-							this.show_type = 0
-						})
-					}
-				})
-				.finally(() => {
-					this.current_loading = false
-				})
-		} else {
-			this.show_type = 0
-		}
+		this.show_type = 0
 		this.init_view()
 		this.init_notify()
 	},
@@ -132,22 +108,6 @@ export default {
 				.finally(() => {
 					this.data_loading = false
 				})
-		},
-		get_host_status(host) {
-			switch (host.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '在线'
-				case 2:
-					return '离线'
-				case 3:
-					return '正在维护'
-				case 4:
-					return '主机错误'
-				default:
-					return `未知状态[${host.status}]`
-			}
 		},
 		show_host_list() {
 			this.show_type = 0
@@ -199,15 +159,6 @@ export default {
 					})
 				}
 			})
-		},
-		get_memory_desplay(memory) {
-			if (memory > 1024 * 1024) {
-				return (memory / (1024 * 1024)).toFixed(2) + ' GB'
-			} else if (memory > 1024) {
-				return (memory / 1024).toFixed(0) + '  MB'
-			} else {
-				return memory + ' KB'
-			}
 		},
 		pasue_host(host) {
 			this.$confirm('维护主机, 是否继续?', '提示', {

@@ -13,7 +13,7 @@
 							<el-table-column label="类型" prop="type" width="120" />
 							<el-table-column label="容量" prop="capacity" width="120">
 								<template #default="scope">
-									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
+									<el-tooltip class="item" effect="dark" :content="'已用:' + get_volume_desplay_size(scope.row.allocation) + ' / 总共:' + get_volume_desplay_size(scope.row.capacity)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
 									</el-tooltip>
 								</template>
@@ -34,32 +34,7 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<el-card class="box-card" v-show="this.show_type === 1">
-					<el-row slot="header">
-						<el-page-header @back="show_storage_list" content="存储池详情"></el-page-header>
-					</el-row>
-					<el-row style="text-align: left; margin: 20px 0">
-						<el-button @click="register_storage(show_storage)" type="success" size="mini">重新注册</el-button>
-						<el-button @click="pasue_storage(show_storage)" type="warning" size="mini" v-if="show_storage.status !== 3">开始维护</el-button>
-						<el-button @click="destroy_storage(show_storage)" type="danger" size="mini">销毁存储池</el-button>
-					</el-row>
-					<el-row>
-						<el-descriptions :column="2" size="medium" border>
-							<el-descriptions-item label="ID">{{ show_storage.storageId }}</el-descriptions-item>
-							<el-descriptions-item label="存储池名">{{ show_storage.name }}</el-descriptions-item>
-							<el-descriptions-item label="存储池类型">{{ show_storage.type }}</el-descriptions-item>
-							<el-descriptions-item label="挂载路径">{{ show_storage.mountPath }}</el-descriptions-item>
-							<el-descriptions-item label="NFS路径" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
-							<el-descriptions-item label="NFS地址" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
-							<el-descriptions-item label="容量">{{ get_storage_desplay(show_storage.capacity) }}</el-descriptions-item>
-							<el-descriptions-item label="可用">{{ get_storage_desplay(show_storage.available) }}</el-descriptions-item>
-							<el-descriptions-item label="已申请">{{ get_storage_desplay(show_storage.allocation) }}</el-descriptions-item>
-							<el-descriptions-item label="状态">
-								<el-tag :type="show_storage.status === 1 ? 'success' : 'danger'">{{ get_storage_status(show_storage) }}</el-tag>
-							</el-descriptions-item>
-						</el-descriptions>
-					</el-row>
-				</el-card>
+				<StorageInfoComponent ref="StorageInfoComponentRef" @back="show_storage_list()" @onStorageUpdate="update_storate_info" v-show="this.show_type === 1" />
 				<el-card class="box-card" v-show="this.show_type === 2">
 					<el-row slot="header">
 						<el-page-header @back="show_storage_list()" content="创建存储池" style="color: #409eff"></el-page-header>
@@ -93,10 +68,12 @@
 </template>
 <script>
 import { getStorageList, getStorageInfo, pauseStorage, registerStorage, destroyStorage, createStorage } from '@/api/api'
+import StorageInfoComponent from '@/components/StorageInfoComponent'
 import Notify from '@/api/notify'
+import util from '@/api/util'
 export default {
 	name: 'storageView',
-	components: {},
+	components: { StorageInfoComponent },
 	data() {
 		return {
 			data_loading: false,
@@ -114,7 +91,7 @@ export default {
 			storages: []
 		}
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 	mounted() {
 		this.current_storage_id = this.$route.query.id
 		if (this.current_storage_id) {
@@ -156,22 +133,6 @@ export default {
 					this.data_loading = false
 				})
 		},
-		get_storage_status(storage) {
-			switch (storage.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '已就绪'
-				case 2:
-					return '正在维护'
-				case 3:
-					return '正在销毁'
-				case 4:
-					return '存储池错误'
-				default:
-					return `未知状态[${storage.status}]`
-			}
-		},
 		update_storate_info(storage) {
 			let findIndex = this.storages.findIndex((item) => item.storageId === storage.storageId)
 			if (findIndex >= 0) {
@@ -179,9 +140,7 @@ export default {
 			} else {
 				this.storages.push(storage)
 			}
-			if (this.show_storage && this.show_storage.storageId === storage.storageId) {
-				this.show_storage = storage
-			}
+			this.$refs.StorageInfoComponentRef.refresh_storage(storage)
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 7) {
@@ -207,7 +166,7 @@ export default {
 			this.show_type = 2
 		},
 		show_storage_info_click(storage) {
-			this.show_storage = storage
+			this.$refs.StorageInfoComponentRef.init_storage(storage)
 			this.show_type = 1
 		},
 		create_storage_click() {
@@ -239,19 +198,6 @@ export default {
 					})
 				}
 			})
-		},
-		get_storage_desplay(size) {
-			if (size >= 1024 * 1024 * 1024 * 1024) {
-				return (size / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB'
-			} else if (size >= 1024 * 1024 * 1024) {
-				return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
-			} else if (size >= 1024 * 1024) {
-				return (size / (1024 * 1024)).toFixed(2) + ' MB'
-			} else if (size >= 1024) {
-				return (size / 1024).toFixed(2) + '  KB'
-			} else {
-				return size + '  bytes'
-			}
 		},
 		pasue_storage(storage) {
 			this.$confirm('暂停存储池, 是否继续?', '提示', {

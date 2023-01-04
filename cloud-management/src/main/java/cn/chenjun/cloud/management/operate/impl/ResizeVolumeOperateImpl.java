@@ -45,7 +45,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             VolumeResizeRequest request = VolumeResizeRequest.builder()
                     .sourceStorage(storage.getName())
                     .sourceVolume(volume.getPath())
-                    .size(param.getSize() + volume.getCapacity())
+                    .size(param.getSize())
                     .build();
             this.asyncInvoker(host, param, Constant.Command.VOLUME_RESIZE, request);
         } else {

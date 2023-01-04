@@ -286,7 +286,7 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = ResizeVolumeOperate.builder().taskId(UUID.randomUUID().toString())
                 .title("更改磁盘大小[" + volume.getName() + "]")
                 .volumeId(volume.getVolumeId())
-                .size(size)
+                .size(volume.getCapacity())
                 .build();
         operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());

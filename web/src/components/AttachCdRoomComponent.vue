@@ -38,8 +38,7 @@ export default {
 		},
 		attach_cd_room_guest_click() {
 			attachGuestCdRoom(this.attach_cd_room_guest).then((res) => {
-				if (res.code === 0) {
-					// this.update_guest_info(res.data)
+				if (res.code === 0) { 
 					this.$emit("onGuestUpdate",res.data)
 					this.attach_cd_room_dialog_visiable = false
 				} else {

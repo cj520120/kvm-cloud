@@ -45,9 +45,6 @@ export default {
 			attachGuestDisk(this.attach_volume_guest).then((res) => {
 				if (res.code === 0) {
 					this.$emit("onVoumeAttachCallBack",res.data.guest,res.data.volume)
-					// this.update_guest_info(res.data.guest)
-					//this.show_guest_info.volumes.push(res.data.volume)
-
 					this.attach_volume_dialog_visiable = false
 				} else {
 					this.$notify.error({

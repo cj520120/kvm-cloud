@@ -61,6 +61,7 @@
 <script>
 import { getSnapshotList, getSnapshotInfo, destroySnapshot, getStorageList } from '@/api/api'
 import Notify from '@/api/notify'
+import util from '@/api/util'
 export default {
 	name: 'snapshotView',
 	components: {},
@@ -73,7 +74,7 @@ export default {
 			storages: []
 		}
 	},
-	mixins: [Notify],
+	mixins: [Notify, util],
 	created() {
 		this.init_view()
 		this.init_notify()
@@ -99,33 +100,6 @@ export default {
 		get_storage_name(storageId) {
 			let findStorage = this.storages.find((item) => item.storageId === storageId) || { name: '-' }
 			return findStorage.name
-		},
-		get_volume_desplay_size(size) {
-			if (size >= 1024 * 1024 * 1024 * 1024) {
-				return (size / (1024 * 1024 * 1024 * 1024)).toFixed(2) + ' TB'
-			} else if (size >= 1024 * 1024 * 1024) {
-				return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
-			} else if (size >= 1024 * 1024) {
-				return (size / (1024 * 1024)).toFixed(2) + ' MB'
-			} else if (size >= 1024) {
-				return (size / 1024).toFixed(2) + '  KB'
-			} else {
-				return size + '  bytes'
-			}
-		},
-		get_snapshot_status(snapshot) {
-			switch (snapshot.status) {
-				case 0:
-					return '正在创建'
-				case 1:
-					return '已就绪'
-				case 2:
-					return '快照错误'
-				case 3:
-					return '正在删除'
-				default:
-					return `未知状态[${snapshot.status}]`
-			}
 		},
 		show_snapshot_list() {
 			this.show_type = 0
