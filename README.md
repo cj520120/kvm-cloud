@@ -9,6 +9,11 @@
     7、简单群组功能
     8、虚拟机IP自动管理
     9、多网卡支持
+    10、支持磁盘导入导出
+    11、支持 raw、qcow、qcow2、vdi、vmdk、vpc磁盘格式
+    12、磁盘快照支持
+### 关于升级
+    目前不支持V1、V2升级到最新版本
 ### 操作系统
 Linux
 ### SELinux配置
@@ -21,7 +26,7 @@ SELINUX=permissive
 ```sh
 vim /etc/sysctl.conf 
 net.ipv4.ip_forward=1               # 设置转发并保存
-sysctl –p
+sysctl -p
 ```
 ### 防火墙配置
 ```sh
@@ -91,7 +96,7 @@ yum install java-1.8.0-openjdk* -y
 ```
 
 #### 3、配置KVM 主机网桥，增加一个网桥
-这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期辛苦配置的虚拟机无法正常被访问到！
+这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期配置的虚拟机无法正常被访问到！
 确认网卡名无误后配置网桥：
 ```sh
 vi /etc/sysconfig/network-scripts/ifcfg-br0
@@ -143,71 +148,58 @@ mvn clean package
 1、导入mysql表及相关数据
 > **脚本位于scripts下**
 
-2、修改配置文件
+2、安装Redis
 
-3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
+3、修改配置文件
+
+4、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
 ```
-管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.properties
+管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
  --spring.config.location 是可选项，用于指定配置文件，如果不需要修改，可以去掉,配置文件为各自模块下的src/main/resources/application.properties文件
 ```
 
-4、平台登陆账号默认用户名/密码:admin/111111
-
-5、创建集群
+5、平台登陆账号默认用户名/密码:admin/111111
 
 
-![](images/cluster.png)
+6、创建基础网络
 
-6、下载系统Route-VM与Console-VM
+> **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突**
 
-> **链接: 链接: https://pan.baidu.com/s/1Qfo0f_i3EROMGf6nMI3UVg 提取码: wbvc**
+![](images/network.png)
 
 
-7、安装nginx，配置Route-VM和Console-VM下载地址,并在页面完成模版配置
+7、创建主机
+
+
+![](images/host.png)
+
+
+8、创建存储池(只支持nfs)
+
+
+![](images/storage.png)
+
+9、下载基础模版
+
+> **链接: https://pan.baidu.com/s/1tdzTCCHQQmMtR5DqaTpf3Q 提取码: g6mp**
+
+
+10、安装nginx，配置基础下载地址,并在页面完成模版配置
 
 
 ![](images/template.png)
 
  
 
-8、创建网络
-
-> **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突** 
-
-![](images/network.png)
-
-
-9、创建主机
-
-
-![](images/host.png)
-
-
-10、创建存储池(只支持nfs)
-
-
-![](images/storage.png)
 
 
 11、等待系统模版下载完成，并初始化系统VM成功
 
-12、Console VM	负责Vnc连接、Route VM负责DHCP下发
+12、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动 
+ 
 
-
-
-![](images/route.png)
-
-
-13、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动
-
-14、系统VM用户名密码均为root/123456，请自行修改相关密码
-
-15、上传ISO系统镜像
-
-> **配置镜像时需要指定系统类型**
-
-16、创建VM
+13、创建VM
 
 
 ![](images/create-vm.png)
@@ -219,11 +211,11 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 1、关于找不到配置文件问题导致数据库连接问题
 ```
-server.properties 和 client.properties 内容分别为management和agent项目下的application.properties的文件，运行时自行修改名称
+server.yaml 和 client.properties 内容分别为management和agent项目下的application.yaml和application.properties的文件，运行时自行修改名称及相关配置
 ```
 2、关于备份与恢复
 ```$xslt
-对数据库和存储池进行完整备份，恢复时如果需要修改存储池IP，请调整tbl_storage_info标中storage_host的主机地址即可；
+对数据库和存储池进行完整备份；
 数据无价，建议对虚拟机中的数据进行备份
 ```
 3、关于网络隔离

@@ -1,0 +1,4 @@
+<cpu mode='host-passthrough' check='partial'>
+    <model fallback='allow'>Nehalem</model>
+    <topology sockets='%d' cores='%d' threads='%d'/>
+</cpu>

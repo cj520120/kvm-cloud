@@ -1,0 +1,11 @@
+[Unit]
+Description=websockify service
+After=network.service
+[Service]
+Type=simple
+ExecStart=/usr/local/websockify/scripts/service.sh start
+ExecReload=/usr/local/websockify/scripts/service.sh restart
+ExecStop=/usr/local/websockify/scripts/service.sh stop
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

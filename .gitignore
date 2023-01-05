@@ -5,3 +5,7 @@ target
 .settings
 .idea
 .DS_Store
+/web/yarn.lock
+/web/yarn-error.log
+/web/node_modules/
+/web/dist/
