@@ -161,7 +161,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 6、下载系统Route-VM与Console-VM
 
-> **链接: https://pan.baidu.com/s/1c7Fvenhp9WfrdaqrBkbd8A 提取码: pw3g**
+> **链接: 链接: https://pan.baidu.com/s/1Qfo0f_i3EROMGf6nMI3UVg 提取码: wbvc**
 
 
 7、安装nginx，配置Route-VM和Console-VM下载地址,并在页面完成模版配置
