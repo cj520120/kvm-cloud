@@ -6,7 +6,7 @@
 			</el-row>
 			<el-row style="text-align: left; margin: 20px 0">
 				<el-button @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
-				<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status >= 3">停止虚拟机</el-button>
+				<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status > 3">停止虚拟机</el-button>
 				<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2" v-show="show_guest_info.current_guest.type !== 0">重启虚拟机</el-button>
 				<el-button @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">重装系统</el-button>
 
