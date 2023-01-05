@@ -2,7 +2,7 @@
 	<div class="main">
 		<div id="top_bar">
 			<div id="status">{{ status }}</div>
-			<div id="sendCtrlAltDelButton" @onclick="on_send_ctrl_alt_del">发送 Ctrl+Alt+Del</div>
+			<div id="sendCtrlAltDelButton" @click="on_send_ctrl_alt_del">发送 Ctrl+Alt+Del</div>
 		</div>
 		<div id="screen"></div>
 	</div>
@@ -72,6 +72,11 @@ export default {
 		},
 		on_send_ctrl_alt_del() {
 			this.rfb.sendCtrlAltDel()
+			this.rfb.focus()
+		},
+		sendKey(keysym, code, down) {
+			this.rfb.sendKey(keysym, code, down)
+			this.rfb.focus()
 		}
 	}
 }
@@ -80,14 +85,14 @@ export default {
     <style scoped>
 .main {
 	margin: 0;
-	background-color: dimgrey;
+	background-color: rgb(40, 40, 40);
 	height: 100vh;
 	width: 100vw;
 	display: flex;
 	flex-direction: column;
 }
 #top_bar {
-	background-color: #6e84a3;
+	background-color: rgb(92, 92, 92);
 	color: white;
 	font: bold 12px Helvetica;
 	padding: 6px 5px 4px 5px;

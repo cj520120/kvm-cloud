@@ -84,7 +84,6 @@ export default {
 	methods: {
 		login() {
 			this.loading = true
-			console.log(this.loginData.loginName)
 			getLoginSignature({ loginName: this.loginData.loginName })
 				.then((res) => {
 					if (res.code === 0) {
