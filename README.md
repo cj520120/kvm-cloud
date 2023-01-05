@@ -96,7 +96,7 @@ yum install java-1.8.0-openjdk* -y
 ```
 
 #### 3、配置KVM 主机网桥，增加一个网桥
-这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期辛苦配置的虚拟机无法正常被访问到！
+这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期配置的虚拟机无法正常被访问到！
 确认网卡名无误后配置网桥：
 ```sh
 vi /etc/sysconfig/network-scripts/ifcfg-br0
@@ -182,7 +182,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 9、下载基础模版
 
-> **链接: https://pan.baidu.com/s/1c7Fvenhp9WfrdaqrBkbd8A 提取码: pw3g**
+> **链接: https://pan.baidu.com/s/1tdzTCCHQQmMtR5DqaTpf3Q 提取码: g6mp**
 
 
 10、安装nginx，配置基础下载地址,并在页面完成模版配置
