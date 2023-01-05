@@ -162,6 +162,9 @@ export default {
 			this.$refs.StorageInfoComponentRef.init(storageId)
 			this.show_type = 4
 		},
+		show_download_volume_click(volume) {
+			this.$refs.DownloadVolumeComponentRef.init(volume)
+		},
 		destroy_volume(volume) {
 			this.$confirm('删除磁盘, 是否继续?', '提示', {
 				confirmButtonText: '确定',
