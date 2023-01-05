@@ -5,7 +5,7 @@
 		</el-row>
 		<el-row style="text-align: left; margin: 20px 0">
 			<el-button @click="register_host(show_host)" type="success" size="mini">重新注册</el-button>
-			<el-button @click="pasue_host(show_host)" type="warning" size="mini" v-if="show_host.status !== 3">开始维护</el-button>
+			<el-button @click="pasue_host(show_host)" type="warning" size="mini" v-show="show_host.status !== 3">开始维护</el-button>
 			<el-button @click="destroy_host(show_host)" type="danger" size="mini">销毁主机</el-button>
 		</el-row>
 		<el-row>
@@ -89,7 +89,6 @@ export default {
 			this.host_loading = true
 			await getHostInfo({ hostId: hostId })
 				.then((res) => {
-					console.log(res)
 					if (res.code === 0) {
 						this.init_host(res.data)
 					} else {

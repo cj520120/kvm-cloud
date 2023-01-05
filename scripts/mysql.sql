@@ -1,9 +1,9 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : 192.168.2.107
+Source Server         : 127.0.0.1
 Source Server Version : 50722
-Source Host           : 192.168.2.107:3306
+Source Host           : 127.0.0.1:3306
 Source Database       : cj_kvm_cloud
 
 Target Server Type    : MYSQL
@@ -16,22 +16,40 @@ CREATE DATABASE `cj_kvm_cloud` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 use cj_kvm_cloud;
 SET FOREIGN_KEY_CHECKS=0;
 
--- ----------------------------
--- Table structure for tbl_component_info
--- ----------------------------
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `tbl_component_info`
+--
+
 DROP TABLE IF EXISTS `tbl_component_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_component_info` (
   `component_id` int(11) NOT NULL AUTO_INCREMENT,
   `component_type` int(11) NOT NULL,
   `network_id` int(11) NOT NULL,
   `guest_id` int(11) NOT NULL,
   PRIMARY KEY (`component_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_guest_disk
--- ----------------------------
+--
+-- Table structure for table `tbl_guest_disk`
+--
+
 DROP TABLE IF EXISTS `tbl_guest_disk`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_guest_disk` (
   `guest_disk_id` int(11) NOT NULL AUTO_INCREMENT,
   `guest_id` int(11) NOT NULL,
@@ -41,12 +59,16 @@ CREATE TABLE `tbl_guest_disk` (
   PRIMARY KEY (`guest_disk_id`),
   UNIQUE KEY `IX_GUEST_VOLUME` (`guest_id`,`device_id`),
   UNIQUE KEY `IX_VOLUME_ID` (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_guest_info
--- ----------------------------
+--
+-- Table structure for table `tbl_guest_info`
+--
+
 DROP TABLE IF EXISTS `tbl_guest_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_guest_info` (
   `guest_id` int(11) NOT NULL AUTO_INCREMENT,
   `guest_name` varchar(45) NOT NULL,
@@ -66,12 +88,16 @@ CREATE TABLE `tbl_guest_info` (
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_guest_network
--- ----------------------------
+--
+-- Table structure for table `tbl_guest_network`
+--
+
 DROP TABLE IF EXISTS `tbl_guest_network`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_guest_network` (
   `guest_network_id` int(11) NOT NULL AUTO_INCREMENT,
   `guest_id` int(11) NOT NULL,
@@ -82,12 +108,16 @@ CREATE TABLE `tbl_guest_network` (
   `network_ip` varchar(20) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=389 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_guest_vnc
--- ----------------------------
+--
+-- Table structure for table `tbl_guest_vnc`
+--
+
 DROP TABLE IF EXISTS `tbl_guest_vnc`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_guest_vnc` (
   `guest_id` int(11) NOT NULL,
   `vnc_port` int(11) NOT NULL,
@@ -96,11 +126,15 @@ CREATE TABLE `tbl_guest_vnc` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_host_info
--- ----------------------------
+--
+-- Table structure for table `tbl_host_info`
+--
+
 DROP TABLE IF EXISTS `tbl_host_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_host_info` (
   `host_id` int(11) NOT NULL AUTO_INCREMENT,
   `host_display_name` varchar(45) NOT NULL,
@@ -124,11 +158,15 @@ CREATE TABLE `tbl_host_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`host_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_network_info
--- ----------------------------
+--
+-- Table structure for table `tbl_network_info`
+--
+
 DROP TABLE IF EXISTS `tbl_network_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_network_info` (
   `network_id` int(11) NOT NULL AUTO_INCREMENT,
   `network_name` varchar(45) NOT NULL,
@@ -136,9 +174,9 @@ CREATE TABLE `tbl_network_info` (
   `network_stop_ip` varchar(20) NOT NULL,
   `network_gateway` varchar(20) NOT NULL,
   `network_mask` varchar(20) NOT NULL,
-  `network_subnet` varchar(20) NOT NULL,
-  `network_broadcast` varchar(20) NOT NULL,
   `network_bridge_name` varchar(20) NOT NULL,
+  `network_subnet` varchar(45) NOT NULL,
+  `network_broadcast` varchar(45) DEFAULT NULL,
   `network_dns` varchar(20) NOT NULL,
   `network_vlan_id` int(11) NOT NULL,
   `network_basic_network_id` int(11) NOT NULL,
@@ -146,12 +184,16 @@ CREATE TABLE `tbl_network_info` (
   `network_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_scheme_info
--- ----------------------------
+--
+-- Table structure for table `tbl_scheme_info`
+--
+
 DROP TABLE IF EXISTS `tbl_scheme_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_scheme_info` (
   `scheme_id` int(11) NOT NULL AUTO_INCREMENT,
   `scheme_name` varchar(45) NOT NULL,
@@ -163,16 +205,19 @@ CREATE TABLE `tbl_scheme_info` (
   `scheme_cpu_threads` int(11) NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`scheme_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_snapshot_volume
--- ----------------------------
+--
+-- Table structure for table `tbl_snapshot_volume`
+--
+
 DROP TABLE IF EXISTS `tbl_snapshot_volume`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_snapshot_volume` (
   `snapshot_volume_id` int(11) NOT NULL AUTO_INCREMENT,
   `snapshot_name` varchar(45) NOT NULL,
-  `storage_description` varchar(45) NOT NULL,
   `storage_id` int(11) NOT NULL,
   `volume_name` varchar(45) NOT NULL,
   `volume_path` varchar(1024) NOT NULL,
@@ -182,15 +227,20 @@ CREATE TABLE `tbl_snapshot_volume` (
   `volume_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`snapshot_volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_storage_info
--- ----------------------------
+--
+-- Table structure for table `tbl_storage_info`
+--
+
 DROP TABLE IF EXISTS `tbl_storage_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_storage_info` (
   `storage_id` int(11) NOT NULL AUTO_INCREMENT,
-  `storage_name` varchar(20) NOT NULL,
+  `storage_description` varchar(45) NOT NULL,
+  `storage_name` varchar(64) NOT NULL,
   `storage_type` varchar(20) NOT NULL,
   `storage_parm` text NOT NULL,
   `storage_mount_path` varchar(1024) NOT NULL,
@@ -200,12 +250,16 @@ CREATE TABLE `tbl_storage_info` (
   `storage_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`storage_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_template_info
--- ----------------------------
+--
+-- Table structure for table `tbl_template_info`
+--
+
 DROP TABLE IF EXISTS `tbl_template_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_template_info` (
   `template_id` int(11) NOT NULL AUTO_INCREMENT,
   `template_name` varchar(45) NOT NULL,
@@ -215,12 +269,16 @@ CREATE TABLE `tbl_template_info` (
   `template_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_template_volume
--- ----------------------------
+--
+-- Table structure for table `tbl_template_volume`
+--
+
 DROP TABLE IF EXISTS `tbl_template_volume`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_template_volume` (
   `template_volume_id` int(11) NOT NULL AUTO_INCREMENT,
   `template_id` int(11) NOT NULL,
@@ -233,12 +291,16 @@ CREATE TABLE `tbl_template_volume` (
   `template_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_user_info
--- ----------------------------
+--
+-- Table structure for table `tbl_user_info`
+--
+
 DROP TABLE IF EXISTS `tbl_user_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_user_info` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `login_name` varchar(10) NOT NULL,
@@ -249,11 +311,15 @@ CREATE TABLE `tbl_user_info` (
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `IX_LOGIN_NAME` (`login_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ----------------------------
--- Table structure for tbl_volume_info
--- ----------------------------
+--
+-- Table structure for table `tbl_volume_info`
+--
+
 DROP TABLE IF EXISTS `tbl_volume_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_volume_info` (
   `volume_id` int(11) NOT NULL AUTO_INCREMENT,
   `volume_description` varchar(45) NOT NULL DEFAULT '',
@@ -267,4 +333,19 @@ CREATE TABLE `tbl_volume_info` (
   `volume_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2023-01-05  5:59:09
+
+INSERT INTO`cj_kvm_cloud`.`tbl_user_info`(`user_id`,`login_name`,`login_password`,`login_password_salt`,`login_state`,`create_time`)
+VALUES(1,'admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,now());

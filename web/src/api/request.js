@@ -43,6 +43,7 @@ class HttpRequest {
         const { data } = res;
         if (data.code === 401) {
           Route.push({ path: "/login" });
+          return res.data;
         } else {
           return res.data;
         }

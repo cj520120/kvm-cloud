@@ -33,117 +33,25 @@
 					</el-row>
 				</el-card>
 				<NetworkInfoComponent ref="NetworkInfoComponentRef" @onNetworkUpdate="update_network_info" @back="show_network_list()" v-show="this.show_type === 1" />
-
-				<el-card class="box-card" v-show="this.show_type === 2">
-					<el-row slot="header">
-						<el-page-header @back="show_network_list()" content="创建网络" style="color: #409eff"></el-page-header>
-					</el-row>
-					<el-row>
-						<el-form ref="createForm" :model="create_network" label-width="100px" class="demo-ruleForm">
-							<el-row :gutter="24">
-								<el-col :span="12">
-									<el-form-item label="网络名称" prop="name">
-										<el-input v-model="create_network.name"></el-input>
-									</el-form-item>
-								</el-col>
-								<el-col :span="12">
-									<el-form-item label="网络类型" prop="type">
-										<el-select v-model="create_network.type" style="width: 100%">
-											<el-option label="基础网络" :value="0"></el-option>
-											<!-- <el-option label="Vlan网络" :value="1"></el-option> -->
-										</el-select>
-									</el-form-item>
-								</el-col>
-							</el-row>
-
-							<el-row :gutter="24">
-								<el-col :span="12">
-									<el-form-item label="起始IP" prop="startIp"><el-input v-model="create_network.startIp"></el-input></el-form-item>
-								</el-col>
-								<el-col :span="12">
-									<el-form-item label="结束IP" prop="endIp"><el-input v-model="create_network.endIp"></el-input></el-form-item>
-								</el-col>
-							</el-row>
-
-							<el-row :gutter="24">
-								<el-col :span="12">
-									<el-form-item label="网关地址" prop="gateway"><el-input v-model="create_network.gateway"></el-input></el-form-item>
-								</el-col>
-								<el-col :span="12">
-									<el-form-item label="子网掩码" prop="mask"><el-input v-model="create_network.mask"></el-input></el-form-item>
-								</el-col>
-							</el-row>
-
-							<el-row :gutter="24">
-								<el-col :span="12">
-									<el-form-item label="子网地址" prop="subnet"><el-input v-model="create_network.subnet"></el-input></el-form-item>
-								</el-col>
-								<el-col :span="12">
-									<el-form-item label="广播地址" prop="broadcast"><el-input v-model="create_network.broadcast"></el-input></el-form-item>
-								</el-col>
-							</el-row>
-							<el-row :gutter="24">
-								<el-col :span="24">
-									<el-form-item label="DNS" prop="dns"><el-input v-model="create_network.dns"></el-input></el-form-item>
-								</el-col>
-							</el-row>
-
-							<el-row :gutter="24">
-								<el-col :span="12">
-									<el-form-item label="桥接网卡" prop="bridge"><el-input v-model="create_network.bridge"></el-input></el-form-item>
-								</el-col>
-							</el-row>
-
-							<el-row :gutter="24" v-if="create_network.type === 1">
-								<el-col :span="12">
-									<el-form-item label="VLAN ID" prop="vlanId"><el-input v-model="create_network.vlanId"></el-input></el-form-item>
-								</el-col>
-								<el-col :span="12">
-									<el-form-item label="基础网络" prop="basicNetworkId">
-										<el-select v-model="create_network.basicNetworkId" placeholder="请选择基础网络" style="width: 100%">
-											<el-option :label="item.name" :value="item.networkId" v-show="item.type === 0" v-for="item in networks" :key="item.networkId"></el-option>
-										</el-select>
-									</el-form-item>
-								</el-col>
-							</el-row>
-							<el-form-item>
-								<el-button type="primary" @click="create_network_click">立即创建</el-button>
-								<el-button @click="show_network_list">取消</el-button>
-							</el-form-item>
-						</el-form>
-					</el-row>
-				</el-card>
+				<CreateNetworkComponent ref="CreateNetworkComponentRef" @onNetworkUpdate="update_network_info" @back="show_network_list()" v-show="this.show_type === 2" />
 			</el-main>
 		</el-container>
 	</div>
 </template>
 <script>
 import util from '@/api/util'
-import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, createNetwork, getGuestInfo } from '@/api/api'
+import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getGuestInfo } from '@/api/api'
 
 import NetworkInfoComponent from '@/components/NetworkInfoComponent'
+import CreateNetworkComponent from '@/components/CreateNetworkComponent'
 import Notify from '@/api/notify'
 export default {
 	name: 'NetworkView',
-	components: { NetworkInfoComponent },
+	components: { NetworkInfoComponent, CreateNetworkComponent },
 	data() {
 		return {
 			data_loading: false,
 			show_type: -1,
-			create_network: {
-				name: '',
-				startIp: '',
-				endIp: '',
-				gateway: '',
-				mask: '',
-				subnet: '',
-				broadcast: '',
-				bridge: '',
-				dns: '',
-				type: 0,
-				vlanId: 100,
-				basicNetworkId: ''
-			},
 			networks: []
 		}
 	},
@@ -198,7 +106,7 @@ export default {
 					if (res.code == 0) {
 						this.$refs.NetworkInfoComponentRef.update_guest_info(res.data)
 					} else if (res.code == 2000001) {
-						this.$refs.NetworkInfoComponentRef.delete_guest(res.data)
+						this.$refs.NetworkInfoComponentRef.delete_guest(notify.id)
 					}
 				})
 			}
@@ -207,31 +115,12 @@ export default {
 			this.show_type = 0
 		},
 		show_create_network() {
-			if (this.$refs['createForm']) {
-				this.$refs['createForm'].resetFields()
-			}
+			this.$refs.CreateNetworkComponentRef.init()
 			this.show_type = 2
 		},
 		show_network_info_click(network) {
 			this.$refs.NetworkInfoComponentRef.init_network(network)
 			this.show_type = 1
-		},
-		create_network_click() {
-			if (this.create_network.type === 0) {
-				this.create_network.vlanId = 0
-				this.create_network.basicNetworkId = 0
-			}
-			createNetwork(this.create_network).then((res) => {
-				if (res.code === 0) {
-					this.update_network_info(res.data)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建网络失败:${res.message}`
-					})
-				}
-			})
 		},
 		pasue_network(network) {
 			this.$confirm('维护网络, 是否继续?', '提示', {

@@ -148,42 +148,44 @@ mvn clean package
 1、导入mysql表及相关数据
 > **脚本位于scripts下**
 
-2、修改配置文件
+2、安装Redis
 
-3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
+3、修改配置文件
+
+4、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
 ```
 管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
  --spring.config.location 是可选项，用于指定配置文件，如果不需要修改，可以去掉,配置文件为各自模块下的src/main/resources/application.properties文件
 ```
 
-4、平台登陆账号默认用户名/密码:admin/111111
+5、平台登陆账号默认用户名/密码:admin/111111
 
 
-5、创建基础网络
+6、创建基础网络
 
 > **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突**
 
 ![](images/network.png)
 
 
-6、创建主机
+7、创建主机
 
 
 ![](images/host.png)
 
 
-7、创建存储池(只支持nfs)
+8、创建存储池(只支持nfs)
 
 
 ![](images/storage.png)
 
-8、下载基础模版
+9、下载基础模版
 
 > **链接: https://pan.baidu.com/s/1c7Fvenhp9WfrdaqrBkbd8A 提取码: pw3g**
 
 
-9、安装nginx，配置基础下载地址,并在页面完成模版配置
+10、安装nginx，配置基础下载地址,并在页面完成模版配置
 
 
 ![](images/template.png)
@@ -192,13 +194,10 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 
 
-10、等待系统模版下载完成，并初始化系统VM成功
+11、等待系统模版下载完成，并初始化系统VM成功
 
-11、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动 
-
-12、上传ISO系统镜像
-
-> **配置镜像时需要指定系统类型**
+12、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动 
+ 
 
 13、创建VM
 
@@ -212,11 +211,11 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 1、关于找不到配置文件问题导致数据库连接问题
 ```
-server.properties 和 client.properties 内容分别为management和agent项目下的application.properties的文件，运行时自行修改名称
+server.yaml 和 client.properties 内容分别为management和agent项目下的application.yaml和application.properties的文件，运行时自行修改名称及相关配置
 ```
 2、关于备份与恢复
 ```$xslt
-对数据库和存储池进行完整备份，恢复时如果需要修改存储池IP，请调整tbl_storage_info标中storage_host的主机地址即可；
+对数据库和存储池进行完整备份；
 数据无价，建议对虚拟机中的数据进行备份
 ```
 3、关于网络隔离

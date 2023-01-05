@@ -6,9 +6,9 @@
 					<el-row slot="header" class="clearfix" style="height: 30px">
 						<div style="float: left">
 							<el-form :inline="true" class="demo-form-inline">
-								<el-form-item><el-link type="primary" @click="show_create_volume">创建磁盘</el-link></el-form-item>
-								<el-form-item><el-link style="margin: 0 10px" type="primary" @click="show_upload_volume">导入磁盘</el-link></el-form-item>
-								<el-form-item><el-link :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-link></el-form-item>
+								<el-form-item><el-button size="mini" type="primary" @click="show_create_volume">创建磁盘</el-button></el-form-item>
+								<el-form-item><el-button size="mini" type="primary" @click="show_upload_volume">导入磁盘</el-button></el-form-item>
+								<el-form-item><el-button size="mini" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-button></el-form-item>
 
 								<el-form-item label="存储池">
 									<el-select v-model="select_storage_id" style="width: 100%" @change="update_show_page">
@@ -44,7 +44,7 @@
 							</el-table-column>
 							<el-table-column label="挂载机器" prop="allocation" width="120" show-overflow-tooltip>
 								<template #default="scope">
-									<el-link type="primary" @click="show_guest_info(scope.row.attach.guestId)" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-link>
+									<el-button type="text" @click="show_guest_info(scope.row.attach.guestId)" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-button>
 									<span v-if="!scope.row.attach">{{ scope.row.attach ? scope.row.attach.description : '-' }}</span>
 								</template>
 							</el-table-column>

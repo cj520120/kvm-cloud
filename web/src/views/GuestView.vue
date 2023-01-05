@@ -7,10 +7,10 @@
 						<div style="float: left">
 							<el-form :inline="true" class="demo-form-inline">
 								<el-form-item>
-									<el-link type="primary" @click="show_create_guest_click">创建虚拟机</el-link>
+									<el-button type="primary" size="mini" @click="show_create_guest_click">创建虚拟机</el-button>
 								</el-form-item>
-								<el-form-item><el-link style="padding: 0 10px" :disabled="!select_guests.length" type="primary" @click="batch_start_guest_click">批量启动</el-link></el-form-item>
-								<el-form-item><el-link :disabled="!select_guests.length" type="danger" @click="batch_stop_guest_click">批量停止</el-link></el-form-item>
+								<el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
+								<el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
 								<el-form-item label="运行主机">
 									<el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
 										<el-option label="全部" :value="0"></el-option>

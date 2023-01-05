@@ -26,114 +26,30 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<SchemeInfoComponent ref="SchemeInfoComponentRef" @back="show_scheme_list()" @onHostUpdate="update_scheme_info" v-show="this.show_type === 1" />
-				<el-card class="box-card" v-show="this.show_type === 2">
-					<el-row slot="header">
-						<el-page-header @back="show_scheme_list()" content="创建计算方案" style="color: #409eff"></el-page-header>
-					</el-row>
-					<el-row>
-						<el-form ref="createForm" :model="create_scheme" label-width="100px" class="demo-ruleForm">
-							<el-form-item label="名称" prop="name">
-								<el-input v-model="create_scheme.name"></el-input>
-							</el-form-item>
-							<el-form-item label="CPU" prop="cpu">
-								<el-input v-model="create_scheme.cpu"></el-input>
-							</el-form-item>
-							<el-form-item label="内存(MB)" prop="memory">
-								<el-input v-model="create_scheme.memory"></el-input>
-							</el-form-item>
-
-							<el-form-item label="配额" prop="speed">
-								<el-input v-model="create_scheme.speed"></el-input>
-							</el-form-item>
-							<el-form-item label="Cores" prop="cores">
-								<el-input v-model="create_scheme.cores"></el-input>
-							</el-form-item>
-							<el-form-item label="Sockets" prop="sockets">
-								<el-input v-model="create_scheme.sockets"></el-input>
-							</el-form-item>
-							<el-form-item label="Threads" prop="threads">
-								<el-input v-model="create_scheme.threads"></el-input>
-							</el-form-item>
-							<el-form-item>
-								<el-button type="primary" @click="create_scheme_click">立即创建</el-button>
-								<el-button @click="show_scheme_list">取消</el-button>
-							</el-form-item>
-						</el-form>
-					</el-row>
-				</el-card>
-				<el-card class="box-card" v-show="this.show_type === 3">
-					<el-row slot="header">
-						<el-page-header @back="show_scheme_list()" content="修改计算方案" style="color: #409eff"></el-page-header>
-					</el-row>
-					<el-row>
-						<el-form :model="modify_scheme" label-width="100px" class="demo-ruleForm">
-							<el-form-item label="名称" prop="name">
-								<el-input v-model="modify_scheme.name"></el-input>
-							</el-form-item>
-							<el-form-item label="CPU" prop="cpu">
-								<el-input v-model="modify_scheme.cpu"></el-input>
-							</el-form-item>
-							<el-form-item label="内存(MB)" prop="memory">
-								<el-input v-model="modify_scheme.memory"></el-input>
-							</el-form-item>
-
-							<el-form-item label="配额" prop="speed">
-								<el-input v-model="modify_scheme.speed"></el-input>
-							</el-form-item>
-							<el-form-item label="Cores" prop="cores">
-								<el-input v-model="modify_scheme.cores"></el-input>
-							</el-form-item>
-							<el-form-item label="Sockets" prop="sockets">
-								<el-input v-model="modify_scheme.sockets"></el-input>
-							</el-form-item>
-							<el-form-item label="Threads" prop="threads">
-								<el-input v-model="modify_scheme.threads"></el-input>
-							</el-form-item>
-							<el-form-item>
-								<el-button type="primary" @click="modify_scheme_click">修改</el-button>
-								<el-button @click="show_type = 0">取消</el-button>
-							</el-form-item>
-						</el-form>
-					</el-row>
-				</el-card>
+				<SchemeInfoComponent ref="SchemeInfoComponentRef" @back="show_scheme_list()" @onSchemeUpdate="update_scheme_info" v-show="this.show_type === 1" />
+				<CreateSchemeComponent ref="CreateSchemeComponentRef" @back="show_scheme_list()" @onSchemeUpdate="update_scheme_info" v-show="this.show_type === 2" />
+				<ModifySchemeComponent ref="ModifySchemeComponentRef" @back="show_scheme_list()" @onSchemeUpdate="update_scheme_info" v-show="this.show_type === 3" />
 			</el-main>
 		</el-container>
 	</div>
 </template>
 <script>
-import { getSchemeList, destroyScheme, createScheme, moidfyScheme, getSchemeInfo } from '@/api/api'
-import SchemeInfoComponent from '@/components/SchemeInfoComponent.vue'
+import { getSchemeList, destroyScheme, getSchemeInfo } from '@/api/api'
+import SchemeInfoComponent from '@/components/SchemeInfoComponent'
+import CreateSchemeComponent from '@/components/CreateSchemeComponent'
+import ModifySchemeComponent from '@/components/ModifySchemeComponent'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 export default {
 	name: 'schemeView',
-	components: { SchemeInfoComponent },
+	components: { SchemeInfoComponent, CreateSchemeComponent, ModifySchemeComponent },
 	data() {
 		return {
 			data_loading: false,
 			current_scheme_id: 0,
 			show_type: -1,
 			show_scheme: {},
-			create_scheme: {
-				name: '',
-				cpu: 1,
-				memory: 512,
-				speed: 0,
-				sockets: 0,
-				cores: 0,
-				threads: 0
-			},
-			modify_scheme: {
-				schemeId: 0,
-				name: '',
-				cpu: 1,
-				memory: 512,
-				speed: 0,
-				sockets: 0,
-				cores: 0,
-				threads: 0
-			},
+
 			schemes: []
 		}
 	},
@@ -172,7 +88,7 @@ export default {
 					if (res.code == 0) {
 						this.update_scheme_info(res.data)
 					} else if (res.code == 8000001) {
-						let findIndex = this.schemes.findIndex((v) => v.networkId === notify.id)
+						let findIndex = this.schemes.findIndex((v) => v.schemeId === notify.id)
 						if (findIndex >= 0) {
 							this.schemes.splice(findIndex, 1)
 						}
@@ -191,54 +107,13 @@ export default {
 			this.show_type = 2
 		},
 		show_modify_scheme(scheme) {
-			this.modify_scheme.schemeId = scheme.schemeId
-			this.modify_scheme.name = scheme.name
-			this.modify_scheme.cpu = scheme.cpu
-			this.modify_scheme.memory = scheme.memory / 1024
-			this.modify_scheme.speed = scheme.speed
-			this.modify_scheme.sockets = scheme.sockets
-			this.modify_scheme.cores = scheme.cores
-			this.modify_scheme.threads = scheme.threads
+			this.$refs.ModifySchemeComponentRef.init(scheme)
 			this.show_type = 3
 		},
 		show_scheme_info_click(scheme) {
 			this.show_scheme = scheme
 			this.$refs.SchemeInfoComponentRef.init_scheme(scheme)
 			this.show_type = 1
-		},
-		create_scheme_click() {
-			createScheme(this.create_scheme).then((res) => {
-				if (res.code === 0) {
-					this.update_scheme_info(res.data)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建计算方案失败:${res.message}`
-					})
-				}
-			})
-		},
-		modify_scheme_click() {
-			this.$confirm('修改计算方案, 是否继续?', '提示', {
-				confirmButtonText: '确定',
-				cancelButtonText: '取消',
-				type: 'warning'
-			})
-				.then(() => {
-					moidfyScheme(this.modify_scheme).then((res) => {
-						if (res.code === 0) {
-							this.update_scheme_info(res.data)
-							this.show_type = 0
-						} else {
-							this.$notify.error({
-								title: '错误',
-								message: `修改计算方案失败:${res.message}`
-							})
-						}
-					})
-				})
-				.catch(() => {})
 		},
 		destroy_scheme(scheme) {
 			this.$confirm('删除计算方案, 是否继续?', '提示', {

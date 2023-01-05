@@ -42,28 +42,7 @@
 					</el-row>
 				</el-card>
 				<HostInfoComponent ref="HostInfoComponentRef" @back="show_host_list" @onHostUpdate="update_host_info" v-show="this.show_type === 1" />
-				<el-card class="box-card" v-show="this.show_type === 2">
-					<el-row slot="header">
-						<el-page-header @back="show_host_list()" content="创建主机" style="color: #409eff"></el-page-header>
-					</el-row>
-					<el-row>
-						<el-form ref="createForm" :model="create_host" label-width="100px" class="demo-ruleForm">
-							<el-form-item label="显示名称" prop="nadisplayNameme">
-								<el-input v-model="create_host.displayName"></el-input>
-							</el-form-item>
-							<el-form-item label="主机IP" prop="hostIp"><el-input v-model="create_host.hostIp"></el-input></el-form-item>
-
-							<el-form-item label="网卡名称" prop="nic"><el-input v-model="create_host.nic"></el-input></el-form-item>
-
-							<el-form-item label="通信地址" prop="uri"><el-input v-model="create_host.uri"></el-input></el-form-item>
-
-							<el-form-item>
-								<el-button type="primary" @click="create_host_click">立即创建</el-button>
-								<el-button @click="show_host_list">取消</el-button>
-							</el-form-item>
-						</el-form>
-					</el-row>
-				</el-card>
+				<CreateHostComponent ref="CreateHostComponentRef" @back="show_host_list" @onHostUpdate="update_host_info" v-show="this.show_type === 2" />
 			</el-main>
 		</el-container>
 	</div>
@@ -71,21 +50,16 @@
 <script>
 import util from '@/api/util'
 import HostInfoComponent from '@/components/HostInfoComponent'
-import { getHostList, getHostInfo, pauseHost, registerHost, destroyHost, createHost } from '@/api/api'
+import CreateHostComponent from '@/components/CreateHostComponent'
+import { getHostList, getHostInfo, pauseHost, registerHost, destroyHost } from '@/api/api'
 import Notify from '@/api/notify'
 export default {
 	name: 'hostView',
-	components: { HostInfoComponent },
+	components: { HostInfoComponent, CreateHostComponent },
 	data() {
 		return {
 			data_loading: false,
 			show_type: -1,
-			create_host: {
-				displayName: '',
-				hostIp: '',
-				nic: '',
-				uri: ''
-			},
 			hosts: []
 		}
 	},
@@ -113,9 +87,7 @@ export default {
 			this.show_type = 0
 		},
 		show_create_host() {
-			if (this.$refs['createForm']) {
-				this.$refs['createForm'].resetFields()
-			}
+			this.$refs.CreateHostComponentRef.init()
 			this.show_type = 2
 		},
 		show_host_info_click(host) {
@@ -146,19 +118,6 @@ export default {
 					}
 				})
 			}
-		},
-		create_host_click() {
-			createHost(this.create_host).then((res) => {
-				if (res.code === 0) {
-					this.update_host_info(res.data)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建主机失败:${res.message}`
-					})
-				}
-			})
 		},
 		pasue_host(host) {
 			this.$confirm('维护主机, 是否继续?', '提示', {

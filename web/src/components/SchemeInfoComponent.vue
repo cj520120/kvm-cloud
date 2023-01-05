@@ -52,7 +52,6 @@ export default {
 			this.schme_loading = true
 			await getSchemeInfo({ schemeId: schemeId })
 				.then((res) => {
-					console.log(res)
 					if (res.code === 0) {
 						this.init_scheme(res.data)
 					} else {

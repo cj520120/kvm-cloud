@@ -21,14 +21,14 @@
 					<el-descriptions-item label="磁盘路径">{{ show_volume.path }}</el-descriptions-item>
 					<el-descriptions-item label="磁盘模版">{{ this.template ? this.template.name : '-' }}</el-descriptions-item>
 					<el-descriptions-item label="磁盘存储池">
-						<el-link type="primary" @click="show_storage_info(show_volume.storageId)" :underline="false">
+						<el-button type="text" @click="show_storage_info(show_volume.storageId)" :underline="false">
 							{{ this.storage ? this.storage.name : show_volume.storageId }}
-						</el-link>
+						</el-button>
 					</el-descriptions-item>
 					<el-descriptions-item label="挂载主机">
-						<el-link type="primary" @click="show_guest_info(show_volume.attach.guestId)" :underline="false" v-if="show_volume.attach">
+						<el-button type="text" @click="show_guest_info(show_volume.attach.guestId)" :underline="false" v-if="show_volume.attach">
 							{{ show_volume.attach.description }}
-						</el-link>
+						</el-button>
 						<span v-if="!show_volume.attach">-</span>
 					</el-descriptions-item>
 					<el-descriptions-item label="磁盘容量">{{ get_volume_desplay_size(show_volume.capacity) }}</el-descriptions-item>

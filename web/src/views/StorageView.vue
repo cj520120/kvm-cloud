@@ -35,88 +35,31 @@
 					</el-row>
 				</el-card>
 				<StorageInfoComponent ref="StorageInfoComponentRef" @back="show_storage_list()" @onStorageUpdate="update_storate_info" v-show="this.show_type === 1" />
-				<el-card class="box-card" v-show="this.show_type === 2">
-					<el-row slot="header">
-						<el-page-header @back="show_storage_list()" content="创建存储池" style="color: #409eff"></el-page-header>
-					</el-row>
-					<el-row>
-						<el-form ref="createForm" :model="create_storage" label-width="100px" class="demo-ruleForm">
-							<el-form-item label="名称" prop="description">
-								<el-input v-model="create_storage.description"></el-input>
-							</el-form-item>
-							<el-form-item label="存储池类型" prop="type">
-								<el-select v-model="create_storage.type" style="width: 100%">
-									<el-option label="NFS" value="nfs"></el-option>
-								</el-select>
-							</el-form-item>
-							<el-form-item label="NFS路径" prop="path" v-if="create_storage.type === 'nfs'">
-								<el-input v-model="create_storage.path"></el-input>
-							</el-form-item>
-							<el-form-item label="NFS地址" prop="uri" v-if="create_storage.type === 'nfs'">
-								<el-input v-model="create_storage.uri"></el-input>
-							</el-form-item>
-							<el-form-item>
-								<el-button type="primary" @click="create_storage_click">立即创建</el-button>
-								<el-button @click="show_storage_list">取消</el-button>
-							</el-form-item>
-						</el-form>
-					</el-row>
-				</el-card>
+				<CreateStorageComponent ref="CreateStorageComponentRef" @back="show_storage_list()" @onStorageUpdate="update_storate_info" v-show="this.show_type === 2" />
 			</el-main>
 		</el-container>
 	</div>
 </template>
 <script>
-import { getStorageList, getStorageInfo, pauseStorage, registerStorage, destroyStorage, createStorage } from '@/api/api'
+import { getStorageList, getStorageInfo, pauseStorage, registerStorage, destroyStorage } from '@/api/api'
 import StorageInfoComponent from '@/components/StorageInfoComponent'
+import CreateStorageComponent from '@/components/CreateStorageComponent'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 export default {
 	name: 'storageView',
-	components: { StorageInfoComponent },
+	components: { StorageInfoComponent, CreateStorageComponent },
 	data() {
 		return {
 			data_loading: false,
-			current_loading: false,
-			current_network_id: 0,
 			show_type: -1,
 			show_storage: {},
-			create_storage: {
-				description: '',
-				type: 'nfs',
-				param: '',
-				path: '',
-				uri: ''
-			},
 			storages: []
 		}
 	},
 	mixins: [Notify, util],
 	mounted() {
-		this.current_storage_id = this.$route.query.id
-		if (this.current_storage_id) {
-			this.show_type == 2
-			this.current_loading = true
-			getStorageInfo({ storageId: this.current_storage_id })
-				.then((res) => {
-					if (res.code === 0) {
-						this.show_storage_info_click(res.data)
-					} else {
-						this.$alert(`获取存储池信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						}).then(() => {
-							this.show_type = 0
-						})
-					}
-				})
-				.finally(() => {
-					this.current_loading = false
-				})
-		} else {
-			this.show_type = 0
-		}
+		this.show_type = 0
 		this.init_view()
 		this.init_notify()
 	},
@@ -160,44 +103,12 @@ export default {
 			this.show_type = 0
 		},
 		show_create_storage() {
-			if (this.$refs['createForm']) {
-				this.$refs['createForm'].resetFields()
-			}
+			this.$refs.CreateStorageComponentRef.init()
 			this.show_type = 2
 		},
 		show_storage_info_click(storage) {
 			this.$refs.StorageInfoComponentRef.init_storage(storage)
 			this.show_type = 1
-		},
-		create_storage_click() {
-			let data = {
-				name: this.create_storage.name,
-				type: this.create_storage.type,
-				param: '{}'
-			}
-			if (this.create_storage.type === 'nfs') {
-				data.param = JSON.stringify({
-					path: this.create_storage.path,
-					uri: this.create_storage.uri
-				})
-			} else {
-				this.$notify.error({
-					title: '错误',
-					message: `不支持的存储池:${this.create_storage.type}`
-				})
-				return
-			}
-			createStorage(data).then((res) => {
-				if (res.code === 0) {
-					this.update_storate_info(res.data)
-					this.show_type = 0
-				} else {
-					this.$notify.error({
-						title: '错误',
-						message: `创建存储池失败:${res.message}`
-					})
-				}
-			})
 		},
 		pasue_storage(storage) {
 			this.$confirm('暂停存储池, 是否继续?', '提示', {

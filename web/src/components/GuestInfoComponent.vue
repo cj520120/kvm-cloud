@@ -6,17 +6,17 @@
 			</el-row>
 			<el-row style="text-align: left; margin: 20px 0">
 				<el-button @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
-				<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini">停止虚拟机</el-button>
-				<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2" v-if="show_guest_info.current_guest.type !== 0">重启虚拟机</el-button>
-				<el-button @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-if="show_guest_info.current_guest.type !== 0">重装系统</el-button>
+				<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status >= 3">停止虚拟机</el-button>
+				<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2" v-show="show_guest_info.current_guest.type !== 0">重启虚拟机</el-button>
+				<el-button @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">重装系统</el-button>
 
-				<el-button @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-if="show_guest_info.current_guest.type !== 0">修改配置</el-button>
-				<el-button @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini">远程桌面</el-button>
-				<el-button @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-if="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
-				<el-button @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-if="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>
-				<el-button @click="show_attach_network_click(show_guest_info.current_guest)" type="primary" size="mini" v-if="show_guest_info.current_guest.type !== 0">添加网卡</el-button>
-				<el-button @click="show_attach_volume_click(show_guest_info.current_guest)" type="primary" size="mini" v-if="show_guest_info.current_guest.type !== 0">挂载磁盘</el-button>
-				<el-button @click="destroy_guest(show_guest_info.current_guest)" type="danger" size="mini">销毁虚拟机</el-button>
+				<el-button @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">修改配置</el-button>
+				<el-button @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">远程桌面</el-button>
+				<el-button @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-show="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
+				<el-button @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-show="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>
+				<el-button @click="show_attach_network_click(show_guest_info.current_guest)" type="primary" size="mini" v-show="show_guest_info.current_guest.type !== 0">添加网卡</el-button>
+				<el-button @click="show_attach_volume_click(show_guest_info.current_guest)" type="primary" size="mini" v-show="show_guest_info.current_guest.type !== 0">挂载磁盘</el-button>
+				<el-button @click="destroy_guest(show_guest_info.current_guest)" type="danger" size="mini" :disabled="show_guest_info.current_guest.status < 3">销毁虚拟机</el-button>
 			</el-row>
 			<el-row>
 				<el-descriptions :column="2" size="medium" border>
@@ -29,12 +29,12 @@
 					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
 					<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 					<el-descriptions-item label="运行主机">
-						<el-link @click="show_host_info(show_guest_info.host.hostId)" type="primary" v-if="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-link>
-						<span v-if="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
+						<el-button @click="show_host_info(show_guest_info.host.hostId)" type="text" v-show="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-button>
+						<span v-show="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
 					</el-descriptions-item>
 					<el-descriptions-item label="架构方案">
-						<el-link @click="show_scheme_info(show_guest_info.scheme.schemeId)" type="primary" v-if="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-link>
-						<span v-if="show_guest_info.scheme.schemeId === 0" :underline="false">{{ show_guest_info.scheme.name }}</span>
+						<el-button @click="show_scheme_info(show_guest_info.scheme.schemeId)" type="text" v-show="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-button>
+						<span v-show="show_guest_info.scheme.schemeId === 0" :underline="false">{{ show_guest_info.scheme.name }}</span>
 					</el-descriptions-item>
 					<el-descriptions-item label="虚拟机类型">
 						<el-tag>{{ show_guest_info.current_guest.type === 0 ? '系统' : '用户' }}</el-tag>
@@ -65,8 +65,8 @@
 							<el-table-column label="路径" prop="path" show-overflow-tooltip />
 							<el-table-column label="操作" width="180">
 								<template #default="scope">
-									<!-- <el-link type="primary" @click="show_volume_info(scope.row.volumeId)">详情</el-link> -->
-									<el-link style="margin-left: 10px" type="danger" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-link>
+									<!-- <el-button type="text" @click="show_volume_info(scope.row.volumeId)">详情</el-button> -->
+									<el-button style="margin-left: 10px" type="text" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -78,7 +78,7 @@
 							<el-table-column label="驱动类型" prop="driveType" width="150" />
 							<el-table-column label="操作">
 								<template #default="scope">
-									<el-link type="danger" @click="detach_network_click(scope.row)" :disabled="scope.row.deviceId === 0">卸载网卡</el-link>
+									<el-button type="text" @click="detach_network_click(scope.row)" :disabled="scope.row.deviceId === 0">卸载网卡</el-button>
 								</template>
 							</el-table-column>
 						</el-table>

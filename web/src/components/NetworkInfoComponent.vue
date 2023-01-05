@@ -24,7 +24,7 @@
 					<el-descriptions-item label="网络类型">{{ get_network_type(show_network) }}</el-descriptions-item>
 					<el-descriptions-item label="VLAN ID" v-if="show_network.type === 1">{{ show_network.vlanId }}</el-descriptions-item>
 					<el-descriptions-item label="基础网络" v-if="show_network.type === 1">
-						<el-link type="primary">{{ get_parent_network(show_network).name }}</el-link>
+						<el-button type="text">{{ get_parent_network(show_network).name }}</el-button>
 					</el-descriptions-item>
 					<el-descriptions-item label="网络状态">
 						<el-tag :type="show_network.status === 2 ? 'success' : 'danger'">{{ get_network_status(show_network) }}</el-tag>
@@ -47,7 +47,7 @@
 							</el-table-column>
 							<el-table-column label="操作">
 								<template #default="scope">
-									<el-link type="primary" @click="go_guest_info(scope.row.guestId)">详情</el-link>
+									<el-button type="text" @click="go_guest_info(scope.row.guestId)">详情</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -148,13 +148,13 @@ export default {
 				.finally(() => {
 					this.network_loading = false
 				})
-        },
-        delete_guest(guestId) {
-            let findIndex = this.system_guests.findIndex((item) => item.guestId === guestId)
-            if (findIndex >= 0) {
-                this.system_guests.splice(findIndex, 1)
-            }
-         },
+		},
+		delete_guest(guestId) {
+			let findIndex = this.system_guests.findIndex((item) => item.guestId === guestId)
+			if (findIndex >= 0) {
+				this.system_guests.splice(findIndex, 1)
+			}
+		},
 		update_guest_info(guest) {
 			if (guest.type === 0 && guest.networkId === this.show_network.networkId) {
 				let findIndex = this.system_guests.findIndex((item) => item.guestId === guest.guestId)
