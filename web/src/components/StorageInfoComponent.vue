@@ -11,7 +11,7 @@
 		<el-row>
 			<el-descriptions :column="2" size="medium" border>
 				<el-descriptions-item label="ID">{{ show_storage.storageId }}</el-descriptions-item>
-				<el-descriptions-item label="存储池名">{{ show_storage.name }}</el-descriptions-item>
+				<el-descriptions-item label="存储池名">{{ show_storage.description }}</el-descriptions-item>
 				<el-descriptions-item label="存储池类型">{{ show_storage.type }}</el-descriptions-item>
 				<el-descriptions-item label="挂载路径">{{ show_storage.mountPath }}</el-descriptions-item>
 				<el-descriptions-item label="NFS路径" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>

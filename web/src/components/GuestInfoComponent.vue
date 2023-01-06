@@ -65,7 +65,7 @@
 							<el-table-column label="路径" prop="path" show-overflow-tooltip />
 							<el-table-column label="操作" width="180">
 								<template #default="scope">
-									<!-- <el-button type="text" @click="show_volume_info(scope.row.volumeId)">详情</el-button> -->
+									<el-button type="text" @click="show_volume_info(scope.row.volumeId)">详情</el-button>
 									<el-button style="margin-left: 10px" type="text" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-button>
 								</template>
 							</el-table-column>
@@ -89,7 +89,7 @@
 		<ReInstallComponentVue ref="ReInstallComponentVueRef" @back="show_type = 0" @finish="on_finish_reinstall" v-show="show_type === 1" />
 		<HostInfoComponent ref="HostInfoComponentRef" v-show="this.show_type === 2" @back="show_host_return" />
 		<SchemeInfoComponent ref="SchemeInfoComponentRef" v-show="this.show_type === 3" @back="show_scheme_return" />
-		<!-- <VolumeInfoComponent ref="VolumeInfoComponentRef" v-show="this.show_type === 4" @back="show_volume_return" /> -->
+		<VolumeInfoComponent ref="VolumeInfoComponentRef" v-if="this.show_type === 4" @back="show_volume_return" />
 		<AttachDiskComponent ref="AttachDiskComponentRef" @onVoumeAttachCallBack="on_volume_attach_callback" />
 		<AttachCdRoomComponent ref="AttachCdRoomComponentRef" @onGuestUpdate="on_notify_update_guest_info" />
 		<AttachNetworkComponent ref="AttachNetworkComponentRef" @onGuestAttachCallback="on_network_attach_callback" />
@@ -109,7 +109,7 @@ import StopGuestComponent from '@/components/StopGuestComponent.vue'
 import ReInstallComponentVue from './ReInstallComponent.vue'
 import HostInfoComponent from '@/components/HostInfoComponent.vue'
 import SchemeInfoComponent from './SchemeInfoComponent.vue'
-// const VolumeInfoComponent = () => import('@/components/VolumeInfoComponent')
+import VolumeInfoComponent from '@/components/VolumeInfoComponent'
 
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 
@@ -123,11 +123,8 @@ export default {
 		StopGuestComponent,
 		ReInstallComponentVue,
 		HostInfoComponent,
-		SchemeInfoComponent
-		// VolumeInfoComponent
-	},
-	beforeCreate() {
-		// this.$options.components.VolumeInfoComponent = require('./VolumeInfoComponent.vue').default
+		SchemeInfoComponent,
+		VolumeInfoComponent
 	},
 	mixins: [util],
 	data() {
@@ -199,9 +196,10 @@ export default {
 			this.$refs.SchemeInfoComponentRef.init(schemeId)
 		},
 		show_volume_info(volumeId) {
-			// this.show_type = 4
-			console.log(volumeId)
-			// this.$refs.VolumeInfoComponentRef.init(volumeId)
+			this.show_type = 4
+			this.$nextTick(() => {
+				this.$refs.VolumeInfoComponentRef.init(volumeId)
+			})
 		},
 		on_back_click() {
 			this.$emit('back')
