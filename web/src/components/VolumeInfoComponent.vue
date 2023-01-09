@@ -22,7 +22,7 @@
 					<el-descriptions-item label="磁盘模版">{{ this.template ? this.template.name : '-' }}</el-descriptions-item>
 					<el-descriptions-item label="磁盘存储池">
 						<el-button type="text" @click="show_storage_info(show_volume.storageId)" :underline="false">
-							{{ this.storage ? this.storage.name : show_volume.storageId }}
+							{{ this.storage ? this.storage.description : show_volume.storageId }}
 						</el-button>
 					</el-descriptions-item>
 					<el-descriptions-item label="挂载主机">
@@ -171,8 +171,7 @@ export default {
 				cancelButtonText: '取消',
 				type: 'warning'
 			})
-				.then(() => {
-					console.log(volume)
+				.then(() => { 
 					destroyVolume({ volumeId: volume.volumeId }).then((res) => {
 						if (res.code === 0) {
 							this.notify_volume_update(res.data)

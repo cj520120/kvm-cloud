@@ -46,9 +46,6 @@ public class TaskIdSyncTask extends AbstractTask {
         if (rBucket.setIfAbsent(System.currentTimeMillis(), Duration.ofSeconds(TASK_CHECK_TIME))) {
             List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : hostList) {
-                if (host.getHostId() != 83) {
-                    continue;
-                }
                 if (Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
                     BaseOperateParam operateParam = SyncHostTaskIdOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).title("同步主机任务列表").build();
                     this.operateTask.addTask(operateParam);

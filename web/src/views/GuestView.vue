@@ -61,7 +61,7 @@
 								</template>
 							</el-table-column>
 						</el-table>
-						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[1, 2, 5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
+						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
 					</el-row>
 				</el-card>
 				<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_guest_list_page" @onGuestUpdate="update_guest_info" v-show="this.show_type === 1" />

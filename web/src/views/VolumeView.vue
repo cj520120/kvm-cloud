@@ -70,7 +70,7 @@
 								</template>
 							</el-table-column>
 						</el-table>
-						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[1, 2, 3, 5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
+						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
 					</el-row>
 				</el-card>
 				<VolumeInfoComponent ref="VolumeInfoComponentRef" @back="show_volume_list()" @onVolumeUpdate="update_volume_info" v-show="this.show_type === 1" />
@@ -258,7 +258,6 @@ export default {
 				let index = this.page_size * (this.current_page - 1)
 				this.volumes.splice(index, 0, volume)
 			}
-			this.$refs.VolumeInfoComponentRef.refresh_volume(volume)
 			this.update_show_page()
 			this.$nextTick(() => {
 				this.volumes.forEach((v) => {
@@ -267,6 +266,7 @@ export default {
 					}
 				})
 			})
+			this.$refs.VolumeInfoComponentRef.refresh_volume(volume)
 		},
 		handle_notify_message(notify) {
 			if (notify.type === 2) {

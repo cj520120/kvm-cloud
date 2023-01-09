@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
@@ -26,10 +27,21 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class VolumeOperateImpl implements VolumeOperate {
+    @Synchronized
+    private StoragePool getStorage(Connect connect,String name)throws Exception{
+        StoragePool storagePool = connect.storagePoolLookupByName(name);
+        if(storagePool!=null) {
+            try {
+                storagePool.refresh(0);
+            } catch (Exception err) {
+
+            }
+        }
+        return storagePool;
+    }
     @Override
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
-        StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
-        storagePool.refresh(0);
+        StoragePool storagePool = this.getStorage(connect,request.getSourceStorage());
         String[] names = storagePool.listVolumes();
         StorageVol findVol = null;
         for (String name : names) {
@@ -61,8 +73,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             String storage = entry.getKey();
             Map<String, VolumeInfo> map = new HashMap<>();
             Set<String> volumePaths = entry.getValue().stream().map(VolumeInfoRequest::getSourceVolume).collect(Collectors.toSet());
-            StoragePool storagePool = connect.storagePoolLookupByName(storage);
-            storagePool.refresh(0);
+            StoragePool storagePool = this.getStorage(connect,storage);
 
             String[] names = storagePool.listVolumes();
             for (String name : names) {
@@ -119,7 +130,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
-        StoragePool storagePool = connect.storagePoolLookupByName(request.getTargetStorage());
+        StoragePool storagePool = this.getStorage(connect,request.getTargetStorage());
         storagePool.refresh(0);
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
         StorageVolInfo storageVolInfo = storageVol.getInfo();
@@ -135,8 +146,7 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
-        StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
-        storagePool.refresh(0);
+        StoragePool storagePool = this.getStorage(connect,request.getSourceStorage());
         String[] names = storagePool.listVolumes();
         for (String name : names) {
             StorageVol storageVol = storagePool.storageVolLookupByName(name);
@@ -149,10 +159,8 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
-        StoragePool sourceStoragePool = connect.storagePoolLookupByName(request.getSourceStorage());
-        StoragePool targetStoragePool = connect.storagePoolLookupByName(request.getTargetStorage());
-        sourceStoragePool.refresh(0);
-        targetStoragePool.refresh(0);
+        StoragePool sourceStoragePool = this.getStorage(connect,request.getSourceStorage());
+        StoragePool targetStoragePool = this.getStorage(connect,request.getTargetStorage());
         StorageVol sourceVol = this.findVol(sourceStoragePool, request.getSourceVolume());
         String xml = ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
         FileUtil.mkParentDirs(request.getTargetVolume());
@@ -172,8 +180,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
 
-        StoragePool storagePool = connect.storagePoolLookupByName(request.getSourceStorage());
-        storagePool.refresh(0);
+        StoragePool storagePool = this.getStorage(connect,request.getSourceStorage());
         StorageVol findVol = this.findVol(storagePool, request.getSourceVolume());
         if (findVol == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘不存在:" + request.getSourceVolume());
