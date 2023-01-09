@@ -82,9 +82,8 @@ export default {
 		on_upload_success(response) {
 			this.uploading = false
 			if (response.code === 0) {
-				this.update_volume_info(response.data)
-				this.show_type = 0
-				this.upload_file_list = []
+				this.notify_volume_update(response.data)
+				this.go_back()
 			} else {
 				this.upload_file_list = []
 				this.$notify.error({

@@ -20,7 +20,7 @@
 							</el-form>
 						</div>
 						<div>
-							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="update_guest_show_page"></el-input>
+							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
 						</div>
 					</el-row>
 					<el-row>
@@ -61,7 +61,7 @@
 								</template>
 							</el-table-column>
 						</el-table>
-						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
+						<el-pagination :current-page="current_page" :page-size="page_size" :page-sizes="[1, 2, 5, 10, 20, 50, 100, 200]" :total="total_size" layout="total, sizes, prev, pager, next, jumper" @size-change="on_page_size_change" @current-change="on_current_page_change"></el-pagination>
 					</el-row>
 				</el-card>
 				<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_guest_list_page" @onGuestUpdate="update_guest_info" v-show="this.show_type === 1" />
@@ -146,6 +146,10 @@ export default {
 				}
 			})
 		},
+		on_key_word_change() {
+			this.current_page = 1
+			this.update_guest_show_page()
+		},
 		on_current_page_change(current_page) {
 			this.current_page = current_page
 			this.update_guest_show_page()
@@ -156,6 +160,8 @@ export default {
 		},
 		update_guest_show_page() {
 			let nCount = 0
+			let nStart = this.page_size * (this.current_page - 1)
+			let nEnd = this.page_size * this.current_page
 			this.guests.forEach((item, index) => {
 				let hasKeyword = true
 				let searchKeyword = this.keyword.trim().toLowerCase()
@@ -168,7 +174,7 @@ export default {
 				}
 				if (hasKeyword && isHost) {
 					nCount++
-					if (nCount <= this.page_size * (this.current_page - 1) || nCount > this.page_size * this.current_page) {
+					if (nCount <= nStart || nCount > nEnd) {
 						item.isShow = false
 					} else {
 						item.isShow = true
