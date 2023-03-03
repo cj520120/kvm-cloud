@@ -228,14 +228,8 @@ public class VolumeOperateImpl implements VolumeOperate {
         try {
             FileUtil.del(tempFile);
             HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
-            return clone(connect, VolumeCloneRequest.builder()
-                    .sourceStorage(request.getTargetStorage())
-                    .sourceVolume(tempFile)
-                    .targetName(request.getTargetName())
-                    .targetStorage(request.getTargetStorage())
-                    .targetVolume(request.getTargetVolume())
-                    .targetType(request.getTargetType())
-                    .build());
+            FileUtil.copy(tempFile,request.getTargetVolume(),true);
+            return this.getInfo(connect, VolumeInfoRequest.builder().sourceStorage(request.getTargetStorage()).sourceVolume(request.getTargetVolume()).sourceName(request.getTargetName()).build());
         } finally {
             FileUtil.del(tempFile);
         }
