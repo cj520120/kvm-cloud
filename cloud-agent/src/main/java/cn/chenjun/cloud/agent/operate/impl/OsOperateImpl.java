@@ -1,6 +1,8 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
+import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.OsOperate;
+import cn.chenjun.cloud.agent.util.NetworkType;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -16,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
 import org.libvirt.Error;
 import org.libvirt.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
@@ -33,6 +36,8 @@ public class OsOperateImpl implements OsOperate {
     private final int MAX_DEVICE_COUNT = 5;
     private final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
         Gson gson = new Gson();
@@ -310,8 +315,15 @@ public class OsOperateImpl implements OsOperate {
         }
         for (OsNic osNic : request.getNetworkInterfaces()) {
             String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+            if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())){
+                if(osNic.getVlanId()>0){
+                    xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
+                }else{
+                    xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
+                }
+            }
             int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
-            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId);
+            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId,osNic.getVlanId());
             nicXml += xml + "\r\n";
         }
         String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");

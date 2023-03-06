@@ -21,4 +21,6 @@ public class OsNic {
     private int deviceId;
     private String mac;
     private String bridgeName;
+
+    private int vlanId;
 }

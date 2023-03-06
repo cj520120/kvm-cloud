@@ -169,6 +169,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                     .name(guest.getName())
                     .deviceId(baseDeviceId + entity.getDeviceId())
                     .bridgeName(network.getBridge())
+                    .vlanId(network.getVlanId())
                     .build();
             networkInterfaces.add(nic);
         }

@@ -55,12 +55,14 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
                 for (OsNic osNic : nicList) {
                     osNic.setDeviceId(osNic.getDeviceId() + 1);
                 }
+                //将网关地址设置为0号网卡
                 OsNic metaServiceNic = OsNic.builder()
                         .deviceId(0)
                         .name("")
                         .mac(IpCaculate.getMacAddrWithFormat(":"))
                         .bridgeName(network.getBridge())
                         .driveType(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO)
+                        .vlanId(network.getVlanId())
                         .build();
                 nicList.add(0, metaServiceNic);
             }
