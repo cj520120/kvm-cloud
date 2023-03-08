@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.bean.OsNic;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.component.AbstractComponentService;
+import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -35,6 +36,8 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     private ComponentMapper componentMapper;
     @Autowired
     private List<AbstractComponentService> componentServices;
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     public StartComponentGuestOperateImpl() {
         super(StartComponentGuestOperate.class);

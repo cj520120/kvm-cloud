@@ -1,4 +1,7 @@
 app:
+  systemComponentCpu: 1
+  systemComponentMemory: 524288
+  systemComponentCpuSpeed: 500
   manager-uri: http://192.168.2.107:8080/
   over-cpu: 2.0
   over-memory: 1.0

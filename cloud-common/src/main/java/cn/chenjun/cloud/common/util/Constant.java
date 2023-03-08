@@ -80,6 +80,7 @@ public class Constant {
     public static class NetworkDriver {
         public static final String VIRTIO = "virtio";
         public static final String RTL8139 = "rtl8139";
+        public static final String E1000 = "e1000";
 
     }
 

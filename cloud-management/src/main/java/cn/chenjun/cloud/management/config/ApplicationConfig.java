@@ -22,4 +22,8 @@ public class ApplicationConfig {
      * ISSUser
      */
     private String jwtIssuer = "CJ Cloud Management";
+
+    private int systemComponentCpu=1;
+    private long systemComponentMemory=512 * 1024L;
+    private int systemComponentCpuSpeed=500;
 }

@@ -51,6 +51,7 @@
 							<el-select v-model="create_guest.networkDeviceType" style="width: 100%" placeholder="请选择网卡驱动">
 								<el-option label="virtio" value="virtio" />
 								<el-option label="rtl8139" value="rtl8139" />
+								<el-option label="e1000" value="e1000" />
 							</el-select>
 						</el-form-item>
 					</el-col>

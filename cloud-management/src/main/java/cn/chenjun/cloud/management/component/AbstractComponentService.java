@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.component;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.bean.NotifyInfo;
 import cn.chenjun.cloud.management.annotation.Lock;
+import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
@@ -35,6 +36,9 @@ public abstract class AbstractComponentService extends AbstractService {
     protected ComponentMapper componentMapper;
     @Autowired
     protected GuestService guestService;
+
+    @Autowired
+    protected ApplicationConfig applicationConfig;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -88,9 +92,9 @@ public abstract class AbstractComponentService extends AbstractService {
                     .name(GuestNameUtil.getName())
                     .description(this.getComponentName())
                     .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
-                    .cpu(1)
-                    .speed(500)
-                    .memory(512 * 1024L)
+                    .cpu(applicationConfig.getSystemComponentCpu())
+                    .speed(applicationConfig.getSystemComponentCpuSpeed())
+                    .memory(applicationConfig.getSystemComponentMemory())
                     .cdRoom(0)
                     .hostId(0)
                     .lastHostId(0)
