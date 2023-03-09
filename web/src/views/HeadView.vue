@@ -81,10 +81,10 @@ export default {
 				if (res.code === 0) {
 					let oldPassword = window.sha256_digest(window.sha256_digest(this.update_password.oldPassword + ':' + res.data.signature) + ':' + res.data.nonce)
 					let nonce = res.data.nonce
-					let netPassword = window.sha256_digest(this.newPassword + ':' + res.data.signature)
+					let newPassword = window.sha256_digest(this.update_password.newPassword + ':' + res.data.signature)
 					let update_request = {
 						oldPassword: oldPassword,
-						newPassword: netPassword,
+						newPassword: newPassword,
 						nonce: nonce
 					}
 					modifyUserPassword(update_request).then((res) => {
