@@ -1,4 +1,6 @@
 app:
+  #系统组件网卡默认驱动，可选值为virtio e1000 rtl8139,变更该值需要删除原系统组件重建
+  systemComponentNetworkDriver: virtio
   systemComponentCpu: 1
   systemComponentMemory: 524288
   systemComponentCpuSpeed: 500

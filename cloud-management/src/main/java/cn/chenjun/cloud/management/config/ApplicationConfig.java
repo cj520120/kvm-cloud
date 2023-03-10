@@ -23,6 +23,10 @@ public class ApplicationConfig {
      */
     private String jwtIssuer = "CJ Cloud Management";
 
+    /**
+     * 默认网络类型
+     */
+    private String systemComponentNetworkDriver =cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO;
     private int systemComponentCpu=1;
     private long systemComponentMemory=512 * 1024L;
     private int systemComponentCpuSpeed=500;

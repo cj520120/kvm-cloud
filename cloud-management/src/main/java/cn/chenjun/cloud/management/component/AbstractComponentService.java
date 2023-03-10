@@ -127,14 +127,14 @@ public abstract class AbstractComponentService extends AbstractService {
             this.guestDiskMapper.insert(guestDisk);
             GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
             guestNetwork.setDeviceId(0);
-            guestNetwork.setDriveType(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO);
+            guestNetwork.setDriveType(this.applicationConfig.getSystemComponentNetworkDriver());
             guestNetwork.setGuestId(guest.getGuestId());
             this.guestNetworkMapper.updateById(guestNetwork);
             guest.setGuestIp(guestNetwork.getIp());
             if (network.getBasicNetworkId() > 0) {
                 guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
                 guestNetwork.setDeviceId(1);
-                guestNetwork.setDriveType(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO);
+                guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
                 guestNetwork.setGuestId(guest.getGuestId());
                 this.guestNetworkMapper.updateById(guestNetwork);
                 guest.setGuestIp(guestNetwork.getIp() + "," + guest.getGuestIp());
