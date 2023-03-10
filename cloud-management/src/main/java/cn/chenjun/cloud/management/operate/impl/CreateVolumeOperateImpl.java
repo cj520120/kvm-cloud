@@ -5,12 +5,14 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
+import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends AbstractOperate<T, ResultUtil<VolumeInfo>> {
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     public CreateVolumeOperateImpl() {
         super((Class<T>) CreateVolumeOperate.class);
@@ -52,17 +56,30 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 Collections.shuffle(templateVolumeList);
                 TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
-                VolumeCreateRequest request = VolumeCreateRequest.builder()
-                        .parentStorage(parentStorage.getName())
-                        .parentType(templateVolume.getType())
-                        .parentVolume(templateVolume.getPath())
-                        .targetStorage(storage.getName())
-                        .targetVolume(volume.getPath())
-                        .targetName(volume.getName())
-                        .targetType(volume.getType())
-                        .targetSize(volume.getCapacity())
-                        .build();
-                this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
+                if(applicationConfig.isEnableVolumeBack()) {
+                    VolumeCreateRequest request = VolumeCreateRequest.builder()
+                            .parentStorage(parentStorage.getName())
+                            .parentType(templateVolume.getType())
+                            .parentVolume(templateVolume.getPath())
+                            .targetStorage(storage.getName())
+                            .targetVolume(volume.getPath())
+                            .targetName(volume.getName())
+                            .targetType(volume.getType())
+                            .targetSize(volume.getCapacity())
+                            .build();
+                    this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
+                }else {
+                    VolumeCloneRequest request = VolumeCloneRequest.builder()
+                            .sourceStorage(parentStorage.getName())
+                            .sourceVolume(templateVolume.getPath())
+                            .targetStorage(storage.getName())
+                            .targetVolume(volume.getPath())
+                            .targetName(volume.getName())
+                            .targetType(volume.getType())
+
+                            .build();
+                    this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
+                }
 
             } else if (param.getSnapshotVolumeId() > 0) {
                 SnapshotVolumeEntity snapshotVolume = snapshotVolumeMapper.selectById(param.getSnapshotVolumeId());
