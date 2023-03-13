@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class OperateTask extends AbstractTask {
-    private final static int TASK_TIMEOUT = (int) TimeUnit.MINUTES.toSeconds(3);
+    private final static int TASK_TIMEOUT_SECONDS = 30;
     @Autowired
     @Qualifier("workExecutorService")
     private ScheduledExecutorService workExecutor;
@@ -43,7 +43,7 @@ public class OperateTask extends AbstractTask {
 
     public void keepTask(String taskId) {
         String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
-        redis.getBucket(key).set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.MINUTES);
+        redis.getBucket(key).set(System.currentTimeMillis(), TASK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
@@ -70,8 +70,7 @@ public class OperateTask extends AbstractTask {
             try {
                 isLock = lock.tryLock(1, TimeUnit.MILLISECONDS);
                 if (isLock) {
-                    taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT, TimeUnit.SECONDS);
-                    isLock = true;
+                    taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 }
             } finally {
                 if (isLock && lock.isHeldByCurrentThread()) {
