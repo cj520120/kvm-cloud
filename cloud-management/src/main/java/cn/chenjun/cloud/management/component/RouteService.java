@@ -8,7 +8,6 @@ import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.IpCaculate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Component;
@@ -82,13 +81,13 @@ public class RouteService extends AbstractComponentService {
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "network"}).build())).build());
         StringBuilder dhcp = new StringBuilder();
         dhcp.append("ddns-update-style none;\r\n").append("ignore client-updates;\r\n");
-        dhcp.append(String.format("subnet %s netmask %s {\r\n", IpCaculate.getSubnetByIp(defaultNetwork.getStartIp()), defaultNetwork.getMask()));
+        dhcp.append("default-lease-time 86400;\r\n");
+        dhcp.append("max-lease-time 172800;\r\n");
+        dhcp.append(String.format("option domain-name-servers %s;\r\n", defaultNetwork.getDns()));
+        dhcp.append(String.format("subnet %s netmask %s {\r\n",defaultNetwork.getSubnet(),defaultNetwork.getMask()));
         dhcp.append(String.format("  range %s %s;\r\n", defaultNetwork.getStartIp(), defaultNetwork.getEndIp()));
         dhcp.append(String.format("  option routers %s;\r\n", defaultNetwork.getGateway()));
-        dhcp.append(String.format("  option broadcast-address %s;\r\n", IpCaculate.getBroadcastByIp(defaultNetwork.getStartIp())));
-        dhcp.append("  default-lease-time 600;\r\n");
-        dhcp.append("  max-lease-time 7200;\r\n");
-        dhcp.append(String.format("  option domain-name-servers %s;\r\n", defaultNetwork.getDns()));
+        dhcp.append(String.format("  option broadcast-address %s;\r\n",defaultNetwork.getBroadcast()));
         dhcp.append("  group{\r\n");
         List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("network_id", component.getNetworkId()));
         for (GuestNetworkEntity guestNetworkEntity : allGuestNetwork) {

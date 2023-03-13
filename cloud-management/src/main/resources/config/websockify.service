@@ -1,11 +1,1 @@
-[Unit]
-Description=websockify service
-After=network.service
-[Service]
-Type=simple
-ExecStart=/usr/local/websockify/scripts/service.sh start
-ExecReload=/usr/local/websockify/scripts/service.sh restart
-ExecStop=/usr/local/websockify/scripts/service.sh stop
-PrivateTmp=true
-[Install]
-WantedBy=multi-user.target
+W1VuaXRdCkRlc2NyaXB0aW9uPXdlYnNvY2tpZnkgc2VydmljZQpBZnRlcj1uZXR3b3JrLnNlcnZpY2UKW1NlcnZpY2VdClR5cGU9c2ltcGxlCkV4ZWNTdGFydD0vdXNyL2xvY2FsL3dlYnNvY2tpZnkvc2NyaXB0cy9zZXJ2aWNlLnNoIHN0YXJ0CkV4ZWNSZWxvYWQ9L3Vzci9sb2NhbC93ZWJzb2NraWZ5L3NjcmlwdHMvc2VydmljZS5zaCByZXN0YXJ0CkV4ZWNTdG9wPS91c3IvbG9jYWwvd2Vic29ja2lmeS9zY3JpcHRzL3NlcnZpY2Uuc2ggc3RvcApQcml2YXRlVG1wPXRydWUKW0luc3RhbGxdCldhbnRlZEJ5PW11bHRpLXVzZXIudGFyZ2V0

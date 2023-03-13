@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -131,8 +132,8 @@ public class VncService extends AbstractComponentService {
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("pip3").args(new String[]{"install", "websockify==0.10.0"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/websockify/token"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/websockify/scripts"}).build())).build());
-        String websockifyShell = ResourceUtil.readUtf8Str("config/websockify.sh");
-        String websockifyService = ResourceUtil.readUtf8Str("config/websockify.service");
+        String websockifyShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("config/websockify.sh").getBytes(StandardCharsets.UTF_8)),StandardCharsets.UTF_8);
+        String websockifyService =  new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("config/websockify.service").getBytes(StandardCharsets.UTF_8)),StandardCharsets.UTF_8);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/websockify/scripts/service.sh").fileBody(websockifyShell).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/websockify.service").fileBody(websockifyService).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"a+x", "/usr/local/websockify/scripts/service.sh"}).build())).build());
