@@ -49,7 +49,7 @@ public class RouteService extends AbstractComponentService {
     }
 
     @Override
-    public GuestQmaRequest getQmaRequest(int guestId) {
+    public GuestQmaRequest buildStartQmaRequest(int guestId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
         if (component == null) {
             return null;
@@ -60,25 +60,19 @@ public class RouteService extends AbstractComponentService {
         request.setTimeout((int) TimeUnit.MINUTES.toSeconds(5));
         request.setCommands(commands);
 
-        //写入默认网卡
-        int startNetworkDeviceId = 0;
+        //写入网卡固定IP
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         NetworkEntity defaultNetwork = this.networkMapper.selectById(component.getNetworkId());
-        if (Objects.equals(defaultNetwork.getType(), Constant.NetworkType.VLAN)) {
-            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + startNetworkDeviceId).fileBody(this.getNicConfig(1, defaultNetwork.getGateway(), defaultNetwork.getMask(), defaultNetwork.getGateway(), defaultNetwork.getDns())).build())).build());
-            startNetworkDeviceId = 2;
-        }
         for (int i = 0; i < guestNetworkList.size(); i++) {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
-            int index = guestNetwork.getDeviceId() + startNetworkDeviceId;
-
+            int index = guestNetwork.getDeviceId();
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
 
         }
 
         //重启网卡
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "network"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "network"}).checkSuccess(true).build())).build());
         StringBuilder dhcp = new StringBuilder();
         dhcp.append("ddns-update-style none;\r\n").append("ignore client-updates;\r\n");
         dhcp.append("default-lease-time 86400;\r\n");
@@ -91,7 +85,6 @@ public class RouteService extends AbstractComponentService {
         dhcp.append("  group{\r\n");
         List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("network_id", component.getNetworkId()));
         for (GuestNetworkEntity guestNetworkEntity : allGuestNetwork) {
-
             dhcp.append(String.format("    host vm-network-%d{\r\n", guestNetworkEntity.getGuestNetworkId()));
             dhcp.append(String.format("       hardware ethernet %s;\r\n", guestNetworkEntity.getMac()));
             dhcp.append(String.format("       fixed-address %s;\r\n", guestNetworkEntity.getIp()));
@@ -100,14 +93,14 @@ public class RouteService extends AbstractComponentService {
         dhcp.append("  }\r\n");
         dhcp.append("}");
         //下载dhcp
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "dhcp"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "dhcp"}).checkSuccess(true).build())).build());
         //写入dhcp
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/dhcp/dhcpd.conf").fileBody(dhcp.toString()).build())).build());
         //启动dhcp
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "dhcpd"}).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "dhcpd"}).build())).build());
-
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "dhcpd"}).checkSuccess(true).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "dhcpd"}).checkSuccess(true).build())).build());
+        //设置主机名
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
         return request;
     }
 }

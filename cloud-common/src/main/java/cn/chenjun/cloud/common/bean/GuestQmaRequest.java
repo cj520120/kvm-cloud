@@ -51,6 +51,8 @@ public class GuestQmaRequest {
     @Builder
     public static class Execute {
         private String command;
+        @Builder.Default
+        private boolean checkSuccess=true;
         private String[] args;
     }
 

@@ -190,5 +190,5 @@ public abstract class AbstractComponentService extends AbstractService {
 
     public abstract String getComponentName();
 
-    public abstract GuestQmaRequest getQmaRequest(int guestId);
+    public abstract GuestQmaRequest buildStartQmaRequest(int guestId);
 }
