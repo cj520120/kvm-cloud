@@ -20,7 +20,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
@@ -50,24 +49,34 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
                 String clientId = (String) map.get("clientId");
                 String nonce = (String) map.get("nonce");
                 long timestamp = NumberUtil.parseLong((String) map.getOrDefault("timestamp", "0"));
-
-                long expire = timestamp + require.timeout();
+                String message = "";
                 boolean isSuccess = false;
-                if (expire > System.currentTimeMillis() && Objects.equals(clientService.getClientId(), clientId)) {
+                do {
+                    long expire = timestamp + require.timeout();
+                    if (expire < System.currentTimeMillis()) {
+                        message = "签名错误:签名时间验证失败,请确认服务器时间是否同步";
+                        break;
+                    }
+                    if (!Objects.equals(clientService.getClientId(), clientId)) {
+                        message = "签名错误:当前客户端已加入其他系统，如需重新加入，请删除当前路径下config.json，重启后重新加入";
+                        break;
+                    }
                     try {
                         String dataSign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
                         if (Objects.equals(dataSign, sign)) {
                             isSuccess = true;
+                        } else {
+                            message = "签名错误:签名验证失败.";
                         }
                     } catch (Exception e) {
-
+                        message = "签名错误:签名验证失败.";
                     }
-                }
-                if (!isSuccess) {
 
+                } while (false);
+                if (!isSuccess) {
                     httpServletResponse.setContentType("application/json; charset=utf-8");
                     httpServletResponse.setStatus(HttpStatus.OK.value());
-                    httpServletResponse.getWriter().print(new Gson().toJson(ResultUtil.<Void>builder().code(ErrorCode.SERVER_ERROR).message("签名错误").build()));
+                    httpServletResponse.getWriter().print(new Gson().toJson(ResultUtil.<Void>builder().code(ErrorCode.SERVER_ERROR).message(message).build()));
                     return false;
                 }
             }

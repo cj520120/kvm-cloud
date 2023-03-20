@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 /**
  * @author chenjun
  */
@@ -39,7 +40,7 @@ public class OsOperateImpl implements OsOperate {
     @Autowired
     private ApplicationConfig applicationConfig;
 
-    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.QmaBody command, GuestQmaRequest.Execute execute) throws LibvirtException {
+    private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.Execute execute) throws LibvirtException {
         Gson gson = new Gson();
         Map<String, Object> map = new HashMap<>(2);
         map.put("execute", "guest-exec");
@@ -69,7 +70,9 @@ public class OsOperateImpl implements OsOperate {
             } else {
                 int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
                 if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:" + commandBody);
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:domain=" + domain.getName() + "command={}" + commandBody + ".response=" + response);
+                } else {
+                    log.info("执行命令成功:domain={} command={} result={}", domain.getName(), execute, response);
                 }
             }
         } while (!isExit);
@@ -315,15 +318,15 @@ public class OsOperateImpl implements OsOperate {
         }
         for (OsNic osNic : request.getNetworkInterfaces()) {
             String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
-            if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())){
-                if(osNic.getVlanId()>0){
+            if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
+                if (osNic.getVlanId() > 0) {
                     xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
-                }else{
+                } else {
                     xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
                 }
             }
             int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
-            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId,osNic.getVlanId());
+            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId, osNic.getVlanId());
             nicXml += xml + "\r\n";
         }
         String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
@@ -339,7 +342,7 @@ public class OsOperateImpl implements OsOperate {
                 nicXml,
                 request.getName(),
                 request.getVncPassword());
-        log.info("create vm={}",xml);
+        log.info("create vm={}", xml);
         domain = connect.domainCreateXML(xml, 0);
 
 
@@ -417,14 +420,14 @@ public class OsOperateImpl implements OsOperate {
                     GuestQmaRequest.WriteFile writeFile = new Gson().fromJson(command.getData(), GuestQmaRequest.WriteFile.class);
                     int handler = qmaOpenFile(writeFile.getFileName(), domain);
                     try {
-                        qmaWriteFile(writeFile.getFileBody(), domain, handler);
+                        qmaWriteFile(writeFile.getFileName(), writeFile.getFileBody(), domain, handler);
                     } finally {
                         qmaCloseFile(domain, handler);
                     }
                     break;
                 case GuestQmaRequest.QmaType.EXECUTE:
                     GuestQmaRequest.Execute execute = new Gson().fromJson(command.getData(), GuestQmaRequest.Execute.class);
-                    qmaExecuteShell(request, domain, command, execute);
+                    qmaExecuteShell(request, domain, execute);
                     break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的QMA操作:" + command.getCommand());
@@ -444,7 +447,7 @@ public class OsOperateImpl implements OsOperate {
         }
     }
 
-    private void qmaWriteFile(String body, Domain domain, int handler) throws LibvirtException {
+    private void qmaWriteFile(String path, String body, Domain domain, int handler) throws LibvirtException {
         Map<String, Object> command = new HashMap<>(2);
         command.put("execute", "guest-file-write");
         Map<String, Object> arguments = new HashMap<>(2);
@@ -455,6 +458,7 @@ public class OsOperateImpl implements OsOperate {
         if (StringUtils.isEmpty(response)) {
             throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "写入文件失败");
         }
+        log.info("写入文件成功:domain={} path={} body={} response={}", domain.getName(), path, body, response);
     }
 
     private int qmaOpenFile(String path, Domain domain) throws LibvirtException {

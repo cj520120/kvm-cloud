@@ -108,7 +108,7 @@ public class NetworkService extends AbstractService {
                     .guestId(0)
                     .ip(ip)
                     .networkId(network.getNetworkId())
-                    .mac(IpCaculate.getMacAddrWithFormat(":"))
+                    .mac(IpCaculate.getRandomMacAddress())
                     .driveType("")
                     .deviceId(0)
                     .build();

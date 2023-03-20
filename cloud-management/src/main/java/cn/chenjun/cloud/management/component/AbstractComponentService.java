@@ -186,9 +186,22 @@ public abstract class AbstractComponentService extends AbstractService {
         return sb.toString();
     }
 
+    /**
+     * 获取组件类型
+     * @return
+     */
     public abstract int getComponentType();
 
+    /**
+     * 获取组件名称
+     * @return
+     */
     public abstract String getComponentName();
 
-    public abstract GuestQmaRequest buildStartQmaRequest(int guestId);
+    /**
+     * 获取组件启动脚本
+     * @param guestId
+     * @return
+     */
+    public abstract GuestQmaRequest getStartQmaRequest(int guestId);
 }

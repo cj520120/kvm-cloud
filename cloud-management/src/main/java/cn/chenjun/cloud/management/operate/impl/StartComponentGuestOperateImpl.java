@@ -45,7 +45,7 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
         ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
         Optional<AbstractComponentService> componentService = componentServices.stream().filter(t -> Objects.equals(t.getComponentType(), component.getComponentType())).findFirst();
         if (componentService.isPresent()) {
-            return componentService.get().buildStartQmaRequest(guest.getGuestId());
+            return componentService.get().getStartQmaRequest(guest.getGuestId());
         }
         return null;
     }

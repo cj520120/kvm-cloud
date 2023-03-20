@@ -105,7 +105,7 @@ public class VncService extends AbstractComponentService {
     }
 
     @Override
-    public GuestQmaRequest buildStartQmaRequest(int guestId) {
+    public GuestQmaRequest getStartQmaRequest(int guestId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
         if (component == null) {
             return null;
