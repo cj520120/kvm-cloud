@@ -33,7 +33,7 @@
             <source mode="bind" path="/var/lib/libvirt/qemu/%s.org.qemu.guest_agent.0"/>
             <target type="virtio" name="org.qemu.guest_agent.0"/>
         </channel>
-
+        <input type="tablet" bus="usb"/>
         <input type="mouse" bus="ps2"/>
         <input type="keyboard" bus="ps2"/>
         <serial type="pty">
