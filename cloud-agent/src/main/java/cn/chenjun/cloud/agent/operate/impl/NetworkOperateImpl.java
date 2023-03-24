@@ -32,7 +32,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     private ApplicationConfig applicationConfig;
     @Override
     public void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
-        log.info("创建基础网络:{}",request);
+        log.info("创建基础网络:{} type={}",request,applicationConfig.getNetworkType());
         if(NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())){
            List<String> networkNames= Arrays.asList(connect.listNetworks());
            if(!networkNames.contains(request.getBridge())){

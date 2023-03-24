@@ -67,6 +67,7 @@ export default {
 		return {
 			network_loading: false,
 			system_guests: [],
+			networks: [],
 			show_type: 0,
 			show_network: {
 				networkId: 0,
@@ -104,11 +105,12 @@ export default {
 			this.show_type = 1
 			this.$refs.GuestInfoComponentRef.initGuestId(guestId)
 		},
-		async init_network(network) {
+		async init_network(networks, show_network) {
 			this.show_type = 0
-			this.show_network = network
+			this.networks = networks
+			this.show_network = show_network
 			this.system_guests = []
-			await this.load_system_guest(network)
+			await this.load_system_guest(show_network)
 		},
 		async init(networkId) {
 			this.show_type = 0
@@ -148,6 +150,10 @@ export default {
 				.finally(() => {
 					this.network_loading = false
 				})
+		},
+		get_parent_network(network) {
+			let find = this.networks.find((v) => v.networkId === network.basicNetworkId)
+			return find || { name: '-' }
 		},
 		delete_guest(guestId) {
 			let findIndex = this.system_guests.findIndex((item) => item.guestId === guestId)

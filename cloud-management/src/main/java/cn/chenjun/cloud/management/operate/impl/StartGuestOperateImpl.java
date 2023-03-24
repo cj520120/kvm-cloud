@@ -149,6 +149,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         List<OsNic> defaultNic = new ArrayList<>();
 
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
+        Collections.sort(guestNetworkEntityList, Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<OsNic> networkInterfaces = new ArrayList<>();
         networkInterfaces.addAll(defaultNic);
         int baseDeviceId = networkInterfaces.size();

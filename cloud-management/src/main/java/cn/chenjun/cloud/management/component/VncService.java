@@ -38,6 +38,28 @@ public class VncService extends AbstractComponentService {
         return "System Vnc";
     }
 
+    @Override
+    public boolean allocateBasicNic() {
+        return true;
+    }
+    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void create(int networkId) {
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", Constant.ComponentType.ROUTE).eq("network_id", networkId).last("limit 0 ,1"));
+        if (component == null) {
+            return;
+        }
+        GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
+        if (vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING)) {
+            return;
+        }
+        super.create(networkId);
+    }
+    @Override
+    public int order() {
+        return 1;
+    }
 
     public GuestEntity getGuestVncServer(int guestId) {
         //获取到客户机默认网络
@@ -117,10 +139,11 @@ public class VncService extends AbstractComponentService {
         request.setCommands(commands);
         //写入默认网卡
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+        Collections.sort(guestNetworkList, Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         for (int i = 0; i < guestNetworkList.size(); i++) {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
-            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + i).fileBody(this.getNicConfig(i, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
+            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + guestNetwork.getDeviceId()).fileBody(this.getNicConfig(guestNetwork.getDeviceId(), guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
 
         }
         //重启网卡

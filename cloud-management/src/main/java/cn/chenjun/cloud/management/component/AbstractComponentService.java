@@ -40,6 +40,7 @@ public abstract class AbstractComponentService extends AbstractService {
     @Autowired
     protected ApplicationConfig applicationConfig;
 
+
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public void create(int networkId) {
@@ -125,20 +126,21 @@ public abstract class AbstractComponentService extends AbstractService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
-            GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
-            guestNetwork.setDeviceId(0);
+            GuestNetworkEntity guestNetwork ;
+            int networkDeviceId=0;
+            if (network.getBasicNetworkId() > 0 && this.allocateBasicNic()) {
+                guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
+                guestNetwork.setDeviceId(networkDeviceId++);
+                guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
+                guestNetwork.setGuestId(guest.getGuestId());
+                this.guestNetworkMapper.updateById(guestNetwork);
+            }
+            guestNetwork = this.allocateService.allocateNetwork(networkId);
+            guestNetwork.setDeviceId(networkDeviceId++);
             guestNetwork.setDriveType(this.applicationConfig.getSystemComponentNetworkDriver());
             guestNetwork.setGuestId(guest.getGuestId());
             this.guestNetworkMapper.updateById(guestNetwork);
             guest.setGuestIp(guestNetwork.getIp());
-            if (network.getBasicNetworkId() > 0) {
-                guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
-                guestNetwork.setDeviceId(1);
-                guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
-                guestNetwork.setGuestId(guest.getGuestId());
-                this.guestNetworkMapper.updateById(guestNetwork);
-                guest.setGuestIp(guestNetwork.getIp() + "," + guest.getGuestIp());
-            }
             this.guestMapper.updateById(guest);
             componentMapper.insert(ComponentEntity.builder().guestId(guest.getGuestId()).componentType(this.getComponentType()).networkId(networkId).build());
             BaseOperateParam operateParam = CreateGuestOperate.builder()
@@ -200,8 +202,23 @@ public abstract class AbstractComponentService extends AbstractService {
 
     /**
      * 获取组件启动脚本
+     *
      * @param guestId
      * @return
      */
     public abstract GuestQmaRequest getStartQmaRequest(int guestId);
+
+    /**
+     * 是否申请父网卡ip
+     *
+     * @return
+     */
+    public abstract boolean allocateBasicNic();
+
+    /**
+     * 之行顺序
+     *
+     * @return
+     */
+    public abstract int order();
 }

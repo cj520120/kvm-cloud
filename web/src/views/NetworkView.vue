@@ -119,7 +119,7 @@ export default {
 			this.show_type = 2
 		},
 		show_network_info_click(network) {
-			this.$refs.NetworkInfoComponentRef.init_network(network)
+			this.$refs.NetworkInfoComponentRef.init_network(this.networks,network)
 			this.show_type = 1
 		},
 		pasue_network(network) {

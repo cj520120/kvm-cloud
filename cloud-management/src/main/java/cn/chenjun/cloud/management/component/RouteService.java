@@ -13,9 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,24 +27,21 @@ public class RouteService extends AbstractComponentService {
     }
 
     @Override
+    public boolean allocateBasicNic() {
+        return true;
+    }
+
+    @Override
+    public int order() {
+        return 0;
+    }
+
+    @Override
     public String getComponentName() {
         return "System Route";
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void create(int networkId) {
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", Constant.ComponentType.VNC).eq("network_id", networkId).last("limit 0 ,1"));
-        if (component == null) {
-            return;
-        }
-        GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
-        if (vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING)) {
-            return;
-        }
-        super.create(networkId);
-    }
+
 
     @Override
     public GuestQmaRequest getStartQmaRequest(int guestId) {
@@ -63,6 +58,7 @@ public class RouteService extends AbstractComponentService {
         //写入网卡固定IP
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         NetworkEntity defaultNetwork = this.networkMapper.selectById(component.getNetworkId());
+        Collections.sort(guestNetworkList, Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         for (int i = 0; i < guestNetworkList.size(); i++) {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());

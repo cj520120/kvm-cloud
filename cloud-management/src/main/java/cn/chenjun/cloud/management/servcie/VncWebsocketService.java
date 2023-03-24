@@ -1,11 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.management.data.entity.GuestVncEntity;
-import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
-import cn.chenjun.cloud.management.data.mapper.GuestMapper;
-import cn.chenjun.cloud.management.data.mapper.GuestVncMapper;
+import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -21,6 +17,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Objects;
 
 @ServerEndpoint(value = "/api/vnc/{id}")
@@ -55,7 +52,18 @@ public class VncWebsocketService {
         if (guestVnc == null) {
             return;
         }
-        String uri = "ws://" + guest.getGuestIp() + ":8080/websockify/?token=" + guestVnc.getToken();
+        GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
+        NetworkMapper networkMapper = SpringContextUtils.getBean(NetworkMapper.class);
+        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
+        String ip = "127.0.0.1";
+        for (GuestNetworkEntity guestNetworkEntity : guestNetworkList) {
+            ip = guestNetworkEntity.getIp();
+            NetworkEntity network = networkMapper.selectById(guestNetworkEntity.getNetworkId());
+            if (network.getType() == Constant.NetworkType.BASIC) {
+                break;
+            }
+        }
+        String uri = "ws://" + ip + ":8080/websockify/?token=" + guestVnc.getToken();
         this.proxy = new VncWebSocketProxy(session, new URI(uri));
         this.proxy.connect();
 

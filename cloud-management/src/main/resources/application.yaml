@@ -51,7 +51,7 @@ spring:
       validation-query: SELECT 1
     password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://127.0.0.1:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&system_time_zone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&useSSL=false&useUnicode=true
+    url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&system_time_zone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&useSSL=false&useUnicode=true
     username: root
   servlet:
     multipart:
@@ -68,7 +68,7 @@ spring:
          timeout: 3000
          retryAttempts: 3
          retryInterval: 1500
-         address: "redis://127.0.0.1:6379"
+         address: "redis://192.168.1.90:6379"
          password: 
          database: 0
          subscriptionsPerConnection: 5
