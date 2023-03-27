@@ -9,6 +9,7 @@
 		<el-menu class="headerMenu" mode="horizontal" @select="handleSelect" background-color="#34495e" text-color="#fff" active-text-color="#ffd04b">
 			<el-menu-item index="quit">退出</el-menu-item>
 			<el-menu-item index="password">修改密码</el-menu-item>
+			<el-menu-item index="support">项目捐赠</el-menu-item>
 		</el-menu>
 		<el-dialog title="修改密码" :visible.sync="update_password_dialog_visible" center width="400px" :close-on-click-modal="false" :close-on-press-escape="false">
 			<el-form :model="update_password" label-position="right" label-width="80px">
@@ -27,6 +28,12 @@
 				</el-form-item>
 			</el-form>
 		</el-dialog>
+		<el-dialog title="项目捐赠" :visible.sync="support_dialog_visible" center width="420px">
+			<el-tabs v-model="supportActiveName" @tab-click="handleClick">
+				<el-tab-pane label="微信" name="wx"><div class="wx" /></el-tab-pane>
+				<el-tab-pane label="支付宝" name="zfb"><div class="zfb" /></el-tab-pane>
+			</el-tabs>
+		</el-dialog>
 	</el-header>
 </template>
   
@@ -36,6 +43,8 @@ export default {
 	data() {
 		return {
 			update_password_dialog_visible: false,
+			support_dialog_visible: false,
+			supportActiveName: 'wx',
 			update_password: {
 				oldPassword: '',
 				newPassword: '',
@@ -47,6 +56,9 @@ export default {
 	methods: {
 		handleSelect(data) {
 			switch (data) {
+				case 'support':
+					this.support_dialog_visible = true
+					break
 				case 'password':
 					this.update_password.oldPassword = ''
 					this.update_password.newPassword = ''
@@ -116,5 +128,17 @@ export default {
 .headerMenu {
 	display: flex;
 	flex-direction: row-reverse;
+}
+.wx {
+	width: 380px;
+	height: 380px;
+	background: url('../assets/wx.png');
+	background-size: contain;
+}
+.zfb {
+	width: 380px;
+	height: 380px;
+	background: url('../assets/zfb.png');
+	background-size: contain;
 }
 </style>
