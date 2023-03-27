@@ -128,13 +128,6 @@ public abstract class AbstractComponentService extends AbstractService {
             this.guestDiskMapper.insert(guestDisk);
             GuestNetworkEntity guestNetwork ;
             int networkDeviceId=0;
-            if (network.getBasicNetworkId() > 0 && this.allocateBasicNic()) {
-                guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
-                guestNetwork.setDeviceId(networkDeviceId++);
-                guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
-                guestNetwork.setGuestId(guest.getGuestId());
-                this.guestNetworkMapper.updateById(guestNetwork);
-            }
             guestNetwork = this.allocateService.allocateNetwork(networkId);
             guestNetwork.setDeviceId(networkDeviceId++);
             guestNetwork.setDriveType(this.applicationConfig.getSystemComponentNetworkDriver());
@@ -142,6 +135,13 @@ public abstract class AbstractComponentService extends AbstractService {
             this.guestNetworkMapper.updateById(guestNetwork);
             guest.setGuestIp(guestNetwork.getIp());
             this.guestMapper.updateById(guest);
+            if (network.getBasicNetworkId() > 0 && this.allocateBasicNic()) {
+                guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
+                guestNetwork.setDeviceId(networkDeviceId++);
+                guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
+                guestNetwork.setGuestId(guest.getGuestId());
+                this.guestNetworkMapper.updateById(guestNetwork);
+            }
             componentMapper.insert(ComponentEntity.builder().guestId(guest.getGuestId()).componentType(this.getComponentType()).networkId(networkId).build());
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())

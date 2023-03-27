@@ -15,7 +15,7 @@
 						<el-form-item label="网络类型" prop="type">
 							<el-select v-model="create_network.type" style="width: 100%">
 								<el-option label="基础网络" :value="0"></el-option>
-								<!-- <el-option label="Vlan网络" :value="1"></el-option> -->
+								<el-option label="Vlan网络(只允许OpenSitch方式)" :value="1"></el-option>
 							</el-select>
 						</el-form-item>
 					</el-col>
@@ -57,6 +57,9 @@
 					<el-col :span="12">
 						<el-form-item label="桥接网卡" prop="bridge"><el-input v-model="create_network.bridge"></el-input></el-form-item>
 					</el-col>
+					<el-col :span="12">
+						<div style="color: red; font-size: 12px; line-height: 40px" v-if="create_network.type === 1">Vlan为测试状态，只支持Openswitch网络,创建的桥接网卡必须为OVS桥接</div>
+					</el-col>
 				</el-row>
 
 				<el-row :gutter="24" v-if="create_network.type === 1">
@@ -80,10 +83,11 @@
 	</el-card>
 </template>
 <script>
-import { createNetwork } from '@/api/api'
+import { createNetwork, getNetworkList } from '@/api/api'
 export default {
 	data() {
 		return {
+			networks: [],
 			create_network: {
 				name: '',
 				startIp: '',
@@ -107,10 +111,19 @@ export default {
 		on_notify_update_network(host) {
 			this.$emit('onNetworkUpdate', host)
 		},
-		init() {
+		async init() {
 			if (this.$refs['createForm']) {
 				this.$refs['createForm'].resetFields()
 			}
+			await getNetworkList()
+				.then((res) => {
+					if (res.code == 0) {
+						this.networks = res.data
+					}
+				})
+				.finally(() => {
+					this.data_loading = false
+				})
 		},
 		create_network_click() {
 			if (this.create_network.type === 0) {

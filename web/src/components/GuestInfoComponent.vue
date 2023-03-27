@@ -78,7 +78,7 @@
 							<el-table-column label="驱动类型" prop="driveType" width="150" />
 							<el-table-column label="操作">
 								<template #default="scope">
-									<el-button type="text" @click="detach_network_click(scope.row)" :disabled="scope.row.deviceId === 0">卸载网卡</el-button>
+									<el-button type="text" @click="detach_network_click(scope.row)" :disabled="scope.row.deviceId === 0 || show_guest_info.current_guest.type === 0">卸载网卡</el-button>
 								</template>
 							</el-table-column>
 						</el-table>

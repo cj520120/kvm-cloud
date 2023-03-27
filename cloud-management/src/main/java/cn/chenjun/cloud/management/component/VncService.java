@@ -137,17 +137,26 @@ public class VncService extends AbstractComponentService {
         request.setName("");
         request.setTimeout((int) TimeUnit.MINUTES.toSeconds(5));
         request.setCommands(commands);
+        String[] iptablesRules = null;
         //写入默认网卡
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         Collections.sort(guestNetworkList, Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         for (int i = 0; i < guestNetworkList.size(); i++) {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
-            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + guestNetwork.getDeviceId()).fileBody(this.getNicConfig(guestNetwork.getDeviceId(), guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
-
+            if (network.getType().equals(Constant.NetworkType.BASIC)) {
+                iptablesRules = new String[]{"-t", "nat", "-A", "POSTROUTING", "-o", "eth" + guestNetwork.getDeviceId(), "-j", "MASQUERADE" };
+                commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + guestNetwork.getDeviceId()).fileBody(this.getNicConfig(guestNetwork.getDeviceId(), guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
+            }
+            else{
+                commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + guestNetwork.getDeviceId()).fileBody(this.getNicConfig(guestNetwork.getDeviceId(), guestNetwork.getIp(), network.getMask(), "", "")).build())).build());
+            }
         }
         //重启网卡
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "network"}).checkSuccess(true).build())).build());
+        if (iptablesRules != null) {
+            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("iptables").args(iptablesRules).checkSuccess(true).build())).build());
+        }
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).build())).build());
         //安装websockify
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "python36"}).checkSuccess(true).build())).build());
