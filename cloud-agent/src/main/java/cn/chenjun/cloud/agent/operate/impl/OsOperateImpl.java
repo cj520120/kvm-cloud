@@ -50,7 +50,7 @@ public class OsOperateImpl implements OsOperate {
         arguments.put("arg", execute.getArgs());
         String commandBody = gson.toJson(map);
         String response = domain.qemuAgentCommand(commandBody, request.getTimeout(), 0);
-        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
+        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
         }.getType());
         String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
         map.clear();
@@ -62,7 +62,7 @@ public class OsOperateImpl implements OsOperate {
         boolean isExit;
         do {
             response = domain.qemuAgentCommand(statusRequest, request.getTimeout(), 0);
-            result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<Map<String, Object>>() {
+            result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
             }.getType());
             isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
             if (!isExit) {
@@ -256,6 +256,13 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
         String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+        if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
+            if (request.getVlanId() > 0) {
+                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
+            } else {
+                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
+            }
+        }
         int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
         xml = String.format(xml, request.getMac(), request.getDriveType(), request.getBridgeName(), deviceId);
         domain.attachDevice(xml);
@@ -271,6 +278,13 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
         String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+        if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
+            if (request.getVlanId() > 0) {
+                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
+            } else {
+                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
+            }
+        }
         int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
         xml = String.format(xml, request.getMac(), request.getDriveType(), request.getBridgeName(), deviceId);
         domain.detachDevice(xml);

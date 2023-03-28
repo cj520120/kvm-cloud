@@ -11,7 +11,7 @@ import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.http.HttpUtil;
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.springframework.beans.factory.annotation.Autowired;

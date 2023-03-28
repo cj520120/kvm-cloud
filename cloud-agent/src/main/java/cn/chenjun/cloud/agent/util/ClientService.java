@@ -64,7 +64,7 @@ public class ClientService implements CommandLineRunner {
             String sign = AppUtils.sign(map, this.clientId, this.clientSecret, nonce);
             map.put("sign", sign);
             String response = HttpUtil.post(this.managerUri + "api/agent/register", map);
-            ResultUtil<Void> result = GsonBuilderUtil.create().fromJson(response, new com.google.common.reflect.TypeToken<ResultUtil<Void>>() {
+            ResultUtil<Void> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<ResultUtil<Void>>() {
             }.getType());
             if (result.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "初始化失败:" + result.getMessage());
