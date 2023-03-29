@@ -9,6 +9,9 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * @author chenjun
+ */
 @Component
 @ServerEndpoint(value = "/api/ws/")
 public class WebSocketServerOne {
@@ -34,16 +37,16 @@ public class WebSocketServerOne {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        SESSIONS.add(this);
+        SESSIONS.remove(this);
     }
 
     @OnMessage
-    public void onVncMessage(byte[] messages, Session session) {
+    public void onMessage(byte[] messages, Session session) {
 
     }
 
     @OnClose
     public void onClose() {
-        SESSIONS.add(this);
+        SESSIONS.remove(this);
     }
 }

@@ -29,7 +29,7 @@
 			</el-form>
 		</el-dialog>
 		<el-dialog title="项目捐赠" :visible.sync="support_dialog_visible" center width="420px">
-			<el-tabs v-model="supportActiveName" @tab-click="handleClick">
+			<el-tabs v-model="supportActiveName">
 				<el-tab-pane label="微信" name="wx"><div class="wx" /></el-tab-pane>
 				<el-tab-pane label="支付宝" name="zfb"><div class="zfb" /></el-tab-pane>
 			</el-tabs>
