@@ -253,3 +253,4 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 4、现在验证嵌套虚拟化功能是否启用
     cat /sys/module/kvm_intel/parameters/nested
 ``` 
+8、安装了cloud-init后无法密码登录问题，请修改cloud-init配置，允许密码登录 设置ssh_pwauth：1

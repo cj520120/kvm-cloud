@@ -347,5 +347,13 @@ CREATE TABLE `tbl_volume_info` (
 
 -- Dump completed on 2023-01-05  5:59:09
 
+DROP TABLE IF EXISTS `tbl_meta_data`;
+CREATE TABLE `tbl_meta_data` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `guest_id` INT NOT NULL,
+  `meta_key` VARCHAR(128) NOT NULL,
+  `meta_value` TEXT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `IX_GUEST_META` (`guest_id` ASC, `meta_key` ASC));
 INSERT INTO`cj_kvm_cloud`.`tbl_user_info`(`user_id`,`login_name`,`login_password`,`login_password_salt`,`login_state`,`create_time`)
 VALUES(1,'admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,now());

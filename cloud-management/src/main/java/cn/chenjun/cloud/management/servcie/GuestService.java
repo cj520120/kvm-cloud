@@ -3,10 +3,12 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.NotifyInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
+import cn.chenjun.cloud.management.data.mapper.MetaMapper;
 import cn.chenjun.cloud.management.model.AttachGuestNetworkModel;
 import cn.chenjun.cloud.management.model.AttachGuestVolumeModel;
 import cn.chenjun.cloud.management.model.GuestModel;
@@ -16,6 +18,7 @@ import cn.chenjun.cloud.management.util.GuestNameUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,8 @@ public class GuestService extends AbstractService {
     @Autowired
     private AllocateService allocateService;
 
+    @Autowired
+    private MetaMapper metaMapper;
     private boolean checkSystemComponent(int networkId, int componentType) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", componentType).eq("network_id", networkId).last("limit 0 ,1"));
         if (component == null) {
@@ -115,7 +120,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> createGuest(String description, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, long size) {
+                                              int storageId, String volumeType, long size,String metaData) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
@@ -180,6 +185,17 @@ public class GuestService extends AbstractService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
+            Map<String,String> metaDataMap=new HashMap<>();
+            metaDataMap.put("hostname","VM-"+guestNetwork.getIp().replace(".","-"));
+            metaDataMap.put("local-hostname","VM-"+guestNetwork.getIp().replace(".","-"));
+            metaDataMap.put("instance-id",guest.getName());
+            if(!StringUtils.isEmpty(metaData)){
+                metaDataMap.putAll(GsonBuilderUtil.create().fromJson(metaData,new TypeToken<Map<String,String>>(){}.getType()));
+            }
+            for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
+                MetaDataEntity metaDataEntity= MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
+                this.metaMapper.insert(metaDataEntity);
+            }
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .snapshotVolumeId(snapshotVolumeId)
@@ -191,6 +207,7 @@ public class GuestService extends AbstractService {
                     .title("创建客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
+
             this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
@@ -618,6 +635,7 @@ public class GuestService extends AbstractService {
                 }
                 this.vncService.destroyGuest(guestId);
                 this.guestMapper.deleteById(guestId);
+                this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id",guestId));
                 this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success();
             default:
