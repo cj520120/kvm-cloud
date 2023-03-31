@@ -262,4 +262,5 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     2)、可设置允许root登录:disable_root: 1
     3)、修改默认用户密码锁定:system_info.default_user.lock_passwd: false
     4)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
+    
 ```
