@@ -175,7 +175,7 @@ export default {
 				name: this.create_template.name,
 				templateType: this.create_template.templateType,
 				uri: this.create_template.uri,
-				volumeType: this.create_template.templateType
+				volumeType: this.create_template.volumeType
 			}
 			if (this.create_template.templateType === 0) {
 				data.volumeType = 'raw'
