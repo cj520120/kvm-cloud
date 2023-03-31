@@ -35,7 +35,6 @@ public class MetaService {
         }
         List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestNetwork.getGuestId()));
         Set<String> metaNames = list.stream().map(MetaDataEntity::getMetaKey).collect(Collectors.toSet());
-        metaNames.add("instance-id");
         return String.join("\r\n", metaNames);
     }
 

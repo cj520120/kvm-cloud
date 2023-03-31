@@ -253,4 +253,13 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 4、现在验证嵌套虚拟化功能是否启用
     cat /sys/module/kvm_intel/parameters/nested
 ``` 
-8、安装了cloud-init后无法密码登录问题，请修改cloud-init配置，允许密码登录 设置ssh_pwauth：1
+8、cloud-init相关配置
+```$xslt
+1、cloud-init数据源采用Ec2
+2、目前只支持动态设置主机名
+3、目前不支持密钥及修改密码行为，在安装cloud-init后手动设置相关配置
+    1)、请求用密码登录:设置ssh_pwauth:   1
+    2)、可设置允许root登录:disable_root: 1
+    3)、修改默认用户密码锁定:system_info.default_user.lock_passwd: false
+    4)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
+```

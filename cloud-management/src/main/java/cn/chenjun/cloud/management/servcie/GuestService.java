@@ -120,7 +120,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> createGuest(String description, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, long size,String metaData) {
+                                              int storageId, String volumeType, long size) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
@@ -189,9 +189,6 @@ public class GuestService extends AbstractService {
             metaDataMap.put("hostname","VM-"+guestNetwork.getIp().replace(".","-"));
             metaDataMap.put("local-hostname","VM-"+guestNetwork.getIp().replace(".","-"));
             metaDataMap.put("instance-id",guest.getName());
-            if(!StringUtils.isEmpty(metaData)){
-                metaDataMap.putAll(GsonBuilderUtil.create().fromJson(metaData,new TypeToken<Map<String,String>>(){}.getType()));
-            }
             for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
                 MetaDataEntity metaDataEntity= MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
                 this.metaMapper.insert(metaDataEntity);
