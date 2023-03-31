@@ -24,9 +24,9 @@ public class MetaController {
     public void getGuestMetaData(HttpServletRequest request, @RequestHeader("x-real-ip") String ip, HttpServletResponse response) {
         String meta=metaService.getGuestMetaData(ip);
         if(StringUtils.isEmpty(meta)){
-            response.setStatus(HttpStatus.OK.value());
-        }else {
             response.setStatus(HttpStatus.NOT_FOUND.value());
+        }else {
+            response.setStatus(HttpStatus.OK.value());
         }
         response.getWriter().write(meta);
     }
@@ -36,9 +36,9 @@ public class MetaController {
     public void getGuestMetaValue(@PathVariable("name") String name, @RequestHeader("x-real-ip") String ip, HttpServletResponse response) {
        String meta=metaService.getGuestMetaValue(ip, name);
         if(StringUtils.isEmpty(meta)){
-            response.setStatus(HttpStatus.OK.value());
-        }else {
             response.setStatus(HttpStatus.NOT_FOUND.value());
+        }else {
+            response.setStatus(HttpStatus.OK.value());
         }
         response.getWriter().write(meta);
     }
