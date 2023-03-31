@@ -21,8 +21,8 @@ public class MetaController {
 
     @SneakyThrows
     @GetMapping(value = "/{version}/meta-data/")
-    public void getGuestMetaData(HttpServletRequest request, @RequestHeader("x-real-ip") String ip, HttpServletResponse response) {
-        String meta=metaService.getGuestMetaData(ip);
+    public void getGuestMetaData(HttpServletRequest request, @RequestHeader("x-real-ip") String ip,  @RequestHeader("x-sign") String sign, HttpServletResponse response) {
+        String meta=metaService.getGuestMetaData(ip,sign);
         if(StringUtils.isEmpty(meta)){
             response.setStatus(HttpStatus.NOT_FOUND.value());
         }else {
@@ -33,8 +33,8 @@ public class MetaController {
 
     @SneakyThrows
     @GetMapping(value = "/{version}/meta-data/{name}")
-    public void getGuestMetaValue(@PathVariable("name") String name, @RequestHeader("x-real-ip") String ip, HttpServletResponse response) {
-       String meta=metaService.getGuestMetaValue(ip, name);
+    public void getGuestMetaValue(@PathVariable("name") String name, @RequestHeader("x-real-ip") String ip, @RequestHeader("x-sign") String sign, HttpServletResponse response) {
+       String meta=metaService.getGuestMetaValue(ip, name,sign);
         if(StringUtils.isEmpty(meta)){
             response.setStatus(HttpStatus.NOT_FOUND.value());
         }else {
@@ -45,9 +45,9 @@ public class MetaController {
 
     @SneakyThrows
     @GetMapping(value = "/{version}/user-data")
-    public void getGuestUserData(HttpServletResponse response) {
+    public void getGuestUserData(HttpServletResponse response, @RequestHeader("x-real-ip") String ip, @RequestHeader("x-sign") String sign) {
         response.setStatus(HttpStatus.OK.value());
-        response.setContentType("text/cloud-config");
+        response.setContentType("text/cloud-config;charset=utf-8");
         response.getWriter().write("");
     }
 }

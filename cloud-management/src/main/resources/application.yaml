@@ -7,10 +7,10 @@ app:
   #通过模版创建是否启用backing file,为false时通过clone磁盘实现,如果磁盘空间充足，可修改为false，该值为false时通过模版创建系统耗时会变长
   enableVolumeBack: true
   manager-uri: http://192.168.2.107:8080/
-  over-cpu: 2.0
+  over-cpu: 4.0
   over-memory: 1.0
   route:
-      #支持dnsmasq 与dhcp两种配置，变更该值必须重建所有网络的System Route,版本升级尤其注意
+      #支持dnsmasq 与dhcp两种配置，变更该值必须重建所有网络的System Route,版本升级尤其注意,dhcp模式不支持metaservice
       type: dnsmasq
   work:
     thread:

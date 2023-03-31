@@ -67,4 +67,9 @@ public class DhcpInitializeService implements RouteInitialize {
         return commands;
 
     }
+
+    @Override
+    public boolean isEnableMetaService() {
+        return false;
+    }
 }

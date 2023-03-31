@@ -65,4 +65,9 @@ public class DnsmasqInitializeService implements RouteInitialize {
         return commands;
 
     }
+
+    @Override
+    public boolean isEnableMetaService() {
+        return true;
+    }
 }

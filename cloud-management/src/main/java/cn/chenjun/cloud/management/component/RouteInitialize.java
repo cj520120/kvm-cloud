@@ -16,4 +16,10 @@ public interface RouteInitialize {
      * @return
      */
     List<GuestQmaRequest.QmaBody> initialize(int guestId);
+
+    /**
+     * 是否支持meta服务
+     * @return
+     */
+    boolean isEnableMetaService();
 }

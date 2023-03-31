@@ -179,6 +179,7 @@ CREATE TABLE `tbl_network_info` (
   `network_broadcast` varchar(45) DEFAULT NULL,
   `network_dns` varchar(20) NOT NULL,
   `network_vlan_id` int(11) NOT NULL,
+  `network_secret` VARCHAR(128) NOT NULL DEFAULT 'CJ:KVM:CLOUD',
   `network_basic_network_id` int(11) NOT NULL,
   `network_type` varchar(20) NOT NULL,
   `network_status` int(11) NOT NULL,

@@ -100,6 +100,7 @@ public class NetworkService extends AbstractService {
                 .type(type)
                 .vlanId(vlanId)
                 .basicNetworkId(basicNetworkId)
+                .secret(UUID.randomUUID().toString().replace("-",""))
                 .status(Constant.NetworkStatus.CREATING).build();
         networkMapper.insert(network);
         List<String> ips = IpCaculate.parseIpRange(startIp, endIp);
