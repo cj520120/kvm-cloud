@@ -253,10 +253,15 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 4、现在验证嵌套虚拟化功能是否启用
     cat /sys/module/kvm_intel/parameters/nested
 ``` 
-8、cloud-init相关配置
+8、cloud-init相关配置(如需禁用，请在管理配置文件中设置app.route.type:dhcp)
 ```$xslt
 1、cloud-init只支持dnsmasq下发方式
-2、cloud-init数据源采用Ec2
+2、cloud-init数据源采用NoCloud,请修改cloud相关配置如下:
+    datasource:
+      NoCloud:
+        seedfrom: http://169.254.169.254/
+    datasource_list: [  NoCloud ]
+    
 3、目前只支持动态设置主机名
 4、目前不支持密钥及修改密码行为，在安装cloud-init后手动设置相关配置
     1)、请求用密码登录:设置ssh_pwauth:   1

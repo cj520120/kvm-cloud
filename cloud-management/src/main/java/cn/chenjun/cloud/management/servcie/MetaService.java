@@ -32,6 +32,22 @@ public class MetaService {
     private GuestNetworkMapper guestNetworkMapper;
     @Autowired
     private NetworkMapper networkMapper;
+    public String loadAllGuestMetaData(String ip,String sign) {
+        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("network_ip", ip));
+        if (guestNetwork == null) {
+            return "";
+        }
+        NetworkEntity network=networkMapper.selectById(guestNetwork.getNetworkId());
+        if (network == null) {
+            return "";
+        }
+        if(!DigestUtil.md5Hex(network.getSecret()+":"+ip).equals(sign)){
+            return "";
+        }
+        List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestNetwork.getGuestId()));
+        Set<String> metaNames = list.stream().map(t->t.getMetaKey()+": "+t.getMetaValue()).collect(Collectors.toSet());
+        return String.join("\r\n", metaNames);
+    }
     public String getGuestMetaData(String ip,String sign) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("network_ip", ip));
         if (guestNetwork == null) {
