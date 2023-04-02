@@ -112,9 +112,18 @@
 						</el-form-item>
 					</el-col>
 				</el-row>
-				<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
-					<el-input v-model="create_guest.size"></el-input>
-				</el-form-item>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="密码" v-if="create_guest.type !== 0">
+                            <el-input v-model="create_guest.password" :show-password="true" type="password"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
+                            <el-input v-model="create_guest.size"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
 				<el-form-item>
 					<el-button type="primary" @click="create_guest_click">立即创建</el-button>
 					<el-button @click="on_back_click">取消</el-button>
@@ -130,6 +139,7 @@ export default {
 		return {
 			create_guest: {
 				type: 0,
+				password:'',
 				description: '',
 				busType: 'virtio',
 				hostId: 0,
@@ -223,6 +233,7 @@ export default {
 			this.create_guest.isoTemplateId = ''
 			this.create_guest.diskTemplateId = ''
 			this.create_guest.snapshotVolumeId = ''
+			this.create_guest.password = ''
 			this.create_guest.volumeId = ''
 			this.create_guest.type = 0
 		},
@@ -232,6 +243,7 @@ export default {
 					this.create_guest.diskTemplateId = 0
 					this.create_guest.snapshotVolumeId = 0
 					this.create_guest.volumeId = 0
+					this.create_guest.password = ''
 					break
 				case 1:
 					this.create_guest.isoTemplateId = 0

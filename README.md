@@ -263,10 +263,11 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     datasource_list: [  NoCloud ]
     
 3、目前只支持动态设置主机名
-4、目前不支持密钥及修改密码行为，在安装cloud-init后手动设置相关配置
+4、在安装cloud-init后手动设置相关配置
     1)、请求用密码登录:设置ssh_pwauth:   1
-    2)、可设置允许root登录:disable_root: 1
-    3)、修改默认用户密码锁定:system_info.default_user.lock_passwd: false
-    4)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
+    2)、可设置允许root登录:disable_root: 1 
+    3)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
+    4)、Windows目前未测试
+    5)、密码只对应默认用户，具体请查看system_info.default_user相关配置
     
 ```

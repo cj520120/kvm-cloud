@@ -65,6 +65,7 @@ public class GuestController {
     @PutMapping("/api/guest/create")
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
                                               @RequestParam("busType") String busType,
+                                              @RequestParam(value = "password",defaultValue = "") String password,
                                               @RequestParam("hostId") int hostId,
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("networkId") int networkId,
@@ -78,7 +79,7 @@ public class GuestController {
                                               @RequestParam("size") long size) {
 
 
-        return this.guestService.createGuest(description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024);
+        return this.guestService.createGuest(description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, password,size * 1024 * 1024 * 1024);
     }
 
     @PostMapping("/api/guest/reinstall")

@@ -355,6 +355,19 @@ CREATE TABLE `tbl_meta_data` (
   `meta_key` VARCHAR(128) NOT NULL,
   `meta_value` TEXT NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `IX_GUEST_META` (`guest_id` ASC, `meta_key` ASC));
+  UNIQUE INDEX `IX_GUEST_META` (`guest_id` ASC, `meta_key` ASC)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `tbl_guest_password`;
+CREATE TABLE `tbl_guest_password` (
+  `guest_id` int(11) NOT NULL,
+  `encode_key` varchar(20) NOT NULL,
+  `iv_key` varchar(20) NOT NULL,
+  `guest_password` varchar(1024) NOT NULL,
+  PRIMARY KEY (`guest_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 INSERT INTO`cj_kvm_cloud`.`tbl_user_info`(`user_id`,`login_name`,`login_password`,`login_password_salt`,`login_state`,`create_time`)
 VALUES(1,'admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,now());
+
