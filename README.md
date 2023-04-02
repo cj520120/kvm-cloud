@@ -269,5 +269,7 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     3)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
     4)、Windows目前未测试
     5)、密码只对应默认用户，具体请查看system_info.default_user相关配置
+    6)、其他配置请参照cloud-init相关配置进行安装
+    7)、对系统模板请安装qemu-command-agent，并进行相关配置
     
 ```
