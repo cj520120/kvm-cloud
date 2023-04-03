@@ -24,7 +24,7 @@
 							<el-table-column label="操作" min-width="200">
 								<template #default="scope">
 									<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>
-									<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.templateType === 0 || scope.row.templateType === 1">重新下载</el-button>
+									<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.uri.indexOf('http://') === 0 || scope.row.uri.indexOf('https://') === 0">重新下载</el-button>
 									<el-button @click="destroy_template(scope.row)" type="danger" size="mini">销毁模版</el-button>
 								</template>
 							</el-table-column>

@@ -4,19 +4,19 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.data.entity.TaskEntity;
+import cn.chenjun.cloud.management.data.mapper.TaskMapper;
 import cn.chenjun.cloud.management.operate.OperateEngine;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RLock;
-import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -36,14 +36,23 @@ public class OperateTask extends AbstractTask {
     @Autowired
     private OperateEngine operateEngine;
 
+    @Autowired
+    private TaskMapper taskMapper;
 
     public void addTask(BaseOperateParam operateParam) {
-        redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY).put(operateParam.getTaskId(), operateParam);
+        TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
+                .version(0)
+                .title(operateParam.getTitle())
+                .type(operateParam.getClass().getName())
+                .param(GsonBuilderUtil.create().toJson(operateParam))
+                .expireTime(new Date(System.currentTimeMillis()))
+                .createTime(new Date(System.currentTimeMillis()))
+                .build();
+        taskMapper.insert(task);
     }
 
     public void keepTask(String taskId) {
-        String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
-        redis.getBucket(key).set(System.currentTimeMillis(), TASK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS)));
     }
 
     @Override
@@ -53,56 +62,44 @@ public class OperateTask extends AbstractTask {
 
     @Override
     protected void dispatch() throws Exception {
-        RMap<String, BaseOperateParam> rMap = redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY);
-        for (Map.Entry<String, BaseOperateParam> entry : rMap.entrySet()) {
-            String taskId = entry.getKey();
-            String key = String.format(RedisKeyUtil.OPERATE_TASK_KEEP, taskId);
-            RBucket<Long> taskBucket = redis.getBucket(key);
-            if (taskBucket.isExists()) {
-                continue;
-            }
-            String lockKey = key + ".lock";
-            RLock lock = redis.getLock(lockKey);
-            if (lock.isLocked()) {
-                continue;
-            }
-            boolean isLock = false;
-            try {
-                isLock = lock.tryLock(1, TimeUnit.MILLISECONDS);
-                if (isLock) {
-                    taskBucket.set(System.currentTimeMillis(), TASK_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                }
-            } finally {
-                if (isLock && lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                }
-            }
-            if (isLock) {
-                workExecutor.submit(() -> {
-                    try {
-                        this.operateEngine.process(entry.getValue());
-                    } catch (Exception err) {
-                        ResultUtil resultUtil;
-                        if (err instanceof CodeException) {
-                            CodeException codeException = (CodeException) err;
-                            resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
-                        } else {
-                            log.error("调用任务出现未知错误.param={}", entry.getValue(), err);
-                            resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
-                        }
-                        this.onTaskFinish(entry.getValue().getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
+        QueryWrapper<TaskEntity> wrapper = new QueryWrapper<TaskEntity>().lt("expire_time", new Date(System.currentTimeMillis()));
+        wrapper.last("limit 0,10");
+        List<TaskEntity> taskList = this.taskMapper.selectList(wrapper);
+        for (TaskEntity entity : taskList) {
+            workExecutor.submit(() -> {
+                try {
+                    Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS));
+                    if (this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0) {
+                        Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
+                        BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
+                        this.operateEngine.process(operateParam);
                     }
-                });
-            }
+
+                } catch (Exception err) {
+                    ResultUtil resultUtil;
+                    if (err instanceof CodeException) {
+                        CodeException codeException = (CodeException) err;
+                        resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
+                    } else {
+                        log.error("调用任务出现未知错误.param={}", entity.getParam(), err);
+                        resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
+                    }
+                    this.onTaskFinish(entity.getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
+                }
+            });
         }
 
     }
 
     public void onTaskFinish(String taskId, String result) {
-        RMap<String, BaseOperateParam> rMap = redis.getMap(RedisKeyUtil.OPERATE_TASK_KEY);
-        BaseOperateParam operateParam = rMap.get(taskId);
-        rMap.remove(taskId);
-        if (operateParam != null) {
+        TaskEntity task = this.taskMapper.selectById(taskId);
+        if (task == null) {
+            return;
+        }
+        try {
+            this.taskMapper.deleteById(taskId);
+            Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(task.getType());
+            BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(task.getParam(), paramClass);
             workExecutor.submit(() -> {
                 try {
                     this.operateEngine.onFinish(operateParam, result);
@@ -110,7 +107,10 @@ public class OperateTask extends AbstractTask {
                     log.error("任务回调失败.param={} result={}", operateParam, result, err);
                 }
             });
+        } catch (Exception err) {
+            log.error("解析任务参数出错:task={} result={}", task, result);
         }
+
     }
 
 

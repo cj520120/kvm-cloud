@@ -198,7 +198,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 11、等待系统模版下载完成，并初始化系统VM成功
 
-12、windows附加磁盘时请安装virtio-win-0.1.185.iso驱动 
+12、windows附加磁盘时请安装virtio-win.iso驱动 
  
 
 13、创建VM
@@ -231,9 +231,10 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     1)、首先确认创建的ISO系统类型是否正确
     2)、如果确认系统类型没有问题，可以通过老毛桃做一个PE的ISO镜像，在创建系统的时候可以通过PE镜像创建，然后进入PE系统，在页面上卸载光盘，重新挂载你要安装的操作系统，然后通过PE安装就可以正常安装了
 ```
-5、windows系统附加磁盘不识别问题
+5、windows系统磁盘不识别问题
 ```$xslt
-    windows没有virto的驱动，请安装virtio-win-0.1.185.iso驱动
+    1)、windows没有virto的驱动，请安装virtio-win.iso驱动
+    2)、如果是系统盘则需要在磁盘选择页面临时挂载virtio-win.iso驱动后安装或选择ide总线方式
 ```
 6、服务器掉电重启后处理
 ```$xslt

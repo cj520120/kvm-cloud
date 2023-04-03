@@ -90,10 +90,11 @@ public class GuestController {
                                             @RequestParam("volumeId") int volumeId,
                                             @RequestParam("storageId") int storageId,
                                             @RequestParam("volumeType") String volumeType,
+                                            @RequestParam(value = "password", defaultValue = "") String password,
                                             @RequestParam("size") long size) {
 
 
-        return this.guestService.reInstall(guestId, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size);
+        return this.guestService.reInstall(guestId, password, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size* 1024 * 1024 * 1024);
     }
 
     @PostMapping("/api/guest/start/batch")

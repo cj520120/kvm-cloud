@@ -61,9 +61,18 @@
 						</el-form-item>
 					</el-col>
 				</el-row>
-				<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
-					<el-input v-model="reinstall_guest.size"></el-input>
-				</el-form-item>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="密码" v-if="reinstall_guest.type !== 0">
+							<el-input v-model="reinstall_guest.password" prefix-icon="el-icon-lock" type="password" :show-password="true"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
+							<el-input v-model="reinstall_guest.size"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
 				<el-form-item>
 					<el-button type="primary" @click="reinstall_guest_click">立即重装</el-button>
 					<el-button @click="on_back_click">取消</el-button>
@@ -86,6 +95,7 @@ export default {
 				snapshotVolumeId: '',
 				volumeId: '',
 				storageId: 0,
+				password: '',
 				size: 100
 			},
 			iso_template: [],
@@ -139,6 +149,7 @@ export default {
 			this.reinstall_guest.diskTemplateId = ''
 			this.reinstall_guest.snapshotVolumeId = ''
 			this.reinstall_guest.volumeId = ''
+			this.reinstall_guest.password = ''
 			this.reinstall_guest.type = 0
 		},
 		reinstall_guest_click() {

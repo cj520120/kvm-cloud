@@ -46,6 +46,30 @@ public class GuestService extends AbstractService {
     @Autowired
     private MetaMapper metaMapper;
 
+    private void initGuestMetaData(int guestId,String password){
+        GuestEntity guest=this.guestMapper.selectById(guestId);
+        Map<String, String> metaDataMap = new HashMap<>();
+        String hostname="VM-" +guest.getGuestIp().replace(".", "-");
+        metaDataMap.put("hostname", hostname);
+        metaDataMap.put("local-hostname", hostname);
+        metaDataMap.put("instance-id", guest.getName());
+        this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id",guestId));
+        for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
+            MetaDataEntity metaDataEntity = MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
+            this.metaMapper.insert(metaDataEntity);
+        }
+        this.guestPasswordMapper.deleteById(guestId);
+        if (!StringUtils.isEmpty(password)) {
+            SymmetricCryptoUtil util = SymmetricCryptoUtil.build();
+            GuestPasswordEntity entity = GuestPasswordEntity.builder()
+                    .guestId(guest.getGuestId())
+                    .ivKey(util.getIvKey())
+                    .encodeKey(util.getEncodeKey())
+                    .password(util.encrypt(password))
+                    .build();
+            this.guestPasswordMapper.insert(entity);
+        }
+    }
     private boolean checkSystemComponent(int networkId, int componentType) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", componentType).eq("network_id", networkId).last("limit 0 ,1"));
         if (component == null) {
@@ -165,16 +189,7 @@ public class GuestService extends AbstractService {
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        if (!StringUtils.isEmpty(password)) {
-            SymmetricCryptoUtil util = SymmetricCryptoUtil.build();
-            GuestPasswordEntity entity = GuestPasswordEntity.builder()
-                    .guestId(guest.getGuestId())
-                    .ivKey(util.getIvKey())
-                    .encodeKey(util.getEncodeKey())
-                    .password(util.encrypt(password))
-                    .build();
-            this.guestPasswordMapper.insert(entity);
-        }
+
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setGuestId(guest.getGuestId());
@@ -200,14 +215,7 @@ public class GuestService extends AbstractService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
-            Map<String, String> metaDataMap = new HashMap<>();
-            metaDataMap.put("hostname", "VM-" + guestNetwork.getIp().replace(".", "-"));
-            metaDataMap.put("local-hostname", "VM-" + guestNetwork.getIp().replace(".", "-"));
-            metaDataMap.put("instance-id", guest.getName());
-            for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
-                MetaDataEntity metaDataEntity = MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
-                this.metaMapper.insert(metaDataEntity);
-            }
+            this.initGuestMetaData(guest.getGuestId(),password);
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .snapshotVolumeId(snapshotVolumeId)
@@ -248,7 +256,7 @@ public class GuestService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, String password,int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
@@ -261,6 +269,7 @@ public class GuestService extends AbstractService {
         this.checkSystemComponent(guest.getNetworkId());
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
+        this.initGuestMetaData(guestId,password);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId).eq("device_id", 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
@@ -273,7 +282,7 @@ public class GuestService extends AbstractService {
                     .type(volumeType)
                     .templateId(diskTemplateId)
                     .allocation(0L)
-                    .capacity(0L)
+                    .capacity(size)
                     .status(Constant.VolumeStatus.CREATING)
                     .build();
             this.volumeMapper.insert(volume);

@@ -8,7 +8,7 @@ app:
   enableVolumeBack: false
   manager-uri: http://192.168.2.107:8080/
   over-cpu: 4.0
-  over-memory: 1.0
+  over-memory: 2.0
   route:
       #支持dnsmasq 与dhcp两种配置，变更该值必须重建所有网络的System Route,版本升级尤其注意,dhcp模式不支持metaservice
       type: dnsmasq

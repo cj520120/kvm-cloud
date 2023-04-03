@@ -128,6 +128,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
             xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetVolume(), request.getTargetType(), request.getParentVolume(), request.getParentType());
         }
+        log.info("create volume:{}",xml);
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
         StoragePool storagePool = this.getStorage(connect,request.getTargetStorage());
@@ -166,6 +167,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
         xml = String.format(xml, request.getTargetName(), request.getTargetVolume(), request.getTargetType());
+        log.info("clone volume:{}",xml);
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();
         return VolumeInfo.builder().storage(request.getTargetStorage())

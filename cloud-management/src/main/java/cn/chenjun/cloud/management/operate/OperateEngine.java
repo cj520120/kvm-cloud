@@ -27,6 +27,7 @@ public class OperateEngine {
     }
 
     public void onFinish(BaseOperateParam operateParam, String result) {
+
         log.info("onFinish type={} param={} result={}", operateParam.getClass().getName(), operateParam, result);
         Operate operate = this.operateHandlerMap.get(operateParam.getClass());
         if (operate == null) {

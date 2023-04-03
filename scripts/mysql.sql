@@ -367,6 +367,17 @@ CREATE TABLE `tbl_guest_password` (
   PRIMARY KEY (`guest_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `tbl_task_info` (
+  `task_id` varchar(64) NOT NULL,
+  `task_version` int NOT NULL,
+  `task_title` varchar(255) DEFAULT NULL,
+  `task_type` varchar(255) NOT NULL,
+  `task_param` text NOT NULL,
+  `create_time` timestamp NOT NULL default current_timestamp,
+  `expire_time` timestamp NOT NULL default current_timestamp,
+  PRIMARY KEY (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 INSERT INTO`cj_kvm_cloud`.`tbl_user_info`(`user_id`,`login_name`,`login_password`,`login_password_salt`,`login_state`,`create_time`)
 VALUES(1,'admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,now());
