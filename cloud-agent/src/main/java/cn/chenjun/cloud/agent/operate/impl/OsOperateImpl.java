@@ -255,12 +255,18 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+        String xml;
         if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
             if (request.getVlanId() > 0) {
                 xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
             } else {
                 xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
+            }
+        } else {
+            if (request.getVlanId() > 0) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "基础网络不支持Vlan");
+            } else {
+                xml = ResourceUtil.readUtf8Str("xml/network/BridgeNic.xml");
             }
         }
         int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
@@ -277,12 +283,18 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+        String xml;
         if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
             if (request.getVlanId() > 0) {
                 xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
             } else {
                 xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
+            }
+        } else {
+            if (request.getVlanId() > 0) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "基础网络不支持Vlan");
+            } else {
+                xml = ResourceUtil.readUtf8Str("xml/network/BridgeNic.xml");
             }
         }
         int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
@@ -331,12 +343,18 @@ public class OsOperateImpl implements OsOperate {
             diskXml += xml + "\r\n";
         }
         for (OsNic osNic : request.getNetworkInterfaces()) {
-            String xml = ResourceUtil.readUtf8Str("xml/network/Nic.xml");
+            String xml;
             if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
                 if (osNic.getVlanId() > 0) {
                     xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
                 } else {
                     xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
+                }
+            } else {
+                if (osNic.getVlanId() > 0) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "基础网络不支持Vlan");
+                } else {
+                    xml = ResourceUtil.readUtf8Str("xml/network/BridgeNic.xml");
                 }
             }
             int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
