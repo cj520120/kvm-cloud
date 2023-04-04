@@ -130,6 +130,8 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 volume.setTemplateId(param.getTemplateId());
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setCapacity(resultUtil.getData().getCapacity());
+                volume.setType(resultUtil.getData().getType());
+                volume.setBackingPath(resultUtil.getData().getBackingPath());
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             } else {
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);

@@ -7,11 +7,10 @@
     5、支持模版维护，用于快速创建VM
     6、虚拟机IP自动管理
     7、多网卡支持
-    8、支持磁盘导入导出
-    9、支持 raw、qcow、qcow2、vdi、vmdk、vpc磁盘格式
-    10、磁盘快照支持
-    11、通过OVS支持VPC概念
-    12、支持cloud-init配置系统密码
+    8、支持 raw、qcow、qcow2、vdi、vmdk、vpc磁盘格式
+    9、磁盘快照支持
+    10、通过OVS支持VPC概念
+    11、支持cloud-init配置系统密码
 
 ### 关于升级
     目前不支持V1、V2升级到最新版本
@@ -269,7 +268,7 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     1)、设置允许密码登录:设置ssh_pwauth:   1
     2)、可设置允许root登录:disable_root: 1 
     3)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
-    4)、Windows相关配置请自行查阅
+    4)、目前只测试了Centos与Ubuntu，Windows请自行实现相关初始化行为
     5)、密码只对应默认用户，具体请查看system_info.default_user相关配置
     6)、其他配置请参照cloud-init相关配置进行安装
     7)、对系统模板请安装qemu-command-agent，并进行相关配置

@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class TemplateService extends AbstractService {
 
@@ -159,6 +162,7 @@ public class TemplateService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyTemplate(int templateId) {
         this.templateMapper.deleteById(templateId);
+        this.guestMapper.detachCdByTemplateId(templateId);
         this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", templateId));
         this.notifyService.publish(NotifyInfo.builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return ResultUtil.success();

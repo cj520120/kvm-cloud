@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class HostService extends AbstractService {
 

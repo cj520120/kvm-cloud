@@ -328,6 +328,7 @@ CREATE TABLE `tbl_volume_info` (
   `storage_id` int(11) NOT NULL,
   `volume_name` varchar(45) NOT NULL,
   `volume_path` varchar(1024) NOT NULL,
+  `volume_backing_path` VARCHAR(1024) NOT NULL DEFAULT ''
   `volume_capacity` bigint(20) NOT NULL,
   `volume_allocation` bigint(20) NOT NULL,
   `volume_type` varchar(20) NOT NULL,

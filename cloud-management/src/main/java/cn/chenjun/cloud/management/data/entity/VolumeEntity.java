@@ -40,6 +40,8 @@ public class VolumeEntity {
     private Long allocation;
     @TableField("volume_type")
     private String type;
+    @TableField("volume_backing_path")
+    private String backingPath;
     @TableField("volume_status")
     private Integer status;
     @TableField("create_time")

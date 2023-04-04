@@ -114,6 +114,7 @@ public abstract class AbstractComponentService extends AbstractService {
                     .name(uid)
                     .path(storage.getMountPath() + "/" + uid)
                     .type(cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2)
+                    .backingPath("")
                     .templateId(diskTemplateId)
                     .allocation(0L)
                     .capacity(0L)

@@ -30,6 +30,9 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class VolumeService extends AbstractService {
 
@@ -158,6 +161,7 @@ public class VolumeService extends AbstractService {
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
+                .backingPath("")
                 .capacity(volumeInfo.getCapacity())
                 .allocation(volumeInfo.getAllocation())
                 .status(Constant.VolumeStatus.READY)
@@ -212,6 +216,7 @@ public class VolumeService extends AbstractService {
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
+                .backingPath("")
                 .capacity(volumeSize)
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
@@ -253,6 +258,7 @@ public class VolumeService extends AbstractService {
                 .description(description)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
+                .backingPath("")
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
@@ -321,6 +327,7 @@ public class VolumeService extends AbstractService {
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
+                .backingPath("")
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)

@@ -7,7 +7,7 @@
 						<div style="float: left">
 							<el-form :inline="true" class="demo-form-inline">
 								<el-form-item><el-button size="mini" type="primary" @click="show_create_volume">创建磁盘</el-button></el-form-item>
-								<el-form-item><el-button size="mini" type="primary" @click="show_upload_volume">导入磁盘</el-button></el-form-item>
+								<!-- <el-form-item><el-button size="mini" type="primary" @click="show_upload_volume">导入磁盘</el-button></el-form-item> -->
 								<el-form-item><el-button size="mini" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-button></el-form-item>
 
 								<el-form-item label="存储池">

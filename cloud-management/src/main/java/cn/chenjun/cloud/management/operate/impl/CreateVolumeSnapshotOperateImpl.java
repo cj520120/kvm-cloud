@@ -85,6 +85,7 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.SnapshotStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
+                targetVolume.setType(resultUtil.getData().getType());
             } else {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.SnapshotStatus.ERROR);
             }

@@ -75,12 +75,16 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
                 }
 
                 if (!Objects.equals(sourceVolume.getCapacity(), info.getCapacity()) ||
-                        !Objects.equals(sourceVolume.getAllocation(), info.getAllocation())
+                        !Objects.equals(sourceVolume.getAllocation(), info.getAllocation()) ||
+                        !Objects.equals(sourceVolume.getType(), info.getType()) ||
+                        !Objects.equals(sourceVolume.getBackingPath(), info.getBackingPath())
                 ) {
                     VolumeEntity updateVolume = VolumeEntity.builder()
                             .volumeId(sourceVolume.getVolumeId())
                             .capacity(info.getCapacity())
                             .allocation(info.getAllocation())
+                            .type(info.getType())
+                            .backingPath(info.getBackingPath())
                             .build();
                     this.volumeMapper.updateById(updateVolume);
                     this.notifyService.publish(NotifyInfo.builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());

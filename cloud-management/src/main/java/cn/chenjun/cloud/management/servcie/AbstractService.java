@@ -11,6 +11,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
+/**
+ * @author chenjun
+ */
 public abstract class AbstractService {
     @Autowired
     protected GuestMapper guestMapper;

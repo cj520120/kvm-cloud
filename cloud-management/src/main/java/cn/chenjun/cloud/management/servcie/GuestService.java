@@ -206,6 +206,7 @@ public class GuestService extends AbstractService {
                     .templateId(diskTemplateId)
                     .allocation(0L)
                     .capacity(size)
+                    .backingPath("")
                     .status(Constant.VolumeStatus.CREATING)
                     .build();
             this.volumeMapper.insert(volume);
@@ -283,6 +284,7 @@ public class GuestService extends AbstractService {
                     .templateId(diskTemplateId)
                     .allocation(0L)
                     .capacity(size)
+                    .backingPath("")
                     .status(Constant.VolumeStatus.CREATING)
                     .build();
             this.volumeMapper.insert(volume);

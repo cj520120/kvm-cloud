@@ -85,6 +85,8 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
+                targetVolume.setType(resultUtil.getData().getType());
+                targetVolume.setBackingPath(resultUtil.getData().getBackingPath());
             } else {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);
             }

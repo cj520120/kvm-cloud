@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class AllocateService extends AbstractService {
     @Autowired

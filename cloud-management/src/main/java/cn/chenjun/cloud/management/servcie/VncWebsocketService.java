@@ -20,6 +20,9 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @author chenjun
+ */
 @ServerEndpoint(value = "/api/vnc/{id}")
 @Component
 public class VncWebsocketService {
