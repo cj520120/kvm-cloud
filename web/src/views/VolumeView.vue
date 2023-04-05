@@ -16,10 +16,10 @@
 										<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 									</el-select>
 								</el-form-item>
+								<el-form-item>
+								<el-input style="float: right; max-width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
+								</el-form-item>
 							</el-form>
-						</div>
-						<div>
-							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
 						</div>
 					</el-row>
 					<el-row>

@@ -3,25 +3,24 @@
 		<el-container>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
-					<el-row slot="header" class="clearfix" style="height: 30px">
-						<div style="float: left">
-							<el-form :inline="true" class="demo-form-inline">
-								<el-form-item>
-									<el-button type="primary" size="mini" @click="show_create_guest_click">创建虚拟机</el-button>
-								</el-form-item>
-								<el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
-								<el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
-								<el-form-item label="运行主机">
-									<el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
-										<el-option label="全部" :value="0"></el-option>
-										<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
-									</el-select>
-								</el-form-item>
-							</el-form>
-						</div>
-						<div>
-							<el-input style="float: right; width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
-						</div>
+					<el-row slot="header">
+                                <el-form :inline="true" class="demo-form-inline">
+                                    <el-form-item>
+                                        <el-button type="primary" size="mini" @click="show_create_guest_click">创建虚拟机</el-button>
+                                    </el-form-item>
+                                    <el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
+                                    <el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
+                                    <el-form-item label="运行主机">
+                                        <el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
+                                            <el-option label="全部" :value="0"></el-option>
+                                            <el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item>
+                                     <el-input style="margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
+                                    </el-form-item>
+                                </el-form>
+
 					</el-row>
 					<el-row>
 						<el-table ref="guestTable" :v-loading="data_loading" :data="show_table_guests" style="width: 100%" @selection-change="handleSelectionChange">
@@ -43,7 +42,7 @@
 									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作">
+							<el-table-column label="操作" min-width="150">
 								<template #default="scope">
 									<el-dropdown size="small" @click="show_guest_info_click(scope.row)" split-button placement="bottom-end" type="primary" @command="menu_command_click">
 										虚拟机管理

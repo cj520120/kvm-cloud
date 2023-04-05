@@ -6,7 +6,7 @@ app:
   systemComponentCpuSpeed: 500
   #通过模版创建是否启用backing file,为false时通过clone磁盘实现,如果磁盘空间充足，可修改为false，该值为false时通过模版创建系统耗时会变长
   enableVolumeBack: false
-  manager-uri: http://192.168.2.107:8080/
+  manager-uri: http://localhost:8080/
   over-cpu: 4.0
   over-memory: 2.0
   route:
@@ -54,7 +54,7 @@ spring:
       validation-query: SELECT 1
     password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&serverTimezone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&useSSL=false&useUnicode=true
+    url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&serverTimezone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
     username: root
   servlet:
     multipart:

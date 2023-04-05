@@ -5,18 +5,19 @@
 				<el-page-header @back="on_back_click" content="虚拟机详情"></el-page-header>
 			</el-row>
 			<el-row style="text-align: left; margin: 20px 0">
-				<el-button @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
-				<el-button @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status > 3">停止虚拟机</el-button>
-				<el-button @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2" v-show="show_guest_info.current_guest.type !== 0">重启虚拟机</el-button>
-				<el-button @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">重装系统</el-button>
-
-				<el-button @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">修改配置</el-button>
-				<el-button @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">远程桌面</el-button>
-				<el-button @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-show="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
-				<el-button @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-show="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>
-				<el-button @click="show_attach_network_click(show_guest_info.current_guest)" type="primary" size="mini" v-show="show_guest_info.current_guest.type !== 0">添加网卡</el-button>
-				<el-button @click="show_attach_volume_click(show_guest_info.current_guest)" type="primary" size="mini" v-show="show_guest_info.current_guest.type !== 0">挂载磁盘</el-button>
-				<el-button @click="destroy_guest(show_guest_info.current_guest)" type="danger" size="mini" :disabled="show_guest_info.current_guest.status < 3">销毁虚拟机</el-button>
+				<el-button style="width:90px" @click="show_start_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4">启动虚拟机</el-button>
+				<el-button style="width:90px" @click="show_stop_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status > 3">停止虚拟机</el-button>
+				<el-button style="width:90px" @click="reboot_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2" v-show="show_guest_info.current_guest.type !== 0">重启虚拟机</el-button>
+				<el-button style="width:90px" @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">重装系统</el-button>
+				<el-button style="width:90px" @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">修改配置</el-button>
+				<el-button style="width:90px" @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">远程桌面</el-button>
+			</el-row>
+			<el-row style="text-align: left; margin: 20px 0">
+				<el-button style="width:90px" @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-show="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
+				<el-button style="width:90px" @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-show="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>
+				<el-button style="width:90px" @click="show_attach_network_click(show_guest_info.current_guest)" type="primary" size="mini" v-show="show_guest_info.current_guest.type !== 0">添加网卡</el-button>
+				<el-button style="width:90px" @click="show_attach_volume_click(show_guest_info.current_guest)" type="primary" size="mini" v-show="show_guest_info.current_guest.type !== 0">挂载磁盘</el-button>
+				<el-button style="width:90px" @click="destroy_guest(show_guest_info.current_guest)" type="danger" size="mini" :disabled="show_guest_info.current_guest.status < 3">销毁虚拟机</el-button>
 			</el-row>
 			<el-row>
 				<el-descriptions :column="2" size="medium" border>
