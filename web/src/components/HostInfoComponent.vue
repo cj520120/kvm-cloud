@@ -19,7 +19,7 @@
 				<el-descriptions-item label="主机架构">{{ show_host.arch }}</el-descriptions-item>
 				<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 				<el-descriptions-item label="内存">
-					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay_size(show_host.allocationMemory) + ' / 总共:' + get_memory_desplay_size(show_host.totalMemory)" placement="top">
+					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(show_host.allocationMemory) + ' / 总共:' + get_memory_display_size(show_host.totalMemory)" placement="top">
 						<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
 					</el-tooltip>
 				</el-descriptions-item>

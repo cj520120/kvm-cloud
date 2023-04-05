@@ -26,7 +26,7 @@
 					<el-descriptions-item label="标签">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
-					<el-descriptions-item label="内存">{{ get_memory_desplay_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
+					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
 					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
 					<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 					<el-descriptions-item label="运行主机">
@@ -41,6 +41,9 @@
 						<el-tag>{{ show_guest_info.current_guest.type === 0 ? '系统' : '用户' }}</el-tag>
 					</el-descriptions-item>
 					<el-descriptions-item label="虚拟机IP">{{ show_guest_info.current_guest.guestIp }}</el-descriptions-item>
+					<el-descriptions-item label="上次运行时间">
+						{{ show_guest_info.current_guest.lastStartTime?parse_date(show_guest_info.current_guest.lastStartTime):'-' }}
+					</el-descriptions-item>
 					<el-descriptions-item label="状态">
 						<el-tag :type="show_guest_info.current_guest.status === 2 ? 'success' : 'danger'">{{ get_guest_status(show_guest_info.current_guest) }}</el-tag>
 					</el-descriptions-item>
@@ -55,12 +58,12 @@
 							<el-table-column label="描述" prop="description" width="200" />
 							<el-table-column label="容量" prop="capacity" width="150">
 								<template #default="scope">
-									{{ get_volume_desplay_size(scope.row.capacity) }}
+									{{ get_volume_display_size(scope.row.capacity) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="已使用" prop="allocation" width="150">
 								<template #default="scope">
-									{{ get_volume_desplay_size(scope.row.allocation) }}
+									{{ get_volume_display_size(scope.row.allocation) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="路径" prop="path" show-overflow-tooltip />

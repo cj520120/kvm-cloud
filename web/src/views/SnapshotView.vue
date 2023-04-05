@@ -10,12 +10,12 @@
 							<el-table-column label="磁盘类型" prop="type" width="100" />
 							<el-table-column label="磁盘空间" prop="capacity" width="100">
 								<template #default="scope">
-									{{ get_volume_desplay_size(scope.row.capacity) }}
+									{{ get_volume_display_size(scope.row.capacity) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="物理空间" prop="allocation" width="100">
 								<template #default="scope">
-									{{ get_volume_desplay_size(scope.row.allocation) }}
+									{{ get_volume_display_size(scope.row.allocation) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="状态" prop="status" width="100">
@@ -44,8 +44,8 @@
 							<el-descriptions-item label="ID">{{ show_snapshot.snapshotVolumeId }}</el-descriptions-item>
 							<el-descriptions-item label="快照名">{{ show_snapshot.name }}</el-descriptions-item>
 							<el-descriptions-item label="快照路径">{{ show_snapshot.volumePath }}</el-descriptions-item>
-							<el-descriptions-item label="快照容量">{{ get_volume_desplay_size(show_snapshot.capacity) }}</el-descriptions-item>
-							<el-descriptions-item label="物理占有">{{ get_volume_desplay_size(show_snapshot.allocation) }}</el-descriptions-item>
+							<el-descriptions-item label="快照容量">{{ get_volume_display_size(show_snapshot.capacity) }}</el-descriptions-item>
+							<el-descriptions-item label="物理占有">{{ get_volume_display_size(show_snapshot.allocation) }}</el-descriptions-item>
 							<el-descriptions-item label="磁盘类型">{{ show_snapshot.type }}</el-descriptions-item>
 							<el-descriptions-item label="存储池">{{ get_storage_name(show_snapshot.storageId) }}</el-descriptions-item>
 							<el-descriptions-item label="状态">

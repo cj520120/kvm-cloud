@@ -12,7 +12,7 @@
 				<el-descriptions-item label="名称">{{ show_scheme.name }}</el-descriptions-item>
 				<el-descriptions-item label="配额">{{ show_scheme.speed }}</el-descriptions-item>
 				<el-descriptions-item label="CPU">{{ show_scheme.cpu }}</el-descriptions-item>
-				<el-descriptions-item label="内存">{{ get_memory_desplay_size(show_scheme.memory) }}</el-descriptions-item>
+				<el-descriptions-item label="内存">{{ get_memory_display_size(show_scheme.memory) }}</el-descriptions-item>
 				<el-descriptions-item label="Cores">{{ show_scheme.cores }}</el-descriptions-item>
 				<el-descriptions-item label="Sockets">{{ show_scheme.sockets }}</el-descriptions-item>
 				<el-descriptions-item label="Threads">{{ show_scheme.threads }}</el-descriptions-item>

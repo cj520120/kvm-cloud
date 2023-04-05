@@ -34,12 +34,12 @@
 							</el-table-column>
 							<el-table-column label="磁盘空间" prop="capacity" width="100">
 								<template #default="scope">
-									{{ get_volume_desplay_size(scope.row.capacity) }}
+									{{ get_volume_display_size(scope.row.capacity) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="物理空间" prop="allocation" width="150">
 								<template #default="scope">
-									{{ get_volume_desplay_size(scope.row.allocation) }}
+									{{ get_volume_display_size(scope.row.allocation) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="挂载机器" prop="allocation" width="120" show-overflow-tooltip>

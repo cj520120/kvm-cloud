@@ -13,7 +13,7 @@
 							<el-table-column label="CPU" prop="cpu" width="120" />
 							<el-table-column label="内存" prop="memory" width="200">
 								<template #default="scope">
-									{{ get_memory_desplay_size(scope.row.memory) }}
+									{{ get_memory_display_size(scope.row.memory) }}
 								</template>
 							</el-table-column>
 							<el-table-column label="操作" min-width="380">

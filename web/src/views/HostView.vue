@@ -20,7 +20,7 @@
 							</el-table-column>
 							<el-table-column label="内存" prop="hostIp" width="120">
 								<template #default="scope">
-									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay_size(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay_size(scope.row.totalMemory)" placement="top">
+									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(scope.row.allocationMemory) + ' / 总共:' + get_memory_display_size(scope.row.totalMemory)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
 									</el-tooltip>
 								</template>

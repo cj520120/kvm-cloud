@@ -13,7 +13,7 @@
 							<el-table-column label="类型" prop="type" width="120" />
 							<el-table-column label="容量" prop="capacity" width="120">
 								<template #default="scope">
-									<el-tooltip class="item" effect="dark" :content="'已用:' + get_volume_desplay_size(scope.row.allocation) + ' / 总共:' + get_volume_desplay_size(scope.row.capacity)" placement="top">
+									<el-tooltip class="item" effect="dark" :content="'已用:' + get_volume_display_size(scope.row.allocation) + ' / 总共:' + get_volume_display_size(scope.row.capacity)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
 									</el-tooltip>
 								</template>

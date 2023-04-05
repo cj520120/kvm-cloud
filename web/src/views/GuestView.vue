@@ -30,7 +30,7 @@
 							<el-table-column label="标签" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="配置" prop="cpu" width="150">
-								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_desplay_size(scope.row.memory) }}</template>
+								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_display_size(scope.row.memory) }}</template>
 							</el-table-column>
 							<el-table-column label="类型" width="100">
 								<template #default="scope">

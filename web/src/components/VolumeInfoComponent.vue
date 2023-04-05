@@ -32,8 +32,8 @@
 						</el-button>
 						<span v-if="!show_volume.attach">-</span>
 					</el-descriptions-item>
-					<el-descriptions-item label="磁盘容量">{{ get_volume_desplay_size(show_volume.capacity) }}</el-descriptions-item>
-					<el-descriptions-item label="物理占用">{{ get_volume_desplay_size(show_volume.allocation) }}</el-descriptions-item>
+					<el-descriptions-item label="磁盘容量">{{ get_volume_display_size(show_volume.capacity) }}</el-descriptions-item>
+					<el-descriptions-item label="物理占用">{{ get_volume_display_size(show_volume.allocation) }}</el-descriptions-item>
 					<el-descriptions-item label="状态">
 						<el-tag :type="show_volume.status === 1 ? 'success' : 'danger'">{{ get_volume_status(show_volume) }}</el-tag>
 					</el-descriptions-item>
