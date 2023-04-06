@@ -113,6 +113,7 @@ vi /etc/sysconfig/network-scripts/ifcfg-br0
     DNS2=8.8.8.8
 
 # 务必使用 ip addr 命令查看你的实际网卡名，他很可能不是eth0
+# 如需ovs配置，请参考[OVS 网卡设置参考.txt](scripts%2FOVS%20%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E5%8F%82%E8%80%83.txt)
 # 下面这个编辑命令注意改成 ifcfg-实际网卡名
 vi /etc/sysconfig/network-scripts/ifcfg-eth0
 # 下面这个DEVICE注意改成 实际网卡名

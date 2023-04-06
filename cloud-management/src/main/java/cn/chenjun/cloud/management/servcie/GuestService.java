@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.NotifyInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -20,7 +19,6 @@ import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -367,26 +365,34 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         this.checkSystemComponent(guest.getNetworkId());
-        if (guest.getStatus() == Constant.GuestStatus.STOP) {
-            guest.setHostId(hostId);
-            guest.setStatus(Constant.GuestStatus.STARTING);
-            this.guestMapper.updateById(guest);
-            this.allocateService.initHostAllocate();
-            BaseOperateParam operateParam;
-            if (Objects.equals(guest.getType(), Constant.GuestType.SYSTEM)) {
-                operateParam = StartComponentGuestOperate.builder().hostId(hostId).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
-                        .title("启动系统主机[" + guest.getDescription() + "]").build();
-            } else {
-                operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
-                        .title("启动客户机[" + guest.getDescription() + "]").build();
-            }
-            this.operateTask.addTask(operateParam);
-            this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-            return ResultUtil.success(this.initGuestInfo(guest));
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.STOP:
+                guest.setHostId(hostId);
+                guest.setStatus(Constant.GuestStatus.STARTING);
+                this.guestMapper.updateById(guest);
+                this.allocateService.initHostAllocate();
+                BaseOperateParam operateParam;
+                if (Objects.equals(guest.getType(), Constant.GuestType.SYSTEM)) {
+                    operateParam = StartComponentGuestOperate.builder().hostId(hostId).guestId(guestId)
+                            .taskId(UUID.randomUUID().toString())
+                            .title("启动系统主机[" + guest.getDescription() + "]").build();
+                } else {
+                    operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
+                            .taskId(UUID.randomUUID().toString())
+                            .title("启动客户机[" + guest.getDescription() + "]").build();
+                }
+                this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                return ResultUtil.success(this.initGuestInfo(guest));
+            case Constant.GuestStatus.RUNNING:
+            case Constant.GuestStatus.STARTING:
+            case Constant.GuestStatus.CREATING:
+            case Constant.GuestStatus.REBOOT:
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
-        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+
 
     }
 
@@ -421,6 +427,8 @@ public class GuestService extends AbstractService {
                         .title("关闭客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                return ResultUtil.success(this.initGuestInfo(guest));
+            case Constant.GuestStatus.STOP:
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");

@@ -223,10 +223,7 @@ export default {
 				.then(() => {
 					destroyTemplate({ templateId: template.templateId }).then((res) => {
 						if (res.code === 0) {
-							let findIndex = this.templates.findIndex((item) => item.templateId === template.templateId)
-							if (findIndex >= 0) {
-								this.templates.splice(findIndex, 1)
-							}
+							this.update_template_info(res.data)
 							this.show_type = 0
 						} else {
 							this.$notify.error({

@@ -17,7 +17,7 @@
 									</el-select>
 								</el-form-item>
 								<el-form-item>
-								<el-input style="float: right; max-width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
+									<el-input style="float: right; max-width: 300px; margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
 								</el-form-item>
 							</el-form>
 						</div>
@@ -128,7 +128,7 @@
 	</div>
 </template>
 <script>
-import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, batchDestroyVolume } from '@/api/api'
+import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, batchDestroyVolume, getGuestInfo } from '@/api/api'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
@@ -286,6 +286,14 @@ export default {
 								}
 							})
 						})
+					}
+				})
+			}
+			if (notify.type === 1) {
+				getGuestInfo({ guestId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.$refs.GuestInfoComponentRef.update_guest_info(res.data)
+						this.$refs.VolumeInfoComponentRef.update_guest_info(res.data)
 					}
 				})
 			}

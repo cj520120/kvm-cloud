@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
+import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
@@ -160,12 +161,25 @@ public class TemplateService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> destroyTemplate(int templateId) {
-        this.templateMapper.deleteById(templateId);
-        this.guestMapper.detachCdByTemplateId(templateId);
-        this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", templateId));
-        this.notifyService.publish(NotifyInfo.builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-        return ResultUtil.success();
+    public ResultUtil<TemplateModel> destroyTemplate(int templateId) {
+        TemplateEntity template = this.templateMapper.selectById(templateId);
+        if (template == null) {
+            return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+        }
+        switch (template.getStatus()) {
+            case Constant.TemplateStatus.ERROR:
+            case Constant.TemplateStatus.READY:
+            case Constant.TemplateStatus.DESTROY:
+                template.setStatus(Constant.TemplateStatus.DESTROY);
+                this.templateMapper.updateById(template);
+                BaseOperateParam operate = DestroyTemplateOperate.builder().taskId(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
+                operateTask.addTask(operate);
+                TemplateModel source = this.initTemplateModel(template);
+                this.notifyService.publish(NotifyInfo.builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+                return ResultUtil.success(source);
+            default:
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");
+        }
     }
 
 }

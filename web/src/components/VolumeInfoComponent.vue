@@ -119,6 +119,9 @@ export default {
 				this.show_volume = volume
 			}
 		},
+		update_volume_info(volume) {
+			this.refresh_volume(volume)
+		},
 		async init_volume_template() {
 			if (this.show_volume.templateId === 0) {
 				return
@@ -158,6 +161,9 @@ export default {
 		show_guest_info(guestId) {
 			this.$refs.GuestInfoComponentRef.initGuestId(guestId)
 			this.show_type = 3
+		},
+		update_guest_info(guest) {
+			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
 		},
 		show_storage_info(storageId) {
 			this.$refs.StorageInfoComponentRef.init(storageId)

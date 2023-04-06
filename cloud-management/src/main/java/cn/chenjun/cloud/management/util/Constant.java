@@ -67,6 +67,7 @@ public class Constant {
         public static final int DOWNLOAD = 1;
         public static final int READY = 2;
         public static final int ERROR = 3;
+        public static final int DESTROY = 4;
     }
 
     public static class NetworkType {

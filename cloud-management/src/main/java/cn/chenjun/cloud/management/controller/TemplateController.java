@@ -51,7 +51,7 @@ public class TemplateController {
     }
 
     @DeleteMapping("/api/template/destroy")
-    public ResultUtil<Void> destroyTemplate(@RequestParam("templateId") int templateId) {
+    public ResultUtil<TemplateModel> destroyTemplate(@RequestParam("templateId") int templateId) {
         return templateService.destroyTemplate(templateId);
     }
 }
