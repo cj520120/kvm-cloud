@@ -420,11 +420,15 @@ public class GuestService extends AbstractService {
             if(hostId==guest.getHostId()){
                 throw new CodeException(ErrorCode.SERVER_ERROR, "迁移目标主机选择错误.");
             }
-            guest.setStatus(Constant.GuestStatus.REBOOT);
-            this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = MigrateGuestOperate.builder().guestId(guestId).hostId(hostId)
+            BaseOperateParam operateParam = MigrateGuestOperate.builder()
+                    .guestId(guestId)
+                    .sourceHostId(guest.getHostId())
+                    .toHostId(hostId)
                     .taskId(UUID.randomUUID().toString())
                     .title("迁移客户机[" + guest.getDescription() + "]").build();
+            guest.setStatus(Constant.GuestStatus.MIGRATE);
+            guest.setHostId(hostId);
+            this.guestMapper.updateById(guest);
             this.operateTask.addTask(operateParam);
             this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
             return ResultUtil.success(this.initGuestInfo(guest));
