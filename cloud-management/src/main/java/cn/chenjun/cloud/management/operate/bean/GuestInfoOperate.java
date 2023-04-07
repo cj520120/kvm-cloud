@@ -9,11 +9,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @EqualsAndHashCode
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MigrateGuestOperate extends BaseOperateParam {
+@SuperBuilder
+public class GuestInfoOperate extends BaseOperateParam {
     private int guestId;
-    private int sourceHostId;
-    private int toHostId;
 }
