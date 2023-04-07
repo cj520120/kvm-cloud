@@ -139,4 +139,12 @@ public interface OsOperate {
      * @throws Exception
      */
     void destroy(Connect connect, GuestDestroyRequest request) throws Exception;
+
+    /**
+     * 虚拟机迁移
+     * @param connect
+     * @param request
+     * @throws Exception
+     */
+    void migrate(Connect connect,GuestMigrateRequest request) throws Exception;
 }

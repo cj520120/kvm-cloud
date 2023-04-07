@@ -48,6 +48,7 @@ public class Constant {
         public static final String ALL_GUEST_INFO = "AllGuestInfo";
         public static final String GUEST_REBOOT = "RebootGuest";
         public static final String GUEST_SHUTDOWN = "ShutdownGuest";
+        public static final String GUEST_MIGRATE = "MigrateGuest";
 
         public static final String GUEST_ATTACH_CD_ROOM = "AttachCdRoom";
         public static final String GUEST_DETACH_CD_ROOM = "DetachCdRoom";

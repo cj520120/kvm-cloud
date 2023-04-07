@@ -135,9 +135,13 @@ vi /etc/libvirt/qemu.conf
 vi /etc/libvirt/libvirtd.conf
     listen_tls = 0
     listen_tcp = 1
-    tcp_port = "16059"
+    unix_sock_group = "root"
+    unix_sock_rw_perms = "0777"
+    auth_unix_ro = "none"
+    auth_unix_rw = "none"
+    tcp_port = "16509"
+    listen_addr = "0.0.0.0"
     auth_tcp = "none"
-    mdns_adv = 0
 vi /etc/sysconfig/libvirtd
     LIBVIRTD_ARGS="--listen"
 systemctl restart libvirtd 

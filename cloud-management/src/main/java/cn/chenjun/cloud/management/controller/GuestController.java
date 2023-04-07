@@ -115,6 +115,11 @@ public class GuestController {
         return this.guestService.reboot(guestId);
     }
 
+    @PostMapping("/api/guest/migrate")
+    public ResultUtil<GuestModel> migrate(@RequestParam("guestId") int guestId, @RequestParam("hostId") int hostId) {
+        return this.guestService.migrate(guestId, hostId);
+    }
+
     @PostMapping("/api/guest/shutdown/batch")
     public ResultUtil<List<GuestModel>> batchStop(@RequestParam("guestIds") String guestIdsStr) {
         List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());

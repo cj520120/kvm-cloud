@@ -14,6 +14,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
 import org.libvirt.Error;
@@ -424,6 +425,17 @@ public class OsOperateImpl implements OsOperate {
             domain.destroy();
         }
     }
+    @Override
+    public void migrate(Connect connect,GuestMigrateRequest request) throws Exception {
+        Domain domain = this.findDomainByName(connect, request.getName());
+        if (domain == null) {
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
+        }
+        @Cleanup
+        Connect toConnect = new Connect(String.format("qemu+tcp://%s/system", request.getHost()));
+        long live_migration_flag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
+        domain.migrate(toConnect, live_migration_flag, null, null, 0);
+    }
 
     private Domain findDomainByName(Connect connect, String name) throws Exception {
         int[] ids = connect.listDomains();
@@ -526,4 +538,68 @@ public class OsOperateImpl implements OsOperate {
         }
         return info;
     }
+
+
+    private static int bit(final int i) {
+        return 1 << i;
+    }
+
+    static final class MigrateFlags {
+        /**
+         * live migration
+         */
+        static final int VIR_MIGRATE_LIVE = bit(0);
+
+        /**
+         * direct source -> dest host control channel
+         */
+        static final int VIR_MIGRATE_PEER2PEER = bit(1);
+
+        /**
+         * tunnel migration data over libvirtd connection
+         *
+         * @apiNote Note the less-common spelling that we're stuck with:
+         * VIR_MIGRATE_TUNNELLED should be VIR_MIGRATE_TUNNELED
+         */
+        static final int VIR_MIGRATE_TUNNELLED = bit(2);
+
+        /**
+         * persist the VM on the destination
+         */
+        static final int VIR_MIGRATE_PERSIST_DEST = bit(3);
+
+        /**
+         * undefine the VM on the source
+         */
+        static final int VIR_MIGRATE_UNDEFINE_SOURCE = bit(4);
+
+        /**
+         * pause on remote side
+         */
+        static final int VIR_MIGRATE_PAUSED = bit(5);
+
+        /**
+         * migration with non-shared storage with full disk copy
+         */
+        static final int VIR_MIGRATE_NON_SHARED_DISK = bit(6);
+
+        /**
+         * migration with non-shared storage with incremental copy
+         * (same base image shared between source and destination)
+         */
+        static final int VIR_MIGRATE_NON_SHARED_INC = bit(7);
+
+        /**
+         * protect for changing domain configuration through the
+         * whole migration process; this will be used automatically
+         * when supported
+         */
+        static final int VIR_MIGRATE_CHANGE_PROTECTION = bit(8);
+
+        /**
+         * force migration even if it is considered unsafe
+         */
+        static final int VIR_MIGRATE_UNSAFE = bit(9);
+    }
+
 }

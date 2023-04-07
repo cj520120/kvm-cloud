@@ -210,6 +210,9 @@ public class OperateDispatchImpl implements OperateDispatch {
                 case Constant.Command.GUEST_QMA:
                     this.osOperate.qma(connect, GsonBuilderUtil.create().fromJson(data, GuestQmaRequest.class));
                     break;
+                case Constant.Command.GUEST_MIGRATE:
+                    this.osOperate.migrate(connect, GsonBuilderUtil.create().fromJson(data, GuestMigrateRequest.class));
+                    break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的操作:" + command);
             }

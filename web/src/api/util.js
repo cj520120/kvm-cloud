@@ -16,6 +16,8 @@ export default {
           return "重启中";
         case 6:
           return "虚拟机错误";
+        case 7:
+          return "正在迁移";
         default:
           return `未知状态[${guest.status}]`;
       }
