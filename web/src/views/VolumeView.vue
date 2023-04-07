@@ -128,7 +128,7 @@
 	</div>
 </template>
 <script>
-import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, batchDestroyVolume, getGuestInfo } from '@/api/api'
+import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, batchDestroyVolume } from '@/api/api'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
@@ -169,7 +169,13 @@ export default {
 		this.show_type = 0
 
 		this.init_view()
+	},
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
 		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
 	},
 	computed: {
 		show_table_volumes() {
@@ -268,7 +274,7 @@ export default {
 			})
 			this.$refs.VolumeInfoComponentRef.refresh_volume(volume)
 		},
-		handle_notify_message(notify) {
+		dispatch_notify_message(notify) {
 			if (notify.type === 2) {
 				getVolumeInfo({ volumeId: notify.id }).then((res) => {
 					if (res.code == 0) {
@@ -286,14 +292,6 @@ export default {
 								}
 							})
 						})
-					}
-				})
-			}
-			if (notify.type === 1) {
-				getGuestInfo({ guestId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.$refs.GuestInfoComponentRef.update_guest_info(res.data)
-						this.$refs.VolumeInfoComponentRef.update_guest_info(res.data)
 					}
 				})
 			}

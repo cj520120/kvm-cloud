@@ -1,5 +1,6 @@
 class NotifyWebsocket {
   static instance = undefined;
+  notify_list = [];
   init(pThis) {
     let pThat = this;
     if (!NotifyWebsocket.instance) {

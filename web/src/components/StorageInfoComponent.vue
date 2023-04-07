@@ -27,16 +27,25 @@
 	</el-card>
 </template>
 <script>
+import Notify from '@/api/notify'
 import util from '@/api/util'
 import { destroyStorage, getStorageInfo, pauseStorage, registerStorage } from '@/api/api'
 export default {
+	name: 'StorageInfoComponent',
 	data() {
 		return {
 			storage_loading: false,
 			show_storage: {}
 		}
 	},
-	mixins: [util],
+	mixins: [Notify,util],
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
+	},
 	methods: {
 		go_back() {
 			this.$emit('back')
@@ -139,6 +148,17 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		dispatch_notify_message(notify) {
+			if (notify.type === 7 && this.show_storage.storageId == notify.id) {
+				getStorageInfo({ storageId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.refresh_storage(res.data)
+					} else if (res.code == 2000001) {
+						this.go_back()
+					}
+				})
+			}
 		}
 	}
 }

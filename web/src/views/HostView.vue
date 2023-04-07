@@ -68,7 +68,13 @@ export default {
 	mounted() {
 		this.show_type = 0
 		this.init_view()
+	},
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
 		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
 	},
 	methods: {
 		async init_view() {
@@ -105,7 +111,7 @@ export default {
 			}
 			this.$refs.HostInfoComponentRef.refresh_host(host)
 		},
-		handle_notify_message(notify) {
+		dispatch_notify_message(notify) {
 			if (notify.type === 4) {
 				getHostInfo({ hostId: notify.id }).then((res) => {
 					if (res.code == 0) {

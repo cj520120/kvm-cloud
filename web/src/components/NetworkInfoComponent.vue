@@ -59,10 +59,12 @@
 	</div>
 </template>
 <script>
-import { getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getSystemGuestList } from '@/api/api'
+import Notify from '@/api/notify'
+import { getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getSystemGuestList, getGuestInfo } from '@/api/api'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
 export default {
+	name: 'NetworkInfoComponent',
 	data() {
 		return {
 			network_loading: false,
@@ -87,7 +89,14 @@ export default {
 		}
 	},
 	components: { GuestInfoComponent },
-	mixins: [util],
+	mixins: [Notify, util],
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
+	},
 	methods: {
 		on_back_click() {
 			this.$emit('back')
@@ -171,7 +180,6 @@ export default {
 				}
 				this.$forceUpdate()
 			}
-			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
 		},
 		pasue_network(network) {
 			this.$confirm('维护网络, 是否继续?', '提示', {
@@ -232,6 +240,25 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		dispatch_notify_message(notify) {
+			if (notify.type === 3 && this.show_network.networkId === notify.id) {
+				getNetworkInfo({ networkId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.refresh_network(res.data)
+					} else if (res.code == 2000001) {
+						this.on_back_click()
+					}
+				})
+			} else if (notify.type === 1) {
+				getGuestInfo({ guestId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.update_guest_info(res.data)
+					} else if (res.code == 2000001) {
+						this.delete_guest(notify.id)
+					}
+				})
+			}
 		}
 	}
 }

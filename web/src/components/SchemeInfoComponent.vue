@@ -21,16 +21,25 @@
 	</el-card>
 </template>
 <script>
+import Notify from '@/api/notify'
 import { destroyScheme, getSchemeInfo } from '@/api/api'
 import util from '@/api/util'
 export default {
+	name: 'SchemeInfoComponent',
 	data() {
 		return {
 			schme_loading: false,
 			show_scheme: { schemeId: 0, name: '-', cpu: 0, memory: 0, speed: 0, sockets: 0, cores: 0, threads: 0 }
 		}
 	},
-	mixins: [util],
+	mixins: [Notify,util],
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
+	},
 	methods: {
 		on_back_click() {
 			this.$emit('back')
@@ -91,6 +100,17 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		dispatch_notify_message(notify) {
+			if (notify.type === 8 && this.show_scheme.schemeId == notify.id) {
+				getSchemeInfo({ schemeId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.refresh_scheme(res.data)
+					} else if (res.code == 2000001) {
+						this.on_back_click()
+					}
+				})
+			}
 		}
 	}
 }

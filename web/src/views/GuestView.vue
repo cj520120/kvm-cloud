@@ -4,23 +4,22 @@
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header">
-                                <el-form :inline="true" class="demo-form-inline">
-                                    <el-form-item>
-                                        <el-button type="primary" size="mini" @click="show_create_guest_click">创建虚拟机</el-button>
-                                    </el-form-item>
-                                    <el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
-                                    <el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
-                                    <el-form-item label="运行主机">
-                                        <el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
-                                            <el-option label="全部" :value="0"></el-option>
-                                            <el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
-                                        </el-select>
-                                    </el-form-item>
-                                    <el-form-item>
-                                     <el-input style="margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
-                                    </el-form-item>
-                                </el-form>
-
+						<el-form :inline="true" class="demo-form-inline">
+							<el-form-item>
+								<el-button type="primary" size="mini" @click="show_create_guest_click">创建虚拟机</el-button>
+							</el-form-item>
+							<el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
+							<el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
+							<el-form-item label="运行主机">
+								<el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
+									<el-option label="全部" :value="0"></el-option>
+									<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+								</el-select>
+							</el-form-item>
+							<el-form-item>
+								<el-input style="margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
+							</el-form-item>
+						</el-form>
 					</el-row>
 					<el-row>
 						<el-table ref="guestTable" :v-loading="data_loading" :data="show_table_guests" style="width: 100%" @selection-change="handleSelectionChange">
@@ -74,7 +73,7 @@
 	</div>
 </template>
 <script>
-import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getHostInfo, getSchemeInfo } from '@/api/api'
+import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest } from '@/api/api'
 import Notify from '@/api/notify'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
@@ -111,7 +110,13 @@ export default {
 	mounted() {
 		this.show_type = 0
 		this.init_view()
+	},
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
 		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
 	},
 	computed: {
 		show_table_guests() {
@@ -203,9 +208,8 @@ export default {
 					}
 				})
 			})
-			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
 		},
-		handle_notify_message(notify) {
+		dispatch_notify_message(notify) {
 			if (notify.type === 1) {
 				getGuestInfo({ guestId: notify.id }).then((res) => {
 					if (res.code == 0) {
@@ -223,20 +227,6 @@ export default {
 								}
 							})
 						})
-					}
-				})
-			} else if (notify.type === 4) {
-				if (notify.type === 4) {
-					getHostInfo({ hostId: notify.id }).then((res) => {
-						if (res.code == 0) {
-							this.$refs.GuestInfoComponentRef.refresh_host(res.data)
-						}
-					})
-				}
-			} else if (notify.type === 8) {
-				getSchemeInfo({ schemeId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.$refs.GuestInfoComponentRef.refresh_scheme(res.data)
 					}
 				})
 			}

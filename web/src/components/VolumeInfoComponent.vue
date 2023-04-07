@@ -59,8 +59,10 @@ import CloneVolumeComponent from '@/components/CloneVolumeComponent'
 import MigrateVolumeComponent from '@/components/MigrateVolumeComponent.vue'
 import StorageInfoComponent from '@/components/StorageInfoComponent'
 import util from '@/api/util'
+import Notify from '@/api/notify'
 import { destroyVolume, getStorageInfo, getTemplateInfo, getVolumeInfo } from '@/api/api'
 export default {
+	name: 'VolumeInfoComponent',
 	data() {
 		return {
 			volume_loading: false,
@@ -74,7 +76,14 @@ export default {
 	beforeCreate() {
 		this.$options.components.GuestInfoComponent = require('./GuestInfoComponent.vue').default
 	},
-	mixins: [util],
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
+	},
+	mixins: [Notify, util],
 	methods: {
 		go_back() {
 			this.$emit('back')
@@ -119,9 +128,6 @@ export default {
 				this.show_volume = volume
 			}
 		},
-		update_volume_info(volume) {
-			this.refresh_volume(volume)
-		},
 		async init_volume_template() {
 			if (this.show_volume.templateId === 0) {
 				return
@@ -162,9 +168,6 @@ export default {
 			this.$refs.GuestInfoComponentRef.initGuestId(guestId)
 			this.show_type = 3
 		},
-		update_guest_info(guest) {
-			this.$refs.GuestInfoComponentRef.update_guest_info(guest)
-		},
 		show_storage_info(storageId) {
 			this.$refs.StorageInfoComponentRef.init(storageId)
 			this.show_type = 4
@@ -192,6 +195,17 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		dispatch_notify_message(notify) {
+			if (notify.type === 1 && this.show_volume.volumeId === notify.id) {
+				getVolumeInfo({ volumeId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.refresh_volume(res.data)
+					} else if (res.code == 2000001) {
+						this.go_back()
+					}
+				})
+			}
 		}
 	}
 }

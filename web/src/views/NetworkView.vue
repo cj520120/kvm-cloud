@@ -40,7 +40,7 @@
 </template>
 <script>
 import util from '@/api/util'
-import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getGuestInfo } from '@/api/api'
+import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork } from '@/api/api'
 
 import NetworkInfoComponent from '@/components/NetworkInfoComponent'
 import CreateNetworkComponent from '@/components/CreateNetworkComponent'
@@ -58,7 +58,13 @@ export default {
 	mounted() {
 		this.show_type = 0
 		this.init_view()
+	},
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
 		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
 	},
 	mixins: [Notify, util],
 	methods: {
@@ -88,7 +94,7 @@ export default {
 
 			this.$refs.NetworkInfoComponentRef.refresh_network(network)
 		},
-		handle_notify_message(notify) {
+		dispatch_notify_message(notify) {
 			if (notify.type === 3) {
 				getNetworkInfo({ networkId: notify.id }).then((res) => {
 					if (res.code == 0) {
@@ -101,14 +107,6 @@ export default {
 					}
 					this.$forceUpdate()
 				})
-			} else if (notify.type === 1) {
-				getGuestInfo({ guestId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.$refs.NetworkInfoComponentRef.update_guest_info(res.data)
-					} else if (res.code == 2000001) {
-						this.$refs.NetworkInfoComponentRef.delete_guest(notify.id)
-					}
-				})
 			}
 		},
 		show_network_list() {
@@ -119,7 +117,7 @@ export default {
 			this.show_type = 2
 		},
 		show_network_info_click(network) {
-			this.$refs.NetworkInfoComponentRef.init_network(this.networks,network)
+			this.$refs.NetworkInfoComponentRef.init_network(this.networks, network)
 			this.show_type = 1
 		},
 		pasue_network(network) {

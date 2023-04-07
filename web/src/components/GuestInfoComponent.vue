@@ -114,10 +114,11 @@ import ReInstallComponentVue from './ReInstallComponent.vue'
 import HostInfoComponent from '@/components/HostInfoComponent.vue'
 import SchemeInfoComponent from './SchemeInfoComponent.vue'
 import VolumeInfoComponent from '@/components/VolumeInfoComponent'
-
+import Notify from '@/api/notify'
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 
 export default {
+	name: 'GuestInfoComponent',
 	components: {
 		AttachDiskComponent,
 		AttachCdRoomComponent,
@@ -130,7 +131,14 @@ export default {
 		SchemeInfoComponent,
 		VolumeInfoComponent
 	},
-	mixins: [util],
+	mixins: [Notify, util],
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
+	},
 	data() {
 		return {
 			show_type: 0,
@@ -219,12 +227,6 @@ export default {
 		on_finish_reinstall(guest) {
 			this.show_type = 0
 			this.on_notify_update_guest_info(guest)
-		},
-		refresh_host(host) {
-			this.$refs.HostInfoComponentRef.refresh_host(host)
-		},
-		refresh_scheme(scheme) {
-			this.$refs.SchemeInfoComponentRef.refresh_scheme(scheme)
 		},
 		async init(guest) {
 			this.show_type = 0
@@ -327,9 +329,6 @@ export default {
 				await this.load_current_guest_scheme(guest)
 				this.$forceUpdate()
 			}
-		},
-		async update_volume_info(volume) {
-			this.$refs.VolumeInfoComponentRef.update_volume_info(volume)
 		},
 		show_start_guest_click(guest) {
 			this.$refs.StartGuestComponentRef.init(guest)
@@ -453,6 +452,17 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		dispatch_notify_message(notify) {
+			if (notify.type === 1 && this.show_guest_info.guestId === notify.id) {
+				getGuestInfo({ guestId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.update_guest_info(res.data)
+					} else if (res.code == 2000001) {
+						this.on_back_click()
+					}
+				})
+			}
 		}
 	}
 }

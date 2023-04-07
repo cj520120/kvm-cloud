@@ -40,9 +40,11 @@
 	</el-card>
 </template>
 <script>
+import Notify from '@/api/notify'
 import util from '@/api/util'
 import { getHostInfo, pauseHost, registerHost, destroyHost } from '@/api/api'
 export default {
+	name: 'HostInfoComponent',
 	data() {
 		return {
 			host_loading: false,
@@ -67,7 +69,14 @@ export default {
 			}
 		}
 	},
-	mixins: [util],
+	mixins: [Notify,util],
+	created() {
+		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.init_notify()
+	},
+	beforeDestroy() {
+		this.unsubscribe_notify(this.$options.name)
+	},
 	methods: {
 		on_back_click() {
 			this.$emit('back')
@@ -168,6 +177,17 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		dispatch_notify_message(notify) {
+			if (notify.type === 4 && this.show_host.hostId === notify.id) {
+				getHostInfo({ hostId: notify.id }).then((res) => {
+					if (res.code == 0) {
+						this.refresh_host(res.data)
+					} else if (res.code == 2000001) {
+						this.on_back_click()
+					}
+				})
+			}
 		}
 	}
 }
