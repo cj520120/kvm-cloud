@@ -19,6 +19,7 @@ public interface RouteInitialize {
 
     /**
      * 是否支持meta服务
+     *
      * @return
      */
     boolean isEnableMetaService();

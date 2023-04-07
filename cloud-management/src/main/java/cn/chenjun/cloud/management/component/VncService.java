@@ -42,6 +42,7 @@ public class VncService extends AbstractComponentService {
     public boolean allocateBasicNic() {
         return true;
     }
+
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -56,6 +57,7 @@ public class VncService extends AbstractComponentService {
         }
         super.create(networkId);
     }
+
     @Override
     public int order() {
         return 1;
@@ -145,10 +147,9 @@ public class VncService extends AbstractComponentService {
             GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
             if (network.getType().equals(Constant.NetworkType.BASIC)) {
-                iptablesRules = new String[]{"-t", "nat", "-A", "POSTROUTING", "-o", "eth" + guestNetwork.getDeviceId(), "-j", "MASQUERADE" };
+                iptablesRules = new String[]{"-t", "nat", "-A", "POSTROUTING", "-o", "eth" + guestNetwork.getDeviceId(), "-j", "MASQUERADE"};
                 commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + guestNetwork.getDeviceId()).fileBody(this.getNicConfig(guestNetwork.getDeviceId(), guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns())).build())).build());
-            }
-            else{
+            } else {
                 commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + guestNetwork.getDeviceId()).fileBody(this.getNicConfig(guestNetwork.getDeviceId(), guestNetwork.getIp(), network.getMask(), "", "")).build())).build());
             }
         }

@@ -11,6 +11,9 @@
 							<el-table-column label="ID" prop="networkId" width="80" />
 							<el-table-column label="名称" prop="name" width="120" show-overflow-tooltip />
 							<el-table-column label="桥接网卡" prop="bridge" width="120" />
+							<el-table-column label="子网" prop="subnet" width="150">
+								<template #default="scope">{{ scope.row.subnet }}/{{ netmask2CIDR(scope.row.mask) }}</template>
+							</el-table-column>
 							<el-table-column label="网络类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ get_network_type(scope.row) }}</el-tag>
@@ -79,6 +82,16 @@ export default {
 				.finally(() => {
 					this.data_loading = false
 				})
+		},
+		netmask2CIDR(netmask) {
+			return (
+				netmask
+					.split('.')
+					.map(Number)
+					.map((part) => (part >>> 0).toString(2))
+					.join('')
+					.split('1').length - 1
+			)
 		},
 		get_parent_network(network) {
 			let find = this.networks.find((v) => v.networkId === network.basicNetworkId)

@@ -127,8 +127,8 @@ public abstract class AbstractComponentService extends AbstractService {
                     .deviceId(0)
                     .build();
             this.guestDiskMapper.insert(guestDisk);
-            GuestNetworkEntity guestNetwork ;
-            int networkDeviceId=0;
+            GuestNetworkEntity guestNetwork;
+            int networkDeviceId = 0;
             guestNetwork = this.allocateService.allocateNetwork(networkId);
             guestNetwork.setDeviceId(networkDeviceId++);
             guestNetwork.setDriveType(this.applicationConfig.getSystemComponentNetworkDriver());
@@ -191,12 +191,14 @@ public abstract class AbstractComponentService extends AbstractService {
 
     /**
      * 获取组件类型
+     *
      * @return
      */
     public abstract int getComponentType();
 
     /**
      * 获取组件名称
+     *
      * @return
      */
     public abstract String getComponentName();

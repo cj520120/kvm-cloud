@@ -44,7 +44,6 @@ public class RouteService extends AbstractComponentService {
     }
 
 
-
     @Override
     public GuestQmaRequest getStartQmaRequest(int guestId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
@@ -88,7 +87,7 @@ public class RouteService extends AbstractComponentService {
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
         commands.addAll(routeInitialize.initialize(guestId));
 
-        if(routeInitialize.isEnableMetaService()) {
+        if (routeInitialize.isEnableMetaService()) {
 
 
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "nginx"}).checkSuccess(true).build())).build());
@@ -109,7 +108,7 @@ public class RouteService extends AbstractComponentService {
             String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("meta/meta.service").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("meta/meta.py").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             NetworkEntity network = this.networkMapper.selectById(component.getNetworkId());
-            metaPython=String.format(metaPython,applicationConfig.getManagerUri(),network.getSecret());
+            metaPython = String.format(metaPython, applicationConfig.getManagerUri(), network.getSecret());
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/meta-service/meta.py").fileBody(metaPython).build())).build());
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/meta-service/service.sh").fileBody(metaServiceShell).build())).build());
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/meta-service.service").fileBody(metaService).build())).build());
