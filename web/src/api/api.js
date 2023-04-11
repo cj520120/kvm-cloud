@@ -381,6 +381,13 @@ export const startGuest = (data = {}) => {
     method: "POST",
   });
 };
+export const migrateGuest = (data = {}) => {
+  return axios.request({
+    url: "api/guest/migrate",
+    data,
+    method: "POST",
+  });
+};
 export const batchStartGuest = (data = {}) => {
   return axios.request({
     url: "api/guest/start/batch",

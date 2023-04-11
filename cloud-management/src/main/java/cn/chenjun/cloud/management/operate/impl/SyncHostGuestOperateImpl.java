@@ -69,11 +69,10 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
             Map<String, GuestEntity> map = guestEntityList.stream().collect(Collectors.toMap(GuestEntity::getName, Function.identity()));
             for (String guestName : guestNames) {
                 GuestEntity guest = map.get(guestName);
-                if (guest == null) {
+                if (guest == null || Objects.equals(cn.chenjun.cloud.management.util.Constant.GuestStatus.MIGRATE, guest.getStatus())) {
                     continue;
                 }
                 if (!Objects.equals(guest.getHostId(), param.getHostId()) || Objects.equals(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP, guest.getStatus())) {
-                    //不是同一台宿主机或者当前是关机状态
                     BaseOperateParam operate = DestroyHostGuestOperate.builder().hostId(param.getHostId()).name(guestName).title("同步停止主机:" + guest.getGuestId()).taskId(UUID.randomUUID().toString()).build();
                     this.operateTask.addTask(operate);
                 }
@@ -84,7 +83,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
             List<GuestEntity> guestEntityList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("host_id", param.getHostId()));
             for (GuestEntity guest : guestEntityList) {
                 if (Objects.equals(guest.getStatus(), cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING)
-                        && System.currentTimeMillis() - guest.getLastStartTime().getTime() > TimeUnit.MINUTES.toMillis(3)) {
+                        && System.currentTimeMillis() - guest.getLastStartTime().getTime() > TimeUnit.MINUTES.toMillis(1)) {
                     //上次超过1分钟，则开始检测
                     if (!guestNames.contains(guest.getName())) {
                         //无效的主机状态，开始自动关机
