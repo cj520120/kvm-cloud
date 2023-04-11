@@ -8,7 +8,6 @@ export default {
       websocket.init(this);
     },
     subscribe_notify(key, func) {
-      console.log(websocket);
       websocket.notify_list.push({ k: key, n: func });
     },
     unsubscribe_notify(key) {

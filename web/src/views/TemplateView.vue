@@ -36,7 +36,7 @@
 						<el-page-header @back="show_template_list" content="模版详情"></el-page-header>
 					</el-row>
 					<el-row style="text-align: left; margin: 20px 0">
-						<el-button @click="download_template(show_template)" type="warning" size="mini" v-if="show_template.uri && (show_template.uri.indexOf('http://') === 0 || show_template.indexOf('https://') === 0)">重新下载</el-button>
+						<el-button @click="download_template(show_template)" type="warning" size="mini" v-if="show_template.uri && (show_template.uri.indexOf('http://') === 0 || show_template.uri.indexOf('https://') === 0)">重新下载</el-button>
 						<el-button @click="destroy_template(show_template)" type="danger" size="mini">销毁模版</el-button>
 					</el-row>
 					<el-row>

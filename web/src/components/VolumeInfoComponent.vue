@@ -10,7 +10,7 @@
 				<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
 				<el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button>
 				<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
-				<!-- <el-button @click="show_download_volume_click(show_volume)" type="primary" size="mini">下载磁盘</el-button> -->
+				<el-button @click="show_download_volume_click(show_volume)" type="primary" size="mini">下载磁盘</el-button>
 				<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
 			</el-row>
 			<el-row>
@@ -197,7 +197,7 @@ export default {
 				.catch(() => {})
 		},
 		dispatch_notify_message(notify) {
-			if (notify.type === 1 && this.show_volume.volumeId === notify.id) {
+			if (notify.type === 2 && this.show_volume.volumeId === notify.id) {
 				getVolumeInfo({ volumeId: notify.id }).then((res) => {
 					if (res.code == 0) {
 						this.refresh_volume(res.data)
