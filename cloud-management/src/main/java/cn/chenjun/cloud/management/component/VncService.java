@@ -46,7 +46,7 @@ public class VncService extends AbstractComponentService {
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void create(int networkId) {
+    public void checkAndStart(int networkId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", Constant.ComponentType.ROUTE).eq("network_id", networkId).last("limit 0 ,1"));
         if (component == null) {
             return;
@@ -55,7 +55,7 @@ public class VncService extends AbstractComponentService {
         if (vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING)) {
             return;
         }
-        super.create(networkId);
+        super.checkAndStart(networkId);
     }
 
     @Override

@@ -39,10 +39,11 @@ public class Oauth2LoginController {
 
     @GetMapping("/login")
     public RedirectView goLoginPage() {
-        String redirectUri = cn.hutool.core.net.URLEncoder.createDefault().encode(this.config.getRedirectUri(), StandardCharsets.UTF_8);
+        String redirectUri = cn.hutool.core.codec.PercentCodec.of( StandardCharsets.UTF_8.name()).encode(this.config.getRedirectUri(), StandardCharsets.UTF_8);
         return new RedirectView(String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", this.config.getAuthUri(), this.config.getClientId(), redirectUri));
     }
 
+    @SuppressWarnings("unchecked")
     @PostMapping("/api/user/oauth2/login")
     @ResponseBody
     public ResultUtil<TokenModel> login(@RequestParam("code") String code) {
@@ -66,9 +67,8 @@ public class Oauth2LoginController {
         if (response.getStatusCode() != HttpStatus.OK) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message(response.getBody()).build();
         }
-        Map<String, Object> userInfo = GsonBuilderUtil.create().fromJson(response.getBody(), new TypeToken<Map<String, Object>>() {
+        Object id = GsonBuilderUtil.create().<Map<String, Object>>fromJson(response.getBody(), new TypeToken<Map<String, Object>>() {
         }.getType());
-        Object id = userInfo;
         for (String name : this.config.getIdPath()) {
             id = ((Map<String, Object>) id).get(name);
         }

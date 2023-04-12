@@ -10,23 +10,23 @@ import lombok.NoArgsConstructor;
  * @author chenjun
  */
 public class RequestContext {
-    private static final ThreadLocal<Context> threadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<Context> THREAD_LOCAL = new ThreadLocal<>();
 
     public static Context getCurrent() {
-        Context context = threadLocal.get();
+        Context context = THREAD_LOCAL.get();
         if (context == null) {
             context = new Context();
-            threadLocal.set(context);
+            THREAD_LOCAL.set(context);
         }
         return context;
     }
 
     public static void remove() {
-        threadLocal.remove();
+        THREAD_LOCAL.remove();
     }
 
     public static void set(Context context) {
-        threadLocal.set(context);
+        THREAD_LOCAL.set(context);
     }
 
     @Data

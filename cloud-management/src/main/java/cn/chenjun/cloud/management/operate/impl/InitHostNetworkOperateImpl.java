@@ -118,6 +118,8 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
                         network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY);
                         networkMapper.updateById(network);
+                    default:
+                        break;
                 }
                 this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             } else {
@@ -135,6 +137,8 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                 case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
                     network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.ERROR);
                     networkMapper.updateById(network);
+                default:
+                    break;
             }
 
 

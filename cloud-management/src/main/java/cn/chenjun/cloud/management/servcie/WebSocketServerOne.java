@@ -2,7 +2,9 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.NotifyInfo;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -12,8 +14,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 @ServerEndpoint(value = "/api/ws/")
+@EqualsAndHashCode
 public class WebSocketServerOne {
     private static final CopyOnWriteArraySet<WebSocketServerOne> SESSIONS = new CopyOnWriteArraySet<>();
     private Session session;
@@ -24,6 +28,7 @@ public class WebSocketServerOne {
             try {
                 client.session.getBasicRemote().sendText(msg);
             } catch (Exception e) {
+                log.info("写入通知消息出错。",e);
             }
         }
     }

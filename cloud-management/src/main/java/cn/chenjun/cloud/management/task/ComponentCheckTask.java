@@ -40,7 +40,7 @@ public class ComponentCheckTask extends AbstractTask {
         for (NetworkEntity network : networkList) {
             if (network.getStatus() == Constant.NetworkStatus.READY) {
                 for (AbstractComponentService componentService : this.componentServiceList) {
-                    componentService.create(network.getNetworkId());
+                    componentService.checkAndStart(network.getNetworkId());
                 }
             }
         }

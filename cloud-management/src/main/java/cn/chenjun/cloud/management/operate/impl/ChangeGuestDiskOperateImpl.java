@@ -78,6 +78,8 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
                 volumeMapper.updateById(volume);
                 break;
+            default:
+                break;
         }
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
         this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_VOLUME).build());

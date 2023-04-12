@@ -52,6 +52,8 @@ public class HostSyncTask extends AbstractTask {
                         BaseOperateParam operateParam = HostCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测主机状态").hostId(host.getHostId()).build();
                         this.operateTask.addTask(operateParam);
                         break;
+                    default:
+                        break;
                 }
             }
         }

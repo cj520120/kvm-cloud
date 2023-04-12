@@ -19,10 +19,10 @@ public class ConfigController {
 
     @GetMapping("/api/config")
     public ResultUtil<Map<String, Object>> getSystemConfig() {
-        Map<String, Object> oauth = new HashMap<>();
+        Map<String, Object> oauth = new HashMap<>(3);
         oauth.put("enable", this.config.isEnable());
         oauth.put("title", this.config.getTitle());
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(1);
         map.put("oauth", oauth);
         return ResultUtil.<Map<String, Object>>builder().data(map).build();
     }

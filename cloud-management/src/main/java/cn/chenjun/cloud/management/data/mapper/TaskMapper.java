@@ -26,6 +26,7 @@ public interface TaskMapper extends BaseMapper<TaskEntity> {
      * 更新数据版本
      * @param taskId
      * @param oldVersion
+     * @param expireTime 
      * @return
      */
     @Update("update tbl_task_info set task_version=task_version+1,expire_time=#{expireTime} where task_id=#{taskId} and task_version=#{oldVersion}")

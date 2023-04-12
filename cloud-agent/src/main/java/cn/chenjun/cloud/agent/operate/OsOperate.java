@@ -44,6 +44,7 @@ public interface OsOperate {
      *
      * @param connect
      * @param request
+     * @return
      * @throws Exception
      */
     GuestInfo start(Connect connect, GuestStartRequest request) throws Exception;

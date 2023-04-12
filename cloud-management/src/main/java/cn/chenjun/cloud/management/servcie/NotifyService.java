@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class NotifyService implements CommandLineRunner, MessageListener<NotifyInfo> {
-    private static final Set<Session> clientSessions = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<Session> CLIENT_SESSIONS = Collections.synchronizedSet(new HashSet<>());
     @Autowired
     private RedissonClient redissonClient;
     private RTopic topic;

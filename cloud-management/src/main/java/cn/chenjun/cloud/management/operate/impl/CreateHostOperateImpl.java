@@ -53,7 +53,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
                 }.getType()))
                 .mountPath(storage.getMountPath())
                 .build()).collect(Collectors.toList());
-        Map<Integer, BasicBridgeNetwork> basicBridgeNetworkMap = new HashMap<>();
+        Map<Integer, BasicBridgeNetwork> basicBridgeNetworkMap = new HashMap<>(1);
         for (NetworkEntity network : networkList) {
             if (Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC, network.getType())) {
                 basicBridgeNetworkMap.put(network.getNetworkId(), BasicBridgeNetwork.builder()
@@ -104,7 +104,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
 
         InitHostRequest request = InitHostRequest.builder()
                 .storageList(createStorageRequest)
-                .basicBridgeNetworkList(basicBridgeNetworkMap.values().stream().collect(Collectors.toList()))
+                .basicBridgeNetworkList(new ArrayList<>(basicBridgeNetworkMap.values()))
                 .vlanNetworkList(vlanNetworkList)
                 .build();
         this.asyncInvoker(host, param, Constant.Command.HOST_INIT, request);

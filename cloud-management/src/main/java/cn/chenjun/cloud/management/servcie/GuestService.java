@@ -46,7 +46,7 @@ public class GuestService extends AbstractService {
 
     private void initGuestMetaData(int guestId,String password){
         GuestEntity guest=this.guestMapper.selectById(guestId);
-        Map<String, String> metaDataMap = new HashMap<>();
+        Map<String, String> metaDataMap = new HashMap<>(4);
         String hostname="VM-" +guest.getGuestIp().replace(".", "-");
         metaDataMap.put("hostname", hostname);
         metaDataMap.put("local-hostname", hostname);
@@ -194,40 +194,7 @@ public class GuestService extends AbstractService {
         this.guestNetworkMapper.updateById(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
-            VolumeEntity volume = VolumeEntity.builder()
-                    .description("ROOT-" + guest.getGuestId())
-                    .capacity(size)
-                    .storageId(storage.getStorageId())
-                    .name(uid)
-                    .path(storage.getMountPath() + "/" + uid)
-                    .type(volumeType)
-                    .templateId(diskTemplateId)
-                    .allocation(0L)
-                    .capacity(size)
-                    .backingPath("")
-                    .status(Constant.VolumeStatus.CREATING)
-                    .build();
-            this.volumeMapper.insert(volume);
-            GuestDiskEntity guestDisk = GuestDiskEntity.builder()
-                    .volumeId(volume.getVolumeId())
-                    .guestId(guest.getGuestId())
-                    .deviceId(0)
-                    .build();
-            this.guestDiskMapper.insert(guestDisk);
-            this.initGuestMetaData(guest.getGuestId(),password);
-            BaseOperateParam operateParam = CreateGuestOperate.builder()
-                    .guestId(guest.getGuestId())
-                    .snapshotVolumeId(snapshotVolumeId)
-                    .templateId(diskTemplateId)
-                    .volumeId(volume.getVolumeId())
-                    .start(true)
-                    .hostId(hostId)
-                    .taskId(uid)
-                    .title("创建客户机[" + guest.getDescription() + "]")
-                    .build();
-            this.operateTask.addTask(operateParam);
-
-            this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+            createGuest(hostId, diskTemplateId, snapshotVolumeId, volumeType, password, size, uid, guest, storage);
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
             if (guestDisk != null) {
@@ -251,6 +218,43 @@ public class GuestService extends AbstractService {
         }
         this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         return ResultUtil.success(this.initGuestInfo(guest));
+    }
+
+    private void createGuest(int hostId, int diskTemplateId, int snapshotVolumeId, String volumeType, String password, long size, String uid, GuestEntity guest, StorageEntity storage) {
+        VolumeEntity volume = VolumeEntity.builder()
+                .description("ROOT-" + guest.getGuestId())
+                .capacity(size)
+                .storageId(storage.getStorageId())
+                .name(uid)
+                .path(storage.getMountPath() + "/" + uid)
+                .type(volumeType)
+                .templateId(diskTemplateId)
+                .allocation(0L)
+                .capacity(size)
+                .backingPath("")
+                .status(Constant.VolumeStatus.CREATING)
+                .build();
+        this.volumeMapper.insert(volume);
+        GuestDiskEntity guestDisk = GuestDiskEntity.builder()
+                .volumeId(volume.getVolumeId())
+                .guestId(guest.getGuestId())
+                .deviceId(0)
+                .build();
+        this.guestDiskMapper.insert(guestDisk);
+        this.initGuestMetaData(guest.getGuestId(), password);
+        BaseOperateParam operateParam = CreateGuestOperate.builder()
+                .guestId(guest.getGuestId())
+                .snapshotVolumeId(snapshotVolumeId)
+                .templateId(diskTemplateId)
+                .volumeId(volume.getVolumeId())
+                .start(true)
+                .hostId(hostId)
+                .taskId(uid)
+                .title("创建客户机[" + guest.getDescription() + "]")
+                .build();
+        this.operateTask.addTask(operateParam);
+
+        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)

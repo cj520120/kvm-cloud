@@ -73,11 +73,11 @@ public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
         Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
-        Map<String, Map<String, VolumeInfo>> result = new HashMap<>();
+        Map<String, Map<String, VolumeInfo>> result = new HashMap<>(4);
 
         for (Map.Entry<String, List<VolumeInfoRequest>> entry : list.entrySet()) {
             String storage = entry.getKey();
-            Map<String, VolumeInfo> map = new HashMap<>();
+            Map<String, VolumeInfo> map = new HashMap<>(4);
             Set<String> volumePaths = entry.getValue().stream().map(VolumeInfoRequest::getSourceVolume).collect(Collectors.toSet());
             StoragePool storagePool = this.getStorage(connect,storage);
 

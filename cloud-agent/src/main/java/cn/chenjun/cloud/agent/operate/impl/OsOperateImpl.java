@@ -127,7 +127,7 @@ public class OsOperateImpl implements OsOperate {
     @Override
     public List<GuestInfo> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception {
         Set<String> names = batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
-        Map<String, GuestInfo> map = new HashMap<>();
+        Map<String, GuestInfo> map = new HashMap<>(4);
         List<GuestInfo> list = new ArrayList<>();
         int[] ids = connect.listDomains();
         for (int id : ids) {
@@ -397,7 +397,7 @@ public class OsOperateImpl implements OsOperate {
             }
             //写入qma
             try {
-                this.execute_qma(domain, request.getQmaRequest());
+                this.qmaExecute(domain, request.getQmaRequest());
             } catch (CodeException err) {
                 domain.destroy();
                 throw err;
@@ -415,7 +415,7 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        this.execute_qma(domain, request);
+        this.qmaExecute(domain, request);
     }
 
     @Override
@@ -433,8 +433,8 @@ public class OsOperateImpl implements OsOperate {
         }
         @Cleanup
         Connect toConnect = new Connect(String.format("qemu+tcp://%s/system", request.getHost()));
-        long live_migration_flag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
-        domain.migrate(toConnect, live_migration_flag, null, null, 0);
+        long liveMigrationFlag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
+        domain.migrate(toConnect, liveMigrationFlag, null, null, 0);
     }
 
     private Domain findDomainByName(Connect connect, String name) throws Exception {
@@ -456,7 +456,7 @@ public class OsOperateImpl implements OsOperate {
         return null;
     }
 
-    private void execute_qma(Domain domain, GuestQmaRequest request) throws LibvirtException {
+    private void qmaExecute(Domain domain, GuestQmaRequest request) throws LibvirtException {
         List<GuestQmaRequest.QmaBody> commands = request.getCommands();
         for (GuestQmaRequest.QmaBody command : commands) {
             switch (command.getCommand()) {
