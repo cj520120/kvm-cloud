@@ -276,5 +276,4 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     5)、密码只对应默认用户，具体请查看system_info.default_user相关配置
     6)、其他配置请参照cloud-init相关配置进行安装
     7)、对系统模板请安装qemu-command-agent，并进行相关配置
-    
 ```
