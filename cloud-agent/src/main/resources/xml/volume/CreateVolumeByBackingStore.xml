@@ -5,7 +5,6 @@
   <capacity unit="bytes">%d</capacity>
   <allocation unit="bytes">%d</allocation>
   <target>
-    <path>%s</path>
     <format type="%s"/>
     <permissions>
       <mode>0600</mode>

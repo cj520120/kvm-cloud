@@ -70,6 +70,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
                 volume.setCapacity(resultUtil.getData().getCapacity());
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setType(resultUtil.getData().getType());
+                volume.setPath(resultUtil.getData().getPath());
                 volume.setBackingPath(resultUtil.getData().getBackingPath());
             }
             volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);

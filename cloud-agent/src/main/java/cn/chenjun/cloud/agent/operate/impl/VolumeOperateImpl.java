@@ -115,7 +115,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         String xml;
         if (StringUtils.isEmpty(request.getParentVolume())) {
             xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolume.xml");
-            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetVolume(), request.getTargetType());
+            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetType());
         } else {
             boolean checkParentSupport = request.getParentType().equals(Constant.VolumeType.QCOW) || request.getParentType().equals(Constant.VolumeType.QCOW2) || request.getParentType().equals(Constant.VolumeType.RAW);
             boolean checkChildSupport = request.getTargetType().equals(Constant.VolumeType.QCOW) || request.getTargetType().equals(Constant.VolumeType.QCOW2);
@@ -132,7 +132,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                 return this.clone(connect, volumeCloneRequest);
             }
             xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
-            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetVolume(), request.getTargetType(), request.getParentVolume(), request.getParentType());
+            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetType(), request.getParentVolume(), request.getParentType());
         }
         log.info("create volume:{}",xml);
         FileUtil.mkParentDirs(request.getTargetVolume());
@@ -264,7 +264,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         String xml = ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
-        xml = String.format(xml, request.getTargetName(), request.getTargetVolume(), request.getTargetType());
+        xml = String.format(xml, request.getTargetName(), request.getTargetType());
         log.info("clone volume:{}", xml);
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();

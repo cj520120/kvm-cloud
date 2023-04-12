@@ -155,6 +155,7 @@ public class TemplateService extends AbstractService {
                 .build();
         operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyInfo.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(NotifyInfo.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(this.initTemplateModel(template));
 
     }

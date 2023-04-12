@@ -449,6 +449,7 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         SnapshotModel model = this.initSnapshot(snapshotVolume);
         this.notifyService.publish(NotifyInfo.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.notifyService.publish(NotifyInfo.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(model);
     }
 

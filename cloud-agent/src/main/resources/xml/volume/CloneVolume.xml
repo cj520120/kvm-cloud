@@ -3,7 +3,6 @@
     <source>
     </source>
     <target>
-        <path>%s</path>
         <format type="%s"/>
         <permissions>
             <mode>0600</mode>

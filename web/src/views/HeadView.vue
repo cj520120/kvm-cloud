@@ -9,7 +9,7 @@
 		<el-menu class="headerMenu" mode="horizontal" @select="handleSelect" background-color="#34495e" text-color="#fff" active-text-color="#ffd04b">
 			<el-menu-item index="quit">退出</el-menu-item>
 			<el-menu-item index="password">修改密码</el-menu-item>
-			<!-- <el-menu-item index="support">联系&amp;支持</el-menu-item> -->
+			<el-menu-item index="support">联系&amp;支持</el-menu-item>
 		</el-menu>
 		<el-dialog title="修改密码" :visible.sync="update_password_dialog_visible" center width="400px" :close-on-click-modal="false" :close-on-press-escape="false">
 			<el-form :model="update_password" label-position="right" label-width="80px">

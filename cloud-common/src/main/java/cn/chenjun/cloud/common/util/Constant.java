@@ -68,6 +68,7 @@ public class Constant {
      */
     public static class StorageType {
         public static final String NFS = "nfs";
+        public static final String ISCSI = "iscsi";
         public static final String LOCAL = "local";
     }
 
