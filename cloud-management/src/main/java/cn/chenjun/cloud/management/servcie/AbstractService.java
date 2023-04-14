@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.management.component.AbstractInitializeService;
 import cn.chenjun.cloud.management.component.VncService;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Lazy;
 /**
  * @author chenjun
  */
-public abstract class AbstractService {
+public abstract class AbstractService extends AbstractInitializeService {
     @Autowired
     protected GuestMapper guestMapper;
     @Autowired

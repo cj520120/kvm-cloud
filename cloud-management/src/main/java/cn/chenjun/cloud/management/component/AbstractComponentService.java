@@ -200,6 +200,7 @@ public abstract class AbstractComponentService extends AbstractService {
         return sb.toString();
     }
 
+
     /**
      * 获取组件类型
      *
