@@ -117,12 +117,12 @@ vi /etc/sysconfig/network-scripts/ifcfg-br0
 # 下面这个编辑命令注意改成 ifcfg-实际网卡名
 vi /etc/sysconfig/network-scripts/ifcfg-eth0
 # 下面这个DEVICE注意改成 实际网卡名
-    DEVICE="eth0"
-    NM_CONTROLLED="no"
-    ONBOOT="yes"
-    TYPE="Ethernet"
     BOOTPROTO=none
-    BRIDGE="br0"
+    NAME=eth0
+    DEVICE=eth0
+    ONBOOT=yes
+    NM_CONTRLLED=no
+    BRIDGE=br0
 ```
 
 #### 4、VNC 配置  
