@@ -101,9 +101,9 @@ yum install java-1.8.0-openjdk* -y
 确认网卡名无误后配置网桥：
 ```sh
 vi /etc/sysconfig/network-scripts/ifcfg-br0
-    DEVICE="br0"
-    TYPE="Bridge"
-    ONBOOT="yes"
+    DEVICE=br0
+    TYPE=Bridge
+    ONBOOT=yes
     BOOTPROTO=static
     IPADDR=192.168.2.130
     NATMASK=255.255.255.0
