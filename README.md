@@ -277,3 +277,5 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     6)、其他配置请参照cloud-init相关配置进行安装
     7)、对系统模板请安装qemu-command-agent，并进行相关配置
 ```
+9、页面删除主机后，如需要重新加入主机，请删除该主机Agent目录下config.json，然后重启Agent
+10、关于提示签名错误问题，请确保管理端跟agent端时间同步
