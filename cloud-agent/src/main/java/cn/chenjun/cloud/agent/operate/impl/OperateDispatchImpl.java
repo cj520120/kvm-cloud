@@ -220,6 +220,7 @@ public class OperateDispatchImpl implements OperateDispatch {
         } catch (CodeException err) {
             throw err;
         } catch (Exception err) {
+            log.error("dispatch fail. taskId={} command={} data={}", taskId,   command,   data,err);
             throw new CodeException(ErrorCode.SERVER_ERROR, err);
         } finally {
             this.taskMap.remove(taskId);
