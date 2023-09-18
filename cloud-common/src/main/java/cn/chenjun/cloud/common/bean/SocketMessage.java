@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NotifyInfo {
+public class SocketMessage {
     private int type;
     private int id;
+    private String data;
 }

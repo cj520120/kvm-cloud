@@ -106,7 +106,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             this.allocateService.initHostAllocate();
             //写入系统vnc
         }
-        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(Constant.SocketCommand.UPDATE_GUEST).build());
     }
 
     protected List<OsDisk> getGuestDisk(GuestEntity guest) {

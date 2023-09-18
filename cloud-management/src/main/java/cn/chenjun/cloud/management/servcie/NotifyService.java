@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import org.redisson.api.RLock;
 import org.redisson.api.RTopic;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenjun
  */
 @Service
-public class NotifyService implements CommandLineRunner, MessageListener<NotifyInfo> {
+public class NotifyService implements CommandLineRunner, MessageListener<SocketMessage> {
     private static final Set<Session> CLIENT_SESSIONS = Collections.synchronizedSet(new HashSet<>());
     @Autowired
     private RedissonClient redissonClient;
@@ -29,11 +29,11 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyI
     @Override
     public void run(String... args) throws Exception {
         topic = redissonClient.getTopic(RedisKeyUtil.GLOBAL_NOTIFY_KET);
-        topic.addListener(NotifyInfo.class, this);
+        topic.addListener(SocketMessage.class, this);
     }
 
     @Override
-    public void onMessage(CharSequence channel, NotifyInfo msg) {
+    public void onMessage(CharSequence channel, SocketMessage msg) {
         RLock rLock = redissonClient.getReadWriteLock(RedisKeyUtil.GLOBAL_LOCK_KEY).readLock();
         try {
             if (rLock.tryLock(1, TimeUnit.MINUTES)) {
@@ -52,7 +52,7 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyI
         }
     }
 
-    public void publish(NotifyInfo notify) {
+    public void publish(SocketMessage notify) {
         this.topic.publish(notify);
     }
 

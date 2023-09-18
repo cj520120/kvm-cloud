@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDownloadRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
@@ -98,6 +98,6 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
             }
         }
 
-        this.notifyService.publish(NotifyInfo.builder().id(template.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(SocketMessage.builder().id(template.getTemplateId()).type(Constant.SocketCommand.UPDATE_TEMPLATE).build());
     }
 }

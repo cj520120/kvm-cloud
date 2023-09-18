@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
@@ -216,7 +216,7 @@ public class GuestService extends AbstractService {
                     .build();
             this.operateTask.addTask(operateParam);
         }
-        this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
@@ -254,7 +254,7 @@ public class GuestService extends AbstractService {
                 .build();
         this.operateTask.addTask(operateParam);
 
-        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -308,7 +308,7 @@ public class GuestService extends AbstractService {
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
-            this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+            this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
             if (guestDisk != null) {
@@ -330,7 +330,7 @@ public class GuestService extends AbstractService {
                     .build();
             this.operateTask.addTask(operateParam);
         }
-        this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
@@ -386,7 +386,7 @@ public class GuestService extends AbstractService {
                             .title("启动客户机[" + guest.getDescription() + "]").build();
                 }
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             case Constant.GuestStatus.RUNNING:
             case Constant.GuestStatus.STARTING:
@@ -411,7 +411,7 @@ public class GuestService extends AbstractService {
                     .taskId(UUID.randomUUID().toString())
                     .title("重启客户机[" + guest.getDescription() + "]").build();
             this.operateTask.addTask(operateParam);
-            this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+            this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
             return ResultUtil.success(this.initGuestInfo(guest));
         }
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -434,7 +434,7 @@ public class GuestService extends AbstractService {
             guest.setHostId(hostId);
             this.guestMapper.updateById(guest);
             this.operateTask.addTask(operateParam);
-            this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+            this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
             return ResultUtil.success(this.initGuestInfo(guest));
         }
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -453,7 +453,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("关闭客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             case Constant.GuestStatus.STOP:
                 return ResultUtil.success(this.initGuestInfo(guest));
@@ -480,7 +480,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -500,7 +500,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
@@ -546,8 +546,8 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("挂载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
                 return ResultUtil.success(AttachGuestVolumeModel.builder().guest(this.initGuestInfo(guest)).volume(this.initVolume(volume)).build());
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
@@ -584,8 +584,8 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
@@ -628,7 +628,7 @@ public class GuestService extends AbstractService {
                         .title("挂载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
 
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
 
                 return ResultUtil.success(AttachGuestNetworkModel.builder().guest(this.initGuestInfo(guest)).network(this.initGuestNetwork(guestNetwork)).build());
             default:
@@ -656,7 +656,7 @@ public class GuestService extends AbstractService {
                         .taskId(UUID.randomUUID().toString())
                         .title("卸载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态未就绪.");
@@ -688,14 +688,14 @@ public class GuestService extends AbstractService {
                         volumeMapper.updateById(volume);
                         DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
                         operateTask.addTask(operate);
-                        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                        this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
                     }
                 }
                 this.vncService.destroyGuest(guestId);
                 this.guestMapper.deleteById(guestId);
                 this.guestPasswordMapper.deleteById(guestId);
                 this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestId));
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success();
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
@@ -737,7 +737,7 @@ public class GuestService extends AbstractService {
                 guest.setMemory(scheme.getMemory());
                 guest.setSpeed(scheme.getSpeed());
                 this.guestMapper.updateById(guest);
-                this.notifyService.publish(NotifyInfo.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(SocketMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
         }
     }

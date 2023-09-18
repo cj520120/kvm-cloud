@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.OsCdRoom;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -76,6 +76,6 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
     @Override
     public void onFinish(T param, ResultUtil<Void> resultUtil) {
 
-        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(Constant.SocketCommand.UPDATE_GUEST).build());
     }
 }

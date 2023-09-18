@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -74,6 +74,6 @@ public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySna
             }
         }
 
-        this.notifyService.publish(NotifyInfo.builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getSnapshotVolumeId()).type(Constant.SocketCommand.UPDATE_SNAPSHOT).build());
     }
 }

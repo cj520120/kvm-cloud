@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.OsNic;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
@@ -71,7 +71,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
             guestNetwork.setDeviceId(0);
             guestNetworkMapper.updateById(guestNetwork);
         }
-        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(Constant.SocketCommand.UPDATE_GUEST).build());
 
     }
 }

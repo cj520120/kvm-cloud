@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.GuestMigrateRequest;
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -87,6 +87,6 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
                     .build();
             this.operateTask.addTask(operate);
         }
-        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(Constant.SocketCommand.UPDATE_GUEST).build());
     }
 }

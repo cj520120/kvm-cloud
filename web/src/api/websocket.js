@@ -11,7 +11,12 @@ class NotifyWebsocket {
       console.log(new Date(), "开始连接通信服务器...");
       NotifyWebsocket.instance = new WebSocket(wsUri);
       NotifyWebsocket.instance.onopen = function () {
-        console.log(new Date(), "通信服务器连接成功");
+        console.log(new Date(), "通信服务器连接成功,发送认证信息");
+        let connect_data = {
+          type: 100,
+          data: localStorage.getItem("X-Token"),
+        };
+        NotifyWebsocket.instance.send(JSON.stringify(connect_data));
       };
       NotifyWebsocket.instance.onerror = function () {
         console.log(new Date(), "出现错误，断开链接，重新开始连接...");

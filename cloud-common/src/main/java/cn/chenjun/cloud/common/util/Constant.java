@@ -86,8 +86,11 @@ public class Constant {
 
     }
 
-    public static class NotifyType {
+    public static class SocketCommand {
+        public static final int LOGIN_SUCCESS = 0;
+
         public static final int UPDATE_GUEST = 1;
+
         public static final int UPDATE_VOLUME = 2;
         public static final int UPDATE_NETWORK = 3;
         public static final int UPDATE_HOST = 4;
@@ -95,5 +98,7 @@ public class Constant {
         public static final int UPDATE_SNAPSHOT = 6;
         public static final int UPDATE_STORAGE = 7;
         public static final int UPDATE_SCHEME = 8;
+        public static final int CLIENT_CONNECT=100;
     }
+
 }

@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -226,7 +226,7 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
         operateTask.addTask(operateParam);
         VolumeModel model = this.initVolume(volume);
-        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
         return ResultUtil.success(model);
     }
 
@@ -273,8 +273,8 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
         VolumeModel clone = this.initVolume(cloneVolume);
-        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyInfo.builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
 
@@ -295,7 +295,7 @@ public class VolumeService extends AbstractService {
                 .size(volume.getCapacity())
                 .build();
         operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
         return ResultUtil.success(this.initVolume(volume));
     }
 
@@ -342,8 +342,8 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
         VolumeModel migrate = this.initVolume(migrateVolume);
-        this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyInfo.builder().id(migrate.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(migrate.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
     }
 
@@ -383,7 +383,7 @@ public class VolumeService extends AbstractService {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate);
                 VolumeModel source = this.initVolume(volume);
-                this.notifyService.publish(NotifyInfo.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                this.notifyService.publish(SocketMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
@@ -405,7 +405,7 @@ public class VolumeService extends AbstractService {
         if (snapshotVolume == null) {
             throw new CodeException(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
         }
-        this.notifyService.publish(NotifyInfo.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.notifyService.publish(SocketMessage.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_SNAPSHOT).build());
         return ResultUtil.success(this.initSnapshot(snapshotVolume));
     }
 
@@ -448,8 +448,8 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).title("创建磁盘快照[" + snapshotVolume.getName() + "]").sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
         operateTask.addTask(operateParam);
         SnapshotModel model = this.initSnapshot(snapshotVolume);
-        this.notifyService.publish(NotifyInfo.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
-        this.notifyService.publish(NotifyInfo.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_SNAPSHOT).build());
+        this.notifyService.publish(SocketMessage.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
         return ResultUtil.success(model);
     }
 
@@ -469,7 +469,7 @@ public class VolumeService extends AbstractService {
                 BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("删除磁盘快照[" + volume.getName() + "]").snapshotVolumeId(snapshotVolumeId).build();
                 operateTask.addTask(operate);
                 SnapshotModel source = this.initSnapshot(volume);
-                this.notifyService.publish(NotifyInfo.builder().id(snapshotVolumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
+                this.notifyService.publish(SocketMessage.builder().id(snapshotVolumeId).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_SNAPSHOT).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");

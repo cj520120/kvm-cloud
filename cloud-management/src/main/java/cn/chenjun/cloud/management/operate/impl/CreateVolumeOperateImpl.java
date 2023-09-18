@@ -140,7 +140,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             volumeMapper.updateById(volume);
         }
 
-        this.notifyService.publish(NotifyInfo.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getVolumeId()).type(Constant.SocketCommand.UPDATE_VOLUME).build());
 
     }
 }

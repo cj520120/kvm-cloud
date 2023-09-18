@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeMigrateRequest;
@@ -109,7 +109,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 volumeMapper.updateById(volume);
             }
         }
-        this.notifyService.publish(NotifyInfo.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyInfo.builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getSourceVolumeId()).type(Constant.SocketCommand.UPDATE_VOLUME).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getTargetVolumeId()).type(Constant.SocketCommand.UPDATE_VOLUME).build());
     }
 }

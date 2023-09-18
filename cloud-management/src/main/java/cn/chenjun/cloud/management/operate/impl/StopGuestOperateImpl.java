@@ -76,6 +76,6 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             this.allocateService.initHostAllocate();
 
         }
-        this.notifyService.publish(NotifyInfo.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(Constant.SocketCommand.UPDATE_GUEST).build());
     }
 }

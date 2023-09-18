@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.SocketMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -67,6 +67,6 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
             }
         }
 
-        this.notifyService.publish(NotifyInfo.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(SocketMessage.builder().id(param.getNetworkId()).type(Constant.SocketCommand.UPDATE_NETWORK).build());
     }
 }

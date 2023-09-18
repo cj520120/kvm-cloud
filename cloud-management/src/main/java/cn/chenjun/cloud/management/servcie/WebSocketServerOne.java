@@ -1,7 +1,13 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyInfo;
+import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.model.LoginUserModel;
+import cn.chenjun.cloud.management.util.SpringUtil;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +27,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class WebSocketServerOne {
     private static final CopyOnWriteArraySet<WebSocketServerOne> SESSIONS = new CopyOnWriteArraySet<>();
     private Session session;
+    private LoginUserModel loginInfo;
 
-    public synchronized static void sendNotify(NotifyInfo message) {
+    public synchronized static void sendNotify(SocketMessage message) {
         String msg = GsonBuilderUtil.create().toJson(message);
         for (WebSocketServerOne client : SESSIONS) {
             try {
@@ -37,7 +44,6 @@ public class WebSocketServerOne {
     @OnOpen
     public void onConnect(Session session) {
         this.session = session;
-        SESSIONS.add(this);
     }
 
     @OnError
@@ -45,13 +51,31 @@ public class WebSocketServerOne {
         SESSIONS.remove(this);
     }
 
+    @SneakyThrows
     @OnMessage
-    public void onMessage(byte[] messages, Session session) {
-
+    public void onMessage(String jsonMsg) {
+        SocketMessage msg = GsonBuilderUtil.create().fromJson(jsonMsg, SocketMessage.class);
+        if (msg.getType() == Constant.SocketCommand.CLIENT_CONNECT) {
+            String token = msg.getData();
+            try {
+                ResultUtil<LoginUserModel> resultUtil = SpringUtil.getBean(UserService.class).getUserIdByToken(token);
+                if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                    this.loginInfo = resultUtil.getData();
+                    SESSIONS.add(this);
+                    session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(SocketMessage.builder().id(0).type(Constant.SocketCommand.LOGIN_SUCCESS).build()));
+                } else {
+                    throw new CodeException(ErrorCode.NO_LOGIN_ERROR);
+                }
+            } catch (Exception err) {
+                this.session.close();
+            }
+        }
     }
 
     @OnClose
     public void onClose() {
         SESSIONS.remove(this);
     }
+
+
 }
