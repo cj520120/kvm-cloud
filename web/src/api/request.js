@@ -42,6 +42,10 @@ class HttpRequest {
       (res) => {
         const { data } = res;
         if (data.code === 401) {
+          let hrefHash = window.location.hash.toLowerCase();
+          if (hrefHash && !hrefHash.startsWith("#/login")) {
+            localStorage.setItem("X-Back", window.location.href);
+          }
           Route.push({ path: "/login" });
           return res.data;
         } else {

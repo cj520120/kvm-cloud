@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -71,7 +71,7 @@ public class SchemeService extends AbstractService {
         }
         SchemeEntity entity = SchemeEntity.builder().name(name).cpu(cpu).memory(memory).speed(speed).sockets(sockets).cores(cores).threads(threads).build();
         this.schemeMapper.insert(entity);
-        this.notifyService.publish(SocketMessage.builder().id(entity.getSchemeId()).type(Constant.SocketCommand.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyMessage.builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
 
         return ResultUtil.success(this.initScheme(entity));
     }
@@ -116,7 +116,7 @@ public class SchemeService extends AbstractService {
         entity.setCores(cores);
         entity.setThreads(threads);
         this.schemeMapper.updateById(entity);
-        this.notifyService.publish(SocketMessage.builder().id(entity.getSchemeId()).type(Constant.SocketCommand.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyMessage.builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return ResultUtil.success(this.initScheme(entity));
     }
 
@@ -124,7 +124,7 @@ public class SchemeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyScheme(int schemeId) {
         this.schemeMapper.deleteById(schemeId);
-        this.notifyService.publish(SocketMessage.builder().id(schemeId).type(Constant.SocketCommand.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyMessage.builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return ResultUtil.success();
     }
 }

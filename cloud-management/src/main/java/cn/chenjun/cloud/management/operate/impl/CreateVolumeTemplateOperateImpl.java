@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeCreateTemplateRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
@@ -98,8 +98,8 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
             }
         }
 
-        this.notifyService.publish(SocketMessage.builder().id(param.getSourceVolumeId()).type(Constant.SocketCommand.UPDATE_VOLUME).build());
-        this.notifyService.publish(SocketMessage.builder().id(targetVolume.getTemplateId()).type(Constant.SocketCommand.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyMessage.builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
     }
 }

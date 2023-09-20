@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
@@ -71,7 +71,7 @@ public class TemplateService extends AbstractService {
         }
         TemplateEntity template = TemplateEntity.builder().uri(uri).name(name).templateType(templateType).volumeType(volumeType).status(Constant.TemplateStatus.DOWNLOAD).build();
         this.templateMapper.insert(template);
-        this.notifyService.publish(SocketMessage.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(NotifyMessage.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
     }
 
@@ -101,7 +101,7 @@ public class TemplateService extends AbstractService {
                 this.templateMapper.updateById(template);
                 BaseOperateParam operateParam = DownloadTemplateOperate.builder().taskId(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
-                this.notifyService.publish(SocketMessage.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_TEMPLATE).build());
+                this.notifyService.publish(NotifyMessage.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(this.initTemplateModel(template));
 
             default:
@@ -154,8 +154,8 @@ public class TemplateService extends AbstractService {
                 .title("创建磁盘模版[" + template.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
-        this.notifyService.publish(SocketMessage.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_TEMPLATE).build());
-        this.notifyService.publish(SocketMessage.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyMessage.builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(NotifyMessage.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(this.initTemplateModel(template));
 
     }
@@ -176,7 +176,7 @@ public class TemplateService extends AbstractService {
                 BaseOperateParam operate = DestroyTemplateOperate.builder().taskId(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
                 operateTask.addTask(operate);
                 TemplateModel source = this.initTemplateModel(template);
-                this.notifyService.publish(SocketMessage.builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_TEMPLATE).build());
+                this.notifyService.publish(NotifyMessage.builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");

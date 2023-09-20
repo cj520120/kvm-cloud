@@ -64,7 +64,13 @@ export default {
 								this.show_type = 'Error'
 							} else {
 								localStorage.setItem('X-Token', res.data.token)
-								this.$router.push({ path: '/' })
+								let href = localStorage.getItem('X-Back')
+								localStorage.removeItem('X-Back')
+								if (href) {
+									window.location.href = href
+								} else {
+									this.$router.push({ path: '/' })
+								}
 							}
 						})
 					} else {
@@ -93,7 +99,13 @@ export default {
 							.then((res) => {
 								if (res.code === 0) {
 									localStorage.setItem('X-Token', res.data.token)
-									this.$router.push({ path: '/' })
+									let href = localStorage.getItem('X-Back')
+									localStorage.removeItem('X-Back')
+									if (href) {
+										window.location.href = href
+									} else {
+										this.$router.push({ path: '/' })
+									}
 								} else {
 									this.$notify.error({
 										title: '错误',

@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -59,7 +59,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
             guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
         }
-        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
     }
 }

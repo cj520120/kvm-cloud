@@ -1,7 +1,8 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.WsMessage;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
@@ -29,8 +30,10 @@ public class WebSocketServerOne {
     private Session session;
     private LoginUserModel loginInfo;
 
-    public synchronized static void sendNotify(SocketMessage message) {
-        String msg = GsonBuilderUtil.create().toJson(message);
+    public synchronized static void sendNotify(NotifyMessage message) {
+
+        WsMessage<NotifyMessage> wsMessage= WsMessage.<NotifyMessage>builder().command(Constant.SocketCommand.NOTIFY).data(message).build();
+        String msg = GsonBuilderUtil.create().toJson(wsMessage);
         for (WebSocketServerOne client : SESSIONS) {
             try {
                 client.session.getBasicRemote().sendText(msg);
@@ -54,21 +57,26 @@ public class WebSocketServerOne {
     @SneakyThrows
     @OnMessage
     public void onMessage(String jsonMsg) {
-        SocketMessage msg = GsonBuilderUtil.create().fromJson(jsonMsg, SocketMessage.class);
-        if (msg.getType() == Constant.SocketCommand.CLIENT_CONNECT) {
+        NotifyMessage msg = GsonBuilderUtil.create().fromJson(jsonMsg, NotifyMessage.class);
+        if (msg!=null&&msg.getType() == Constant.SocketCommand.CLIENT_CONNECT) {
             String token = msg.getData();
             try {
                 ResultUtil<LoginUserModel> resultUtil = SpringUtil.getBean(UserService.class).getUserIdByToken(token);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                     this.loginInfo = resultUtil.getData();
                     SESSIONS.add(this);
-                    session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(SocketMessage.builder().id(0).type(Constant.SocketCommand.LOGIN_SUCCESS).build()));
+                    WsMessage<Void> wsMessage= WsMessage.<Void>builder().command(Constant.SocketCommand.LOGIN_SUCCESS).build();
+                    session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(wsMessage));
                 } else {
                     throw new CodeException(ErrorCode.NO_LOGIN_ERROR);
                 }
             } catch (Exception err) {
-                this.session.close();
+                WsMessage<Void> wsMessage= WsMessage.<Void>builder().command(Constant.SocketCommand.LOGIN_TOKEN_ERROR).build();
+                session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(wsMessage));
             }
+        }else{
+            log.error("未知的请求:{}",jsonMsg);
+            this.session.close();
         }
     }
 

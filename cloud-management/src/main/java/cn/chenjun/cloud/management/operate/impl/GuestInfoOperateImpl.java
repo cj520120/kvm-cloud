@@ -2,7 +2,7 @@ package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestInfoRequest;
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -73,6 +73,6 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
                 this.vncService.updateVncPort(param.getGuestId(), resultUtil.getData().getVnc());
             }
         }
-        this.notifyService.publish(SocketMessage.builder().id(param.getGuestId()).type(Constant.SocketCommand.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

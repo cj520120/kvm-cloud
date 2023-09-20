@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.bean.StorageInfoRequest;
@@ -83,7 +83,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
                                 .allocation(info.getAllocation())
                                 .build();
                         this.storageMapper.updateById(updateStorage);
-                        this.notifyService.publish(SocketMessage.builder().type(Constant.SocketCommand.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
+                        this.notifyService.publish(NotifyMessage.builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
                     }
                 }
             }

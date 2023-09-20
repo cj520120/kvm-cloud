@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
@@ -71,7 +71,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
             }
         }
 
-        this.notifyService.publish(SocketMessage.builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.SocketCommand.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

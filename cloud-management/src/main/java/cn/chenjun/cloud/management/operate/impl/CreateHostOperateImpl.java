@@ -139,7 +139,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         }
         this.hostMapper.updateById(host);
 
-        this.notifyService.publish(SocketMessage.builder().id(param.getHostId()).type(Constant.SocketCommand.UPDATE_HOST).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
 
     }
 }

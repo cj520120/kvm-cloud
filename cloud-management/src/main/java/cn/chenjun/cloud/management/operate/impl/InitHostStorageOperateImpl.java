@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
@@ -102,7 +102,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                 storageMapper.updateById(storage);
             }
         }
-        this.notifyService.publish(SocketMessage.builder().id(param.getStorageId()).type(Constant.SocketCommand.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

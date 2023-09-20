@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.SocketMessage;
+import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -69,6 +69,6 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
             volumeMapper.deleteById(param.getVolumeId());
         }
 
-        this.notifyService.publish(SocketMessage.builder().id(param.getVolumeId()).type(Constant.SocketCommand.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyMessage.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 }
