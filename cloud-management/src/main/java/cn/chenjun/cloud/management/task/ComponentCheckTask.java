@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class ComponentCheckTask extends AbstractTask {
 
     public ComponentCheckTask(@Autowired  List<AbstractComponentService> componentServiceLis){
         this.componentServiceList=componentServiceLis;
-        Collections.sort(this.componentServiceList, Comparator.comparingInt(AbstractComponentService::order));
+        this.componentServiceList.sort(Comparator.comparingInt(AbstractComponentService::order));
     }
 
     @Override

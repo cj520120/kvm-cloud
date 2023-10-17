@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
@@ -68,27 +68,27 @@ public class GuestService extends AbstractService {
             this.guestPasswordMapper.insert(entity);
         }
     }
-    private boolean checkSystemComponent(int networkId, int componentType) {
+
+    private boolean checkComponentComplete(int networkId, int componentType) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", componentType).eq("network_id", networkId).last("limit 0 ,1"));
         if (component == null) {
-            return false;
+            return true;
         }
         GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
-        return vncGuest != null && Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING);
+        return vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING);
     }
 
-    private void checkSystemComponent(int networkId) {
-        if (!this.checkSystemComponent(networkId, Constant.ComponentType.VNC)) {
+    private void checkSystemComponentComplete(int networkId) {
+        if (this.checkComponentComplete(networkId, Constant.ComponentType.VNC)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络Vnc服务未初始化完成,请稍后重试");
         }
-        if (!this.checkSystemComponent(networkId, Constant.ComponentType.ROUTE)) {
+        if (this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络路由服务未初始化完成,请稍后重试");
         }
     }
 
     private GuestModel initGuestInfo(GuestEntity entity) {
-        GuestModel model = new BeanConverter<>(GuestModel.class).convert(entity, null);
-        return model;
+        return new BeanConverter<>(GuestModel.class).convert(entity, null);
     }
 
 
@@ -105,22 +105,18 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listUserGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("guest_type", Constant.GuestType.USER));
-        List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
-        Collections.sort(models, new Comparator<GuestModel>() {
-            @Override
-            public int compare(GuestModel o1, GuestModel o2) {
-                if (o1.getStatus() == o2.getStatus()) {
-                    return Integer.compare(o1.getGuestId(), o2.getGuestId());
-                }
-                if (o1.getStatus() == Constant.GuestStatus.RUNNING) {
-                    return -1;
-                }
-                if (o2.getStatus() == Constant.GuestStatus.RUNNING) {
-                    return 1;
-                }
-                return Integer.compare(o1.getStatus(), o2.getStatus());
+        List<GuestModel> models = guestList.stream().map(this::initGuestInfo).sorted((o1, o2) -> {
+            if (o1.getStatus() == o2.getStatus()) {
+                return Integer.compare(o1.getGuestId(), o2.getGuestId());
             }
-        });
+            if (o1.getStatus() == Constant.GuestStatus.RUNNING) {
+                return -1;
+            }
+            if (o2.getStatus() == Constant.GuestStatus.RUNNING) {
+                return 1;
+            }
+            return Integer.compare(o1.getStatus(), o2.getStatus());
+        }).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
@@ -166,7 +162,7 @@ public class GuestService extends AbstractService {
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
         }
-        this.checkSystemComponent(networkId);
+        this.checkSystemComponentComplete(networkId);
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         String uid = UUID.randomUUID().toString().replace("-", "");
@@ -269,7 +265,7 @@ public class GuestService extends AbstractService {
         if (guest.getStatus() != Constant.GuestStatus.STOP) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态对主机进行重装");
         }
-        this.checkSystemComponent(guest.getNetworkId());
+        this.checkSystemComponentComplete(guest.getNetworkId());
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
         this.initGuestMetaData(guestId,password);
@@ -342,7 +338,7 @@ public class GuestService extends AbstractService {
             try {
                 GuestModel model = this.start(guestId, 0).getData();
                 models.add(model);
-            } catch (Exception er) {
+            } catch (Exception ignored) {
 
             }
         }
@@ -357,7 +353,7 @@ public class GuestService extends AbstractService {
             try {
                 GuestModel model = this.shutdown(guestId, false).getData();
                 models.add(model);
-            } catch (Exception er) {
+            } catch (Exception ignored) {
 
             }
         }
@@ -368,7 +364,7 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        this.checkSystemComponent(guest.getNetworkId());
+        this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
                 guest.setHostId(hostId);

@@ -37,7 +37,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         if(storagePool!=null) {
             try {
                 storagePool.refresh(0);
-            } catch (Exception err) {
+            } catch (Exception ignored) {
 
             }
         }

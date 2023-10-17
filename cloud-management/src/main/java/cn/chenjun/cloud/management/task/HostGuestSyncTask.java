@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class HostGuestSyncTask extends AbstractTask {
-    private final int TASK_CHECK_TIME = 30;
+    private static final int TASK_CHECK_TIME = 30;
     @Autowired
     private RedissonClient redissonClient;
     @Autowired

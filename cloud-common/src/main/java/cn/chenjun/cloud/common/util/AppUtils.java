@@ -41,7 +41,7 @@ public class AppUtils {
      * @date 2019/8/27 16:16
      */
     public static String getAppId() {
-        StringBuffer shortBuffer = new StringBuffer();
+        StringBuilder shortBuffer = new StringBuilder();
         String uuid = UUID.randomUUID().toString().replace("-", "");
         for (int i = 0; i < 8; i++) {
             String str = uuid.substring(i * 4, i * 4 + 4);
@@ -63,7 +63,7 @@ public class AppUtils {
     public static String getAppSecret(String appId) {
         try {
             String[] array = new String[]{appId, SERVER_NAME};
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             // 字符串排序
             Arrays.sort(array);
             for (String s : array) {
@@ -74,7 +74,7 @@ public class AppUtils {
             md.update(str.getBytes());
             byte[] digest = md.digest();
 
-            StringBuffer hexstr = new StringBuffer();
+            StringBuilder hexstr = new StringBuilder();
             String shaHex;
             for (byte b : digest) {
                 shaHex = Integer.toHexString(b & 0xFF);
@@ -85,7 +85,6 @@ public class AppUtils {
             }
             return hexstr.toString();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
             throw new RuntimeException();
         }
     }

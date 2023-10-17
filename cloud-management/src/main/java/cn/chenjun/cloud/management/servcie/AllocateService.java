@@ -41,7 +41,7 @@ public class AllocateService extends AbstractService {
         } else {
             List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
             storageList = storageList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.StorageStatus.READY)).collect(Collectors.toList());
-            storage = storageList.stream().sorted((o1, o2) -> Long.compare(o2.getAvailable(), o1.getAvailable())).findFirst().orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
+            storage = storageList.stream().min((o1, o2) -> Long.compare(o2.getAvailable(), o1.getAvailable())).orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
         }
         return storage;
     }

@@ -109,7 +109,7 @@ public class VncWebsocketService {
         }
     }
 
-    public class VncWebSocketProxy extends WebSocketClient {
+    public static class VncWebSocketProxy extends WebSocketClient {
 
         private final Session session;
 

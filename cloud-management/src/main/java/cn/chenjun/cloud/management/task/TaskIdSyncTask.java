@@ -23,7 +23,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class TaskIdSyncTask extends AbstractTask {
-    private final int TASK_CHECK_TIME = 10;
+    private static final int TASK_CHECK_TIME = 10;
     @Autowired
     private RedissonClient redissonClient;
     @Autowired

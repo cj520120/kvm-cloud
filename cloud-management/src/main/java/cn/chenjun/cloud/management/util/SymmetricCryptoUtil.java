@@ -13,13 +13,13 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author gogo
  */
 public class SymmetricCryptoUtil {
+    private final Mode mode = Mode.CBC;
+    private final Padding padding = Padding.ZeroPadding;
     /**
      * 16字节
      */
-    private String encodeKey = "0234567812345678";
-    private String ivKey = "0000000000000000";
-    private Mode mode=Mode.CBC;
-    private Padding padding=Padding.ZeroPadding;
+    private final String encodeKey;
+    private final String ivKey;
     private SymmetricCryptoUtil(String encodeKey, String ivKey) {
         this.encodeKey = encodeKey;
         this.ivKey = ivKey;

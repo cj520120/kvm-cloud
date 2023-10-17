@@ -54,7 +54,7 @@ public class NetworkOperateImpl implements NetworkOperate {
             try {
                 Network network = connect.networkLookupByName(bridge.getBridge());
                 network.destroy();
-            } catch (Exception err) {
+            } catch (Exception ignored) {
 
             }
         }

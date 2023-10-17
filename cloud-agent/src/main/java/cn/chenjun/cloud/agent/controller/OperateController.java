@@ -24,7 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.UUID;
 
 /**
@@ -50,7 +54,7 @@ public class OperateController {
 
     @SignRequire
     @PostMapping("/api/operate")
-    public <T> ResultUtil<T> execute(@RequestParam("taskId") String taskId, @RequestParam("command") String command, @RequestParam("data") String data) {
+    public ResultUtil<?> execute(@RequestParam("taskId") String taskId, @RequestParam("command") String command, @RequestParam("data") String data) {
         return dispatch.dispatch(taskId, command, data);
     }
 
@@ -66,7 +70,9 @@ public class OperateController {
         String tempPath = path + sub;
         File file = new File(tempPath);
         try {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                return ResultUtil.error(ErrorCode.SERVER_ERROR, "创建文件失败");
+            }
             multipartFile.transferTo(file);
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceStorage(storage)
@@ -76,7 +82,9 @@ public class OperateController {
                     .targetVolume(path)
                     .targetType(volumeType)
                     .build();
-            return this.dispatch.dispatch(UUID.randomUUID().toString(), Constant.Command.VOLUME_MIGRATE, GsonBuilderUtil.create().toJson(request));
+            ResultUtil<?> resultUtil = this.dispatch.dispatch(UUID.randomUUID().toString(), Constant.Command.VOLUME_MIGRATE, GsonBuilderUtil.create().toJson(request));
+
+            return ResultUtil.<VolumeInfo>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).data((VolumeInfo) resultUtil.getData()).build();
         } catch (Exception err) {
             return ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         } finally {
@@ -95,7 +103,15 @@ public class OperateController {
 
         File file = new File(path + sub);
         try {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                response.setStatus(HttpStatus.OK.value());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                String body = GsonBuilderUtil.create().toJson(ResultUtil.error(ErrorCode.SERVER_ERROR, "创建文件失败"));
+                @Cleanup
+                OutputStream outputStream = response.getOutputStream();
+                outputStream.write(body.getBytes());
+                return;
+            }
             VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceStorage(storage)
                     .sourceVolume(path)
@@ -104,7 +120,7 @@ public class OperateController {
                     .targetVolume(path + sub)
                     .targetType(volumeType)
                     .build();
-            ResultUtil<VolumeInfo> resultUtil = this.dispatch.dispatch(UUID.randomUUID().toString(), Constant.Command.VOLUME_CLONE, GsonBuilderUtil.create().toJson(request));
+            ResultUtil<?> resultUtil = this.dispatch.dispatch(UUID.randomUUID().toString(), Constant.Command.VOLUME_CLONE, GsonBuilderUtil.create().toJson(request));
             if (resultUtil.getCode() != ErrorCode.SUCCESS) {
                 throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
             }
@@ -112,7 +128,7 @@ public class OperateController {
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + name + "." + volumeType);
             @Cleanup
-            InputStream in = new FileInputStream(file);
+            InputStream in = Files.newInputStream(file.toPath());
             response.setContentLengthLong(file.length());
             @Cleanup
             OutputStream outputStream = response.getOutputStream();

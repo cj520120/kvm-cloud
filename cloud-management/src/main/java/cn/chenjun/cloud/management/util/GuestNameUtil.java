@@ -9,7 +9,7 @@ public class GuestNameUtil {
 
     public static String getName() {
         long time = System.nanoTime();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (time != 0) {
             int index = (int) (time % KEY.length);
             sb.append(KEY[index]);

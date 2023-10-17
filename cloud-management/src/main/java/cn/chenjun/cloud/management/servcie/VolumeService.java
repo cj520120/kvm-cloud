@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -69,22 +69,18 @@ public class VolumeService extends AbstractService {
     public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
         List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
         diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
-        List<VolumeModel> models = diskList.stream().map(this::initVolume).collect(Collectors.toList());
-        Collections.sort(models, new Comparator<VolumeModel>() {
-            @Override
-            public int compare(VolumeModel o1, VolumeModel o2) {
-                if (o1.getStatus() == o2.getStatus()) {
-                    return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
-                }
-                if (o1.getStatus() == Constant.VolumeStatus.READY) {
-                    return -1;
-                }
-                if (o2.getStatus() == Constant.VolumeStatus.READY) {
-                    return 1;
-                }
-                return Integer.compare(o1.getStatus(), o2.getStatus());
+        List<VolumeModel> models = diskList.stream().map(this::initVolume).sorted((o1, o2) -> {
+            if (o1.getStatus() == o2.getStatus()) {
+                return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
             }
-        });
+            if (o1.getStatus() == Constant.VolumeStatus.READY) {
+                return -1;
+            }
+            if (o2.getStatus() == Constant.VolumeStatus.READY) {
+                return 1;
+            }
+            return Integer.compare(o1.getStatus(), o2.getStatus());
+        }).collect(Collectors.toList());
         return ResultUtil.success(models);
 
     }
@@ -150,7 +146,7 @@ public class VolumeService extends AbstractService {
         }
         ResultUtil<VolumeInfo> resultUtil = GsonBuilderUtil.create().fromJson(responseEntity.getBody(), new TypeToken<ResultUtil<VolumeInfo>>() {
         }.getType());
-        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+        if (Objects.requireNonNull(resultUtil).getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }
         VolumeInfo volumeInfo = resultUtil.getData();
@@ -354,7 +350,7 @@ public class VolumeService extends AbstractService {
         for (Integer volumeId : volumeIds) {
             try {
                 models.add(this.destroyVolume(volumeId).getData());
-            } catch (Exception err) {
+            } catch (Exception ignored) {
 
             }
         }

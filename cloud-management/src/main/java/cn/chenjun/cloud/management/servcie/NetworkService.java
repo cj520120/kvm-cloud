@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
@@ -13,7 +13,7 @@ import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.IpCaculate;
+import cn.chenjun.cloud.management.util.IpCalculate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
@@ -105,13 +105,13 @@ public class NetworkService extends AbstractService {
                 .secret(UUID.randomUUID().toString().replace("-", ""))
                 .status(Constant.NetworkStatus.CREATING).build();
         networkMapper.insert(network);
-        List<String> ips = IpCaculate.parseIpRange(startIp, endIp);
+        List<String> ips = IpCalculate.parseIpRange(startIp, endIp);
         for (String ip : ips) {
             GuestNetworkEntity guestNetwork = GuestNetworkEntity.builder()
                     .guestId(0)
                     .ip(ip)
                     .networkId(network.getNetworkId())
-                    .mac(IpCaculate.getRandomMacAddress())
+                    .mac(IpCalculate.getRandomMacAddress())
                     .driveType("")
                     .deviceId(0)
                     .build();

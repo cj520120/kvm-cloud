@@ -13,8 +13,7 @@ public interface OperateDispatch {
      * @param taskId
      * @param command
      * @param data
-     * @param <T>
      * @return
      */
-    <T> ResultUtil<T> dispatch(String taskId, String command, String data);
+    ResultUtil<?> dispatch(String taskId, String command, String data);
 }

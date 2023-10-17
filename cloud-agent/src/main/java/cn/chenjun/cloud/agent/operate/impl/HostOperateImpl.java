@@ -59,17 +59,17 @@ public class HostOperateImpl implements HostOperate {
                 Object arch = node.selectObject("arch");
                 boolean isHvm = false;
                 boolean isArch = false;
-                if (osType != null && osType instanceof Element) {
+                if (osType instanceof Element) {
                     isHvm = "hvm".equals(((Element) osType).getData());
                 }
-                if (arch != null && arch instanceof Element) {
+                if (arch instanceof Element) {
                     String archValue = ((Element) node.selectObject("arch")).attribute("name").getText();
                     isArch = Objects.equals(hostArch, archValue);
                 }
                 if (isHvm && isArch) {
 
                     Object emulatorNode = node.selectObject("arch/emulator");
-                    if (emulatorNode != null && emulatorNode instanceof Element) {
+                    if (emulatorNode instanceof Element) {
                         emulator = ((Element) emulatorNode).getTextTrim();
                         //break;
                     }
@@ -78,7 +78,7 @@ public class HostOperateImpl implements HostOperate {
                         Attribute attribute = domainNode.attribute("type");
                         if (attribute != null && Objects.equals(attribute.getValue(), "kvm")) {
                             emulatorNode = domainNode.selectObject("emulator");
-                            if (emulatorNode != null && emulatorNode instanceof Element) {
+                            if (emulatorNode instanceof Element) {
                                 emulator = ((Element) emulatorNode).getTextTrim();
                             }
                         }

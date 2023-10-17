@@ -41,6 +41,8 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         HostEntity host = hostMapper.selectById(param.getHostId());
         if (host == null) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "主机不存在"));
+            return;
+
         }
         if (!Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "主机当前不在线"));

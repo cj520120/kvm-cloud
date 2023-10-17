@@ -4,7 +4,6 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.HostCheckOperate;
-import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -25,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class HostSyncTask extends AbstractTask {
-    private final int TASK_CHECK_TIME = 30;
+    private static final int TASK_CHECK_TIME = 30;
     @Autowired
     private RedissonClient redissonClient;
     @Autowired
@@ -33,9 +32,6 @@ public class HostSyncTask extends AbstractTask {
     @Autowired
     @Lazy
     private OperateTask operateTask;
-
-    @Autowired
-    private AllocateService allocateService;
 
     @Override
     protected void dispatch() {

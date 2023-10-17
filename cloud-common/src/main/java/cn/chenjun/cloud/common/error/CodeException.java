@@ -6,7 +6,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
  * @author chenjun
  */
 public class CodeException extends RuntimeException {
-    static final long serialVersionUID = 1L;
     private final int code;
 
     public CodeException(ResultUtil<?> resultUtil) {

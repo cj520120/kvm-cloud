@@ -98,7 +98,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         }
         ResultUtil<Void> resultUtil = GsonBuilderUtil.create().fromJson(responseEntity.getBody(), new TypeToken<ResultUtil<Void>>() {
         }.getType());
-        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+        if (Objects.requireNonNull(resultUtil).getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }
 

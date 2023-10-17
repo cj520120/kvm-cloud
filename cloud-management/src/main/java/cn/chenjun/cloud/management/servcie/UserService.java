@@ -41,7 +41,7 @@ public class UserService extends AbstractService {
     @Autowired
     private Oauth2Config oauth2Config;
     @Autowired
-    private ApplicationConfig applicaionconfig;
+    private ApplicationConfig config;
 
 
     public ResultUtil<TokenModel> login(String loginName, String password, String nonce) {
@@ -80,7 +80,7 @@ public class UserService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "token不能为空");
         }
         try {
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(this.applicaionconfig.getJwtPassword())).withIssuer(this.applicaionconfig.getJwtIssuer()).build();
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(this.config.getJwtPassword())).withIssuer(this.config.getJwtIssuer()).build();
             DecodedJWT jwt = jwtVerifier.verify(token);
             LoginUserModel loginUser = GsonBuilderUtil.create().fromJson(jwt.getClaim("User").asString(), LoginUserModel.class);
             if (this.oauth2Config.isEnable() && !Constant.UserType.OAUTH2.equals(loginUser.getType())) {
@@ -193,11 +193,11 @@ public class UserService extends AbstractService {
 
         LoginUserModel user = LoginUserModel.builder().id(userId).type(userType).build();
         String token = JWT.create()
-                .withIssuer(this.applicaionconfig.getJwtIssuer())
+                .withIssuer(this.config.getJwtIssuer())
                 .withIssuedAt(new Date())
                 .withClaim("User", GsonBuilderUtil.create().toJson(user))
                 .withExpiresAt(expire)
-                .sign(Algorithm.HMAC256(this.applicaionconfig.getJwtPassword()));
+                .sign(Algorithm.HMAC256(this.config.getJwtPassword()));
 
 
         return TokenModel.builder().expire(expire).token(token).build();

@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
@@ -37,8 +37,7 @@ public class TemplateService extends AbstractService {
         if (guestDisk == null) {
             return null;
         }
-        GuestEntity guest = guestMapper.selectById(guestDisk.getGuestId());
-        return guest;
+        return guestMapper.selectById(guestDisk.getGuestId());
     }
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)

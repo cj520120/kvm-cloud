@@ -39,14 +39,14 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyM
             if (rLock.tryLock(1, TimeUnit.MINUTES)) {
                 WebSocketServerOne.sendNotify(msg);
             }
-        } catch (Exception err) {
+        } catch (Exception ignored) {
 
         } finally {
             try {
                 if (rLock.isHeldByCurrentThread()) {
                     rLock.unlock();
                 }
-            } catch (Exception err) {
+            } catch (Exception ignored) {
 
             }
         }

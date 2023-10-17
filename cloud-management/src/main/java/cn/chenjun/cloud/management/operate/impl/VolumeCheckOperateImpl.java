@@ -64,8 +64,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             List<VolumeInfo> volumeInfoList = resultUtil.getData();
 
-            for (int i = 0; i < volumeInfoList.size(); i++) {
-                VolumeInfo info = volumeInfoList.get(i);
+            for (VolumeInfo info : volumeInfoList) {
                 if (info == null) {
                     continue;
                 }

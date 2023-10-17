@@ -98,8 +98,7 @@ public abstract class AbstractService extends AbstractInitializeService {
     }
 
     protected SnapshotModel initSnapshot(SnapshotVolumeEntity volume) {
-        SnapshotModel model = new BeanConverter<>(SnapshotModel.class).convert(volume, null);
 
-        return model;
+        return new BeanConverter<>(SnapshotModel.class).convert(volume, null);
     }
 }

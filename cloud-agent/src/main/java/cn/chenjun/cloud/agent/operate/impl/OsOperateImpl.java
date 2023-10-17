@@ -314,8 +314,8 @@ public class OsOperateImpl implements OsOperate {
         }
         String cpuXml = "";
         String cdRoomXml = "";
-        String diskXml = "";
-        String nicXml = "";
+        StringBuilder diskXml = new StringBuilder();
+        StringBuilder nicXml = new StringBuilder();
         if (request.getOsCpu().getShare() > 0) {
             String xml = ResourceUtil.readUtf8Str("xml/cpu/cputune.xml");
             cpuXml += String.format(xml, request.getOsCpu().getShare()) + "\r\n";
@@ -341,7 +341,7 @@ public class OsOperateImpl implements OsOperate {
 
             String dev = "" + (char) ('a' + deviceId);
             xml = String.format(xml, dev, osDisk.getVolumeType(), osDisk.getVolume(), deviceId, deviceId);
-            diskXml += xml + "\r\n";
+            diskXml.append(xml).append("\r\n");
         }
         for (OsNic osNic : request.getNetworkInterfaces()) {
             String xml;
@@ -360,7 +360,7 @@ public class OsOperateImpl implements OsOperate {
             }
             int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
             xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId, osNic.getVlanId());
-            nicXml += xml + "\r\n";
+            nicXml.append(xml).append("\r\n");
         }
         String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
         xml = String.format(xml,

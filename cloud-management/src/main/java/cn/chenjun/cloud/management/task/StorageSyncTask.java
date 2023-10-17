@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.task;
 
-import cn.chenjun.cloud.management.data.mapper.StorageMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
@@ -25,8 +24,6 @@ public class StorageSyncTask extends AbstractTask {
 
     @Autowired
     private RedissonClient redissonClient;
-    @Autowired
-    private StorageMapper storageMapper;
     @Autowired
     @Lazy
     private OperateTask operateTask;

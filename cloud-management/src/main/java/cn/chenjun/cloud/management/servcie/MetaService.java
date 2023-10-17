@@ -4,7 +4,10 @@ import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.GuestPasswordEntity;
 import cn.chenjun.cloud.management.data.entity.MetaDataEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
-import cn.chenjun.cloud.management.data.mapper.*;
+import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
+import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
+import cn.chenjun.cloud.management.data.mapper.MetaMapper;
+import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -25,9 +28,6 @@ import java.util.stream.Collectors;
 public class MetaService {
     @Autowired
     private MetaMapper mapper;
-
-    @Autowired
-    private GuestMapper guestMapper;
 
     @Autowired
     private GuestNetworkMapper guestNetworkMapper;

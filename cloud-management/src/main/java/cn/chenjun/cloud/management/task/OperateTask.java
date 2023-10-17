@@ -10,7 +10,6 @@ import cn.chenjun.cloud.management.operate.OperateEngine;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -31,8 +30,6 @@ public class OperateTask extends AbstractTask {
     @Qualifier("workExecutorService")
     private ScheduledExecutorService workExecutor;
 
-    @Autowired
-    private RedissonClient redis;
     @Autowired
     private OperateEngine operateEngine;
 
@@ -76,7 +73,7 @@ public class OperateTask extends AbstractTask {
                     }
 
                 } catch (Exception err) {
-                    ResultUtil resultUtil;
+                    ResultUtil<?> resultUtil;
                     if (err instanceof CodeException) {
                         CodeException codeException = (CodeException) err;
                         resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());

@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -54,9 +54,6 @@ public class SchemeService extends AbstractService {
         if (memory <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入内存");
         }
-        if (memory <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入内存");
-        }
         if (speed < 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的配额");
         }
@@ -84,9 +81,6 @@ public class SchemeService extends AbstractService {
         }
         if (cpu <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入CPU");
-        }
-        if (memory <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入内存");
         }
         if (memory <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入内存");

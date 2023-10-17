@@ -21,6 +21,7 @@ import java.util.List;
  * @author chenjun
  */
 @Component
+@Deprecated
 @ConditionalOnProperty(name = "app.route.type", havingValue = "dhcp", matchIfMissing = true)
 public class DhcpInitializeService implements RouteInitialize {
     @Autowired

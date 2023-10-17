@@ -1,14 +1,14 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.WsMessage;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.LoginUserModel;
-import cn.chenjun.cloud.management.util.SpringUtil;
+import cn.chenjun.cloud.management.util.SpringContextUtils;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +61,7 @@ public class WebSocketServerOne {
         if (msg!=null&&msg.getType() == Constant.SocketCommand.CLIENT_CONNECT) {
             String token = msg.getData();
             try {
-                ResultUtil<LoginUserModel> resultUtil = SpringUtil.getBean(UserService.class).getUserIdByToken(token);
+                ResultUtil<LoginUserModel> resultUtil = SpringContextUtils.getBean(UserService.class).getUserIdByToken(token);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                     this.loginInfo = resultUtil.getData();
                     SESSIONS.add(this);
