@@ -103,6 +103,7 @@ public abstract class AbstractComponentService extends AbstractService {
         String uid = UUID.randomUUID().toString().replace("-", "");
         GuestEntity guest = GuestEntity.builder()
                 .name(GuestNameUtil.getName())
+                .groupId(0)
                 .description(this.getComponentName())
                 .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
                 .cpu(applicationConfig.getSystemComponentCpu())

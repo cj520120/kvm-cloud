@@ -63,6 +63,7 @@ CREATE TABLE `tbl_guest_info` (
   `guest_ip` varchar(48) NOT NULL DEFAULT '',
   `network_id` varchar(45) NOT NULL DEFAULT '0',
   `guest_type` int(11) NOT NULL,
+  `group_id` varchar(45) NOT NULL DEFAULT '0',
   `guest_status` int(11) NOT NULL,
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -310,6 +311,17 @@ CREATE TABLE `tbl_volume_info` (
   `volume_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`volume_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=646 DEFAULT CHARSET=utf8mb4;
+
+/*Table structure for table `tbl_group_info` */
+
+DROP TABLE IF EXISTS `tbl_group_info`;
+
+CREATE TABLE `tbl_group_info` (
+  `group_id` INT NOT NULL AUTO_INCREMENT,
+  `group_name` VARCHAR(64) NOT NULL,
+  `create_time` TIMESTAMP NOT NULL,
+  PRIMARY KEY (`group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=646 DEFAULT CHARSET=utf8mb4;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

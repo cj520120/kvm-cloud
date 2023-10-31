@@ -53,20 +53,24 @@ public final class ErrorCode {
     public static final int SNAPSHOT_NOT_FOUND = BASE_SNAPSHOT_ERROR + 1;
     public static final int BASE_HOST_ERROR = BASE_ERROR * 7;
     /**
-     * HOst
+     * Host
      */
     public static final int HOST_NOT_FOUND = BASE_HOST_ERROR + 1;
     public static final int HOST_NOT_SPACE = BASE_HOST_ERROR + 2;
-    public static final int BASE_SCHEME_ERROR = BASE_ERROR * 8;
     /**
      * Scheme
      */
+    public static final int BASE_SCHEME_ERROR = BASE_ERROR * 8;
     public static final int SCHEME_NOT_FOUND = BASE_SCHEME_ERROR + 1;
     public static final int BASE_USER_ERROR = BASE_ERROR * 9;
     public static final int USER_LOGIN_NAME_OR_PASSWORD_ERROR = BASE_USER_ERROR + 1;
     public static final int USER_FORBID_ERROR = BASE_USER_ERROR + 2;
     public static final int PERMISSION_ERROR = BASE_USER_ERROR + 3;
-
+    /**
+     * Group
+     */
+    public static final int BASE_GROUP_ERROR = BASE_ERROR * 10;
+    public static final int GROUP_NOT_FOUND = BASE_GROUP_ERROR + 1;
     private ErrorCode() {
 
     }

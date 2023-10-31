@@ -55,7 +55,7 @@ export default {
 	},
 	mixins: [Notify, util],
 	mounted() {
-		this.show_type = 0 
+		this.show_type = 0
 		this.init_view()
 	},
 	created() {
@@ -107,9 +107,7 @@ export default {
 			this.show_type = 0
 		},
 		show_crate_scheme_info_click() {
-			if (this.$refs['createForm']) {
-				this.$refs['createForm'].resetFields()
-			}
+			this.$refs.CreateSchemeComponentRef.init()
 			this.show_type = 2
 		},
 		show_modify_scheme(scheme) {

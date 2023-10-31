@@ -548,3 +548,40 @@ export const getSystemConfig = (data = {}) => {
     method: "GET",
   });
 };
+
+//group
+export const getGroupList = (params = {}) => {
+  return axios.request({
+    url: "/api/group/all",
+    params,
+  });
+};
+export const createGroup = (data = {}) => {
+  return axios.request({
+    url: "api/group/create",
+    data,
+    method: "PUT",
+  });
+};
+
+export const modifyGroup = (data = {}) => {
+  return axios.request({
+    url: "api/group/update",
+    data,
+    method: "POST",
+  });
+};
+
+export const getGroupInfo = (params = {}) => {
+  return axios.request({
+    url: "/api/group/info",
+    params,
+  });
+};
+export const destroyGroup = (data = {}) => {
+  return axios.request({
+    url: "api/group/destroy",
+    data,
+    method: "DELETE",
+  });
+};

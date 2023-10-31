@@ -140,7 +140,7 @@ public class GuestService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(String description, String busType
+    public ResultUtil<GuestModel> createGuest(int groupId, String description, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                               int storageId, String volumeType, String password, long size) {
@@ -167,6 +167,7 @@ public class GuestService extends AbstractService {
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         String uid = UUID.randomUUID().toString().replace("-", "");
         GuestEntity guest = GuestEntity.builder()
+                .groupId(groupId)
                 .name(GuestNameUtil.getName())
                 .description(description)
                 .busType(busType)
@@ -708,7 +709,7 @@ public class GuestService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> modifyGuest(int guestId, String busType, String description, int schemeId) {
+    public ResultUtil<GuestModel> modifyGuest(int guestId, int groupId, String busType, String description, int schemeId) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的描述信息");
         }
@@ -728,6 +729,7 @@ public class GuestService extends AbstractService {
                 SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
                 guest.setDescription(description);
                 guest.setBusType(busType);
+                guest.setGroupId(groupId);
                 guest.setSchemeId(scheme.getSchemeId());
                 guest.setCpu(scheme.getCpu());
                 guest.setMemory(scheme.getMemory());

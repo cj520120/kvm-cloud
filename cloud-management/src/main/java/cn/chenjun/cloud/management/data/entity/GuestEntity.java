@@ -23,6 +23,8 @@ public class GuestEntity {
     @TableId(type = IdType.AUTO)
     @TableField("guest_id")
     private Integer guestId;
+    @TableField("group_id")
+    private Integer groupId;
     @TableField("guest_name")
     private String name;
     @TableField("guest_description")

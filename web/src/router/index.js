@@ -7,6 +7,7 @@ import TemplateView from "../views/TemplateView.vue";
 import SnapshotView from "../views/SnapshotView.vue";
 import VolumeView from "../views/VolumeView.vue";
 import SchemeView from "../views/SchemeView.vue";
+import GroupView from "../views/GroupView.vue";
 import GuestView from "../views/GuestView.vue";
 import VncView from "../views/VncView.vue";
 import HomeView from "../views/HomeView.vue";
@@ -64,6 +65,11 @@ const routes = [
     path: "/Scheme",
     name: "Scheme",
     component: SchemeView,
+  },
+  {
+    path: "/Group",
+    name: "Group",
+    component: GroupView,
   },
   {
     path: "/User",

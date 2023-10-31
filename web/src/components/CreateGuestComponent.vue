@@ -114,13 +114,23 @@
 				</el-row>
 				<el-row>
 					<el-col :span="12">
-						<el-form-item label="密码" v-if="create_guest.type !== 0">
-                            <el-input v-model="create_guest.password" :show-password="true" type="password"></el-input>
+						<el-form-item label="群组">
+							<el-select v-model="create_guest.groupId" style="width: 100%" placeholder="请选择群组">
+								<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
+							</el-select>
 						</el-form-item>
 					</el-col>
+
+					<el-col :span="12">
+						<el-form-item label="密码" v-if="create_guest.type === 1">
+							<el-input v-model="create_guest.password" :show-password="true" type="password"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
 					<el-col :span="12">
 						<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
-                            <el-input v-model="create_guest.size"></el-input>
+							<el-input v-model="create_guest.size"></el-input>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -133,13 +143,14 @@
 	</el-card>
 </template>
 <script>
-import { getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getNetworkList, getHostList, getSchemeList, createGuest } from '@/api/api'
+import { getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getNetworkList, getHostList, getSchemeList, createGuest, getGroupList } from '@/api/api'
 export default {
 	data() {
 		return {
 			create_guest: {
 				type: 0,
-				password:'',
+				groupId: 0,
+				password: '',
 				description: '',
 				busType: 'virtio',
 				hostId: 0,
@@ -161,7 +172,8 @@ export default {
 			snapshot_template: [],
 			schemes: [],
 			hosts: [],
-			networks: []
+			networks: [],
+			groups: []
 		}
 	},
 	methods: {
@@ -218,6 +230,13 @@ export default {
 				}
 			})
 		},
+		async load_all_groups() {
+			await getGroupList().then((res) => {
+				if (res.code === 0) {
+					this.groups = [{ groupId: 0, groupName: '默认' }, ...res.data]
+				}
+			})
+		},
 		async init() {
 			this.load_all_attach_volumes()
 			this.load_all_host()
@@ -226,7 +245,7 @@ export default {
 			this.load_all_schemes()
 			this.load_all_networks()
 			this.load_all_snapshot()
-
+			this.load_all_groups()
 			if (this.$refs['createForm']) {
 				this.$refs['createForm'].resetFields()
 			}
@@ -236,6 +255,7 @@ export default {
 			this.create_guest.password = ''
 			this.create_guest.volumeId = ''
 			this.create_guest.type = 0
+			this.create_guest.groupId = 0
 		},
 		create_guest_click() {
 			switch (this.create_guest.type) {

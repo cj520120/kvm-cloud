@@ -28,6 +28,7 @@ export default {
 				{ path: '/Storage', title: '存储池管理', icon: 'el-icon-coin' },
 				{ path: '/Template', title: '模版管理', icon: 'el-icon-price-tag' },
 				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' },
+				{ path: '/Group', title: '群组管理', icon: 'el-icon-folder' },
 				{ path: '/User', title: '用户管理', icon: 'el-icon-s-custom' }
 			]
 		}

@@ -16,6 +16,11 @@
 					<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
 				</el-select>
 			</el-form-item>
+			<el-form-item label="群组">
+				<el-select v-model="modify_guest.groupId" style="width: 100%" placeholder="请选择群组">
+					<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
+				</el-select>
+			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="modify_guest_dialog_visiable = false">取 消</el-button>
@@ -24,14 +29,15 @@
 	</el-dialog>
 </template>
 <script>
-import { getSchemeList, modifyGuest } from '@/api/api'
+import { getGroupList, getSchemeList, modifyGuest } from '@/api/api'
 export default {
 	data() {
 		return {
 			modify_guest_dialog_visiable: false,
-			schemes: [],
+			groups: [],
 			modify_guest: {
 				guestId: 0,
+				groupId: 0,
 				busType: '',
 				description: '',
 				schemeId: ''
@@ -40,17 +46,27 @@ export default {
 	},
 	methods: {
 		async init(guest) {
+			this.groups = [{ groupId: 0, groupName: '默认' }]
 			this.modify_guest.guestId = guest.guestId
+			this.modify_guest.groupId = guest.groupId
 			this.modify_guest.description = guest.description
 			this.modify_guest.schemeId = guest.schemeId
 			this.modify_guest.busType = guest.busType
 			this.modify_guest_dialog_visiable = true
 			await this.load_all_schemes()
+			await this.load_all_groups()
 		},
 		async load_all_schemes() {
 			await getSchemeList().then((res) => {
 				if (res.code === 0) {
 					this.schemes = res.data
+				}
+			})
+		},
+		async load_all_groups() {
+			await getGroupList().then((res) => {
+				if (res.code === 0) {
+					this.groups = [{ groupId: 0, groupName: '默认' }, ...res.data]
 				}
 			})
 		},

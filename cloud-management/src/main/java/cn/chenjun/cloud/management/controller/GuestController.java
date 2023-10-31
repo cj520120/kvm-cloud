@@ -66,6 +66,7 @@ public class GuestController {
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
                                               @RequestParam("busType") String busType,
                                               @RequestParam(value = "password",defaultValue = "") String password,
+                                              @RequestParam("groupId") int groupId,
                                               @RequestParam("hostId") int hostId,
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("networkId") int networkId,
@@ -79,7 +80,7 @@ public class GuestController {
                                               @RequestParam("size") long size) {
 
 
-        return this.guestService.createGuest(description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, password,size * 1024 * 1024 * 1024);
+        return this.guestService.createGuest(groupId, description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, password, size * 1024 * 1024 * 1024);
     }
 
     @PostMapping("/api/guest/reinstall")
@@ -176,8 +177,9 @@ public class GuestController {
     public ResultUtil<GuestModel> updateGuest(@RequestParam("guestId") int guestId,
                                               @RequestParam("busType") String busType,
                                               @RequestParam("description") String description,
-                                              @RequestParam("schemeId") int schemeId) {
-        return this.guestService.modifyGuest(guestId, busType, description, schemeId);
+                                              @RequestParam("schemeId") int schemeId,
+                                              @RequestParam("groupId") int groupId) {
+        return this.guestService.modifyGuest(guestId, groupId, busType, description, schemeId);
     }
 
     @DeleteMapping("/api/guest/destroy")

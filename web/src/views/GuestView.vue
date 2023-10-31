@@ -10,6 +10,12 @@
 							</el-form-item>
 							<el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
 							<el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
+							<el-form-item label="群组">
+								<el-select v-model="select_group_id" style="width: 100%" @change="update_guest_show_page">
+									<el-option label="任意" :value="-1"></el-option>
+									<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
+								</el-select>
+							</el-form-item>
 							<el-form-item label="运行主机">
 								<el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
 									<el-option label="全部" :value="0"></el-option>
@@ -73,7 +79,7 @@
 	</div>
 </template>
 <script>
-import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest } from '@/api/api'
+import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getGroupList } from '@/api/api'
 import Notify from '@/api/notify'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
@@ -94,12 +100,14 @@ export default {
 		return {
 			data_loading: false,
 			select_host_id: 0,
+			select_group_id: -1,
 			show_type: -1,
 			keyword: '',
 			guests: [],
 			storages: [],
 			hosts: [],
 			select_guests: [],
+			groups: [],
 			current_page: 1,
 			page_size: 10,
 			total_size: 0
@@ -142,11 +150,19 @@ export default {
 					this.data_loading = false
 				})
 			await this.load_all_host()
+			await this.load_all_groups()
 		},
 		async load_all_host() {
 			await getHostList().then((res) => {
 				if (res.code === 0) {
 					this.hosts = res.data.filter((v) => v.status == 1)
+				}
+			})
+		},
+		async load_all_groups() {
+			await getGroupList().then((res) => {
+				if (res.code === 0) {
+					this.groups = [{ groupId: 0, groupName: '默认' }, ...res.data]
 				}
 			})
 		},
@@ -176,7 +192,12 @@ export default {
 				if (this.select_host_id > 0) {
 					isHost = item.hostId === this.select_host_id
 				}
-				if (hasKeyword && isHost) {
+				let isGroup = true
+
+				if (this.select_group_id > -1) {
+					isGroup = item.groupId === this.select_group_id
+				}
+				if (hasKeyword && isHost && isGroup) {
 					nCount++
 					if (nCount <= nStart || nCount > nEnd) {
 						item.isShow = false
