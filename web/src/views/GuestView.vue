@@ -12,7 +12,7 @@
 							<el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
 							<el-form-item label="群组">
 								<el-select v-model="select_group_id" style="width: 100%" @change="update_guest_show_page">
-									<el-option label="任意" :value="-1"></el-option>
+									<el-option label="全部" :value="-1"></el-option>
 									<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
 								</el-select>
 							</el-form-item>
