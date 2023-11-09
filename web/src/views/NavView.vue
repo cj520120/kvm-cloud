@@ -21,13 +21,13 @@ export default {
 			nav_menu_data: [
 				{ path: '/', title: '主页', icon: 'el-icon-house' },
 				{ path: '/Guest', title: '虚拟机管理', icon: 'el-icon-s-platform' },
-				{ path: '/Volume', title: '磁盘管理', icon: 'el-icon-bank-card' },
-				{ path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },
-				{ path: '/Network', title: '网络管理', icon: 'el-icon-platform-eleme' },
 				{ path: '/Host', title: '主机管理', icon: 'el-icon-monitor' },
+				{ path: '/Network', title: '网络管理', icon: 'el-icon-platform-eleme' },
 				{ path: '/Storage', title: '存储池管理', icon: 'el-icon-coin' },
 				{ path: '/Template', title: '模版管理', icon: 'el-icon-price-tag' },
 				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' },
+				{ path: '/Volume', title: '磁盘管理', icon: 'el-icon-bank-card' },
+				{ path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },
 				{ path: '/Group', title: '群组管理', icon: 'el-icon-folder' },
 				{ path: '/User', title: '用户管理', icon: 'el-icon-s-custom' }
 			]
