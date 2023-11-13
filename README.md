@@ -185,9 +185,9 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 ![](images/storage.png)
 
-9、下载基础模版
+9、下载基础模版(系统模版选择cloud/v3/Cloud-System-V3.1.qcow2)
 
-> **链接: https://pan.baidu.com/s/1tdzTCCHQQmMtR5DqaTpf3Q 提取码: g6mp**
+> **链接: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn 提取码: 1bpn**
 
 
 10、安装nginx，配置基础下载地址,并在页面完成模版配置
