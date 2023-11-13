@@ -276,7 +276,16 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     5)、密码只对应默认用户，具体请查看system_info.default_user相关配置
     6)、其他配置请参照cloud-init相关配置进行安装
     7)、对系统模板请安装qemu-command-agent，并进行相关配置
+    
+    
+4、目前只提供Centos7及Ubuntu18.04的系统模版，其他系统模版，请自行实现
+    1）、Centos默认用户名为centos，密码为创建系统时输入的密码
+    2）、Ubuntu默认用户名为ubuntu，密码为创建系统输入的密码
+    3）、系统模版不支持root用户名密码登录，如需root登录，请自行修改
+
 ```
 9、页面删除主机后，如需要重新加入主机，请删除该主机Agent目录下config.json，然后重启Agent
 
 10、关于提示签名错误问题，请确保管理端跟agent端时间同步
+
+
