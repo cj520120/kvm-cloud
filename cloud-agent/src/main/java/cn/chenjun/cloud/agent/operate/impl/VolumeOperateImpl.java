@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
+import com.hubspot.jinjava.Jinjava;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
@@ -112,11 +113,14 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
-        String xml;
-        if (StringUtils.isEmpty(request.getParentVolume())) {
-            xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolume.xml");
-            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetType());
-        } else {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", request.getTargetName());
+        map.put("capacity", request.getTargetSize());
+        map.put("allocation", request.getTargetSize());
+        map.put("format", request.getTargetType());
+
+        if (!StringUtils.isEmpty(request.getParentVolume())) {
             boolean checkParentSupport = request.getParentType().equals(Constant.VolumeType.QCOW) || request.getParentType().equals(Constant.VolumeType.QCOW2) || request.getParentType().equals(Constant.VolumeType.RAW);
             boolean checkChildSupport = request.getTargetType().equals(Constant.VolumeType.QCOW) || request.getTargetType().equals(Constant.VolumeType.QCOW2);
             boolean checkSupport = checkParentSupport && checkChildSupport;
@@ -131,9 +135,15 @@ public class VolumeOperateImpl implements VolumeOperate {
                         .build();
                 return this.clone(connect, volumeCloneRequest);
             }
-            xml = ResourceUtil.readUtf8Str("xml/volume/CreateVolumeByBackingStore.xml");
-            xml = String.format(xml, request.getTargetName(), request.getTargetSize(), request.getTargetSize(), request.getTargetType(), request.getParentVolume(), request.getParentType());
+            Map<String, Object> backMap = new HashMap<>();
+            backMap.put("path", request.getParentVolume());
+            backMap.put("format", request.getParentType());
+            map.put("back", backMap);
+
         }
+        String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
+        Jinjava jinjava = new Jinjava();
+        xml = jinjava.render(xml, map);
         log.info("create volume:{}",xml);
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
@@ -261,10 +271,15 @@ public class VolumeOperateImpl implements VolumeOperate {
         StoragePool sourceStoragePool = this.getStorage(connect, request.getSourceStorage());
         StoragePool targetStoragePool = this.getStorage(connect, request.getTargetStorage());
         StorageVol sourceVol = this.findVol(sourceStoragePool, request.getSourceVolume());
-        String xml = ResourceUtil.readUtf8Str("xml/volume/CloneVolume.xml");
+
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
-        xml = String.format(xml, request.getTargetName(), request.getTargetType());
+        String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", request.getTargetName());
+        map.put("format", request.getTargetType());
+        Jinjava jinjava = new Jinjava();
+        xml = jinjava.render(xml, map);
         log.info("clone volume:{}", xml);
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();

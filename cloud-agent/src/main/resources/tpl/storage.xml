@@ -1,12 +1,12 @@
 <pool type="netfs">
-    <name>%s</name>
+    <name>{{name}}</name>
     <source>
-        <host name="%s"/>
-        <dir path="%s"/>
+        <host name="{{host}}"/>
+        <dir path="{{path}}"/>
         <format type="auto"/>
     </source>
     <target>
-        <path>%s</path>
+        <path>{{mount}}</path>
         <permissions>
             <mode>0777</mode>
             <owner>0</owner>

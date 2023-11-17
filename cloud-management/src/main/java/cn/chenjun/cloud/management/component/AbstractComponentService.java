@@ -57,11 +57,15 @@ public abstract class AbstractComponentService extends AbstractService {
             return;
         }
         List<ComponentEntity> componentList = componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq("network_id", networkId).eq("component_type", this.getComponentType()));
-        while (componentList.size() > 1) {
-            for (ComponentEntity component : componentList) {
-                guestService.destroyGuest(component.getGuestId());
-                componentMapper.deleteById(component.getComponentId());
-            }
+        if (componentList.size() > 1) {
+            /**
+             * 如果创建的虚拟机数量大于1，则删除后返回，等待下次检测
+             */
+            ComponentEntity component = componentList.get(componentList.size() - 1);
+            guestService.destroyGuest(component.getGuestId());
+            componentMapper.deleteById(component.getComponentId());
+            componentList.remove(componentList.size() - 1);
+            return;
         }
         if (!componentList.isEmpty()) {
             ComponentEntity component = componentList.get(0);

@@ -1,0 +1,28 @@
+<volume type="file">
+    <name>{{name}}</name>
+    {% if capacity > 0 %}
+    <capacity unit="bytes">{{capacity}}</capacity>
+    {% endif %}
+    {% if allocation > 0 %}
+    <allocation unit="bytes">{{allocation}}</allocation>
+    {% endif %}
+    <target>
+        <format type="{{format}}"/>
+        <permissions>
+            <mode>0600</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </target>
+    {% if back %}
+    <backingStore>
+        <path>{{back.path}}</path>
+        <format type="{{back.format}}"/>
+        <permissions>
+            <mode>0644</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </backingStore>
+    {% endif %}
+</volume>

@@ -1,0 +1,109 @@
+<domain type="kvm" >
+    <name>{{name}}</name>
+    <description>{{description}}</description>
+    <memory unit="KiB">{{memory}}</memory>
+    <currentMemory unit="KiB">{{memory}}</currentMemory>
+    <vcpu placement="static">{{cpu.number}}</vcpu>
+    {% if cpu.share > 0 %}
+    <cputune>
+        <shares>{{cpu.share}}</shares>
+    </cputune>
+    {% endif %}
+    <cpu mode="host-passthrough" check="partial">
+        <model fallback="allow">Nehalem</model>
+        {% if cpu.socket > 0 and cpu.core > 0 and cpu.thread > 0 %}
+        <topology sockets="{{cpu.socket}}" cores="{{cpu.core}}" threads="{{cpu.thread}}"/>
+        {% endif %}
+    </cpu>
+    <os>
+        <type arch="x86_64">hvm</type>
+        <boot dev="hd"/>
+        <boot dev="cdrom"/>
+        <bootmenu enable="yes" timeout="5000"/>
+    </os>
+    <features>
+        <acpi/>
+        <apic/>
+        <pae/>
+        <hap state="on"/>
+        <privnet/>
+    </features>
+    <clock offset="utc"/>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+    <devices>
+        <emulator>{{emulator}}</emulator>
+        <!--光驱-->
+        <disk type="file" device="cdrom">
+            <driver name="qemu"/>
+            <target dev="hda" bus="ide"/>
+            {% if cd.path > 0 %}
+            <source file="{{cd.path}}"/>
+            {% endif %}
+            <readonly/>
+            <address type="drive" controller="0" bus="0" target="0" unit="0"/>
+        </disk>
+        <!-- 磁盘 -->
+        {% for disk in disks %}
+        <disk type="file" device="disk" cache="none" aio="native">
+            <target dev="{{disk.dev}}" bus="{{disk.bus}}"/>
+            <driver name="qemu" type="{{disk.type}}" cache="none" aio="native"/>
+            <source file="{{disk.path}}"/>
+            {% if disk.bus=='virtio' %}
+            <!-- virtio 驱动-->
+            <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>
+            {% else %}
+            <!-- ide/scsi 驱动-->
+            <address type="drive" controller="0" bus="0" target="0" unit="0"/>
+            {% endif %}
+        </disk>
+        {% endfor %}
+        <!--网卡-->
+        {% for nic in networks %}
+        <interface type="bridge">
+            <mac address="{{nic.address}}"/>
+            <model type="{{nic.type}}"/>
+            <source bridge="{{nic.bridge}}"/>
+            <address type="pci" domain="0x0000" bus="0x00" slot="{{nic.slot}}" function="0x0"/>
+            <link state="up"/>
+            {% if nic.ovs %}
+            <virtualport type="openvswitch"/>
+            {% if nic.ovs.vlan > 0 %}
+            <vlan trunk="no">
+                <tag id="{{nic.ovs.vlan}}"/>
+            </vlan>
+            {% endif %}
+            {% endif %}
+        </interface>
+        {% endfor %}
+
+        <channel type="unix">
+            <source mode="bind" path="/var/lib/libvirt/qemu/{{name}}.org.qemu.guest_agent.0"/>
+            <target type="virtio" name="org.qemu.guest_agent.0"/>
+        </channel>
+        <input type="tablet" bus="usb"/>
+        <input type="mouse" bus="ps2"/>
+        <input type="keyboard" bus="ps2"/>
+        <serial type="pty">
+            <target port="0"/>
+        </serial>
+        <console type="pty">
+            <target type="serial" port="0"/>
+        </console>
+        <graphics type="vnc" port="-1" autoport="yes" listen="0.0.0.0" keymap="en-us" passwd="{{vnc.password}}"/>
+
+        <video>
+            <model type="cirrus" vram="16384" heads="1" primary="yes"/>
+            <address type="pci" domain="0x0000" bus="0x00" slot="0x02" function="0x0"/>
+        </video>
+        <memballoon model="virtio">
+            <stats period="10"/>
+            <address type="pci" domain="0x0000" bus="0x00" slot="0x04" function="0x0"/>
+        </memballoon>
+    </devices>
+    <seclabel type="dynamic" model="dac" relabel="yes">
+        <label>+0:+0</label>
+        <imagelabel>+0:+0</imagelabel>
+    </seclabel>
+</domain>

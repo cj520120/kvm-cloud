@@ -2,14 +2,13 @@ package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.OsOperate;
-import cn.chenjun.cloud.agent.util.NetworkType;
+import cn.chenjun.cloud.agent.util.DomainXmlUtil;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.google.gson.Gson;
@@ -35,9 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class OsOperateImpl implements OsOperate {
-    private final int MAX_DEVICE_COUNT = 5;
-    private final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
-    private final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
     @Autowired
     private ApplicationConfig applicationConfig;
 
@@ -80,23 +76,6 @@ public class OsOperateImpl implements OsOperate {
 
     }
 
-    private static String getDiskXml(OsDisk request, String bus) {
-        String xml;
-        switch (bus) {
-            case Constant.DiskBus.VIRTIO:
-                xml = ResourceUtil.readUtf8Str("xml/disk/VirtioDisk.xml");
-                break;
-            case Constant.DiskBus.IDE:
-                xml = ResourceUtil.readUtf8Str("xml/disk/IdeDisk.xml");
-                break;
-            case Constant.DiskBus.SCSI:
-                xml = ResourceUtil.readUtf8Str("xml/disk/ScsiDisk.xml");
-                break;
-            default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的总线模式:" + bus);
-        }
-        return xml;
-    }
 
     @Override
     public GuestInfo getGustInfo(Connect connect, GuestInfoRequest request) throws Exception {
@@ -199,8 +178,9 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
+        String xml = DomainXmlUtil.buildCdXml(request);
         domain.updateDeviceFlags(xml, 1);
+
     }
 
     @Override
@@ -209,8 +189,7 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
-        xml = String.format(xml, request.getPath());
+        String xml = DomainXmlUtil.buildCdXml(request);
         domain.updateDeviceFlags(xml, 1);
     }
 
@@ -220,14 +199,10 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
+        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = getDiskXml(request, Constant.DiskBus.VIRTIO);
-        int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
-
-        String dev = "" + (char) ('a' + deviceId);
-        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), deviceId);
+        String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
         domain.attachDevice(xml);
     }
 
@@ -237,13 +212,10 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
+        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
-        String xml = getDiskXml(request, Constant.DiskBus.VIRTIO);
-        int deviceId = request.getDeviceId() + MIN_DISK_DEVICE_ID;
-        String dev = "" + (char) ('a' + deviceId);
-        xml = String.format(xml, dev, request.getVolumeType(), request.getVolume(), deviceId);
+        String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
         domain.detachDevice(xml);
     }
 
@@ -253,25 +225,10 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
+        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml;
-        if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
-            if (request.getVlanId() > 0) {
-                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
-            } else {
-                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
-            }
-        } else {
-            if (request.getVlanId() > 0) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "基础网络不支持Vlan");
-            } else {
-                xml = ResourceUtil.readUtf8Str("xml/network/BridgeNic.xml");
-            }
-        }
-        int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
-        xml = String.format(xml, request.getMac(), request.getDriveType(), request.getBridgeName(), deviceId);
+        String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
         domain.attachDevice(xml);
     }
 
@@ -281,25 +238,10 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= MAX_DEVICE_COUNT) {
+        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml;
-        if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
-            if (request.getVlanId() > 0) {
-                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
-            } else {
-                xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
-            }
-        } else {
-            if (request.getVlanId() > 0) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "基础网络不支持Vlan");
-            } else {
-                xml = ResourceUtil.readUtf8Str("xml/network/BridgeNic.xml");
-            }
-        }
-        int deviceId = request.getDeviceId() + MIN_NIC_DEVICE_ID;
-        xml = String.format(xml, request.getMac(), request.getDriveType(), request.getBridgeName(), deviceId);
+        String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
         domain.detachDevice(xml);
     }
 
@@ -312,73 +254,9 @@ public class OsOperateImpl implements OsOperate {
             }
             domain.destroy();
         }
-        String cpuXml = "";
-        String cdRoomXml = "";
-        StringBuilder diskXml = new StringBuilder();
-        StringBuilder nicXml = new StringBuilder();
-        if (request.getOsCpu().getShare() > 0) {
-            String xml = ResourceUtil.readUtf8Str("xml/cpu/cputune.xml");
-            cpuXml += String.format(xml, request.getOsCpu().getShare()) + "\r\n";
-        }
-        if (request.getOsCpu().getCore() > 0) {
-            String xml = ResourceUtil.readUtf8Str("xml/cpu/cpu.xml");
-            cpuXml += String.format(xml, request.getOsCpu().getSocket(), request.getOsCpu().getCore(), request.getOsCpu().getThread()) + "\r\n";
-        }
-        if (request.getOsCdRoom() != null) {
-            OsCdRoom cd = request.getOsCdRoom();
-            if (StringUtils.isEmpty(cd.getPath())) {
-                String xml = ResourceUtil.readUtf8Str("xml/cd/DetachCdRoom.xml");
-                cdRoomXml += xml + "\r\n";
-            } else {
-                String xml = ResourceUtil.readUtf8Str("xml/cd/AttachCdRoom.xml");
-                cdRoomXml += String.format(xml, cd.getPath()) + "\r\n";
-            }
-        }
-        for (int i = 0; i < request.getOsDisks().size(); i++) {
-            OsDisk osDisk = request.getOsDisks().get(i);
-            String xml = getDiskXml(osDisk, i == 0 ? request.getBus() : Constant.DiskBus.VIRTIO);
-            int deviceId = osDisk.getDeviceId() + MIN_DISK_DEVICE_ID;
-
-            String dev = "" + (char) ('a' + deviceId);
-            xml = String.format(xml, dev, osDisk.getVolumeType(), osDisk.getVolume(), deviceId, deviceId);
-            diskXml.append(xml).append("\r\n");
-        }
-        for (OsNic osNic : request.getNetworkInterfaces()) {
-            String xml;
-            if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(applicationConfig.getNetworkType())) {
-                if (osNic.getVlanId() > 0) {
-                    xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchVlanNic.xml");
-                } else {
-                    xml = ResourceUtil.readUtf8Str("xml/network/OpenSwitchNic.xml");
-                }
-            } else {
-                if (osNic.getVlanId() > 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "基础网络不支持Vlan");
-                } else {
-                    xml = ResourceUtil.readUtf8Str("xml/network/BridgeNic.xml");
-                }
-            }
-            int deviceId = osNic.getDeviceId() + MIN_NIC_DEVICE_ID;
-            xml = String.format(xml, osNic.getMac(), osNic.getDriveType(), osNic.getBridgeName(), deviceId, osNic.getVlanId());
-            nicXml.append(xml).append("\r\n");
-        }
-        String xml = ResourceUtil.readUtf8Str("xml/Domain.xml");
-        xml = String.format(xml,
-                request.getName(),
-                request.getDescription(),
-                request.getOsMemory().getMemory(),
-                request.getOsCpu().getNumber(),
-                cpuXml,
-                request.getEmulator(),
-                cdRoomXml,
-                diskXml,
-                nicXml,
-                request.getName(),
-                request.getVncPassword());
+        String xml = DomainXmlUtil.buildDomainXml(applicationConfig.getNetworkType(), request);
         log.info("create vm={}", xml);
         domain = connect.domainCreateXML(xml, 0);
-
-
         if (Objects.nonNull(request.getQmaRequest())) {
             long start = System.currentTimeMillis();
             Map<String, Object> map = new HashMap<>(2);
@@ -392,6 +270,12 @@ public class OsOperateImpl implements OsOperate {
                         break;
                     }
                 } catch (Exception err) {
+                    if (err instanceof LibvirtException) {
+                        LibvirtException libvirtException = (LibvirtException) err;
+                        if (libvirtException.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机当前未运行");
+                        }
+                    }
                     ThreadUtil.sleep(5, TimeUnit.SECONDS);
                 }
             }

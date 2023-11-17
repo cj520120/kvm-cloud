@@ -664,6 +664,9 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyGuest(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest == null) {
+            return ResultUtil.<Void>builder().code(ErrorCode.GUEST_NOT_FOUND).build();
+        }
         switch (guest.getStatus()) {
             case Constant.GuestStatus.ERROR:
             case Constant.GuestStatus.STOP:

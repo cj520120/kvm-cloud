@@ -10,14 +10,13 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.hubspot.jinjava.Jinjava;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
 import org.libvirt.StoragePoolInfo;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author chenjun
@@ -79,8 +78,14 @@ public class StorageOperateImpl implements StorageOperate {
             String nfsUri = request.getParam().get("uri").toString();
             String nfsPath = request.getParam().get("path").toString();
             FileUtil.mkdir(request.getMountPath());
-            String xml = ResourceUtil.readUtf8Str("xml/storage/NfsStorage.xml");
-            xml = String.format(xml, request.getName(), nfsUri, nfsPath, request.getMountPath());
+            String xml = ResourceUtil.readUtf8Str("tpl/storage.xml");
+            Map<String, Object> map = new HashMap<>(0);
+            map.put("name", request.getName());
+            map.put("host", nfsUri);
+            map.put("path", nfsPath);
+            map.put("mount", request.getMountPath());
+            Jinjava jinjava = new Jinjava();
+            xml = jinjava.render(xml, map);
             storagePool = connect.storagePoolCreateXML(xml, 0);
         }
         storagePool.refresh(0);
