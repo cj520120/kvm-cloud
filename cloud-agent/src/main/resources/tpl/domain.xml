@@ -38,7 +38,7 @@
         <disk type="file" device="cdrom">
             <driver name="qemu"/>
             <target dev="hda" bus="ide"/>
-            {% if cd.path > 0 %}
+            {% if cd.path %}
             <source file="{{cd.path}}"/>
             {% endif %}
             <readonly/>
