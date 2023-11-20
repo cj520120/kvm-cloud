@@ -62,16 +62,6 @@
             <readonly/>
             <address type="drive" controller="0" bus="0" target="0" unit="0"/>
         </disk>
-        <!--光驱2-->
-        <disk type='file' device='cdrom'>
-            <driver name='qemu' type='raw'/>
-            <target dev='hdb' bus='ide'/>
-            {% if cd2.path %}
-            <source file="{{cd2.path}}"/>
-            {% endif %}
-            <readonly/>
-            <address type='drive' controller='0' bus='0' target='0' unit='1'/>
-        </disk>
         <!-- 磁盘 -->
         {% for disk in disks %}
         <disk type="file" device="disk" cache="none" aio="native">
@@ -83,7 +73,7 @@
             <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>
             {% else %}
             <!-- ide/scsi 驱动-->
-            <address type="drive" controller="0" bus="1" target="0" unit="0"/>
+            <address type='drive' controller='0' bus='0' target='0' unit='1'/>
             {% endif %}
         </disk>
         {% endfor %}
