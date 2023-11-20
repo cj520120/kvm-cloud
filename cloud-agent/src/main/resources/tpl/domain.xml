@@ -27,6 +27,15 @@
         <pae/>
         <hap state="on"/>
         <privnet/>
+        <!-- 启用各种功能，以改善运行 Microsoft Windows 的虚机的行为。 -->
+        <hyperv>
+            <!-- 放宽对计时器的约束 -->
+            <relaxed state='on'/>
+            <!-- 启用虚拟 APIC -->
+            <vapic state='on'/>
+            <!-- 启动 spinlock 的支持 -->
+            <spinlocks state='on' retries='4096'/>
+        </hyperv>
     </features>
     <clock offset="utc"/>
     <on_poweroff>destroy</on_poweroff>
@@ -34,7 +43,7 @@
     <on_crash>destroy</on_crash>
     <devices>
         <emulator>{{emulator}}</emulator>
-        <!--光驱-->
+        <!--光驱1-->
         <disk type="file" device="cdrom">
             <driver name="qemu"/>
             <target dev="hda" bus="ide"/>
@@ -43,6 +52,16 @@
             {% endif %}
             <readonly/>
             <address type="drive" controller="0" bus="0" target="0" unit="0"/>
+        </disk>
+        <!--光驱2-->
+        <disk type='file' device='cdrom'>
+            <driver name='qemu' type='raw'/>
+            <target dev='hdb' bus='ide'/>
+            {% if cd2.path %}
+            <source file="{{cd2.path}}"/>
+            {% endif %}
+            <readonly/>
+            <address type='drive' controller='0' bus='0' target='0' unit='1'/>
         </disk>
         <!-- 磁盘 -->
         {% for disk in disks %}
@@ -55,10 +74,10 @@
             <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>
             {% else %}
             <!-- ide/scsi 驱动-->
-            <address type="drive" controller="0" bus="0" target="0" unit="0"/>
+            <address type="drive" controller="0" bus="1" target="0" unit="0"/>
             {% endif %}
         </disk>
-        {% endfor %}
+        {% endfor %}:q
         <!--网卡-->
         {% for nic in networks %}
         <interface type="bridge">
@@ -78,6 +97,8 @@
         </interface>
         {% endfor %}
 
+
+        <!-- 主机和虚拟机专用通信通道 -->
         <channel type="unix">
             <source mode="bind" path="/var/lib/libvirt/qemu/{{name}}.org.qemu.guest_agent.0"/>
             <target type="virtio" name="org.qemu.guest_agent.0"/>
@@ -88,11 +109,13 @@
         <serial type="pty">
             <target port="0"/>
         </serial>
+        <!-- 控制台设置 -->
         <console type="pty">
             <target type="serial" port="0"/>
         </console>
+        <!-- vnc 图形交互 -->
         <graphics type="vnc" port="-1" autoport="yes" listen="0.0.0.0" keymap="en-us" passwd="{{vnc.password}}"/>
-
+        <!-- 视频驱动 -->
         <video>
             <model type="cirrus" vram="16384" heads="1" primary="yes"/>
             <address type="pci" domain="0x0000" bus="0x00" slot="0x02" function="0x0"/>
@@ -102,8 +125,4 @@
             <address type="pci" domain="0x0000" bus="0x00" slot="0x04" function="0x0"/>
         </memballoon>
     </devices>
-    <seclabel type="dynamic" model="dac" relabel="yes">
-        <label>+0:+0</label>
-        <imagelabel>+0:+0</imagelabel>
-    </seclabel>
 </domain>
