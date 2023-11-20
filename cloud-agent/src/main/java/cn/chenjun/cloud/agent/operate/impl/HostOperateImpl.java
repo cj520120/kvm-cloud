@@ -12,6 +12,7 @@ import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
 import org.libvirt.NodeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -31,18 +32,20 @@ public class HostOperateImpl implements HostOperate {
     @Autowired
     private ClientService clientService;
 
+    private static String getNodeText(Document doc,  String path, String defaultValue) {
+            Node node = doc.selectSingleNode(path);
+            if (node != null) {
+                return node.getText();
+            }
+            return defaultValue;
+    }
     private static String getArch(String xml) throws SAXException, DocumentException {
 
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
             reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
-            String path = "/capabilities/host/cpu/arch";
-            Node node = doc.selectSingleNode(path);
-            if (node != null) {
-                return node.getText();
-            }
-            return "x86_64";
+            return getNodeText(doc, "/capabilities/host/cpu/arch", "x86_64");
         }
     }
 

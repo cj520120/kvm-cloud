@@ -16,11 +16,20 @@
         {% endif %}
     </cpu>
     <os>
-        <type arch="x86_64">hvm</type>
+        <type>hvm</type>
         <boot dev="hd"/>
         <boot dev="cdrom"/>
         <bootmenu enable="yes" timeout="5000"/>
+        <smbios mode='sysinfo'/>
+        <bios useserial='yes' rebootTimeout='0'/>
     </os>
+    <sysinfo type='smbios'>
+        <system>
+            <entry name='product'>CJ KVM Cloud</entry>
+            <entry name='version'>3.1</entry>
+            <entry name='manufacturer'>chenjun</entry>
+        </system>
+    </sysinfo>
     <features>
         <acpi/>
         <apic/>
@@ -33,7 +42,7 @@
             <relaxed state='on'/>
             <!-- 启用虚拟 APIC -->
             <vapic state='on'/>
-            <!-- 启动 spinlock 的支持 -->
+            <!-- 启用自旋锁支持 -->
             <spinlocks state='on' retries='4096'/>
         </hyperv>
     </features>
@@ -77,7 +86,9 @@
             <address type="drive" controller="0" bus="1" target="0" unit="0"/>
             {% endif %}
         </disk>
-        {% endfor %}:q
+        {% endfor %}
+
+
         <!--网卡-->
         {% for nic in networks %}
         <interface type="bridge">
@@ -119,6 +130,7 @@
         <video>
             <model type="cirrus" vram="16384" heads="1" primary="yes"/>
             <address type="pci" domain="0x0000" bus="0x00" slot="0x02" function="0x0"/>
+            <driver name='qemu'/>
         </video>
         <memballoon model="virtio">
             <stats period="10"/>
