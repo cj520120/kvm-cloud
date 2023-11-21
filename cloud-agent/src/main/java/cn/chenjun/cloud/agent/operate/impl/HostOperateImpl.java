@@ -12,7 +12,6 @@ import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
 import org.libvirt.NodeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -32,13 +31,14 @@ public class HostOperateImpl implements HostOperate {
     @Autowired
     private ClientService clientService;
 
-    private static String getNodeText(Document doc,  String path, String defaultValue) {
-            Node node = doc.selectSingleNode(path);
-            if (node != null) {
-                return node.getText();
-            }
-            return defaultValue;
+    private static String getNodeText(Document doc, String path, String defaultValue) {
+        Node node = doc.selectSingleNode(path);
+        if (node != null) {
+            return node.getText();
+        }
+        return defaultValue;
     }
+
     private static String getArch(String xml) throws SAXException, DocumentException {
 
         try (StringReader sr = new StringReader(xml)) {

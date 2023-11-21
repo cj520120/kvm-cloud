@@ -27,6 +27,7 @@ public class NetworkOperateImpl implements NetworkOperate {
 
     @Autowired
     private ApplicationConfig applicationConfig;
+
     @Override
     public void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
         log.info("创建基础网络:{} type={}", request, applicationConfig.getNetworkType());
@@ -45,7 +46,7 @@ public class NetworkOperateImpl implements NetworkOperate {
 
     @Override
     public void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
-        log.info("创建Vlan网络:{}",vlan);
+        log.info("创建Vlan网络:{}", vlan);
     }
 
     @Override
@@ -66,9 +67,8 @@ public class NetworkOperateImpl implements NetworkOperate {
 
     @Override
     public void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
-        log.info("销毁Vlan网络:{}",vlan);
+        log.info("销毁Vlan网络:{}", vlan);
     }
-
 
 
 }

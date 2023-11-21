@@ -143,9 +143,10 @@ public interface OsOperate {
 
     /**
      * 虚拟机迁移
+     *
      * @param connect
      * @param request
      * @throws Exception
      */
-    void migrate(Connect connect,GuestMigrateRequest request) throws Exception;
+    void migrate(Connect connect, GuestMigrateRequest request) throws Exception;
 }

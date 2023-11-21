@@ -73,10 +73,10 @@ public class OperateDispatchImpl implements OperateDispatch {
                     map.put("sign", sign);
                     HttpUtil.post(clientService.getManagerUri() + "api/agent/task/report", map);
                 } catch (Exception err) {
-                    log.error("上报任务出现异常。command={} param={} result={}",command,data,result,err);
-                }finally {
+                    log.error("上报任务出现异常。command={} param={} result={}", command, data, result, err);
+                } finally {
                     taskMap.remove(taskId);
-                    log.info("移除异步任务:{}",taskId);
+                    log.info("移除异步任务:{}", taskId);
                 }
 
             }
@@ -220,7 +220,7 @@ public class OperateDispatchImpl implements OperateDispatch {
         } catch (CodeException err) {
             throw err;
         } catch (Exception err) {
-            log.error("dispatch fail. taskId={} command={} data={}", taskId,   command,   data,err);
+            log.error("dispatch fail. taskId={} command={} data={}", taskId, command, data, err);
             throw new CodeException(ErrorCode.SERVER_ERROR, err);
         } finally {
             this.taskMap.remove(taskId);

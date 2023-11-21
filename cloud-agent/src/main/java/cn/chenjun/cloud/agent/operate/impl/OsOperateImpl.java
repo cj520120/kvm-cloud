@@ -76,6 +76,9 @@ public class OsOperateImpl implements OsOperate {
 
     }
 
+    private static int bit(final int i) {
+        return 1 << i;
+    }
 
     @Override
     public GuestInfo getGustInfo(Connect connect, GuestInfoRequest request) throws Exception {
@@ -309,8 +312,9 @@ public class OsOperateImpl implements OsOperate {
             domain.destroy();
         }
     }
+
     @Override
-    public void migrate(Connect connect,GuestMigrateRequest request) throws Exception {
+    public void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -421,11 +425,6 @@ public class OsOperateImpl implements OsOperate {
             info.setVnc(VncUtil.getVnc(xml));
         }
         return info;
-    }
-
-
-    private static int bit(final int i) {
-        return 1 << i;
     }
 
     static final class MigrateFlags {

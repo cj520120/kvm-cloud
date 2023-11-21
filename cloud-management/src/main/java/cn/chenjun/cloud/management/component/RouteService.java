@@ -100,9 +100,9 @@ public class RouteService extends AbstractComponentService {
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/meta-service/"}).checkSuccess(true).build())).build());
 
 
-            String metaServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("meta/meta.sh").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-            String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("meta/meta.service").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-            String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("meta/meta.py").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            String metaServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             NetworkEntity network = this.networkMapper.selectById(component.getNetworkId());
             metaPython = String.format(metaPython, applicationConfig.getManagerUri(), network.getSecret());
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/meta-service/meta.py").fileBody(metaPython).build())).build());
@@ -115,7 +115,7 @@ public class RouteService extends AbstractComponentService {
 
 
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "nginx"}).checkSuccess(true).build())).build());
-            String metaServiceConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("meta/nginx.conf").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+            String metaServiceConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/nginx/nginx.conf").fileBody(metaServiceConfig).build())).build());
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "nginx"}).checkSuccess(true).build())).build());
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "nginx"}).checkSuccess(true).build())).build());
