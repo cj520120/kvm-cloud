@@ -53,7 +53,7 @@ public class DnsmasqInitializeService implements RouteInitialize {
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/dnsmasq.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
-        map.put("ip", "192.168.1.210");
+        map.put("ip", defaultGuestNetwork.getIp());
         map.put("startIp", network.getStartIp());
         map.put("endIp", network.getEndIp());
         map.put("gateway", network.getGateway());
