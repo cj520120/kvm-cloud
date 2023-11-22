@@ -34,7 +34,7 @@ public class TaskIdSyncTask extends AbstractTask {
 
     @Override
     protected int getPeriodSeconds() {
-        return 2;
+        return 5;
     }
 
     @Override

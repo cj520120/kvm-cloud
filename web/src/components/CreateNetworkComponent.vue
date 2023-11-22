@@ -48,8 +48,11 @@
 					</el-col>
 				</el-row>
 				<el-row :gutter="24">
-					<el-col :span="24">
+					<el-col :span="12">
 						<el-form-item label="DNS" prop="dns"><el-input v-model="create_network.dns"></el-input></el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="搜索域" prop="domain"><el-input v-model="create_network.domain"></el-input></el-form-item>
 					</el-col>
 				</el-row>
 
@@ -99,6 +102,7 @@ export default {
 				bridge: '',
 				dns: '',
 				type: 0,
+				domain: 'cj.kvm.internal',
 				vlanId: 100,
 				basicNetworkId: ''
 			}

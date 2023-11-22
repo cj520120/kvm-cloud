@@ -5,8 +5,10 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
+import cn.chenjun.cloud.management.data.entity.DnsEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
+import cn.chenjun.cloud.management.data.mapper.DnsMapper;
 import cn.chenjun.cloud.management.model.GuestNetworkModel;
 import cn.chenjun.cloud.management.model.NetworkModel;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
@@ -16,6 +18,7 @@ import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class NetworkService extends AbstractService {
+    @Autowired
+    private DnsMapper dnsMapper;
 
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(int guestId) {
@@ -57,7 +62,7 @@ public class NetworkService extends AbstractService {
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, int type, int vlanId, int basicNetworkId) {
+    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId) {
 
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");
@@ -86,6 +91,9 @@ public class NetworkService extends AbstractService {
         if (StringUtils.isEmpty(broadcast)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入广播地址");
         }
+        if (StringUtils.isEmpty(domain)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入搜索域");
+        }
         if (Objects.equals(Constant.NetworkType.VLAN, type) && vlanId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
         }
@@ -99,6 +107,7 @@ public class NetworkService extends AbstractService {
                 .broadcast(broadcast)
                 .bridge(bridge)
                 .dns(dns)
+                .domain(domain)
                 .type(type)
                 .vlanId(vlanId)
                 .basicNetworkId(basicNetworkId)
@@ -165,6 +174,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(Constant.NetworkStatus.DESTROY);
         networkMapper.updateById(network);
+        dnsMapper.delete(new QueryWrapper<DnsEntity>().eq("network_id", networkId));
         this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId));
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);

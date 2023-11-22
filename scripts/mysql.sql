@@ -157,24 +157,25 @@ CREATE TABLE `tbl_meta_data` (
 DROP TABLE IF EXISTS `tbl_network_info`;
 
 CREATE TABLE `tbl_network_info` (
-  `network_id` int(11) NOT NULL AUTO_INCREMENT,
+  `network_id` int NOT NULL AUTO_INCREMENT,
   `network_name` varchar(45) NOT NULL,
   `network_start_ip` varchar(20) NOT NULL,
   `network_stop_ip` varchar(20) NOT NULL,
   `network_gateway` varchar(20) NOT NULL,
   `network_mask` varchar(20) NOT NULL,
-  `network_subnet` varchar(45) NOT NULL,
-  `network_broadcast` varchar(45) NOT NULL,
   `network_bridge_name` varchar(20) NOT NULL,
+  `network_subnet` varchar(45) NOT NULL,
+  `network_broadcast` varchar(45) DEFAULT NULL,
   `network_dns` varchar(20) NOT NULL,
-  `network_vlan_id` int(11) NOT NULL,
-  `network_basic_network_id` int(11) NOT NULL,
-  `network_type` varchar(20) NOT NULL,
+  `network_vlan_id` int NOT NULL,
   `network_secret` varchar(128) NOT NULL DEFAULT 'CJ:KVM:CLOUD',
-  `network_status` int(11) NOT NULL,
+  `network_basic_network_id` int NOT NULL,
+  `network_domain` varchar(64) NOT NULL DEFAULT 'cj.kvm.internal',
+  `network_type` varchar(20) NOT NULL,
+  `network_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 /*Table structure for table `tbl_scheme_info` */
 
@@ -323,6 +324,19 @@ CREATE TABLE `tbl_group_info` (
   `create_time` TIMESTAMP NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=646 DEFAULT CHARSET=utf8mb4;
+
+/*Table structure for table `tbl_group_info` */
+
+DROP TABLE IF EXISTS `tbl_dns_info`;
+CREATE TABLE `tbl_dns_info` (
+  `dns_id` int NOT NULL AUTO_INCREMENT,
+  `network_id` int NOT NULL,
+  `dns_domain` varchar(128) NOT NULL,
+  `dns_ip` varchar(45) NOT NULL,
+  `create_time` timestamp NOT NULL,
+  PRIMARY KEY (`dns_id`),
+  UNIQUE KEY `IX_NETWORK_DOMAIN` (`network_id`,`dns_domain`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

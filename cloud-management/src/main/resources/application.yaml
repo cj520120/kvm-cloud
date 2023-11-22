@@ -8,12 +8,9 @@ app:
   enableVolumeBack: false
   #删除模版时是否自动删除磁盘文件，enableVolumeBack为false时有效，请确认当前所有磁盘没有依赖模版文件，否则删除后无法启动
   clearTemplateVolume: true
-  manager-uri: http://192.168.2.107:8080/
+  manager-uri: http://localhost:8080/
   over-cpu: 4.0
   over-memory: 2.0
-  route:
-      #支持dnsmasq 与dhcp两种配置，变更该值必须重建所有网络的System Route,版本升级尤其注意,dhcp模式不支持metaservice
-      type: dnsmasq
   #pip3加速源，国内用户可配置，海外无需配置
   pip-source: https://pypi.tuna.tsinghua.edu.cn/simple
   #yum加速源，国内用户可配置，海外无需配置
@@ -69,22 +66,25 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
       filters: stat,wall
-      initial-size: 5
-      max-active: 20
-      max-open-prepared-statements: 50
-      max-pool-prepared-statement-per-connection-size: 20
+      stat-view-servlet.enabled: false
+      initial-size: 8
+      max-idle: 8
+      max-active: 16
       max-wait: 60000
-      min-evictable-idle-time-millis: 300000
-      min-idle: 5
-      pool-prepared-statements: true
+      time-between-eviction-runsMillis: 60000
+      min-evictable-idle-timeMillis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
       test-on-borrow: false
       test-on-return: false
-      test-while-idle: true
-      time-between-eviction-runs-millis: 60000
-      validation-query: SELECT 1
+      pool-prepared-statements: true
+      max-open-prepared-statements: 32
+      max-pool-prepared-statement-per-connection-size: 32
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
     password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&serverTimezone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
+    url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
     username: root
   servlet:
     multipart:

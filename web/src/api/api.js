@@ -18,7 +18,6 @@ export const createNetwork = (data = {}) => {
     method: "PUT",
   });
 };
-
 export const pauseNetwork = (data = {}) => {
   return axios.request({
     url: "api/network/maintenance",
@@ -42,7 +41,13 @@ export const destroyNetwork = (data = {}) => {
     method: "DELETE",
   });
 };
-
+export const destroyNetworDns = (data = {}) => {
+  return axios.request({
+    url: "api/dns/destroy",
+    data,
+    method: "DELETE",
+  });
+};
 /** HOST */
 export const getHostList = (params = {}) => {
   return axios.request({
@@ -80,6 +85,20 @@ export const registerHost = (data = {}) => {
   });
 };
 
+/** dns */
+export const getNetworkDnsList = (params = {}) => {
+  return axios.request({
+    url: "/api/dns/list",
+    params,
+  });
+};
+export const createNetworkDns = (data = {}) => {
+  return axios.request({
+    url: "api/dns/create",
+    data,
+    method: "PUT",
+  });
+};
 export const destroyHost = (data = {}) => {
   return axios.request({
     url: "api/host/destroy",

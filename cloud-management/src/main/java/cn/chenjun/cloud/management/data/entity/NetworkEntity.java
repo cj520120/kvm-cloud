@@ -50,6 +50,8 @@ public class NetworkEntity {
     private Integer vlanId;
     @TableField("network_secret")
     private String secret;
+    @TableField("network_domain")
+    private String domain;
     @TableField("network_basic_network_id")
     private Integer basicNetworkId;
     @TableField("create_time")

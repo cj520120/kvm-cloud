@@ -25,6 +25,7 @@ public class TplTest {
         map.put("endIp",network.getEndIp());
         map.put("gateway",network.getGateway());
         map.put("mask",network.getMask());
+        map.put("domain","cj.local");
         map.put("dnsList", Arrays.asList(network.getDns().split(",")));
         List<Map<String,Object>> dhcpList=allGuestNetwork.stream().map(guestNetwork -> {
             Map<String,Object> dhcp=new HashMap<>(2);

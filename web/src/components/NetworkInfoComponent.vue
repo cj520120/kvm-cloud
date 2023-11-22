@@ -20,6 +20,7 @@
 					<el-descriptions-item label="子网地址">{{ show_network.subnet }}</el-descriptions-item>
 					<el-descriptions-item label="广播地址">{{ show_network.broadcast }}</el-descriptions-item>
 					<el-descriptions-item label="DNS">{{ show_network.dns }}</el-descriptions-item>
+					<el-descriptions-item label="搜索域">{{ show_network.domain }}</el-descriptions-item>
 					<el-descriptions-item label="桥接网卡">{{ show_network.bridge }}</el-descriptions-item>
 					<el-descriptions-item label="网络类型">{{ get_network_type(show_network) }}</el-descriptions-item>
 					<el-descriptions-item label="VLAN ID" v-if="show_network.type === 1">{{ show_network.vlanId }}</el-descriptions-item>
@@ -52,25 +53,58 @@
 							</el-table-column>
 						</el-table>
 					</el-tab-pane>
+					<el-tab-pane label="内部dns">
+						<el-button type="primary" size="small" @click="dialog_create_network_dns_visible = true">新建内部解析</el-button>
+						<el-table :data="network_dns_list" style="width: 100%">
+							<el-table-column label="IP" prop="ip" width="300" />
+							<el-table-column label="Domain" prop="domain" />
+							<el-table-column label="操作" width="200px">
+								<template #default="scope">
+									<el-button type="text" size="small" @click="destroy_network_dns(scope.row.id)">删除</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-tab-pane>
 				</el-tabs>
 			</el-row>
 		</el-card>
 		<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_type = 0" @onGuestUpdate="update_guest_info" v-show="this.show_type === 1" />
+		<el-dialog title="创建内部解析" :visible.sync="dialog_create_network_dns_visible" width="500px">
+			<el-form :model="create_network_dns" label-width="100px" class="demo-ruleForm">
+				<el-form-item label="域名" prop="name">
+					<el-input v-model="create_network_dns.domain"></el-input>
+				</el-form-item>
+				<el-form-item label="IP" prop="cpu">
+					<el-input v-model="create_network_dns.ip"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="create_network_dns_click">创建</el-button>
+					<el-button @click="dialog_create_network_dns_visible = false">取消</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
 	</div>
 </template>
 <script>
 import Notify from '@/api/notify'
-import { getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getSystemGuestList, getGuestInfo } from '@/api/api'
+import { getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getSystemGuestList, getGuestInfo, getNetworkDnsList, destroyNetworDns, createNetworkDns } from '@/api/api'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
 export default {
 	name: 'NetworkInfoComponent',
 	data() {
 		return {
+			dialog_create_network_dns_visible: false,
 			network_loading: false,
 			system_guests: [],
 			networks: [],
+			network_dns_list: [],
 			show_type: 0,
+			create_network_dns: {
+				networkId: 0,
+				domain: '',
+				ip: ''
+			},
 			show_network: {
 				networkId: 0,
 				name: '',
@@ -82,6 +116,7 @@ export default {
 				broadcast: '',
 				bridge: '',
 				dns: '',
+				domain: '',
 				type: 0,
 				vlanId: 100,
 				basicNetworkId: ''
@@ -119,7 +154,12 @@ export default {
 			this.networks = networks
 			this.show_network = show_network
 			this.system_guests = []
+			this.network_dns_list = []
+			this.create_network_dns.networkId = show_network.networkId
+			this.create_network_dns.domain = ''
+			this.create_network_dns.ip = ''
 			await this.load_system_guest(show_network)
+			await this.load_network_dns(show_network)
 		},
 		async init(networkId) {
 			this.show_type = 0
@@ -146,6 +186,14 @@ export default {
 				.finally(() => {
 					this.host_loading = false
 				})
+		},
+		async load_network_dns(network) {
+			this.network_dns_list = []
+			await getNetworkDnsList({ networkId: network.networkId }).then((res) => {
+				if (res.code === 0) {
+					this.network_dns_list = res.data
+				}
+			})
 		},
 		async load_system_guest(network) {
 			this.system_guests = []
@@ -215,6 +263,44 @@ export default {
 							this.$notify.error({
 								title: '错误',
 								message: `注册网络失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
+		},
+		create_network_dns_click() {
+			createNetworkDns(this.create_network_dns).then((res) => {
+				if (res.code === 0) {
+					this.create_network_dns.domain = ''
+					this.create_network_dns.ip = ''
+					this.network_dns_list.push(res.data)
+					this.dialog_create_network_dns_visible = false
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: `添加内部Dns失败:${res.message}`
+					})
+				}
+			})
+		},
+		destroy_network_dns(dnsId) {
+			this.$confirm('删除dns记录, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			})
+				.then(() => {
+					destroyNetworDns({ dnsId: dnsId }).then((res) => {
+						if (res.code === 0) {
+							let findIndex = this.network_dns_list.findIndex((v) => v.id === dnsId)
+							if (findIndex >= 0) {
+								this.network_dns_list.splice(findIndex, 1)
+							}
+						} else {
+							this.$notify.error({
+								title: '错误',
+								message: `删除网络Dns失败:${res.message}`
 							})
 						}
 					})

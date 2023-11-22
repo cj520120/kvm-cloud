@@ -12,7 +12,6 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hubspot.jinjava.Jinjava;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
  * @author chenjun
  */
 @Component
-@ConditionalOnProperty(name = "app.route.type", havingValue = "dnsmasq")
 public class DnsmasqInitializeService implements RouteInitialize {
     @Autowired
     protected GuestNetworkMapper guestNetworkMapper;
@@ -58,6 +56,7 @@ public class DnsmasqInitializeService implements RouteInitialize {
         map.put("endIp", network.getEndIp());
         map.put("gateway", network.getGateway());
         map.put("mask", network.getMask());
+        map.put("domain", network.getDomain());
         map.put("dnsList", Arrays.asList(network.getDns().split(",")));
         List<Map<String, Object>> dhcpList = allGuestNetwork.stream().map(guestNetwork -> {
             Map<String, Object> dhcp = new HashMap<>(2);
@@ -72,7 +71,7 @@ public class DnsmasqInitializeService implements RouteInitialize {
         //写入dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/dnsmasq.conf").fileBody(dnsmasqConfig).build())).build());
         //创建hosts文件
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"/etc/dnsmasq.hosts.d"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/etc/dnsmasq.hosts.d"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"755","/etc/dnsmasq.hosts.d"}).build())).build());
         //启动dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("touch").args(new String[]{"/etc/dnsmasq.hosts.d/hosts"}).build())).build());
@@ -80,12 +79,9 @@ public class DnsmasqInitializeService implements RouteInitialize {
         //启动dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "dnsmasq"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "dnsmasq"}).build())).build());
+
+        //写入dns自动加载配置
         return commands;
 
-    }
-
-    @Override
-    public boolean isEnableMetaService() {
-        return true;
     }
 }

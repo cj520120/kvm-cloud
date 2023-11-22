@@ -54,7 +54,7 @@ public class OperateTask extends AbstractTask {
 
     @Override
     protected int getPeriodSeconds() {
-        return 1;
+        return 5;
     }
 
     @Override

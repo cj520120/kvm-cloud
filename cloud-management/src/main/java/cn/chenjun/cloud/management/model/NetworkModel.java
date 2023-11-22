@@ -26,6 +26,7 @@ public class NetworkModel {
     private String broadcast;
     private String bridge;
     private String dns;
+    private String domain;
     private int type;
     private int status;
     private int vlanId;
