@@ -97,15 +97,15 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
+                //写入系统vnc
+                GuestInfo guestInfo = resultUtil.getData();
+                this.vncService.updateVncPort(guest.getNetworkId(), param.getGuestId(), guestInfo.getVnc());
             } else {
                 guest.setHostId(0);
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP);
             }
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
-            //写入系统vnc
-            GuestInfo guestInfo = resultUtil.getData();
-            this.vncService.updateVncPort(guest.getNetworkId(), param.getGuestId(), guestInfo.getVnc());
         }
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 
