@@ -39,8 +39,4 @@ public class DnsController {
     }
 
 
-    @GetMapping(value = "/api/dns/reload")
-    public ResultUtil<List<DnsModel>> listAllDnsByService(@RequestHeader(value = "X-Network-ID") int networkId, @RequestHeader(value = "X-Nonce") String nonce, @RequestHeader("X-Sign") String sign) {
-        return this.dnsService.listAllDns(networkId, nonce, sign);
-    }
 }

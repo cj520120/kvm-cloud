@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.common.bean;
+package cn.chenjun.cloud.management.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
  * @author chenjun
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class NotifyMessage<T> {
-    private int type;
-    private int id;
-    private T data;
+public class VncModel {
+    private String host;
+    private int port;
+    private String token;
+
 }

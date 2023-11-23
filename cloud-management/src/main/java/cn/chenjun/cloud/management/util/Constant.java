@@ -90,8 +90,8 @@ public class Constant {
     }
 
     public static class ComponentType {
-        public static final int ROUTE = 1;
-        public static final int VNC = 2;
+        public static final int SYSTEM = 1;
+
     }
 
     public class UserState {

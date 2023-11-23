@@ -226,7 +226,7 @@ public abstract class AbstractComponentService extends AbstractService {
      * @param guestId
      * @return
      */
-    public abstract GuestQmaRequest getStartQmaRequest(int guestId);
+    public abstract GuestQmaRequest getStartQmaRequest(int networkId, int guestId);
 
     /**
      * 是否申请父网卡ip

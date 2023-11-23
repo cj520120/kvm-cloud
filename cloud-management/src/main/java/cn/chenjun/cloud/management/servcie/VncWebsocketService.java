@@ -40,7 +40,7 @@ public class VncWebsocketService {
             return;
         }
         ComponentMapper componentMapper = SpringContextUtils.getBean(ComponentMapper.class);
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", guest.getNetworkId()).eq("component_type", Constant.ComponentType.VNC).last("limit 0,1"));
+        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", guest.getNetworkId()).eq("component_type", Constant.ComponentType.SYSTEM).last("limit 0,1"));
         if (component == null) {
             session.close();
             return;

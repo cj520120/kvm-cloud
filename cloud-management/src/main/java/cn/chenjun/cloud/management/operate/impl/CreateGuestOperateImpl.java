@@ -60,6 +60,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
             this.allocateService.initHostAllocate();
         }
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyMessage.builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
 
     }
 }

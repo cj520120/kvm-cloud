@@ -86,6 +86,9 @@ public class Constant {
         public static final int LOGIN_SUCCESS = 1;
         public static final int LOGIN_TOKEN_ERROR = 2;
         public static final int NOTIFY=3;
+        public static final int NOT_LOGIN = 4;
+        public static final int VNC_REQUEST = 5;
+        public static final int DNS_REQUEST = 6;
     }
     public static class NotifyType {
 
@@ -99,6 +102,10 @@ public class Constant {
         public static final int UPDATE_STORAGE = 7;
         public static final int UPDATE_SCHEME = 8;
         public static final int UPDATE_GROUP = 9;
+
+
+        public static final int COMPONENT_UPDATE_VNC = 100;
+        public static final int COMPONENT_UPDATE_DNS = 101;
     }
 
 }

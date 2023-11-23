@@ -79,11 +79,8 @@ public class GuestService extends AbstractService {
     }
 
     private void checkSystemComponentComplete(int networkId) {
-        if (this.checkComponentComplete(networkId, Constant.ComponentType.VNC)) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "网络Vnc服务未初始化完成,请稍后重试");
-        }
-        if (this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "网络路由服务未初始化完成,请稍后重试");
+        if (this.checkComponentComplete(networkId, Constant.ComponentType.SYSTEM)) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
         }
     }
 
@@ -252,6 +249,8 @@ public class GuestService extends AbstractService {
         this.operateTask.addTask(operateParam);
 
         this.notifyService.publish(NotifyMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+
+        this.notifyService.publish(NotifyMessage.builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
     }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
@@ -691,11 +690,14 @@ public class GuestService extends AbstractService {
                         this.notifyService.publish(NotifyMessage.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                     }
                 }
-                this.vncService.destroyGuest(guestId);
+                this.guestVncMapper.deleteById(guestId);
                 this.guestMapper.deleteById(guestId);
                 this.guestPasswordMapper.deleteById(guestId);
+                this.componentMapper.delete(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
                 this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestId));
                 this.notifyService.publish(NotifyMessage.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+
+                this.notifyService.publish(NotifyMessage.builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
                 return ResultUtil.success();
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");

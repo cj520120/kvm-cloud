@@ -5,6 +5,7 @@ package cn.chenjun.cloud.management.util;
  */
 public class RedisKeyUtil {
     public final static String GLOBAL_NOTIFY_KET = "Cloud.Notify";
+    public final static String GLOBAL_COMPONENT_NOTIFY_KET = "Cloud.Component.Notify";
     public final static String GLOBAL_LOCK_KEY = "Cloud.Lock";
     public final static String TASK_ID_SYNC_KEY = "Cloud.TaskId.Sync";
     public final static String HOST_SYNC_KEY = "Cloud.Host.Sync";

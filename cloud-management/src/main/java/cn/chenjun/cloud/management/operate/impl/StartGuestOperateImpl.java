@@ -5,9 +5,9 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
-import cn.chenjun.cloud.management.component.VncService;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
+import cn.chenjun.cloud.management.servcie.VncService;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -27,6 +27,7 @@ import java.util.*;
 @Component
 @Slf4j
 public class StartGuestOperateImpl<T extends StartGuestOperate> extends AbstractOperate<T, ResultUtil<GuestInfo>> {
+
 
     @Autowired
     private VncService vncService;
@@ -96,8 +97,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
-                GuestInfo guestInfo = resultUtil.getData();
-                this.vncService.updateVncPort(param.getGuestId(), guestInfo.getVnc());
             } else {
                 guest.setHostId(0);
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP);
@@ -105,8 +104,11 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
             //写入系统vnc
+            GuestInfo guestInfo = resultUtil.getData();
+            this.vncService.updateVncPort(guest.getNetworkId(), param.getGuestId(), guestInfo.getVnc());
         }
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+
     }
 
     protected List<OsDisk> getGuestDisk(GuestEntity guest) {

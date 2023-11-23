@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.management.component.AbstractInitializeService;
-import cn.chenjun.cloud.management.component.VncService;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
@@ -43,9 +42,7 @@ public abstract class AbstractService extends AbstractInitializeService {
     protected ApplicationConfig applicationConfig;
     @Autowired
     protected GuestVncMapper guestVncMapper;
-    @Autowired
-    @Lazy
-    protected VncService vncService;
+
     @Autowired
     protected SchemeMapper schemeMapper;
     @Autowired

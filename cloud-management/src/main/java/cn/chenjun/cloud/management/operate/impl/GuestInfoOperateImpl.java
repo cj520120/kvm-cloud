@@ -8,10 +8,10 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
-import cn.chenjun.cloud.management.component.VncService;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.GuestInfoOperate;
+import cn.chenjun.cloud.management.servcie.VncService;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, ResultUtil<GuestInfo>> {
+
 
     @Autowired
     private VncService vncService;
@@ -70,7 +71,7 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
         if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING) {
             this.allocateService.initHostAllocate();
             if(resultUtil.getCode()==ErrorCode.SUCCESS) {
-                this.vncService.updateVncPort(param.getGuestId(), resultUtil.getData().getVnc());
+                this.vncService.updateVncPort(guest.getNetworkId(), param.getGuestId(), resultUtil.getData().getVnc());
             }
         }
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());

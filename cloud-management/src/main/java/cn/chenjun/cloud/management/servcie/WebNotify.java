@@ -25,16 +25,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 @ServerEndpoint(value = "/api/ws/")
 @EqualsAndHashCode
-public class WebSocketServerOne {
-    private static final CopyOnWriteArraySet<WebSocketServerOne> SESSIONS = new CopyOnWriteArraySet<>();
+public class WebNotify {
+    private static final CopyOnWriteArraySet<WebNotify> SESSIONS = new CopyOnWriteArraySet<>();
     private Session session;
     private LoginUserModel loginInfo;
 
-    public synchronized static void sendNotify(NotifyMessage message) {
+    public synchronized static <T> void sendNotify(NotifyMessage<T> message) {
 
-        WsMessage<NotifyMessage> wsMessage= WsMessage.<NotifyMessage>builder().command(Constant.SocketCommand.NOTIFY).data(message).build();
+        WsMessage<NotifyMessage<T>> wsMessage = WsMessage.<NotifyMessage<T>>builder().command(Constant.SocketCommand.NOTIFY).data(message).build();
         String msg = GsonBuilderUtil.create().toJson(wsMessage);
-        for (WebSocketServerOne client : SESSIONS) {
+        for (WebNotify client : SESSIONS) {
             try {
                 client.session.getBasicRemote().sendText(msg);
             } catch (Exception e) {
@@ -57,9 +57,9 @@ public class WebSocketServerOne {
     @SneakyThrows
     @OnMessage
     public void onMessage(String jsonMsg) {
-        NotifyMessage msg = GsonBuilderUtil.create().fromJson(jsonMsg, NotifyMessage.class);
+        NotifyMessage<?> msg = GsonBuilderUtil.create().fromJson(jsonMsg, NotifyMessage.class);
         if (msg!=null&&msg.getType() == Constant.SocketCommand.CLIENT_CONNECT) {
-            String token = msg.getData();
+            String token = (String) msg.getData();
             try {
                 ResultUtil<LoginUserModel> resultUtil = SpringContextUtils.getBean(UserService.class).getUserIdByToken(token);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {

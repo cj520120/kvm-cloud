@@ -3,17 +3,14 @@ package cn.chenjun.cloud.management.component;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
-import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,14 +19,10 @@ import java.util.concurrent.TimeUnit;
  * @author chenjun
  */
 @Component
-public class RouteService extends AbstractComponentService {
-    @Autowired
-    private RouteInitialize routeInitialize;
+public class SystemComponentService extends AbstractComponentService {
 
-    @Override
-    public int getComponentType() {
-        return Constant.ComponentType.ROUTE;
-    }
+
+    private final List<ComponentQmaInitialize> componentQmaInitializeList;
 
     @Override
     public boolean allocateBasicNic() {
@@ -41,14 +34,24 @@ public class RouteService extends AbstractComponentService {
         return 0;
     }
 
-    @Override
-    public String getComponentName() {
-        return "System Route";
+    public SystemComponentService(@Autowired List<ComponentQmaInitialize> componentQmaInitializeList) {
+
+        componentQmaInitializeList.sort(Comparator.comparingInt(Ordered::getOrder));
+        this.componentQmaInitializeList = componentQmaInitializeList;
     }
 
+    @Override
+    public int getComponentType() {
+        return Constant.ComponentType.SYSTEM;
+    }
 
     @Override
-    public GuestQmaRequest getStartQmaRequest(int guestId) {
+    public String getComponentName() {
+        return "System VM";
+    }
+
+    @Override
+    public GuestQmaRequest getStartQmaRequest(int networkId, int guestId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
         if (component == null) {
             return null;
@@ -59,7 +62,14 @@ public class RouteService extends AbstractComponentService {
         request.setName("");
         request.setTimeout((int) TimeUnit.MINUTES.toSeconds(5));
         request.setCommands(commands);
-
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
+        for (ComponentQmaInitialize componentQmaInitialize : componentQmaInitializeList) {
+            List<GuestQmaRequest.QmaBody> childCommands = componentQmaInitialize.initialize(component);
+            if (!ObjectUtils.isEmpty(childCommands)) {
+                commands.addAll(childCommands);
+            }
+        }
+  /*
         //写入网卡固定IP
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         guestNetworkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
@@ -90,6 +100,8 @@ public class RouteService extends AbstractComponentService {
         }
         //设置主机名
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
+
+
         commands.addAll(this.initYumSource());
         commands.addAll(routeInitialize.initialize(guestId));
 
@@ -134,7 +146,7 @@ public class RouteService extends AbstractComponentService {
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "nginx"}).checkSuccess(true).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "nginx"}).checkSuccess(true).build())).build());
 
-
+*/
         return request;
     }
 }

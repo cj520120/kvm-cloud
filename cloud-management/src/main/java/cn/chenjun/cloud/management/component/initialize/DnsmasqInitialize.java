@@ -1,7 +1,9 @@
-package cn.chenjun.cloud.management.component;
+package cn.chenjun.cloud.management.component.initialize;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.management.component.ComponentQmaInitialize;
+import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -18,12 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-/**
- * @author chenjun
- */
 @Component
-public class DnsmasqInitializeService implements RouteInitialize {
+public class DnsmasqInitialize implements ComponentQmaInitialize {
     @Autowired
     protected GuestNetworkMapper guestNetworkMapper;
     @Autowired
@@ -32,13 +30,13 @@ public class DnsmasqInitializeService implements RouteInitialize {
     protected GuestMapper guestMapper;
 
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(int guestId) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        GuestEntity guest = this.guestMapper.selectById(guestId);
+        GuestEntity guest = this.guestMapper.selectById(component.getGuestId());
         if (guest == null) {
             return commands;
         }
-        GuestNetworkEntity defaultGuestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId).eq("network_id", guest.getNetworkId()).eq("device_id", 0));
+        GuestNetworkEntity defaultGuestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", component.getGuestId()).eq("network_id", guest.getNetworkId()).eq("device_id", 0));
         if (defaultGuestNetwork == null) {
             return commands;
         }
@@ -47,7 +45,6 @@ public class DnsmasqInitializeService implements RouteInitialize {
             return commands;
         }
         List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("network_id", guest.getNetworkId()));
-
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/dnsmasq.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
@@ -72,16 +69,20 @@ public class DnsmasqInitializeService implements RouteInitialize {
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/dnsmasq.conf").fileBody(dnsmasqConfig).build())).build());
         //创建hosts文件
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/etc/dnsmasq.hosts.d"}).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"755","/etc/dnsmasq.hosts.d"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"755", "/etc/dnsmasq.hosts.d"}).build())).build());
         //启动dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("touch").args(new String[]{"/etc/dnsmasq.hosts.d/hosts"}).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"644","/etc/dnsmasq.hosts.d/hosts"}).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"644", "/etc/dnsmasq.hosts.d/hosts"}).build())).build());
         //启动dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "dnsmasq"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "dnsmasq"}).build())).build());
 
         //写入dns自动加载配置
         return commands;
+    }
 
+    @Override
+    public int getOrder() {
+        return 2;
     }
 }
