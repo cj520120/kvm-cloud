@@ -3,18 +3,15 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateStorageOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -35,8 +32,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
         super(CreateStorageOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(CreateStorageOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())
@@ -59,13 +55,11 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateStorageOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
-            if (storage.getStatus() == Constant.StorageStatus.INIT) {
+            if (storage != null && storage.getStatus() == Constant.StorageStatus.INIT) {
                 storage.setStatus(Constant.StorageStatus.ERROR);
                 storageMapper.updateById(storage);
             }

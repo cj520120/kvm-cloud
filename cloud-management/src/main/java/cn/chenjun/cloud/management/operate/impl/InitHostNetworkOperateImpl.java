@@ -7,15 +7,12 @@ import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -34,8 +31,6 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         super(InitHostNetworkOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(InitHostNetworkOperate param) {
 
@@ -102,8 +97,6 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(InitHostNetworkOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
@@ -113,15 +106,17 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             }
             if (hostIds.isEmpty()) {
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-                switch (network.getStatus()) {
-                    case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
-                    case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                        network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY);
-                        networkMapper.updateById(network);
-                    default:
-                        break;
+                if (network != null) {
+                    switch (network.getStatus()) {
+                        case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
+                        case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
+                            network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY);
+                            networkMapper.updateById(network);
+                        default:
+                            break;
+                    }
+                    this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
-                this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
                         .networkId(param.getNetworkId())
@@ -132,17 +127,17 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            switch (network.getStatus()) {
-                case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
-                case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                    network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.ERROR);
-                    networkMapper.updateById(network);
-                default:
-                    break;
+            if (network != null) {
+                switch (network.getStatus()) {
+                    case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
+                    case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
+                        network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.ERROR);
+                        networkMapper.updateById(network);
+                    default:
+                        break;
+                }
+                this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
-
-
-            this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
         }
     }
 }

@@ -6,16 +6,13 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.GuestInfoOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateGuestOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
@@ -32,8 +29,6 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
         super(MigrateGuestOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(MigrateGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -64,12 +59,10 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(MigrateGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.MIGRATE) {
+        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.MIGRATE) {
             guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setHostId(param.getToHostId());

@@ -1,8 +1,7 @@
-package cn.chenjun.cloud.management.component.initialize;
+package cn.chenjun.cloud.management.component.route;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.component.ComponentQmaInitialize;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
@@ -21,7 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class DnsmasqInitialize implements ComponentQmaInitialize {
+public class DnsmasqInitialize implements RouteComponentQmaInitialize {
     @Autowired
     protected GuestNetworkMapper guestNetworkMapper;
     @Autowired

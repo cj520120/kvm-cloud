@@ -5,12 +5,10 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -39,8 +36,6 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         super(CreateHostOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CreateHostOperate param) {
         HostEntity host = this.hostMapper.selectById(param.getHostId());
@@ -116,29 +111,28 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateHostOperate param, ResultUtil<HostInfo> resultUtil) {
         HostEntity host = HostEntity.builder().hostId(param.getHostId()).build();
-        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            HostInfo hostInfo = resultUtil.getData();
-            host.setThreads(hostInfo.getThreads());
-            host.setCores(hostInfo.getCores());
-            host.setSockets(hostInfo.getSockets());
-            host.setArch(hostInfo.getArch());
-            host.setHypervisor(hostInfo.getHypervisor());
-            host.setTotalCpu(hostInfo.getCpu());
-            host.setTotalMemory(hostInfo.getMemory());
-            host.setEmulator(hostInfo.getEmulator());
-            host.setHostName(hostInfo.getHostName());
+        if (host != null) {
+            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                HostInfo hostInfo = resultUtil.getData();
+                host.setThreads(hostInfo.getThreads());
+                host.setCores(hostInfo.getCores());
+                host.setSockets(hostInfo.getSockets());
+                host.setArch(hostInfo.getArch());
+                host.setHypervisor(hostInfo.getHypervisor());
+                host.setTotalCpu(hostInfo.getCpu());
+                host.setTotalMemory(hostInfo.getMemory());
+                host.setEmulator(hostInfo.getEmulator());
+                host.setHostName(hostInfo.getHostName());
 
-            host.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
-        } else {
-            host.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ERROR);
+                host.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
+            } else {
+                host.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ERROR);
+            }
+            this.hostMapper.updateById(host);
         }
-        this.hostMapper.updateById(host);
-
         this.notifyService.publish(NotifyMessage.builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
 
     }

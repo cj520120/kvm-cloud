@@ -3,18 +3,15 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -35,8 +32,6 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
         super(CreateNetworkOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CreateNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
@@ -57,13 +52,11 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateNetworkOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (Objects.equals(network.getStatus(), Constant.NetworkStatus.CREATING)) {
+            if (network != null && Objects.equals(network.getStatus(), Constant.NetworkStatus.CREATING)) {
                 network.setStatus(Constant.NetworkStatus.ERROR);
                 networkMapper.updateById(network);
             }

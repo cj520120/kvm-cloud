@@ -6,6 +6,8 @@ import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.model.VncModel;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
+import cn.chenjun.cloud.management.websocket.ComponentWsService;
+import cn.chenjun.cloud.management.websocket.WebWsService;
 import org.redisson.api.RLock;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
@@ -49,7 +51,7 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyM
                             vncModelList = SpringContextUtils.getBean(VncService.class).listVncByNetworkId(msg.getId());
                         }
                         NotifyMessage<List<VncModel>> sendMsg = NotifyMessage.<List<VncModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_VNC).data(vncModelList).build();
-                        ComponentNotify.sendNotify(msg.getId(), sendMsg);
+                        ComponentWsService.sendNotify(msg.getId(), sendMsg);
                     }
                     break;
                     case Constant.NotifyType.COMPONENT_UPDATE_DNS: {
@@ -58,11 +60,11 @@ public class NotifyService implements CommandLineRunner, MessageListener<NotifyM
                             dnsModelList = SpringContextUtils.getBean(DnsService.class).listLocalNetworkDns(msg.getId());
                         }
                         NotifyMessage<List<DnsModel>> sendMsg = NotifyMessage.<List<DnsModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModelList).build();
-                        ComponentNotify.sendNotify(msg.getId(), sendMsg);
+                        ComponentWsService.sendNotify(msg.getId(), sendMsg);
                     }
                     break;
                     default:
-                        WebNotify.sendNotify(msg);
+                        WebWsService.sendNotify(msg);
                         break;
                 }
 

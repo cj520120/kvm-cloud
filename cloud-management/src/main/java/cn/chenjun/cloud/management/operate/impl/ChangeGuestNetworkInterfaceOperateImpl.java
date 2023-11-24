@@ -4,17 +4,14 @@ import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.OsNic;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestNetworkInterfaceOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -31,8 +28,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
         super(ChangeGuestNetworkInterfaceOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(ChangeGuestNetworkInterfaceOperate param) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
@@ -67,9 +63,11 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
     public void onFinish(ChangeGuestNetworkInterfaceOperate param, ResultUtil<Void> resultUtil) {
         if (!param.isAttach()) {
             GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
-            guestNetwork.setGuestId(0);
-            guestNetwork.setDeviceId(0);
-            guestNetworkMapper.updateById(guestNetwork);
+            if (guestNetwork != null) {
+                guestNetwork.setGuestId(0);
+                guestNetwork.setDeviceId(0);
+                guestNetworkMapper.updateById(guestNetwork);
+            }
         }
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 

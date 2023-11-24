@@ -6,18 +6,15 @@ import cn.chenjun.cloud.common.bean.StorageDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.SnapshotVolumeEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostStorageOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -36,8 +33,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
         super(DestroyHostStorageOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(DestroyHostStorageOperate param) {
 
@@ -62,8 +58,6 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DestroyHostStorageOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
@@ -80,7 +74,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                 this.operateTask.addTask(operate);
             } else {
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
-                if (storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
+                if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
                     storageMapper.deleteById(param.getStorageId());
                     templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("storage_id", param.getStorageId()));
                     snapshotVolumeMapper.delete(new QueryWrapper<SnapshotVolumeEntity>().eq("storage_id", param.getStorageId()));
@@ -88,7 +82,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
             }
         } else {
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
-            if (Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY)) {
+            if (storage != null && Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY)) {
                 storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.ERROR);
                 storageMapper.updateById(storage);
             }

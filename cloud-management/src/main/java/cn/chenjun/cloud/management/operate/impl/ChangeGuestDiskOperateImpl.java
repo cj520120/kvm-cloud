@@ -6,16 +6,13 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestDiskOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -32,8 +29,6 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         super(ChangeGuestDiskOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ChangeGuestDiskOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
@@ -67,19 +62,19 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        switch (volume.getStatus()) {
-            case cn.chenjun.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
-            case cn.chenjun.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
-                volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
-                volumeMapper.updateById(volume);
-                break;
-            default:
-                break;
+        if (volume != null) {
+            switch (volume.getStatus()) {
+                case cn.chenjun.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
+                case cn.chenjun.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
+                    volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
+                    volumeMapper.updateById(volume);
+                    break;
+                default:
+                    break;
+            }
         }
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
         this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_VOLUME).build());

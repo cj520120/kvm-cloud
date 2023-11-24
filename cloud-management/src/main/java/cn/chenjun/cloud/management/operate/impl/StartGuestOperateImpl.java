@@ -4,17 +4,14 @@ import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
 import cn.chenjun.cloud.management.servcie.VncService;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -40,8 +37,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         super(tClass);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(T param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -89,12 +85,10 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(T param, ResultUtil<GuestInfo> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
+        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
                 //写入系统vnc
@@ -122,7 +116,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(entity.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
             disks.add(disk);
         }
-        Collections.sort(disks, Comparator.comparingInt(OsDisk::getDeviceId));
+        disks.sort(Comparator.comparingInt(OsDisk::getDeviceId));
         return disks;
     }
 
@@ -132,7 +126,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         if (guest.getCdRoom() > 0) {
             List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
             Collections.shuffle(templateVolumeList);
-            if (templateVolumeList.size() > 0) {
+            if (!templateVolumeList.isEmpty()) {
                 TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
                 cdRoom.setPath(templateVolume.getPath());
             } else {
@@ -148,13 +142,10 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
     protected List<OsNic> getGuestNetwork(GuestEntity guest) {
-        List<OsNic> defaultNic = new ArrayList<>();
-
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
-        Collections.sort(guestNetworkEntityList, Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
+        guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<OsNic> networkInterfaces = new ArrayList<>();
-        networkInterfaces.addAll(defaultNic);
-        int baseDeviceId = networkInterfaces.size();
+        int baseDeviceId = 0;
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
             if (network.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {

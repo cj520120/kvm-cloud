@@ -4,17 +4,14 @@ import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -35,8 +32,6 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
         super(DestroyNetworkOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
@@ -56,13 +51,11 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DestroyNetworkOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
+            if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
                 networkMapper.deleteById(param.getNetworkId());
             }
         }

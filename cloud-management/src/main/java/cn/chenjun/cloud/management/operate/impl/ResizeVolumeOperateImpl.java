@@ -7,16 +7,13 @@ import cn.chenjun.cloud.common.bean.VolumeResizeRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ResizeVolumeOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -31,8 +28,6 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
         super(ResizeVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(ResizeVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
@@ -60,12 +55,10 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(ResizeVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.RESIZE) {
+        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.RESIZE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 volume.setCapacity(resultUtil.getData().getCapacity());
                 volume.setAllocation(resultUtil.getData().getAllocation());

@@ -7,19 +7,16 @@ import cn.chenjun.cloud.common.bean.VolumeMigrateRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateVolumeOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
@@ -35,8 +32,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         super(MigrateVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(MigrateVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
@@ -74,13 +70,11 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(MigrateVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
         VolumeEntity targetVolume = volumeMapper.selectById(param.getTargetVolumeId());
-        if (targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
+        if (targetVolume != null && targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
@@ -93,10 +87,10 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             }
             volumeMapper.updateById(targetVolume);
         }
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
+        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
-                if (guestDisk != null) {
+                if (guestDisk != null && targetVolume != null) {
                     guestDisk.setVolumeId(targetVolume.getVolumeId());
                     guestDiskMapper.updateById(guestDisk);
                 }

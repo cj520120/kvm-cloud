@@ -94,12 +94,12 @@ public class OperateTask extends AbstractTask {
             return;
         }
         try {
-            this.taskMapper.deleteById(taskId);
             Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(task.getType());
             BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(task.getParam(), paramClass);
             workExecutor.submit(() -> {
                 try {
                     this.operateEngine.onFinish(operateParam, result);
+                    this.taskMapper.deleteById(taskId);
                 } catch (Exception err) {
                     log.error("任务回调失败.param={} result={}", operateParam, result, err);
                 }

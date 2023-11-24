@@ -7,17 +7,14 @@ import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.SnapshotVolumeEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeSnapshotOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -32,8 +29,6 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
         super(CreateVolumeSnapshotOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(CreateVolumeSnapshotOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
@@ -70,17 +65,15 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateVolumeSnapshotOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATE_SNAPSHOT) {
+        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATE_SNAPSHOT) {
             volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
         }
         SnapshotVolumeEntity targetVolume = this.snapshotVolumeMapper.selectById(param.getSnapshotVolumeId());
-        if (targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.SnapshotStatus.CREATING) {
+        if (targetVolume != null && targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.SnapshotStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.SnapshotStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());

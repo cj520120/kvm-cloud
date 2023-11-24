@@ -6,16 +6,13 @@ import cn.chenjun.cloud.common.bean.VolumeDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -32,8 +29,6 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         super(DestroyVolumeOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
@@ -65,7 +60,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
     @Override
     public void onFinish(DestroyVolumeOperate param, ResultUtil<Void> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY) {
+        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY) {
             volumeMapper.deleteById(param.getVolumeId());
         }
 

@@ -1,8 +1,7 @@
-package cn.chenjun.cloud.management.component.initialize;
+package cn.chenjun.cloud.management.component.route;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.component.ComponentQmaInitialize;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.hutool.core.io.resource.ResourceUtil;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Component
-public class NginxInitialize implements ComponentQmaInitialize {
+public class NginxInitialize implements RouteComponentQmaInitialize {
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();

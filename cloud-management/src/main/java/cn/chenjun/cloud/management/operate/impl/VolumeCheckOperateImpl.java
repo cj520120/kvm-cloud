@@ -6,17 +6,14 @@ import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeInfoRequest;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.VolumeCheckOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -35,8 +32,6 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
         super(VolumeCheckOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(VolumeCheckOperate param) {
         StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
@@ -56,8 +51,6 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(VolumeCheckOperate param, ResultUtil<List<VolumeInfo>> resultUtil) {
 

@@ -4,17 +4,14 @@ import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -40,8 +37,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
         super(tClass);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
@@ -56,7 +51,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 Collections.shuffle(templateVolumeList);
                 TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
-                if(applicationConfig.isEnableVolumeBack()) {
+                if (applicationConfig.isEnableVolumeBack()) {
                     VolumeCreateRequest request = VolumeCreateRequest.builder()
                             .parentStorage(parentStorage.getName())
                             .parentType(templateVolume.getType())
@@ -68,7 +63,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                             .targetSize(volume.getCapacity())
                             .build();
                     this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
-                }else {
+                } else {
                     VolumeCloneRequest request = VolumeCloneRequest.builder()
                             .sourceStorage(parentStorage.getName())
                             .sourceVolume(templateVolume.getPath())
@@ -120,8 +115,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(T param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());

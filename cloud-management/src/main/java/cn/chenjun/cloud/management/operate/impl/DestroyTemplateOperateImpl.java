@@ -6,18 +6,15 @@ import cn.chenjun.cloud.common.bean.VolumeDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -36,8 +33,6 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         super(DestroyTemplateOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DestroyTemplateOperate param) {
         TemplateEntity template = this.templateMapper.selectById(param.getTemplateId());
@@ -75,7 +70,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
     @Override
     public void onFinish(DestroyTemplateOperate param, ResultUtil<Void> resultUtil) {
         TemplateEntity template = this.templateMapper.selectById(param.getTemplateId());
-        if (template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
+        if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
             this.templateMapper.deleteById(template);
             this.guestMapper.detachCdByTemplateId(template.getTemplateId());
             this.notifyService.publish(NotifyMessage.builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());

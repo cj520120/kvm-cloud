@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.servcie;
+package cn.chenjun.cloud.management.websocket;
 
 import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.WsMessage;
@@ -8,6 +8,8 @@ import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.model.VncModel;
+import cn.chenjun.cloud.management.servcie.DnsService;
+import cn.chenjun.cloud.management.servcie.VncService;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -29,8 +31,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 @ServerEndpoint(value = "/api/component/ws")
 @EqualsAndHashCode
-public class ComponentNotify {
-    private static final CopyOnWriteArraySet<ComponentNotify> NETWORK_CLIENT_SESSIONS = new CopyOnWriteArraySet<>();
+public class ComponentWsService {
+    private static final CopyOnWriteArraySet<ComponentWsService> NETWORK_CLIENT_SESSIONS = new CopyOnWriteArraySet<>();
     private Session session;
 
     private int networkId;
@@ -39,7 +41,7 @@ public class ComponentNotify {
 
         WsMessage<NotifyMessage<T>> wsMessage = WsMessage.<NotifyMessage<T>>builder().command(Constant.SocketCommand.NOTIFY).data(message).build();
         String msg = GsonBuilderUtil.create().toJson(wsMessage);
-        for (ComponentNotify client : NETWORK_CLIENT_SESSIONS) {
+        for (ComponentWsService client : NETWORK_CLIENT_SESSIONS) {
             if (client.networkId == networkId) {
                 try {
                     client.session.getBasicRemote().sendText(msg);

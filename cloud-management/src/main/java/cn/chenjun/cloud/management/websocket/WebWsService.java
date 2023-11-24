@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.servcie;
+package cn.chenjun.cloud.management.websocket;
 
 import cn.chenjun.cloud.common.bean.NotifyMessage;
 import cn.chenjun.cloud.common.bean.ResultUtil;
@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.LoginUserModel;
+import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -25,8 +26,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 @ServerEndpoint(value = "/api/ws/")
 @EqualsAndHashCode
-public class WebNotify {
-    private static final CopyOnWriteArraySet<WebNotify> SESSIONS = new CopyOnWriteArraySet<>();
+public class WebWsService {
+    private static final CopyOnWriteArraySet<WebWsService> CLIENT_SESSION_LIST = new CopyOnWriteArraySet<>();
     private Session session;
     private LoginUserModel loginInfo;
 
@@ -34,7 +35,7 @@ public class WebNotify {
 
         WsMessage<NotifyMessage<T>> wsMessage = WsMessage.<NotifyMessage<T>>builder().command(Constant.SocketCommand.NOTIFY).data(message).build();
         String msg = GsonBuilderUtil.create().toJson(wsMessage);
-        for (WebNotify client : SESSIONS) {
+        for (WebWsService client : CLIENT_SESSION_LIST) {
             try {
                 client.session.getBasicRemote().sendText(msg);
             } catch (Exception e) {
@@ -51,7 +52,7 @@ public class WebNotify {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        SESSIONS.remove(this);
+        CLIENT_SESSION_LIST.remove(this);
     }
 
     @SneakyThrows
@@ -64,7 +65,7 @@ public class WebNotify {
                 ResultUtil<LoginUserModel> resultUtil = SpringContextUtils.getBean(UserService.class).getUserIdByToken(token);
                 if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                     this.loginInfo = resultUtil.getData();
-                    SESSIONS.add(this);
+                    CLIENT_SESSION_LIST.add(this);
                     WsMessage<Void> wsMessage= WsMessage.<Void>builder().command(Constant.SocketCommand.LOGIN_SUCCESS).build();
                     session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(wsMessage));
                 } else {
@@ -82,7 +83,7 @@ public class WebNotify {
 
     @OnClose
     public void onClose() {
-        SESSIONS.remove(this);
+        CLIENT_SESSION_LIST.remove(this);
     }
 
 

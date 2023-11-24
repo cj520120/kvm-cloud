@@ -4,15 +4,12 @@ import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -30,8 +27,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
     }
 
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(StopGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -58,12 +54,11 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void onFinish(StopGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STOPPING) {
+        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STOPPING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setLastHostId(guest.getHostId());
                 guest.setHostId(0);

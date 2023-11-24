@@ -4,18 +4,15 @@ import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.SyncHostGuestOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -34,8 +31,6 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
     }
 
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(SyncHostGuestOperate param) {
         HostEntity host = hostMapper.selectById(param.getHostId());
@@ -56,8 +51,6 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(SyncHostGuestOperate param, ResultUtil<List<GuestInfo>> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {

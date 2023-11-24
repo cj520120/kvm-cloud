@@ -7,14 +7,11 @@ import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -29,8 +26,7 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
         super(CreateVolumeTemplateOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(CreateVolumeTemplateOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
@@ -67,17 +63,15 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(CreateVolumeTemplateOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATE_TEMPLATE) {
+        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATE_TEMPLATE) {
             volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
         }
         TemplateVolumeEntity targetVolume = this.templateVolumeMapper.selectById(param.getTargetTemplateVolumeId());
-        if (targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
+        if (targetVolume != null && targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());

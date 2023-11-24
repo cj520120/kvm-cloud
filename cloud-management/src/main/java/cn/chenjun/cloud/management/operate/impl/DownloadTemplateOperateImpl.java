@@ -7,17 +7,14 @@ import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 
@@ -32,8 +29,6 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         super(DownloadTemplateOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(DownloadTemplateOperate param) {
         TemplateVolumeEntity templateVolume = templateVolumeMapper.selectById(param.getTemplateVolumeId());
@@ -70,34 +65,34 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DownloadTemplateOperate param, ResultUtil<VolumeInfo> resultUtil) {
         TemplateVolumeEntity templateVolume = templateVolumeMapper.selectById(param.getTemplateVolumeId());
-        TemplateEntity template = templateMapper.selectById(templateVolume.getTemplateId());
-        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            if (templateVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                templateVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
-                templateVolume.setCapacity(resultUtil.getData().getCapacity());
-                templateVolume.setAllocation(resultUtil.getData().getAllocation());
-                templateVolumeMapper.updateById(templateVolume);
+        if (templateVolume != null) {
+            TemplateEntity template = templateMapper.selectById(templateVolume.getTemplateId());
+            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
+                if (templateVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
+                    templateVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+                    templateVolume.setCapacity(resultUtil.getData().getCapacity());
+                    templateVolume.setAllocation(resultUtil.getData().getAllocation());
+                    templateVolumeMapper.updateById(templateVolume);
+                }
+                if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
+                    template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+                    templateMapper.updateById(template);
+                }
+            } else {
+                if (templateVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
+                    templateVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.ERROR);
+                    templateVolumeMapper.updateById(templateVolume);
+                }
+                if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
+                    template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.ERROR);
+                    templateMapper.updateById(template);
+                }
             }
-            if (template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
-                templateMapper.updateById(template);
-            }
-        } else {
-            if (templateVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                templateVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.ERROR);
-                templateVolumeMapper.updateById(templateVolume);
-            }
-            if (template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.ERROR);
-                templateMapper.updateById(template);
-            }
-        }
+            this.notifyService.publish(NotifyMessage.builder().id(templateVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
-        this.notifyService.publish(NotifyMessage.builder().id(template.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+        }
     }
 }

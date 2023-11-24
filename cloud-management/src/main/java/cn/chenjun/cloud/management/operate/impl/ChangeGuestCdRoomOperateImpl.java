@@ -6,17 +6,14 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestCdRoomOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -39,8 +36,6 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
         super(tClass);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(T param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -50,7 +45,7 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
             if (guest.getCdRoom() > 0) {
                 List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
                 Collections.shuffle(templateVolumeList);
-                if (templateVolumeList.size() > 0) {
+                if (!templateVolumeList.isEmpty()) {
                     TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
                     cdRoom.setPath(templateVolume.getPath());
                 } else {

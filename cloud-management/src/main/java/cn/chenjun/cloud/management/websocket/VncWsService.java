@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.servcie;
+package cn.chenjun.cloud.management.websocket;
 
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
@@ -25,7 +25,7 @@ import java.util.Objects;
  */
 @ServerEndpoint(value = "/api/vnc/{id}")
 @Component
-public class VncWebsocketService {
+public class VncWsService {
 
     private VncWebSocketProxy proxy;
     private Session session;

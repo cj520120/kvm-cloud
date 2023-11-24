@@ -8,15 +8,12 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -32,8 +29,6 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
         super(InitHostStorageOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(InitHostStorageOperate param) {
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
@@ -64,9 +59,6 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
         return new TypeToken<ResultUtil<StorageInfo>>() {
         }.getType();
     }
-
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(InitHostStorageOperate param, ResultUtil<StorageInfo> resultUtil) {
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
@@ -78,7 +70,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
             StorageInfo info = resultUtil.getData();
 
-            if (Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
+            if (storage != null && Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
                 if (info != null) {
                     storage.setAllocation(resultUtil.getData().getAllocation());
                     storage.setCapacity(resultUtil.getData().getCapacity());
@@ -97,7 +89,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             }
         } else {
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
-            if (Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
+            if (storage != null && Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
                 storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.ERROR);
                 storageMapper.updateById(storage);
             }

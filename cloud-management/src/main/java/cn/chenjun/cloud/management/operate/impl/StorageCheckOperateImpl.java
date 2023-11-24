@@ -6,16 +6,13 @@ import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.bean.StorageInfoRequest;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -34,8 +31,6 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
         super(StorageCheckOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void operate(StorageCheckOperate param) {
 
@@ -55,8 +50,6 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(StorageCheckOperate param, ResultUtil<List<StorageInfo>> resultUtil) {
 
@@ -65,8 +58,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
             if (storageInfoList.isEmpty()) {
                 return;
             }
-            for (int i = 0; i < storageInfoList.size(); i++) {
-                StorageInfo info = storageInfoList.get(i);
+            for (StorageInfo info : storageInfoList) {
                 if (info == null) {
                     continue;
                 }

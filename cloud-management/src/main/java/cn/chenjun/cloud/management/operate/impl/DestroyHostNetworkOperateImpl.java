@@ -7,17 +7,14 @@ import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostNetworkOperate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -36,8 +33,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         super(DestroyHostNetworkOperate.class);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
-    @Transactional(rollbackFor = Exception.class)
+
     @Override
     public void operate(DestroyHostNetworkOperate param) {
 
@@ -101,8 +97,6 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         }.getType();
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public void onFinish(DestroyHostNetworkOperate param, ResultUtil<Void> resultUtil) {
 
@@ -114,7 +108,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             }
             if (hostIds.isEmpty()) {
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-                if (network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
+                if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
                     networkMapper.deleteById(param.getNetworkId());
                     guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", param.getNetworkId()));
                 }
@@ -128,7 +122,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
+            if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
                 network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.ERROR);
                 networkMapper.updateById(network);
             }
