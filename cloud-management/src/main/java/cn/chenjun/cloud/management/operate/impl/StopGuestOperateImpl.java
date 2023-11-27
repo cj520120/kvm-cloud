@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
@@ -71,6 +72,6 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             this.allocateService.initHostAllocate();
 
         }
-        this.notifyService.publish(NotifyMessage.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.clusterService.publish(NotifyData.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

@@ -6,6 +6,7 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.task.OperateTask;
+import cn.chenjun.cloud.management.websocket.cluster.ClusterService;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public abstract class AbstractService extends AbstractInitializeService {
     @Autowired
     protected SchemeMapper schemeMapper;
     @Autowired
-    protected NotifyService notifyService;
+    protected ClusterService clusterService;
 
     protected StorageModel initStorageModel(StorageEntity entity) {
         return new BeanConverter<>(StorageModel.class).convert(entity, null);

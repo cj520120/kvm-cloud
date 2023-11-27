@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -115,7 +115,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                         default:
                             break;
                     }
-                    this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                    this.clusterService.publish(NotifyData.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
@@ -136,7 +136,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     default:
                         break;
                 }
-                this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                this.clusterService.publish(NotifyData.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
     }

@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeCreateTemplateRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
@@ -92,8 +92,8 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
             }
         }
 
-        this.notifyService.publish(NotifyMessage.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyMessage.builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+        this.clusterService.publish(NotifyData.builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.clusterService.publish(NotifyData.builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
     }
 }

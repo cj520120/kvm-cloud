@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.DnsEntity;
@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.mapper.DnsMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.model.DnsModel;
+import cn.chenjun.cloud.management.websocket.cluster.ClusterService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class DnsService {
     @Autowired
     private GuestMapper guestMapper;
     @Autowired
-    private NotifyService notifyService;
+    private ClusterService clusterService;
 
     public ResultUtil<List<DnsModel>> listDnsByNetworkId(int networkId) {
         QueryWrapper<DnsEntity> wrapper = new QueryWrapper<>();
@@ -59,7 +60,7 @@ public class DnsService {
         DnsEntity entity = this.mapper.selectById(dnsId);
         if (entity != null) {
             this.mapper.deleteById(dnsId);
-            this.notifyService.publish(NotifyMessage.builder().id(entity.getNetworkId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.listLocalNetworkDns(entity.getNetworkId())).build());
+            this.clusterService.publish(NotifyData.builder().id(entity.getNetworkId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.listLocalNetworkDns(entity.getNetworkId())).build());
         }
         return ResultUtil.success();
     }
@@ -67,7 +68,7 @@ public class DnsService {
     public ResultUtil<DnsModel> createDns(int networkId, String domain, String ip) {
         DnsEntity entity = DnsEntity.builder().dnsIp(ip).dnsDomain(domain).networkId(networkId).createTime(new Date()).build();
         mapper.insert(entity);
-        this.notifyService.publish(NotifyMessage.builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.listLocalNetworkDns(entity.getNetworkId())).build());
+        this.clusterService.publish(NotifyData.builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.listLocalNetworkDns(entity.getNetworkId())).build());
         return ResultUtil.<DnsModel>builder().data(this.initDns(entity)).build();
     }
 

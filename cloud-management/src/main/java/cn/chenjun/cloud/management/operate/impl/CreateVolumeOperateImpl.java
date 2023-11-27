@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
@@ -133,7 +134,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             volumeMapper.updateById(volume);
         }
 
-        this.notifyService.publish(NotifyMessage.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.clusterService.publish(NotifyData.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
 
     }
 }

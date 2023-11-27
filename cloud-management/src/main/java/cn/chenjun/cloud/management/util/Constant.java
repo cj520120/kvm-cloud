@@ -122,4 +122,10 @@ public class Constant {
 
     }
 
+    public class WsClientType{
+        public static final short WEB=0;
+        public static final short COMPONENT=1;
+
+    }
+
 }

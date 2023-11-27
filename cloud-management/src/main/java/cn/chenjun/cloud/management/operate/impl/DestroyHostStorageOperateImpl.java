@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -88,6 +88,6 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
             }
         }
 
-        this.notifyService.publish(NotifyMessage.builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        this.clusterService.publish(NotifyData.builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
     }
 }

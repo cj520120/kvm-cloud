@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestVncEntity;
@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestVncMapper;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.model.VncModel;
+import cn.chenjun.cloud.management.websocket.cluster.ClusterService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -31,7 +32,7 @@ public class VncService {
     @Autowired
     private HostMapper hostMapper;
     @Autowired
-    private NotifyService notifyService;
+    private ClusterService clusterService;
 
     public GuestVncEntity getGuestVnc(int guestId) {
         GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guestId);
@@ -53,7 +54,7 @@ public class VncService {
             guestVncEntity.setPort(port);
             this.guestVncMapper.updateById(guestVncEntity);
         }
-        this.notifyService.publish(NotifyMessage.builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_VNC).data(this.listVncByNetworkId(networkId)).build());
+        this.clusterService.publish(NotifyData.builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_VNC).data(this.listVncByNetworkId(networkId)).build());
     }
 
     public List<VncModel> listVncByNetworkId(int networkId) {

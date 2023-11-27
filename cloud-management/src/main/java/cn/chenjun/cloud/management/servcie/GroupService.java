@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -26,7 +26,7 @@ public class GroupService extends AbstractService {
     public ResultUtil<GroupModel> createGroup(String groupName) {
         GroupInfoEntity entity = GroupInfoEntity.builder().groupName(groupName).createTime(new Date()).build();
         mapper.insert(entity);
-        this.notifyService.publish(NotifyMessage.builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.clusterService.publish(NotifyData.builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
 
         return ResultUtil.success(this.initGroup(entity));
     }
@@ -46,7 +46,7 @@ public class GroupService extends AbstractService {
         }
         entity.setGroupName(groupName);
         mapper.updateById(entity);
-        this.notifyService.publish(NotifyMessage.builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.clusterService.publish(NotifyData.builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
         return ResultUtil.success(this.initGroup(entity));
     }
 
@@ -62,7 +62,7 @@ public class GroupService extends AbstractService {
 
     public ResultUtil<Void> deleteGroupById(int groupId) {
         mapper.deleteById(groupId);
-        this.notifyService.publish(NotifyMessage.builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.clusterService.publish(NotifyData.builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
         return ResultUtil.success();
     }
 

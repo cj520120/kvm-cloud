@@ -7,6 +7,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * @author chenjun
  */
@@ -23,7 +27,13 @@ public class SpringContextUtils implements ApplicationContextAware {
             throw new CodeException(ErrorCode.SERVER_ERROR, "系统未初始化完成....");
         }
     }
-
+    public static <T> Collection<T> getBeanCollection(Class<T> requiredType) {
+        if (applicationContext != null) {
+            return applicationContext.getBeansOfType(requiredType).values() ;
+        } else {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "系统未初始化完成....");
+        }
+    }
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         SpringContextUtils.applicationContext = applicationContext;

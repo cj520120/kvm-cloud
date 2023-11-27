@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.common.bean;
+package cn.chenjun.cloud.management.websocket.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NotifyMessage<T> {
+public class NotifyData<T> {
     private int type;
     private int id;
     private T data;

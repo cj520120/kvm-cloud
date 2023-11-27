@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -128,6 +128,6 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             }
         }
 
-        this.notifyService.publish(NotifyMessage.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+        this.clusterService.publish(NotifyData.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
     }
 }

@@ -13,7 +13,7 @@ import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.operate.Operate;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.AllocateService;
-import cn.chenjun.cloud.management.servcie.NotifyService;
+import cn.chenjun.cloud.management.websocket.cluster.ClusterService;
 import cn.chenjun.cloud.management.task.OperateTask;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +62,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected AllocateService allocateService;
     @Autowired
-    protected NotifyService notifyService;
+    protected ClusterService clusterService;
     @Autowired
     @Lazy
     protected OperateTask operateTask;

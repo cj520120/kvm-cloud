@@ -4,6 +4,7 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
+import cn.chenjun.cloud.management.websocket.client.VncClient;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
@@ -27,7 +28,7 @@ import java.util.Objects;
 @Component
 public class VncWsService {
 
-    private VncWebSocketProxy proxy;
+    private VncClient proxy;
     private Session session;
 
     @SneakyThrows
@@ -67,7 +68,7 @@ public class VncWsService {
             }
         }
         String uri = "ws://" + ip + ":8080/websockify/?token=" + guestVnc.getToken();
-        this.proxy = new VncWebSocketProxy(session, new URI(uri));
+        this.proxy = new VncClient(session, new URI(uri));
         this.proxy.connect();
 
     }
@@ -92,7 +93,7 @@ public class VncWsService {
         if (this.session != null) {
             try {
                 this.session.close();
-            } catch (Exception err) {
+            } catch (Exception ignored) {
 
             } finally {
                 this.session = null;
@@ -101,7 +102,7 @@ public class VncWsService {
         if (this.proxy != null) {
             try {
                 this.proxy.close();
-            } catch (Exception err) {
+            } catch (Exception ignored) {
 
             } finally {
                 this.proxy = null;
@@ -109,43 +110,5 @@ public class VncWsService {
         }
     }
 
-    public static class VncWebSocketProxy extends WebSocketClient {
 
-        private final Session session;
-
-        public VncWebSocketProxy(Session session, URI serverUri) {
-            super(serverUri, new Draft_6455());
-            this.session = session;
-
-        }
-
-        @Override
-        public void onOpen(ServerHandshake serverHandshake) {
-
-        }
-
-        @Override
-        public void onMessage(String s) {
-        }
-
-        @SneakyThrows
-        @Override
-        public void onMessage(ByteBuffer bytes) {
-            session.getBasicRemote().sendBinary(bytes);
-        }
-
-        @SneakyThrows
-        @Override
-        public void onClose(int i, String s, boolean b) {
-            this.session.close();
-            this.close();
-        }
-
-        @SneakyThrows
-        @Override
-        public void onError(Exception e) {
-            this.session.close();
-            this.close();
-        }
-    }
 }

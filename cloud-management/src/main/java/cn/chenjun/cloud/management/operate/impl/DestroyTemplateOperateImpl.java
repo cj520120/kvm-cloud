@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NotifyMessage;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -73,7 +73,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
             this.templateMapper.deleteById(template);
             this.guestMapper.detachCdByTemplateId(template.getTemplateId());
-            this.notifyService.publish(NotifyMessage.builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            this.clusterService.publish(NotifyData.builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
 
     }
