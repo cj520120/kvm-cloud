@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -17,6 +16,7 @@ import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -129,7 +129,7 @@ public class NetworkService extends AbstractService {
 
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
-        this.clusterService.publish(NotifyData.builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -144,7 +144,7 @@ public class NetworkService extends AbstractService {
         this.networkMapper.updateById(network);
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
-        this.clusterService.publish(NotifyData.builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -157,7 +157,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(Constant.NetworkStatus.MAINTENANCE);
         this.networkMapper.updateById(network);
-        this.clusterService.publish(NotifyData.builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -178,7 +178,7 @@ public class NetworkService extends AbstractService {
         this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId));
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
-        this.clusterService.publish(NotifyData.builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 }

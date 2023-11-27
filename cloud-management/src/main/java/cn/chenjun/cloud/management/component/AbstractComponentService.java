@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.component;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -15,6 +14,7 @@ import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.GuestNameUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public abstract class AbstractComponentService extends AbstractService {
                     this.componentMapper.updateById(component);
                     BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(host.getHostId()).build();
                     this.operateTask.addTask(operateParam);
-                    this.clusterService.publish(NotifyData.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                    this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                     break;
                 case Constant.GuestStatus.ERROR:
                     this.guestService.destroyGuest(guest.getGuestId());
@@ -99,7 +99,7 @@ public abstract class AbstractComponentService extends AbstractService {
             Collections.shuffle(templateList);
             int templateId = templateList.get(0).getTemplateId();
             GuestEntity guest = createSystemComponentGuest( network,templateId);
-            this.clusterService.publish(NotifyData.builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+            this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         }
     }
 

@@ -1,13 +1,16 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
+import cn.chenjun.cloud.common.bean.VolumeCreateRequest;
+import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -134,7 +137,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             volumeMapper.updateById(volume);
         }
 
-        this.clusterService.publish(NotifyData.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
 
     }
 }

@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.GuestMigrateRequest;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -10,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.GuestInfoOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateGuestOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -80,6 +80,6 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
                     .build();
             this.operateTask.addTask(operate);
         }
-        this.clusterService.publish(NotifyData.builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

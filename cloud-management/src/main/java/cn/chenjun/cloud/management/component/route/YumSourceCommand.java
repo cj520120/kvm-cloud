@@ -11,6 +11,9 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class YumSourceCommand implements RouteComponentQmaInitialize {
     @Autowired

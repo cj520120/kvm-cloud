@@ -8,6 +8,9 @@ import lombok.Data;
 import javax.websocket.Session;
 import java.io.IOException;
 
+/**
+ * @author chenjun
+ */
 @Data
 @Builder
 public class WsClient {

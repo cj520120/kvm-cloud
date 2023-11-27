@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -8,6 +7,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostStorageOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyStorageOperate;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +64,6 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
             }
         }
 
-        this.clusterService.publish(NotifyData.builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
     }
 }

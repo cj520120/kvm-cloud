@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeResizeRequest;
@@ -11,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ResizeVolumeOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -69,6 +69,6 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
         }
-        this.clusterService.publish(NotifyData.builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 }

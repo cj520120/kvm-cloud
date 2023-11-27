@@ -10,7 +10,6 @@
 				<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
 				<el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button>
 				<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
-				<el-button @click="show_download_volume_click(show_volume)" type="primary" size="mini">下载磁盘</el-button>
 				<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
 			</el-row>
 			<el-row>
@@ -44,14 +43,13 @@
 		<MigrateVolumeComponent ref="MigrateVolumeComponentRef" @back="show_type = 0" @onVolumeUpdate="notify_volume_update" v-show="this.show_type === 2" />
 		<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_type = 0" v-show="this.show_type === 3" />
 		<StorageInfoComponent ref="StorageInfoComponentRef" @back="show_type = 0" v-show="this.show_type === 4" />
-		<DownloadVolumeComponent ref="DownloadVolumeComponentRef" />
+
 		<ResizeVolumeComponent ref="ResizeVolumeComponentRef" @onVolumeUpdate="notify_volume_update" />
 		<CreateVolumeTemplateComponent ref="CreateVolumeTemplateComponentRef" />
 		<CreateVolumeSnapshotComponent ref="CreateVolumeSnapshotComponentRef" />
 	</div>
 </template>
 <script>
-import DownloadVolumeComponent from '@/components/DownloadVolumeComponent'
 import ResizeVolumeComponent from '@/components/ResizeVolumeComponent'
 import CreateVolumeTemplateComponent from '@/components/CreateVolumeTemplateComponent'
 import CreateVolumeSnapshotComponent from '@/components/CreateVolumeSnapshotComponent.vue'
@@ -72,7 +70,7 @@ export default {
 			storage: {}
 		}
 	},
-	components: { DownloadVolumeComponent, ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent },
+	components: { ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent },
 	beforeCreate() {
 		this.$options.components.GuestInfoComponent = require('./GuestInfoComponent.vue').default
 	},
@@ -171,9 +169,6 @@ export default {
 		show_storage_info(storageId) {
 			this.$refs.StorageInfoComponentRef.init(storageId)
 			this.show_type = 4
-		},
-		show_download_volume_click(volume) {
-			this.$refs.DownloadVolumeComponentRef.init(volume)
 		},
 		destroy_volume(volume) {
 			this.$confirm('删除磁盘, 是否继续?', '提示', {

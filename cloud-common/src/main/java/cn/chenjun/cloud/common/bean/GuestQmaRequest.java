@@ -52,7 +52,7 @@ public class GuestQmaRequest {
     public static class Execute {
         private String command;
         @Builder.Default
-        private boolean checkSuccess=true;
+        private boolean checkSuccess = true;
         private String[] args;
     }
 

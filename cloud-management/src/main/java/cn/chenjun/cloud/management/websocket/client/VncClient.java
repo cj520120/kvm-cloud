@@ -9,6 +9,9 @@ import javax.websocket.Session;
 import java.net.URI;
 import java.nio.ByteBuffer;
 
+/**
+ * @author chenjun
+ */
 public class VncClient extends WebSocketClient {
 
     private final Session session;

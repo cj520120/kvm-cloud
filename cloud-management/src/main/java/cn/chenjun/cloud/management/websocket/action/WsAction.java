@@ -5,8 +5,23 @@ import cn.chenjun.cloud.management.websocket.message.WsRequest;
 import javax.websocket.Session;
 import java.io.IOException;
 
+/**
+ * @author chenjun
+ */
 public interface WsAction {
-    void doAction(Session session, WsRequest<?> msg) throws IOException;
+    /**
+     * ws 消息处理
+     *
+     * @param session
+     * @param msg
+     * @throws IOException
+     */
+    void doAction(Session session, WsRequest  msg) throws IOException;
 
-    int getType();
+    /**
+     * 消息类型
+     *
+     * @return
+     */
+    int getCommand();
 }

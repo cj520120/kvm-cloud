@@ -19,6 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class DnsmasqInitialize implements RouteComponentQmaInitialize {
     @Autowired

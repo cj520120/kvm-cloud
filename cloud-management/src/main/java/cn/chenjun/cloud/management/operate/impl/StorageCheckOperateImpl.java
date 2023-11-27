@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.bean.StorageInfoRequest;
@@ -9,6 +8,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +75,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
                                 .allocation(info.getAllocation())
                                 .build();
                         this.storageMapper.updateById(updateStorage);
-                        this.clusterService.publish(NotifyData.builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
+                        this.eventService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
                     }
                 }
             }

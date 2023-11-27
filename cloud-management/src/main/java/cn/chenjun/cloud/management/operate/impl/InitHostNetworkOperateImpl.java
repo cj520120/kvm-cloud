@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -10,6 +9,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -115,7 +115,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                         default:
                             break;
                     }
-                    this.clusterService.publish(NotifyData.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                    this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
@@ -136,7 +136,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     default:
                         break;
                 }
-                this.clusterService.publish(NotifyData.builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
     }

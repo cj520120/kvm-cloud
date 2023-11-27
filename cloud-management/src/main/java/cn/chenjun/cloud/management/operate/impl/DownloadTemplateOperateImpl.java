@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDownloadRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
@@ -12,6 +11,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -91,7 +91,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
                     templateMapper.updateById(template);
                 }
             }
-            this.clusterService.publish(NotifyData.builder().id(templateVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            this.eventService.publish(NotifyData.<Void>builder().id(templateVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
         }
     }

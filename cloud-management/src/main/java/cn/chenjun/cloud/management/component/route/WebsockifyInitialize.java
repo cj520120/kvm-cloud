@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class WebsockifyInitialize implements RouteComponentQmaInitialize {
     @Override

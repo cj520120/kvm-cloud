@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
@@ -11,6 +10,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -94,7 +94,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                 storageMapper.updateById(storage);
             }
         }
-        this.clusterService.publish(NotifyData.builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

@@ -14,8 +14,10 @@ class NotifyWebsocket {
       NotifyWebsocket.instance.onopen = function () {
         console.log(new Date(), "通信服务器连接成功,发送认证信息");
         let connect_data = {
-          command: 0,
-          data: localStorage.getItem("X-Token"),
+          command: 100,
+          data: {
+            token: localStorage.getItem("X-Token"),
+          },
         };
         NotifyWebsocket.instance.send(JSON.stringify(connect_data));
       };
@@ -38,16 +40,16 @@ class NotifyWebsocket {
     NotifyWebsocket.instance.onmessage = function (event) {
       if (event.data) {
         let wsMessage = JSON.parse(event.data);
-        if (wsMessage.command == 1) {
+        if (wsMessage.command == 101) {
           console.log(new Date(), "WebSocket 登录认证成功.");
-        } else if (wsMessage.command == 2) {
+        } else if (wsMessage.command == 102) {
           console.log(new Date(), "WebSocket 登录认证Token错误.");
           let hrefHash = window.location.hash.toLowerCase();
           if (hrefHash && !hrefHash.startsWith("#/login")) {
             localStorage.setItem("X-Back", window.location.href);
           }
           Route.push({ path: "/login" });
-        } else if (wsMessage.command == 3) {
+        } else if (wsMessage.command == 103) {
           pThis.handle_notify_message(wsMessage.data);
         }
       }

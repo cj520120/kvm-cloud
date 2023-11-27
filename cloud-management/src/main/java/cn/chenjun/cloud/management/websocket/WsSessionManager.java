@@ -1,18 +1,20 @@
 package cn.chenjun.cloud.management.websocket;
 
 import cn.chenjun.cloud.common.bean.WsMessage;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.client.WsClient;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.collection.ConcurrentHashSet;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import java.util.Objects;
 
+/**
+ * @author chenjun
+ */
 @Component
-public class WsManager {
+public class WsSessionManager {
     public ConcurrentHashSet<WsClient> wsClientSets = new ConcurrentHashSet<>();
 
 
@@ -38,8 +40,7 @@ public class WsManager {
 
     public synchronized <T> void sendWebNotify(NotifyData<T> message) {
 
-        WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.NOTIFY).data(message).build();
-
+        WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.WEB_NOTIFY).data(message).build();
         wsClientSets.stream().filter(ws -> Objects.equals(ws.getClientType(), Constant.WsClientType.WEB)).forEach(ws -> {
             try {
                 ws.send(wsMessage);
@@ -51,8 +52,7 @@ public class WsManager {
 
     public synchronized <T> void sendComponentNotify(int networkId, NotifyData<T> message) {
 
-        WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.NOTIFY).data(message).build();
-        String msg = GsonBuilderUtil.create().toJson(wsMessage);
+        WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.COMPONENT_NOTIFY).data(message).build();
         wsClientSets.stream().filter(ws -> Objects.equals(networkId, ws.getNetworkId()) && Objects.equals(ws.getClientType(), Constant.WsClientType.COMPONENT)).forEach(ws -> {
             try {
                 ws.send(wsMessage);

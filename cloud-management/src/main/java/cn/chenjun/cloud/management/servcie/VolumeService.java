@@ -1,32 +1,25 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.model.*;
+import cn.chenjun.cloud.management.model.CloneModel;
+import cn.chenjun.cloud.management.model.MigrateModel;
+import cn.chenjun.cloud.management.model.SnapshotModel;
+import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -109,90 +102,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(this.initVolume(volume));
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> uploadVolume(String description, int storageId, String volumeType, File file) {
-        if (StringUtils.isEmpty(description)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
-        }
-        StorageEntity storage = this.allocateService.allocateStorage(storageId);
-        HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
-        String volumeName = UUID.randomUUID().toString();
-        String uploadPath = storage.getMountPath() + "/" + volumeName;
-        String uploadUri = String.format("%s/api/upload", host.getUri());
-        long timestamp = System.currentTimeMillis();
-
-        String nonce = String.valueOf(System.nanoTime());
-        Map<String, Object> map = new HashMap<>(6);
-        map.put("path", uploadPath);
-        map.put("storage", storage.getName());
-        map.put("volumeType", volumeType);
-        map.put("name", volumeName);
-        map.put("timestamp", timestamp);
-        try {
-            String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
-            map.put("sign", sign);
-        } catch (Exception err) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
-        }
-
-        FileSystemResource resource = new FileSystemResource(file);
-        MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
-        map.forEach((k, v) -> param.add(k, v.toString()));
-        param.add("volume", resource);
-        org.springframework.http.HttpEntity<MultiValueMap<String, Object>> httpEntity = new org.springframework.http.HttpEntity<>(param);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(uploadUri, HttpMethod.POST, httpEntity, String.class);
-        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "上传失败");
-        }
-        ResultUtil<VolumeInfo> resultUtil = GsonBuilderUtil.create().fromJson(responseEntity.getBody(), new TypeToken<ResultUtil<VolumeInfo>>() {
-        }.getType());
-        if (Objects.requireNonNull(resultUtil).getCode() != ErrorCode.SUCCESS) {
-            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
-        }
-        VolumeInfo volumeInfo = resultUtil.getData();
-        VolumeEntity volume = VolumeEntity.builder()
-                .storageId(storage.getStorageId())
-                .templateId(0)
-                .description(description)
-                .name(volumeName)
-                .path(storage.getMountPath() + "/" + volumeName)
-                .type(volumeType)
-                .backingPath("")
-                .capacity(volumeInfo.getCapacity())
-                .allocation(volumeInfo.getAllocation())
-                .status(Constant.VolumeStatus.READY)
-                .createTime(new Date())
-                .build();
-        this.volumeMapper.insert(volume);
-        return ResultUtil.success(this.initVolume(volume));
-    }
-
-    public ResultUtil<DownloadModel> getDownloadUri(int volumeId) {
-        HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
-        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
-        StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
-        if (!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘未就绪");
-        }
-        GuestEntity guest = this.getVolumeGuest(volumeId);
-        if (guest != null) {
-            switch (guest.getStatus()) {
-                case Constant.GuestStatus.STOP:
-                case Constant.GuestStatus.ERROR:
-                    break;
-                default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
-            }
-        }
-        return ResultUtil.success(DownloadModel.builder().storage(storage.getName())
-                .host(host.getUri())
-                .clientId(host.getClientId())
-                .clientSecret(host.getClientSecret())
-                .name(volume.getName())
-                .path(volume.getPath())
-                .build());
-
-    }
 
     @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -222,7 +131,7 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
         operateTask.addTask(operateParam);
         VolumeModel model = this.initVolume(volume);
-        this.clusterService.publish(NotifyData.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(model);
     }
 
@@ -269,8 +178,8 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
         VolumeModel clone = this.initVolume(cloneVolume);
-        this.clusterService.publish(NotifyData.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.clusterService.publish(NotifyData.builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
 
@@ -291,7 +200,7 @@ public class VolumeService extends AbstractService {
                 .size(volume.getCapacity())
                 .build();
         operateTask.addTask(operateParam);
-        this.clusterService.publish(NotifyData.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(this.initVolume(volume));
     }
 
@@ -338,8 +247,8 @@ public class VolumeService extends AbstractService {
         operateTask.addTask(operateParam);
         VolumeModel source = this.initVolume(volume);
         VolumeModel migrate = this.initVolume(migrateVolume);
-        this.clusterService.publish(NotifyData.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.clusterService.publish(NotifyData.builder().id(migrate.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(migrate.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
     }
 
@@ -379,7 +288,7 @@ public class VolumeService extends AbstractService {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate);
                 VolumeModel source = this.initVolume(volume);
-                this.clusterService.publish(NotifyData.builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
@@ -401,7 +310,7 @@ public class VolumeService extends AbstractService {
         if (snapshotVolume == null) {
             throw new CodeException(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
         }
-        this.clusterService.publish(NotifyData.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
         return ResultUtil.success(this.initSnapshot(snapshotVolume));
     }
 
@@ -444,8 +353,8 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).title("创建磁盘快照[" + snapshotVolume.getName() + "]").sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
         operateTask.addTask(operateParam);
         SnapshotModel model = this.initSnapshot(snapshotVolume);
-        this.clusterService.publish(NotifyData.builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
-        this.clusterService.publish(NotifyData.builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(model);
     }
 
@@ -465,7 +374,7 @@ public class VolumeService extends AbstractService {
                 BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("删除磁盘快照[" + volume.getName() + "]").snapshotVolumeId(snapshotVolumeId).build();
                 operateTask.addTask(operate);
                 SnapshotModel source = this.initSnapshot(volume);
-                this.clusterService.publish(NotifyData.builder().id(snapshotVolumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
+                this.eventService.publish(NotifyData.<Void>builder().id(snapshotVolumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");

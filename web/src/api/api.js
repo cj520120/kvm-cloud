@@ -215,14 +215,6 @@ export const createSnapshot = (data = {}) => {
   });
 };
 
-export const downloadSnapshot = (data = {}) => {
-  return axios.request({
-    url: "api/snapshot/download",
-    data,
-    method: "POST",
-  });
-};
-
 export const destroySnapshot = (data = {}) => {
   return axios.request({
     url: "api/snapshot/destroy",

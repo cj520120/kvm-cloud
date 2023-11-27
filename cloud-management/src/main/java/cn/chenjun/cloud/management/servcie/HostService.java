@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -13,6 +12,7 @@ import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +90,7 @@ public class HostService extends AbstractService {
                 .title("添加主机[" + host.getDisplayName() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
-        this.clusterService.publish(NotifyData.builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
     }
 
@@ -107,7 +107,7 @@ public class HostService extends AbstractService {
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
                 .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
-        this.clusterService.publish(NotifyData.builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
     }
 
@@ -121,7 +121,7 @@ public class HostService extends AbstractService {
 
         host.setStatus(Constant.HostStatus.MAINTENANCE);
         this.hostMapper.updateById(host);
-        this.clusterService.publish(NotifyData.builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
 
     }
@@ -134,7 +134,7 @@ public class HostService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         this.hostMapper.deleteById(hostId);
-        this.clusterService.publish(NotifyData.builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success();
     }
 }

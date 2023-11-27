@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeInfoRequest;
@@ -10,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.VolumeCheckOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +80,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
                             .path(info.getPath())
                             .build();
                     this.volumeMapper.updateById(updateVolume);
-                    this.clusterService.publish(NotifyData.builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());
+                    this.eventService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());
                 }
             }
         }

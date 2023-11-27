@@ -6,6 +6,9 @@ import org.springframework.core.Ordered;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 public interface ComponentQmaInitialize extends Ordered {
 
     /**

@@ -71,6 +71,7 @@ public final class ErrorCode {
      */
     public static final int BASE_GROUP_ERROR = BASE_ERROR * 10;
     public static final int GROUP_NOT_FOUND = BASE_GROUP_ERROR + 1;
+
     private ErrorCode() {
 
     }

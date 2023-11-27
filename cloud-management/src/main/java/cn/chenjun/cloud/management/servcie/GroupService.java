@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -8,6 +7,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GroupInfoEntity;
 import cn.chenjun.cloud.management.data.mapper.GroupMapper;
 import cn.chenjun.cloud.management.model.GroupModel;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class GroupService extends AbstractService {
     public ResultUtil<GroupModel> createGroup(String groupName) {
         GroupInfoEntity entity = GroupInfoEntity.builder().groupName(groupName).createTime(new Date()).build();
         mapper.insert(entity);
-        this.clusterService.publish(NotifyData.builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
 
         return ResultUtil.success(this.initGroup(entity));
     }
@@ -46,7 +46,7 @@ public class GroupService extends AbstractService {
         }
         entity.setGroupName(groupName);
         mapper.updateById(entity);
-        this.clusterService.publish(NotifyData.builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
         return ResultUtil.success(this.initGroup(entity));
     }
 
@@ -62,7 +62,7 @@ public class GroupService extends AbstractService {
 
     public ResultUtil<Void> deleteGroupById(int groupId) {
         mapper.deleteById(groupId);
-        this.clusterService.publish(NotifyData.builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
         return ResultUtil.success();
     }
 

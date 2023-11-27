@@ -1,19 +1,22 @@
 package cn.chenjun.cloud.management.websocket.cluster.process;
 
 import cn.chenjun.cloud.common.util.Constant;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.servcie.DnsService;
-import cn.chenjun.cloud.management.websocket.WsManager;
+import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @Component
-public class UpdateDnsProcess implements ClusterProcess {
+public class UpdateDnsProcess implements ClusterMessageProcess {
     @Autowired
-    private WsManager wsManager;
+    private WsSessionManager wsSessionManager;
     @Autowired
     private DnsService dnsService;
 
@@ -24,7 +27,7 @@ public class UpdateDnsProcess implements ClusterProcess {
             dnsModelList = this.dnsService.listLocalNetworkDns(msg.getId());
         }
         NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModelList).build();
-        wsManager.sendComponentNotify(msg.getId(), sendMsg);
+        wsSessionManager.sendComponentNotify(msg.getId(), sendMsg);
     }
 
     @Override

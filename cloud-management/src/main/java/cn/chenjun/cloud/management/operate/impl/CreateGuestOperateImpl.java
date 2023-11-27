@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -10,6 +9,7 @@ import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -56,8 +56,8 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
                 guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
             }
-            this.clusterService.publish(NotifyData.builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
         }
-        this.clusterService.publish(NotifyData.builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
     }
 }

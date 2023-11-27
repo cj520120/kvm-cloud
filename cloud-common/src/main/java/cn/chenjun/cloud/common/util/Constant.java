@@ -81,15 +81,23 @@ public class Constant {
 
     }
 
-    public static class SocketCommand{
-        public static final int CLIENT_CONNECT=0;
-        public static final int LOGIN_SUCCESS = 1;
-        public static final int LOGIN_TOKEN_ERROR = 2;
-        public static final int NOTIFY=3;
-        public static final int NOT_LOGIN = 4;
-        public static final int VNC_REQUEST = 5;
-        public static final int DNS_REQUEST = 6;
+    public static class SocketCommand {
+
+        public static final int WEB_LOGIN = 100;
+        public static final int WEB_LOGIN_SUCCESS = 101;
+        public static final int WEB_LOGIN_TOKEN_ERROR = 102;
+        public static final int WEB_NOTIFY = 103;
+
+
+
+        public static final int COMPONENT_CONNECT = 200;
+        public static final int COMPONENT_CONNECT_SUCCESS = 201;
+        public static final int COMPONENT_CONNECT_FAIL = 202;
+        public static final int COMPONENT_NOTIFY = 203;
+        public static final int COMPONENT_VNC_REQUEST = 205;
+        public static final int COMPONENT_DNS_REQUEST = 206;
     }
+
     public static class NotifyType {
 
         public static final int UPDATE_GUEST = 1;

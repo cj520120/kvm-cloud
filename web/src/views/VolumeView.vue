@@ -7,7 +7,6 @@
 						<div style="float: left">
 							<el-form :inline="true" class="demo-form-inline">
 								<el-form-item><el-button size="mini" type="primary" @click="show_create_volume">创建磁盘</el-button></el-form-item>
-								<!-- <el-form-item><el-button size="mini" type="primary" @click="show_upload_volume">导入磁盘</el-button></el-form-item> -->
 								<el-form-item><el-button size="mini" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-button></el-form-item>
 
 								<el-form-item label="存储池">
@@ -115,11 +114,8 @@
 
 				<MigrateVolumeComponent ref="MigrateVolumeComponentRef" @back="show_volume_list()" @onVolumeUpdate="update_volume_info" v-show="this.show_type === 4" />
 
-				<UploadVolumeComponent ref="UploadVolumeComponentRef" @back="show_volume_list()" @onVolumeUpdate="update_volume_info" v-show="this.show_type === 5" />
-
 				<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_volume_list" v-show="this.show_type === 6" />
 
-				<DownloadVolumeComponent ref="DownloadVolumeComponentRef" />
 				<ResizeVolumeComponent ref="ResizeVolumeComponentRef" @onVolumeUpdate="update_volume_info" />
 				<CreateVolumeTemplateComponent ref="CreateVolumeTemplateComponentRef" />
 				<CreateVolumeSnapshotComponent ref="CreateVolumeSnapshotComponentRef" />
@@ -132,21 +128,18 @@ import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolu
 import Notify from '@/api/notify'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
-import DownloadVolumeComponent from '@/components/DownloadVolumeComponent'
 import ResizeVolumeComponent from '@/components/ResizeVolumeComponent'
 import CreateVolumeTemplateComponent from '@/components/CreateVolumeTemplateComponent'
 import CreateVolumeSnapshotComponent from '@/components/CreateVolumeSnapshotComponent.vue'
 import CloneVolumeComponent from '@/components/CloneVolumeComponent'
 import MigrateVolumeComponent from '@/components/MigrateVolumeComponent.vue'
-import UploadVolumeComponent from '@/components/UploadVolumeComponent'
 import VolumeInfoComponent from '@/components/VolumeInfoComponent'
 export default {
 	name: 'volumeView',
-	components: { GuestInfoComponent, DownloadVolumeComponent, ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, UploadVolumeComponent, VolumeInfoComponent },
+	components: { GuestInfoComponent, ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, VolumeInfoComponent },
 	data() {
 		return {
 			data_loading: false,
-			uploading: false,
 			show_type: -1,
 			select_storage_id: 0,
 			create_volume: {
@@ -305,10 +298,6 @@ export default {
 			}
 			this.show_type = 2
 		},
-		show_upload_volume() {
-			this.$refs.UploadVolumeComponentRef.init()
-			this.show_type = 5
-		},
 		async show_volume_info(volume) {
 			this.$refs.VolumeInfoComponentRef.init_volume(volume)
 			this.show_type = 1
@@ -356,9 +345,6 @@ export default {
 					this.destroy_volume(data.volume)
 					break
 			}
-		},
-		show_download_volume_click(volume) {
-			this.$refs.DownloadVolumeComponentRef.init(volume)
 		},
 		show_clone_volume_click(volume) {
 			this.$refs.CloneVolumeComponentRef.init(volume)

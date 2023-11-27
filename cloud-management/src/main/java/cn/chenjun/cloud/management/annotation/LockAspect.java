@@ -41,8 +41,7 @@ public class LockAspect {
                 if (isLocked && rLock.isHeldByCurrentThread()) {
                     rLock.unlock();
                 }
-            } catch (Exception err) {
-                err.printStackTrace();
+            } catch (Exception ignored) {
             }
         }
     }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Vlan网络
+ *
  * @author chenjun
  */
 @Data
