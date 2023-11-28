@@ -8,14 +8,17 @@ import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hubspot.jinjava.Jinjava;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class NetworkInitialize implements RouteComponentQmaInitialize {
@@ -43,9 +46,6 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
                 networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), "", "");
 
             }
-            if (i == 0) {
-                networkConfig += "\r\nIPADDR1=169.254.169.254";
-            }
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(networkConfig).build())).build());
         }
         //重启网卡
@@ -62,32 +62,15 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
     }
 
     protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("TYPE=Ethernet").append("\r\n");
-        sb.append("BROWSER_ONLY=no").append("\r\n");
-        sb.append("BOOTPROTO=static").append("\r\n");
-        sb.append("DEFROUTE=yes").append("\r\n");
-        sb.append("IPV4_FAILURE_FATAL=no").append("\r\n");
-        sb.append("NAME=eth").append(index).append("\r\n");
-        sb.append("DEVICE=eth").append(index).append("\r\n");
-        sb.append("ONBOOT=yes").append("\r\n");
-        if (!StringUtils.isEmpty(ip)) {
-            sb.append("IPADDR=").append(ip).append("\r\n");
-        }
-        if (!StringUtils.isEmpty(netmask)) {
-            sb.append("NETMASK=").append(netmask).append("\r\n");
-        }
-        if (!StringUtils.isEmpty(gateway)) {
-            sb.append("GATEWAY=").append(gateway).append("\r\n");
-        }
-        if (!StringUtils.isEmpty(dns)) {
-            for (String s : dns.split(",")) {
-                String dnsStr = s.trim();
-                if (!StringUtils.isEmpty(dnsStr)) {
-                    sb.append("DNS1=").append(dnsStr).append("\r\n");
-                }
-            }
-        }
-        return sb.toString();
+        String body =   new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/network.tpl")), StandardCharsets.UTF_8);
+        Jinjava jinjava = new Jinjava();
+        Map<String, Object> map = new HashMap<>(5);
+        map.put("index",index);
+        map.put("ip",ip);
+        map.put("gateway",gateway);
+        map.put("netmask",netmask);
+        List<String> dnsList=Arrays.stream(dns.split(",")).filter(ObjectUtils::isNotEmpty).collect(Collectors.toList());
+        map.put("dnsList",dnsList);
+        return jinjava.render(body, map).replaceAll("(?m)^[ \t]*\r?\n", "");
     }
 }
