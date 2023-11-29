@@ -60,12 +60,6 @@ public class GroupService extends AbstractService {
         return ResultUtil.success(entities.stream().map(this::initGroup).collect(Collectors.toList()));
     }
 
-    public ResultUtil<Void> deleteGroupById(int groupId) {
-        mapper.deleteById(groupId);
-        this.eventService.publish(NotifyData.<Void>builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
-        return ResultUtil.success();
-    }
-
     private GroupModel initGroup(GroupInfoEntity entity) {
         return GroupModel.builder().groupId(entity.getGroupId()).groupName(entity.getGroupName()).createTime(entity.getCreateTime()).build();
     }

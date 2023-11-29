@@ -39,8 +39,7 @@ public class VolumeService extends AbstractService {
         if (guestDisk == null) {
             return null;
         }
-        GuestEntity guest = guestMapper.selectById(guestDisk.getGuestId());
-        return guest;
+        return guestMapper.selectById(guestDisk.getGuestId());
     }
 
 
