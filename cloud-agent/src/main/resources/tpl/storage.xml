@@ -3,7 +3,7 @@
     <source>
         <host name="{{host}}"/>
         <dir path="{{path}}"/>
-        <format type="auto"/>
+        <format type="{{format}}"/>
     </source>
     <target>
         <path>{{mount}}</path>

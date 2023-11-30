@@ -63,8 +63,12 @@ public class StorageOperateImpl implements StorageOperate {
 
     @Override
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
-        if (!Objects.equals(Constant.StorageType.NFS, request.getType())) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
+        switch (request.getType()) {
+            case Constant.StorageType.NFS:
+            case Constant.StorageType.GLUSTERFS:
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
         }
         StoragePool storagePool = this.findStorage(connect, request.getName());
         if (storagePool != null) {
@@ -84,6 +88,11 @@ public class StorageOperateImpl implements StorageOperate {
             map.put("host", nfsUri);
             map.put("path", nfsPath);
             map.put("mount", request.getMountPath());
+            if (request.getType().equals(Constant.StorageType.GLUSTERFS)) {
+                map.put("format", "glusterfs");
+            } else {
+                map.put("format", "auto");
+            }
             Jinjava jinjava = new Jinjava();
             xml = jinjava.render(xml, map);
             storagePool = connect.storagePoolCreateXML(xml, 0);

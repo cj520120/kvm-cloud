@@ -11,12 +11,13 @@
 				<el-form-item label="存储池类型" prop="type">
 					<el-select v-model="create_storage.type" style="width: 100%">
 						<el-option label="NFS" value="nfs"></el-option>
+						<el-option label="Glusterfs" value="glusterfs"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="NFS路径" prop="path" v-if="create_storage.type === 'nfs'">
+				<el-form-item label="路径" prop="path" v-if="create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs'">
 					<el-input v-model="create_storage.path"></el-input>
 				</el-form-item>
-				<el-form-item label="NFS地址" prop="uri" v-if="create_storage.type === 'nfs'">
+				<el-form-item label="地址" prop="uri" v-if="create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs'">
 					<el-input v-model="create_storage.uri"></el-input>
 				</el-form-item>
 				<el-form-item>
@@ -60,7 +61,7 @@ export default {
 				type: this.create_storage.type,
 				param: '{}'
 			}
-			if (this.create_storage.type === 'nfs') {
+			if (this.create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs') {
 				data.param = JSON.stringify({
 					path: this.create_storage.path,
 					uri: this.create_storage.uri

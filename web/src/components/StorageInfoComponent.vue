@@ -16,6 +16,8 @@
 				<el-descriptions-item label="挂载路径">{{ show_storage.mountPath }}</el-descriptions-item>
 				<el-descriptions-item label="NFS路径" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
 				<el-descriptions-item label="NFS地址" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
+				<el-descriptions-item label="Glusterfs路径" v-if="show_storage.type === 'glusterfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
+				<el-descriptions-item label="Glusterfs地址" v-if="show_storage.type === 'glusterfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
 				<el-descriptions-item label="容量">{{ get_volume_display_size(show_storage.capacity) }}</el-descriptions-item>
 				<el-descriptions-item label="可用">{{ get_volume_display_size(show_storage.available) }}</el-descriptions-item>
 				<el-descriptions-item label="已申请">{{ get_volume_display_size(show_storage.allocation) }}</el-descriptions-item>
