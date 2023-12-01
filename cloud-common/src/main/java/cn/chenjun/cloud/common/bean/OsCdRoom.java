@@ -17,5 +17,5 @@ public class OsCdRoom {
      * 虚拟机名称
      */
     private String name;
-    private String path;
+    private Volume volume;
 }

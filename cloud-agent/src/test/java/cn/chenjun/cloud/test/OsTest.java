@@ -1,5 +1,7 @@
 package cn.chenjun.cloud.test;
 
+import cn.chenjun.cloud.agent.util.DomainXmlUtil;
+import cn.chenjun.cloud.agent.util.NetworkType;
 import cn.chenjun.cloud.common.bean.*;
 import cn.hutool.http.HttpUtil;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -9,154 +11,12 @@ import java.util.*;
 
 public class OsTest {
     public static void main(String[] args) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("uri", "192.168.1.69");
-        param.put("path", "/data/nfs");
-        param.put("mount", "/mnt/TEST_NFS");
-        System.out.println(GsonBuilderUtil.create().toJson(param));
-//        getHostInfo();
-//        createNetwork();
-//        createStorage();
-//        startOs(3,5, Constant.DiskBus.IDE);
-//        destroyOs();
-//        destroyVolume(5);
-//        destroyStorage();
-//        destroyNetwork();
-    }
-   public static void getHostInfo(){
-
-       Map<String,Object> map=new HashMap<>();
-       map.put("command",Constant.Command.HOST_INFO);
-       map.put("data", "{}");
-       System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-   }
-    public static void createStorage(){
-        String name = "TEST_NFS";
-        Map<String, Object> param = new HashMap<>();
-        param.put("uri", "192.168.1.69");
-        param.put("path", "/data/nfs");
-        StorageCreateRequest request = StorageCreateRequest.builder()
-                .name(name)
-                .type(Constant.StorageType.NFS)
-                .param(param)
-                .mountPath("/mnt/TEST_NFS")
-                .build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.STORAGE_CREATE);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
+        String json="{\"name\":\"VM-NTmsXYEgy\",\"description\":\"gluster\",\"emulator\":\"/usr/libexec/qemu-kvm\",\"osMemory\":{\"memory\":2097152},\"osCpu\":{\"number\":2,\"socket\":0,\"core\":0,\"thread\":0,\"share\":0},\"osCdRoom\":{},\"bus\":\"virtio\",\"osDisks\":[{\"name\":\"VM-NTmsXYEgy\",\"deviceId\":0,\"volume\":{\"name\":\"0951d4bf-135b-4e8c-8749-cb9addea3987\",\"path\":\"/mnt/27b21e06aa444b2e924faa1b850275b8/0951d4bf-135b-4e8c-8749-cb9addea3987\",\"type\":\"qcow2\",\"storage\":{\"name\":\"27b21e06aa444b2e924faa1b850275b8\",\"type\":\"glusterfs\",\"mountPath\":\"/mnt/27b21e06aa444b2e924faa1b850275b8\",\"param\":{\"path\":\"v1\",\"uri\":\"192.168.1.54\"}}}}],\"networkInterfaces\":[{\"name\":\"VM-NTmsXYEgy\",\"driveType\":\"virtio\",\"deviceId\":0,\"mac\":\"00:04:EA:62:A8:A9\",\"bridgeName\":\"br0\",\"vlanId\":0}],\"vncPassword\":\"oIW5iOQ4\"}";
+//        String json="{\"name\":\"VM-eMVBnWcS\",\"description\":\"TEST_002\",\"emulator\":\"/usr/libexec/qemu-kvm\",\"osMemory\":{\"memory\":1048576},\"osCpu\":{\"number\":1,\"socket\":0,\"core\":0,\"thread\":0,\"share\":0},\"osCdRoom\":{},\"bus\":\"virtio\",\"osDisks\":[{\"name\":\"VM-eMVBnWcS\",\"deviceId\":0,\"volume\":{\"name\":\"8d4659fc-6673-47ef-9bf2-7b23d12a7e7e\",\"path\":\"/mnt/0981d4d911fa4f1c9f5a4eb396529ff1/8d4659fc-6673-47ef-9bf2-7b23d12a7e7e\",\"type\":\"qcow2\",\"storage\":{\"name\":\"0981d4d911fa4f1c9f5a4eb396529ff1\",\"type\":\"nfs\",\"mountPath\":\"/mnt/0981d4d911fa4f1c9f5a4eb396529ff1\",\"param\":{\"path\":\"/data/nfs\",\"uri\":\"192.168.1.90\"}}}}],\"networkInterfaces\":[{\"name\":\"VM-eMVBnWcS\",\"driveType\":\"virtio\",\"deviceId\":0,\"mac\":\"00:0D:ED:E3:A4:04\",\"bridgeName\":\"br0\",\"vlanId\":200}],\"vncPassword\":\"LKAWROCL\"}";
+        GuestStartRequest request= GsonBuilderUtil.create().fromJson(json, GuestStartRequest.class);
+        request.getOsCdRoom().setVolume(request.getOsDisks().get(0).getVolume());
+        String xml = DomainXmlUtil.buildDomainXml(NetworkType.OPEN_SWITCH, request);
+        System.out.println(xml);
     }
 
-    public static void destroyStorage(){
-        String name = "TEST_NFS";
-        StorageDestroyRequest request = StorageDestroyRequest.builder()
-                .name(name)
-                .build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.STORAGE_DESTROY);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-    }
-    public static void createNetwork(){
-        BasicBridgeNetwork request=BasicBridgeNetwork.builder().bridge("br0").ip("192.168.1.69").geteway("192.168.1.1").nic("ens20").netmask("255.255.255.0").build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.NETWORK_CREATE_BASIC);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-    }
-    public static void destroyNetwork(){
-        BasicBridgeNetwork request=BasicBridgeNetwork.builder().bridge("br0").ip("192.168.1.69").geteway("192.168.1.1").nic("ens20").netmask("255.255.255.0").build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.NETWORK_DESTROY_BASIC);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-    }
-    public static OsDisk createVolume(int index){
-        List<String> volumeTypes = Arrays.asList(Constant.VolumeType.QCOW2, Constant.VolumeType.QCOW, Constant.VolumeType.RAW, Constant.VolumeType.VDI, Constant.VolumeType.VPC, Constant.VolumeType.VMDK);
-        String volumeType = volumeTypes.get(index % volumeTypes.size());
-        VolumeCreateRequest request = VolumeCreateRequest.builder()
-                .targetStorage("TEST_NFS")
-                .targetVolume("/mnt/TEST_NFS/" + "VOL_" + volumeType + "_" + index)
-                .targetName("VOL_" + volumeType + "_" + index)
-                .targetType(volumeType)
-                .targetSize(1024L * 1024 * 1024 * 30)
-                .build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.VOLUME_CREATE);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-        return OsDisk.builder()
-                .volume(request.getTargetVolume())
-                .deviceId(index)
-                .volumeType(volumeType).build();
-    }
-    public static void destroyVolume(int number){
-        for(int index=0;index<number;index++){
-            List<String> volumeTypes = Arrays.asList(Constant.VolumeType.QCOW2, Constant.VolumeType.QCOW, Constant.VolumeType.RAW, Constant.VolumeType.VDI, Constant.VolumeType.VPC, Constant.VolumeType.VMDK);
-            String volumeType = volumeTypes.get(index % volumeTypes.size());
-            VolumeDestroyRequest request = VolumeDestroyRequest.builder()
-                    .sourceStorage("TEST_NFS")
-                    .sourceVolume("/mnt/TEST_NFS/" + "VOL_" + volumeType + "_" + index)
-                    .sourceType(volumeType)
-                    .build();
-            Map<String,Object> map=new HashMap<>();
-            map.put("command",Constant.Command.VOLUME_DESTROY);
-            map.put("data", GsonBuilderUtil.create().toJson(request));
-            System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-        }
-    }
-    public static void startOs(int networkNumber,int diskNumber,String diskBus){
-        List<OsDisk> osDisks = new ArrayList<>();
-        for (int i = 0; i < diskNumber; i++) {
-            osDisks.add(createVolume(i));
-        }
-        List<OsNic> networkInterfaces = new ArrayList<>();
-        for (int i = 0; i < networkNumber; i++) {
-            networkInterfaces.add(OsNic.builder().bridgeName("br0").mac(randomMacAddress()).deviceId(i).driveType("virtio").build());
-        }
-        GuestStartRequest request = GuestStartRequest.builder()
-                .emulator("/usr/bin/qemu-system-x86_64")
-                .name("VM_TEST")
-                .description("测试虚拟机")
-                .bus(diskBus)
-                .osCpu(OsCpu.builder().number(8).core(0).socket(0).thread(0).share(500).build())
-                .osMemory(OsMemory.builder().memory(1024 * 1024).build())
-                .osCdRoom(OsCdRoom.builder()
-                        .path("/mnt/TEST_NFS/CentOS-7-x86_64-Minimal-2003.iso")
-                        .build())
-                .osDisks(osDisks)
-                .networkInterfaces(networkInterfaces)
-                .vncPassword("123456")
-                .build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.GUEST_START);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-    }
-    public static void destroyOs(){
-        GuestDestroyRequest request= GuestDestroyRequest.builder().name("VM_TEST").build();
-        Map<String,Object> map=new HashMap<>();
-        map.put("command",Constant.Command.GUEST_DESTROY);
-        map.put("data", GsonBuilderUtil.create().toJson(request));
-        System.out.println(HttpUtil.post("http://192.168.1.69:8081/api/operate",map));
-    }
-    public static String randomMacAddress() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            if (sb.length() > 0) {
-                sb.append(":");
-            }
-
-            Random random = new Random();
-            int val = random.nextInt(256);
-            String element = Integer.toHexString(val);
-            if (element.length() < 2) {
-                sb.append(0);
-            }
-
-            sb.append(element);
-        }
-
-        return "00:"+sb.toString();
-    }
 }

@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -9,6 +10,7 @@ import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
 import cn.chenjun.cloud.management.servcie.VncService;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,12 +111,32 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     protected List<OsDisk> getGuestDisk(GuestEntity guest) {
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
         List<OsDisk> disks = new ArrayList<>();
+        Map<Integer, Storage> storageMap = Maps.newHashMap();
         for (GuestDiskEntity entity : guestDiskEntityList) {
             VolumeEntity volume = volumeMapper.selectById(entity.getVolumeId());
             if (volume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
             }
-            OsDisk disk = OsDisk.builder().name(guest.getName()).deviceId(entity.getDeviceId()).volume(volume.getPath()).volumeType(volume.getType()).build();
+            Storage storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
+                StorageEntity storageEntity = this.storageMapper.selectById(storageId);
+                if (storageEntity == null) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
+                }
+                if (storageEntity.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getStatus());
+                }
+                Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+                }.getType());
+                return Storage.builder()
+                        .name(storageEntity.getName())
+                        .type(storageEntity.getType())
+                        .param(storageParam)
+                        .mountPath(storageEntity.getMountPath())
+                        .build();
+            });
+            Volume diskVolume = Volume.builder().name(volume.getName()).type(volume.getType()).path(volume.getPath()).storage(storage).build();
+
+            OsDisk disk = OsDisk.builder().name(guest.getName()).volume(diskVolume).deviceId(entity.getDeviceId()).build();
             disks.add(disk);
         }
         disks.sort(Comparator.comparingInt(OsDisk::getDeviceId));
@@ -129,7 +151,25 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             Collections.shuffle(templateVolumeList);
             if (!templateVolumeList.isEmpty()) {
                 TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
-                cdRoom.setPath(templateVolume.getPath());
+                if (templateVolume != null) {
+                    StorageEntity storageEntity = this.storageMapper.selectById(templateVolume.getStorageId());
+                    if (storageEntity == null) {
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]光盘[" + templateVolume.getName() + "]所属存储池不存在");
+                    }
+                    if (storageEntity.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]光盘[" + templateVolume.getName() + "]所属存储池未就绪:" + storageEntity.getStatus());
+                    }
+                    Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+                    }.getType());
+                    Storage storage = Storage.builder()
+                            .name(storageEntity.getName())
+                            .type(storageEntity.getType())
+                            .param(storageParam)
+                            .mountPath(storageEntity.getMountPath())
+                            .build();
+                    Volume cdVolume = Volume.builder().name(templateVolume.getName()).type(templateVolume.getType()).path(templateVolume.getPath()).storage(storage).build();
+                    cdRoom.setVolume(cdVolume);
+                }
             } else {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "光盘镜像未就绪");
             }

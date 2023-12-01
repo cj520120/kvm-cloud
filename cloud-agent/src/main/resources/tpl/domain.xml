@@ -53,21 +53,31 @@
     <devices>
         <emulator>{{emulator}}</emulator>
         <!--光驱1-->
-        <disk type="file" device="cdrom">
+        <disk type="{{cd.type}}" device="cdrom">
             <driver name="qemu"/>
             <target dev="hda" bus="ide"/>
-            {% if cd.path %}
-            <source file="{{cd.path}}"/>
+            {% if cd.storage.type == 'nfs' %}
+            <source file="{{cd.storage.path}}/{{cd.name}}"/>
+            {% elif cd.storage.type == 'glusterfs' %}
+            <source protocol="gluster" name="{{cd.storage.param.path}}/{{cd.name}}">
+                <host name="{{cd.storage.param.uri}}"/>
+            </source>
             {% endif %}
             <readonly/>
             <address type="drive" controller="0" bus="0" target="0" unit="0"/>
         </disk>
         <!-- 磁盘 -->
         {% for disk in disks %}
-        <disk type="file" device="disk" cache="none" aio="native">
+        <disk type="{{disk.type}}" device="disk" cache="none" aio="native">
             <target dev="{{disk.dev}}" bus="{{disk.bus}}"/>
-            <driver name="qemu" type="{{disk.type}}" cache="none" aio="native"/>
-            <source file="{{disk.path}}"/>
+            <driver name="qemu" type="{{disk.volumeType}}" cache="none" aio="native"/>
+            {% if disk.storage.type == 'nfs' %}
+            <source file="{{disk.storage.path}}/{{disk.name}}"/>
+            {% elif disk.storage.type == 'glusterfs' %}
+            <source protocol="gluster" name="{{disk.storage.param.path}}/{{disk.name}}">
+                <host name="{{disk.storage.param.uri}}"/>
+            </source>
+            {% endif %}
             {% if disk.bus=='virtio' %}
             <!-- virtio 驱动-->
             <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>

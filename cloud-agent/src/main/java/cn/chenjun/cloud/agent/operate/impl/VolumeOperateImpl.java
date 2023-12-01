@@ -145,7 +145,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
         Jinjava jinjava = new Jinjava();
         xml = jinjava.render(xml, map);
-        log.info("create volume:{}", xml);
+        log.info("create volume xml={}", xml);
         FileUtil.mkParentDirs(request.getTargetVolume());
         FileUtil.del(request.getTargetVolume());
         StoragePool storagePool = this.getStorage(connect, request.getTargetStorage());
@@ -281,7 +281,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         map.put("format", request.getTargetType());
         Jinjava jinjava = new Jinjava();
         xml = jinjava.render(xml, map);
-        log.info("clone volume:{}", xml);
+        log.info("clone volume xml={}", xml);
         StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();
 

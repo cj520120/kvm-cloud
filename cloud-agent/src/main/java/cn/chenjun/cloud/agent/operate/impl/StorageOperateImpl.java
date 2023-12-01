@@ -11,6 +11,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
+import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
 import org.libvirt.StoragePoolInfo;
@@ -21,6 +22,7 @@ import java.util.*;
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class StorageOperateImpl implements StorageOperate {
     @Override
@@ -95,6 +97,7 @@ public class StorageOperateImpl implements StorageOperate {
             }
             Jinjava jinjava = new Jinjava();
             xml = jinjava.render(xml, map);
+            log.info("createStorage xml={}", xml);
             storagePool = connect.storagePoolCreateXML(xml, 0);
         }
         storagePool.refresh(0);

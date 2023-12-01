@@ -1,7 +1,14 @@
-<disk type="file" device="disk" cache="none" aio="native">
+<disk type="{{disk.type}}" device="disk" cache="none" aio="native">
     <target dev="{{disk.dev}}" bus="{{disk.bus}}"/>
-    <driver name="qemu" type="{{disk.type}}" cache="none" aio="native"/>
-    <source file="{{disk.path}}"/>
+    <driver name="qemu" type="{{disk.volumeType}}" cache="none" aio="native"/>
+    {% if disk.storage.type == 'nfs' %}
+    <source file="{{disk.storage.path}}/{{disk.name}}"/>
+    {% elif disk.storage.type == 'glusterfs' %}
+    <source protocol="gluster" name="{{disk.storage.param.path}}/{{disk.name}}">
+        <host name="{{disk.storage.param.uri}}"/>
+    </source>
+    {% endif %}
+
     {% if disk.bus=='virtio' %}
     <!-- virtio 驱动-->
     <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>

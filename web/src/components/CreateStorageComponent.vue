@@ -14,10 +14,13 @@
 						<el-option label="Glusterfs" value="glusterfs"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="路径" prop="path" v-if="create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs'">
+				<el-form-item label="路径" prop="path" v-if="create_storage.type === 'nfs'">
 					<el-input v-model="create_storage.path"></el-input>
 				</el-form-item>
-				<el-form-item label="地址" prop="uri" v-if="create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs'">
+				<el-form-item label="磁盘名" prop="path" v-if="this.create_storage.type === 'glusterfs'">
+					<el-input v-model="create_storage.path"></el-input>
+				</el-form-item>
+				<el-form-item label="主机" prop="uri" v-if="create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs'">
 					<el-input v-model="create_storage.uri"></el-input>
 				</el-form-item>
 				<el-form-item>

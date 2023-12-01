@@ -1,7 +1,9 @@
 package cn.chenjun.cloud.agent.util;
 
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
 
@@ -42,8 +44,10 @@ public class DomainXmlUtil {
     public static String buildDiskXml(String busType, OsDisk disk) {
         String xml = ResourceUtil.readUtf8Str("tpl/disk.xml");
         Jinjava jinjava = new Jinjava();
+
         Map<String, Object> map = new HashMap<>(0);
         map.put("disk", getDiskContext(busType, disk));
+
         return jinjava.render(xml, map);
     }
 
@@ -67,7 +71,28 @@ public class DomainXmlUtil {
 
     private static Map<String, Object> getCdContext(OsCdRoom cdRoom) {
         Map<String, Object> map = new HashMap<>(0);
-        map.put("path", cdRoom.getPath());
+        map.put("type", "file");
+        Volume volume = cdRoom.getVolume();
+        if (volume != null) {
+            Map<String, Object> storage = new HashMap<>(0);
+            storage.put("name", volume.getStorage().getName());
+            storage.put("param", volume.getStorage().getParam());
+            storage.put("path", volume.getStorage().getMountPath());
+            storage.put("type", volume.getStorage().getType());
+            map.put("storage", storage);
+            map.put("name", volume.getName());
+            switch (volume.getStorage().getType()) {
+                case Constant.StorageType.GLUSTERFS:
+                    map.put("type", "network");
+                    break;
+                case Constant.StorageType.NFS:
+                    map.put("type", "file");
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.BASE_STORAGE_ERROR, "不支持的存储池类型");
+
+            }
+        }
         return map;
     }
 
@@ -83,13 +108,32 @@ public class DomainXmlUtil {
 
     private static Map<String, Object> getDiskContext(String bus, OsDisk disk) {
         int deviceId = disk.getDeviceId() + MIN_DISK_DEVICE_ID;
+        Map<String, Object> storage = new HashMap<>(0);
+        Volume volume = disk.getVolume();
+        Storage volumeStorage = volume.getStorage();
+        storage.put("name", volumeStorage.getName());
+        storage.put("param", volumeStorage.getParam());
+        storage.put("path", volumeStorage.getMountPath());
+        storage.put("type", volumeStorage.getType());
         String dev = "" + (char) ('a' + deviceId);
         Map<String, Object> map = new HashMap<>(0);
+        map.put("name", volume.getName());
         map.put("bus", bus);
         map.put("dev", "vd" + dev);
-        map.put("type", disk.getVolumeType());
+        map.put("volumeType", volume.getType());
         map.put("slot", String.format("0x%02x", deviceId));
-        map.put("path", disk.getVolume());
+        map.put("storage", storage);
+        switch (volumeStorage.getType()) {
+            case Constant.StorageType.GLUSTERFS:
+                map.put("type", "network");
+                break;
+            case Constant.StorageType.NFS:
+                map.put("type", "file");
+                break;
+            default:
+                throw new CodeException(ErrorCode.BASE_STORAGE_ERROR, "不支持的存储池类型");
+
+        }
         return map;
     }
 
@@ -121,4 +165,6 @@ public class DomainXmlUtil {
         map.put("password", password);
         return map;
     }
+
+
 }

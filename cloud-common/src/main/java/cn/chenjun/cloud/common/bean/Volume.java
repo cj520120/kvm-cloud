@@ -12,12 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OsDisk {
-    /**
-     * 虚拟机名称
-     */
+public class Volume {
     private String name;
-    private int deviceId;
-    private Volume volume;
-
+    private String path;
+    private String type;
+    private Storage storage;
 }

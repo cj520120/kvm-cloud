@@ -193,6 +193,7 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         String xml = DomainXmlUtil.buildCdXml(request);
+        log.info("attachCdRoom xml={}", xml);
         domain.updateDeviceFlags(xml, 1);
     }
 
@@ -206,6 +207,7 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
         String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
+        log.info("attachDisk xml={}", xml);
         domain.attachDevice(xml);
     }
 
@@ -219,6 +221,7 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
         }
         String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
+        log.info("detachDisk xml={}", xml);
         domain.detachDevice(xml);
     }
 
@@ -232,6 +235,7 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
         String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
+        log.info("attachNic xml={}", xml);
         domain.attachDevice(xml);
     }
 
@@ -245,6 +249,7 @@ public class OsOperateImpl implements OsOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
         String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
+        log.info("detachNic xml={}", xml);
         domain.detachDevice(xml);
     }
 
