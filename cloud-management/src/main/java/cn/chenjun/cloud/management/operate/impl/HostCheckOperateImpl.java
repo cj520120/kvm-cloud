@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
+import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.HostInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
@@ -10,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 
 /**
  * @author chenjun
@@ -28,7 +28,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
 
 
         HostEntity host = this.hostMapper.selectById(param.getHostId());
-        this.asyncInvoker(host, param, Constant.Command.HOST_INFO, new HashMap<>(0));
+        this.asyncInvoker(host, param, Constant.Command.HOST_INFO, NoneRequest.builder());
     }
 
     @Override

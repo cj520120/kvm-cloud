@@ -16,6 +16,5 @@ public class VolumeDownloadRequest {
     private String sourceUri;
     private String targetStorage;
     private String targetName;
-    private String targetVolume;
     private String targetType;
 }

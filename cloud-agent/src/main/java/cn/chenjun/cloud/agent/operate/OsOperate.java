@@ -27,7 +27,7 @@ public interface OsOperate {
      * @return
      * @throws Exception
      */
-    List<GuestInfo> listAllGuestInfo(Connect connect) throws Exception;
+    List<GuestInfo> listAllGuestInfo(Connect connect, NoneRequest request) throws Exception;
 
     /**
      * 批量获取客户机信息
@@ -57,7 +57,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void shutdown(Connect connect, GuestShutdownRequest request) throws Exception;
+    Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception;
 
     /**
      * 重启
@@ -66,7 +66,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void reboot(Connect connect, GuestRebootRequest request) throws Exception;
+    Void reboot(Connect connect, GuestRebootRequest request) throws Exception;
 
     /**
      * 挂载光驱
@@ -75,7 +75,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void attachCdRoom(Connect connect, OsCdRoom request) throws Exception;
+    Void attachCdRoom(Connect connect, OsCdRoom request) throws Exception;
 
     /**
      * 卸载光驱
@@ -84,7 +84,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void detachCdRoom(Connect connect, OsCdRoom request) throws Exception;
+    Void detachCdRoom(Connect connect, OsCdRoom request) throws Exception;
 
     /**
      * 挂载磁盘
@@ -93,7 +93,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void attachDisk(Connect connect, OsDisk request) throws Exception;
+    Void attachDisk(Connect connect, OsDisk request) throws Exception;
 
     /**
      * 卸载磁盘
@@ -102,7 +102,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void detachDisk(Connect connect, OsDisk request) throws Exception;
+    Void detachDisk(Connect connect, OsDisk request) throws Exception;
 
     /**
      * 挂载网卡
@@ -111,7 +111,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void attachNic(Connect connect, OsNic request) throws Exception;
+    Void attachNic(Connect connect, OsNic request) throws Exception;
 
     /**
      * 卸载网卡
@@ -120,7 +120,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void detachNic(Connect connect, OsNic request) throws Exception;
+    Void detachNic(Connect connect, OsNic request) throws Exception;
 
 
     /**
@@ -130,7 +130,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void qma(Connect connect, GuestQmaRequest request) throws Exception;
+    Void qma(Connect connect, GuestQmaRequest request) throws Exception;
 
     /**
      * 销毁
@@ -139,7 +139,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void destroy(Connect connect, GuestDestroyRequest request) throws Exception;
+    Void destroy(Connect connect, GuestDestroyRequest request) throws Exception;
 
     /**
      * 虚拟机迁移
@@ -148,5 +148,5 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    void migrate(Connect connect, GuestMigrateRequest request) throws Exception;
+    Void migrate(Connect connect, GuestMigrateRequest request) throws Exception;
 }

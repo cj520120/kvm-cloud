@@ -18,6 +18,6 @@ public class ThreadPoolConfig {
 
     @Bean
     public ThreadPoolExecutor threadPoolExecutor() {
-        return new ScheduledThreadPoolExecutor(config.getTaskThreadSize(), new BasicThreadFactory.Builder().namingPattern("job-executor-pool-%d").daemon(true).build());
+        return new ScheduledThreadPoolExecutor(Math.max(config.getTaskThreadSize(), 1), new BasicThreadFactory.Builder().namingPattern("job-executor-pool-%d").daemon(true).build());
     }
 }

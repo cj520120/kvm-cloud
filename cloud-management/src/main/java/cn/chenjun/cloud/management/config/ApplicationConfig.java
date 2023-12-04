@@ -32,6 +32,5 @@ public class ApplicationConfig {
     private int systemComponentCpu = 1;
     private long systemComponentMemory = 512 * 1024L;
     private int systemComponentCpuSpeed = 500;
-    private boolean enableVolumeBack;
     private boolean clearTemplateVolume;
 }

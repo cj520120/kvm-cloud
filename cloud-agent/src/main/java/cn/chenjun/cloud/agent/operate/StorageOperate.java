@@ -49,5 +49,5 @@ public interface StorageOperate {
      * @param request
      * @throws Exception
      */
-    void destroy(Connect connect, StorageDestroyRequest request) throws Exception;
+    Void destroy(Connect connect, StorageDestroyRequest request) throws Exception;
 }

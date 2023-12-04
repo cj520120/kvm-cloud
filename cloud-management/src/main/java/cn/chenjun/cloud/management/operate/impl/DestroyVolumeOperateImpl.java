@@ -40,8 +40,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
             HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             VolumeDestroyRequest request = VolumeDestroyRequest.builder()
                     .sourceStorage(storage.getName())
-                    .sourceVolume(volume.getPath())
-                    .sourceType(volume.getType())
+                    .sourceName(volume.getName())
                     .build();
             this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
         } else {

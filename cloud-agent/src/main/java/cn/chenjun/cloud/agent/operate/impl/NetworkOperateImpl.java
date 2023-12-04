@@ -29,11 +29,11 @@ public class NetworkOperateImpl implements NetworkOperate {
     private ApplicationConfig applicationConfig;
 
     @Override
-    public void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
+    public Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
         log.info("创建基础网络:{} type={}", request, applicationConfig.getNetworkType());
         List<String> networkNames = Arrays.asList(connect.listNetworks());
         if (!networkNames.contains(request.getBridge())) {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(3);
             map.put("name", request.getBridge());
             map.put("bridge", request.getBridge());
             map.put("type", applicationConfig.getNetworkType());
@@ -41,16 +41,18 @@ public class NetworkOperateImpl implements NetworkOperate {
             Jinjava jinjava = new Jinjava();
             connect.networkCreateXML(jinjava.render(xml, map));
         }
+        return null;
 
     }
 
     @Override
-    public void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
+    public Void createVlan(Connect connect, VlanNetwork vlan) {
         log.info("创建Vlan网络:{}", vlan);
+        return null;
     }
 
     @Override
-    public void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
+    public Void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
         log.info("销毁基础网络:{}", bridge);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
         if (!networkNames.contains(bridge.getBridge())) {
@@ -61,14 +63,15 @@ public class NetworkOperateImpl implements NetworkOperate {
 
             }
         }
+        return null;
 
 
     }
 
     @Override
-    public void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
+    public Void destroyVlan(Connect connect, VlanNetwork vlan) {
         log.info("销毁Vlan网络:{}", vlan);
+        return null;
     }
-
 
 }

@@ -37,6 +37,7 @@ public class OsOperateImpl implements OsOperate {
     @Autowired
     private ApplicationConfig applicationConfig;
 
+    @SuppressWarnings({"unchecked"})
     private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.Execute execute) throws LibvirtException {
         Gson gson = new Gson();
         Map<String, Object> map = new HashMap<>(2);
@@ -91,7 +92,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public List<GuestInfo> listAllGuestInfo(Connect connect) throws Exception {
+    public List<GuestInfo> listAllGuestInfo(Connect connect, NoneRequest request) throws Exception {
         List<GuestInfo> list = new ArrayList<>();
         int[] ids = connect.listDomains();
         for (int id : ids) {
@@ -132,7 +133,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
+    public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         while (true) {
             try {
                 Domain domain = this.findDomainByName(connect, request.getName());
@@ -155,11 +156,12 @@ public class OsOperateImpl implements OsOperate {
                 throw err;
             }
         }
+        return null;
 
     }
 
     @Override
-    public void reboot(Connect connect, GuestRebootRequest request) throws Exception {
+    public Void reboot(Connect connect, GuestRebootRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -173,21 +175,23 @@ public class OsOperateImpl implements OsOperate {
                 domain.reboot(1);
                 break;
         }
+        return null;
     }
 
     @Override
-    public void detachCdRoom(Connect connect, OsCdRoom request) throws Exception {
+    public Void detachCdRoom(Connect connect, OsCdRoom request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         String xml = DomainXmlUtil.buildCdXml(request);
         domain.updateDeviceFlags(xml, 1);
+        return null;
 
     }
 
     @Override
-    public void attachCdRoom(Connect connect, OsCdRoom request) throws Exception {
+    public Void attachCdRoom(Connect connect, OsCdRoom request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -195,10 +199,11 @@ public class OsOperateImpl implements OsOperate {
         String xml = DomainXmlUtil.buildCdXml(request);
         log.info("attachCdRoom xml={}", xml);
         domain.updateDeviceFlags(xml, 1);
+        return null;
     }
 
     @Override
-    public void attachDisk(Connect connect, OsDisk request) throws Exception {
+    public Void attachDisk(Connect connect, OsDisk request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -209,10 +214,11 @@ public class OsOperateImpl implements OsOperate {
         String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
         log.info("attachDisk xml={}", xml);
         domain.attachDevice(xml);
+        return null;
     }
 
     @Override
-    public void detachDisk(Connect connect, OsDisk request) throws Exception {
+    public Void detachDisk(Connect connect, OsDisk request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -223,10 +229,11 @@ public class OsOperateImpl implements OsOperate {
         String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
         log.info("detachDisk xml={}", xml);
         domain.detachDevice(xml);
+        return null;
     }
 
     @Override
-    public void attachNic(Connect connect, OsNic request) throws Exception {
+    public Void attachNic(Connect connect, OsNic request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -237,10 +244,11 @@ public class OsOperateImpl implements OsOperate {
         String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
         log.info("attachNic xml={}", xml);
         domain.attachDevice(xml);
+        return null;
     }
 
     @Override
-    public void detachNic(Connect connect, OsNic request) throws Exception {
+    public Void detachNic(Connect connect, OsNic request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -251,6 +259,7 @@ public class OsOperateImpl implements OsOperate {
         String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
         log.info("detachNic xml={}", xml);
         domain.detachDevice(xml);
+        return null;
     }
 
     @Override
@@ -302,24 +311,26 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @Override
-    public void qma(Connect connect, GuestQmaRequest request) throws Exception {
+    public Void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
         this.qmaExecute(domain, request);
+        return null;
     }
 
     @Override
-    public void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
+    public Void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             domain.destroy();
         }
+        return null;
     }
 
     @Override
-    public void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
+    public Void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -328,6 +339,7 @@ public class OsOperateImpl implements OsOperate {
         Connect toConnect = new Connect(String.format("qemu+tcp://%s/system", request.getHost()));
         long liveMigrationFlag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
         domain.migrate(toConnect, liveMigrationFlag, null, null, 0);
+        return null;
     }
 
     private Domain findDomainByName(Connect connect, String name) throws Exception {

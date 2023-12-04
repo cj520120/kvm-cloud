@@ -45,10 +45,9 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
             StorageEntity targetStorage = storageMapper.selectById(cloneVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceStorage(storage.getName())
-                    .sourceVolume(volume.getPath())
+                    .sourceName(volume.getName())
                     .targetStorage(targetStorage.getName())
                     .targetName(cloneVolume.getName())
-                    .targetVolume(cloneVolume.getPath())
                     .targetType(cloneVolume.getType())
 
                     .build();

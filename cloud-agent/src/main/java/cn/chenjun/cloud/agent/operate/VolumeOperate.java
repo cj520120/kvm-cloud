@@ -46,7 +46,7 @@ public interface VolumeOperate {
      * @param request
      * @throws Exception
      */
-    void destroy(Connect connect, VolumeDestroyRequest request) throws Exception;
+    Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception;
 
     /**
      * 克隆磁盘

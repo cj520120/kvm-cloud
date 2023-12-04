@@ -57,7 +57,7 @@
             <driver name="qemu"/>
             <target dev="hda" bus="ide"/>
             {% if cd.storage.type == 'nfs' %}
-            <source file="{{cd.storage.path}}/{{cd.name}}"/>
+            <source pool="{{cd.storage.name}}" volume="{{cd.name}}"/>
             {% elif cd.storage.type == 'glusterfs' %}
             <source protocol="gluster" name="{{cd.storage.param.path}}/{{cd.name}}">
                 <host name="{{cd.storage.param.uri}}"/>
@@ -72,7 +72,7 @@
             <target dev="{{disk.dev}}" bus="{{disk.bus}}"/>
             <driver name="qemu" type="{{disk.volumeType}}" cache="none" aio="native"/>
             {% if disk.storage.type == 'nfs' %}
-            <source file="{{disk.storage.path}}/{{disk.name}}"/>
+            <source pool="{{disk.storage.name}}" volume="{{disk.name}}"/>
             {% elif disk.storage.type == 'glusterfs' %}
             <source protocol="gluster" name="{{disk.storage.param.path}}/{{disk.name}}">
                 <host name="{{disk.storage.param.uri}}"/>

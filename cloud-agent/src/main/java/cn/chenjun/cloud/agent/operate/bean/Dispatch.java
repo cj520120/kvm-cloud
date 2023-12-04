@@ -1,9 +1,11 @@
-package cn.chenjun.cloud.common.bean;
+package cn.chenjun.cloud.agent.operate.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.lang.reflect.Type;
 
 /**
  * @author chenjun
@@ -12,7 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VolumeInfoRequest {
-    private String sourceName;
-    private String sourceStorage;
+public class Dispatch<T, V> {
+    private Type paramType;
+    private Consumer<T, V> consumer;
+
 }

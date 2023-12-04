@@ -49,10 +49,9 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceStorage(storage.getName())
-                    .sourceVolume(volume.getPath())
+                    .sourceName(volume.getName())
                     .targetStorage(targetStorage.getName())
                     .targetName(targetVolume.getName())
-                    .targetVolume(targetVolume.getPath())
                     .targetType(targetVolume.getType())
 
                     .build();

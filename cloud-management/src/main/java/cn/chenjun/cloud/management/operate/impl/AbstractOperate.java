@@ -114,6 +114,9 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         String response = responseEntity.getBody();
         ResultUtil<Void> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<Void>>() {
         }.getType());
+        if (resultUtil == null) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "请求出错.response=" + response);
+        }
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
         }

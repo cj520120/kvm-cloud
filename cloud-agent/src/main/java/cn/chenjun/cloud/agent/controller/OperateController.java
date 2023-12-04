@@ -2,7 +2,6 @@ package cn.chenjun.cloud.agent.controller;
 
 import cn.chenjun.cloud.agent.annotation.SignRequire;
 import cn.chenjun.cloud.agent.operate.OperateDispatch;
-import cn.chenjun.cloud.agent.operate.VolumeOperate;
 import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class OperateController {
     @Autowired
     private OperateDispatch dispatch;
-
-    @Autowired
-    private VolumeOperate volumeOperate;
     @Autowired
     private ClientService clientService;
 

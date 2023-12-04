@@ -44,20 +44,17 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
             this.templateVolumeMapper.deleteBatchIds(volumes.stream().map(TemplateVolumeEntity::getTemplateVolumeId).collect(Collectors.toSet()));
         }
         this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
-        if (this.applicationConfig.isClearTemplateVolume() && !this.applicationConfig.isEnableVolumeBack()) {
-            for (TemplateVolumeEntity volume : volumes) {
-                StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-                if (storage != null) {
-                    HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
-                    VolumeDestroyRequest request = VolumeDestroyRequest.builder()
-                            .sourceStorage(storage.getName())
-                            .sourceVolume(volume.getPath())
-                            .sourceType(volume.getType())
-                            .build();
-                    this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
-                }
-                templateVolumeMapper.deleteById(volume);
+        for (TemplateVolumeEntity volume : volumes) {
+            StorageEntity storage = storageMapper.selectById(volume.getStorageId());
+            if (storage != null) {
+                HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+                VolumeDestroyRequest request = VolumeDestroyRequest.builder()
+                        .sourceStorage(storage.getName())
+                        .sourceName(volume.getName())
+                        .build();
+                this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
             }
+            templateVolumeMapper.deleteById(volume);
         }
     }
 

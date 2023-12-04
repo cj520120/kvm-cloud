@@ -3,7 +3,6 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.operate.VolumeOperate;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -19,7 +18,6 @@ import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
 import org.libvirt.StorageVolInfo;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.StringReader;
@@ -33,30 +31,29 @@ import java.util.stream.Collectors;
 @Slf4j
 public class VolumeOperateImpl implements VolumeOperate {
     @Synchronized
-    private StoragePool getStorage(Connect connect, String name) throws Exception {
-        StoragePool storagePool = connect.storagePoolLookupByName(name);
-        if (storagePool != null) {
+    private StoragePool getStorage(Connect connect, String name) {
+
+
+        try {
+            StoragePool storagePool = connect.storagePoolLookupByName(name);
             try {
                 storagePool.refresh(0);
             } catch (Exception ignored) {
 
             }
+            return storagePool;
+        } catch (Exception ignored) {
+            return null;
         }
-        return storagePool;
     }
 
     @Override
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
         StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
-        String[] names = storagePool.listVolumes();
-        StorageVol findVol = null;
-        for (String name : names) {
-            StorageVol storageVol = storagePool.storageVolLookupByName(name);
-            if (Objects.equals(storageVol.getPath(), request.getSourceVolume())) {
-                findVol = storageVol;
-                break;
-            }
+        if (storagePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
         }
+        StorageVol findVol = this.findVol(storagePool, request.getSourceName());
         if (findVol == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在:" + request.getSourceName());
         }
@@ -80,30 +77,31 @@ public class VolumeOperateImpl implements VolumeOperate {
         for (Map.Entry<String, List<VolumeInfoRequest>> entry : list.entrySet()) {
             String storage = entry.getKey();
             Map<String, VolumeInfo> map = new HashMap<>(4);
-            Set<String> volumePaths = entry.getValue().stream().map(VolumeInfoRequest::getSourceVolume).collect(Collectors.toSet());
+            Set<String> volumeNameList = entry.getValue().stream().map(VolumeInfoRequest::getSourceName).collect(Collectors.toSet());
             StoragePool storagePool = this.getStorage(connect, storage);
-
-            String[] names = storagePool.listVolumes();
-            for (String name : names) {
-                StorageVol storageVol = storagePool.storageVolLookupByName(name);
-                if (volumePaths.contains(storageVol.getPath())) {
-                    StorageVolInfo storageVolInfo = storageVol.getInfo();
-                    VolumeInfo volume = VolumeInfo.builder().storage(storage)
-                            .name("")
-                            .path(storageVol.getPath())
-                            .type(storageVolInfo.type.toString())
-                            .capacity(storageVolInfo.capacity)
-                            .allocation(storageVolInfo.allocation)
-                            .build();
-                    this.init(storageVol, volume);
-                    map.put(storageVol.getPath(), volume);
+            if (storagePool != null) {
+                String[] names = storagePool.listVolumes();
+                for (String name : names) {
+                    if (volumeNameList.contains(name)) {
+                        StorageVol storageVol = storagePool.storageVolLookupByName(name);
+                        StorageVolInfo storageVolInfo = storageVol.getInfo();
+                        VolumeInfo volume = VolumeInfo.builder().storage(storage)
+                                .name("")
+                                .path(storageVol.getPath())
+                                .type(storageVolInfo.type.toString())
+                                .capacity(storageVolInfo.capacity)
+                                .allocation(storageVolInfo.allocation)
+                                .build();
+                        this.init(storageVol, volume);
+                        map.put(storageVol.getPath(), volume);
+                    }
                 }
             }
             result.put(storage, map);
         }
         List<VolumeInfo> modelList = new ArrayList<>();
         for (VolumeInfoRequest request : batchRequest) {
-            VolumeInfo model = result.get(request.getSourceStorage()).get(request.getSourceVolume());
+            VolumeInfo model = result.get(request.getSourceStorage()).get(request.getSourceName());
             if (model != null) {
                 model.setName(request.getSourceName());
             }
@@ -114,42 +112,23 @@ public class VolumeOperateImpl implements VolumeOperate {
 
     @Override
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
-
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(4);
         map.put("name", request.getTargetName());
         map.put("capacity", request.getTargetSize());
         map.put("allocation", request.getTargetSize());
         map.put("format", request.getTargetType());
-
-        if (!StringUtils.isEmpty(request.getParentVolume())) {
-            boolean checkParentSupport = request.getParentType().equals(Constant.VolumeType.QCOW) || request.getParentType().equals(Constant.VolumeType.QCOW2) || request.getParentType().equals(Constant.VolumeType.RAW);
-            boolean checkChildSupport = request.getTargetType().equals(Constant.VolumeType.QCOW) || request.getTargetType().equals(Constant.VolumeType.QCOW2);
-            boolean checkSupport = checkParentSupport && checkChildSupport;
-            if (!checkSupport) {
-                VolumeCloneRequest volumeCloneRequest = VolumeCloneRequest.builder()
-                        .sourceStorage(request.getParentStorage())
-                        .sourceVolume(request.getParentVolume())
-                        .targetStorage(request.getTargetStorage())
-                        .targetVolume(request.getTargetVolume())
-                        .targetName(request.getTargetName())
-                        .targetType(request.getTargetType())
-                        .build();
-                return this.clone(connect, volumeCloneRequest);
-            }
-            Map<String, Object> backMap = new HashMap<>();
-            backMap.put("path", request.getParentVolume());
-            backMap.put("format", request.getParentType());
-            map.put("back", backMap);
-
-        }
         String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
         Jinjava jinjava = new Jinjava();
         xml = jinjava.render(xml, map);
         log.info("create volume xml={}", xml);
-        FileUtil.mkParentDirs(request.getTargetVolume());
-        FileUtil.del(request.getTargetVolume());
         StoragePool storagePool = this.getStorage(connect, request.getTargetStorage());
-        storagePool.refresh(0);
+        if (storagePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
+        }
+        StorageVol targetVol = this.findVol(storagePool, request.getTargetName());
+        if (targetVol != null) {
+            targetVol.delete(0);
+        }
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
         StorageVolInfo storageVolInfo = storageVol.getInfo();
         VolumeInfo volumeInfo = VolumeInfo.builder().storage(request.getTargetStorage())
@@ -164,25 +143,25 @@ public class VolumeOperateImpl implements VolumeOperate {
 
 
     @Override
-    public void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
+    public Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
         StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
-        String[] names = storagePool.listVolumes();
-        for (String name : names) {
-            StorageVol storageVol = storagePool.storageVolLookupByName(name);
-            if (Objects.equals(storageVol.getPath(), request.getSourceVolume())) {
-                storageVol.delete(0);
-                break;
-            }
+        if (storagePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
         }
+        StorageVol storageVol = this.findVol(storagePool, request.getSourceName());
+        if (storageVol != null) {
+            storageVol.delete(0);
+        }
+        return null;
     }
 
     @Override
     public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
 
         StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
-        StorageVol findVol = this.findVol(storagePool, request.getSourceVolume());
+        StorageVol findVol = this.findVol(storagePool, request.getSourceName());
         if (findVol == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘不存在:" + request.getSourceVolume());
+            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘不存在:" + request.getSourceName());
         }
         findVol.resize(request.getSize(), 0);
         StorageVolInfo storageVolInfo = findVol.getInfo();
@@ -201,10 +180,9 @@ public class VolumeOperateImpl implements VolumeOperate {
     public VolumeInfo snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
-                .sourceVolume(request.getSourceVolume())
+                .sourceName(request.getSourceName())
                 .targetName(request.getTargetName())
                 .targetStorage(request.getTargetStorage())
-                .targetVolume(request.getTargetVolume())
                 .targetType(request.getTargetType())
                 .build());
     }
@@ -214,23 +192,37 @@ public class VolumeOperateImpl implements VolumeOperate {
 
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
-                .sourceVolume(request.getSourceVolume())
+                .sourceName(request.getSourceName())
                 .targetName(request.getTargetName())
                 .targetStorage(request.getTargetStorage())
-                .targetVolume(request.getTargetVolume())
                 .targetType(request.getTargetType())
                 .build());
     }
 
     @Override
-    public VolumeInfo download(Connect connect, VolumeDownloadRequest request) throws Exception {
-        FileUtil.mkParentDirs(request.getTargetVolume());
-        String tempFile = request.getTargetVolume() + ".data";
+    public VolumeInfo download(Connect connect, VolumeDownloadRequest request) {
+        StoragePool targetStoragePool = this.getStorage(connect, request.getTargetStorage());
+        if (targetStoragePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
+        }
+        File tempFile = FileUtil.createTempFile();
+        File targetFile = null;
         try {
-            FileUtil.del(tempFile);
-            HttpUtil.downloadFile(request.getSourceUri(), new File(tempFile));
-            FileUtil.copy(tempFile, request.getTargetVolume(), true);
-            return this.getInfo(connect, VolumeInfoRequest.builder().sourceStorage(request.getTargetStorage()).sourceVolume(request.getTargetVolume()).sourceName(request.getTargetName()).build());
+            HttpUtil.downloadFile(request.getSourceUri(), tempFile);
+            VolumeInfo volumeInfo = this.create(connect, VolumeCreateRequest.builder()
+                    .targetStorage(request.getTargetStorage())
+                    .targetName(request.getTargetName())
+                    .targetSize(tempFile.length() / 1024)
+                    .targetType(request.getTargetType()).build());
+            targetFile = new File(volumeInfo.getPath());
+            FileUtil.copy(tempFile, new File(volumeInfo.getPath()), true);
+            return this.getInfo(connect, VolumeInfoRequest.builder().sourceStorage(request.getTargetStorage()).sourceName(request.getTargetName()).build());
+        } catch (Exception err) {
+            if (targetFile != null) {
+                FileUtil.del(targetFile);
+            }
+            log.error("下载导入模版出错.", err);
+            throw new CodeException(ErrorCode.SERVER_ERROR, "下载文件出错:" + err.getMessage());
         } finally {
             FileUtil.del(tempFile);
         }
@@ -240,51 +232,45 @@ public class VolumeOperateImpl implements VolumeOperate {
     public VolumeInfo migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceStorage(request.getSourceStorage())
-                .sourceVolume(request.getSourceVolume())
+                .sourceName(request.getSourceName())
                 .targetName(request.getTargetName())
                 .targetStorage(request.getTargetStorage())
-                .targetVolume(request.getTargetVolume())
                 .targetType(request.getTargetType())
                 .build());
     }
 
-    private StorageVol findVol(StoragePool storagePool, String volume) throws Exception {
-        String[] names = storagePool.listVolumes();
-        StorageVol sourceVol = null;
-        for (String name : names) {
-            try {
-                StorageVol storageVol = storagePool.storageVolLookupByName(name);
-                if (volume.startsWith(storageVol.getPath())) {
-                    if (Objects.equals(volume, storageVol.getPath())) {
-                        sourceVol = storageVol;
-                    }
-                    break;
-                }
-            } catch (Exception err) {
-                //do
-            }
+    private StorageVol findVol(StoragePool storagePool, String volume) {
+        try {
+            return storagePool.storageVolLookupByName(volume);
+        } catch (Exception err) {
+            return null;
         }
-        return sourceVol;
     }
 
     @Override
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
         StoragePool sourceStoragePool = this.getStorage(connect, request.getSourceStorage());
+        if (sourceStoragePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
+        }
         StoragePool targetStoragePool = this.getStorage(connect, request.getTargetStorage());
-        StorageVol sourceVol = this.findVol(sourceStoragePool, request.getSourceVolume());
-
-        FileUtil.mkParentDirs(request.getTargetVolume());
-        FileUtil.del(request.getTargetVolume());
+        if (targetStoragePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
+        }
+        StorageVol sourceVol = this.findVol(sourceStoragePool, request.getSourceName());
+        StorageVol targetVol = this.findVol(targetStoragePool, request.getTargetName());
+        if (targetVol != null) {
+            targetVol.delete(0);
+        }
         String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(2);
         map.put("name", request.getTargetName());
         map.put("format", request.getTargetType());
         Jinjava jinjava = new Jinjava();
         xml = jinjava.render(xml, map);
         log.info("clone volume xml={}", xml);
-        StorageVol targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
+        targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         StorageVolInfo storageVolInfo = targetVol.getInfo();
-
         VolumeInfo volumeInfo = VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .type(storageVolInfo.type.toString())

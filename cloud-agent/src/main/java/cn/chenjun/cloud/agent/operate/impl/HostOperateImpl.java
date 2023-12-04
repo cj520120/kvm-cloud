@@ -3,7 +3,6 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.operate.HostOperate;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
-import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.*;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
@@ -28,8 +27,6 @@ public class HostOperateImpl implements HostOperate {
     private NetworkOperate networkOperate;
     @Autowired
     private StorageOperate storageOperate;
-    @Autowired
-    private ClientService clientService;
 
     private static String getNodeText(Document doc, String path, String defaultValue) {
         Node node = doc.selectSingleNode(path);
@@ -49,6 +46,7 @@ public class HostOperateImpl implements HostOperate {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     private static String getEmulator(String xml, String hostArch) throws SAXException, DocumentException {
         String emulator = null;
         try (StringReader sr = new StringReader(xml)) {
@@ -74,7 +72,6 @@ public class HostOperateImpl implements HostOperate {
                     Object emulatorNode = node.selectObject("arch/emulator");
                     if (emulatorNode instanceof Element) {
                         emulator = ((Element) emulatorNode).getTextTrim();
-                        //break;
                     }
                     List<Element> domainNodes = node.selectNodes("arch/domain");
                     for (Element domainNode : domainNodes) {
@@ -94,7 +91,7 @@ public class HostOperateImpl implements HostOperate {
     }
 
     @Override
-    public HostInfo getHostInfo(Connect connect) throws Exception {
+    public HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception {
         OsInfo osInfo = SystemUtil.getOsInfo();
         String xml = connect.getCapabilities();
         String arch = getArch(xml);
@@ -136,6 +133,6 @@ public class HostOperateImpl implements HostOperate {
                 this.networkOperate.createVlan(connect, vlanNetwork);
             }
         }
-        return this.getHostInfo(connect);
+        return this.getHostInfo(connect, null);
     }
 }

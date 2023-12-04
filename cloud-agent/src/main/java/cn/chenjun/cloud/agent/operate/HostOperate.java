@@ -2,6 +2,7 @@ package cn.chenjun.cloud.agent.operate;
 
 import cn.chenjun.cloud.common.bean.HostInfo;
 import cn.chenjun.cloud.common.bean.InitHostRequest;
+import cn.chenjun.cloud.common.bean.NoneRequest;
 import org.libvirt.Connect;
 
 /**
@@ -15,7 +16,7 @@ public interface HostOperate {
      * @return
      * @throws Exception
      */
-    HostInfo getHostInfo(Connect connect) throws Exception;
+    HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception;
 
     /**
      * 初始化主机信息

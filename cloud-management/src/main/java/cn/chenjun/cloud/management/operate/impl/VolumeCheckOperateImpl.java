@@ -39,7 +39,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
         if (volumeList.isEmpty()) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
-            List<VolumeInfoRequest> requests = volumeList.stream().map(t -> VolumeInfoRequest.builder().sourceName(t.getName()).sourceVolume(t.getPath()).sourceStorage(storage.getName()).build()).collect(Collectors.toList());
+            List<VolumeInfoRequest> requests = volumeList.stream().map(t -> VolumeInfoRequest.builder().sourceName(t.getName()).sourceStorage(storage.getName()).build()).collect(Collectors.toList());
             HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_VOLUME_INFO, requests);
         }

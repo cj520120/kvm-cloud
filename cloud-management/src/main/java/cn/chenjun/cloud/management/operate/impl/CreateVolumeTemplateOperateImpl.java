@@ -43,10 +43,9 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeCreateTemplateRequest request = VolumeCreateTemplateRequest.builder()
                     .sourceStorage(storage.getName())
-                    .sourceVolume(volume.getPath())
+                    .sourceName(volume.getName())
                     .targetStorage(targetStorage.getName())
                     .targetName(targetVolume.getName())
-                    .targetVolume(targetVolume.getPath())
                     .targetType(targetVolume.getType())
                     .build();
 

@@ -13,12 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VolumeCreateRequest {
-    private String parentStorage;
-    private String parentVolume;
-    private String parentType;
     private String targetName;
     private String targetStorage;
-    private String targetVolume;
     private String targetType;
     private long targetSize;
 }

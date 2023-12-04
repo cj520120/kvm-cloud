@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
+import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -33,7 +33,7 @@ public class SyncHostTaskIdOperateImpl extends AbstractOperate<SyncHostTaskIdOpe
     @Override
     public void operate(SyncHostTaskIdOperate param) {
         HostEntity host = this.hostMapper.selectById(param.getHostId());
-        this.asyncInvoker(host, param, Constant.Command.CHECK_TASK, new HashMap<>(0));
+        this.asyncInvoker(host, param, Constant.Command.CHECK_TASK, NoneRequest.builder());
     }
 
     @Override

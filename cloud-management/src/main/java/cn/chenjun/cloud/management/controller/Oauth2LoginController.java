@@ -62,7 +62,9 @@ public class Oauth2LoginController {
         Map<String, Object> token = GsonBuilderUtil.create().fromJson(response.getBody(), new TypeToken<Map<String, Object>>() {
         }.getType());
         headers = new HttpHeaders();
-        headers.set(HttpHeaders.AUTHORIZATION, String.format("%s %s", token.get("token_type"), token.get("access_token")));
+        if (token != null) {
+            headers.set(HttpHeaders.AUTHORIZATION, String.format("%s %s", token.get("token_type"), token.get("access_token")));
+        }
         response = restTemplate.exchange(this.config.getUserUri(), HttpMethod.GET, new HttpEntity<>(null, headers), String.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message(response.getBody()).build();
@@ -70,7 +72,11 @@ public class Oauth2LoginController {
         Object id = GsonBuilderUtil.create().<Map<String, Object>>fromJson(response.getBody(), new TypeToken<Map<String, Object>>() {
         }.getType());
         for (String name : this.config.getIdPath()) {
-            id = ((Map<String, Object>) id).get(name);
+            if (id != null) {
+                id = ((Map<String, Object>) id).get(name);
+            }else {
+                break;
+            }
         }
         if (id == null) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message("未找到用户唯一标识，请检查系统配置").build();

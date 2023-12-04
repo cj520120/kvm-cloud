@@ -15,7 +15,7 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
+    Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
 
     /**
      * 创建Vlan网络
@@ -24,7 +24,7 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void createVlan(Connect connect, VlanNetwork request) throws Exception;
+    Void createVlan(Connect connect, VlanNetwork request) throws Exception;
 
     /**
      * 删除基础网络信息
@@ -33,7 +33,7 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void destroyBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
+    Void destroyBasic(Connect connect, BasicBridgeNetwork request) throws Exception;
 
     /**
      * 删除Vlan网络信息
@@ -42,5 +42,5 @@ public interface NetworkOperate {
      * @param request
      * @throws Exception
      */
-    void destroyVlan(Connect connect, VlanNetwork request) throws Exception;
+    Void destroyVlan(Connect connect, VlanNetwork request) throws Exception;
 }

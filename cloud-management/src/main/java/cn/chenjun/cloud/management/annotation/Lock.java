@@ -26,17 +26,4 @@ public @interface Lock {
      */
     boolean write() default true;
 
-    /**
-     * 超时时间
-     *
-     * @return
-     */
-    int timeout() default 5;
-
-    /**
-     * 超时单位
-     *
-     * @return
-     */
-    TimeUnit timeUnit() default TimeUnit.SECONDS;
 }

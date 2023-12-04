@@ -51,7 +51,6 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
                 .sourceUri(template.getUri())
                 .targetStorage(targetStorage.getName())
                 .targetName(templateVolume.getName())
-                .targetVolume(templateVolume.getPath())
                 .targetType(templateVolume.getType())
                 .build();
         this.asyncInvoker(host, param, Constant.Command.VOLUME_DOWNLOAD, request);

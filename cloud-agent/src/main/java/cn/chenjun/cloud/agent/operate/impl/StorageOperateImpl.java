@@ -63,6 +63,22 @@ public class StorageOperateImpl implements StorageOperate {
         return list;
     }
 
+    private static Map<String, Object> buildStorageContext(StorageCreateRequest request, String nfsUri, String nfsPath) {
+        Map<String, Object> map = new HashMap<>(4);
+        map.put("name", request.getName());
+        map.put("host", nfsUri);
+        map.put("path", nfsPath);
+        map.put("mount", request.getMountPath());
+        if (request.getType().equals(Constant.StorageType.GLUSTERFS)) {
+            map.put("format", "glusterfs");
+        } else if (request.getType().equals(Constant.StorageType.NFS)) {
+            map.put("format", "nfs");
+        } else {
+            map.put("format", "auto");
+        }
+        return map;
+    }
+
     @Override
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
         switch (request.getType()) {
@@ -85,16 +101,7 @@ public class StorageOperateImpl implements StorageOperate {
             String nfsPath = request.getParam().get("path").toString();
             FileUtil.mkdir(request.getMountPath());
             String xml = ResourceUtil.readUtf8Str("tpl/storage.xml");
-            Map<String, Object> map = new HashMap<>(0);
-            map.put("name", request.getName());
-            map.put("host", nfsUri);
-            map.put("path", nfsPath);
-            map.put("mount", request.getMountPath());
-            if (request.getType().equals(Constant.StorageType.GLUSTERFS)) {
-                map.put("format", "glusterfs");
-            } else {
-                map.put("format", "auto");
-            }
+            Map<String, Object> map = buildStorageContext(request, nfsUri, nfsPath);
             Jinjava jinjava = new Jinjava();
             xml = jinjava.render(xml, map);
             log.info("createStorage xml={}", xml);
@@ -111,12 +118,13 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @Override
-    public void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
+    public Void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
 
         StoragePool storagePool = this.findStorage(connect, request.getName());
         if (storagePool != null) {
             storagePool.destroy();
         }
+        return null;
     }
 
     private StoragePool findStorage(Connect connect, String name) throws Exception {

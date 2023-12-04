@@ -43,7 +43,6 @@ public abstract class AbstractComponentService extends AbstractService {
 
     /**
      * 创建系统组件
-     * @param networkId
      */
     @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
@@ -57,8 +56,8 @@ public abstract class AbstractComponentService extends AbstractService {
         }
         List<ComponentEntity> componentList = componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq("network_id", networkId).eq("component_type", this.getComponentType()));
         if (componentList.size() > 1) {
-            /**
-             * 如果创建的虚拟机数量大于1，则删除后返回，等待下次检测
+            /*
+              如果创建的虚拟机数量大于1，则删除后返回，等待下次检测
              */
             ComponentEntity component = componentList.get(componentList.size() - 1);
             guestService.destroyGuest(component.getGuestId());
@@ -191,7 +190,7 @@ public abstract class AbstractComponentService extends AbstractService {
 
     /**
      * 获取组件启动脚本
-     *
+     * @param networkId
      * @param guestId
      * @return
      */

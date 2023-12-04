@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
+import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
@@ -15,7 +16,10 @@ import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -42,7 +46,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         if (!Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "主机当前不在线"));
         }
-        this.asyncInvoker(host, param, Constant.Command.ALL_GUEST_INFO, new HashMap<>(0));
+        this.asyncInvoker(host, param, Constant.Command.ALL_GUEST_INFO, NoneRequest.builder());
     }
 
     @Override

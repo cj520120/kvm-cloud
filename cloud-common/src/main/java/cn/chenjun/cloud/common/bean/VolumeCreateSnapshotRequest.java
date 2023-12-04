@@ -14,10 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VolumeCreateSnapshotRequest {
     private String sourceStorage;
-    private String sourceVolume;
+    private String sourceName;
     private String targetName;
     private String targetStorage;
-    private String targetVolume;
     private String targetType;
 
 }

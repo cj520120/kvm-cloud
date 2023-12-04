@@ -11,6 +11,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author chenjun
  */
@@ -29,11 +31,10 @@ public class LockAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Lock lock = signature.getMethod().getAnnotation(Lock.class);
         String key = lock.value();
-        RReadWriteLock readWriteLock = redisson.getReadWriteLock(key);
-        RLock rLock = lock.write() ? readWriteLock.writeLock() : readWriteLock.readLock();
+        RLock rLock = redisson.getLock(key);
         boolean isLocked = false;
         try {
-            rLock.lock(lock.timeout(), lock.timeUnit());
+            rLock.lock(1, TimeUnit.MINUTES);
             isLocked = true;
             return joinPoint.proceed();
         } finally {
