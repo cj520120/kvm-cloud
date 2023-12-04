@@ -3,11 +3,7 @@ app:
   systemComponentNetworkDriver: virtio
   systemComponentCpu: 1
   systemComponentMemory: 524288
-  systemComponentCpuSpeed: 500
-  #通过模版创建是否启用backing file,为false时通过clone磁盘实现,如果磁盘空间充足，可修改为false，该值为false时通过模版创建系统耗时会变长
-  enableVolumeBack: false
-  #删除模版时是否自动删除磁盘文件，enableVolumeBack为false时有效，请确认当前所有磁盘没有依赖模版文件，否则删除后无法启动
-  clearTemplateVolume: true
+  systemComponentCpuSpeed: 0
   manager-uri: http://localhost:8080/
   over-cpu: 4.0
   over-memory: 2.0
