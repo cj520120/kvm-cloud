@@ -145,6 +145,7 @@ public class OperateDispatchImpl implements OperateDispatch {
                     Consumer consumer = dispatch.getConsumer();
                     Object param = StringUtils.isEmpty(data) ? null : GsonBuilderUtil.create().fromJson(data, dispatch.getParamType());
                     result = consumer.dispatch(connect, param);
+                    log.info("dispatch command={} param={} result={}", command, data, result);
                     break;
 
             }
