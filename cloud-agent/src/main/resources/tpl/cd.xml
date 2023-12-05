@@ -2,7 +2,7 @@
     <driver name="qemu"/>
     <target dev="hda" bus="ide"/>
     {% if cd.storage.type == 'nfs' %}
-    <source pool="{{disk.storage.name}}" volume="{{disk.name}}"/>
+    <source file="{{cd.storage.path}}/{{cd.name}}"/>
     {% elif cd.storage.type == 'glusterfs' %}
     <source protocol="gluster" name="{{cd.storage.param.path}}/{{cd.name}}">
         <host name="{{cd.storage.param.uri}}"/>

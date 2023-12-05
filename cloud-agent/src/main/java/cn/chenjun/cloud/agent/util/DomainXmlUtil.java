@@ -86,7 +86,7 @@ public class DomainXmlUtil {
                     map.put("type", "network");
                     break;
                 case Constant.StorageType.NFS:
-                    map.put("type", "volume");
+                    map.put("type", "file");
                     break;
                 default:
                     throw new CodeException(ErrorCode.BASE_STORAGE_ERROR, "不支持的存储池类型");
@@ -128,7 +128,7 @@ public class DomainXmlUtil {
                 map.put("type", "network");
                 break;
             case Constant.StorageType.NFS:
-                map.put("type", "volume");
+                map.put("type", "file");
                 break;
             default:
                 throw new CodeException(ErrorCode.BASE_STORAGE_ERROR, "不支持的存储池类型");
