@@ -94,7 +94,7 @@
 	</div>
 </template>
 <script>
-import { getTemplateList, getTemplateInfo, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
+import { getTemplateList, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 export default {
@@ -120,12 +120,17 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	methods: {
+		async reload_page() {
+			this.init_view()
+		},
 		async init_view() {
 			this.data_loading = true
 			await getTemplateList()
@@ -164,16 +169,15 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 5) {
-				getTemplateInfo({ templateId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_template_info(res.data)
-					} else if (res.code == 5000001) {
-						let findIndex = this.templates.findIndex((v) => v.templateId === notify.id)
-						if (findIndex >= 0) {
-							this.templates.splice(findIndex, 1)
-						}
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_template_info(res.data)
+				} else if (res.code == 5000001) {
+					let findIndex = this.templates.findIndex((v) => v.templateId === notify.id)
+					if (findIndex >= 0) {
+						this.templates.splice(findIndex, 1)
 					}
-				})
+				}
 			}
 		},
 		create_template_click() {

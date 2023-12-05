@@ -11,7 +11,6 @@ import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,23 +39,23 @@ public class TemplateService extends AbstractService {
         return guestMapper.selectById(guestDisk.getGuestId());
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<List<TemplateModel>> listTemplate() {
         List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<>());
         List<TemplateModel> models = templateList.stream().map(this::initTemplateModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
         TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id", templateId));
         if (template == null) {
-            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+            return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
         }
         return ResultUtil.success(this.initTemplateModel(template));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createTemplate(String name, String uri, int templateType, String volumeType) {
         if (StringUtils.isEmpty(name)) {
@@ -74,7 +73,7 @@ public class TemplateService extends AbstractService {
         return this.downloadTemplate(template.getTemplateId());
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> downloadTemplate(int templateId) {
         StorageEntity storage = allocateService.allocateStorage(0);
@@ -108,7 +107,7 @@ public class TemplateService extends AbstractService {
         }
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
@@ -159,7 +158,7 @@ public class TemplateService extends AbstractService {
 
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> destroyTemplate(int templateId) {
         TemplateEntity template = this.templateMapper.selectById(templateId);

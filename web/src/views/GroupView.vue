@@ -26,7 +26,7 @@
 	</div>
 </template>
 <script>
-import { getGroupList, destroyGroup, getGroupInfo } from '@/api/api'
+import { getGroupList, destroyGroup } from '@/api/api'
 import CreateGroupComponent from '@/components/CreateGroupComponent'
 import ModifyGroupComponent from '@/components/ModifyGroupComponent'
 import Notify from '@/api/notify'
@@ -51,12 +51,17 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	methods: {
+		async reload_page() {
+			this.init_view()
+		},
 		async init_view() {
 			this.data_loading = true
 			await getGroupList()
@@ -76,22 +81,20 @@ export default {
 			} else {
 				this.groups.push(group)
 			}
-			this.$refs.GroupInfoComponentRef.init_group(group)
 			this.$forceUpdate()
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 9) {
-				getGroupInfo({ groupId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_group(res.data)
-					} else if (res.code == 10000001) {
-						let findIndex = this.groups.findIndex((v) => v.groupId === notify.id)
-						if (findIndex >= 0) {
-							this.groups.splice(findIndex, 1)
-						}
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_group(res.data)
+				} else if (res.code == 10000001) {
+					let findIndex = this.groups.findIndex((v) => v.groupId === notify.id)
+					if (findIndex >= 0) {
+						this.groups.splice(findIndex, 1)
 					}
-					this.$forceUpdate()
-				})
+				}
+				this.$forceUpdate()
 			}
 		},
 		show_group_list() {

@@ -11,7 +11,6 @@ import cn.chenjun.cloud.management.model.SnapshotModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class VolumeService extends AbstractService {
     }
 
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
         List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
         diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
@@ -77,14 +76,14 @@ public class VolumeService extends AbstractService {
 
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
         List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn("volume_id", volumeIds));
@@ -92,17 +91,17 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
+            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
         }
         return ResultUtil.success(this.initVolume(volume));
     }
 
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, String volumeType, long volumeSize) {
         if (StringUtils.isEmpty(description)) {
@@ -134,7 +133,7 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(model);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId, String volumeType) {
         if (StringUtils.isEmpty(volumeType)) {
@@ -182,7 +181,7 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) {
 
@@ -203,7 +202,7 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(this.initVolume(volume));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
         if (StringUtils.isEmpty(volumeType)) {
@@ -251,7 +250,7 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<VolumeModel>> batchDestroyVolume(List<Integer> volumeIds) {
         List<VolumeModel> models = new ArrayList<>(volumeIds.size());
@@ -265,7 +264,7 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
@@ -294,7 +293,7 @@ public class VolumeService extends AbstractService {
         }
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<SnapshotModel>> listSnapshot() {
         List<SnapshotVolumeEntity> snapshotVolumeList = this.snapshotVolumeMapper.selectList(new QueryWrapper<>());
@@ -302,18 +301,18 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> getSnapshotInfo(int snapshotVolumeId) {
         SnapshotVolumeEntity snapshotVolume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);
         if (snapshotVolume == null) {
-            throw new CodeException(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
+            return ResultUtil.error(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
         }
         this.eventService.publish(NotifyData.<Void>builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
         return ResultUtil.success(this.initSnapshot(snapshotVolume));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId, String snapshotName, String snapshotVolumeType) {
         if (StringUtils.isEmpty(snapshotName)) {
@@ -358,7 +357,7 @@ public class VolumeService extends AbstractService {
     }
 
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> destroySnapshot(int snapshotVolumeId) {
         SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);

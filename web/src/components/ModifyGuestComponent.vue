@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="修改配置" :visible.sync="modify_guest_dialog_visiable" width="400px">
+	<el-dialog title="修改配置" :close-on-click-modal="false" :visible.sync="modify_guest_dialog_visiable" width="400px">
 		<el-form :model="modify_guest" label-width="100px">
 			<el-form-item label="名称" prop="description">
 				<el-input v-model="modify_guest.description"></el-input>

@@ -1,12 +1,11 @@
 package cn.chenjun.cloud.management.annotation;
 
+import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
-import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,10 +27,7 @@ public class LockAspect {
 
     @Around("preLock()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Lock lock = signature.getMethod().getAnnotation(Lock.class);
-        String key = lock.value();
-        RLock rLock = redisson.getLock(key);
+        RLock rLock = redisson.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY);
         boolean isLocked = false;
         try {
             rLock.lock(1, TimeUnit.MINUTES);

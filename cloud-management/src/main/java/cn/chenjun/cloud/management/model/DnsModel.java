@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class DnsModel {
     private int id;
+    private int networkId;
     private String domain;
     private String ip;
 

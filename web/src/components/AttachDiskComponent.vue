@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="挂载磁盘" :visible.sync="attach_volume_dialog_visiable" width="400px">
+	<el-dialog title="挂载磁盘" :close-on-click-modal="false" :visible.sync="attach_volume_dialog_visiable" width="400px">
 		<el-form :model="attach_volume_guest" label-width="100px">
 			<el-form-item label="磁盘">
 				<el-select v-model="attach_volume_guest.volumeId" style="width: 100%" placeholder="请选择磁盘">
@@ -44,7 +44,7 @@ export default {
 		attach_volume_click() {
 			attachGuestDisk(this.attach_volume_guest).then((res) => {
 				if (res.code === 0) {
-					this.$emit("onVoumeAttachCallBack",res.data.guest,res.data.volume)
+					this.$emit('onVoumeAttachCallBack', res.data.guest, res.data.volume)
 					this.attach_volume_dialog_visiable = false
 				} else {
 					this.$notify.error({

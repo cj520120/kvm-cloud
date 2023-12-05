@@ -1,11 +1,13 @@
 package cn.chenjun.cloud.management.websocket.cluster.process;
 
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import org.springframework.plugin.core.Plugin;
+
 
 /**
  * @author chenjun
  */
-public interface ClusterMessageProcess {
+public interface ClusterMessageProcess extends Plugin<Integer> {
     /**
      * 处理通知消息
      *
@@ -13,10 +15,4 @@ public interface ClusterMessageProcess {
      */
     void process(NotifyData<?> msg);
 
-    /**
-     * 处理消息类型
-     *
-     * @return
-     */
-    int getType();
 }

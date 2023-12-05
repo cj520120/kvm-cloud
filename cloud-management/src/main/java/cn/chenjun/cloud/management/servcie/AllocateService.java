@@ -9,7 +9,6 @@ import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ public class AllocateService extends AbstractService {
     @Autowired
     private ApplicationConfig applicationConfig;
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     public StorageEntity allocateStorage(int storageId) {
         StorageEntity storage;
         if (storageId > 0) {
@@ -45,7 +44,7 @@ public class AllocateService extends AbstractService {
         return storage;
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     public GuestNetworkEntity allocateNetwork(int networkId) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("network_id", networkId);
@@ -58,7 +57,7 @@ public class AllocateService extends AbstractService {
         return guestNetwork;
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
@@ -97,7 +96,7 @@ public class AllocateService extends AbstractService {
         return host.getTotalCpu() > allocateCpu && host.getTotalMemory() > allocationMemory;
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public void initHostAllocate() {
         List<HostEntity> hosts = this.hostMapper.selectList(new QueryWrapper<>());

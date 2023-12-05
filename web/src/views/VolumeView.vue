@@ -124,7 +124,7 @@
 	</div>
 </template>
 <script>
-import { getVolumeList, getStorageList, getVolumeInfo, destroyVolume, createVolume, batchDestroyVolume } from '@/api/api'
+import { getVolumeList, getStorageList, destroyVolume, createVolume, batchDestroyVolume } from '@/api/api'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
@@ -165,10 +165,12 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	computed: {
 		show_table_volumes() {
@@ -180,6 +182,9 @@ export default {
 	methods: {
 		handleSelectionChange(val) {
 			this.select_volumes = val
+		},
+		async reload_page() {
+			this.init_view()
 		},
 		async init_view() {
 			this.data_loading = true
@@ -269,24 +274,23 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 2) {
-				getVolumeInfo({ volumeId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_volume_info(res.data)
-					} else if (res.code == 4000001) {
-						let select_volume_ids = this.select_volumes.map((v) => v.volumeId)
-						let findIndex = this.volumes.findIndex((v) => v.volumeId === notify.id)
-						if (findIndex >= 0) {
-							this.volumes.splice(findIndex, 1)
-						}
-						this.$nextTick(() => {
-							this.volumes.forEach((v) => {
-								if (select_volume_ids.includes(v.volumeId) && v.isShow) {
-									this.$refs.volumeTable.toggleRowSelection(v)
-								}
-							})
-						})
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_volume_info(res.data)
+				} else if (res.code == 4000001) {
+					let select_volume_ids = this.select_volumes.map((v) => v.volumeId)
+					let findIndex = this.volumes.findIndex((v) => v.volumeId === notify.id)
+					if (findIndex >= 0) {
+						this.volumes.splice(findIndex, 1)
 					}
-				})
+					this.$nextTick(() => {
+						this.volumes.forEach((v) => {
+							if (select_volume_ids.includes(v.volumeId) && v.isShow) {
+								this.$refs.volumeTable.toggleRowSelection(v)
+							}
+						})
+					})
+				}
 			}
 		},
 		show_volume_list() {

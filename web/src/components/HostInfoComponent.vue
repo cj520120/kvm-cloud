@@ -48,6 +48,7 @@ export default {
 	data() {
 		return {
 			host_loading: false,
+			show_host_id: 0,
 			show_host: {
 				hostId: 0,
 				displayName: '',
@@ -69,23 +70,55 @@ export default {
 			}
 		}
 	},
-	mixins: [Notify,util],
+	mixins: [Notify, util],
 	created() {
+		this.show_host_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
+		this.show_host_id = 0
 	},
 	methods: {
 		on_back_click() {
+			this.show_host_id = 0
 			this.$emit('back')
 		},
 		on_notify_update_host_info(host) {
 			this.refresh_host(host)
 			this.$emit('onHostUpdate', host)
 		},
+		async reload_page() {
+			if (this.show_host_id > 0) {
+				this.host_loading = true
+				await getHostInfo({ hostId: this.show_host_id })
+					.then((res) => {
+						if (res.code === 0) {
+							this.init_host(res.data)
+						} else {
+							this.$alert(`获取主机信息失败:${res.message}`, '提示', {
+								dangerouslyUseHTMLString: true,
+								confirmButtonText: '返回',
+								type: 'error'
+							})
+								.then(() => {
+									this.on_back_click()
+								})
+								.catch(() => {
+									this.on_back_click()
+								})
+						}
+					})
+					.finally(() => {
+						this.host_loading = false
+					})
+			}
+		},
 		init_host(host) {
+			this.show_host_id = host.hostId
 			this.show_host = host
 			this.host_loading = false
 		},
@@ -95,28 +128,8 @@ export default {
 			}
 		},
 		async init(hostId) {
-			this.host_loading = true
-			await getHostInfo({ hostId: hostId })
-				.then((res) => {
-					if (res.code === 0) {
-						this.init_host(res.data)
-					} else {
-						this.$alert(`获取主机信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						})
-							.then(() => {
-								this.on_back_click()
-							})
-							.catch(() => {
-								this.on_back_click()
-							})
-					}
-				})
-				.finally(() => {
-					this.host_loading = false
-				})
+			this.show_host_id = hostId
+			this.reload_page()
 		},
 		pasue_host(host) {
 			this.$confirm('维护主机, 是否继续?', '提示', {
@@ -180,13 +193,12 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 4 && this.show_host.hostId === notify.id) {
-				getHostInfo({ hostId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.refresh_host(res.data)
-					} else if (res.code == 2000001) {
-						this.on_back_click()
-					}
-				})
+				let res = notify.data
+				if (res.code == 0) {
+					this.refresh_host(res.data)
+				} else if (res.code == 2000001) {
+					this.on_back_click()
+				}
 			}
 		}
 	}

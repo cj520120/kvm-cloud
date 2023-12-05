@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.DnsEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -61,6 +62,7 @@ public class DnsService {
             this.mapper.deleteById(dnsId);
             this.eventService.publish(NotifyData.<List<DnsModel>>builder().id(entity.getNetworkId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.listLocalNetworkDns(entity.getNetworkId())).build());
         }
+        this.eventService.publish(NotifyData.<Void>builder().id(dnsId).type(Constant.NotifyType.UPDATE_DNS).build());
         return ResultUtil.success();
     }
 
@@ -68,11 +70,21 @@ public class DnsService {
         DnsEntity entity = DnsEntity.builder().dnsIp(ip).dnsDomain(domain).networkId(networkId).createTime(new Date()).build();
         mapper.insert(entity);
         this.eventService.publish(NotifyData.<List<DnsModel>>builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.listLocalNetworkDns(entity.getNetworkId())).build());
+        this.eventService.publish(NotifyData.<Void>builder().id(entity.getDnsId()).type(Constant.NotifyType.UPDATE_DNS).build());
+        return ResultUtil.<DnsModel>builder().data(this.initDns(entity)).build();
+    }
+
+    public ResultUtil<DnsModel> getDnsInfo(int dnsId) {
+        DnsEntity entity = this.mapper.selectById(dnsId);
+        if (entity == null) {
+            return ResultUtil.error(ErrorCode.DNS_NOT_FOUND, "dns不存在");
+        }
         return ResultUtil.<DnsModel>builder().data(this.initDns(entity)).build();
     }
 
     private DnsModel initDns(DnsEntity entity) {
         return DnsModel.builder().id(entity.getDnsId())
+                .networkId(entity.getNetworkId())
                 .domain(entity.getDnsDomain())
                 .ip(entity.getDnsIp())
                 .build();

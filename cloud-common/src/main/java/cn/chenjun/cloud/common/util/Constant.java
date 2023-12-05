@@ -110,6 +110,7 @@ public class Constant {
         public static final int UPDATE_STORAGE = 7;
         public static final int UPDATE_SCHEME = 8;
         public static final int UPDATE_GROUP = 9;
+        public static final int UPDATE_DNS = 10;
 
 
         public static final int COMPONENT_UPDATE_VNC = 100;

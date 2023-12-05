@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="创建快照" :visible.sync="snapshot_dialog_visiable" width="400px">
+	<el-dialog title="创建快照" :close-on-click-modal="false" :visible.sync="snapshot_dialog_visiable" width="400px">
 		<el-form :model="snapshot_volume" label-width="100px">
 			<el-form-item label="快照名称">
 				<el-input v-model="snapshot_volume.snapshotName" placeholder="请输入快照名称"></el-input>

@@ -29,19 +29,25 @@ export default {
 	data() {
 		return {
 			schme_loading: false,
+			show_scheme_id: 0,
 			show_scheme: { schemeId: 0, name: '-', cpu: 0, memory: 0, speed: 0, sockets: 0, cores: 0, threads: 0 }
 		}
 	},
-	mixins: [Notify,util],
+	mixins: [Notify, util],
 	created() {
+		this.show_scheme_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
+		this.show_scheme_id = 0
 	},
 	methods: {
 		on_back_click() {
+			this.show_scheme_id = 0
 			this.$emit('back')
 		},
 		on_notify_update_scheme_info(host) {
@@ -53,33 +59,40 @@ export default {
 				this.show_scheme = scheme
 			}
 		},
+		async reload_page() {
+			if (this.show_scheme_id > 0) {
+				this.schme_loading = true
+				await getSchemeInfo({ schemeId: this.show_scheme_id })
+					.then((res) => {
+						if (res.code === 0) {
+							this.init_scheme(res.data)
+						} else {
+							this.$alert(`获取计算方案信息失败:${res.message}`, '提示', {
+								dangerouslyUseHTMLString: true,
+								confirmButtonText: '返回',
+								type: 'error'
+							})
+								.then(() => {
+									this.on_back_click()
+								})
+								.catch(() => {
+									this.on_back_click()
+								})
+						}
+					})
+					.finally(() => {
+						this.host_loading = false
+					})
+			}
+		},
 		init_scheme(scheme) {
+			this.show_scheme_id = scheme.schemeId
 			this.show_scheme = scheme
 			this.schme_loading = false
 		},
 		async init(schemeId) {
-			this.schme_loading = true
-			await getSchemeInfo({ schemeId: schemeId })
-				.then((res) => {
-					if (res.code === 0) {
-						this.init_scheme(res.data)
-					} else {
-						this.$alert(`获取计算方案信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						})
-							.then(() => {
-								this.on_back_click()
-							})
-							.catch(() => {
-								this.on_back_click()
-							})
-					}
-				})
-				.finally(() => {
-					this.host_loading = false
-				})
+			this.show_scheme_id = schemeId
+			this.reload_page()
 		},
 		destroy_scheme(scheme) {
 			this.$confirm('删除计算方案, 是否继续?', '提示', {
@@ -103,13 +116,12 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 8 && this.show_scheme.schemeId == notify.id) {
-				getSchemeInfo({ schemeId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.refresh_scheme(res.data)
-					} else if (res.code == 2000001) {
-						this.on_back_click()
-					}
-				})
+				let res = notify.data
+				if (res.code == 0) {
+					this.refresh_scheme(res.data)
+				} else if (res.code == 2000001) {
+					this.on_back_click()
+				}
 			}
 		}
 	}

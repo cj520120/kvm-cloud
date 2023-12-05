@@ -12,7 +12,7 @@
 				<el-button style="width: 90px" @click="show_reinstall_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">重装系统</el-button>
 				<el-button style="width: 90px" @click="show_migrate_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">迁移虚拟机</el-button>
 			</el-row>
-			<el-row style="text-align: left; margin: 20px 0">				
+			<el-row style="text-align: left; margin: 20px 0">
 				<el-button style="width: 90px" @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">远程桌面</el-button>
 				<el-button style="width: 90px" @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">修改配置</el-button>
 				<el-button style="width: 90px" @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-show="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
@@ -138,16 +138,21 @@ export default {
 	},
 	mixins: [Notify, util],
 	created() {
+		this.show_guest_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
+		this.show_guest_id = 0
 	},
 	data() {
 		return {
 			show_type: 0,
 			guest_loading: false,
+			show_guest_id: 0,
 			show_guest_info: {
 				guestId: 0,
 				volume_loading: false,
@@ -219,6 +224,7 @@ export default {
 			})
 		},
 		on_back_click() {
+			this.show_guest_id = 0
 			this.$emit('back')
 		},
 		on_notify_update_guest_info(guest) {
@@ -233,7 +239,35 @@ export default {
 			this.show_type = 0
 			this.on_notify_update_guest_info(guest)
 		},
+		async reload_page() {
+			if (this.show_guest_id > 0) {
+				this.show_type = 0
+				this.guest_loading = true
+				await getGuestInfo({ guestId: this.show_guest_id })
+					.then((res) => {
+						if (res.code === 0) {
+							this.init(res.data)
+						} else {
+							this.$alert(`获取虚拟机信息失败:${res.message}`, '提示', {
+								dangerouslyUseHTMLString: true,
+								confirmButtonText: '返回',
+								type: 'error'
+							})
+								.then(() => {
+									this.on_back_click()
+								})
+								.catch(() => {
+									this.on_back_click()
+								})
+						}
+					})
+					.finally(() => {
+						this.guest_loading = false
+					})
+			}
+		},
 		async init(guest) {
+			this.show_guest_id = guest.guestId
 			this.show_type = 0
 			this.guest_loading = false
 			this.show_guest_info.guestId = guest.guestId
@@ -245,29 +279,8 @@ export default {
 			await this.load_current_guest_network(guest)
 		},
 		async initGuestId(guestId) {
-			this.show_type = 0
-			this.guest_loading = true
-			await getGuestInfo({ guestId: guestId })
-				.then((res) => {
-					if (res.code === 0) {
-						this.init(res.data)
-					} else {
-						this.$alert(`获取虚拟机信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						})
-							.then(() => {
-								this.on_back_click()
-							})
-							.catch(() => {
-								this.on_back_click()
-							})
-					}
-				})
-				.finally(() => {
-					this.guest_loading = false
-				})
+			this.show_guest_id = guestId
+			this.reload_page()
 		},
 		async load_current_guest_template(guest) {
 			this.show_guest_info.template.templateId = guest.cdRoom
@@ -463,13 +476,12 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 1 && this.show_guest_info.guestId === notify.id) {
-				getGuestInfo({ guestId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_guest_info(res.data)
-					} else if (res.code == 2000001) {
-						this.on_back_click()
-					}
-				})
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_guest_info(res.data)
+				} else if (res.code == 2000001) {
+					this.on_back_click()
+				}
 			}
 		}
 	}

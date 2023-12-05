@@ -34,7 +34,7 @@
 	</div>
 </template>
 <script>
-import { getSchemeList, destroyScheme, getSchemeInfo } from '@/api/api'
+import { getSchemeList, destroyScheme } from '@/api/api'
 import SchemeInfoComponent from '@/components/SchemeInfoComponent'
 import CreateSchemeComponent from '@/components/CreateSchemeComponent'
 import ModifySchemeComponent from '@/components/ModifySchemeComponent'
@@ -60,12 +60,17 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	methods: {
+		async reload_page() {
+			this.init_view()
+		},
 		async init_view() {
 			this.data_loading = true
 			await getSchemeList()
@@ -90,17 +95,16 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 8) {
-				getSchemeInfo({ schemeId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_scheme_info(res.data)
-					} else if (res.code == 8000001) {
-						let findIndex = this.schemes.findIndex((v) => v.schemeId === notify.id)
-						if (findIndex >= 0) {
-							this.schemes.splice(findIndex, 1)
-						}
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_scheme_info(res.data)
+				} else if (res.code == 8000001) {
+					let findIndex = this.schemes.findIndex((v) => v.schemeId === notify.id)
+					if (findIndex >= 0) {
+						this.schemes.splice(findIndex, 1)
 					}
-					this.$forceUpdate()
-				})
+				}
+				this.$forceUpdate()
 			}
 		},
 		show_scheme_list() {

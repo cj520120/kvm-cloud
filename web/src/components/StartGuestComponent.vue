@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="启动虚拟机" :visible.sync="start_dialog_visiable" width="400px">
+	<el-dialog title="启动虚拟机" :close-on-click-modal="false" :visible.sync="start_dialog_visiable" width="400px">
 		<el-form :model="start_guest" label-width="100px">
 			<el-form-item label="选择主机">
 				<el-select v-model="start_guest.hostId" style="width: 100%">

@@ -1,8 +1,10 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.operate.VolumeOperate;
+import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -47,6 +49,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_INFO)
     @Override
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
         StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
@@ -69,6 +72,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return volume;
     }
 
+    @DispatchBind(command = Constant.Command.BATCH_VOLUME_INFO)
     @Override
     public List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
         Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
@@ -110,6 +114,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return modelList;
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_CREATE)
     @Override
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
         Map<String, Object> map = new HashMap<>(4);
@@ -142,6 +147,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
 
+    @DispatchBind(command = Constant.Command.VOLUME_DESTROY)
     @Override
     public Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
         StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
@@ -155,6 +161,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return null;
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_RESIZE)
     @Override
     public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
 
@@ -176,6 +183,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return volumeInfo;
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_SNAPSHOT)
     @Override
     public VolumeInfo snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
@@ -187,6 +195,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                 .build());
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_TEMPLATE)
     @Override
     public VolumeInfo template(Connect connect, VolumeCreateTemplateRequest request) throws Exception {
 
@@ -199,6 +208,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                 .build());
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD)
     @Override
     public VolumeInfo download(Connect connect, VolumeDownloadRequest request) {
         StoragePool targetStoragePool = this.getStorage(connect, request.getTargetStorage());
@@ -228,6 +238,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_MIGRATE)
     @Override
     public VolumeInfo migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
@@ -247,6 +258,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
+    @DispatchBind(command = Constant.Command.VOLUME_CLONE)
     @Override
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
         StoragePool sourceStoragePool = this.getStorage(connect, request.getSourceStorage());

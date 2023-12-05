@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="迁移虚拟机" :visible.sync="migrate_dialog_visiable" width="400px">
+	<el-dialog title="迁移虚拟机" :close-on-click-modal="false" :visible.sync="migrate_dialog_visiable" width="400px">
 		<el-form :model="migrate_guest" label-width="100px">
 			<el-form-item label="选择主机">
 				<el-select v-model="migrate_guest.hostId" style="width: 100%">
@@ -24,7 +24,7 @@ export default {
 				hostId: 0,
 				guestId: 0
 			},
-			last_runing_host_id:0,
+			last_runing_host_id: 0,
 			hosts: []
 		}
 	},
@@ -32,14 +32,14 @@ export default {
 		async init(guest) {
 			this.migrate_guest.guestId = guest.guestId
 			this.migrate_guest.hostId = 0
-			this.last_runing_host_id=guest.hostId
+			this.last_runing_host_id = guest.hostId
 			this.migrate_dialog_visiable = true
 			await this.load_all_host()
 		},
 		async load_all_host() {
 			await getHostList().then((res) => {
 				if (res.code === 0) {
-					this.hosts = res.data.filter((v) => v.status === 1&&v.hostId!==this.last_runing_host_id)
+					this.hosts = res.data.filter((v) => v.status === 1 && v.hostId !== this.last_runing_host_id)
 				}
 			})
 		},

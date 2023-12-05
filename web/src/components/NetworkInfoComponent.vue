@@ -87,7 +87,7 @@
 </template>
 <script>
 import Notify from '@/api/notify'
-import { getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getSystemGuestList, getGuestInfo, getNetworkDnsList, destroyNetworDns, createNetworkDns } from '@/api/api'
+import { getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork, getSystemGuestList, getNetworkDnsList, destroyNetworDns, createNetworkDns } from '@/api/api'
 import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
 export default {
@@ -120,20 +120,26 @@ export default {
 				type: 0,
 				vlanId: 100,
 				basicNetworkId: ''
-			}
+			},
+			show_network_id: 0
 		}
 	},
 	components: { GuestInfoComponent },
 	mixins: [Notify, util],
 	created() {
+		this.show_network_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
+		this.show_network_id = 0
 	},
 	methods: {
 		on_back_click() {
+			this.show_network_id = 0
 			this.$emit('back')
 		},
 		on_notify_update_networkt_info(network) {
@@ -151,41 +157,50 @@ export default {
 		},
 		async init_network(networks, show_network) {
 			this.show_type = 0
-			this.networks = networks
+			if (networks) {
+				this.networks = networks
+			}
 			this.show_network = show_network
 			this.system_guests = []
 			this.network_dns_list = []
 			this.create_network_dns.networkId = show_network.networkId
 			this.create_network_dns.domain = ''
 			this.create_network_dns.ip = ''
+			this.show_network_id = show_network.networkId
 			await this.load_system_guest(show_network)
 			await this.load_network_dns(show_network)
 		},
+		async reload_page() {
+			if (this.show_network_id > 0) {
+				this.show_type = 0
+				this.network_loading = true
+				await getNetworkInfo({ networkId: this.show_network_id })
+					.then((res) => {
+						this.network_loading = false
+						if (res.code === 0) {
+							this.init_network(null, res.data)
+						} else {
+							this.$alert(`获取网络信息失败:${res.message}`, '提示', {
+								dangerouslyUseHTMLString: true,
+								confirmButtonText: '返回',
+								type: 'error'
+							})
+								.then(() => {
+									this.on_back_click()
+								})
+								.catch(() => {
+									this.on_back_click()
+								})
+						}
+					})
+					.finally(() => {
+						this.network_loading = false
+					})
+			}
+		},
 		async init(networkId) {
-			this.show_type = 0
-			this.network_loading = true
-			await getNetworkInfo({ networkId: networkId })
-				.then((res) => {
-					console.log(res)
-					if (res.code === 0) {
-						this.init_network(res.data)
-					} else {
-						this.$alert(`获取网络信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						})
-							.then(() => {
-								this.on_back_click()
-							})
-							.catch(() => {
-								this.on_back_click()
-							})
-					}
-				})
-				.finally(() => {
-					this.host_loading = false
-				})
+			this.show_network_id = networkId
+			this.reload_page()
 		},
 		async load_network_dns(network) {
 			this.network_dns_list = []
@@ -274,7 +289,10 @@ export default {
 				if (res.code === 0) {
 					this.create_network_dns.domain = ''
 					this.create_network_dns.ip = ''
-					this.network_dns_list.push(res.data)
+					let findIndex = this.network_dns_list.findIndex((v) => v.id === res.data.id)
+					if (findIndex < 0) {
+						this.network_dns_list.push(res.data)
+					}
 					this.dialog_create_network_dns_visible = false
 				} else {
 					this.$notify.error({
@@ -329,21 +347,34 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 3 && this.show_network.networkId === notify.id) {
-				getNetworkInfo({ networkId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.refresh_network(res.data)
-					} else if (res.code == 2000001) {
-						this.on_back_click()
-					}
-				})
+				let res = notify.data
+				if (res.code == 0) {
+					this.refresh_network(res.data)
+				} else if (res.code == 2000001) {
+					this.on_back_click()
+				}
 			} else if (notify.type === 1) {
-				getGuestInfo({ guestId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_guest_info(res.data)
-					} else if (res.code == 2000001) {
-						this.delete_guest(notify.id)
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_guest_info(res.data)
+				} else if (res.code == 2000001) {
+					this.delete_guest(notify.id)
+				}
+			} else if (notify.type === 10) {
+				let res = notify.data
+				if (res.code == 0 && res.data.networkId == this.show_network.networkId) {
+					let findIndex = this.network_dns_list.findIndex((v) => v.id === notify.id)
+					if (findIndex >= 0) {
+						this.$set(this.volumes, findIndex, res.data)
+					} else {
+						this.network_dns_list.push(res.data)
 					}
-				})
+				} else if (res.code == 11000001) {
+					let findIndex = this.network_dns_list.findIndex((v) => v.id === notify.id)
+					if (findIndex >= 0) {
+						this.network_dns_list.splice(findIndex, 1)
+					}
+				}
 			}
 		}
 	}

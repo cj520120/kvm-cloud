@@ -79,7 +79,7 @@
 	</div>
 </template>
 <script>
-import { getGuestInfo, destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getGroupList } from '@/api/api'
+import { destroyGuest, rebootGuest, getHostList, detachGuestCdRoom, getUserGuestList, batchStoptGuest, batchStartGuest, getGroupList } from '@/api/api'
 import Notify from '@/api/notify'
 import StartGuestComponent from '@/components/StartGuestComponent'
 import StopGuestComponent from '@/components/StopGuestComponent.vue'
@@ -121,10 +121,12 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	computed: {
 		show_table_guests() {
@@ -136,6 +138,9 @@ export default {
 	methods: {
 		handleSelectionChange(val) {
 			this.select_guests = val
+		},
+		async reload_page() {
+			this.init_view()
 		},
 		async init_view() {
 			this.data_loading = true
@@ -232,24 +237,23 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 1) {
-				getGuestInfo({ guestId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_guest_info(res.data)
-					} else if (res.code == 2000001) {
-						let select_guest_ids = this.select_guests.map((v) => v.guestId)
-						let findIndex = this.guests.findIndex((v) => v.guestId === notify.id)
-						if (findIndex >= 0) {
-							this.guests.splice(findIndex, 1)
-						}
-						this.$nextTick(() => {
-							this.guests.forEach((v) => {
-								if (select_guest_ids.includes(v.guestId) && v.isShow) {
-									this.$refs.guestTable.toggleRowSelection(v)
-								}
-							})
-						})
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_guest_info(res.data)
+				} else if (res.code == 2000001) {
+					let select_guest_ids = this.select_guests.map((v) => v.guestId)
+					let findIndex = this.guests.findIndex((v) => v.guestId === notify.id)
+					if (findIndex >= 0) {
+						this.guests.splice(findIndex, 1)
 					}
-				})
+					this.$nextTick(() => {
+						this.guests.forEach((v) => {
+							if (select_guest_ids.includes(v.guestId) && v.isShow) {
+								this.$refs.guestTable.toggleRowSelection(v)
+							}
+						})
+					})
+				}
 			}
 		},
 		show_guest_list_page() {

@@ -8,8 +8,11 @@ import cn.chenjun.cloud.management.data.entity.TaskEntity;
 import cn.chenjun.cloud.management.data.mapper.TaskMapper;
 import cn.chenjun.cloud.management.operate.OperateEngine;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -35,6 +38,8 @@ public class OperateTask extends AbstractTask {
 
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private RedissonClient redissonClient;
 
     public void addTask(BaseOperateParam operateParam) {
         TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
@@ -69,9 +74,10 @@ public class OperateTask extends AbstractTask {
                     if (this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0) {
                         Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
                         BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
-                        this.operateEngine.process(operateParam);
+                        this.lockRun(() -> {
+                            this.operateEngine.process(operateParam);
+                        });
                     }
-
                 } catch (Exception err) {
                     ResultUtil<?> resultUtil;
                     if (err instanceof CodeException) {
@@ -98,7 +104,9 @@ public class OperateTask extends AbstractTask {
             BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(task.getParam(), paramClass);
             workExecutor.submit(() -> {
                 try {
-                    this.operateEngine.onFinish(operateParam, result);
+                    this.lockRun(() -> {
+                        this.operateEngine.onFinish(operateParam, result);
+                    });
                     this.taskMapper.deleteById(taskId);
                 } catch (Exception err) {
                     log.error("任务回调失败.param={} result={}", operateParam, result, err);
@@ -108,6 +116,22 @@ public class OperateTask extends AbstractTask {
             log.error("解析任务参数出错:task={} result={}", task, result);
         }
 
+    }
+
+    private void lockRun(Runnable runnable) {
+        RLock rLock = redissonClient.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY);
+        try {
+            rLock.lock(1, TimeUnit.MINUTES);
+            runnable.run();
+        } finally {
+            try {
+                if (rLock.isHeldByCurrentThread()) {
+                    rLock.unlock();
+                }
+            } catch (Exception ignored) {
+
+            }
+        }
     }
 
 

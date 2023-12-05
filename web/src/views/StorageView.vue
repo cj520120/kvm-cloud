@@ -41,7 +41,7 @@
 	</div>
 </template>
 <script>
-import { getStorageList, getStorageInfo, pauseStorage, registerStorage, destroyStorage } from '@/api/api'
+import { getStorageList, pauseStorage, registerStorage, destroyStorage } from '@/api/api'
 import StorageInfoComponent from '@/components/StorageInfoComponent'
 import CreateStorageComponent from '@/components/CreateStorageComponent'
 import Notify from '@/api/notify'
@@ -64,12 +64,17 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	methods: {
+		async reload_page() {
+			this.init_view()
+		},
 		async init_view() {
 			this.data_loading = true
 			await getStorageList()
@@ -92,16 +97,15 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 7) {
-				getStorageInfo({ storageId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_storate_info(res.data)
-					} else if (res.code == 3000001) {
-						let findIndex = this.storages.findIndex((v) => v.storageId === notify.id)
-						if (findIndex >= 0) {
-							this.storages.splice(findIndex, 1)
-						}
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_storate_info(res.data)
+				} else if (res.code == 3000001) {
+					let findIndex = this.storages.findIndex((v) => v.storageId === notify.id)
+					if (findIndex >= 0) {
+						this.storages.splice(findIndex, 1)
 					}
-				})
+				}
 			}
 		},
 		show_storage_list() {

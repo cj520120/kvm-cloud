@@ -2,13 +2,14 @@ import Route from "../router/index";
 class NotifyWebsocket {
   static instance = undefined;
   notify_list = [];
+  connect_notify_list = [];
   init(pThis) {
     let pThat = this;
     if (!NotifyWebsocket.instance) {
       let wsUri =
         process.env.NODE_ENV === "production"
           ? `ws://${window.location.host}/api/ws/`
-          : `ws://192.168.2.107:8080/api/ws/`;
+          : `ws://localhost:8080/api/ws/`;
       console.log(new Date(), "开始连接通信服务器...");
       NotifyWebsocket.instance = new WebSocket(wsUri);
       NotifyWebsocket.instance.onopen = function () {
@@ -42,6 +43,7 @@ class NotifyWebsocket {
         let wsMessage = JSON.parse(event.data);
         if (wsMessage.command == 101) {
           console.log(new Date(), "WebSocket 登录认证成功.");
+          pThis.handle_connect();
         } else if (wsMessage.command == 102) {
           console.log(new Date(), "WebSocket 登录认证Token错误.");
           let hrefHash = window.location.hash.toLowerCase();

@@ -43,7 +43,7 @@
 </template>
 <script>
 import util from '@/api/util'
-import { getNetworkList, getNetworkInfo, pauseNetwork, registerNetwork, destroyNetwork } from '@/api/api'
+import { getNetworkList, pauseNetwork, registerNetwork, destroyNetwork } from '@/api/api'
 
 import NetworkInfoComponent from '@/components/NetworkInfoComponent'
 import CreateNetworkComponent from '@/components/CreateNetworkComponent'
@@ -64,13 +64,18 @@ export default {
 	},
 	created() {
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
 	},
 	mixins: [Notify, util],
 	methods: {
+		async reload_page() {
+			this.init_view()
+		},
 		async init_view() {
 			this.data_loading = true
 			await getNetworkList()
@@ -109,17 +114,16 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 3) {
-				getNetworkInfo({ networkId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.update_network_info(res.data)
-					} else if (res.code == 1000001) {
-						let findIndex = this.networks.findIndex((v) => v.networkId === notify.id)
-						if (findIndex >= 0) {
-							this.networks.splice(findIndex, 1)
-						}
+				let res = notify.data
+				if (res.code == 0) {
+					this.update_network_info(res.data)
+				} else if (res.code == 1000001) {
+					let findIndex = this.networks.findIndex((v) => v.networkId === notify.id)
+					if (findIndex >= 0) {
+						this.networks.splice(findIndex, 1)
 					}
-					this.$forceUpdate()
-				})
+				}
+				this.$forceUpdate()
 			}
 		},
 		show_network_list() {

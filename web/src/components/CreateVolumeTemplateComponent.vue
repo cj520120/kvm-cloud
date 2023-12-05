@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="创建模版" :visible.sync="template_dialog_visiable" width="400px">
+	<el-dialog title="创建模版" :close-on-click-modal="false" :visible.sync="template_dialog_visiable" width="400px">
 		<el-form :model="template_volume" label-width="100px">
 			<el-form-item label="模版名称">
 				<el-input v-model="template_volume.name" placeholder="请输入模版名称"></el-input>

@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="挂载网卡" :visible.sync="attach_network_dialog_visiable" width="400px">
+	<el-dialog title="挂载网卡" :close-on-click-modal="false" :visible.sync="attach_network_dialog_visiable" width="400px">
 		<el-form :model="attach_network_guest" label-width="100px">
 			<el-form-item label="网络">
 				<el-select v-model="attach_network_guest.networkId" style="width: 100%" placeholder="请选择网络">

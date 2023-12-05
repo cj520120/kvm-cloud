@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.annotation;
+package cn.chenjun.cloud.agent.operate.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,7 +10,11 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Lock {
-
-
+public @interface DispatchBind {
+    /**
+     * 绑定命令
+     *
+     * @return
+     */
+    String command();
 }

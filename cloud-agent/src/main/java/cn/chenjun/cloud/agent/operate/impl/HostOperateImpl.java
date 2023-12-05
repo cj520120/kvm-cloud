@@ -3,7 +3,9 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.operate.HostOperate;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
+import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import org.dom4j.*;
@@ -90,6 +92,7 @@ public class HostOperateImpl implements HostOperate {
         return emulator;
     }
 
+    @DispatchBind(command = Constant.Command.HOST_INFO)
     @Override
     public HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception {
         OsInfo osInfo = SystemUtil.getOsInfo();
@@ -112,6 +115,7 @@ public class HostOperateImpl implements HostOperate {
                 .build();
     }
 
+    @DispatchBind(command = Constant.Command.HOST_INIT)
     @Override
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
 

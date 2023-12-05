@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="磁盘扩容" :visible.sync="resize_dialog_visiable" width="300px">
+	<el-dialog title="磁盘扩容" :close-on-click-modal="false" :visible.sync="resize_dialog_visiable" width="300px">
 		<el-form :model="resize_volume" label-width="100px">
 			<el-form-item label="磁盘大小(GB)">
 				<el-input v-model="resize_volume.size" placeholder="请输入磁盘大小(GB)"></el-input>

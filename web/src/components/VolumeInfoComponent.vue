@@ -67,7 +67,8 @@ export default {
 			show_type: 0,
 			show_volume: {},
 			template: {},
-			storage: {}
+			storage: {},
+			show_volume_id: 0
 		}
 	},
 	components: { ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent },
@@ -75,47 +76,59 @@ export default {
 		this.$options.components.GuestInfoComponent = require('./GuestInfoComponent.vue').default
 	},
 	created() {
+		this.show_volume_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
+		this.show_volume_id = 0
 	},
 	mixins: [Notify, util],
 	methods: {
 		go_back() {
+			this.show_volume_id = 0
 			this.$emit('back')
 		},
 		async init_volume(volume) {
+			this.show_volume_id = volume.volumeId
 			this.show_volume = volume
 			this.show_type = 0
 			await this.init_volume_template()
 			await this.init_volume_storage()
 		},
+		async reload_page() {
+			if (this.show_volume_id > 0) {
+				this.show_type = 0
+				this.volume_loading = true
+				await getVolumeInfo({ volumeId: this.show_volume_id })
+					.then((res) => {
+						if (res.code === 0) {
+							this.init_volume(res.data)
+						} else {
+							this.$alert(`获取磁盘信息失败:${res.message}`, '提示', {
+								dangerouslyUseHTMLString: true,
+								confirmButtonText: '返回',
+								type: 'error'
+							})
+								.then(() => {
+									this.go_back()
+								})
+								.catch(() => {
+									this.go_back()
+								})
+						}
+					})
+					.finally(() => {
+						this.volume_loading = false
+					})
+			}
+		},
 		async init(volumeId) {
-			this.show_type = 0
-			this.volume_loading = true
-			await getVolumeInfo({ volumeId: volumeId })
-				.then((res) => {
-					if (res.code === 0) {
-						this.init_volume(res.data)
-					} else {
-						this.$alert(`获取磁盘信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						})
-							.then(() => {
-								this.go_back()
-							})
-							.catch(() => {
-								this.go_back()
-							})
-					}
-				})
-				.finally(() => {
-					this.volume_loading = false
-				})
+			this.show_volume_id = volumeId
+			this.reload_page()
 		},
 		notify_volume_update(volume) {
 			this.refresh_volume(volume)
@@ -193,13 +206,12 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 2 && this.show_volume.volumeId === notify.id) {
-				getVolumeInfo({ volumeId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.refresh_volume(res.data)
-					} else if (res.code == 2000001) {
-						this.go_back()
-					}
-				})
+				let res = notify.data
+				if (res.code == 0) {
+					this.refresh_volume(res.data)
+				} else if (res.code == 2000001) {
+					this.go_back()
+				}
 			}
 		}
 	}

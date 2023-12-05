@@ -1,5 +1,5 @@
 <template>
-	<el-dialog title="关闭虚拟机" :visible.sync="stop_dialog_visiable" width="400px">
+	<el-dialog title="关闭虚拟机" :close-on-click-modal="false" :visible.sync="stop_dialog_visiable" width="400px">
 		<el-checkbox v-model="stop_guest.force">强制关闭</el-checkbox>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="stop_dialog_visiable = false">取 消</el-button>

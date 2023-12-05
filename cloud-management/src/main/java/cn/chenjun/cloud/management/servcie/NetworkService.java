@@ -15,7 +15,6 @@ import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class NetworkService extends AbstractService {
     @Autowired
     private DnsMapper dnsMapper;
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(int guestId) {
         List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
@@ -44,23 +43,23 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<NetworkModel> getNetworkInfo(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
         if (network == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
+            return ResultUtil.error(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     public ResultUtil<List<NetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());
         List<NetworkModel> models = networkList.stream().map(this::initGuestNetwork).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId) {
 
@@ -133,7 +132,7 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> registerNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -148,7 +147,7 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> maintenanceNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -161,7 +160,7 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> destroyNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);

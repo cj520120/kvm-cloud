@@ -13,7 +13,6 @@ import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.GuestNameUtil;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,7 @@ public abstract class AbstractComponentService extends AbstractService {
     /**
      * 创建系统组件
      */
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public void checkAndStart(int networkId) {
         NetworkEntity network = networkMapper.selectById(networkId);

@@ -36,49 +36,62 @@ export default {
 	name: 'StorageInfoComponent',
 	data() {
 		return {
+			show_storage_id: 0,
 			storage_loading: false,
 			show_storage: {}
 		}
 	},
-	mixins: [Notify,util],
+	mixins: [Notify, util],
 	created() {
+		this.show_storage_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
+		this.subscribe_connect_notify(this.$options.name, this.reload_page)
 		this.init_notify()
 	},
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
+		this.unsubscribe_connect_notify(this.$options.name)
+		this.show_storage_id = 0
 	},
 	methods: {
 		go_back() {
+			this.show_storage_id = 0
 			this.$emit('back')
+		},
+		async reload_page() {
+			if (this.show_storage_id > 0) {
+				this.storage_loading = true
+				await getStorageInfo({ storageId: this.show_storage_id })
+					.then((res) => {
+						if (res.code === 0) {
+							this.init_storage(res.data)
+						} else {
+							this.$alert(`获取存储池信息失败:${res.message}`, '提示', {
+								dangerouslyUseHTMLString: true,
+								confirmButtonText: '返回',
+								type: 'error'
+							})
+								.then(() => {
+									this.go_back()
+								})
+								.catch(() => {
+									this.go_back()
+								})
+						}
+					})
+					.finally(() => {
+						this.storage_loading = false
+					})
+			}
 		},
 		async init_storage(storage) {
 			this.show_storage = storage
+			this.show_storage_id = storage.storageId
 			this.storage_loading = false
 		},
 		async init(storageId) {
-			this.storage_loading = true
-			await getStorageInfo({ storageId: storageId })
-				.then((res) => {
-					if (res.code === 0) {
-						this.init_storage(res.data)
-					} else {
-						this.$alert(`获取存储池信息失败:${res.message}`, '提示', {
-							dangerouslyUseHTMLString: true,
-							confirmButtonText: '返回',
-							type: 'error'
-						})
-							.then(() => {
-								this.go_back()
-							})
-							.catch(() => {
-								this.go_back()
-							})
-					}
-				})
-				.finally(() => {
-					this.storage_loading = false
-				})
+			this.show_storage_id = storageId
+			this.reload_page()
 		},
 		notify_storage_update(volume) {
 			this.refresh_storage(volume)
@@ -153,13 +166,12 @@ export default {
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 7 && this.show_storage.storageId == notify.id) {
-				getStorageInfo({ storageId: notify.id }).then((res) => {
-					if (res.code == 0) {
-						this.refresh_storage(res.data)
-					} else if (res.code == 2000001) {
-						this.go_back()
-					}
-				})
+				let res = notify.data
+				if (res.code == 0) {
+					this.refresh_storage(res.data)
+				} else if (res.code == 2000001) {
+					this.go_back()
+				}
 			}
 		}
 	}

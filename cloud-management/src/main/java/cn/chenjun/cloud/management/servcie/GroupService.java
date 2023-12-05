@@ -34,7 +34,7 @@ public class GroupService extends AbstractService {
     public ResultUtil<GroupModel> getGroup(Integer groupId) {
         GroupInfoEntity entity = mapper.selectById(groupId);
         if (entity == null) {
-            throw new CodeException(ErrorCode.GROUP_NOT_FOUND, "计算方案不存在");
+            return ResultUtil.error(ErrorCode.GROUP_NOT_FOUND, "计算方案不存在");
         }
         return ResultUtil.success(this.initGroup(entity));
     }

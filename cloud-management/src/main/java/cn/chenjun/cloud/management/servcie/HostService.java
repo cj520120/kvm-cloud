@@ -11,7 +11,6 @@ import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 public class HostService extends AbstractService {
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<HostModel>> listAllHost() {
         List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
@@ -36,17 +35,17 @@ public class HostService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> getHostInfo(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);
         if (host == null) {
-            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+            return ResultUtil.error(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
         return ResultUtil.success(this.initHost(host));
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> getHostInfoByClientId(String clientId) {
         HostEntity host = this.hostMapper.selectOne(new QueryWrapper<HostEntity>().eq("client_id", clientId));
@@ -56,7 +55,7 @@ public class HostService extends AbstractService {
         return ResultUtil.success(this.initHost(host));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic) {
         if (StringUtils.isEmpty(name)) {
@@ -94,7 +93,7 @@ public class HostService extends AbstractService {
         return ResultUtil.success(this.initHost(host));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> registerHost(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);
@@ -111,7 +110,7 @@ public class HostService extends AbstractService {
         return ResultUtil.success(this.initHost(host));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> maintenanceHost(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);
@@ -126,7 +125,7 @@ public class HostService extends AbstractService {
 
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyHost(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);

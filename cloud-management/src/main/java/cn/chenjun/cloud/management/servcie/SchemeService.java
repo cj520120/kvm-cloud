@@ -7,7 +7,6 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.SchemeEntity;
 import cn.chenjun.cloud.management.model.SchemeModel;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
@@ -24,17 +23,17 @@ import java.util.stream.Collectors;
 public class SchemeService extends AbstractService {
 
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> getSchemeInfo(int schemeId) {
         SchemeEntity entity = this.schemeMapper.selectById(schemeId);
         if (entity == null) {
-            throw new CodeException(ErrorCode.SCHEME_NOT_FOUND, "计算方案不存在");
+            return ResultUtil.error(ErrorCode.SCHEME_NOT_FOUND, "计算方案不存在");
         }
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<SchemeModel>> listScheme() {
         List<SchemeEntity> list = this.schemeMapper.selectList(new QueryWrapper<>());
@@ -42,7 +41,7 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> createScheme(String name, int cpu, long memory, int speed, int sockets, int cores, int threads) {
         if (StringUtils.isEmpty(name)) {
@@ -73,7 +72,7 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> updateScheme(int schemeId, String name, int cpu, long memory, int speed, int sockets, int cores, int threads) {
         if (StringUtils.isEmpty(name)) {
@@ -114,7 +113,7 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
+    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyScheme(int schemeId) {
         this.schemeMapper.deleteById(schemeId);

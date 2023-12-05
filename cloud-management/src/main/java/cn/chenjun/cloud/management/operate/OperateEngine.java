@@ -4,9 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,6 @@ public class OperateEngine {
         this.operateHandlerMap = operates.stream().collect(Collectors.toMap(Operate::getParamType, Function.identity()));
     }
 
-    @Lock(RedisKeyUtil.GLOBAL_LOCK_KEY)
     @Transactional(rollbackFor = Exception.class)
     public void onFinish(BaseOperateParam operateParam, String result) {
 
@@ -47,7 +44,6 @@ public class OperateEngine {
         operate.onFinish(operateParam, resultUtil);
     }
 
-    @Lock(value = RedisKeyUtil.GLOBAL_LOCK_KEY, write = false)
     @Transactional(rollbackFor = Exception.class)
     public void process(BaseOperateParam operateParam) {
         log.info("process type={} param={}", operateParam.getClass().getName(), operateParam);
