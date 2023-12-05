@@ -12,6 +12,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.StoragePool;
@@ -132,18 +133,16 @@ public class StorageOperateImpl implements StorageOperate {
         return null;
     }
 
-    private StoragePool findStorage(Connect connect, String name) throws Exception {
-        String[] pools = connect.listStoragePools();
-        boolean isExist = false;
-        for (String pool : pools) {
-            if (Objects.equals(pool, name)) {
-                isExist = true;
-                break;
+    private StoragePool findStorage(Connect connect, String name) {
+        try {
+            StoragePool storagePool = connect.storagePoolLookupByName(name);
+            try {
+                storagePool.refresh(0);
+            } catch (Exception ignored) {
+
             }
-        }
-        if (isExist) {
-            return connect.storagePoolLookupByName(name);
-        } else {
+            return storagePool;
+        } catch (Exception ignored) {
             return null;
         }
     }
