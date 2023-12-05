@@ -14,7 +14,6 @@ import com.hubspot.jinjava.Jinjava;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -34,8 +33,7 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", component.getGuestId()));
         guestNetworkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         String[] iptablesRules = null;
-        for (int i = 0; i < guestNetworkList.size(); i++) {
-            GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
+        for (GuestNetworkEntity guestNetwork : guestNetworkList) {
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
             int index = guestNetwork.getDeviceId();
             String networkConfig;

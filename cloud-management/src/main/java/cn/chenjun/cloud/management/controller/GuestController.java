@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 @LoginRequire
 @RestController
-public class GuestController {
+public class GuestController extends BaseController {
 
     @Autowired
     private GuestService guestService;
@@ -29,37 +29,37 @@ public class GuestController {
 
     @GetMapping("/api/guest/all")
     public ResultUtil<List<GuestModel>> listGuests() {
-        return this.guestService.listGuests();
+        return this.lockRun(() -> this.guestService.listGuests());
     }
 
     @GetMapping("/api/guest/system")
     public ResultUtil<List<GuestModel>> listSystemGuests(@RequestParam("networkId") int networkId) {
-        return this.guestService.listSystemGuests(networkId);
+        return this.lockRun(() -> this.guestService.listSystemGuests(networkId));
     }
 
     @GetMapping("/api/guest/user")
     public ResultUtil<List<GuestModel>> listUserGuests() {
-        return this.guestService.listUserGuests();
+        return this.lockRun(() -> this.guestService.listUserGuests());
     }
 
     @GetMapping("/api/guest/info")
     public ResultUtil<GuestModel> getGuestInfo(@RequestParam("guestId") int guestId) {
-        return this.guestService.getGuestInfo(guestId);
+        return this.lockRun(() -> this.guestService.getGuestInfo(guestId));
     }
 
     @GetMapping("/api/guest/vnc/password")
     public ResultUtil<String> getVncPassword(@RequestParam("guestId") int guestId) {
-        return this.guestService.getVncPassword(guestId);
+        return this.lockRun(() -> this.guestService.getVncPassword(guestId));
     }
 
     @GetMapping("/api/guest/network")
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(@RequestParam("guestId") int guestId) {
-        return this.networkService.listGuestNetworks(guestId);
+        return this.lockRun(() -> this.networkService.listGuestNetworks(guestId));
     }
 
     @GetMapping("/api/guest/volume")
     public ResultUtil<List<VolumeModel>> listGuestVolumes(@RequestParam("guestId") int guestId) {
-        return this.volumeService.listGuestVolumes(guestId);
+        return this.lockRun(() -> this.volumeService.listGuestVolumes(guestId));
     }
 
     @PutMapping("/api/guest/create")
@@ -80,7 +80,7 @@ public class GuestController {
                                               @RequestParam("size") long size) {
 
 
-        return this.guestService.createGuest(groupId, description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, password, size * 1024 * 1024 * 1024);
+        return this.lockRun(() -> this.guestService.createGuest(groupId, description, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, password, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/reinstall")
@@ -95,66 +95,66 @@ public class GuestController {
                                             @RequestParam("size") long size) {
 
 
-        return this.guestService.reInstall(guestId, password, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size* 1024 * 1024 * 1024);
+        return this.lockRun(() -> this.guestService.reInstall(guestId, password, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/start/batch")
     public ResultUtil<List<GuestModel>> batchStart(@RequestParam("guestIds") String guestIdsStr) {
         List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-        return this.guestService.batchStart(guestIds);
+        return this.lockRun(() -> this.guestService.batchStart(guestIds));
     }
 
     @PostMapping("/api/guest/start")
     public ResultUtil<GuestModel> start(@RequestParam("guestId") int guestId,
                                         @RequestParam("hostId") int hostId) {
-        return this.guestService.start(guestId, hostId);
+        return this.lockRun(() -> this.guestService.start(guestId, hostId));
 
     }
 
     @PostMapping("/api/guest/reboot")
     public ResultUtil<GuestModel> reboot(@RequestParam("guestId") int guestId) {
-        return this.guestService.reboot(guestId);
+        return this.lockRun(() -> this.guestService.reboot(guestId));
     }
 
     @PostMapping("/api/guest/migrate")
     public ResultUtil<GuestModel> migrate(@RequestParam("guestId") int guestId, @RequestParam("hostId") int hostId) {
-        return this.guestService.migrate(guestId, hostId);
+        return this.lockRun(() -> this.guestService.migrate(guestId, hostId));
     }
 
     @PostMapping("/api/guest/shutdown/batch")
     public ResultUtil<List<GuestModel>> batchStop(@RequestParam("guestIds") String guestIdsStr) {
         List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-        return this.guestService.batchStop(guestIds);
+        return this.lockRun(() -> this.guestService.batchStop(guestIds));
     }
 
     @PostMapping("/api/guest/shutdown")
     public ResultUtil<GuestModel> shutdown(@RequestParam("guestId") int guestId,
                                            @RequestParam("force") boolean force) {
-        return this.guestService.shutdown(guestId, force);
+        return this.lockRun(() -> this.guestService.shutdown(guestId, force));
 
     }
 
     @PostMapping("/api/guest/cd/attach")
     public ResultUtil<GuestModel> attachCdRoom(@RequestParam("guestId") int guestId,
                                                @RequestParam("templateId") int templateId) {
-        return this.guestService.attachCdRoom(guestId, templateId);
+        return this.lockRun(() -> this.guestService.attachCdRoom(guestId, templateId));
     }
 
     @PostMapping("/api/guest/cd/detach")
     public ResultUtil<GuestModel> detachCdRoom(@RequestParam("guestId") int guestId) {
-        return this.guestService.detachCdRoom(guestId);
+        return this.lockRun(() -> this.guestService.detachCdRoom(guestId));
     }
 
     @PostMapping("/api/guest/disk/attach")
     public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
                                                          @RequestParam("volumeId") int volumeId) {
-        return this.guestService.attachDisk(guestId, volumeId);
+        return this.lockRun(() -> this.guestService.attachDisk(guestId, volumeId));
     }
 
     @PostMapping("/api/guest/disk/detach")
     public ResultUtil<GuestModel> detachDisk(@RequestParam("guestId") int guestId,
                                              @RequestParam("guestDiskId") int guestDiskId) {
-        return this.guestService.detachDisk(guestId, guestDiskId);
+        return this.lockRun(() -> this.guestService.detachDisk(guestId, guestDiskId));
     }
 
     @PostMapping("/api/guest/network/attach")
@@ -162,7 +162,7 @@ public class GuestController {
     public ResultUtil<AttachGuestNetworkModel> attachNetwork(@RequestParam("guestId") int guestId,
                                                              @RequestParam("networkId") int networkId,
                                                              @RequestParam("driveType") String driveType) {
-        return this.guestService.attachNetwork(guestId, networkId, driveType);
+        return this.lockRun(() -> this.guestService.attachNetwork(guestId, networkId, driveType));
 
     }
 
@@ -170,7 +170,7 @@ public class GuestController {
 
     public ResultUtil<GuestModel> detachNetwork(@RequestParam("guestId") int guestId,
                                                 @RequestParam("guestNetworkId") int guestNetworkId) {
-        return this.guestService.detachNetwork(guestId, guestNetworkId);
+        return this.lockRun(() -> this.guestService.detachNetwork(guestId, guestNetworkId));
     }
 
     @PostMapping("/api/guest/modify")
@@ -179,12 +179,12 @@ public class GuestController {
                                               @RequestParam("description") String description,
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("groupId") int groupId) {
-        return this.guestService.modifyGuest(guestId, groupId, busType, description, schemeId);
+        return this.lockRun(() -> this.guestService.modifyGuest(guestId, groupId, busType, description, schemeId));
     }
 
     @DeleteMapping("/api/guest/destroy")
     public ResultUtil<Void> destroyGuest(@RequestParam("guestId") int guestId) {
-        return this.guestService.destroyGuest(guestId);
+        return this.lockRun(() -> this.guestService.destroyGuest(guestId));
     }
 
 }

@@ -2,7 +2,6 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
@@ -28,7 +27,6 @@ public class AllocateService extends AbstractService {
     @Autowired
     private ApplicationConfig applicationConfig;
 
-    @Lock
     public StorageEntity allocateStorage(int storageId) {
         StorageEntity storage;
         if (storageId > 0) {
@@ -44,7 +42,6 @@ public class AllocateService extends AbstractService {
         return storage;
     }
 
-    @Lock
     public GuestNetworkEntity allocateNetwork(int networkId) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("network_id", networkId);
@@ -57,7 +54,6 @@ public class AllocateService extends AbstractService {
         return guestNetwork;
     }
 
-    @Lock
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
@@ -96,7 +92,6 @@ public class AllocateService extends AbstractService {
         return host.getTotalCpu() > allocateCpu && host.getTotalMemory() > allocationMemory;
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public void initHostAllocate() {
         List<HostEntity> hosts = this.hostMapper.selectList(new QueryWrapper<>());

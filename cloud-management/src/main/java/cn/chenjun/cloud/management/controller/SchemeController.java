@@ -14,18 +14,18 @@ import java.util.List;
  */
 @LoginRequire
 @RestController
-public class SchemeController {
+public class SchemeController extends BaseController {
     @Autowired
     private SchemeService schemeService;
 
     @GetMapping("/api/scheme/info")
     public ResultUtil<SchemeModel> getSchemeInfo(@RequestParam("schemeId") int schemeId) {
-        return this.schemeService.getSchemeInfo(schemeId);
+        return this.lockRun(() -> this.schemeService.getSchemeInfo(schemeId));
     }
 
     @GetMapping("/api/scheme/all")
     public ResultUtil<List<SchemeModel>> listScheme() {
-        return this.schemeService.listScheme();
+        return this.lockRun(() -> this.schemeService.listScheme());
     }
 
     @PutMapping("/api/scheme/create")
@@ -36,7 +36,7 @@ public class SchemeController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.schemeService.createScheme(name, cpu, memory * 1024, speed, sockets, cores, threads);
+        return this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, speed, sockets, cores, threads));
     }
 
 
@@ -49,12 +49,12 @@ public class SchemeController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, speed, sockets, cores, threads);
+        return this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, speed, sockets, cores, threads));
     }
 
 
     @DeleteMapping("/api/scheme/destroy")
     public ResultUtil<Void> destroyScheme(@RequestParam("schemeId") int schemeId) {
-        return this.schemeService.destroyScheme(schemeId);
+        return this.lockRun(() -> this.schemeService.destroyScheme(schemeId));
     }
 }

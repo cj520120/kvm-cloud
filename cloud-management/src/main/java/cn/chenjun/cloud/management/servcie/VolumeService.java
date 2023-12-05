@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
@@ -56,7 +55,6 @@ public class VolumeService extends AbstractService {
     }
 
 
-    @Lock
     public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
         List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
         diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
@@ -76,14 +74,12 @@ public class VolumeService extends AbstractService {
 
     }
 
-    @Lock
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock
     public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
         List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn("volume_id", volumeIds));
@@ -91,7 +87,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
@@ -101,7 +96,6 @@ public class VolumeService extends AbstractService {
     }
 
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, String volumeType, long volumeSize) {
         if (StringUtils.isEmpty(description)) {
@@ -133,7 +127,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(model);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId, String volumeType) {
         if (StringUtils.isEmpty(volumeType)) {
@@ -181,7 +174,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) {
 
@@ -202,7 +194,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(this.initVolume(volume));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
         if (StringUtils.isEmpty(volumeType)) {
@@ -250,7 +241,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<VolumeModel>> batchDestroyVolume(List<Integer> volumeIds) {
         List<VolumeModel> models = new ArrayList<>(volumeIds.size());
@@ -264,7 +254,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
@@ -293,7 +282,6 @@ public class VolumeService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<SnapshotModel>> listSnapshot() {
         List<SnapshotVolumeEntity> snapshotVolumeList = this.snapshotVolumeMapper.selectList(new QueryWrapper<>());
@@ -301,7 +289,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> getSnapshotInfo(int snapshotVolumeId) {
         SnapshotVolumeEntity snapshotVolume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);
@@ -312,7 +299,6 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(this.initSnapshot(snapshotVolume));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId, String snapshotName, String snapshotVolumeType) {
         if (StringUtils.isEmpty(snapshotName)) {
@@ -357,7 +343,6 @@ public class VolumeService extends AbstractService {
     }
 
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SnapshotModel> destroySnapshot(int snapshotVolumeId) {
         SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);

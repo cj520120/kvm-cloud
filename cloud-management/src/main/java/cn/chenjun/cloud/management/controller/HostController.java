@@ -14,18 +14,18 @@ import java.util.List;
  */
 @LoginRequire
 @RestController
-public class HostController {
+public class HostController extends BaseController {
     @Autowired
     private HostService hostService;
 
     @GetMapping("/api/host/all")
     public ResultUtil<List<HostModel>> listAllHost() {
-        return hostService.listAllHost();
+        return this.lockRun(() -> hostService.listAllHost());
     }
 
     @GetMapping("/api/host/info")
     public ResultUtil<HostModel> getHostInfo(@RequestParam("hostId") int hostId) {
-        return hostService.getHostInfo(hostId);
+        return this.lockRun(() -> hostService.getHostInfo(hostId));
     }
 
     @PutMapping("/api/host/create")
@@ -33,21 +33,21 @@ public class HostController {
                                             @RequestParam("hostIp") String hostIp,
                                             @RequestParam("uri") String uri,
                                             @RequestParam("nic") String nic) {
-        return hostService.createHost(displayName, hostIp, uri, nic);
+        return this.lockRun(() -> hostService.createHost(displayName, hostIp, uri, nic));
     }
 
     @PostMapping("/api/host/register")
     public ResultUtil<HostModel> registerHost(@RequestParam("hostId") int hostId) {
-        return hostService.registerHost(hostId);
+        return this.lockRun(() -> hostService.registerHost(hostId));
     }
 
     @PostMapping("/api/host/maintenance")
     public ResultUtil<HostModel> maintenanceHost(@RequestParam("hostId") int hostId) {
-        return hostService.maintenanceHost(hostId);
+        return this.lockRun(() -> hostService.maintenanceHost(hostId));
     }
 
     @DeleteMapping("/api/host/destroy")
     public ResultUtil<Void> destroyHost(@RequestParam("hostId") int hostId) {
-        return hostService.destroyHost(hostId);
+        return this.lockRun(() -> hostService.destroyHost(hostId));
     }
 }

@@ -7,13 +7,12 @@ import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.hubspot.jinjava.Jinjava;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author chenjun
@@ -33,6 +32,12 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
         String cloudServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/cloud_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String cloudService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/cloud_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String cloudPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/cloud_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        Map<String, Object> map = new HashMap<>(3);
+        map.put("managerUri", applicationConfig.getManagerUri());
+        map.put("secret", network.getSecret());
+        map.put("networkId", network.getNetworkId());
+        Jinjava jinjava = new Jinjava();
+        cloudPython = jinjava.render(cloudPython, map);
 
         cloudPython = String.format(cloudPython, applicationConfig.getManagerUri(), network.getSecret(), network.getNetworkId());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/cloud-service/cloud.py").fileBody(cloudPython).build())).build());

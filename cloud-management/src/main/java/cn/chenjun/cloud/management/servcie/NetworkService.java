@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.DnsEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -35,7 +34,6 @@ public class NetworkService extends AbstractService {
     @Autowired
     private DnsMapper dnsMapper;
 
-    @Lock
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(int guestId) {
         List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
         networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
@@ -43,7 +41,6 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     public ResultUtil<NetworkModel> getNetworkInfo(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
         if (network == null) {
@@ -52,14 +49,12 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock
     public ResultUtil<List<NetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());
         List<NetworkModel> models = networkList.stream().map(this::initGuestNetwork).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId) {
 
@@ -132,7 +127,6 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> registerNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -147,7 +141,6 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> maintenanceNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
@@ -160,7 +153,6 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<NetworkModel> destroyNetwork(int networkId) {
         NetworkEntity network = this.networkMapper.selectById(networkId);

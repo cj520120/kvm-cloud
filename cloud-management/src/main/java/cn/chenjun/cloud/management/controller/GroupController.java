@@ -9,34 +9,37 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * @author chenjun
+ */
 @LoginRequire
 @RestController
-public class GroupController {
+public class GroupController extends BaseController {
     @Autowired
     private GroupService groupService;
 
     @GetMapping("/api/group/all")
     public ResultUtil<List<GroupModel>> listGroups() {
-        return this.groupService.listGroups();
+        return this.lockRun(() -> this.groupService.listGroups());
     }
 
     @GetMapping("/api/group/info")
     public ResultUtil<GroupModel> getGroupInfo(@RequestParam("groupId") int groupId) {
-        return this.groupService.getGroup(groupId);
+        return this.lockRun(() -> this.groupService.getGroup(groupId));
     }
 
     @PutMapping("/api/group/create")
     public ResultUtil<GroupModel> createGroup(@RequestParam("groupName") String groupName) {
-        return this.groupService.createGroup(groupName);
+        return this.lockRun(() -> this.groupService.createGroup(groupName));
     }
 
     @PostMapping("/api/group/update")
     public ResultUtil<GroupModel> updateGroup(@RequestParam("groupId") int groupId, @RequestParam("groupName") String groupName) {
-        return this.groupService.updateGroup(groupId, groupName);
+        return this.lockRun(() -> this.groupService.updateGroup(groupId, groupName));
     }
 
     @DeleteMapping("/api/group/destroy")
     public ResultUtil<Void> deleteGroup(@RequestParam("groupId") int groupId) {
-        return this.groupService.deleteGroup(groupId);
+        return this.lockRun(() -> this.groupService.deleteGroup(groupId));
     }
 }

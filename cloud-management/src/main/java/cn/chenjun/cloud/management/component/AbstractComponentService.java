@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.component;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
@@ -43,7 +42,6 @@ public abstract class AbstractComponentService extends AbstractService {
     /**
      * 创建系统组件
      */
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public void checkAndStart(int networkId) {
         NetworkEntity network = networkMapper.selectById(networkId);

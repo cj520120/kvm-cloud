@@ -4,7 +4,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.SchemeEntity;
 import cn.chenjun.cloud.management.model.SchemeModel;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 public class SchemeService extends AbstractService {
 
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> getSchemeInfo(int schemeId) {
         SchemeEntity entity = this.schemeMapper.selectById(schemeId);
@@ -33,7 +31,6 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<SchemeModel>> listScheme() {
         List<SchemeEntity> list = this.schemeMapper.selectList(new QueryWrapper<>());
@@ -41,7 +38,6 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> createScheme(String name, int cpu, long memory, int speed, int sockets, int cores, int threads) {
         if (StringUtils.isEmpty(name)) {
@@ -72,7 +68,6 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> updateScheme(int schemeId, String name, int cpu, long memory, int speed, int sockets, int cores, int threads) {
         if (StringUtils.isEmpty(name)) {
@@ -113,7 +108,6 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyScheme(int schemeId) {
         this.schemeMapper.deleteById(schemeId);

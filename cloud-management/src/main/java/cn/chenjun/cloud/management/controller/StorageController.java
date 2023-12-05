@@ -14,40 +14,40 @@ import java.util.List;
  */
 @LoginRequire
 @RestController
-public class StorageController {
+public class StorageController extends BaseController {
     @Autowired
     private StorageService storageService;
 
     @GetMapping("/api/storage/all")
     public ResultUtil<List<StorageModel>> listStorage() {
-        return storageService.listStorage();
+        return this.lockRun(() -> storageService.listStorage());
     }
 
     @GetMapping("/api/storage/info")
     public ResultUtil<StorageModel> getStorageInfo(@RequestParam("storageId") int storageId) {
-        return storageService.getStorageInfo(storageId);
+        return this.lockRun(() -> storageService.getStorageInfo(storageId));
     }
 
     @PutMapping("/api/storage/create")
     public ResultUtil<StorageModel> createStorage(@RequestParam("description") String description,
                                                   @RequestParam("type") String type,
                                                   @RequestParam("param") String param) {
-        return storageService.createStorage(description, type, param);
+        return this.lockRun(() -> storageService.createStorage(description, type, param));
     }
 
     @PostMapping("/api/storage/register")
     public ResultUtil<StorageModel> registerStorage(int storageId) {
-        return storageService.registerStorage(storageId);
+        return this.lockRun(() -> storageService.registerStorage(storageId));
     }
 
     @PostMapping("/api/storage/maintenance")
     public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
-        return storageService.maintenanceStorage(storageId);
+        return this.lockRun(() -> storageService.maintenanceStorage(storageId));
     }
 
     @DeleteMapping("/api/storage/destroy")
     public ResultUtil<StorageModel> destroyStorage(int storageId) {
-        return storageService.destroyStorage(storageId);
+        return this.lockRun(() -> storageService.destroyStorage(storageId));
 
     }
 

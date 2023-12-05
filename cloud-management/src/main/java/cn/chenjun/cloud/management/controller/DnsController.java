@@ -13,7 +13,7 @@ import java.util.List;
  * @author chenjun
  */
 @RestController
-public class DnsController {
+public class DnsController extends BaseController {
     @Autowired
     private DnsService dnsService;
 
@@ -21,7 +21,9 @@ public class DnsController {
     @LoginRequire
     @GetMapping("/api/dns/list")
     public ResultUtil<List<DnsModel>> listDnsByNetworkId(@RequestParam("networkId") int networkId) {
-        return this.dnsService.listDnsByNetworkId(networkId);
+
+        return this.lockRun(() -> this.dnsService.listDnsByNetworkId(networkId));
+
     }
 
     @LoginRequire
@@ -29,13 +31,13 @@ public class DnsController {
     public ResultUtil<DnsModel> createDns(@RequestParam("networkId") int networkId,
                                           @RequestParam("domain") String domain,
                                           @RequestParam("ip") String ip) {
-        return this.dnsService.createDns(networkId, domain, ip);
+        return this.lockRun(() -> this.dnsService.createDns(networkId, domain, ip));
     }
 
     @LoginRequire
     @DeleteMapping("/api/dns/destroy")
     public ResultUtil<Void> destroyDns(@RequestParam("dnsId") int dnsId) {
-        return this.dnsService.deleteDns(dnsId);
+        return this.lockRun(() -> this.dnsService.deleteDns(dnsId));
     }
 
 

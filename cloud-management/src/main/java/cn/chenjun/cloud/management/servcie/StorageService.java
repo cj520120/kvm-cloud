@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.model.StorageModel;
@@ -28,14 +27,12 @@ import java.util.stream.Collectors;
 public class StorageService extends AbstractService {
 
 
-    @Lock
     public ResultUtil<List<StorageModel>> listStorage() {
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>());
         List<StorageModel> models = storageList.stream().map(this::initStorageModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock
     public ResultUtil<StorageModel> getStorageInfo(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {
@@ -44,7 +41,6 @@ public class StorageService extends AbstractService {
         return ResultUtil.success(this.initStorageModel(storage));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> createStorage(String description, String type, String param) {
         if (StringUtils.isEmpty(description)) {
@@ -75,7 +71,6 @@ public class StorageService extends AbstractService {
         return ResultUtil.success(this.initStorageModel(storage));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> registerStorage(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
@@ -98,7 +93,6 @@ public class StorageService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
@@ -118,7 +112,6 @@ public class StorageService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> destroyStorage(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);

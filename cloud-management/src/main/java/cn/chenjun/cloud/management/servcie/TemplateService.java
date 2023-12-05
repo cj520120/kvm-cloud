@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
@@ -39,14 +38,12 @@ public class TemplateService extends AbstractService {
         return guestMapper.selectById(guestDisk.getGuestId());
     }
 
-    @Lock
     public ResultUtil<List<TemplateModel>> listTemplate() {
         List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<>());
         List<TemplateModel> models = templateList.stream().map(this::initTemplateModel).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Lock
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
         TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id", templateId));
         if (template == null) {
@@ -55,7 +52,6 @@ public class TemplateService extends AbstractService {
         return ResultUtil.success(this.initTemplateModel(template));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createTemplate(String name, String uri, int templateType, String volumeType) {
         if (StringUtils.isEmpty(name)) {
@@ -73,7 +69,6 @@ public class TemplateService extends AbstractService {
         return this.downloadTemplate(template.getTemplateId());
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> downloadTemplate(int templateId) {
         StorageEntity storage = allocateService.allocateStorage(0);
@@ -107,7 +102,6 @@ public class TemplateService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
@@ -158,7 +152,6 @@ public class TemplateService extends AbstractService {
 
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> destroyTemplate(int templateId) {
         TemplateEntity template = this.templateMapper.selectById(templateId);

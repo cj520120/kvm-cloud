@@ -14,18 +14,18 @@ import java.util.List;
  */
 @LoginRequire
 @RestController
-public class NetworkController {
+public class NetworkController extends BaseController {
     @Autowired
     private NetworkService networkService;
 
     @GetMapping("/api/network/info")
     public ResultUtil<NetworkModel> getNetworkInfo(@RequestParam("networkId") int networkId) {
-        return networkService.getNetworkInfo(networkId);
+        return this.lockRun(() -> networkService.getNetworkInfo(networkId));
     }
 
     @GetMapping("/api/network/all")
     public ResultUtil<List<NetworkModel>> listNetwork() {
-        return networkService.listNetwork();
+        return this.lockRun(() -> networkService.listNetwork());
     }
 
     @PutMapping("/api/network/create")
@@ -42,21 +42,21 @@ public class NetworkController {
                                                   @RequestParam("type") int type,
                                                   @RequestParam("vlanId") int vlanId,
                                                   @RequestParam("basicNetworkId") int basicNetworkId) {
-        return networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId);
+        return this.lockRun(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId));
     }
 
     @PostMapping("/api/network/register")
     public ResultUtil<NetworkModel> registerNetwork(@RequestParam("networkId") int networkId) {
-        return networkService.registerNetwork(networkId);
+        return this.lockRun(() -> networkService.registerNetwork(networkId));
     }
 
     @PostMapping("/api/network/maintenance")
     public ResultUtil<NetworkModel> maintenanceNetwork(@RequestParam("networkId") int networkId) {
-        return networkService.maintenanceNetwork(networkId);
+        return this.lockRun(() -> networkService.maintenanceNetwork(networkId));
     }
 
     @DeleteMapping("/api/network/destroy")
     public ResultUtil<NetworkModel> destroyNetwork(@RequestParam("networkId") int networkId) {
-        return networkService.destroyNetwork(networkId);
+        return this.lockRun(() -> networkService.destroyNetwork(networkId));
     }
 }

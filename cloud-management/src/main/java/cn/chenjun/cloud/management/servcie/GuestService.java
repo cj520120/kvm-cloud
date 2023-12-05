@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.Lock;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
@@ -88,7 +87,6 @@ public class GuestService extends AbstractService {
     }
 
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
@@ -97,7 +95,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listUserGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("guest_type", Constant.GuestType.USER));
@@ -116,7 +113,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listSystemGuests(int networkId) {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("network_id", networkId).eq("guest_type", Constant.GuestType.SYSTEM));
@@ -124,7 +120,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -134,7 +129,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(int groupId, String description, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
@@ -252,7 +246,6 @@ public class GuestService extends AbstractService {
         this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> reInstall(int guestId, String password,int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
@@ -329,7 +322,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> batchStart(List<Integer> guestIds) {
         List<GuestModel> models = new ArrayList<>(guestIds.size());
@@ -344,7 +336,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> batchStop(List<Integer> guestIds) {
         List<GuestModel> models = new ArrayList<>(guestIds.size());
@@ -359,7 +350,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -395,7 +385,6 @@ public class GuestService extends AbstractService {
 
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> reboot(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -412,7 +401,6 @@ public class GuestService extends AbstractService {
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> migrate (int guestId,int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -436,7 +424,6 @@ public class GuestService extends AbstractService {
         throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> shutdown(int guestId, boolean force) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -460,7 +447,6 @@ public class GuestService extends AbstractService {
     }
 
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> attachCdRoom(int guestId, int templateId) {
         if (templateId <= 0) {
@@ -483,7 +469,6 @@ public class GuestService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachCdRoom(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -503,7 +488,6 @@ public class GuestService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId) {
         if (volumeId <= 0) {
@@ -550,7 +534,6 @@ public class GuestService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachDisk(int guestId, int guestDiskId) {
         if (guestDiskId <= 0) {
@@ -588,7 +571,6 @@ public class GuestService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<AttachGuestNetworkModel> attachNetwork(int guestId, int networkId, String driveType) {
         if (networkId <= 0) {
@@ -633,7 +615,6 @@ public class GuestService extends AbstractService {
 
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> detachNetwork(int guestId, int guestNetworkId) {
         if (guestNetworkId <= 0) {
@@ -659,7 +640,6 @@ public class GuestService extends AbstractService {
         }
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyGuest(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -712,7 +692,6 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(guestVnc.getPassword());
     }
 
-    @Lock
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> modifyGuest(int guestId, int groupId, String busType, String description, int schemeId) {
         if (StringUtils.isEmpty(description)) {
