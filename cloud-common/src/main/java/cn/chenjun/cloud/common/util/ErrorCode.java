@@ -76,6 +76,7 @@ public final class ErrorCode {
      */
     public static final int BASE_DNS_ERROR = BASE_ERROR * 11;
     public static final int DNS_NOT_FOUND = BASE_DNS_ERROR + 1;
+
     private ErrorCode() {
 
     }

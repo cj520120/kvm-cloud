@@ -34,14 +34,14 @@ import java.util.stream.Collectors;
 public class VolumeOperateImpl implements VolumeOperate {
     @Synchronized
     private StoragePool getStorage(Connect connect, String name) {
-
-
         try {
             StoragePool storagePool = connect.storagePoolLookupByName(name);
-            try {
-                storagePool.refresh(0);
-            } catch (Exception ignored) {
+            synchronized (name.intern()) {
+                try {
+                    storagePool.refresh(0);
+                } catch (Exception ignored) {
 
+                }
             }
             return storagePool;
         } catch (Exception ignored) {

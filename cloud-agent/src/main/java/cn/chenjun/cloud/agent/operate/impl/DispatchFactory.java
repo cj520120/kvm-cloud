@@ -10,6 +10,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -43,7 +44,11 @@ public class DispatchFactory implements BeanPostProcessor {
                     args[0] = connect;
                     args[1] = param;
                     method.setAccessible(true);
-                    return method.invoke(bean, args);
+                    try {
+                        return method.invoke(bean, args);
+                    } catch (InvocationTargetException err) {
+                        throw (Exception) err.getCause();
+                    }
                 };
                 Dispatch<Object, Object> dispatch = Dispatch.builder().paramType(paramType).consumer(consumer).build();
                 dispatchMap.put(dispatchBind.command(), dispatch);

@@ -37,7 +37,7 @@ app:
     gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
   work:
     thread:
-      size: 16
+      size: 1
 
 oauth2:
   auth-uri: https://192.168.1.2:8083/oauth2/authorize

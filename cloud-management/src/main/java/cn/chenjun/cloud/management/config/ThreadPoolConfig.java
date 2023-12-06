@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class ThreadPoolConfig {
     @Bean(destroyMethod = "shutdown")
     @Primary
-    public ScheduledExecutorService workExecutorService(@Value("${app.work.thread.size:8}") int size) {
+    public ScheduledExecutorService workExecutorService(@Value("${app.work.thread.size:1}") int size) {
         return new ScheduledThreadPoolExecutor(Math.max(size, 1), new BasicThreadFactory.Builder().namingPattern("executor-pool-%d").daemon(true).build());
     }
 

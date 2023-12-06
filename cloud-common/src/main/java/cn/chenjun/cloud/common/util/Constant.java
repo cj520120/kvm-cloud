@@ -89,7 +89,6 @@ public class Constant {
         public static final int WEB_NOTIFY = 103;
 
 
-
         public static final int COMPONENT_CONNECT = 200;
         public static final int COMPONENT_CONNECT_SUCCESS = 201;
         public static final int COMPONENT_CONNECT_FAIL = 202;
