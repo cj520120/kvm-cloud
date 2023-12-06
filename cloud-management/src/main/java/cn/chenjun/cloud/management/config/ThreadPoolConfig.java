@@ -15,14 +15,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  */
 @Configuration
 public class ThreadPoolConfig {
-    @Bean(destroyMethod = "shutdown", name = "workExecutorService")
+    @Bean(destroyMethod = "shutdown")
     @Primary
     public ScheduledExecutorService workExecutorService(@Value("${app.work.thread.size:8}") int size) {
         return new ScheduledThreadPoolExecutor(Math.max(size, 1), new BasicThreadFactory.Builder().namingPattern("executor-pool-%d").daemon(true).build());
     }
 
-    @Bean(destroyMethod = "shutdown", name = "bossExecutorService")
-    public ScheduledExecutorService bossExecutorService(@Value("${app.boss.thread.size:2}") int size) {
-        return new ScheduledThreadPoolExecutor(Math.max(size, 1), new BasicThreadFactory.Builder().namingPattern("executor-pool-%d").daemon(true).build());
-    }
 }

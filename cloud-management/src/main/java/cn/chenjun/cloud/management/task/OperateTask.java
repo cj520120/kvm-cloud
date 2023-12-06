@@ -14,12 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,9 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class OperateTask extends AbstractTask {
     private final static int TASK_TIMEOUT_SECONDS = 30;
-    @Autowired
-    @Qualifier("workExecutorService")
-    private ScheduledExecutorService workExecutor;
+
 
     @Autowired
     private OperateEngine operateEngine;
@@ -68,8 +64,7 @@ public class OperateTask extends AbstractTask {
         wrapper.last("limit 0,10");
         List<TaskEntity> taskList = this.taskMapper.selectList(wrapper);
         for (TaskEntity entity : taskList) {
-            workExecutor.submit(() -> {
-                try {
+            try {
                     Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS));
                     if (this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0) {
                         Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
@@ -88,8 +83,7 @@ public class OperateTask extends AbstractTask {
                         resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                     }
                     this.onTaskFinish(entity.getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
-                }
-            });
+            }
         }
 
     }
@@ -102,16 +96,14 @@ public class OperateTask extends AbstractTask {
         try {
             Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(task.getType());
             BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(task.getParam(), paramClass);
-            workExecutor.submit(() -> {
-                try {
+            try {
                     this.lockRun(() -> {
                         this.operateEngine.onFinish(operateParam, result);
                     });
                     this.taskMapper.deleteById(taskId);
                 } catch (Exception err) {
                     log.error("任务回调失败.param={} result={}", operateParam, result, err);
-                }
-            });
+            }
         } catch (Exception err) {
             log.error("解析任务参数出错:task={} result={}", task, result);
         }
