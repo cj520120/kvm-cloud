@@ -36,7 +36,7 @@ public class DispatchFactory implements BeanPostProcessor {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "处理命令必须为两个参数");
                 }
                 if (!parameters[0].getType().isAssignableFrom(Connect.class)) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "定一个参数必须为:" + Connect.class.getName());
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "第一个参数必须为:" + Connect.class.getName());
                 }
                 Type paramType = parameters[1].getParameterizedType();
                 Consumer<Object, Object> consumer = (connect, param) -> {
