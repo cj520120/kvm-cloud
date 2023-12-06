@@ -29,8 +29,8 @@ public class OperateController {
 
     @SignRequire
     @PostMapping("/api/operate")
-    public ResultUtil<?> execute(@RequestParam("taskId") String taskId, @RequestParam("command") String command, @RequestParam("data") String data) {
-        return dispatch.dispatch(taskId, command, data);
+    public ResultUtil<Void> submitTask(@RequestParam("data") String data) {
+        return dispatch.submitTask(data);
     }
 
 }

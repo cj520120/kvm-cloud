@@ -38,7 +38,7 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
             Method method = handlerMethod.getMethod();
             if (method.isAnnotationPresent(SignRequire.class)) {
                 SignRequire require = method.getAnnotation(SignRequire.class);
-                Map<String, Object> map = new HashMap<>(4);
+                Map<String, Object> map = new HashMap<>(0);
                 Enumeration<String> it = httpServletRequest.getParameterNames();
                 while (it.hasMoreElements()) {
                     String key = it.nextElement();

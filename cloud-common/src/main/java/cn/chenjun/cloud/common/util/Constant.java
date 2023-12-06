@@ -16,7 +16,6 @@ public class Constant {
 
     public static class Command {
         public static final String CHECK_TASK = "CheckTask";
-        public static final String SUBMIT_TASK = "SubmitTask";
         public static final String HOST_INFO = "HostInfo";
         public static final String HOST_INIT = "HostInit";
         public static final String STORAGE_INFO = "StorageInfo";

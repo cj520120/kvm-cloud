@@ -5,7 +5,6 @@ import cn.chenjun.cloud.common.bean.TaskRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
-import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -29,7 +28,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author chenjun
@@ -89,8 +87,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         String nonce = String.valueOf(System.nanoTime());
         Map<String, Object> map = new HashMap<>(6);
         map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
-        map.put("taskId", UUID.randomUUID().toString());
-        map.put("command", Constant.Command.SUBMIT_TASK);
         map.put("timestamp", System.currentTimeMillis());
         try {
             String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);

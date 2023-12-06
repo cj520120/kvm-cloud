@@ -16,4 +16,13 @@ public interface OperateDispatch {
      * @return
      */
     ResultUtil<?> dispatch(String taskId, String command, String data);
+
+
+    /**
+     * 操作分发
+     *
+     * @param data
+     * @return
+     */
+    ResultUtil<Void> submitTask(String data);
 }
