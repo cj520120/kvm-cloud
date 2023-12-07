@@ -47,12 +47,13 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
         map.put("ip", defaultGuestNetwork.getIp());
+        map.put("vip", component.getComponentVip());
         map.put("startIp", network.getStartIp());
         map.put("endIp", network.getEndIp());
         map.put("gateway", component.getComponentVip());
         map.put("mask", network.getMask());
         map.put("domain", network.getDomain());
-        map.put("dnsList", Collections.singletonList(component.getComponentVip()));
+        map.put("dnsList", Arrays.asList(network.getDns().split(",")));
         List<Map<String, Object>> dhcpList = allGuestNetwork.stream().map(guestNetwork -> {
             Map<String, Object> dhcp = new HashMap<>(2);
             dhcp.put("mac", guestNetwork.getMac());
