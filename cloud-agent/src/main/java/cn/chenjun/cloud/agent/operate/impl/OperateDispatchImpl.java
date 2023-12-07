@@ -42,7 +42,6 @@ public class OperateDispatchImpl implements OperateDispatch, BeanPostProcessor {
     @Override
     public ResultUtil<Void> submitTask(String data) {
         TaskRequest task = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
-        TaskIdUtil.push(task.getTaskId());
         log.info("提交异步任务:taskId={},command={},data={}", task.getTaskId(), task.getCommand(), task.getData());
         this.executor.submit(() -> {
             ResultUtil<?> result = null;
@@ -66,7 +65,6 @@ public class OperateDispatchImpl implements OperateDispatch, BeanPostProcessor {
                 } catch (Exception err) {
                     log.error("上报任务出现异常。command={} param={} result={}", task.getCommand(), task.getData(), result, err);
                 } finally {
-                    TaskIdUtil.remove(task.getTaskId());
                     log.info("移除异步任务:{}", task.getTaskId());
                 }
 

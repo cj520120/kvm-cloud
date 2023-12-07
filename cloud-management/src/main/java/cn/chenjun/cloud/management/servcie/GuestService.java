@@ -72,7 +72,7 @@ public class GuestService extends AbstractService {
         if (component == null) {
             return true;
         }
-        GuestEntity vncGuest = this.guestMapper.selectById(component.getGuestId());
+        GuestEntity vncGuest = this.guestMapper.selectById(component.getMasterGuestId());
         return vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING);
     }
 
@@ -177,7 +177,8 @@ public class GuestService extends AbstractService {
 
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
-        guestNetwork.setGuestId(guest.getGuestId());
+        guestNetwork.setAllocateId(guest.getGuestId());
+        guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
@@ -360,16 +361,13 @@ public class GuestService extends AbstractService {
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 this.guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
-                BaseOperateParam operateParam;
-                if (Objects.equals(guest.getType(), Constant.GuestType.SYSTEM)) {
-                    operateParam = StartComponentGuestOperate.builder().hostId(hostId).guestId(guestId)
-                            .taskId(UUID.randomUUID().toString())
-                            .title("启动系统主机[" + guest.getDescription() + "]").build();
-                } else {
-                    operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
-                            .taskId(UUID.randomUUID().toString())
-                            .title("启动客户机[" + guest.getDescription() + "]").build();
+                if (!Objects.equals(guest.getType(), Constant.GuestType.USER)) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "非用户主机由系统管理.");
                 }
+
+                BaseOperateParam operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
+                        .taskId(UUID.randomUUID().toString())
+                        .title("启动客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
@@ -584,7 +582,7 @@ public class GuestService extends AbstractService {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
                 GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
-                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guestId));
                 List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
                 int deviceId = -1;
                 for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
@@ -598,7 +596,8 @@ public class GuestService extends AbstractService {
                 }
                 guestNetwork.setDeviceId(deviceId);
                 guestNetwork.setDriveType(driveType);
-                guestNetwork.setGuestId(guestId);
+                guestNetwork.setAllocateId(guestId);
+                guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
                 this.guestNetworkMapper.updateById(guestNetwork);
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
@@ -625,7 +624,7 @@ public class GuestService extends AbstractService {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
                 GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
-                if (guestNetwork == null || guestNetwork.getGuestId() != guestId) {
+                if (guestNetwork == null || guestNetwork.getAllocateId() != guestId) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前网卡未挂载");
                 }
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
@@ -647,41 +646,27 @@ public class GuestService extends AbstractService {
             return ResultUtil.<Void>builder().code(ErrorCode.GUEST_NOT_FOUND).build();
         }
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.ERROR:
-            case Constant.GuestStatus.STOP:
-                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
-                for (GuestNetworkEntity guestNetwork : guestNetworkList) {
-                    guestNetwork.setGuestId(0);
-                    guestNetwork.setDeviceId(0);
-                    guestNetwork.setDriveType("");
-                    this.guestNetworkMapper.updateById(guestNetwork);
-                }
-                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
-                for (GuestDiskEntity guestDisk : guestDiskList) {
-                    this.guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
-                }
-                if (!guestDiskList.isEmpty()) {
-                    List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList()));
-                    for (VolumeEntity volume : guestVolumeList) {
-                        volume.setStatus(Constant.VolumeStatus.DESTROY);
-                        volumeMapper.updateById(volume);
-                        DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
-                        operateTask.addTask(operate);
-                        this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-                    }
-                }
-                this.guestVncMapper.deleteById(guestId);
-                this.guestMapper.deleteById(guestId);
-                this.guestPasswordMapper.deleteById(guestId);
-                this.componentMapper.delete(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
-                this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestId));
+            case Constant.GuestStatus.ERROR: {
+                guest.setStatus(Constant.GuestStatus.DESTROY);
+                this.guestMapper.updateById(guest);
                 this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                DestroyGuestOperate operate = DestroyGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
+                operateTask.addTask(operate);
+                break;
+            }
+            case Constant.GuestStatus.STOP: {
 
-                this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
-                return ResultUtil.success();
+                guest.setStatus(Constant.GuestStatus.DESTROY);
+                this.guestMapper.updateById(guest);
+                this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                DestroyGuestOperate operate = DestroyGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
+                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? this.applicationConfig.getDestroyDelayMinute() : 0);
+                break;
+            }
             default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
+                return ResultUtil.error(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
         }
+        return ResultUtil.success();
     }
 
     public ResultUtil<String> getVncPassword(int guestId) {

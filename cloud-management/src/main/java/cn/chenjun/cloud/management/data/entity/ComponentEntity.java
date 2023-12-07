@@ -24,8 +24,14 @@ public class ComponentEntity {
     private Integer componentId;
     @TableField("component_type")
     private Integer componentType;
+    @TableField("component_vip")
+    private String componentVip;
     @TableField("network_id")
     private Integer networkId;
-    @TableField("guest_id")
-    private Integer guestId;
+    @TableField("master_guest_id")
+    private Integer masterGuestId;
+    @TableField("component_slave_number")
+    private Integer componentSlaveNumber;
+    @TableField("slave_guest_ids")
+    private String slaveGuestIds;
 }

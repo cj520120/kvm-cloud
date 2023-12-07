@@ -165,7 +165,7 @@ public class TemplateService extends AbstractService {
                 template.setStatus(Constant.TemplateStatus.DESTROY);
                 this.templateMapper.updateById(template);
                 BaseOperateParam operate = DestroyTemplateOperate.builder().taskId(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
-                operateTask.addTask(operate);
+                operateTask.addTask(operate, this.applicationConfig.getDestroyDelayMinute());
                 TemplateModel source = this.initTemplateModel(template);
                 this.eventService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(source);

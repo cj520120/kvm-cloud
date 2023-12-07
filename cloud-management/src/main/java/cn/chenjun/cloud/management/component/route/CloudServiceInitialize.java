@@ -25,7 +25,7 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
     private NetworkMapper networkMapper;
 
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         NetworkEntity network = networkMapper.selectById(component.getNetworkId());
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/cloud-service/"}).checkSuccess(true).build())).build());
@@ -52,6 +52,6 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return 7;
+        return RouteOrder.CLOUD;
     }
 }

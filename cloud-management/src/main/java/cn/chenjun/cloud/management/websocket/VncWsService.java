@@ -8,16 +8,12 @@ import cn.chenjun.cloud.management.websocket.client.VncClient;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_6455;
-import org.java_websocket.handshake.ServerHandshake;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +42,7 @@ public class VncWsService {
             session.close();
             return;
         }
-        guest = guestMapper.selectById(component.getGuestId());
+        guest = guestMapper.selectById(component.getMasterGuestId());
         if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
             session.close();
             return;
@@ -58,7 +54,7 @@ public class VncWsService {
         }
         GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
         NetworkMapper networkMapper = SpringContextUtils.getBean(NetworkMapper.class);
-        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
+        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guest.getGuestId()).eq("allocate_type", Constant.NetworkAllocateType.GUEST));
         String ip = "127.0.0.1";
         for (GuestNetworkEntity guestNetworkEntity : guestNetworkList) {
             ip = guestNetworkEntity.getIp();

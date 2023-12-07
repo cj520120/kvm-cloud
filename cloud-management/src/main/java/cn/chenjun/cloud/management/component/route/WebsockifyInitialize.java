@@ -17,14 +17,14 @@ import java.util.List;
 @Component
 public class WebsockifyInitialize implements RouteComponentQmaInitialize {
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/websockify/token"}).checkSuccess(true).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/websockify/scripts"}).checkSuccess(true).build())).build());
         String websockifyShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/websockify_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String websockifyService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/websockify_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/websockify/scripts/service.sh").fileBody(websockifyShell).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/websockify_service.tpl").fileBody(websockifyService).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/websockify.service").fileBody(websockifyService).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"a+x", "/usr/local/websockify/scripts/service.sh"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"daemon-reload"}).checkSuccess(true).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "websockify"}).checkSuccess(true).build())).build());
@@ -35,6 +35,6 @@ public class WebsockifyInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return 6;
+        return RouteOrder.VNC;
     }
 }

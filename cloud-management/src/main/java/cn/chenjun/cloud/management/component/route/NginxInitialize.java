@@ -21,8 +21,8 @@ public class NginxInitialize implements RouteComponentQmaInitialize {
     @Autowired
     private GuestMapper guestMapper;
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
-        GuestEntity guest = this.guestMapper.selectById(component.getGuestId());
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "nginx"}).checkSuccess(true).build())).build());
         String nginxConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
@@ -38,6 +38,6 @@ public class NginxInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return 8;
+        return RouteOrder.NGINX;
     }
 }

@@ -32,6 +32,7 @@ public class GuestQmaRequest {
     @AllArgsConstructor
     @Builder
     public static class QmaBody {
+        private int index;
         private int command;
         private String data;
     }

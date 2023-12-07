@@ -273,7 +273,7 @@ public class VolumeService extends AbstractService {
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate);
+                operateTask.addTask(operate, this.applicationConfig.getDestroyDelayMinute());
                 VolumeModel source = this.initVolume(volume);
                 this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);
@@ -355,7 +355,7 @@ public class VolumeService extends AbstractService {
                 volume.setStatus(Constant.SnapshotStatus.DESTROY);
                 this.snapshotVolumeMapper.updateById(volume);
                 BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("删除磁盘快照[" + volume.getName() + "]").snapshotVolumeId(snapshotVolumeId).build();
-                operateTask.addTask(operate);
+                operateTask.addTask(operate, this.applicationConfig.getDestroyDelayMinute());
                 SnapshotModel source = this.initSnapshot(volume);
                 this.eventService.publish(NotifyData.<Void>builder().id(snapshotVolumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
                 return ResultUtil.success(source);

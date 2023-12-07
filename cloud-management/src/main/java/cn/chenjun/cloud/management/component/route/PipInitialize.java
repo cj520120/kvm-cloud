@@ -20,7 +20,7 @@ public class PipInitialize implements RouteComponentQmaInitialize {
     private ApplicationConfig applicationConfig;
 
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "python36"}).checkSuccess(true).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "python3-pip"}).checkSuccess(true).build())).build());
@@ -42,6 +42,6 @@ public class PipInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return 3;
+        return RouteOrder.PYTHON_INSTALL;
     }
 }

@@ -75,7 +75,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 .osDisks(disks)
                 .networkInterfaces(networkInterfaces)
                 .vncPassword(guestVncEntity.getPassword())
-                .qmaRequest(this.getStartQmaRequest(guest))
+                .qmaRequest(this.getStartQmaRequest(param))
                 .build();
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
@@ -177,13 +177,13 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         return cdRoom;
     }
 
-    protected GuestQmaRequest getStartQmaRequest(GuestEntity guest) {
+    protected GuestQmaRequest getStartQmaRequest(T param) {
 
         return null;
     }
 
     protected List<OsNic> getGuestNetwork(GuestEntity guest) {
-        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guest.getGuestId()));
+        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guest.getGuestId()).eq("allocate_type", cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<OsNic> networkInterfaces = new ArrayList<>();
         int baseDeviceId = 0;

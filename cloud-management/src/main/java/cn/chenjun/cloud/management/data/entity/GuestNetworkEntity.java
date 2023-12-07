@@ -23,8 +23,10 @@ public class GuestNetworkEntity {
     @TableId(type = IdType.AUTO)
     @TableField("guest_network_id")
     private Integer guestNetworkId;
-    @TableField("guest_id")
-    private Integer guestId;
+    @TableField("allocate_id")
+    private Integer allocateId;
+    @TableField("allocate_type")
+    private Integer allocateType;
     @TableField("network_id")
     private Integer networkId;
     @TableField("device_id")

@@ -27,10 +27,10 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
     private NetworkMapper networkMapper;
 
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         //写入网卡固定IP
-        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", component.getGuestId()));
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guestId).eq("allocate_type", Constant.NetworkAllocateType.GUEST));
         guestNetworkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         String[] iptablesRules = null;
         for (GuestNetworkEntity guestNetwork : guestNetworkList) {
@@ -47,7 +47,7 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(networkConfig).build())).build());
         }
         //重启网卡
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "network"}).checkSuccess(true).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("service").args(new String[]{"network", "restart"}).checkSuccess(true).build())).build());
         if (iptablesRules != null) {
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("iptables").args(iptablesRules).checkSuccess(true).build())).build());
         }
@@ -56,7 +56,7 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return 0;
+        return RouteOrder.NETWORK;
     }
 
     protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns) {

@@ -4,11 +4,9 @@ import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.component.AbstractComponentService;
-import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.operate.bean.StartComponentGuestOperate;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,9 +33,9 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
 
 
     @Override
-    protected GuestQmaRequest getStartQmaRequest(GuestEntity guest) {
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guest.getGuestId()));
-        Optional<AbstractComponentService> componentService = componentServices.stream().filter(t -> Objects.equals(t.getComponentType(), component.getComponentType())).findFirst();
+    protected GuestQmaRequest getStartQmaRequest(StartComponentGuestOperate param) {
+        GuestEntity guest = this.guestMapper.selectById(param.getGuestId());
+        Optional<AbstractComponentService> componentService = componentServices.stream().filter(t -> Objects.equals(t.getComponentType(), param.getComponentType())).findFirst();
         return componentService.map(abstractComponentService -> abstractComponentService.getStartQmaRequest(guest.getNetworkId(), guest.getGuestId())).orElse(null);
     }
 

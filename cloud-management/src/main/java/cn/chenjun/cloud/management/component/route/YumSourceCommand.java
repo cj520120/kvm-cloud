@@ -20,7 +20,7 @@ public class YumSourceCommand implements RouteComponentQmaInitialize {
     protected ApplicationConfig applicationConfig;
 
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         String source = applicationConfig.getYumSource().replace("\r", "").trim();
         if (!StringUtils.isEmpty(source)) {
@@ -36,6 +36,6 @@ public class YumSourceCommand implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return 1;
+        return RouteOrder.YUM_SOURCE;
     }
 }

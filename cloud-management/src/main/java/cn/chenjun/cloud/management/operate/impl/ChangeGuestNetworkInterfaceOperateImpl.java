@@ -32,7 +32,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
     @Override
     public void operate(ChangeGuestNetworkInterfaceOperate param) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
-        GuestEntity guest = guestMapper.selectById(guestNetwork.getGuestId());
+        GuestEntity guest = guestMapper.selectById(guestNetwork.getAllocateId());
         if (guest.getHostId() > 0) {
             HostEntity host = hostMapper.selectById(guest.getHostId());
             NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
@@ -64,7 +64,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
         if (!param.isAttach()) {
             GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
             if (guestNetwork != null) {
-                guestNetwork.setGuestId(0);
+                guestNetwork.setAllocateId(0);
                 guestNetwork.setDeviceId(0);
                 guestNetworkMapper.updateById(guestNetwork);
             }

@@ -18,6 +18,8 @@ export default {
           return "虚拟机错误";
         case 7:
           return "正在迁移";
+        case 8:
+          return "正在销毁";
         default:
           return `未知状态[${guest.status}]`;
       }

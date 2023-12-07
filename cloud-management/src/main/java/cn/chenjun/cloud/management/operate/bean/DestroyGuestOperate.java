@@ -12,6 +12,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StartComponentGuestOperate extends StartGuestOperate {
-    private int componentType;
+public class DestroyGuestOperate extends BaseOperateParam {
+    private int guestId;
 }

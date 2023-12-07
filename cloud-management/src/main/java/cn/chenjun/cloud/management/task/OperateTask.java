@@ -49,6 +49,17 @@ public class OperateTask extends AbstractTask {
         taskMapper.insert(task);
     }
 
+    public void addTask(BaseOperateParam operateParam, int delayMinute) {
+        TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
+                .version(0)
+                .title(operateParam.getTitle())
+                .type(operateParam.getClass().getName())
+                .param(GsonBuilderUtil.create().toJson(operateParam))
+                .expireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(delayMinute)))
+                .createTime(new Date(System.currentTimeMillis()))
+                .build();
+        taskMapper.insert(task);
+    }
     public void keepTask(String taskId) {
         taskMapper.keep(taskId, new Date(System.currentTimeMillis() + + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS)));
     }

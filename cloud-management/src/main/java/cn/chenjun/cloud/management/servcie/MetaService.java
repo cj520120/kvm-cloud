@@ -49,7 +49,7 @@ public class MetaService {
         if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce+":"+ip).equals(sign)) {
             return "";
         }
-        List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestNetwork.getGuestId()));
+        List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestNetwork.getAllocateId()));
         Set<String> metaNames = list.stream().map(t -> t.getMetaKey() + ": " + t.getMetaValue()).collect(Collectors.toSet());
         return String.join("\r\n", metaNames);
     }
@@ -67,7 +67,7 @@ public class MetaService {
         if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce+":"+ip).equals(sign)) {
             return data;
         }
-        GuestPasswordEntity entity = guestPasswordMapper.selectById(guestNetwork.getGuestId());
+        GuestPasswordEntity entity = guestPasswordMapper.selectById(guestNetwork.getAllocateId());
         if (entity == null) {
             return data;
         }

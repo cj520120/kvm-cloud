@@ -6,6 +6,10 @@ package cn.chenjun.cloud.management.util;
 public class Constant {
     public static int MAX_DEVICE_ID = 5;
 
+    public static class NetworkAllocateType {
+        public static final int GUEST = 0;
+        public static final int SYSTEM_VIP = 1;
+    }
     public static class HostStatus {
         public static final int REGISTER = 0;
         public static final int ONLINE = 1;
@@ -62,6 +66,8 @@ public class Constant {
 
         public static final int ERROR = 6;
         public static final int MIGRATE = 7;
+
+        public static final int DESTROY = 8;
     }
 
     public static class TemplateStatus {

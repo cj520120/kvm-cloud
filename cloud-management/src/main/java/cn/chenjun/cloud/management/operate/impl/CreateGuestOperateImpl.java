@@ -6,7 +6,6 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
-import cn.chenjun.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -34,15 +33,16 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         if (guest != null) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 if (param.isStart()) {
-                    guest.setStatus(Constant.GuestStatus.STARTING);
-                    guestMapper.updateById(guest);
-                    BaseOperateParam operateParam;
-                    if (Objects.equals(Constant.GuestType.SYSTEM, guest.getType())) {
-                        operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").guestId(guest.getGuestId()).hostId(param.getHostId()).build();
+                    if (Objects.equals(Constant.GuestType.USER, guest.getType())) {
+                        guest.setStatus(Constant.GuestStatus.STARTING);
+                        guestMapper.updateById(guest);
+                        BaseOperateParam operateParam = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").hostId(param.getHostId()).guestId(param.getGuestId()).build();
+                        this.operateTask.addTask(operateParam);
                     } else {
-                        operateParam = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").hostId(param.getHostId()).guestId(param.getGuestId()).build();
+                        guest.setStatus(Constant.GuestStatus.STOP);
+                        guestMapper.updateById(guest);
                     }
-                    this.operateTask.addTask(operateParam);
+
                 } else {
                     guest.setHostId(0);
                     guest.setLastHostId(0);

@@ -20,14 +20,21 @@ USE `cj_kvm_cloud`;
 /*Table structure for table `tbl_component_info` */
 
 DROP TABLE IF EXISTS `tbl_component_info`;
-
 CREATE TABLE `tbl_component_info` (
-  `component_id` int(11) NOT NULL AUTO_INCREMENT,
-  `component_type` int(11) NOT NULL,
-  `network_id` int(11) NOT NULL,
-  `guest_id` int(11) NOT NULL,
-  PRIMARY KEY (`component_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4;
+  `component_id` int NOT NULL AUTO_INCREMENT,
+  `component_type` int NOT NULL,
+  `component_vip` varchar(45) NOT NULL,
+  `network_id` int NOT NULL,
+  `master_guest_id` int NOT NULL,
+  `component_slave_number` int NOT NULL DEFAULT '1',
+  `slave_guest_ids` varchar(128) NOT NULL DEFAULT '[]',
+  PRIMARY KEY (`component_id`),
+  KEY `IX_NETWORK_COMPONENT` (`component_type`,`network_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8mb4;
+
+
+
+
 
 /*Table structure for table `tbl_guest_disk` */
 
@@ -75,16 +82,18 @@ CREATE TABLE `tbl_guest_info` (
 DROP TABLE IF EXISTS `tbl_guest_network`;
 
 CREATE TABLE `tbl_guest_network` (
-  `guest_network_id` int(11) NOT NULL AUTO_INCREMENT,
-  `guest_id` int(11) NOT NULL,
-  `network_id` int(11) NOT NULL,
-  `device_id` int(11) NOT NULL,
+  `guest_network_id` int NOT NULL AUTO_INCREMENT,
+  `network_id` int NOT NULL,
+  `device_id` int NOT NULL,
   `device_type` varchar(10) NOT NULL,
   `network_mac_address` varchar(45) NOT NULL,
   `network_ip` varchar(20) NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `allocate_id` int NOT NULL,
+  `allocate_type` int NOT NULL DEFAULT '0',
+  `create_time` timestamp NOT NULL,
   PRIMARY KEY (`guest_network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1190 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=132187 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 /*Table structure for table `tbl_guest_password` */
 

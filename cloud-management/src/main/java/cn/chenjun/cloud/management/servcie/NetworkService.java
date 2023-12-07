@@ -3,9 +3,11 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.DnsEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
+import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.DnsMapper;
 import cn.chenjun.cloud.management.model.GuestNetworkModel;
 import cn.chenjun.cloud.management.model.NetworkModel;
@@ -33,9 +35,11 @@ import java.util.stream.Collectors;
 public class NetworkService extends AbstractService {
     @Autowired
     private DnsMapper dnsMapper;
+    @Autowired
+    private ComponentMapper componentMapper;
 
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(int guestId) {
-        List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("guest_id", guestId));
+        List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guestId).eq("allocate_type", Constant.NetworkAllocateType.GUEST));
         networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<GuestNetworkModel> models = networkList.stream().map(this::initGuestNetwork).collect(Collectors.toList());
         return ResultUtil.success(models);
@@ -111,7 +115,8 @@ public class NetworkService extends AbstractService {
         List<String> ips = IpCalculate.parseIpRange(startIp, endIp);
         for (String ip : ips) {
             GuestNetworkEntity guestNetwork = GuestNetworkEntity.builder()
-                    .guestId(0)
+                    .allocateId(0)
+                    .allocateType(Constant.NetworkAllocateType.GUEST)
                     .ip(ip)
                     .networkId(network.getNetworkId())
                     .mac(IpCalculate.getRandomMacAddress())
@@ -160,13 +165,14 @@ public class NetworkService extends AbstractService {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
 
-        if (guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId).ne("guest_id", 0)) > 0) {
+        if (guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId).eq("allocate_type", Constant.NetworkAllocateType.GUEST).ne("allocate_id", 0)) > 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前网络被其他虚拟机引用，请首先删除虚拟机");
         }
         network.setStatus(Constant.NetworkStatus.DESTROY);
         networkMapper.updateById(network);
         dnsMapper.delete(new QueryWrapper<DnsEntity>().eq("network_id", networkId));
         this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", networkId));
+        this.componentMapper.delete(new QueryWrapper<ComponentEntity>().eq("network_id", networkId));
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
         this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());

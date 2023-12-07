@@ -52,12 +52,17 @@ public class SystemComponentService extends AbstractComponentService {
     }
 
     @Override
+    public int getVipAddressAllocateType() {
+        return Constant.NetworkAllocateType.SYSTEM_VIP;
+    }
+
+    @Override
     public GuestQmaRequest getStartQmaRequest(int networkId, int guestId) {
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("guest_id", guestId));
+
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", networkId).eq("component_type", this.getComponentType()));
         if (component == null) {
             return null;
         }
-
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         GuestQmaRequest request = GuestQmaRequest.builder().build();
         request.setName("");
@@ -65,7 +70,7 @@ public class SystemComponentService extends AbstractComponentService {
         request.setCommands(commands);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
         for (ComponentQmaInitialize componentQmaInitialize : componentQmaInitializeList) {
-            List<GuestQmaRequest.QmaBody> childCommands = componentQmaInitialize.initialize(component);
+            List<GuestQmaRequest.QmaBody> childCommands = componentQmaInitialize.initialize(component, guestId);
             if (!ObjectUtils.isEmpty(childCommands)) {
                 commands.addAll(childCommands);
             }
