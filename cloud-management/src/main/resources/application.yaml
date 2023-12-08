@@ -4,6 +4,8 @@ app:
   systemComponentCpu: 1
   systemComponentMemory: 524288
   systemComponentCpuSpeed: 0
+  systemComponentSlaveNumber: 1
+  destroyDelayMinute: 3
   manager-uri: http://localhost:8080/
   over-cpu: 4.0
   over-memory: 2.0

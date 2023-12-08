@@ -118,6 +118,8 @@ public abstract class AbstractComponentService extends AbstractService {
                     slaveGuest = this.createSystemComponentGuest(false, network, templateId);
                     slaveList.set(i, slaveGuest.getGuestId());
                     isUpdateSlave = true;
+                    this.eventService.publish(NotifyData.<Void>builder().id(slaveGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+
                 }
                 this.startComponentGuest(slaveGuest);
             }
@@ -228,7 +230,7 @@ public abstract class AbstractComponentService extends AbstractService {
         this.guestNetworkMapper.updateById(guestNetwork);
         guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
-        if (isMaster && network.getBasicNetworkId() > 0 && this.allocateBasicNic()) {
+        if (network.getBasicNetworkId() > 0 && this.allocateBasicNic()) {
             //只有master节点需要基础网络
             guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
             guestNetwork.setDeviceId(networkDeviceId);

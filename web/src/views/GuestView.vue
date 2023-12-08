@@ -354,10 +354,7 @@ export default {
 				.then(() => {
 					destroyGuest({ guestId: guest.guestId }).then((res) => {
 						if (res.code === 0) {
-							let findIndex = this.guests.findIndex((v) => v.guestId === guest.guestId)
-							if (findIndex >= 0) {
-								this.guests.splice(findIndex, 1)
-							}
+							this.update_guest_info(res.data)
 							this.show_type = 0
 						} else {
 							this.$notify.error({

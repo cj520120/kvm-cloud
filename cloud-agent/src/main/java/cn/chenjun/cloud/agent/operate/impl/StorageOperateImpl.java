@@ -29,6 +29,22 @@ import java.util.Map;
 @Slf4j
 @Component
 public class StorageOperateImpl implements StorageOperate {
+    private static Map<String, Object> buildStorageContext(StorageCreateRequest request, String nfsUri, String nfsPath) {
+        Map<String, Object> map = new HashMap<>(4);
+        map.put("name", request.getName());
+        map.put("host", nfsUri);
+        map.put("path", nfsPath);
+        map.put("mount", request.getMountPath());
+        if (request.getType().equals(Constant.StorageType.GLUSTERFS)) {
+            map.put("format", "glusterfs");
+        } else if (request.getType().equals(Constant.StorageType.NFS)) {
+            map.put("format", "nfs");
+        } else {
+            map.put("format", "auto");
+        }
+        return map;
+    }
+
     @DispatchBind(command = Constant.Command.STORAGE_INFO)
     @Override
     public StorageInfo getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception {
@@ -65,22 +81,6 @@ public class StorageOperateImpl implements StorageOperate {
 
         }
         return list;
-    }
-
-    private static Map<String, Object> buildStorageContext(StorageCreateRequest request, String nfsUri, String nfsPath) {
-        Map<String, Object> map = new HashMap<>(4);
-        map.put("name", request.getName());
-        map.put("host", nfsUri);
-        map.put("path", nfsPath);
-        map.put("mount", request.getMountPath());
-        if (request.getType().equals(Constant.StorageType.GLUSTERFS)) {
-            map.put("format", "glusterfs");
-        } else if (request.getType().equals(Constant.StorageType.NFS)) {
-            map.put("format", "nfs");
-        } else {
-            map.put("format", "auto");
-        }
-        return map;
     }
 
     @DispatchBind(command = Constant.Command.STORAGE_CREATE)

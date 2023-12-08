@@ -34,5 +34,5 @@ public class ApplicationConfig {
     private int systemComponentCpuSpeed = 500;
     private int systemComponentSlaveNumber = 1;
 
-    private int destroyDelayMinute = 10;
+    private int destroyDelayMinute = 3;
 }

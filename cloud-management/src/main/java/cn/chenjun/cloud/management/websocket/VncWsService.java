@@ -1,11 +1,13 @@
 package cn.chenjun.cloud.management.websocket;
 
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.VncClient;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.reflect.TypeToken;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
 import org.springframework.stereotype.Component;
@@ -14,8 +16,10 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -42,7 +46,16 @@ public class VncWsService {
             session.close();
             return;
         }
-        guest = guestMapper.selectById(component.getMasterGuestId());
+        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
+        }.getType());
+        componentGuestIds.add(component.getMasterGuestId());
+        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
+        if (componentGuestList.isEmpty()) {
+            session.close();
+            return;
+        }
+        Collections.shuffle(componentGuestList);
+        guest = componentGuestList.get(0);
         if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
             session.close();
             return;

@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
@@ -17,6 +18,7 @@ import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,12 +74,15 @@ public class GuestService extends AbstractService {
         if (component == null) {
             return true;
         }
-        GuestEntity vncGuest = this.guestMapper.selectById(component.getMasterGuestId());
-        return vncGuest == null || !Objects.equals(vncGuest.getStatus(), Constant.GuestStatus.RUNNING);
+        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
+        }.getType());
+        componentGuestIds.add(component.getMasterGuestId());
+        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
+        return !componentGuestList.isEmpty();
     }
 
     private void checkSystemComponentComplete(int networkId) {
-        if (this.checkComponentComplete(networkId, Constant.ComponentType.SYSTEM)) {
+        if (!this.checkComponentComplete(networkId, Constant.ComponentType.SYSTEM)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
         }
     }
@@ -354,6 +359,10 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (!Objects.equals(guest.getType(), Constant.GuestType.USER)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "非用户主机由系统管理.");
+        }
+
         this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
@@ -361,10 +370,6 @@ public class GuestService extends AbstractService {
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 this.guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
-                if (!Objects.equals(guest.getType(), Constant.GuestType.USER)) {
-                    throw new CodeException(ErrorCode.PARAM_ERROR, "非用户主机由系统管理.");
-                }
-
                 BaseOperateParam operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
                         .taskId(UUID.randomUUID().toString())
                         .title("启动客户机[" + guest.getDescription() + "]").build();

@@ -273,7 +273,7 @@ public class VolumeService extends AbstractService {
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate, this.applicationConfig.getDestroyDelayMinute());
+                operateTask.addTask(operate, volume.getStatus() == Constant.VolumeStatus.ERROR ? 0 : this.applicationConfig.getDestroyDelayMinute());
                 VolumeModel source = this.initVolume(volume);
                 this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);
