@@ -22,8 +22,7 @@ public class PipInitialize implements RouteComponentQmaInitialize {
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "python36"}).checkSuccess(true).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"install", "-y", "python3-pip"}).checkSuccess(true).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_python_install.sh"}).checkSuccess(true).build())).build());
         commands.add(this.pip3Install("flask"));
         commands.add(this.pip3Install("requests"));
         commands.add(this.pip3Install("websocket-client"));

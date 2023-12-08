@@ -139,28 +139,7 @@ public class OsOperateImpl implements OsOperate {
     @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN)
     @Override
     public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
-        while (true) {
-            try {
-                Domain domain = this.findDomainByName(connect, request.getName());
-                if (domain == null) {
-                    break;
-                }
-                switch (domain.getInfo().state) {
-                    case VIR_DOMAIN_SHUTDOWN:
-                    case VIR_DOMAIN_SHUTOFF:
-                        domain.destroy();
-                    default:
-                        domain.shutdown();
-                        ThreadUtil.sleep(1, TimeUnit.SECONDS);
-                        break;
-                }
-            } catch (LibvirtException err) {
-                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
-                    break;
-                }
-                throw err;
-            }
-        }
+        this.stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(5));
         return null;
 
     }
@@ -313,14 +292,52 @@ public class OsOperateImpl implements OsOperate {
             try {
                 this.qmaExecute(domain, request.getQmaRequest());
             } catch (CodeException err) {
-                domain.destroy();
+                stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(1));
                 throw err;
             } catch (Exception err) {
-                domain.destroy();
+                stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(1));
                 throw new CodeException(ErrorCode.SERVER_ERROR, err.getMessage());
             }
         }
         return this.initVmResponse(domain);
+    }
+
+    /**
+     * 关机操作
+     *
+     * @param connect
+     * @param name
+     * @param timeout
+     * @throws Exception
+     */
+    private void stopDomain(Connect connect, String name, long timeout) throws Exception {
+        long stopTime = System.currentTimeMillis();
+        while (true) {
+            try {
+                Domain domain = this.findDomainByName(connect, name);
+                if (domain == null) {
+                    break;
+                }
+                if (System.currentTimeMillis() - stopTime > timeout) {
+                    domain.destroy();
+                } else {
+                    switch (domain.getInfo().state) {
+                        case VIR_DOMAIN_SHUTDOWN:
+                        case VIR_DOMAIN_SHUTOFF:
+                            domain.destroy();
+                        default:
+                            domain.shutdown();
+                            ThreadUtil.sleep(5, TimeUnit.SECONDS);
+                            break;
+                    }
+                }
+            } catch (LibvirtException err) {
+                if (err.getError().getCode().equals(Error.ErrorNumber.VIR_ERR_NO_DOMAIN)) {
+                    break;
+                }
+                throw err;
+            }
+        }
     }
 
     @DispatchBind(command = Constant.Command.GUEST_QMA)
