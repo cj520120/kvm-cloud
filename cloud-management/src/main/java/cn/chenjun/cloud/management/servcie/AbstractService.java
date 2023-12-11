@@ -91,7 +91,14 @@ public abstract class AbstractService {
     }
 
     protected GuestNetworkModel initGuestNetwork(GuestNetworkEntity entity) {
-        return new BeanConverter<>(GuestNetworkModel.class).convert(entity, null);
+        return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())
+                .networkId(entity.getNetworkId())
+                .ip(entity.getIp())
+                .mac(entity.getMac())
+                .guestId(entity.getAllocateId())
+                .driveType(entity.getDriveType())
+                .deviceId(entity.getDeviceId())
+                .build();
     }
 
     protected HostModel initHost(HostEntity entity) {
