@@ -20,28 +20,39 @@ import java.util.Date;
 @Builder
 @TableName("tbl_storage_info")
 public class StorageEntity {
+    public static final String STORAGE_ID = "storage_id";
+    public static final String STORAGE_DESCRIPTION = "storage_description";
+    public static final String STORAGE_NAME = "storage_name";
+    public static final String STORAGE_TYPE = "storage_type";
+    public static final String STORAGE_PARM = "storage_parm";
+    public static final String STORAGE_MOUNT_PATH = "storage_mount_path";
+    public static final String STORAGE_CAPACITY = "storage_capacity";
+    public static final String STORAGE_AVAILABLE = "storage_available";
+    public static final String STORAGE_ALLOCATION = "storage_allocation";
+    public static final String STORAGE_STATUS = "storage_status";
+    public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO)
-    @TableField("storage_id")
+    @TableField(STORAGE_ID)
     private Integer storageId;
-    @TableField("storage_description")
+    @TableField(STORAGE_DESCRIPTION)
     private String description;
-    @TableField("storage_name")
+    @TableField(STORAGE_NAME)
     private String name;
-    @TableField("storage_type")
+    @TableField(STORAGE_TYPE)
     private String type;
-    @TableField("storage_parm")
+    @TableField(STORAGE_PARM)
     private String param;
-    @TableField("storage_mount_path")
+    @TableField(STORAGE_MOUNT_PATH)
     private String mountPath;
-    @TableField("storage_capacity")
+    @TableField(STORAGE_CAPACITY)
     private Long capacity;
-    @TableField("storage_available")
+    @TableField(STORAGE_AVAILABLE)
     private Long available;
-    @TableField("storage_allocation")
+    @TableField(STORAGE_ALLOCATION)
     private Long allocation;
-    @TableField("storage_status")
+    @TableField(STORAGE_STATUS)
     private Integer status;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 }

@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.GuestInfo;
+import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -29,10 +29,6 @@ import java.util.stream.Collectors;
  */
 @Component
 public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOperate, ResultUtil<List<GuestInfo>>> {
-
-    public SyncHostGuestOperateImpl() {
-        super(SyncHostGuestOperate.class);
-    }
 
 
     @Override
@@ -64,7 +60,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         List<GuestInfo> guestList = resultUtil.getData();
         List<String> guestNames = guestList.stream().map(GuestInfo::getName).collect(Collectors.toList());
         if (!guestNames.isEmpty()) {
-            List<GuestEntity> guestEntityList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().in("guest_name", guestNames));
+            List<GuestEntity> guestEntityList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().in(GuestEntity.GUEST_NAME, guestNames));
             Map<String, GuestEntity> map = guestEntityList.stream().collect(Collectors.toMap(GuestEntity::getName, Function.identity()));
             for (String guestName : guestNames) {
                 GuestEntity guest = map.get(guestName);
@@ -79,7 +75,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         }
         //检查运行的客户机不在当前主机
         {
-            List<GuestEntity> guestEntityList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("host_id", param.getHostId()));
+            List<GuestEntity> guestEntityList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.HOST_ID, param.getHostId()));
             for (GuestEntity guest : guestEntityList) {
                 if (Objects.equals(guest.getStatus(), cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING)
                         && System.currentTimeMillis() - guest.getLastStartTime().getTime() > TimeUnit.MINUTES.toMillis(1)) {
@@ -96,5 +92,10 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
                 }
             }
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.SYNC_HOST_GUEST;
     }
 }

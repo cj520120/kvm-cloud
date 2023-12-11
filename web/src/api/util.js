@@ -162,6 +162,14 @@ export default {
           return `未知状态[${volume.status}]`;
       }
     },
+    get_component_type(componentType) {
+      switch (componentType) {
+        case 0:
+          return "Route";
+        default:
+          return "未知";
+      }
+    },
     get_volume_display_size(size) {
       if (size >= 1024 * 1024 * 1024 * 1024) {
         return (size / (1024 * 1024 * 1024 * 1024)).toFixed(2) + " TB";

@@ -31,7 +31,7 @@ public class TemplateService extends AbstractService {
     private AllocateService allocateService;
 
     private GuestEntity getVolumeGuest(int volumeId) {
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
         if (guestDisk == null) {
             return null;
         }
@@ -45,7 +45,7 @@ public class TemplateService extends AbstractService {
     }
 
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
-        TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq("template_id", templateId));
+        TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_ID, templateId));
         if (template == null) {
             return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
         }
@@ -77,7 +77,7 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.READY:
             case Constant.TemplateStatus.DOWNLOAD:
             case Constant.TemplateStatus.ERROR:
-                this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", templateId));
+                this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
                 String uid = UUID.randomUUID().toString();
                 TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                         .storageId(storage.getStorageId())

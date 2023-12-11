@@ -2,26 +2,23 @@ package cn.chenjun.cloud.management.operate;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import org.springframework.plugin.core.Plugin;
 
 import java.lang.reflect.Type;
 
 /**
  * @author chenjun
  */
-public interface Operate<T extends BaseOperateParam, V extends ResultUtil> {
-    /**
-     * 获取操作类型
-     *
-     * @return
-     */
-    Class<T> getParamType();
+public interface Operate extends Plugin<Integer> {
+
 
     /**
      * 操作
      *
      * @param param
      */
-    void operate(T param);
+    void process(BaseOperateParam param);
+
 
     /**
      * 结果回调
@@ -29,7 +26,7 @@ public interface Operate<T extends BaseOperateParam, V extends ResultUtil> {
      * @param param
      * @param resultUtil
      */
-    void onFinish(T param, V resultUtil);
+    void onComplete(BaseOperateParam param, ResultUtil<?> resultUtil);
 
     /**
      * 获取远程调用结果

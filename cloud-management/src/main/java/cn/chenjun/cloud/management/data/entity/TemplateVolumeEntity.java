@@ -20,25 +20,36 @@ import java.util.Date;
 @Builder
 @TableName("tbl_template_volume")
 public class TemplateVolumeEntity {
+    public static final String TEMPLATE_VOLUME_ID = "template_volume_id";
+    public static final String TEMPLATE_ID = "template_id";
+    public static final String STORAGE_ID = "storage_id";
+    public static final String TEMPLATE_NAME = "template_name";
+    public static final String TEMPLATE_PATH = "template_path";
+    public static final String TEMPLATE_CAPACITY = "template_capacity";
+    public static final String TEMPLATE_ALLOCATION = "template_allocation";
+    public static final String TEMPLATE_TYPE = "template_type";
+    public static final String TEMPLATE_STATUS = "template_status";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("template_volume_id")
+    @TableField(TEMPLATE_VOLUME_ID)
     private Integer templateVolumeId;
-    @TableField("template_id")
+    @TableField(TEMPLATE_ID)
     private Integer templateId;
-    @TableField("storage_id")
+    @TableField(STORAGE_ID)
     private Integer storageId;
-    @TableField("template_name")
+    @TableField(TEMPLATE_NAME)
     private String name;
-    @TableField("template_path")
+    @TableField(TEMPLATE_PATH)
     private String path;
-    @TableField("template_capacity")
+    @TableField(TEMPLATE_CAPACITY)
     private Long capacity;
-    @TableField("template_allocation")
+    @TableField(TEMPLATE_ALLOCATION)
     private Long allocation;
-    @TableField("template_type")
+    @TableField(TEMPLATE_TYPE)
     private String type;
-    @TableField("template_status")
+    @TableField(TEMPLATE_STATUS)
     private Integer status;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 }

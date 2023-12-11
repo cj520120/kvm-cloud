@@ -30,9 +30,6 @@ import java.util.Map;
 @Slf4j
 public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskOperate, ResultUtil<Void>> {
 
-    public ChangeGuestDiskOperateImpl() {
-        super(ChangeGuestDiskOperate.class);
-    }
 
     @Override
     public void operate(ChangeGuestDiskOperate param) {
@@ -100,5 +97,10 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CHANGE_GUEST_DISK;
     }
 }

@@ -56,26 +56,28 @@ CREATE TABLE `tbl_guest_disk` (
 DROP TABLE IF EXISTS `tbl_guest_info`;
 
 CREATE TABLE `tbl_guest_info` (
-  `guest_id` int(11) NOT NULL AUTO_INCREMENT,
+  `guest_id` int NOT NULL AUTO_INCREMENT,
   `guest_name` varchar(45) NOT NULL,
   `guest_description` varchar(45) NOT NULL,
   `guest_bus_type` varchar(10) NOT NULL,
-  `guest_cpu` int(11) NOT NULL,
-  `guest_cpu_speed` int(11) NOT NULL DEFAULT '0',
-  `guest_memory` bigint(20) NOT NULL,
-  `guest_cd_room` int(11) NOT NULL,
-  `host_id` int(11) NOT NULL,
-  `last_host_id` int(11) NOT NULL,
-  `scheme_id` int(11) NOT NULL DEFAULT '0',
+  `guest_cpu` int NOT NULL,
+  `guest_cpu_speed` int NOT NULL DEFAULT '0',
+  `guest_memory` bigint NOT NULL,
+  `guest_cd_room` int NOT NULL,
+  `host_id` int NOT NULL,
+  `last_host_id` int NOT NULL,
+  `scheme_id` int NOT NULL DEFAULT '0',
   `guest_ip` varchar(48) NOT NULL DEFAULT '',
   `network_id` varchar(45) NOT NULL DEFAULT '0',
-  `guest_type` int(11) NOT NULL,
-  `group_id` varchar(45) NOT NULL DEFAULT '0',
-  `guest_status` int(11) NOT NULL,
+  `guest_type` int NOT NULL,
+  `group_id` int NOT NULL DEFAULT '0',
+  `other_id` int NOT NULL,
+  `guest_status` int NOT NULL,
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=436 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
 
 /*Table structure for table `tbl_guest_network` */
 

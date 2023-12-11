@@ -18,15 +18,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @TableName("tbl_meta_data")
 public class MetaDataEntity {
+    public static final String ID = "id";
+    public static final String GUEST_ID = "guest_id";
+    public static final String META_KEY = "meta_key";
+    public static final String META_VALUE = "meta_value";
 
     @TableId(type = IdType.AUTO)
-    @TableField("id")
+    @TableField(ID)
     private Integer id;
-    @TableField("guest_id")
+    @TableField(GUEST_ID)
     private Integer guestId;
 
-    @TableField("meta_key")
+    @TableField(META_KEY)
     private String metaKey;
-    @TableField("meta_value")
+    @TableField(META_VALUE)
     private String metaValue;
 }

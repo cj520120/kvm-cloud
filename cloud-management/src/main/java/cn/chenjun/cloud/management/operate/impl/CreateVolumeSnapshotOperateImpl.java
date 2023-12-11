@@ -25,9 +25,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolumeSnapshotOperate, ResultUtil<VolumeInfo>> {
 
-    public CreateVolumeSnapshotOperateImpl() {
-        super(CreateVolumeSnapshotOperate.class);
-    }
 
     @Override
     public void operate(CreateVolumeSnapshotOperate param) {
@@ -89,5 +86,10 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_VOLUME_SNAPSHOT;
     }
 }

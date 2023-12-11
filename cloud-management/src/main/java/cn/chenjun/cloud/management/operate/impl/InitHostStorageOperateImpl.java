@@ -25,9 +25,6 @@ import java.util.*;
 @Slf4j
 public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageOperate, ResultUtil<StorageInfo>> {
 
-    public InitHostStorageOperateImpl() {
-        super(InitHostStorageOperate.class);
-    }
 
     @Override
     public void operate(InitHostStorageOperate param) {
@@ -98,4 +95,9 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
 
     }
 
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.INIT_HOST_STORAGE;
+    }
 }

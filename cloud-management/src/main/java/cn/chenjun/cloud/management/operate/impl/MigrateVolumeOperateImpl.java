@@ -28,10 +28,6 @@ import java.util.UUID;
 @Slf4j
 public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOperate, ResultUtil<VolumeInfo>> {
 
-    public MigrateVolumeOperateImpl() {
-        super(MigrateVolumeOperate.class);
-    }
-
 
     @Override
     public void operate(MigrateVolumeOperate param) {
@@ -88,7 +84,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         }
         if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
+                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
                 if (guestDisk != null && targetVolume != null) {
                     guestDisk.setVolumeId(targetVolume.getVolumeId());
                     guestDiskMapper.updateById(guestDisk);
@@ -104,5 +100,10 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
         this.eventService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.MIGRATE_VOLUME;
     }
 }

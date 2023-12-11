@@ -24,9 +24,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate, ResultUtil<VolumeInfo>> {
 
-    public ResizeVolumeOperateImpl() {
-        super(ResizeVolumeOperate.class);
-    }
 
     @Override
     public void operate(ResizeVolumeOperate param) {
@@ -70,5 +67,10 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             volumeMapper.updateById(volume);
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.RESIZE_VOLUME;
     }
 }

@@ -25,9 +25,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplateOperate, ResultUtil<VolumeInfo>> {
 
-    public DownloadTemplateOperateImpl() {
-        super(DownloadTemplateOperate.class);
-    }
 
     @Override
     public void operate(DownloadTemplateOperate param) {
@@ -93,5 +90,10 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
             this.eventService.publish(NotifyData.<Void>builder().id(templateVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DOWNLOAD_TEMPLATE;
     }
 }

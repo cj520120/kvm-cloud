@@ -28,10 +28,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOperate, ResultUtil<Void>> {
 
-    public CreateStorageOperateImpl() {
-        super(CreateStorageOperate.class);
-    }
-
 
     @Override
     public void operate(CreateStorageOperate param) {
@@ -69,4 +65,9 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
 
     }
 
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_STORAGE;
+    }
 }

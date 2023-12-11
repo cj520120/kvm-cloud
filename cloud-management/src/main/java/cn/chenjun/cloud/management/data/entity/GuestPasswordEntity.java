@@ -18,13 +18,18 @@ import lombok.NoArgsConstructor;
 @Builder
 @TableName("tbl_guest_password")
 public class GuestPasswordEntity {
+    public static final String GUEST_ID = "guest_id";
+    public static final String ENCODE_KEY = "encode_key";
+    public static final String IV_KEY = "iv_key";
+    public static final String GUEST_PASSWORD = "guest_password";
+
     @TableId(type = IdType.INPUT)
-    @TableField("guest_id")
+    @TableField(GUEST_ID)
     private Integer guestId;
-    @TableField("encode_key")
+    @TableField(ENCODE_KEY)
     private String encodeKey;
-    @TableField("iv_key")
+    @TableField(IV_KEY)
     private String ivKey;
-    @TableField("guest_password")
+    @TableField(GUEST_PASSWORD)
     private String password;
 }

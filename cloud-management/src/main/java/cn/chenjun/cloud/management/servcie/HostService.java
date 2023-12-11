@@ -44,7 +44,7 @@ public class HostService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> getHostInfoByClientId(String clientId) {
-        HostEntity host = this.hostMapper.selectOne(new QueryWrapper<HostEntity>().eq("client_id", clientId));
+        HostEntity host = this.hostMapper.selectOne(new QueryWrapper<HostEntity>().eq(HostEntity.CLIENT_ID, clientId));
         if (host == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
@@ -121,7 +121,7 @@ public class HostService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyHost(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);
-        if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq("host_id", hostId)) > 0) {
+        if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq(GuestEntity.HOST_ID, hostId)) > 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         this.hostMapper.deleteById(hostId);

@@ -33,7 +33,7 @@ public class VolumeService extends AbstractService {
     private RestTemplate restTemplate;
 
     private GuestEntity getVolumeGuest(int volumeId) {
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
         if (guestDisk == null) {
             return null;
         }
@@ -56,7 +56,7 @@ public class VolumeService extends AbstractService {
 
 
     public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
-        List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
+        List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
         diskList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
         List<VolumeModel> models = diskList.stream().map(this::initVolume).sorted((o1, o2) -> {
             if (o1.getStatus() == o2.getStatus()) {
@@ -82,7 +82,7 @@ public class VolumeService extends AbstractService {
 
     public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
         List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn("volume_id", volumeIds));
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn(VolumeEntity.VOLUME_ID, volumeIds));
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
@@ -267,7 +267,7 @@ public class VolumeService extends AbstractService {
         switch (volume.getStatus()) {
             case Constant.VolumeStatus.ERROR:
             case Constant.VolumeStatus.READY:
-                if (guestDiskMapper.selectCount(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId)) > 0) {
+                if (guestDiskMapper.selectCount(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId)) > 0) {
                     throw new CodeException(ErrorCode.GUEST_VOLUME_ATTACH_ERROR, "当前磁盘被系统挂载");
                 }
                 volume.setStatus(Constant.VolumeStatus.DESTROY);

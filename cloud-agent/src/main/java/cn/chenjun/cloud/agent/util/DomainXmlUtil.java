@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author chenjun
+ */
 public class DomainXmlUtil {
     public static final int MAX_DEVICE_COUNT = 5;
     public static final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;

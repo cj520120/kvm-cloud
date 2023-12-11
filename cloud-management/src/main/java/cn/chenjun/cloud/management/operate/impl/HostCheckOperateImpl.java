@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.HostInfo;
+import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -19,9 +19,7 @@ import java.lang.reflect.Type;
 @Slf4j
 public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, ResultUtil<HostInfo>> {
 
-    public HostCheckOperateImpl() {
-        super(HostCheckOperate.class);
-    }
+
 
     @Override
     public void operate(HostCheckOperate param) {
@@ -56,5 +54,10 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);
         }
         hostMapper.updateById(updateHost);
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.HOST_CHECK;
     }
 }

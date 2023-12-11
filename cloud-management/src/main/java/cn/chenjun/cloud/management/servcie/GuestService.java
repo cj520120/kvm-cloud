@@ -16,7 +16,6 @@ import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.GuestNameUtil;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,7 @@ public class GuestService extends AbstractService {
         metaDataMap.put("hostname", hostname);
         metaDataMap.put("local-hostname", hostname);
         metaDataMap.put("instance-id", guest.getName());
-        this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id",guestId));
+        this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestId));
         for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
             MetaDataEntity metaDataEntity = MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
             this.metaMapper.insert(metaDataEntity);
@@ -70,7 +69,7 @@ public class GuestService extends AbstractService {
     }
 
     private boolean checkComponentComplete(int networkId, int componentType) {
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("component_type", componentType).eq("network_id", networkId).last("limit 0 ,1"));
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, componentType).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
         if (component == null) {
             return true;
         }
@@ -82,14 +81,11 @@ public class GuestService extends AbstractService {
     }
 
     private void checkSystemComponentComplete(int networkId) {
-        if (!this.checkComponentComplete(networkId, Constant.ComponentType.SYSTEM)) {
+        if (!this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
         }
     }
 
-    private GuestModel initGuestInfo(GuestEntity entity) {
-        return new BeanConverter<>(GuestModel.class).convert(entity, null);
-    }
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -102,7 +98,7 @@ public class GuestService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listUserGuests() {
-        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("guest_type", Constant.GuestType.USER));
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.GUEST_TYPE, Constant.GuestType.USER));
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).sorted((o1, o2) -> {
             if (o1.getStatus() == o2.getStatus()) {
                 return Integer.compare(o1.getGuestId(), o2.getGuestId());
@@ -120,7 +116,7 @@ public class GuestService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listSystemGuests(int networkId) {
-        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("network_id", networkId).eq("guest_type", Constant.GuestType.SYSTEM));
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.NETWORK_ID, networkId).eq(GuestEntity.GUEST_TYPE, Constant.GuestType.COMPONENT));
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
@@ -174,6 +170,7 @@ public class GuestService extends AbstractService {
                 .lastHostId(0)
                 .schemeId(schemeId)
                 .guestIp(guestNetwork.getIp())
+                .otherId(0)
                 .networkId(networkId)
                 .type(Constant.GuestType.USER)
                 .status(Constant.GuestStatus.CREATING)
@@ -189,7 +186,7 @@ public class GuestService extends AbstractService {
         if (volumeId <= 0) {
             createGuest(hostId, diskTemplateId, snapshotVolumeId, volumeType, password, size, uid, guest, storage);
         } else {
-            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
             }
@@ -267,7 +264,7 @@ public class GuestService extends AbstractService {
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
         this.initGuestMetaData(guestId,password);
-        this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId).eq("device_id", 0));
+        this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
             VolumeEntity volume = VolumeEntity.builder()
@@ -304,7 +301,7 @@ public class GuestService extends AbstractService {
             this.operateTask.addTask(operateParam);
             this.eventService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         } else {
-            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volumeId));
+            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
             }
@@ -504,11 +501,11 @@ public class GuestService extends AbstractService {
                 if (volume.getStatus() != Constant.VolumeStatus.READY) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
                 }
-                GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
+                GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
                 if (guestDisk != null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
                 }
-                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guestId));
+                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
                 List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
                 int deviceId = -1;
                 for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
@@ -587,7 +584,7 @@ public class GuestService extends AbstractService {
             case Constant.GuestStatus.STOP:
             case Constant.GuestStatus.RUNNING:
                 GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
-                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guestId));
+                List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId));
                 List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
                 int deviceId = -1;
                 for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {

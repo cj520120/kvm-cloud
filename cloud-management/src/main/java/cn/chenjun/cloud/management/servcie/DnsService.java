@@ -20,6 +20,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class DnsService {
     @Autowired
@@ -46,11 +49,11 @@ public class DnsService {
             return new ArrayList<>();
         }
         List<DnsModel> list = new ArrayList<>();
-        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq("network_id", networkId));
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.NETWORK_ID, networkId));
         for (GuestEntity guest : guestList) {
             list.add(DnsModel.builder().domain(guest.getName() + "." + network.getDomain()).ip(guest.getGuestIp()).build());
         }
-        List<DnsEntity> entityList = this.mapper.selectList(new QueryWrapper<DnsEntity>().eq("network_id", networkId));
+        List<DnsEntity> entityList = this.mapper.selectList(new QueryWrapper<DnsEntity>().eq(DnsEntity.NETWORK_ID, networkId));
         for (DnsEntity entity : entityList) {
             list.add(this.initDns(entity));
         }

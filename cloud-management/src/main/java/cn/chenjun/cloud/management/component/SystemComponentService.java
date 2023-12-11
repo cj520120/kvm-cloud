@@ -43,12 +43,12 @@ public class SystemComponentService extends AbstractComponentService {
 
     @Override
     public int getComponentType() {
-        return Constant.ComponentType.SYSTEM;
+        return Constant.ComponentType.ROUTE;
     }
 
     @Override
     public String getComponentName() {
-        return "System VM";
+        return "Route VM";
     }
 
     @Override
@@ -59,7 +59,7 @@ public class SystemComponentService extends AbstractComponentService {
     @Override
     public GuestQmaRequest getStartQmaRequest(int networkId, int guestId) {
 
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", networkId).eq("component_type", this.getComponentType()));
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, networkId).eq(ComponentEntity.COMPONENT_TYPE, this.getComponentType()));
         if (component == null) {
             return null;
         }

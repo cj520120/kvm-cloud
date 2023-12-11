@@ -21,9 +21,6 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestOperate> {
-    public CreateGuestOperateImpl() {
-        super(CreateGuestOperate.class);
-    }
 
 
     @Override
@@ -59,5 +56,10 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
             this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_GUEST;
     }
 }

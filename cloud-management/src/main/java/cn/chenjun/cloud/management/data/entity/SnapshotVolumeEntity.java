@@ -20,27 +20,37 @@ import java.util.Date;
 @Builder
 @TableName("tbl_snapshot_volume")
 public class SnapshotVolumeEntity {
+    public static final String SNAPSHOT_VOLUME_ID = "snapshot_volume_id";
+    public static final String SNAPSHOT_NAME = "snapshot_name";
+    public static final String STORAGE_ID = "storage_id";
+    public static final String VOLUME_NAME = "volume_name";
+    public static final String VOLUME_PATH = "volume_path";
+    public static final String VOLUME_CAPACITY = "volume_capacity";
+    public static final String VOLUME_ALLOCATION = "volume_allocation";
+    public static final String VOLUME_TYPE = "volume_type";
+    public static final String VOLUME_STATUS = "volume_status";
+    public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO)
-    @TableField("snapshot_volume_id")
+    @TableField(SNAPSHOT_VOLUME_ID)
     private Integer snapshotVolumeId;
-    @TableField("snapshot_name")
+    @TableField(SNAPSHOT_NAME)
     private String name;
-    @TableField("storage_id")
+    @TableField(STORAGE_ID)
     private Integer storageId;
-    @TableField("volume_name")
+    @TableField(VOLUME_NAME)
     private String volumeName;
-    @TableField("volume_path")
+    @TableField(VOLUME_PATH)
     private String volumePath;
-    @TableField("volume_capacity")
+    @TableField(VOLUME_CAPACITY)
     private Long capacity;
-    @TableField("volume_allocation")
+    @TableField(VOLUME_ALLOCATION)
     private Long allocation;
-    @TableField("volume_type")
+    @TableField(VOLUME_TYPE)
     private String type;
-    @TableField("volume_status")
+    @TableField(VOLUME_STATUS)
     private Integer status;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 
 }

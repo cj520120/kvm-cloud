@@ -1,5 +1,8 @@
 package cn.chenjun.cloud.management.websocket.cluster.process;
 
+/**
+ * @author chenjun
+ */
 public abstract class AbstractClusterMessageProcess implements ClusterMessageProcess {
     @Override
     public boolean supports(Integer type) {

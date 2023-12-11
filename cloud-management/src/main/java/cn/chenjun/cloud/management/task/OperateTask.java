@@ -71,7 +71,7 @@ public class OperateTask extends AbstractTask {
 
     @Override
     protected void dispatch() throws Exception {
-        QueryWrapper<TaskEntity> wrapper = new QueryWrapper<TaskEntity>().lt("expire_time", new Date(System.currentTimeMillis()));
+        QueryWrapper<TaskEntity> wrapper = new QueryWrapper<TaskEntity>().lt(TaskEntity.EXPIRE_TIME, new Date(System.currentTimeMillis()));
         wrapper.last("limit 0,10");
         List<TaskEntity> taskList = this.taskMapper.selectList(wrapper);
         for (TaskEntity entity : taskList) {

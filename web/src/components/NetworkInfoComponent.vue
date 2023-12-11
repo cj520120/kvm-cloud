@@ -40,7 +40,12 @@
 							<el-table-column label="实例名" prop="name" width="200" />
 							<el-table-column label="标签" prop="description" width="200" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
-
+							<el-table-column label="VIP地址" prop="componentVip" width="150" />
+							<el-table-column label="类型" prop="status" width="80">
+								<template #default="scope">
+									<el-tag type="success">{{ get_component_type(scope.row.componentType) }}</el-tag>
+								</template>
+							</el-table-column>
 							<el-table-column label="状态" prop="status" width="100">
 								<template #default="scope">
 									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>

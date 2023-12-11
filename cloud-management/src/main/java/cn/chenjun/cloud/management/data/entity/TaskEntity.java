@@ -20,20 +20,27 @@ import java.util.Date;
 @Builder
 @TableName("tbl_task_info")
 public class TaskEntity {
-    @TableId(type = IdType.INPUT)
-    @TableField("task_id")
-    private String taskId;
+    public static final String TASK_ID = "task_id";
+    public static final String TASK_VERSION = "task_version";
+    public static final String TASK_TITLE = "task_title";
+    public static final String TASK_TYPE = "task_type";
+    public static final String TASK_PARAM = "task_param";
+    public static final String CREATE_TIME = "create_time";
+    public static final String EXPIRE_TIME = "expire_time";
 
-    @TableField("task_version")
+    @TableId(type = IdType.INPUT)
+    @TableField(TASK_ID)
+    private String taskId;
+    @TableField(TASK_VERSION)
     private Integer version;
-    @TableField("task_title")
+    @TableField(TASK_TITLE)
     private String title;
-    @TableField("task_type")
+    @TableField(TASK_TYPE)
     private String type;
-    @TableField("task_param")
+    @TableField(TASK_PARAM)
     private String param;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
-    @TableField("expire_time")
+    @TableField(EXPIRE_TIME)
     private Date expireTime;
 }

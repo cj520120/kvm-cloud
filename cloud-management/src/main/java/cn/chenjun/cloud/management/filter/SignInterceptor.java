@@ -53,7 +53,7 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
                 String clientId = (String) map.get("clientId");
                 String nonce = (String) map.get("nonce");
                 long timestamp = NumberUtil.parseLong((String) map.getOrDefault("timestamp", "0"));
-                HostEntity host = hostMapper.selectOne(new QueryWrapper<HostEntity>().eq("client_id", clientId));
+                HostEntity host = hostMapper.selectOne(new QueryWrapper<HostEntity>().eq(HostEntity.CLIENT_ID, clientId));
                 boolean isSuccess = false;
                 long expire = timestamp + require.timeout();
                 String message="成功";

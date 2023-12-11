@@ -20,13 +20,17 @@ import java.util.Date;
 @Builder
 @TableName("tbl_group_info")
 public class GroupInfoEntity {
+    public static final String GROUP_ID = "group_id";
+    public static final String GROUP_NAME = "group_name";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("group_id")
+    @TableField(GROUP_ID)
     private Integer groupId;
 
-    @TableField("group_name")
+    @TableField(GROUP_NAME)
     private String groupName;
 
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 }

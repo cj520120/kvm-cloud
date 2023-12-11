@@ -33,13 +33,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
     @Autowired
     private ApplicationConfig applicationConfig;
 
-    public CreateVolumeOperateImpl() {
-        super((Class<T>) CreateVolumeOperate.class);
-    }
 
-    public CreateVolumeOperateImpl(Class<T> tClass) {
-        super(tClass);
-    }
 
     @Override
     public void operate(T param) {
@@ -51,7 +45,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             }
             HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             if (param.getTemplateId() > 0) {
-                List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", param.getTemplateId()));
+                List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
                 Collections.shuffle(templateVolumeList);
                 TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
@@ -123,5 +117,10 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_VOLUME;
     }
 }

@@ -95,7 +95,7 @@ public class AllocateService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public void initHostAllocate() {
         List<HostEntity> hosts = this.hostMapper.selectList(new QueryWrapper<>());
-        Map<Integer, List<GuestEntity>> map = guestMapper.selectList(new QueryWrapper<GuestEntity>().gt("host_id", 0)).stream().collect(Collectors.groupingBy(GuestEntity::getHostId));
+        Map<Integer, List<GuestEntity>> map = guestMapper.selectList(new QueryWrapper<GuestEntity>().gt(GuestEntity.HOST_ID, 0)).stream().collect(Collectors.groupingBy(GuestEntity::getHostId));
         for (HostEntity host : hosts) {
             List<GuestEntity> guestList = map.get(host.getHostId());
             if (guestList == null) {

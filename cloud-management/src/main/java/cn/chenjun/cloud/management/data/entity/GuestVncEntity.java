@@ -20,16 +20,22 @@ import java.util.Date;
 @Builder
 @TableName("tbl_guest_vnc")
 public class GuestVncEntity {
+    public static final String GUEST_ID = "guest_id";
+    public static final String VNC_PORT = "vnc_port";
+    public static final String VNC_PASSWORD = "vnc_password";
+    public static final String VNC_TOKEN = "vnc_token";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.INPUT)
-    @TableField("guest_id")
+    @TableField(GUEST_ID)
     private Integer guestId;
-    @TableField("vnc_port")
+    @TableField(VNC_PORT)
     private Integer port;
-    @TableField("vnc_password")
+    @TableField(VNC_PASSWORD)
     private String password;
-    @TableField("vnc_token")
+    @TableField(VNC_TOKEN)
     private String token;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 
 }

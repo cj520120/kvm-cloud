@@ -19,6 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class NetworkInitialize implements RouteComponentQmaInitialize {
     @Autowired
@@ -30,7 +33,7 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         //写入网卡固定IP
-        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guestId).eq("allocate_type", Constant.NetworkAllocateType.GUEST));
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         guestNetworkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         String[] iptablesRules = null;
         for (GuestNetworkEntity guestNetwork : guestNetworkList) {

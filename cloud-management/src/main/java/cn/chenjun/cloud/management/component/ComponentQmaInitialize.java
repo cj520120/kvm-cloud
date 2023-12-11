@@ -15,6 +15,7 @@ public interface ComponentQmaInitialize extends Ordered {
      * 初始化脚本
      *
      * @param component
+     * @param guestId
      * @return
      */
     List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId);

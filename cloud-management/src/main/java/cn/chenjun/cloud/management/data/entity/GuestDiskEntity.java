@@ -20,16 +20,22 @@ import java.util.Date;
 @Builder
 @TableName("tbl_guest_disk")
 public class GuestDiskEntity {
+    public static final String GUEST_DISK_ID = "guest_disk_id";
+    public static final String GUEST_ID = "guest_id";
+    public static final String VOLUME_ID = "volume_id";
+    public static final String DEVICE_ID = "device_id";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("guest_disk_id")
+    @TableField(GUEST_DISK_ID)
     private Integer guestDiskId;
-    @TableField("guest_id")
+    @TableField(GUEST_ID)
     private Integer guestId;
-    @TableField("volume_id")
+    @TableField(VOLUME_ID)
     private Integer volumeId;
-    @TableField("device_id")
+    @TableField(DEVICE_ID)
     private Integer deviceId;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 
 }

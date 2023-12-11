@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class VncService {
     @Autowired

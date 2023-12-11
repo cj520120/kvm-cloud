@@ -27,9 +27,6 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     @Autowired
     private List<AbstractComponentService> componentServices;
 
-    public StartComponentGuestOperateImpl() {
-        super(StartComponentGuestOperate.class);
-    }
 
 
     @Override
@@ -43,5 +40,10 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     public void onFinish(StartComponentGuestOperate param, ResultUtil<GuestInfo> resultUtil) {
         super.onFinish(param, resultUtil);
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.START_COMPONENT_GUEST;
     }
 }

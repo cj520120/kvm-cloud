@@ -25,9 +25,7 @@ import java.util.UUID;
 @Slf4j
 public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate, ResultUtil<Void>> {
 
-    public MigrateGuestOperateImpl() {
-        super(MigrateGuestOperate.class);
-    }
+
 
     @Override
     public void operate(MigrateGuestOperate param) {
@@ -81,5 +79,10 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
             this.operateTask.addTask(operate);
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.MIGRATE_GUEST;
     }
 }

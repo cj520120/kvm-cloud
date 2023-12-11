@@ -20,34 +20,41 @@ import java.util.Date;
 @Builder
 @TableName("tbl_user_info")
 public class UserInfoEntity {
+    public static final String USER_ID = "user_id";
+    public static final String LOGIN_NAME = "login_name";
+    public static final String LOGIN_PASSWORD = "login_password";
+    public static final String LOGIN_STATE = "login_state";
+    public static final String LOGIN_PASSWORD_SALT = "login_password_salt";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("user_id")
+    @TableField(USER_ID)
     private Integer userId;
 
     /**
      * 用户名
      */
-    @TableField("login_name")
+    @TableField(LOGIN_NAME)
     private String loginName;
     /**
      * 密码
      */
-    @TableField("login_password")
+    @TableField(LOGIN_PASSWORD)
     private String loginPassword;
     /**
      *
      */
-    @TableField("login_state")
+    @TableField(LOGIN_STATE)
     private Short loginState;
     /**
      * 密码
      */
-    @TableField("login_password_salt")
+    @TableField(LOGIN_PASSWORD_SALT)
     private String loginPasswordSalt;
 
     /**
      * 密码
      */
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 }

@@ -2,6 +2,9 @@ package cn.chenjun.cloud.agent.operate.bean;
 
 import org.libvirt.Connect;
 
+/**
+ * @author chenjun
+ */
 @FunctionalInterface
 public interface Consumer<T, V> {
     /**

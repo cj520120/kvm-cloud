@@ -28,14 +28,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, ResultUtil<List<VolumeInfo>>> {
 
-    public VolumeCheckOperateImpl() {
-        super(VolumeCheckOperate.class);
-    }
+
 
     @Override
     public void operate(VolumeCheckOperate param) {
         StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq("storage_id", param.getStorageId())).stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY)).collect(Collectors.toList());
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, param.getStorageId())).stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY)).collect(Collectors.toList());
         if (volumeList.isEmpty()) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
@@ -61,7 +59,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
                 if (info == null) {
                     continue;
                 }
-                VolumeEntity sourceVolume = this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().eq("volume_name", info.getName()));
+                VolumeEntity sourceVolume = this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.VOLUME_NAME, info.getName()));
                 if (sourceVolume == null) {
                     continue;
                 }
@@ -84,5 +82,10 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
                 }
             }
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.VOLUME_CHECK;
     }
 }

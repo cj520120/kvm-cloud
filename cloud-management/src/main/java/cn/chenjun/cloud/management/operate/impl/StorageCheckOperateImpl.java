@@ -27,9 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate, ResultUtil<List<StorageInfo>>> {
 
-    public StorageCheckOperateImpl() {
-        super(StorageCheckOperate.class);
-    }
+
 
     @Override
     public void operate(StorageCheckOperate param) {
@@ -62,7 +60,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
                 if (info == null) {
                     continue;
                 }
-                StorageEntity sourceEntity = this.storageMapper.selectOne(new QueryWrapper<StorageEntity>().eq("storage_name", info.getName()));
+                StorageEntity sourceEntity = this.storageMapper.selectOne(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_NAME, info.getName()));
                 if (sourceEntity != null) {
                     if (!Objects.equals(sourceEntity.getCapacity(), info.getCapacity()) ||
                             !Objects.equals(sourceEntity.getAvailable(), info.getAvailable()) ||
@@ -80,5 +78,10 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
                 }
             }
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.STORAGE_CHECK;
     }
 }

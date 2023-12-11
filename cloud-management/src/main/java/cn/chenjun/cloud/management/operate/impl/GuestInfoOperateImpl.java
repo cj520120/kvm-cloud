@@ -29,9 +29,6 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
 
     @Autowired
     private VncService vncService;
-    public GuestInfoOperateImpl() {
-        super(GuestInfoOperate.class);
-    }
 
 
     @Override
@@ -69,5 +66,10 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
             }
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.GUEST_INFO;
     }
 }

@@ -27,9 +27,6 @@ import java.util.UUID;
 @Slf4j
 public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkOperate, ResultUtil<Void>> {
 
-    public InitHostNetworkOperateImpl() {
-        super(InitHostNetworkOperate.class);
-    }
 
     @Override
     public void operate(InitHostNetworkOperate param) {
@@ -139,5 +136,10 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                 this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.INIT_HOST_NETWORK;
     }
 }

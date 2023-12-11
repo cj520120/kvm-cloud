@@ -29,9 +29,6 @@ import java.util.UUID;
 @Slf4j
 public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNetworkOperate, ResultUtil<Void>> {
 
-    public DestroyHostNetworkOperateImpl() {
-        super(DestroyHostNetworkOperate.class);
-    }
 
 
     @Override
@@ -110,7 +107,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
                 if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
                     networkMapper.deleteById(param.getNetworkId());
-                    guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq("network_id", param.getNetworkId()));
+                    guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, param.getNetworkId()));
                 }
             } else {
                 DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
@@ -129,5 +126,10 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         }
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_HOST_NETWORK;
     }
 }

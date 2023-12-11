@@ -20,51 +20,72 @@ import java.util.Date;
 @Builder
 @TableName("tbl_host_info")
 public class HostEntity {
+    public static final String HOST_ID = "host_id";
+    public static final String HOST_DISPLAY_NAME = "host_display_name";
+    public static final String CLIENT_ID = "client_id";
+    public static final String CLIENT_SECRET = "client_secret";
+    public static final String HOST_IP = "host_ip";
+    public static final String HOST_NAME = "host_name";
+    public static final String HOST_NIC_NAME = "host_nic_name";
+    public static final String HOST_URI = "host_uri";
+    public static final String HOST_ALLOCATION_MEMORY = "host_allocation_memory";
+    public static final String HOST_ALLOCATION_CPU = "host_allocation_cpu";
+    public static final String HOST_TOTAL_MEMORY = "host_total_memory";
+    public static final String HOST_TOTAL_CPU = "host_total_cpu";
+    public static final String HOST_ARCH = "host_arch";
+    public static final String HOST_HYPERVISOR = "host_hypervisor";
+    public static final String HOST_EMULATOR = "host_emulator";
+    public static final String HOST_CPU_CORES = "host_cpu_cores";
+    public static final String HOST_CPU_THREADS = "host_cpu_threads";
+    public static final String HOST_CPU_SOCKETS = "host_cpu_sockets";
+    public static final String HOST_STATUS = "host_status";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("host_id")
+    @TableField(HOST_ID)
     private Integer hostId;
-    @TableField("host_display_name")
+    @TableField(HOST_DISPLAY_NAME)
     private String displayName;
 
-    @TableField("client_id")
+    @TableField(CLIENT_ID)
     private String clientId;
 
-    @TableField("client_secret")
+    @TableField(CLIENT_SECRET)
     private String clientSecret;
 
-    @TableField("host_ip")
+    @TableField(HOST_IP)
     private String hostIp;
-    @TableField("host_name")
+    @TableField(HOST_NAME)
     private String hostName;
-    @TableField("host_nic_name")
+    @TableField(HOST_NIC_NAME)
     private String nic;
-    @TableField("host_uri")
+    @TableField(HOST_URI)
     private String uri;
-    @TableField("host_allocation_memory")
+    @TableField(HOST_ALLOCATION_MEMORY)
     private Long allocationMemory;
-    @TableField("host_allocation_cpu")
+    @TableField(HOST_ALLOCATION_CPU)
     private Integer allocationCpu;
-    @TableField("host_total_memory")
+    @TableField(HOST_TOTAL_MEMORY)
     private Long totalMemory;
-    @TableField("host_total_cpu")
+    @TableField(HOST_TOTAL_CPU)
     private Integer totalCpu;
-    @TableField("host_arch")
+    @TableField(HOST_ARCH)
     private String arch;
-    @TableField("host_hypervisor")
+    @TableField(HOST_HYPERVISOR)
     private String hypervisor;
-    @TableField("host_emulator")
+    @TableField(HOST_EMULATOR)
     private String emulator;
-    @TableField("host_cpu_cores")
+    @TableField(HOST_CPU_CORES)
     private Integer cores;
-    @TableField("host_cpu_threads")
+    @TableField(HOST_CPU_THREADS)
     private Integer threads;
-    @TableField("host_cpu_sockets")
+    @TableField(HOST_CPU_SOCKETS)
     private Integer sockets;
-    @TableField("host_status")
+    @TableField(HOST_STATUS)
     private Integer status;
 
 
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 
 }

@@ -46,7 +46,7 @@ public class UserService extends AbstractService {
 
     public ResultUtil<TokenModel> login(String loginName, String password, String nonce) {
 
-        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq("login_name", loginName));
+        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, "用户名或密码错误");
         }
@@ -71,7 +71,7 @@ public class UserService extends AbstractService {
 
 
     public ResultUtil<UserInfoModel> findUserByLoginName(String loginName) {
-        UserInfoEntity user = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq("login_name", loginName));
+        UserInfoEntity user = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
         return ResultUtil.success(this.initLoginInfoBO(user));
     }
 
@@ -123,7 +123,7 @@ public class UserService extends AbstractService {
     public ResultUtil<UserInfoModel> register(String loginName, String password) {
 
 
-        UserInfoEntity entity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq("login_name", loginName));
+        UserInfoEntity entity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
         if (entity != null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "用户已经存在");
         }
@@ -177,7 +177,7 @@ public class UserService extends AbstractService {
             return ResultUtil.error(ErrorCode.PARAM_ERROR, "用户名不能为空");
         }
 
-        UserInfoEntity loginInfoBean = this.loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq("login_name", loginName));
+        UserInfoEntity loginInfoBean = this.loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
         LoginSignatureModel model = LoginSignatureModel.builder().signature(loginInfoBean == null ? UUID.randomUUID().toString() : loginInfoBean.getLoginPasswordSalt()).nonce(String.valueOf(System.currentTimeMillis())).build();
         return ResultUtil.success(model);
     }

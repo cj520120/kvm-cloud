@@ -91,12 +91,12 @@ public class Constant {
     }
 
     public static class GuestType {
-        public static final int SYSTEM = 0;
+        public static final int COMPONENT = 0;
         public static final int USER = 1;
     }
 
     public static class ComponentType {
-        public static final int SYSTEM = 1;
+        public static final int ROUTE = 1;
 
     }
 
@@ -134,4 +134,42 @@ public class Constant {
 
     }
 
+    public static class OperateType {
+        public static int DESTROY_HOST_STORAGE = 1;
+        public static int SYNC_HOST_GUEST = 2;
+        public static int DESTROY_GUEST = 3;
+        public static int START_COMPONENT_GUEST = 4;
+        public static int CREATE_STORAGE = 5;
+        public static int DESTROY_STORAGE = 6;
+        public static int CHANGE_GUEST_NETWORK_INTERFACE = 7;
+        public static int INIT_HOST_STORAGE = 8;
+        public static int DESTROY_HOST_NETWORK = 9;
+        public static int DESTROY_SNAPSHOT_VOLUME = 10;
+        public static int RESIZE_VOLUME = 11;
+        public static int CREATE_GUEST = 12;
+        public static int INIT_HOST_NETWORK = 13;
+        public static int VOLUME_CHECK = 14;
+        public static int SYNC_HOST_TASK_ID = 15;
+        public static int DESTROY_TEMPLATE = 16;
+        public static int CHANGE_GUEST_CD_ROOM = 17;
+        public static int REBOOT_GUEST = 18;
+        public static int CREATE_VOLUME_SNAPSHOT = 19;
+        public static int STOP_GUEST = 20;
+        public static int CREATE_VOLUME_TEMPLATE = 21;
+        public static int MIGRATE_VOLUME = 22;
+        public static int GUEST_INFO = 23;
+        public static int CLONE_VOLUME = 24;
+        public static int CREATE_HOST = 25;
+        public static int DESTROY_HOST_GUEST = 26;
+        public static int DOWNLOAD_TEMPLATE = 27;
+        public static int CREATE_NETWORK = 28;
+        public static int START_GUEST = 29;
+        public static int CREATE_VOLUME = 30;
+        public static int DESTROY_VOLUME = 31;
+        public static int CHANGE_GUEST_DISK = 32;
+        public static int DESTROY_NETWORK = 33;
+        public static int MIGRATE_GUEST = 34;
+        public static int HOST_CHECK = 35;
+        public static int STORAGE_CHECK = 36;
+    }
 }

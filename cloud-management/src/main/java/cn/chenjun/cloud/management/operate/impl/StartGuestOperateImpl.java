@@ -32,13 +32,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     @Autowired
     private VncService vncService;
 
-    public StartGuestOperateImpl() {
-        super((Class<T>) StartGuestOperate.class);
-    }
-
-    public StartGuestOperateImpl(Class<T> tClass) {
-        super(tClass);
-    }
 
 
     @Override
@@ -109,7 +102,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
     protected List<OsDisk> getGuestDisk(GuestEntity guest) {
-        List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
+        List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
         List<OsDisk> disks = new ArrayList<>();
         Map<Integer, Storage> storageMap = Maps.newHashMap();
         for (GuestDiskEntity entity : guestDiskEntityList) {
@@ -147,7 +140,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     protected OsCdRoom getGuestCdRoom(GuestEntity guest) {
         OsCdRoom cdRoom = OsCdRoom.builder().build();
         if (guest.getCdRoom() > 0) {
-            List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
+            List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, guest.getCdRoom()));
             Collections.shuffle(templateVolumeList);
             if (!templateVolumeList.isEmpty()) {
                 TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
@@ -183,7 +176,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     }
 
     protected List<OsNic> getGuestNetwork(GuestEntity guest) {
-        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guest.getGuestId()).eq("allocate_type", cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
+        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<OsNic> networkInterfaces = new ArrayList<>();
         int baseDeviceId = 0;
@@ -209,5 +202,10 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             networkInterfaces.add(nic);
         }
         return networkInterfaces;
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.START_GUEST;
     }
 }

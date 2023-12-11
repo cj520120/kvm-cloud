@@ -24,9 +24,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, ResultUtil<Void>> {
 
-    public RebootGuestOperateImpl() {
-        super(RebootGuestOperate.class);
-    }
 
     @Override
     public void operate(RebootGuestOperate param) {
@@ -61,5 +58,10 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
             this.allocateService.initHostAllocate();
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.REBOOT_GUEST;
     }
 }

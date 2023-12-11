@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOperate, ResultUtil<Void>> {
 
-    public CreateNetworkOperateImpl() {
-        super(CreateNetworkOperate.class);
-    }
 
     @Override
     public void operate(CreateNetworkOperate param) {
@@ -64,5 +61,10 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_NETWORK;
     }
 }

@@ -28,9 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOperate, ResultUtil<Void>> {
 
-    public DestroyNetworkOperateImpl() {
-        super(DestroyNetworkOperate.class);
-    }
+
 
     @Override
     public void operate(DestroyNetworkOperate param) {
@@ -61,5 +59,10 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
         }
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_NETWORK;
     }
 }

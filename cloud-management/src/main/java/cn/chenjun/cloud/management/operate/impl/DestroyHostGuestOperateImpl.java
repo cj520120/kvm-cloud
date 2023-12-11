@@ -20,10 +20,6 @@ import java.util.Objects;
 @Slf4j
 public class DestroyHostGuestOperateImpl extends AbstractOperate<DestroyHostGuestOperate, ResultUtil<Void>> {
 
-    public DestroyHostGuestOperateImpl() {
-        super(DestroyHostGuestOperate.class);
-    }
-
 
     @Override
     public void operate(DestroyHostGuestOperate param) {
@@ -37,9 +33,19 @@ public class DestroyHostGuestOperateImpl extends AbstractOperate<DestroyHostGues
     }
 
     @Override
+    public void onFinish(DestroyHostGuestOperate param, ResultUtil<Void> resultUtil) {
+
+    }
+
+    @Override
     public Type getCallResultType() {
         return new TypeToken<ResultUtil<GuestInfo>>() {
         }.getType();
     }
 
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_HOST_GUEST;
+    }
 }

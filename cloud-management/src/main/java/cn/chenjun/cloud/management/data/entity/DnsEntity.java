@@ -11,22 +11,31 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * @author chenjun
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @TableName("tbl_dns_info")
 public class DnsEntity {
+    public static final String DNS_ID = "dns_id";
+    public static final String NETWORK_ID = "network_id";
+    public static final String DNS_DOMAIN = "dns_domain";
+    public static final String DNS_IP = "dns_ip";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("dns_id")
+    @TableField(DNS_ID)
     private Integer dnsId;
-    @TableField("network_id")
+    @TableField(NETWORK_ID)
     private Integer networkId;
-    @TableField("dns_domain")
+    @TableField(DNS_DOMAIN)
     private String dnsDomain;
-    @TableField("dns_ip")
+    @TableField(DNS_IP)
     private String dnsIp;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 
 }

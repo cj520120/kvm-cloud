@@ -22,9 +22,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolumeTemplateOperate, ResultUtil<VolumeInfo>> {
 
-    public CreateVolumeTemplateOperateImpl() {
-        super(CreateVolumeTemplateOperate.class);
-    }
 
 
     @Override
@@ -95,5 +92,10 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
         if (targetVolume != null) {
             this.eventService.publish(NotifyData.<Void>builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_VOLUME_TEMPLATE;
     }
 }

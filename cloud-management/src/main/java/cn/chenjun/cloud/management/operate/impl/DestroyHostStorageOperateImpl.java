@@ -29,10 +29,6 @@ import java.util.UUID;
 @Slf4j
 public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostStorageOperate, ResultUtil<Void>> {
 
-    public DestroyHostStorageOperateImpl() {
-        super(DestroyHostStorageOperate.class);
-    }
-
 
     @Override
     public void operate(DestroyHostStorageOperate param) {
@@ -76,8 +72,8 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
                 if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
                     storageMapper.deleteById(param.getStorageId());
-                    templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq("storage_id", param.getStorageId()));
-                    snapshotVolumeMapper.delete(new QueryWrapper<SnapshotVolumeEntity>().eq("storage_id", param.getStorageId()));
+                    templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, param.getStorageId()));
+                    snapshotVolumeMapper.delete(new QueryWrapper<SnapshotVolumeEntity>().eq(SnapshotVolumeEntity.STORAGE_ID, param.getStorageId()));
                 }
             }
         } else {
@@ -89,5 +85,10 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
         }
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_HOST_STORAGE;
     }
 }

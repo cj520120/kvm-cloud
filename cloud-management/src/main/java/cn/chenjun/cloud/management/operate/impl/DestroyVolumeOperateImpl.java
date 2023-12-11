@@ -25,9 +25,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOperate, ResultUtil<Void>> {
 
-    public DestroyVolumeOperateImpl() {
-        super(DestroyVolumeOperate.class);
-    }
 
     @Override
     public void operate(DestroyVolumeOperate param) {
@@ -64,5 +61,10 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         }
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_VOLUME;
     }
 }

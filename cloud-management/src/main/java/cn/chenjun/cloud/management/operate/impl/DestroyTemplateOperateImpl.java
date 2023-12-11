@@ -29,9 +29,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateOperate, ResultUtil<Void>> {
 
-    public DestroyTemplateOperateImpl() {
-        super(DestroyTemplateOperate.class);
-    }
 
     @Override
     public void operate(DestroyTemplateOperate param) {
@@ -39,7 +36,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         if (template.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + template.getName() + "]状态不正确:" + template.getStatus());
         }
-        List<TemplateVolumeEntity> volumes = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", param.getTemplateId()));
+        List<TemplateVolumeEntity> volumes = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
         if (!volumes.isEmpty()) {
             this.templateVolumeMapper.deleteBatchIds(volumes.stream().map(TemplateVolumeEntity::getTemplateVolumeId).collect(Collectors.toSet()));
         }
@@ -73,5 +70,10 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
             this.eventService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_TEMPLATE;
     }
 }

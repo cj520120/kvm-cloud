@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * @author chenjun
+ */
 @Component
 public class KeepaliveInitialize implements RouteComponentQmaInitialize {
     @Override

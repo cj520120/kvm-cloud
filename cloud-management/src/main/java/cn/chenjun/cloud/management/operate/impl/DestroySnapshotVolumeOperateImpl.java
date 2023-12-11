@@ -23,9 +23,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySnapshotVolumeOperate, ResultUtil<Void>> {
 
-    public DestroySnapshotVolumeOperateImpl() {
-        super(DestroySnapshotVolumeOperate.class);
-    }
 
     @Override
     public void operate(DestroySnapshotVolumeOperate param) {
@@ -67,5 +64,10 @@ public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySna
         }
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_SNAPSHOT_VOLUME;
     }
 }

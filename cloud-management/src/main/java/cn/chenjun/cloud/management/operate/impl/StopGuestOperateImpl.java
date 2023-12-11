@@ -26,10 +26,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, ResultUtil<Void>> {
 
-    public StopGuestOperateImpl() {
-        super(StopGuestOperate.class);
-    }
-
 
 
     @Override
@@ -76,5 +72,10 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
 
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.STOP_GUEST;
     }
 }

@@ -5,7 +5,6 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
-import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.websocket.WsSessionManager;
 import cn.chenjun.cloud.management.websocket.action.WsAction;
 import cn.chenjun.cloud.management.websocket.client.WsClient;
@@ -26,8 +25,6 @@ import java.util.Map;
 public class ComponentConnectionAction implements WsAction {
     @Autowired
     private WsSessionManager wsSessionManager;
-    @Autowired
-    private UserService userService;
     @Autowired
     private NetworkMapper networkMapper;
 

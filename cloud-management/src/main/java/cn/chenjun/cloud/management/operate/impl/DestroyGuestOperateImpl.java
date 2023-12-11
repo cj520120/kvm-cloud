@@ -37,9 +37,7 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
     @Autowired
     private MetaMapper metaMapper;
 
-    public DestroyGuestOperateImpl() {
-        super(DestroyGuestOperate.class);
-    }
+
 
     @Override
     public void operate(DestroyGuestOperate param) {
@@ -66,14 +64,14 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
             return;
         }
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guest.getGuestId()).eq("allocate_type", Constant.NetworkAllocateType.GUEST));
+            List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
             for (GuestNetworkEntity guestNetwork : guestNetworkList) {
                 guestNetwork.setAllocateId(0);
                 guestNetwork.setDeviceId(0);
                 guestNetwork.setDriveType("");
                 this.guestNetworkMapper.updateById(guestNetwork);
             }
-            List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq("guest_id", guest.getGuestId()));
+            List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
             for (GuestDiskEntity guestDisk : guestDiskList) {
                 this.guestDiskMapper.deleteById(guestDisk.getGuestDiskId());
             }
@@ -90,11 +88,16 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
             this.guestVncMapper.deleteById(guest.getGuestId());
             this.guestMapper.deleteById(guest.getGuestId());
             this.guestPasswordMapper.deleteById(guest.getGuestId());
-            this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq("guest_id", guest.getGuestId()));
+            this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));
             this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
             this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
 
         }
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_GUEST;
     }
 }

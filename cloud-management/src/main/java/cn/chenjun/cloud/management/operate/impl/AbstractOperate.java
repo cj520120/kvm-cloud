@@ -21,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -32,8 +33,8 @@ import java.util.Map;
 /**
  * @author chenjun
  */
-public abstract class AbstractOperate<T extends BaseOperateParam, V extends ResultUtil> implements Operate<T, V> {
-    private final Class<T> paramType;
+public abstract class AbstractOperate<T extends BaseOperateParam, V extends ResultUtil> implements Operate {
+
     @Autowired
     protected GuestMapper guestMapper;
     @Autowired
@@ -69,15 +70,11 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected RestTemplate restTemplate;
 
-    protected AbstractOperate(Class<T> paramType) {
-        this.paramType = paramType;
-    }
 
     @Override
-    public Class<T> getParamType() {
-        return this.paramType;
+    public boolean supports(@NonNull Integer type) {
+        return this.getType() == type;
     }
-
 
     protected void asyncInvoker(HostEntity host, T param, String command, Object data) {
         TaskRequest taskRequest = TaskRequest.builder()
@@ -118,12 +115,44 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         }
     }
 
-    @Override
-    public void onFinish(T param, V resultUtil) {
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void process(BaseOperateParam param) {
+        this.operate((T) param);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onComplete(BaseOperateParam param, ResultUtil<?> resultUtil) {
+        this.onFinish((T) param, (V) resultUtil);
+    }
+
 
     protected void onSubmitFinishEvent(String taskId, V result) {
         this.operateTask.onTaskFinish(taskId, GsonBuilderUtil.create().toJson(result));
     }
+
+
+    /**
+     * 执行操作
+     *
+     * @param param
+     */
+    public abstract void operate(T param);
+
+    /**
+     * 执行结果回调
+     *
+     * @param param
+     * @param resultUtil
+     */
+    public abstract void onFinish(T param, V resultUtil);
+
+    /**
+     * 获取处理类型
+     *
+     * @return
+     */
+    public abstract int getType();
 }

@@ -34,7 +34,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        GuestNetworkEntity defaultGuestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guestId).eq("allocate_type", Constant.NetworkAllocateType.GUEST).eq("network_id", component.getNetworkId()).eq("device_id", 0));
+        GuestNetworkEntity defaultGuestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST).eq(GuestNetworkEntity.NETWORK_ID, component.getNetworkId()).eq(GuestNetworkEntity.DEVICE_ID, 0));
         if (defaultGuestNetwork == null) {
             return commands;
         }
@@ -42,7 +42,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         if (network == null) {
             return commands;
         }
-        List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("network_id", component.getNetworkId()));
+        List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, component.getNetworkId()));
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/dnsmasq.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
@@ -50,7 +50,11 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         map.put("vip", component.getComponentVip());
         map.put("startIp", network.getStartIp());
         map.put("endIp", network.getEndIp());
-        map.put("gateway", component.getComponentVip());
+        if(network.getBasicNetworkId()>0) {
+            map.put("gateway", component.getComponentVip());
+        }else{
+            map.put("gateway", network.getGateway());
+        }
         map.put("mask", network.getMask());
         map.put("domain", network.getDomain());
         map.put("dnsList", Arrays.asList(network.getDns().split(",")));

@@ -38,7 +38,7 @@ public class MetaService {
 
 
     public String loadAllGuestMetaData(String ip,String nonce, String sign) {
-        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("network_ip", ip));
+        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip));
         if (guestNetwork == null) {
             return "";
         }
@@ -49,14 +49,14 @@ public class MetaService {
         if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce+":"+ip).equals(sign)) {
             return "";
         }
-        List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq("guest_id", guestNetwork.getAllocateId()));
+        List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestNetwork.getAllocateId()));
         Set<String> metaNames = list.stream().map(t -> t.getMetaKey() + ": " + t.getMetaValue()).collect(Collectors.toSet());
         return String.join("\r\n", metaNames);
     }
 
     public String loadAllGuestUserData(String ip, String nonce,String sign) {
         String data = "#cloud-config\r\n";
-        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq("network_ip", ip));
+        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip));
         if (guestNetwork == null) {
             return data;
         }

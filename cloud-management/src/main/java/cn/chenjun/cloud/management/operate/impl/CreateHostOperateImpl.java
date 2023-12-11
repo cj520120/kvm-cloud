@@ -33,9 +33,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, ResultUtil<HostInfo>> {
 
-    public CreateHostOperateImpl() {
-        super(CreateHostOperate.class);
-    }
 
     @Override
     public void operate(CreateHostOperate param) {
@@ -136,5 +133,10 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_HOST;
     }
 }

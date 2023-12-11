@@ -41,7 +41,7 @@ public class VncWsService {
             return;
         }
         ComponentMapper componentMapper = SpringContextUtils.getBean(ComponentMapper.class);
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq("network_id", guest.getNetworkId()).eq("component_type", Constant.ComponentType.SYSTEM).last("limit 0,1"));
+        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, guest.getNetworkId()).eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).last("limit 0,1"));
         if (component == null) {
             session.close();
             return;
@@ -67,7 +67,7 @@ public class VncWsService {
         }
         GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
         NetworkMapper networkMapper = SpringContextUtils.getBean(NetworkMapper.class);
-        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq("allocate_id", guest.getGuestId()).eq("allocate_type", Constant.NetworkAllocateType.GUEST));
+        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         String ip = "127.0.0.1";
         for (GuestNetworkEntity guestNetworkEntity : guestNetworkList) {
             ip = guestNetworkEntity.getIp();

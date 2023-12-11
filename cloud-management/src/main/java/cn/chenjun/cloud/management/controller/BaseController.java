@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 public class BaseController {
     @Autowired
     private RedissonClient redissonClient;

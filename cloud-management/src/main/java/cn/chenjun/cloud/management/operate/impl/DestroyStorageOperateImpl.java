@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOperate, ResultUtil<Void>> {
 
-    public DestroyStorageOperateImpl() {
-        super(DestroyStorageOperate.class);
-    }
 
 
     @Override
@@ -65,5 +62,10 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
         }
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_STORAGE;
     }
 }

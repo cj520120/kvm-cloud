@@ -31,24 +31,17 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> extends AbstractOperate<T, ResultUtil<Void>> {
+public class ChangeGuestCdRoomOperateImpl extends AbstractOperate<ChangeGuestCdRoomOperate, ResultUtil<Void>> {
 
-    public ChangeGuestCdRoomOperateImpl() {
-        super((Class<T>) ChangeGuestCdRoomOperate.class);
-    }
-
-    public ChangeGuestCdRoomOperateImpl(Class<T> tClass) {
-        super(tClass);
-    }
 
     @Override
-    public void operate(T param) {
+    public void operate(ChangeGuestCdRoomOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getHostId() > 0) {
             HostEntity host = hostMapper.selectById(guest.getHostId());
             OsCdRoom cdRoom = OsCdRoom.builder().name(guest.getName()).build();
             if (guest.getCdRoom() > 0) {
-                List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq("template_id", guest.getCdRoom()));
+                List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, guest.getCdRoom()));
                 Collections.shuffle(templateVolumeList);
                 if (!templateVolumeList.isEmpty()) {
                     TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
@@ -93,9 +86,15 @@ public class ChangeGuestCdRoomOperateImpl<T extends ChangeGuestCdRoomOperate> ex
         }.getType();
     }
 
+
     @Override
-    public void onFinish(T param, ResultUtil<Void> resultUtil) {
+    public void onFinish(ChangeGuestCdRoomOperate param, ResultUtil<Void> resultUtil) {
 
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CHANGE_GUEST_CD_ROOM;
     }
 }

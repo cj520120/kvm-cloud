@@ -24,9 +24,6 @@ import java.lang.reflect.Type;
 @Slf4j
 public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<ChangeGuestNetworkInterfaceOperate, ResultUtil<Void>> {
 
-    public ChangeGuestNetworkInterfaceOperateImpl() {
-        super(ChangeGuestNetworkInterfaceOperate.class);
-    }
 
 
     @Override
@@ -71,5 +68,10 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
         }
         this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 
+    }
+
+    @Override
+    public int getType() {
+        return cn.chenjun.cloud.management.util.Constant.OperateType.CHANGE_GUEST_NETWORK_INTERFACE;
     }
 }

@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.operate.bean;
 
+import cn.chenjun.cloud.management.util.Constant;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -8,10 +9,15 @@ import lombok.experimental.SuperBuilder;
  */
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 public class DestroyVolumeOperate extends BaseOperateParam {
     private int volumeId;
+
+    @Override
+    public int getType() {
+        return Constant.OperateType.DESTROY_VOLUME;
+    }
 }

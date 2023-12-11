@@ -5,8 +5,10 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.task.OperateTask;
+import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
@@ -46,6 +48,29 @@ public abstract class AbstractService {
     protected SchemeMapper schemeMapper;
     @Autowired
     protected EventService eventService;
+    @Autowired
+    protected ComponentMapper componentMapper;
+
+    public GuestModel initGuestInfo(GuestEntity entity) {
+        GuestModel model;
+        switch (entity.getType()) {
+            case Constant.GuestType.COMPONENT:
+                ComponentGuestModel componentGuestModel = new ComponentGuestModel();
+                componentGuestModel.setComponentId(entity.getOtherId());
+                ComponentEntity component = componentMapper.selectById(entity.getOtherId());
+                if (component != null) {
+                    componentGuestModel.setComponentVip(component.getComponentVip());
+                    componentGuestModel.setComponentType(componentGuestModel.getComponentType());
+                }
+                model = componentGuestModel;
+                break;
+            case Constant.GuestType.USER:
+            default:
+                model = new GuestModel();
+        }
+        BeanUtils.copyProperties(entity, model);
+        return model;
+    }
 
     protected StorageModel initStorageModel(StorageEntity entity) {
         return new BeanConverter<>(StorageModel.class).convert(entity, null);
@@ -83,7 +108,7 @@ public abstract class AbstractService {
 
     protected VolumeModel initVolume(VolumeEntity volume) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
-        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq("volume_id", volume.getVolumeId()));
+        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
         if (disk != null && disk.getGuestId() != 0) {
             GuestEntity guest = this.guestMapper.selectById(disk.getGuestId());
             if (guest != null) {

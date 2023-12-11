@@ -20,24 +20,34 @@ import java.util.Date;
 @Builder
 @TableName("tbl_guest_network")
 public class GuestNetworkEntity {
+    public static final String GUEST_NETWORK_ID = "guest_network_id";
+    public static final String ALLOCATE_ID = "allocate_id";
+    public static final String ALLOCATE_TYPE = "allocate_type";
+    public static final String NETWORK_ID = "network_id";
+    public static final String DEVICE_ID = "device_id";
+    public static final String DEVICE_TYPE = "device_type";
+    public static final String NETWORK_MAC_ADDRESS = "network_mac_address";
+    public static final String NETWORK_IP = "network_ip";
+    public static final String CREATE_TIME = "create_time";
+
     @TableId(type = IdType.AUTO)
-    @TableField("guest_network_id")
+    @TableField(GUEST_NETWORK_ID)
     private Integer guestNetworkId;
-    @TableField("allocate_id")
+    @TableField(ALLOCATE_ID)
     private Integer allocateId;
-    @TableField("allocate_type")
+    @TableField(ALLOCATE_TYPE)
     private Integer allocateType;
-    @TableField("network_id")
+    @TableField(NETWORK_ID)
     private Integer networkId;
-    @TableField("device_id")
+    @TableField(DEVICE_ID)
     private Integer deviceId;
-    @TableField("device_type")
+    @TableField(DEVICE_TYPE)
     private String driveType;
-    @TableField("network_mac_address")
+    @TableField(NETWORK_MAC_ADDRESS)
     private String mac;
-    @TableField("network_ip")
+    @TableField(NETWORK_IP)
     private String ip;
-    @TableField("create_time")
+    @TableField(CREATE_TIME)
     private Date createTime;
 
 }
