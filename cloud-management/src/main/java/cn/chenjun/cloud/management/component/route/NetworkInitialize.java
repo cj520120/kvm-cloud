@@ -65,7 +65,7 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
     }
 
     protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns) {
-        String body =   new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/network.tpl")), StandardCharsets.UTF_8);
+        String body = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/network/network.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(5);
         map.put("index",index);

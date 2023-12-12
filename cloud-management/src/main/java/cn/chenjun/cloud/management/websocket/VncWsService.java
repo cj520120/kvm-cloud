@@ -1,13 +1,15 @@
 package cn.chenjun.cloud.management.websocket;
 
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.data.mapper.*;
+import cn.chenjun.cloud.management.data.entity.ComponentEntity;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.data.entity.GuestVncEntity;
+import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
+import cn.chenjun.cloud.management.data.mapper.GuestMapper;
+import cn.chenjun.cloud.management.data.mapper.GuestVncMapper;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.VncClient;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.reflect.TypeToken;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
 import org.springframework.stereotype.Component;
@@ -16,10 +18,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -46,37 +45,12 @@ public class VncWsService {
             session.close();
             return;
         }
-        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-        }.getType());
-        componentGuestIds.add(component.getMasterGuestId());
-        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
-        if (componentGuestList.isEmpty()) {
-            session.close();
-            return;
-        }
-        Collections.shuffle(componentGuestList);
-        guest = componentGuestList.get(0);
-        if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
-            session.close();
-            return;
-        }
         GuestVncMapper guestVncMapper = SpringContextUtils.getBean(GuestVncMapper.class);
         GuestVncEntity guestVnc = guestVncMapper.selectById(id);
         if (guestVnc == null) {
             return;
         }
-        GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
-        NetworkMapper networkMapper = SpringContextUtils.getBean(NetworkMapper.class);
-        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
-        String ip = "127.0.0.1";
-        for (GuestNetworkEntity guestNetworkEntity : guestNetworkList) {
-            ip = guestNetworkEntity.getIp();
-            NetworkEntity network = networkMapper.selectById(guestNetworkEntity.getNetworkId());
-            if (network.getType() == Constant.NetworkType.BASIC) {
-                break;
-            }
-        }
-        String uri = "ws://" + ip + ":8080/websockify/?token=" + guestVnc.getToken();
+        String uri = "ws://" + component.getBasicComponentVip() + ":8080/websockify/?token=" + guestVnc.getToken();
         this.proxy = new VncClient(session, new URI(uri));
         this.proxy.connect();
 

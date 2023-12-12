@@ -21,6 +21,7 @@ public class ComponentEntity {
     public static final String COMPONENT_ID = "component_id";
     public static final String COMPONENT_TYPE = "component_type";
     public static final String COMPONENT_VIP = "component_vip";
+    public static final String BASIC_COMPONENT_VIP = "basic_component_vip";
     public static final String NETWORK_ID = "network_id";
     public static final String MASTER_GUEST_ID = "master_guest_id";
     public static final String COMPONENT_SLAVE_NUMBER = "component_slave_number";
@@ -33,6 +34,8 @@ public class ComponentEntity {
     private Integer componentType;
     @TableField(COMPONENT_VIP)
     private String componentVip;
+    @TableField(BASIC_COMPONENT_VIP)
+    private String basicComponentVip;
     @TableField(NETWORK_ID)
     private Integer networkId;
     @TableField(MASTER_GUEST_ID)

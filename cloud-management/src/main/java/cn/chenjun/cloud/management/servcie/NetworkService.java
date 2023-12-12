@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 /**
  * @author chenjun
@@ -110,7 +107,8 @@ public class NetworkService extends AbstractService {
                 .vlanId(vlanId)
                 .basicNetworkId(basicNetworkId)
                 .secret(UUID.randomUUID().toString().replace("-", ""))
-                .status(Constant.NetworkStatus.CREATING).build();
+                .status(Constant.NetworkStatus.CREATING)
+                .createTime(new Date()).build();
         networkMapper.insert(network);
         List<String> ips = IpCalculate.parseIpRange(startIp, endIp);
         for (String ip : ips) {
@@ -122,6 +120,7 @@ public class NetworkService extends AbstractService {
                     .mac(IpCalculate.getRandomMacAddress())
                     .driveType("")
                     .deviceId(0)
+                    .createTime(new Date())
                     .build();
             this.guestNetworkMapper.insert(guestNetwork);
         }
@@ -169,10 +168,20 @@ public class NetworkService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前网络被其他虚拟机引用，请首先删除虚拟机");
         }
         network.setStatus(Constant.NetworkStatus.DESTROY);
-        networkMapper.updateById(network);
-        dnsMapper.delete(new QueryWrapper<DnsEntity>().eq(DnsEntity.NETWORK_ID, networkId));
+        this.networkMapper.updateById(network);
+        this.dnsMapper.delete(new QueryWrapper<DnsEntity>().eq(DnsEntity.NETWORK_ID, networkId));
         this.guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, networkId));
-        this.componentMapper.delete(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, networkId));
+        List<ComponentEntity> componentList = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, networkId));
+        for (ComponentEntity componentEntity : componentList) {
+            //取消vip地址
+            List<GuestNetworkEntity> guestNetworkEntityList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, componentEntity.getComponentId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.COMPONENT_VIP));
+            for (GuestNetworkEntity guestNetwork : guestNetworkEntityList) {
+                guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+                guestNetwork.setAllocateId(0);
+                this.guestNetworkMapper.updateById(guestNetwork);
+            }
+            this.componentMapper.deleteById(componentEntity);
+        }
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
         this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());

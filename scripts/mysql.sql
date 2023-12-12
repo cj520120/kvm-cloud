@@ -24,6 +24,7 @@ CREATE TABLE `tbl_component_info` (
   `component_id` int NOT NULL AUTO_INCREMENT,
   `component_type` int NOT NULL,
   `component_vip` varchar(45) NOT NULL,
+  `basic_component_vip` varchar(45) NOT NULL,
   `network_id` int NOT NULL,
   `master_guest_id` int NOT NULL,
   `component_slave_number` int NOT NULL DEFAULT '1',
@@ -31,6 +32,7 @@ CREATE TABLE `tbl_component_info` (
   PRIMARY KEY (`component_id`),
   KEY `IX_NETWORK_COMPONENT` (`component_type`,`network_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8mb4;
+
 
 
 

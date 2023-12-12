@@ -43,7 +43,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
             return commands;
         }
         List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, component.getNetworkId()));
-        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/dnsmasq.tpl")), StandardCharsets.UTF_8);
+        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/route/dnsmasq.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
         map.put("ip", defaultGuestNetwork.getIp());

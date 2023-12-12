@@ -60,6 +60,7 @@ public abstract class AbstractService {
                 ComponentEntity component = componentMapper.selectById(entity.getOtherId());
                 if (component != null) {
                     componentGuestModel.setComponentVip(component.getComponentVip());
+                    componentGuestModel.setBasicComponentVip(component.getBasicComponentVip());
                     componentGuestModel.setComponentType(componentGuestModel.getComponentType());
                 }
                 model = componentGuestModel;

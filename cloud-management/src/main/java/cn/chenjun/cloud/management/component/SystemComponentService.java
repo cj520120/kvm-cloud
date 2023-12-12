@@ -53,7 +53,7 @@ public class SystemComponentService extends AbstractComponentService {
 
     @Override
     public int getVipAddressAllocateType() {
-        return Constant.NetworkAllocateType.SYSTEM_VIP;
+        return Constant.NetworkAllocateType.COMPONENT_VIP;
     }
 
     @Override

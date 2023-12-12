@@ -147,25 +147,48 @@ public abstract class AbstractComponentService extends AbstractService {
     }
 
     private ComponentEntity checkAndAllocateComponent(NetworkEntity network) {
+        boolean notify = false;
         ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()).eq(ComponentEntity.COMPONENT_TYPE, this.getComponentType()));
         if (component == null) {
-            component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(this.applicationConfig.getSystemComponentSlaveNumber()).slaveGuestIds("[]").componentType(this.getComponentType()).networkId(network.getNetworkId()).componentVip("").build();
+            component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(this.applicationConfig.getSystemComponentSlaveNumber()).slaveGuestIds("[]").componentType(this.getComponentType()).networkId(network.getNetworkId()).componentVip("").basicComponentVip("").build();
             componentMapper.insert(component);
+            notify = true;
         }
         if (ObjectUtils.isEmpty(component.getComponentVip())) {
             //申请VIP地址
-            GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, network.getNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, this.getVipAddressAllocateType()).ne("allocate_id", 0).last("limit 0,1"));
+            GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, this.getVipAddressAllocateType()).ne("allocate_id", 0).last("limit 0,1"));
             if (guestNetwork == null) {
                 guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
-                guestNetwork.setAllocateId(network.getNetworkId());
+                guestNetwork.setAllocateId(component.getComponentId());
                 guestNetwork.setAllocateType(this.getVipAddressAllocateType());
                 this.guestNetworkMapper.updateById(guestNetwork);
             }
             component.setComponentVip(guestNetwork.getIp());
             componentMapper.updateById(component);
+            notify = true;
+
+        }
+        if (ObjectUtils.isEmpty(component.getBasicComponentVip())) {
+            if (network.getBasicNetworkId() > 0) {
+                GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getBasicNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, this.getVipAddressAllocateType()).ne("allocate_id", 0).last("limit 0,1"));
+                if (guestNetwork == null) {
+                    guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
+                    guestNetwork.setAllocateId(component.getComponentId());
+                    guestNetwork.setAllocateType(this.getVipAddressAllocateType());
+                    this.guestNetworkMapper.updateById(guestNetwork);
+                }
+                component.setBasicComponentVip(guestNetwork.getIp());
+            } else {
+                component.setBasicComponentVip(component.getComponentVip());
+            }
+            componentMapper.updateById(component);
+            notify = true;
+        }
+        if (notify) {
             this.eventService.publish(NotifyData.<Void>builder().type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).id(component.getComponentId()).build());
 
         }
+
         return component;
     }
 

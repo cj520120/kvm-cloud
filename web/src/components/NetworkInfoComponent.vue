@@ -41,6 +41,7 @@
 							<el-table-column label="标签" prop="description" width="200" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="VIP地址" prop="componentVip" width="150" />
+							<el-table-column label="Basic VIP地址" prop="basicComponentVip" width="150" v-if="show_network.type === 1" />
 							<el-table-column label="类型" prop="status" width="80">
 								<template #default="scope">
 									<el-tag type="success">{{ get_component_type(scope.row.componentType) }}</el-tag>

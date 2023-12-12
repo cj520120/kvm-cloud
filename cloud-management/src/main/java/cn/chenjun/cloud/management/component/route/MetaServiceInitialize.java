@@ -29,9 +29,9 @@ public class MetaServiceInitialize implements RouteComponentQmaInitialize {
         NetworkEntity network = networkMapper.selectById(component.getNetworkId());
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/meta-service/"}).checkSuccess(true).build())).build());
-        String metaServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-        String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-        String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String metaServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/meta_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/meta_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/meta_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(2);
         map.put("managerUri", this.applicationConfig.getManagerUri());
         map.put("secret", network.getSecret());

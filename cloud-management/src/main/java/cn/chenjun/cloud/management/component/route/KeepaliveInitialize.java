@@ -4,8 +4,10 @@ import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.google.common.reflect.TypeToken;
 import com.hubspot.jinjava.Jinjava;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -15,20 +17,40 @@ import java.util.*;
  */
 @Component
 public class KeepaliveInitialize implements RouteComponentQmaInitialize {
+    public static final int MASTER_PRIORITY = 500;
+    public static final int SLAVE_PRIORITY = 300;
+
+    private static Map<String, Object> buildVrrp(String name, String nic, String vip, ComponentEntity component, int guestId) {
+        List<Integer> slaveIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
+        }.getType());
+        Map<String, Object> vrrp = new HashMap<>(3);
+        vrrp.put("name", name);
+        vrrp.put("interface", nic);
+        vrrp.put("vip", vip);
+        if (component.getMasterGuestId() == guestId) {
+            vrrp.put("state", "MASTER");
+            vrrp.put("priority", MASTER_PRIORITY);
+        } else {
+            vrrp.put("state", "BACKUP");
+            int index = slaveIds.indexOf(guestId);
+            vrrp.put("priority", SLAVE_PRIORITY - index);
+        }
+        return vrrp;
+    }
+
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>(3);
-        map.put("vip", component.getComponentVip());
-        map.put("virtual_router_id", component.getComponentId());
-        if (component.getMasterGuestId() == guestId) {
-            map.put("state", "MASTER");
-            map.put("priority", "150");
-        } else {
-            map.put("state", "BACKUP");
-            map.put("priority", "100");
+
+        List<Map<String, Object>> vrrpList = new ArrayList<>(1);
+        vrrpList.add(buildVrrp("VI_1", "eth0", component.getComponentVip(), component, guestId));
+
+        if (!StringUtils.isEmpty(component.getBasicComponentVip()) && !Objects.equals(component.getComponentVip(), component.getBasicComponentVip())) {
+            vrrpList.add(buildVrrp("VI_2", "eth1", component.getBasicComponentVip(), component, guestId));
         }
-        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/keepalived.tpl")), StandardCharsets.UTF_8);
+        Map<String, Object> map = new HashMap<>(1);
+        map.put("vrrpList", vrrpList);
+        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/keepalived/keepalived.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         config = jinjava.render(config, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "keepalived"}).build())).build());

@@ -24,7 +24,7 @@ public class NginxInitialize implements RouteComponentQmaInitialize {
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        String nginxConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String nginxConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(0);
         map.put("ip", guest.getGuestIp());
         Jinjava jinjava = new Jinjava();
