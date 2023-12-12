@@ -1,7 +1,8 @@
-package cn.chenjun.cloud.management.component.route;
+package cn.chenjun.cloud.management.component.global;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  * @author chenjun
  */
 @Component
-public class NetworkInitialize implements RouteComponentQmaInitialize {
+public class NetworkInitialize implements GlobalComponentQmaInitialize {
     @Autowired
     private GuestNetworkMapper guestNetworkMapper;
     @Autowired
@@ -61,7 +62,7 @@ public class NetworkInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.NETWORK;
+        return ComponentOrder.NETWORK;
     }
 
     protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns) {

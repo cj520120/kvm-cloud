@@ -1,7 +1,8 @@
-package cn.chenjun.cloud.management.component.route;
+package cn.chenjun.cloud.management.component.global;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.List;
  * @author chenjun
  */
 @Component
-public class YumSourceCommand implements RouteComponentQmaInitialize {
+public class YumSourceCommand implements GlobalComponentQmaInitialize {
     @Autowired
     protected ApplicationConfig applicationConfig;
 
@@ -36,6 +37,6 @@ public class YumSourceCommand implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.YUM_SOURCE;
+        return ComponentOrder.YUM_SOURCE;
     }
 }

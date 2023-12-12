@@ -1,7 +1,8 @@
-package cn.chenjun.cloud.management.component.route;
+package cn.chenjun.cloud.management.component.global;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.List;
  * @author chenjun
  */
 @Component
-public class PipInitialize implements RouteComponentQmaInitialize {
+public class PipInitialize implements GlobalComponentQmaInitialize {
     @Autowired
     private ApplicationConfig applicationConfig;
 
@@ -41,6 +42,6 @@ public class PipInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.PYTHON_INSTALL;
+        return ComponentOrder.PYTHON_INSTALL;
     }
 }

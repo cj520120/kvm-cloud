@@ -54,6 +54,9 @@ public abstract class AbstractComponentService extends AbstractService {
         if (!Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)) {
             return;
         }
+        if (!this.isAllow(network)) {
+            return;
+        }
         ComponentEntity component = checkAndAllocateComponent(network);
         GuestEntity masterGuest = checkAndStartMasterComponent(networkId, component, network);
         if (masterGuest == null) {
@@ -156,11 +159,11 @@ public abstract class AbstractComponentService extends AbstractService {
         }
         if (ObjectUtils.isEmpty(component.getComponentVip())) {
             //申请VIP地址
-            GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, this.getVipAddressAllocateType()).ne("allocate_id", 0).last("limit 0,1"));
+            GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.COMPONENT_VIP).ne("allocate_id", 0).last("limit 0,1"));
             if (guestNetwork == null) {
                 guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
                 guestNetwork.setAllocateId(component.getComponentId());
-                guestNetwork.setAllocateType(this.getVipAddressAllocateType());
+                guestNetwork.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
                 this.guestNetworkMapper.updateById(guestNetwork);
             }
             component.setComponentVip(guestNetwork.getIp());
@@ -170,11 +173,11 @@ public abstract class AbstractComponentService extends AbstractService {
         }
         if (ObjectUtils.isEmpty(component.getBasicComponentVip())) {
             if (network.getBasicNetworkId() > 0) {
-                GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getBasicNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, this.getVipAddressAllocateType()).ne("allocate_id", 0).last("limit 0,1"));
+                GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getBasicNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.COMPONENT_VIP).ne("allocate_id", 0).last("limit 0,1"));
                 if (guestNetwork == null) {
                     guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
                     guestNetwork.setAllocateId(component.getComponentId());
-                    guestNetwork.setAllocateType(this.getVipAddressAllocateType());
+                    guestNetwork.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
                     this.guestNetworkMapper.updateById(guestNetwork);
                 }
                 component.setBasicComponentVip(guestNetwork.getIp());
@@ -328,12 +331,7 @@ public abstract class AbstractComponentService extends AbstractService {
      */
     public abstract String getComponentName();
 
-    /**
-     * 获取vip地址类型
-     *
-     * @return
-     */
-    public abstract int getVipAddressAllocateType();
+
     /**
      * 获取组件启动脚本
      * @param networkId
@@ -349,6 +347,13 @@ public abstract class AbstractComponentService extends AbstractService {
      */
     public abstract boolean allocateBasicNic();
 
+    /**
+     * 当前网络是否允许创建
+     *
+     * @param network
+     * @return
+     */
+    public abstract boolean isAllow(NetworkEntity network);
     /**
      * 之行顺序
      *

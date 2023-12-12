@@ -1,7 +1,8 @@
-package cn.chenjun.cloud.management.component.route;
+package cn.chenjun.cloud.management.component.global;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.google.common.reflect.TypeToken;
@@ -16,7 +17,7 @@ import java.util.*;
  * @author chenjun
  */
 @Component
-public class KeepaliveInitialize implements RouteComponentQmaInitialize {
+public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     public static final int MASTER_PRIORITY = 500;
     public static final int SLAVE_PRIORITY = 300;
 
@@ -62,6 +63,6 @@ public class KeepaliveInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.KEEPALIVE;
+        return ComponentOrder.KEEPALIVE;
     }
 }

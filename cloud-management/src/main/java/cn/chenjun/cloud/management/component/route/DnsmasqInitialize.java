@@ -85,6 +85,6 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.DNS;
+        return ComponentOrder.DNS;
     }
 }

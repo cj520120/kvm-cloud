@@ -35,6 +35,6 @@ public class WebsockifyInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.VNC;
+        return ComponentOrder.VNC;
     }
 }

@@ -49,6 +49,6 @@ public class MetaServiceInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.META;
+        return ComponentOrder.META;
     }
 }

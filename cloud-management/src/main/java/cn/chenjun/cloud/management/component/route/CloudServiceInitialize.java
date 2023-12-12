@@ -52,6 +52,6 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.CLOUD;
+        return ComponentOrder.CLOUD;
     }
 }

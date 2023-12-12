@@ -37,6 +37,6 @@ public class NginxInitialize implements RouteComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return RouteOrder.NGINX;
+        return ComponentOrder.NGINX;
     }
 }

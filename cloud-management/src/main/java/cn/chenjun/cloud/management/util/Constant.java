@@ -97,6 +97,7 @@ public class Constant {
 
     public static class ComponentType {
         public static final int ROUTE = 1;
+        public static final int NAT = 2;
 
     }
 

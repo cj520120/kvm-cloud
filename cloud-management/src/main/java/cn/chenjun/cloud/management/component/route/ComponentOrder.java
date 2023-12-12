@@ -3,7 +3,7 @@ package cn.chenjun.cloud.management.component.route;
 /**
  * @author chenjun
  */
-public class RouteOrder {
+public class ComponentOrder {
     public static final int SCRIPT_INIT=0;
     public static final int NETWORK = 1;
     public static final int YUM_SOURCE = 2;
@@ -15,6 +15,7 @@ public class RouteOrder {
     public static final int VNC = 6;
     public static final int CLOUD = 7;
     public static final int NGINX = 8;
+    public static final int FIREWALLD = 8;
 
     public static final int KEEPALIVE = 9;
 }
