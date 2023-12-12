@@ -27,7 +27,7 @@ public abstract class AbstractTask implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         this.lastStartTime = System.currentTimeMillis() + this.getDelaySeconds();
-//        this.bossExecutor.scheduleAtFixedRate(this::call, 0, 1, TimeUnit.SECONDS);
+        this.bossExecutor.scheduleAtFixedRate(this::call, 0, 1, TimeUnit.SECONDS);
     }
 
     private void call() {
