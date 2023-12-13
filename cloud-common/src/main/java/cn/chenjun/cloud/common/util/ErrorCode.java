@@ -15,6 +15,8 @@ public final class ErrorCode {
      */
     public static final int NETWORK_NOT_FOUND = BASE_NETWORK_ERROR + 1;
     public static final int NETWORK_NOT_SPACE = BASE_NETWORK_ERROR + 2;
+    public static final int NETWORK_COMPONENT_NOT_FOUND = BASE_NETWORK_ERROR + 3;
+    public static final int NETWORK_COMPONENT_NAT_NOT_FOUND = BASE_NETWORK_ERROR + 4;
     public static final int BASE_GUEST_ERROR = BASE_ERROR * 2;
     /**
      * GUEST

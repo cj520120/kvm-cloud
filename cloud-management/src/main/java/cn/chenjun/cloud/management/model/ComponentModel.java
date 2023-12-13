@@ -18,6 +18,7 @@ public class ComponentModel {
     private Integer componentId;
     private Integer componentType;
     private String componentVip;
+    private String basicComponentVip;
     private Integer networkId;
     private Integer masterGuestId;
     private Integer componentSlaveNumber;

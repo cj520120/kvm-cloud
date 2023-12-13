@@ -6,12 +6,12 @@
 		<el-row>
 			<el-form ref="createForm" :model="create_network" label-width="100px" class="demo-ruleForm">
 				<el-row :gutter="24">
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="网络名称" prop="name">
 							<el-input v-model="create_network.name"></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="网络类型" prop="type">
 							<el-select v-model="create_network.type" style="width: 100%">
 								<el-option label="基础网络" :value="0"></el-option>
@@ -22,54 +22,50 @@
 				</el-row>
 
 				<el-row :gutter="24">
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="起始IP" prop="startIp"><el-input v-model="create_network.startIp"></el-input></el-form-item>
 					</el-col>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="结束IP" prop="endIp"><el-input v-model="create_network.endIp"></el-input></el-form-item>
 					</el-col>
 				</el-row>
 
 				<el-row :gutter="24">
-					<el-col :span="12">
+					<el-col :span="8">
+						<el-form-item label="子网掩码" prop="mask"><el-input v-model="create_network.mask"></el-input></el-form-item>
+					</el-col>
+					<el-col :span="8" v-if="create_network.type === 0">
 						<el-form-item label="网关地址" prop="gateway"><el-input v-model="create_network.gateway"></el-input></el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="子网掩码" prop="mask"><el-input v-model="create_network.mask"></el-input></el-form-item>
+					<el-col :span="8" v-if="create_network.type === 1">
+						<el-form-item label="VLAN ID" prop="vlanId"><el-input v-model="create_network.vlanId"></el-input></el-form-item>
 					</el-col>
 				</el-row>
 
 				<el-row :gutter="24">
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="子网地址" prop="subnet"><el-input v-model="create_network.subnet"></el-input></el-form-item>
 					</el-col>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="广播地址" prop="broadcast"><el-input v-model="create_network.broadcast"></el-input></el-form-item>
 					</el-col>
 				</el-row>
 				<el-row :gutter="24">
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="DNS" prop="dns"><el-input v-model="create_network.dns"></el-input></el-form-item>
 					</el-col>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="搜索域" prop="domain"><el-input v-model="create_network.domain"></el-input></el-form-item>
 					</el-col>
 				</el-row>
 
 				<el-row :gutter="24">
-					<el-col :span="12">
-						<el-form-item label="桥接网卡" prop="bridge"><el-input v-model="create_network.bridge"></el-input></el-form-item>
+					<el-col :span="8">
+						<el-form-item label="桥接网卡" prop="bridge">
+							<el-input v-model="create_network.bridge"></el-input>
+						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<div style="color: red; font-size: 12px; line-height: 40px" v-if="create_network.type === 1">Vlan为测试状态，只支持Openswitch网络,创建的桥接网卡必须为OVS桥接</div>
-					</el-col>
-				</el-row>
-
-				<el-row :gutter="24" v-if="create_network.type === 1">
-					<el-col :span="12">
-						<el-form-item label="VLAN ID" prop="vlanId"><el-input v-model="create_network.vlanId"></el-input></el-form-item>
-					</el-col>
-					<el-col :span="12">
+					<el-col :span="8" v-if="create_network.type === 1">
 						<el-form-item label="基础网络" prop="basicNetworkId">
 							<el-select v-model="create_network.basicNetworkId" placeholder="请选择基础网络" style="width: 100%">
 								<el-option :label="item.name" :value="item.networkId" v-show="item.type === 0" v-for="item in networks" :key="item.networkId"></el-option>

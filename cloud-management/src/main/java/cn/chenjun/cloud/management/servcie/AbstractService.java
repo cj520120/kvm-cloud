@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
@@ -8,9 +9,12 @@ import cn.chenjun.cloud.management.task.OperateTask;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.common.reflect.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+
+import java.util.List;
 
 /**
  * @author chenjun
@@ -60,6 +64,7 @@ public abstract class AbstractService {
                 ComponentEntity component = componentMapper.selectById(entity.getOtherId());
                 if (component != null) {
                     componentGuestModel.setComponentVip(component.getComponentVip());
+                    componentGuestModel.setComponentType(component.getComponentType());
                     componentGuestModel.setBasicComponentVip(component.getBasicComponentVip());
                     componentGuestModel.setComponentType(componentGuestModel.getComponentType());
                 }
@@ -130,4 +135,21 @@ public abstract class AbstractService {
 
         return new BeanConverter<>(SnapshotModel.class).convert(volume, null);
     }
+
+    protected ComponentModel initComponent(ComponentEntity entity) {
+
+        return ComponentModel.builder().componentId(entity.getComponentId())
+                .networkId(entity.getNetworkId())
+                .componentSlaveNumber(entity.getComponentSlaveNumber())
+                .componentType(entity.getComponentType())
+                .masterGuestId(entity.getMasterGuestId())
+                .componentVip(entity.getComponentVip())
+                .basicComponentVip(entity.getBasicComponentVip())
+                .slaveGuestIds(GsonBuilderUtil.create().fromJson(entity.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
+                }.getType())).build();
+    }
+    protected NatModel initNat(NatEntity entity) {
+        return NatModel.builder().natId(entity.getNatId()).componentId(entity.getComponentId()).localPort(entity.getLocalPort()).protocol(entity.getProtocol()).remoteIp(entity.getRemoteIp()).remotePort(entity.getRemotePort()).build();
+    }
+
 }

@@ -164,8 +164,10 @@ export default {
     },
     get_component_type(componentType) {
       switch (componentType) {
-        case 0:
+        case 1:
           return "Route";
+        case 2:
+          return "Nat";
         default:
           return "未知";
       }

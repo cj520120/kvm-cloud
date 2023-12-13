@@ -2,6 +2,8 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.model.ComponentModel;
+import cn.chenjun.cloud.management.model.NatModel;
 import cn.chenjun.cloud.management.model.NetworkModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,21 @@ public class NetworkController extends BaseController {
     @GetMapping("/api/network/all")
     public ResultUtil<List<NetworkModel>> listNetwork() {
         return this.lockRun(() -> networkService.listNetwork());
+    }
+
+    @GetMapping("/api/network/component")
+    public ResultUtil<List<ComponentModel>> listNetworkComponent(@RequestParam("networkId") int networkId) {
+        return this.lockRun(() -> networkService.listNetworkComponent(networkId));
+    }
+
+    @PostMapping("/api/network/component/slave/update")
+    public ResultUtil<ComponentModel> updateComponentSlaveNumber(@RequestParam("componentId") int componentId, @RequestParam("number") int number) {
+        return this.lockRun(() -> networkService.updateComponentSlaveNumber(componentId, number));
+    }
+
+    @PutMapping("/api/network/component/create")
+    public ResultUtil<ComponentModel> createComponent(@RequestParam("networkId") int networkId, @RequestParam("componentType") int componentType) {
+        return this.lockRun(() -> networkService.createComponent(networkId, componentType));
     }
 
     @PutMapping("/api/network/create")
@@ -58,5 +75,26 @@ public class NetworkController extends BaseController {
     @DeleteMapping("/api/network/destroy")
     public ResultUtil<NetworkModel> destroyNetwork(@RequestParam("networkId") int networkId) {
         return this.lockRun(() -> networkService.destroyNetwork(networkId));
+    }
+
+    @DeleteMapping("/api/network/component/destroy")
+    public ResultUtil<Void> destroyNetworkComponent(@RequestParam("componentId") int componentId) {
+        return this.lockRun(() -> networkService.destroyComponent(componentId));
+    }
+    @GetMapping("/api/network/nat/list")
+    public ResultUtil<List<NatModel>> listNetworkComponentNat(@RequestParam("componentId") int componentId) {
+        return this.lockRun(() -> networkService.listComponentNat(componentId));
+    }
+    @PutMapping("/api/network/nat/create")
+    public ResultUtil<NatModel> createNetworkComponentNat(@RequestParam("componentId") int componentId,
+                                                          @RequestParam("localPort") int localPort,
+                                                          @RequestParam("protocol") String protocol,
+                                                          @RequestParam("remoteIp") String remoteIp,
+                                                          @RequestParam("remotePort") int remotePort) {
+        return this.lockRun(() -> networkService.createComponentNat(componentId,localPort,protocol,remoteIp,remotePort));
+    }
+    @DeleteMapping("/api/network/nat/destroy")
+    public ResultUtil<Void> destroyNetworkComponentNat(@RequestParam("natId") int natId) {
+        return this.lockRun(() -> networkService.deleteComponentNat(natId));
     }
 }

@@ -18,4 +18,5 @@ public class ComponentOrder {
     public static final int FIREWALLD = 8;
 
     public static final int KEEPALIVE = 9;
+    public static final int NAT = 10;
 }

@@ -27,7 +27,7 @@ public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess {
             dnsModelList = this.dnsService.listLocalNetworkDns(msg.getId());
         }
         NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModelList).build();
-        wsSessionManager.sendComponentNotify(msg.getId(), sendMsg);
+        wsSessionManager.sendNetworkNotify(msg.getId(), sendMsg);
     }
 
     @Override

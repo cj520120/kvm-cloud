@@ -34,6 +34,19 @@ CREATE TABLE `tbl_component_info` (
 ) ENGINE=InnoDB AUTO_INCREMENT=204 DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `tbl_nat_info`;
+CREATE TABLE `tbl_nat_info` (
+  `nat_id` int NOT NULL AUTO_INCREMENT,
+  `component_id` int NOT NULL,
+  `nat_protocol` varchar(45) NOT NULL,
+  `nat_local_port` int NOT NULL,
+  `name_remote_ip` varchar(45) NOT NULL,
+  `name_remote_port` int NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`nat_id`),
+  UNIQUE KEY `IX_NAT` (`component_id`,`nat_protocol`,`nat_local_port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+
 
 
 

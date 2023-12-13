@@ -38,8 +38,6 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
         map.put("networkId", network.getNetworkId());
         Jinjava jinjava = new Jinjava();
         cloudPython = jinjava.render(cloudPython, map);
-
-        cloudPython = String.format(cloudPython, applicationConfig.getManagerUri(), network.getSecret(), network.getNetworkId());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/cloud-service/cloud.py").fileBody(cloudPython).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/cloud-service/service.sh").fileBody(cloudServiceShell).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/cloud-service.service").fileBody(cloudService).build())).build());

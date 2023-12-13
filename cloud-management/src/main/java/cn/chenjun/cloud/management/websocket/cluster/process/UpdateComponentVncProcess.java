@@ -27,7 +27,7 @@ public class UpdateComponentVncProcess extends AbstractClusterMessageProcess {
             vncModelList = this.vncService.listVncByNetworkId(msg.getId());
         }
         NotifyData<List<VncModel>> sendMsg = NotifyData.<List<VncModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_VNC).data(vncModelList).build();
-        wsSessionManager.sendComponentNotify(msg.getId(), sendMsg);
+        wsSessionManager.sendNetworkNotify(msg.getId(), sendMsg);
     }
 
     @Override

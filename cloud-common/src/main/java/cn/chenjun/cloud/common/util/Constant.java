@@ -94,6 +94,7 @@ public class Constant {
         public static final int COMPONENT_NOTIFY = 203;
         public static final int COMPONENT_VNC_REQUEST = 205;
         public static final int COMPONENT_DNS_REQUEST = 206;
+        public static final int COMPONENT_NAT_REQUEST = 207;
     }
 
     public static class NotifyType {
@@ -109,11 +110,14 @@ public class Constant {
         public static final int UPDATE_SCHEME = 8;
         public static final int UPDATE_GROUP = 9;
         public static final int UPDATE_DNS = 10;
-        public static final int UPDATE_COMPONENT = 10;
+        public static final int UPDATE_COMPONENT = 11;
+        public static final int UPDATE_COMPONENT_NAT = 12;
 
 
         public static final int COMPONENT_UPDATE_VNC = 100;
         public static final int COMPONENT_UPDATE_DNS = 101;
+        public static final int COMPONENT_UPDATE_NAT = 102;
+
     }
 
 }

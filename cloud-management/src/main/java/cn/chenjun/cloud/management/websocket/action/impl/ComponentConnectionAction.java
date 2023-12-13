@@ -32,11 +32,12 @@ public class ComponentConnectionAction implements WsAction {
     public void doAction(Session session, WsRequest msg) throws IOException {
         Map<String, Object> params = msg.getData();
             int networkId = NumberUtil.parseInt(params.getOrDefault("networkId", "0").toString());
+        int componentId = NumberUtil.parseInt(params.getOrDefault("componentId", "0").toString());
             String nonce = params.getOrDefault("nonce", "").toString();
             String sign = params.getOrDefault("sign", "").toString();
             NetworkEntity network =this.networkMapper.selectById(networkId);
             if (DigestUtil.md5Hex(network.getSecret() + ":" + networkId + ":" + nonce).equals(sign)) {
-                WsClient wsClient = wsSessionManager.registerComponentClient(session, networkId);
+                WsClient wsClient = wsSessionManager.registerComponentClient(session, networkId, componentId);
                 WsMessage<Void> wsMessage = WsMessage.<Void>builder().command(Constant.SocketCommand.COMPONENT_CONNECT_SUCCESS).build();
                 wsClient.send(wsMessage);
             } else {

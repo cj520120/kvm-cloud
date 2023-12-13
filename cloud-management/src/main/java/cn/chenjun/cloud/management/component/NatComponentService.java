@@ -4,9 +4,7 @@ import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.component.nat.NatComponentQmaInitialize;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.util.Constant;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -31,15 +29,6 @@ public class NatComponentService extends AbstractComponentService {
         this.componentQmaInitializeList = componentQmaInitializeList;
     }
 
-    @Override
-    public boolean allocateBasicNic() {
-        return true;
-    }
-
-    @Override
-    public int order() {
-        return 1;
-    }
 
     @Override
     public int getComponentType() {
@@ -52,18 +41,11 @@ public class NatComponentService extends AbstractComponentService {
     }
 
 
-    @Override
-    public boolean isAllow(NetworkEntity network) {
-        return network.getBasicNetworkId() > 0;
-    }
 
     @Override
-    public GuestQmaRequest getStartQmaRequest(int networkId, int guestId) {
+    public GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId) {
 
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, networkId).eq(ComponentEntity.COMPONENT_TYPE, this.getComponentType()));
-        if (component == null) {
-            return null;
-        }
+
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         GuestQmaRequest request = GuestQmaRequest.builder().build();
         request.setName("");

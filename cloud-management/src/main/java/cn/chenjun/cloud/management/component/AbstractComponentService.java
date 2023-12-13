@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.component;
 
-import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -18,8 +17,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.UUID;
  * @author chenjun
  */
 @Slf4j
-public abstract class AbstractComponentService extends AbstractService {
+public abstract class AbstractComponentService extends AbstractService implements ComponentProcess {
 
     @Autowired
     protected AllocateService allocateService;
@@ -42,23 +41,14 @@ public abstract class AbstractComponentService extends AbstractService {
     @Autowired
     protected ApplicationConfig applicationConfig;
 
+
     /**
      * 创建系统组件
      */
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void checkAndStart(int networkId) {
-        NetworkEntity network = networkMapper.selectById(networkId);
-        if (network == null) {
-            return;
-        }
-        if (!Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)) {
-            return;
-        }
-        if (!this.isAllow(network)) {
-            return;
-        }
-        ComponentEntity component = checkAndAllocateComponent(network);
-        GuestEntity masterGuest = checkAndStartMasterComponent(networkId, component, network);
+    public void checkAndStart(NetworkEntity network, ComponentEntity component) {
+        GuestEntity masterGuest = checkAndStartMasterComponent(network, component);
         if (masterGuest == null) {
             return;
         }
@@ -90,7 +80,8 @@ public abstract class AbstractComponentService extends AbstractService {
             component.setSlaveGuestIds(GsonBuilderUtil.create().toJson(slaveList));
             this.componentMapper.updateById(component);
         }
-        while (slaveList.size() > component.getComponentSlaveNumber()) {
+
+        if (slaveList.size() > component.getComponentSlaveNumber()) {
             //删除多余的slave组件
             int slaveGuestId = slaveList.remove(slaveList.size() - 1);
             if (slaveGuestId > 0) {
@@ -98,9 +89,15 @@ public abstract class AbstractComponentService extends AbstractService {
                 if (slaveGuest != null) {
                     this.destroySlaveGuest(slaveGuest);
                     //slave销毁成功后再进行后续操作
-                    return false;
+                } else {
+                    component.setSlaveGuestIds(GsonBuilderUtil.create().toJson(slaveList));
+                    this.componentMapper.updateById(component);
                 }
+            } else {
+                component.setSlaveGuestIds(GsonBuilderUtil.create().toJson(slaveList));
+                this.componentMapper.updateById(component);
             }
+            return false;
         }
         return true;
     }
@@ -112,11 +109,20 @@ public abstract class AbstractComponentService extends AbstractService {
         int templateId = 0;
         for (int i = 0; i < slaveList.size() && templateId >= 0; i++) {
             int slaveGuestId = slaveList.get(i);
+
             GuestEntity slaveGuest;
-            if (slaveGuestId == 0 || (slaveGuest = this.guestMapper.selectById(slaveGuestId)) == null) {
+            if (slaveGuestId > 0) {
+                //删除无效的组件
+                slaveGuest = this.guestMapper.selectById(slaveGuestId);
+                if (slaveGuest == null) {
+                    slaveList.set(i, 0);
+                    isUpdateSlave = true;
+                    this.eventService.publish(NotifyData.<Void>builder().id(slaveGuestId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                }
+            } else {
                 //创建已经删除或无效的slave组件
                 if (templateId == 0) {
-                    templateId = getTemplateId(component.getNetworkId());
+                    templateId = getTemplateId();
                 }
                 slaveGuest = this.createSystemComponentGuest(component.getComponentId(), "Slave " + this.getComponentName(), network, templateId);
                 slaveList.set(i, slaveGuest.getGuestId());
@@ -124,7 +130,9 @@ public abstract class AbstractComponentService extends AbstractService {
                 this.eventService.publish(NotifyData.<Void>builder().id(slaveGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
             }
-            this.startComponentGuest(slaveGuest);
+            if (slaveGuest != null) {
+                this.startComponentGuest(slaveGuest);
+            }
         }
         if (isUpdateSlave) {
             component.setSlaveGuestIds(GsonBuilderUtil.create().toJson(slaveList));
@@ -132,11 +140,10 @@ public abstract class AbstractComponentService extends AbstractService {
         }
     }
 
-    private GuestEntity checkAndStartMasterComponent(int networkId, ComponentEntity component, NetworkEntity network) {
+    private GuestEntity checkAndStartMasterComponent(NetworkEntity network, ComponentEntity component) {
         GuestEntity masterGuest = this.guestMapper.selectById(component.getMasterGuestId());
         if (masterGuest == null) {
-            //创建master节点
-            int templateId = getTemplateId(networkId);
+            int templateId = getTemplateId();
             if (templateId < 0) {
                 return null;
             }
@@ -149,57 +156,12 @@ public abstract class AbstractComponentService extends AbstractService {
         return masterGuest;
     }
 
-    private ComponentEntity checkAndAllocateComponent(NetworkEntity network) {
-        boolean notify = false;
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()).eq(ComponentEntity.COMPONENT_TYPE, this.getComponentType()));
-        if (component == null) {
-            component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(this.applicationConfig.getSystemComponentSlaveNumber()).slaveGuestIds("[]").componentType(this.getComponentType()).networkId(network.getNetworkId()).componentVip("").basicComponentVip("").build();
-            componentMapper.insert(component);
-            notify = true;
-        }
-        if (ObjectUtils.isEmpty(component.getComponentVip())) {
-            //申请VIP地址
-            GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.COMPONENT_VIP).ne("allocate_id", 0).last("limit 0,1"));
-            if (guestNetwork == null) {
-                guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
-                guestNetwork.setAllocateId(component.getComponentId());
-                guestNetwork.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
-                this.guestNetworkMapper.updateById(guestNetwork);
-            }
-            component.setComponentVip(guestNetwork.getIp());
-            componentMapper.updateById(component);
-            notify = true;
 
-        }
-        if (ObjectUtils.isEmpty(component.getBasicComponentVip())) {
-            if (network.getBasicNetworkId() > 0) {
-                GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.NETWORK_ID, network.getBasicNetworkId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.COMPONENT_VIP).ne("allocate_id", 0).last("limit 0,1"));
-                if (guestNetwork == null) {
-                    guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
-                    guestNetwork.setAllocateId(component.getComponentId());
-                    guestNetwork.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
-                    this.guestNetworkMapper.updateById(guestNetwork);
-                }
-                component.setBasicComponentVip(guestNetwork.getIp());
-            } else {
-                component.setBasicComponentVip(component.getComponentVip());
-            }
-            componentMapper.updateById(component);
-            notify = true;
-        }
-        if (notify) {
-            this.eventService.publish(NotifyData.<Void>builder().type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).id(component.getComponentId()).build());
-
-        }
-
-        return component;
-    }
-
-    private int getTemplateId(int networkId) {
+    private int getTemplateId() {
         int templateId;
         List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_TYPE, Constant.TemplateType.SYSTEM).eq(TemplateEntity.TEMPLATE_STATUS, Constant.TemplateStatus.READY));
         if (templateList.isEmpty()) {
-            log.info("系统模版未就绪，等待就绪后创建系统组件.networkId={}", networkId);
+            log.info("系统模版未就绪，等待就绪后创建系统组件.");
             templateId = -1;
         } else {
             Collections.shuffle(templateList);
@@ -293,8 +255,7 @@ public abstract class AbstractComponentService extends AbstractService {
         this.guestNetworkMapper.updateById(guestNetwork);
         guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
-        if (network.getBasicNetworkId() > 0 && this.allocateBasicNic()) {
-            //只有master节点需要基础网络
+        if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
             guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
             guestNetwork.setDeviceId(networkDeviceId);
             guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
@@ -316,6 +277,10 @@ public abstract class AbstractComponentService extends AbstractService {
         return guest;
     }
 
+    @Override
+    public boolean supports(@NonNull Integer type) {
+        return Objects.equals(type, this.getComponentType());
+    }
 
     /**
      * 获取组件类型
@@ -332,32 +297,4 @@ public abstract class AbstractComponentService extends AbstractService {
     public abstract String getComponentName();
 
 
-    /**
-     * 获取组件启动脚本
-     * @param networkId
-     * @param guestId
-     * @return
-     */
-    public abstract GuestQmaRequest getStartQmaRequest(int networkId, int guestId);
-
-    /**
-     * 是否申请父网卡ip
-     *
-     * @return
-     */
-    public abstract boolean allocateBasicNic();
-
-    /**
-     * 当前网络是否允许创建
-     *
-     * @param network
-     * @return
-     */
-    public abstract boolean isAllow(NetworkEntity network);
-    /**
-     * 之行顺序
-     *
-     * @return
-     */
-    public abstract int order();
 }
