@@ -41,4 +41,9 @@ public class TaskIdSyncTask extends AbstractTask {
             }
         }
     }
+
+    @Override
+    protected String getName() {
+        return "检测主机任务列表";
+    }
 }

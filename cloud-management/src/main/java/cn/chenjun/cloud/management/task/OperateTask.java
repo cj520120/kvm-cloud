@@ -137,5 +137,8 @@ public class OperateTask extends AbstractTask {
         }
     }
 
-
+    @Override
+    protected String getName() {
+        return "检测可执行任务";
+    }
 }

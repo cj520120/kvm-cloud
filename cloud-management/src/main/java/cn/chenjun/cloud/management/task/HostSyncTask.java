@@ -49,4 +49,9 @@ public class HostSyncTask extends AbstractTask {
     protected int getPeriodSeconds() {
         return 30;
     }
+
+    @Override
+    protected String getName() {
+        return "宿主机检测";
+    }
 }

@@ -31,4 +31,9 @@ public class StorageSyncTask extends AbstractTask {
         BaseOperateParam operateParam = StorageCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测存储池使用情况").build();
         this.operateTask.addTask(operateParam);
     }
+
+    @Override
+    protected String getName() {
+        return "存储池检测";
+    }
 }

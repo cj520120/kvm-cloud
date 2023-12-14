@@ -43,4 +43,9 @@ public class HostGuestSyncTask extends AbstractTask {
             }
         }
     }
+
+    @Override
+    protected String getName() {
+        return "同步主机虚拟机";
+    }
 }

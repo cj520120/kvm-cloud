@@ -18,23 +18,26 @@ import java.util.*;
  */
 @Component
 public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
-    public static final int MASTER_PRIORITY = 500;
-    public static final int SLAVE_PRIORITY = 300;
+    public static final int MASTER_PRIORITY = 100;
+    public static final int SLAVE_PRIORITY = 90;
 
     private static Map<String, Object> buildVrrp(String name, String nic, String vip, ComponentEntity component, int guestId) {
         List<Integer> slaveIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
         }.getType());
+        int routeId = component.getComponentId() % 255;
+        routeId = Math.max(1, routeId);
         Map<String, Object> vrrp = new HashMap<>(3);
         vrrp.put("name", name);
         vrrp.put("interface", nic);
         vrrp.put("vip", vip);
+        //非抢占模式全部为backup
+        vrrp.put("state", "BACKUP");
+        vrrp.put("routeId", routeId);
         if (component.getMasterGuestId() == guestId) {
-            vrrp.put("state", "MASTER");
             vrrp.put("priority", MASTER_PRIORITY);
         } else {
-            vrrp.put("state", "BACKUP");
-            int index = slaveIds.indexOf(guestId);
-            vrrp.put("priority", SLAVE_PRIORITY - index);
+            int index = slaveIds.indexOf(guestId) + 1;
+            vrrp.put("priority", Math.max(1, SLAVE_PRIORITY - index));
         }
         return vrrp;
     }

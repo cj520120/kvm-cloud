@@ -7,7 +7,6 @@
 			<el-row style="text-align: left; margin: 20px 0">
 				<el-button @click="register_network(show_network)" type="success" size="mini">重新注册</el-button>
 				<el-button @click="pasue_network(show_network)" type="warning" size="mini" v-if="show_network.status !== 3">开始维护</el-button>
-				<el-button @click="dialog_create_network_component_visible = true" type="warning" size="mini">添加组件</el-button>
 				<el-button @click="destroy_network(show_network)" type="danger" size="mini">销毁网络</el-button>
 			</el-row>
 			<el-row>
@@ -34,64 +33,62 @@
 				</el-descriptions>
 
 				<br />
-				<el-tabs type="border-card">
-					<el-tab-pane label="系统组件">
-						<el-collapse accordion value="0">
-							<div v-for="(component, index) in components" :key="index">
-								<el-collapse-item :name="index">
-									<template slot="title">
-										<div style="width: 100%; line-height: 48px">
-											<div style="float: left; width: 50px; margin-right: 15px; text-align: right">ID:</div>
-											<div style="float: left; width: 70px">{{ component.componentId }}</div>
-											<div style="float: left; width: 50px; margin-right: 15px; text-align: right">类型:</div>
-											<div style="float: left; width: 70px">
-												<el-tag size="small">{{ get_component_type(component.componentType) }}</el-tag>
-											</div>
-											<div style="float: left; width: 50px; margin-right: 15px; text-align: right">VIP:</div>
-											<div style="float: left; width: 100px">{{ component.componentVip }}</div>
-											<div style="float: left; width: 100px; margin-right: 15px; text-align: right">Basic VIP:</div>
-											<div style="float: left; width: 100px">{{ component.basicComponentVip }}</div>
-											<div style="float: left; width: 100px; margin-right: 15px; text-align: right">Slave数量:</div>
-											<div style="float: left"><el-input-number size="mini" v-model="component.componentSlaveNumber" @change="update_component_slave_number($event, component.componentId)" :min="0" :max="10" label="Slave数量"></el-input-number></div>
-											<div style="float: left; margin-left: 15px"><el-button size="mini" type="primary" v-if="component.componentType === 2" @click="show_network_component_nat_list(component)">Nat列表</el-button></div>
-											<div style="float: left; margin-left: 15px"><el-button size="mini" type="danger" v-if="component.componentType != 1" @click="destroy_network_component(component)">删除</el-button></div>
-										</div>
-									</template>
-
-									<el-divider></el-divider>
-									<el-table :data="component.guests" style="width: 100%">
-										<el-table-column label="ID" prop="guestId" width="80" />
-										<el-table-column label="实例名" prop="name" width="200" />
-										<el-table-column label="标签" prop="description" width="200" />
-										<el-table-column label="IP地址" prop="guestIp" width="150" />
-										<el-table-column label="状态" prop="status" width="100">
-											<template #default="scope">
-												<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
-											</template>
-										</el-table-column>
-										<el-table-column label="操作">
-											<template #default="scope">
-												<el-button type="text" @click="go_guest_info(scope.row.guestId)">详情</el-button>
-											</template>
-										</el-table-column>
-									</el-table>
-								</el-collapse-item>
+				<el-card class="box-card">
+					<div slot="header" class="clearfix">
+						<span>系统组件</span>
+						<el-button style="float: right; padding: 3px 0" @click="dialog_create_network_component_visible = true" type="text">添加组件</el-button>
+					</div>
+					<el-row class="table_tr" type="flex">
+						<el-col style="width: 80px">&nbsp;</el-col>
+						<el-col style="width: 150px">ID</el-col>
+						<el-col style="width: 200px">类型</el-col>
+						<el-col style="width: 200px">VIP</el-col>
+						<el-col style="width: 200px">Base VIP</el-col>
+						<el-col style="width: 200px">Slave 数量</el-col>
+						<el-col style="width: 100%">操作</el-col>
+					</el-row>
+					<div v-for="(component, index) in components" :key="component.componentId">
+						<el-row class="table_td" type="flex">
+							<el-col style="width: 80px; text-align: center"><i :class="`${component.is_show ? 'el-icon-arrow-down' : 'el-icon-arrow-right'}`" style="cursor: pointer" @click="change_componet_show(index, component)" /></el-col>
+							<el-col style="width: 150px">{{ component.componentId }}</el-col>
+							<el-col style="width: 200px">
+								<el-tag size="small">{{ get_component_type(component.componentType) }}</el-tag>
+							</el-col>
+							<el-col style="width: 200px">{{ component.componentVip }}</el-col>
+							<el-col style="width: 200px">{{ component.basicComponentVip }}</el-col>
+							<el-col style="width: 200px">{{ component.componentSlaveNumber }}</el-col>
+							<el-col style="width: 100%">
+								<el-button size="mini" type="primary" plain @click="show_update_component_slave_number(component)">修改Slave数量</el-button>
+								<el-button size="mini" type="danger" plain v-if="component.componentType != 1" @click="destroy_network_component(component)">删除</el-button>
+							</el-col>
+						</el-row>
+						<el-card class="box-card" v-show="component.is_show" style="margin: 10px 0">
+							<div slot="header" class="clearfix">
+								<span>系统虚拟机</span>
+								<div style="float: right; padding: 3px 0">
+									<el-button size="mini" type="text" v-if="component.componentType === 2" @click="show_network_component_nat_list(component)">Nat转发管理</el-button>
+									<el-button size="mini" type="text" v-if="component.componentType === 1" @click="show_network_dns_list()">Dns管理</el-button>
+								</div>
 							</div>
-						</el-collapse>
-					</el-tab-pane>
-					<el-tab-pane label="内部dns">
-						<el-button type="primary" size="small" @click="dialog_create_network_dns_visible = true">新建内部解析</el-button>
-						<el-table :data="network_dns_list" style="width: 100%">
-							<el-table-column label="IP" prop="ip" width="300" />
-							<el-table-column label="Domain" prop="domain" />
-							<el-table-column label="操作" width="200px">
-								<template #default="scope">
-									<el-button type="text" size="small" @click="destroy_network_dns(scope.row.id)">删除</el-button>
-								</template>
-							</el-table-column>
-						</el-table>
-					</el-tab-pane>
-				</el-tabs>
+							<el-table :data="component.guests" style="width: 100%">
+								<el-table-column label="ID" prop="guestId" width="80" />
+								<el-table-column label="实例名" prop="name" width="200" />
+								<el-table-column label="标签" prop="description" width="200" />
+								<el-table-column label="IP地址" prop="guestIp" width="150" />
+								<el-table-column label="状态" prop="status" width="100">
+									<template #default="scope">
+										<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
+									</template>
+								</el-table-column>
+								<el-table-column label="操作">
+									<template #default="scope">
+										<el-button type="text" @click="go_guest_info(scope.row.guestId)">详情</el-button>
+									</template>
+								</el-table-column>
+							</el-table>
+						</el-card>
+					</div>
+				</el-card>
 			</el-row>
 		</el-card>
 		<GuestInfoComponent ref="GuestInfoComponentRef" @back="show_type = 0" @onGuestUpdate="update_guest_info" v-show="this.show_type === 1" />
@@ -122,6 +119,19 @@
 				</el-form-item>
 			</el-form>
 		</el-dialog>
+		<el-dialog title="Dns管理" :visible.sync="dialog_network_dns_visible" width="800px" :close-on-click-modal="false">
+			<el-button type="primary" size="small" @click="dialog_create_network_dns_visible = true">新建Dns记录</el-button>
+			<el-table :data="network_dns_list" style="width: 100%" max-height="300" height="300">
+				<el-table-column label="IP" prop="ip" width="300" />
+				<el-table-column label="Domain" prop="domain" />
+				<el-table-column label="操作" width="200px">
+					<template #default="scope">
+						<el-button type="text" size="small" @click="destroy_network_dns(scope.row.id)">删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</el-dialog>
+
 		<el-dialog title="Nat管理" :visible.sync="dialog_network_component_nat_visible" width="800px" :close-on-click-modal="false">
 			<el-button type="primary" size="small" @click="dialog_create_network_component_nat_visible = true">新建转发</el-button>
 			<el-table :data="network_component_nat_list" style="width: 100%" max-height="300" height="300">
@@ -163,6 +173,17 @@
 				</el-form-item>
 			</el-form>
 		</el-dialog>
+		<el-dialog title="修改Slave数量" :visible.sync="dialog_component_nat_change_slave_number_visible" width="320px" :close-on-click-modal="false">
+			<el-form :model="update_component_slave_number" label-width="70px" class="demo-ruleForm" style="width: 100%">
+				<el-form-item label="数量" prop="number">
+					<el-input-number v-model="update_component_slave_number.number" :min="0" :max="10" label="Slave数量"></el-input-number>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="update_component_slave_number_click">修改</el-button>
+					<el-button @click="dialog_component_nat_change_slave_number_visible = false">取消</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
 	</div>
 </template>
 <script>
@@ -175,6 +196,8 @@ export default {
 	name: 'NetworkInfoComponent',
 	data() {
 		return {
+			dialog_component_nat_change_slave_number_visible: false,
+			dialog_network_dns_visible: false,
 			dialog_create_network_dns_visible: false,
 			dialog_create_network_component_visible: false,
 			dialog_network_component_nat_visible: false,
@@ -186,6 +209,10 @@ export default {
 			network_dns_list: [],
 			network_component_nat_list: [],
 			show_type: 0,
+			update_component_slave_number: {
+				componentId: 0,
+				number: 0
+			},
 			create_network_dns: {
 				networkId: 0,
 				domain: '',
@@ -236,9 +263,15 @@ export default {
 	},
 	computed: {},
 	methods: {
+		print_scope(s) {
+			console.log(s)
+		},
 		on_back_click() {
 			this.show_network_id = 0
 			this.$emit('back')
+		},
+		change_componet_show(index, component) {
+			this.$set(this.components, index, { ...component, is_show: !component.is_show })
 		},
 		on_notify_update_networkt_info(network) {
 			this.refresh_network(network)
@@ -263,14 +296,33 @@ export default {
 				}
 			})
 		},
-		update_component_slave_number(value, componentId) {
-			console.log(value, componentId)
-			updateNetworkComponentSlaveNumber({ componentId: componentId, number: value }).then((res) => {
+		async show_network_dns_list() {
+			if (this.dialog_network_dns_visible) {
+				return
+			}
+			this.dialog_network_dns_visible = true
+
+			this.network_dns_list = []
+			await getNetworkDnsList({ networkId: this.show_network_id }).then((res) => {
+				if (res.code === 0) {
+					this.network_dns_list = res.data
+				}
+			})
+		},
+		show_update_component_slave_number(component) {
+			this.update_component_slave_number.componentId = component.componentId
+			this.update_component_slave_number.number = component.componentSlaveNumber
+			this.dialog_component_nat_change_slave_number_visible = true
+		},
+		update_component_slave_number_click() {
+			updateNetworkComponentSlaveNumber(this.update_component_slave_number).then((res) => {
 				if (res.code !== 0) {
 					this.$notify.error({
 						title: '错误',
 						message: `更改网络组件数量失败:${res.message}`
 					})
+				} else {
+					this.dialog_component_nat_change_slave_number_visible = 0
 				}
 			})
 		},
@@ -281,8 +333,8 @@ export default {
 			})
 		},
 		refresh_component_guest() {
-			this.components.forEach((component) => {
-				component.guests = this.get_component_guest(component.componentId)
+			this.components.forEach((component, index) => {
+				this.$set(this.components, index, { ...component, guests: this.get_component_guest(component.componentId) })
 			})
 		},
 		go_guest_info(guestId) {
@@ -303,7 +355,6 @@ export default {
 			this.show_network_id = show_network.networkId
 			this.create_network_componet.networkId = show_network.networkId
 			await this.load_system_guest(show_network)
-			await this.load_network_dns(show_network)
 			await this.load_system_component(show_network)
 		},
 		async reload_page() {
@@ -338,14 +389,7 @@ export default {
 			this.show_network_id = networkId
 			this.reload_page()
 		},
-		async load_network_dns(network) {
-			this.network_dns_list = []
-			await getNetworkDnsList({ networkId: network.networkId }).then((res) => {
-				if (res.code === 0) {
-					this.network_dns_list = res.data
-				}
-			})
-		},
+
 		async load_system_component(network) {
 			this.components = []
 			await getNetworkComponentList({ networkId: network.networkId }).then((res) => {
@@ -611,9 +655,10 @@ export default {
 				if (res.code == 0 && res.data.networkId == this.show_network.networkId) {
 					let findIndex = this.components.findIndex((v) => v.componentId === notify.id)
 					if (findIndex >= 0) {
-						this.$set(this.components, findIndex, res.data)
+						let compoent = this.components[findIndex]
+						this.$set(this.components, findIndex, { ...res.data, guests: compoent.guests, is_show: compoent.is_show })
 					} else {
-						this.network_dns_list.push(res.data)
+						this.components.push(res.data)
 					}
 					this.refresh_component_guest()
 				} else if (res.code == 1000003) {
@@ -627,3 +672,24 @@ export default {
 	}
 }
 </script>
+<style scoped>
+.table_tr {
+	color: #909399;
+	padding: 12px 0;
+	text-align: left;
+	width: 100%;
+	font-size: 14px;
+	text-indent: initial;
+	border-bottom: 1px solid #dcdfe6;
+	margin-left: 10px;
+}
+.table_td {
+	font-size: 14px;
+	color: #606266;
+	padding: 12px 0;
+	text-align: left;
+	width: 100%;
+	border-bottom: 1px solid #dcdfe6;
+	margin-left: 10px;
+}
+</style>

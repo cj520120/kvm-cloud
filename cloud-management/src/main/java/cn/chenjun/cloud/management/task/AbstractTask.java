@@ -46,7 +46,7 @@ public abstract class AbstractTask implements CommandLineRunner {
             if (isCurrentServer) {
                 if (System.currentTimeMillis() > this.lastStartTime + TimeUnit.SECONDS.toMillis(this.getPeriodSeconds())) {
                     this.lastStartTime = System.currentTimeMillis();
-                    log.info("开始执行周期任务: {}", this.getClass().getName());
+                    log.info("开始执行周期任务: {}", this.getName());
                     this.dispatch();
                 }
             } else {
@@ -71,4 +71,11 @@ public abstract class AbstractTask implements CommandLineRunner {
      * @throws Exception
      */
     protected abstract void dispatch() throws Exception;
+
+    /**
+     * 任务名称
+     *
+     * @return
+     */
+    protected abstract String getName();
 }

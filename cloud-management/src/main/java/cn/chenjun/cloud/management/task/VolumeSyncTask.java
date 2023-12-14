@@ -44,4 +44,8 @@ public class VolumeSyncTask extends AbstractTask {
         }
     }
 
+    @Override
+    protected String getName() {
+        return "检测存储池磁盘";
+    }
 }
