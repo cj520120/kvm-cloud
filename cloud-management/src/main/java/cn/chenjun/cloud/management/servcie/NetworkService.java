@@ -152,23 +152,6 @@ public class NetworkService extends AbstractService {
                 this.networkMapper.updateById(network);
             }
         }
-        //申请vlan组件
-        if (type == Constant.NetworkType.VLAN) {
-            GuestNetworkEntity componentVip = this.allocateService.allocateNetwork(network.getNetworkId());
-            GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(basicNetworkId);
-
-            ComponentEntity component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(0).slaveGuestIds("[]")
-                    .componentType(Constant.ComponentType.NAT).networkId(network.getNetworkId())
-                    .componentVip(componentVip.getIp()).basicComponentVip(basicComponentVip.getIp()).build();
-            componentMapper.insert(component);
-
-            componentVip.setAllocateId(component.getComponentId());
-            componentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
-            this.guestNetworkMapper.updateById(componentVip);
-            basicComponentVip.setAllocateId(component.getComponentId());
-            basicComponentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
-            this.guestNetworkMapper.updateById(componentVip);
-        }
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());

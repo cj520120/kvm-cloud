@@ -9,9 +9,10 @@
     7、多网卡支持
     8、支持 raw、qcow、qcow2、vdi、vmdk、vpc磁盘格式
     9、磁盘快照支持
-    10、通过OVS支持VPC概念
+    10、通过OVS支持Vlan网络划分
     11、支持cloud-init配置系统密码
     12、支持内部dns解析
+    13、支持nat转发
 
 ### 关于升级
     目前不支持V1、V2升级到最新版本
@@ -213,6 +214,9 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 
 ![](images/vm.png)
+
+![](images/vm-info.png)
+
 
 ### 相关问题
 
