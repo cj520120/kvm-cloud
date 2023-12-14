@@ -45,7 +45,11 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
                 iptablesRules = new String[]{"-t", "nat", "-A", "POSTROUTING", "-o", "eth" + index, "-j", "MASQUERADE"};
                 networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns());
             } else {
-                networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), "", "");
+                String gateway = network.getGateway();
+                if (component.getComponentType() == Constant.ComponentType.ROUTE) {
+                    gateway = "";
+                }
+                networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), gateway, network.getDns());
 
             }
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(networkConfig).build())).build());
