@@ -3,8 +3,7 @@ package cn.chenjun.cloud.management.component.route;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.management.data.mapper.GuestMapper;
+import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +17,18 @@ import java.util.*;
  */
 @Component
 public class NginxInitialize implements RouteComponentQmaInitialize {
+
     @Autowired
-    private GuestMapper guestMapper;
+    private GuestNetworkMapper guestNetworkMapper;
+
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
-        GuestEntity guest = this.guestMapper.selectById(guestId);
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
+        List<String> ipList = new ArrayList<>();
+        ipList.add("169.254.169.254");
         String nginxConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(0);
-        map.put("ip", guest.getGuestIp());
+        map.put("ipList", ipList);
         Jinjava jinjava = new Jinjava();
         nginxConfig = jinjava.render(nginxConfig, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "nginx"}).build())).build());

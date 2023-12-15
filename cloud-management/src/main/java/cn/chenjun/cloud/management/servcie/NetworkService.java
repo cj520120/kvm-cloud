@@ -79,7 +79,7 @@ public class NetworkService extends AbstractService {
         if (StringUtils.isEmpty(mask)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入子网掩码");
         }
-        if (StringUtils.isEmpty(bridge)) {
+        if (Constant.NetworkType.BASIC == type && StringUtils.isEmpty(bridge)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入桥接网卡名称");
         }
         if (StringUtils.isEmpty(dns)) {
@@ -96,6 +96,19 @@ public class NetworkService extends AbstractService {
         }
         if (Objects.equals(Constant.NetworkType.VLAN, type) && vlanId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
+        }
+        if (Objects.equals(Constant.NetworkType.VLAN, type)) {
+            if (vlanId <= 0) {
+                throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
+            }
+            if (basicNetworkId <= 0) {
+                throw new CodeException(ErrorCode.PARAM_ERROR, "请输入基础网络");
+            }
+            NetworkEntity basicNetwork = this.networkMapper.selectById(basicNetworkId);
+            if (basicNetwork == null) {
+                throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络不存在");
+            }
+            bridge = basicNetwork.getBridge();
         }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
@@ -259,9 +272,7 @@ public class NetworkService extends AbstractService {
         if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
             basicComponentVip.setAllocateId(component.getComponentId());
             basicComponentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
-            this.guestNetworkMapper.updateById(componentVip);
-            network.setGateway(componentVip.getIp());
-            this.networkMapper.updateById(network);
+            this.guestNetworkMapper.updateById(basicComponentVip);
         }
         this.eventService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
         return ResultUtil.success(this.initComponent(component));

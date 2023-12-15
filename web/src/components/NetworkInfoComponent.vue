@@ -45,6 +45,7 @@
 						<el-col style="width: 200px">VIP</el-col>
 						<el-col style="width: 200px">Base VIP</el-col>
 						<el-col style="width: 200px">Slave 数量</el-col>
+						<el-col style="width: 300px">状态</el-col>
 						<el-col style="width: 100%">操作</el-col>
 					</el-row>
 					<div v-for="(component, index) in components" :key="component.componentId">
@@ -57,6 +58,11 @@
 							<el-col style="width: 200px">{{ component.componentVip }}</el-col>
 							<el-col style="width: 200px">{{ component.basicComponentVip }}</el-col>
 							<el-col style="width: 200px">{{ component.componentSlaveNumber }}</el-col>
+							<el-col style="width: 300px">
+								<span v-for="guest in component.guests" :key="guest.guestId">
+									<i :style="guest.status === 2 ? 'color: #67c23a' : 'color:#F56C6C'" :class="guest.status === 2 ? 'el-icon-success' : 'el-icon-error'" />
+								</span>
+							</el-col>
 							<el-col style="width: 100%">
 								<el-button size="mini" type="primary" plain @click="show_update_component_slave_number(component)">修改Slave数量</el-button>
 								<el-button size="mini" type="danger" plain v-if="component.componentType != 1" @click="destroy_network_component(component)">删除</el-button>

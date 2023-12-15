@@ -36,31 +36,40 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         //写入网卡固定IP
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         guestNetworkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
-        String[] iptablesRules = null;
+
+        List<String> routeCommands = new ArrayList<>();
         for (GuestNetworkEntity guestNetwork : guestNetworkList) {
             NetworkEntity network = this.networkMapper.selectById(guestNetwork.getNetworkId());
             int index = guestNetwork.getDeviceId();
             String networkConfig;
-            if (network.getType().equals(Constant.NetworkType.BASIC)) {
-                iptablesRules = new String[]{"-t", "nat", "-A", "POSTROUTING", "-o", "eth" + index, "-j", "MASQUERADE"};
-                networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns());
-            } else {
-                String gateway = network.getGateway();
-                if (component.getComponentType() == Constant.ComponentType.ROUTE) {
-                    gateway = "";
-                }
-                networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), gateway, network.getDns());
-
+            List<String> otherIpList = null;
+            if (Objects.equals(network.getNetworkId(), component.getNetworkId())) {
+                otherIpList = Collections.singletonList("169.254.169.254");
             }
+            if (network.getType().equals(Constant.NetworkType.BASIC)) {
+                networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns(), otherIpList);
+            } else {
+                networkConfig = this.getNicConfig(index, guestNetwork.getIp(), network.getMask(), network.getGateway(), network.getDns(), otherIpList);
+                //删除vlan网卡的外网转发
+                routeCommands.add(String.format("route del -net 0.0.0.0 netmask 0.0.0.0 dev eth%d", index));
+            }
+            routeCommands.add(String.format("iptables -t nat -A POSTROUTING -o eth%d -j MASQUERADE ", index));
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(networkConfig).build())).build());
         }
         //重启网卡
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("service").args(new String[]{"network", "restart"}).checkSuccess(true).build())).build());
+        //安装网络检测脚本
+        String networkCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/network_check_shell.tpl")), StandardCharsets.UTF_8);
+        Jinjava jinjava = new Jinjava();
+        Map<String, Object> map = new HashMap<>();
+        map.put("commands", routeCommands);
+        networkCheckScript = jinjava.render(networkCheckScript, map);
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/network_check.sh").fileBody(networkCheckScript).build())).build());
+
+
         //检测网卡初始化完成
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/network_check.sh"}).checkSuccess(true).build())).build());
-        if (iptablesRules != null) {
-            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("iptables").args(iptablesRules).checkSuccess(true).build())).build());
-        }
+
         return commands;
     }
 
@@ -69,7 +78,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         return ComponentOrder.NETWORK;
     }
 
-    protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns) {
+    protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns, List<String> otherIpList) {
         String body = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/network/network.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(5);
@@ -77,6 +86,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         map.put("ip",ip);
         map.put("gateway",gateway);
         map.put("netmask",netmask);
+        map.put("otherIpList", otherIpList);
         List<String> dnsList=Arrays.stream(dns.split(",")).filter(ObjectUtils::isNotEmpty).collect(Collectors.toList());
         map.put("dnsList",dnsList);
         return jinjava.render(body, map).replaceAll("(?m)^[ \t]*\r?\n", "");

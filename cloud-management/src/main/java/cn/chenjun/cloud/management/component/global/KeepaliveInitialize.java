@@ -4,11 +4,18 @@ import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
+import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
+import cn.chenjun.cloud.management.data.entity.NetworkEntity;
+import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
+import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
+import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
 import com.hubspot.jinjava.Jinjava;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -20,7 +27,10 @@ import java.util.*;
 public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     public static final int MASTER_PRIORITY = 100;
     public static final int SLAVE_PRIORITY = 90;
-
+    @Autowired
+    private GuestNetworkMapper guestNetworkMapper;
+    @Autowired
+    private NetworkMapper networkMapper;
     private static Map<String, Object> buildVrrp(String name, String nic, String vip, ComponentEntity component, int guestId) {
         List<Integer> slaveIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
         }.getType());
@@ -45,12 +55,23 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         List<Map<String, Object>> vrrpList = new ArrayList<>(1);
-        vrrpList.add(buildVrrp("VI_1", "eth0", component.getComponentVip(), component, guestId));
 
-        if (!StringUtils.isEmpty(component.getBasicComponentVip()) && !Objects.equals(component.getComponentVip(), component.getBasicComponentVip())) {
-            vrrpList.add(buildVrrp("VI_2", "eth1", component.getBasicComponentVip(), component, guestId));
+        NetworkEntity network = this.networkMapper.selectById(component.getNetworkId());
+        for (int i = 0; i < guestNetworkList.size(); i++) {
+            GuestNetworkEntity guestNetwork = guestNetworkList.get(i);
+            String name = "VI_" + i;
+            String nic = "eth" + i;
+            String vip = null;
+            if (Objects.equals(network.getNetworkId(), guestNetwork.getNetworkId())) {
+                vip = component.getComponentVip();
+            } else if (Objects.equals(network.getBasicNetworkId(), guestNetwork.getNetworkId())) {
+                vip = component.getBasicComponentVip();
+            }
+            if (ObjectUtils.isNotEmpty(vip)) {
+                vrrpList.add(buildVrrp(name, nic, vip, component, guestId));
+            }
         }
         Map<String, Object> map = new HashMap<>(1);
         map.put("vrrpList", vrrpList);

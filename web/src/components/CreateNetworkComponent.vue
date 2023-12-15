@@ -61,7 +61,7 @@
 
 				<el-row :gutter="24">
 					<el-col :span="8">
-						<el-form-item label="桥接网卡" prop="bridge">
+						<el-form-item label="桥接网卡" prop="bridge" v-if="create_network.type === 0">
 							<el-input v-model="create_network.bridge"></el-input>
 						</el-form-item>
 					</el-col>

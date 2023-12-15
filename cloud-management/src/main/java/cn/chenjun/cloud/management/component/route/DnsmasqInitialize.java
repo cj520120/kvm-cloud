@@ -1,7 +1,9 @@
 package cn.chenjun.cloud.management.component.route;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -9,6 +11,7 @@ import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.util.IpCalculate;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hubspot.jinjava.Jinjava;
@@ -30,26 +33,39 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
     protected NetworkMapper networkMapper;
     @Autowired
     protected GuestMapper guestMapper;
+    private final int MIN_DHCP_SIZE = 2;
 
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        GuestNetworkEntity defaultGuestNetwork = this.guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST).eq(GuestNetworkEntity.NETWORK_ID, component.getNetworkId()).eq(GuestNetworkEntity.DEVICE_ID, 0));
-        if (defaultGuestNetwork == null) {
-            return commands;
-        }
+
         NetworkEntity network = this.networkMapper.selectById(component.getNetworkId());
         if (network == null) {
-            return commands;
+            throw new CodeException(ErrorCode.SERVER_ERROR, "Dnsmasq初始化失败.组件所属网络不存在,ComponentId=" + component.getComponentId());
         }
         List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, component.getNetworkId()));
+        Optional<GuestNetworkEntity> optional = allGuestNetwork.stream().filter(t -> Objects.equals(t.getAllocateId(), guestId) && Objects.equals(t.getAllocateType(), Constant.NetworkAllocateType.GUEST)).findFirst();
+        if (!optional.isPresent()) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "Dnsmasq初始化失败.未找到监听网卡,ComponentId=" + component.getComponentId() + ",GuestId=" + guestId);
+        }
+        GuestNetworkEntity defaultGuestNetwork = optional.get();
+        //删除VIP地址、网关地址、以及本机的IP地址
+        allGuestNetwork.removeIf(t -> Objects.equals(t.getIp(), network.getGateway()) || Objects.equals(t.getIp(), component.getComponentVip()) || (Objects.equals(t.getAllocateId(), guestId) && Objects.equals(t.getAllocateType(), Constant.NetworkAllocateType.GUEST)));
+        allGuestNetwork.sort(Comparator.comparingLong(o -> IpCalculate.ipToLong(o.getIp())));
+        if (allGuestNetwork.size() < MIN_DHCP_SIZE) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "Dnsmasq初始化失败.没有可分配的区间,ComponentId=" + component.getComponentId());
+        }
+        String startIp = allGuestNetwork.get(0).getIp();
+        String endIp = allGuestNetwork.get(allGuestNetwork.size() - 1).getIp();
+
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/route/dnsmasq.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
+        map.put("interface", "eth" + defaultGuestNetwork.getDeviceId());
         map.put("ip", defaultGuestNetwork.getIp());
         map.put("vip", component.getComponentVip());
-        map.put("startIp", network.getStartIp());
-        map.put("endIp", network.getEndIp());
+        map.put("startIp", startIp);
+        map.put("endIp", endIp);
         if(network.getBasicNetworkId()>0) {
             map.put("gateway", component.getComponentVip());
         }else{

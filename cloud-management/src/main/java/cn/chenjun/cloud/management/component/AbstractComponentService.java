@@ -246,9 +246,8 @@ public abstract class AbstractComponentService extends AbstractService implement
                 .build();
         this.guestDiskMapper.insert(guestDisk);
         GuestNetworkEntity guestNetwork;
-        int networkDeviceId = 0;
         guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
-        guestNetwork.setDeviceId(networkDeviceId++);
+        guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(this.applicationConfig.getSystemComponentNetworkDriver());
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
@@ -256,12 +255,16 @@ public abstract class AbstractComponentService extends AbstractService implement
         guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
         if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
-            guestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
-            guestNetwork.setDeviceId(networkDeviceId);
-            guestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
-            guestNetwork.setAllocateId(guest.getGuestId());
-            guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+            //调整基础网络网卡为第一网卡
+            guestNetwork.setDeviceId(1);
             this.guestNetworkMapper.updateById(guestNetwork);
+
+            GuestNetworkEntity basicGuestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
+            basicGuestNetwork.setDeviceId(0);
+            basicGuestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
+            basicGuestNetwork.setAllocateId(guest.getGuestId());
+            basicGuestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+            this.guestNetworkMapper.updateById(basicGuestNetwork);
         }
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
