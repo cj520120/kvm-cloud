@@ -32,11 +32,11 @@
 			<el-tabs v-model="supportActiveName">
 				<el-tab-pane label="联系作者" name="concat">
 					<div style="font-size: 15px; line-height: 30px">
-						<div>&nbsp;&nbsp;&nbsp;&nbsp;本产品开源免费，遵从Apache2.0协议，个人或企业内部可自由的接入和使用，并且将持续提供免费的社区技术支持。</div>
+						<div>&nbsp;&nbsp;&nbsp;&nbsp;本产品开源免费，遵从Apache2.0协议，个人或企业内部可自由的接入和使用。</div>
 						<br />
-						<div>&nbsp;&nbsp;&nbsp;&nbsp;为了保证性能，请使用SSD创建NFS存储。数据无价，做删除操作前务必三思，建议对核数据采用异备。</div>
+						<div>&nbsp;&nbsp;&nbsp;&nbsp;为了保证性能，请使用SSD创建存储。数据无价，做删除操作前务必三思，建议对核心数据采用异备方案。</div>
 						<br />
-						<div>&nbsp;&nbsp;&nbsp;&nbsp;如果您在使用中遇到问题或相关建议，请提交issue。如遇紧急问题也可添加作者QQ(153391689)寻求帮助。项目会在适当的时期启动交流群，如有相关需求可发送邮件至153391689@qq.com</div>
+						<div>&nbsp;&nbsp;&nbsp;&nbsp;如果您在使用中遇到问题或相关建议，请提交issue。如遇紧急问题也可添加作者QQ(153391689)寻求帮助。</div>
 						<br />
 						<div>&nbsp;&nbsp;&nbsp;&nbsp;开源不易，如果KVM Cloud对您带来了帮助，请给作者买杯咖啡吧 :)</div>
 						<br />
