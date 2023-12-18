@@ -1,14 +1,23 @@
 <template>
 	<div class="main">
-		<div id="top_bar">
-			<div id="status">{{ status }}</div>
-			<div id="sendCtrlAltDelButton" @click="on_send_ctrl_alt_del">发送 Ctrl+Alt+Del</div>
-		</div>
-		<div id="screen"></div>
+		<el-container>
+			<el-header class="tool_tip" height="40px" align="middle" justify="center">
+				<div style="text-align: center; height: 40px; align: center; float: left">
+					<img src="../assets/logo.png" style="margin-top: 10px; width: 16px; height: 16px" />
+				</div>
+				<div style="float: left; margin-left: 5px; font: bold 14px Helvetica; color: grary; padding-top: 11px">KVM Cloud</div>
+				<div class="tooltip_status">{{ status }}</div>
+				<div class="btn_ctr_alt_del" @click="on_send_ctrl_alt_del">发送 Ctrl+Alt+Del</div>
+			</el-header>
+			<el-main><div ref="vncContainer"></div></el-main>
+			<el-footer class="footer" height="40px">
+				<div></div>
+			</el-footer>
+		</el-container>
 	</div>
 </template>
     
-    <script>
+<script>
 import RFB from '@novnc/novnc/core/rfb'
 import { getGuestVncPassword } from '@/api/api'
 export default {
@@ -44,7 +53,8 @@ export default {
 		connect() {
 			getGuestVncPassword({ guestId: this.id }).then((res) => {
 				if (res.code === 0) {
-					this.rfb = new RFB(document.getElementById('screen'), this.url, { credentials: { password: res.data } })
+					const container = this.$refs.vncContainer
+					this.rfb = new RFB(container, this.url, { credentials: { password: res.data } })
 					this.rfb.addEventListener('connect', this.on_connect_success)
 					this.rfb.addEventListener('disconnect', this.on_disconnect)
 					this.rfb.addEventListener('credentialsrequired', this.on_required_password)
@@ -84,31 +94,34 @@ export default {
     
     <style scoped>
 .main {
-	margin: 0;
+	margin: 20, 20px;
 	background-color: rgb(40, 40, 40);
 	height: 100vh;
 	width: 100vw;
 	display: flex;
 	flex-direction: column;
 }
-#top_bar {
+.tool_tip {
 	background-color: rgb(92, 92, 92);
 	color: white;
 	font: bold 12px Helvetica;
-	padding: 6px 5px 4px 5px;
 	border-bottom: 1px outset;
-	height: 20px;
 }
-#status {
-	text-align: center;
+footer {
+	color: white;
+	font: bold 12px Helvetica;
+	border-bottom: 1px outset;
 }
-#sendCtrlAltDelButton {
+.tooltip_status {
+	padding-top: 12px;
+}
+.btn_ctr_alt_del {
 	position: fixed;
-	top: 0px;
-	right: 0px;
+	top: 8px;
+	right: 5px;
 	border: 1px outset;
-	padding: 5px 5px 4px 5px;
 	cursor: pointer;
+	padding: 5px;
 }
 
 #screen {
