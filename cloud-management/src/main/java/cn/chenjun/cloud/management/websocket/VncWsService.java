@@ -1,28 +1,34 @@
 package cn.chenjun.cloud.management.websocket;
 
-import cn.chenjun.cloud.management.data.entity.ComponentEntity;
+import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.AppUtils;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.management.data.entity.GuestVncEntity;
-import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
-import cn.chenjun.cloud.management.data.mapper.GuestVncMapper;
+import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.VncClient;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @ServerEndpoint(value = "/api/vnc/{id}")
 @Component
 public class VncWsService {
@@ -35,23 +41,31 @@ public class VncWsService {
     public void onVncConnect(Session session, @PathParam(value = "id") int id) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(id);
-        if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
+        if (guest == null || guest.getHostId() <= 0) {
             session.close();
             return;
         }
-        ComponentMapper componentMapper = SpringContextUtils.getBean(ComponentMapper.class);
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, guest.getNetworkId()).eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).last("limit 0,1"));
-        if (component == null) {
+        if (!Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING) && !Objects.equals(guest.getStatus(), Constant.GuestStatus.STARTING)) {
             session.close();
             return;
         }
-        GuestVncMapper guestVncMapper = SpringContextUtils.getBean(GuestVncMapper.class);
-        GuestVncEntity guestVnc = guestVncMapper.selectById(id);
-        if (guestVnc == null) {
-            return;
-        }
-        String uri = "ws://" + component.getBasicComponentVip() + ":8080/websockify/?token=" + guestVnc.getToken();
-        this.proxy = new VncClient(session, new URI(uri));
+
+        HostEntity host = SpringContextUtils.getBean(HostMapper.class).selectById(guest.getHostId());
+        URI url = new URI(host.getUri().replaceFirst("http", "ws") + "/api/vnc");
+        this.proxy = new VncClient(session, new URI(url.toASCIIString()), () -> {
+            String nonce = String.valueOf(System.nanoTime());
+            Map<String, Object> map = new HashMap<>(6);
+            map.put("name", guest.getName());
+            map.put("timestamp", String.valueOf(System.currentTimeMillis()));
+            try {
+                String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+                map.put("sign", sign);
+            } catch (Exception err) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
+            }
+            String request = GsonBuilderUtil.create().toJson(map);
+            proxy.send(request.getBytes(StandardCharsets.UTF_8));
+        });
         this.proxy.connect();
 
     }

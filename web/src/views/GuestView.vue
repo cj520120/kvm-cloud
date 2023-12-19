@@ -55,7 +55,7 @@
 											<el-dropdown-item :command="{ guest: scope.row, command: 'info' }">虚拟机详情</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'start' }" divided :disabled="scope.row.status !== 4">启动虚拟机</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'stop' }" :disabled="scope.row.status !== 2">停止虚拟机</el-dropdown-item>
-											<el-dropdown-item :command="{ guest: scope.row, command: 'vnc' }" :disabled="scope.row.status !== 2">远程桌面</el-dropdown-item>
+											<el-dropdown-item :command="{ guest: scope.row, command: 'vnc' }" :disabled="scope.row.status !== 2 && scope.row.status !== 1">远程桌面</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'reboot' }" :disabled="scope.row.status !== 2">重启虚拟机</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'attach_cd' }" :disabled="scope.row.cdRoom !== 0" v-if="scope.row.type !== 0">挂载光驱</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'detach_cd' }" :disabled="scope.row.cdRoom === 0" v-if="scope.row.type !== 0">卸载光驱</el-dropdown-item>

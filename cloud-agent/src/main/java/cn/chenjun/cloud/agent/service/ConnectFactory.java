@@ -16,6 +16,7 @@ public class ConnectFactory extends BasePooledObjectFactory<Connect> {
     @Override
     public Connect create() throws Exception {
         return new Connect("qemu:///system");
+//        return new Connect("qemu+tcp://192.168.1.69:16509/system");
     }
 
     @Override

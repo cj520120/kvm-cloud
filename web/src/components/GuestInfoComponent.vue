@@ -13,7 +13,7 @@
 				<el-button style="width: 90px" @click="show_migrate_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">迁移虚拟机</el-button>
 			</el-row>
 			<el-row style="text-align: left; margin: 20px 0">
-				<el-button style="width: 90px" @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">远程桌面</el-button>
+				<el-button style="width: 90px" @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2 && show_guest_info.current_guest.status !== 1">远程桌面</el-button>
 				<el-button style="width: 90px" @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">修改配置</el-button>
 				<el-button style="width: 90px" @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-show="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
 				<el-button style="width: 90px" @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-show="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>

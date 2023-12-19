@@ -15,16 +15,18 @@ import java.nio.ByteBuffer;
 public class VncClient extends WebSocketClient {
 
     private final Session session;
+    private final WsCallback callback;
 
-    public VncClient(Session session, URI serverUri) {
+    public VncClient(Session session, URI serverUri, WsCallback callback) {
         super(serverUri, new Draft_6455());
         this.session = session;
+        this.callback = callback;
 
     }
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-
+        this.callback.onConnect();
     }
 
     @Override
@@ -49,5 +51,10 @@ public class VncClient extends WebSocketClient {
     public void onError(Exception e) {
         this.session.close();
         this.close();
+    }
+
+    @FunctionalInterface
+    public interface WsCallback {
+        void onConnect();
     }
 }

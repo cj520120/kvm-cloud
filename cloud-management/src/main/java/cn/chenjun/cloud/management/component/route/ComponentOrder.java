@@ -12,7 +12,6 @@ public class ComponentOrder {
     public static final int PYTHON_INSTALL = 4;
     public static final int META = 5;
 
-    public static final int VNC = 6;
     public static final int CLOUD = 7;
     public static final int NGINX = 8;
     public static final int FIREWALLD = 9;

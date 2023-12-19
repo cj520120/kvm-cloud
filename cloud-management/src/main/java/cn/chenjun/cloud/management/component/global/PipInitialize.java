@@ -27,7 +27,6 @@ public class PipInitialize implements GlobalComponentQmaInitialize {
         commands.add(this.pip3Install("flask"));
         commands.add(this.pip3Install("requests"));
         commands.add(this.pip3Install("websocket-client"));
-        commands.add(this.pip3Install("websockify==0.10.0"));
         return commands;
     }
 
