@@ -20,7 +20,6 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -52,20 +51,20 @@ public class VncWsService {
 
         HostEntity host = SpringContextUtils.getBean(HostMapper.class).selectById(guest.getHostId());
         URI url = new URI(host.getUri().replaceFirst("http", "ws") + "/api/vnc");
-        this.proxy = new VncClient(session, new URI(url.toASCIIString()), () -> {
-            String nonce = String.valueOf(System.nanoTime());
-            Map<String, Object> map = new HashMap<>(6);
-            map.put("name", guest.getName());
-            map.put("timestamp", String.valueOf(System.currentTimeMillis()));
-            try {
-                String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
-                map.put("sign", sign);
-            } catch (Exception err) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
-            }
-            String request = GsonBuilderUtil.create().toJson(map);
-            proxy.send(request.getBytes(StandardCharsets.UTF_8));
-        });
+        String nonce = String.valueOf(System.nanoTime());
+        Map<String, Object> map = new HashMap<>(6);
+        map.put("name", guest.getName());
+        map.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        try {
+            String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+            map.put("sign", sign);
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
+        }
+        String data = GsonBuilderUtil.create().toJson(map);
+        Map<String, String> header = new HashMap<>(1);
+        header.put("x-data", data);
+        this.proxy = new VncClient(session, new URI(url.toASCIIString()), header);
         this.proxy.connect();
 
     }
