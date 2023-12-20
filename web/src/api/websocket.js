@@ -6,10 +6,16 @@ class NotifyWebsocket {
   init(pThis) {
     let pThat = this;
     if (!NotifyWebsocket.instance) {
+      let protocol;
+      if (window.location.protocol === "https:") {
+        protocol = "wss";
+      } else {
+        protocol = "ws";
+      }
       let wsUri =
         process.env.NODE_ENV === "production"
-          ? `ws://${window.location.host}/api/ws/`
-          : `ws://localhost:8080/api/ws/`;
+          ? `${protocol}://${window.location.host}/api/ws/`
+          : `${protocol}://localhost:8080/api/ws/`;
       console.log(new Date(), "开始连接通信服务器...");
       NotifyWebsocket.instance = new WebSocket(wsUri);
       NotifyWebsocket.instance.onopen = function () {

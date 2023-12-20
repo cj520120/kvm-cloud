@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class NioSelector {
 
-    private final static long SELECTOR_TIMEOUT = 1000;
+    private final static long SELECTOR_TIMEOUT = 1;
     private final ScheduledThreadPoolExecutor poolExecutor;
     private final Selector selector;
     private final Map<SocketChannel, NioClient> channelMap = new ConcurrentHashMap<>();
@@ -41,12 +41,12 @@ public class NioSelector {
 
     private void run() {
         try {
-            while (isRunning && selector.select(SELECTOR_TIMEOUT) > 0) {
+            while (isRunning && selector.selectNow() > 0) {
                 Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
                     try {
                         SelectionKey sk = iterator.next();
-                        if (sk.isReadable()) {
+                        if (sk.isValid() && sk.isReadable()) {
                             SocketChannel channel = (SocketChannel) sk.channel();
                             ((Buffer) socketReceiveBuffer).clear();
                             int len = channel.read(socketReceiveBuffer);

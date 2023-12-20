@@ -76,11 +76,24 @@ public class VncWsService implements NioCallback {
             }
             log.info("开始查询虚拟机信息:{}", name);
             connect = connectPool.borrowObject();
-            String xml = connect.domainLookupByName(name).getXMLDesc(0);
-            int port = VncUtil.getVnc(xml);
+            int port = 0;
+            try {
+                String xml = connect.domainLookupByName(name).getXMLDesc(0);
+                port = VncUtil.getVnc(xml);
+            } catch (Exception err) {
+                log.error("查询虚拟机信息信息失败.name={}", name, err);
+                throw new CodeException(ErrorCode.SERVER_ERROR, err);
+            }
             String host = "127.0.0.1";
-            this.vncClient = this.nioSelector.createClient(host, port, this);
-            log.info("开始连接到{} vnc://{}:{} 成功", name, host, port);
+            log.info("获取到vnc端口:{}={}", name, port);
+            long startTime = System.currentTimeMillis();
+            try {
+                this.vncClient = this.nioSelector.createClient(host, port, this);
+                log.info("开始连接到{} vnc://{}:{} 成功 time={}", name, host, port, System.currentTimeMillis() - startTime);
+            } catch (Exception err) {
+                log.error("连接到{} vnc://{}:{} 失败 time={}", name, host, port, System.currentTimeMillis() - startTime, err);
+                throw new CodeException(ErrorCode.SERVER_ERROR, err);
+            }
         } finally {
             if (connect != null) {
                 connectPool.returnObject(connect);
