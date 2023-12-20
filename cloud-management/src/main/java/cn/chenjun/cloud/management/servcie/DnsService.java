@@ -59,6 +59,7 @@ public class DnsService {
         }
         return list;
     }
+
     public ResultUtil<Void> deleteDns(int dnsId) {
         DnsEntity entity = this.mapper.selectById(dnsId);
         if (entity != null) {

@@ -23,7 +23,7 @@ public class AgentController {
 
     @SignRequire
     @PostMapping("/api/agent/task/report")
-    public ResultUtil<Void> report(@RequestParam("taskId") String taskId,@RequestParam("data") String data) {
+    public ResultUtil<Void> report(@RequestParam("taskId") String taskId, @RequestParam("data") String data) {
 
         operateTask.onTaskFinish(taskId, data);
         return ResultUtil.success();

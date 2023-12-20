@@ -30,7 +30,6 @@ import java.util.UUID;
 public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNetworkOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(DestroyHostNetworkOperate param) {
 

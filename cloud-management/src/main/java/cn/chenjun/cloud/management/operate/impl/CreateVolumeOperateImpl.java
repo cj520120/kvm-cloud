@@ -34,7 +34,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
     private ApplicationConfig applicationConfig;
 
 
-
     @Override
     public void operate(T param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
@@ -51,13 +50,13 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
 
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
-                            .sourceStorage(parentStorage.getName())
+                        .sourceStorage(parentStorage.getName())
                         .sourceName(templateVolume.getName())
-                            .targetStorage(storage.getName())
-                            .targetName(volume.getName())
-                            .targetType(volume.getType())
+                        .targetStorage(storage.getName())
+                        .targetName(volume.getName())
+                        .targetType(volume.getType())
 
-                            .build();
+                        .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 
             } else if (param.getSnapshotVolumeId() > 0) {

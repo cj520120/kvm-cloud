@@ -56,6 +56,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
         return new TypeToken<ResultUtil<StorageInfo>>() {
         }.getType();
     }
+
     @Override
     public void onFinish(InitHostStorageOperate param, ResultUtil<StorageInfo> resultUtil) {
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {

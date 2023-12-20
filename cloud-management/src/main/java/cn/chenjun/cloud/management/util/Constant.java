@@ -10,6 +10,7 @@ public class Constant {
         public static final int GUEST = 0;
         public static final int COMPONENT_VIP = 1;
     }
+
     public static class HostStatus {
         public static final int REGISTER = 0;
         public static final int ONLINE = 1;
@@ -101,40 +102,6 @@ public class Constant {
 
     }
 
-    public class UserState {
-        /**
-         * 启用
-         */
-        public static final short ABLE = 0;
-        /**
-         * 禁用
-         */
-        public static final short DISABLE = 1;
-    }
-
-    public class UserType {
-        public static final String LOCAL = "Local";
-        public static final String OAUTH2 = "Oauth2";
-    }
-
-    public class HttpHeaderNames {
-        /**
-         * 登陆HTTP TOKEN 头
-         */
-        public static final String TOKEN_HEADER = "X-TOKEN";
-        /**
-         * 登陆用户HTTP 上下文
-         */
-        public static final String LOGIN_USER_INFO_ATTRIBUTE = "X-USER-INFO";
-
-    }
-
-    public class WsClientType{
-        public static final short WEB=0;
-        public static final short COMPONENT=1;
-
-    }
-
     public static class OperateType {
         public static int DESTROY_HOST_STORAGE = 1;
         public static int SYNC_HOST_GUEST = 2;
@@ -172,5 +139,39 @@ public class Constant {
         public static int MIGRATE_GUEST = 34;
         public static int HOST_CHECK = 35;
         public static int STORAGE_CHECK = 36;
+    }
+
+    public class UserState {
+        /**
+         * 启用
+         */
+        public static final short ABLE = 0;
+        /**
+         * 禁用
+         */
+        public static final short DISABLE = 1;
+    }
+
+    public class UserType {
+        public static final String LOCAL = "Local";
+        public static final String OAUTH2 = "Oauth2";
+    }
+
+    public class HttpHeaderNames {
+        /**
+         * 登陆HTTP TOKEN 头
+         */
+        public static final String TOKEN_HEADER = "X-TOKEN";
+        /**
+         * 登陆用户HTTP 上下文
+         */
+        public static final String LOGIN_USER_INFO_ATTRIBUTE = "X-USER-INFO";
+
+    }
+
+    public class WsClientType {
+        public static final short WEB = 0;
+        public static final short COMPONENT = 1;
+
     }
 }

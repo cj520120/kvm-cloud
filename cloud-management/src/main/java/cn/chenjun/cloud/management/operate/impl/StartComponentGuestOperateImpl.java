@@ -28,7 +28,6 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     private PluginRegistry<ComponentProcess, Integer> componentPlugin;
 
 
-
     @Override
     protected GuestQmaRequest getStartQmaRequest(StartComponentGuestOperate param) {
         GuestEntity guest = this.guestMapper.selectById(param.getGuestId());

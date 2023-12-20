@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public abstract class AbstractTask implements CommandLineRunner {
+    private final String clusterId = UUID.randomUUID().toString();
     @Autowired
     private ScheduledExecutorService bossExecutor;
-    private final String clusterId = UUID.randomUUID().toString();
     @Autowired
     private RedissonClient redissonClient;
     private long lastStartTime = System.currentTimeMillis();

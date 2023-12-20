@@ -41,7 +41,6 @@ public class NatComponentService extends AbstractComponentService {
     }
 
 
-
     @Override
     public GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId) {
 

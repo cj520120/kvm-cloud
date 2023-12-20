@@ -20,7 +20,6 @@ import java.lang.reflect.Type;
 public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, ResultUtil<HostInfo>> {
 
 
-
     @Override
     public void operate(HostCheckOperate param) {
 

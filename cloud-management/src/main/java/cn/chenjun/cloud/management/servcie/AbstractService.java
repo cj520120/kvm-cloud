@@ -148,6 +148,7 @@ public abstract class AbstractService {
                 .slaveGuestIds(GsonBuilderUtil.create().fromJson(entity.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
                 }.getType())).build();
     }
+
     protected NatModel initNat(NatEntity entity) {
         return NatModel.builder().natId(entity.getNatId()).componentId(entity.getComponentId()).localPort(entity.getLocalPort()).protocol(entity.getProtocol()).remoteIp(entity.getRemoteIp()).remotePort(entity.getRemotePort()).build();
     }

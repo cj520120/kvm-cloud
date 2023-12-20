@@ -65,7 +65,7 @@ public class GuestController extends BaseController {
     @PutMapping("/api/guest/create")
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
                                               @RequestParam("busType") String busType,
-                                              @RequestParam(value = "password",defaultValue = "") String password,
+                                              @RequestParam(value = "password", defaultValue = "") String password,
                                               @RequestParam("groupId") int groupId,
                                               @RequestParam("hostId") int hostId,
                                               @RequestParam("schemeId") int schemeId,

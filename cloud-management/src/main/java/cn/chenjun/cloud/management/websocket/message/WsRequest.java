@@ -14,8 +14,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WsRequest  {
+public class WsRequest {
     private int command;
     private int id;
-    private Map<String,Object> data;
+    private Map<String, Object> data;
 }

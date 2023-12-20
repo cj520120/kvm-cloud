@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, ResultUtil<List<VolumeInfo>>> {
 
 
-
     @Override
     public void operate(VolumeCheckOperate param) {
         StorageEntity storage = this.storageMapper.selectById(param.getStorageId());

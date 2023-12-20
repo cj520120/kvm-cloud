@@ -25,7 +25,6 @@ import java.lang.reflect.Type;
 public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<ChangeGuestNetworkInterfaceOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(ChangeGuestNetworkInterfaceOperate param) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());

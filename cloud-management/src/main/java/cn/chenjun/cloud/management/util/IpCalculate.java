@@ -27,8 +27,8 @@ public class IpCalculate {
 
 
     public static List<String> parseIpRange(String ipStart, String ipStop) {
-        long start=ipToLong(ipStart);
-        long end=ipToLong(ipStop);
+        long start = ipToLong(ipStart);
+        long end = ipToLong(ipStop);
         return Stream.iterate(start, n -> n + 1).limit(end - start + 1).map(IpCalculate::longToIp).distinct().collect(Collectors.toList());
 
     }

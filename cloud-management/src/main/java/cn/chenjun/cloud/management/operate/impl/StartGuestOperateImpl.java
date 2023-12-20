@@ -33,7 +33,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     private VncService vncService;
 
 
-
     @Override
     public void operate(T param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());

@@ -36,8 +36,8 @@ public class HostSyncTask extends AbstractTask {
 
                 case Constant.HostStatus.ONLINE:
                 case Constant.HostStatus.OFFLINE:
-                        BaseOperateParam operateParam = HostCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测主机状态").hostId(host.getHostId()).build();
-                        this.operateTask.addTask(operateParam);
+                    BaseOperateParam operateParam = HostCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测主机状态").hostId(host.getHostId()).build();
+                    this.operateTask.addTask(operateParam);
                     break;
                 default:
                     break;

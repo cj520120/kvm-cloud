@@ -81,18 +81,21 @@ public class NetworkController extends BaseController {
     public ResultUtil<Void> destroyNetworkComponent(@RequestParam("componentId") int componentId) {
         return this.lockRun(() -> networkService.destroyComponent(componentId));
     }
+
     @GetMapping("/api/network/nat/list")
     public ResultUtil<List<NatModel>> listNetworkComponentNat(@RequestParam("componentId") int componentId) {
         return this.lockRun(() -> networkService.listComponentNat(componentId));
     }
+
     @PutMapping("/api/network/nat/create")
     public ResultUtil<NatModel> createNetworkComponentNat(@RequestParam("componentId") int componentId,
                                                           @RequestParam("localPort") int localPort,
                                                           @RequestParam("protocol") String protocol,
                                                           @RequestParam("remoteIp") String remoteIp,
                                                           @RequestParam("remotePort") int remotePort) {
-        return this.lockRun(() -> networkService.createComponentNat(componentId,localPort,protocol,remoteIp,remotePort));
+        return this.lockRun(() -> networkService.createComponentNat(componentId, localPort, protocol, remoteIp, remotePort));
     }
+
     @DeleteMapping("/api/network/nat/destroy")
     public ResultUtil<Void> destroyNetworkComponentNat(@RequestParam("natId") int natId) {
         return this.lockRun(() -> networkService.deleteComponentNat(natId));

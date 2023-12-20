@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.component.nat;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
-import cn.chenjun.cloud.management.component.route.RouteComponentQmaInitialize;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;

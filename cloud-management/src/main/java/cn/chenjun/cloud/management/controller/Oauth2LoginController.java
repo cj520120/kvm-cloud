@@ -39,7 +39,7 @@ public class Oauth2LoginController {
 
     @GetMapping("/login")
     public RedirectView goLoginPage() {
-        String redirectUri = cn.hutool.core.codec.PercentCodec.of( StandardCharsets.UTF_8.name()).encode(this.config.getRedirectUri(), StandardCharsets.UTF_8);
+        String redirectUri = cn.hutool.core.codec.PercentCodec.of(StandardCharsets.UTF_8.name()).encode(this.config.getRedirectUri(), StandardCharsets.UTF_8);
         return new RedirectView(String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", this.config.getAuthUri(), this.config.getClientId(), redirectUri));
     }
 
@@ -74,7 +74,7 @@ public class Oauth2LoginController {
         for (String name : this.config.getIdPath()) {
             if (id != null) {
                 id = ((Map<String, Object>) id).get(name);
-            }else {
+            } else {
                 break;
             }
         }

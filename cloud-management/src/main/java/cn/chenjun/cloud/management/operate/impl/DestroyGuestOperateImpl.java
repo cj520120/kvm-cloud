@@ -38,7 +38,6 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
     private MetaMapper metaMapper;
 
 
-
     @Override
     public void operate(DestroyGuestOperate param) {
         GuestEntity guest = this.guestMapper.selectById(param.getGuestId());

@@ -56,19 +56,19 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
                 HostEntity host = hostMapper.selectOne(new QueryWrapper<HostEntity>().eq(HostEntity.CLIENT_ID, clientId));
                 boolean isSuccess = false;
                 long expire = timestamp + require.timeout();
-                String message="成功";
+                String message = "成功";
                 if (expire > System.currentTimeMillis()) {
                     try {
                         String dataSign = AppUtils.sign(map, clientId, host.getClientSecret(), nonce);
                         if (Objects.equals(dataSign, sign)) {
                             isSuccess = true;
-                        }else{
-                            message="签名不正确";
+                        } else {
+                            message = "签名不正确";
                         }
                     } catch (Exception e) {
-                        message="签名数据出错,请检查签名数据是否合法";
+                        message = "签名数据出错,请检查签名数据是否合法";
                     }
-                }else{
+                } else {
                     message = "签名错误:签名时间验证失败,请确认服务器时间是否同步";
                 }
                 if (!isSuccess) {

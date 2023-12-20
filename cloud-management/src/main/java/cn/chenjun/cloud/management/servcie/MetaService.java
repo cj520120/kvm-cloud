@@ -37,7 +37,7 @@ public class MetaService {
     private GuestPasswordMapper guestPasswordMapper;
 
 
-    public String loadAllGuestMetaData(String ip,String nonce, String sign) {
+    public String loadAllGuestMetaData(String ip, String nonce, String sign) {
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip));
         if (guestNetwork == null) {
             return "";
@@ -46,7 +46,7 @@ public class MetaService {
         if (network == null) {
             return "";
         }
-        if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce+":"+ip).equals(sign)) {
+        if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce + ":" + ip).equals(sign)) {
             return "";
         }
         List<MetaDataEntity> list = mapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestNetwork.getAllocateId()));
@@ -54,7 +54,7 @@ public class MetaService {
         return String.join("\r\n", metaNames);
     }
 
-    public String loadAllGuestUserData(String ip, String nonce,String sign) {
+    public String loadAllGuestUserData(String ip, String nonce, String sign) {
         String data = "#cloud-config\r\n";
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip));
         if (guestNetwork == null) {
@@ -64,7 +64,7 @@ public class MetaService {
         if (network == null) {
             return data;
         }
-        if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce+":"+ip).equals(sign)) {
+        if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce + ":" + ip).equals(sign)) {
             return data;
         }
         GuestPasswordEntity entity = guestPasswordMapper.selectById(guestNetwork.getAllocateId());
@@ -75,7 +75,7 @@ public class MetaService {
         String password = util.decrypt(entity.getPassword());
         if (!StringUtils.isEmpty(password)) {
 
-            data += "password: "+password+"\r\n";
+            data += "password: " + password + "\r\n";
             data += "chpasswd: {expire: False}\r\n";
             data += "ssh_pwauth: True";
         }

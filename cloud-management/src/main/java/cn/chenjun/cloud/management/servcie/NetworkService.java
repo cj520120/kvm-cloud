@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 /**
  * @author chenjun
  */
@@ -40,6 +41,7 @@ public class NetworkService extends AbstractService {
     private AllocateService allocateService;
     @Autowired
     private NatMapper natMapper;
+
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(int guestId) {
         List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
@@ -310,25 +312,27 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(list);
 
     }
+
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<NatModel> createComponentNat(int componentId,int localPort,String protocol,String remoteIp,int remotePort){
+    public ResultUtil<NatModel> createComponentNat(int componentId, int localPort, String protocol, String remoteIp, int remotePort) {
         ComponentEntity component = this.componentMapper.selectById(componentId);
         if (component == null) {
             return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件不存在");
         }
-        NatEntity entity=NatEntity.builder().componentId(componentId).localPort(localPort).protocol(protocol).remotePort(remotePort).remoteIp(remoteIp).createTime(new Date()).build();
+        NatEntity entity = NatEntity.builder().componentId(componentId).localPort(localPort).protocol(protocol).remotePort(remotePort).remoteIp(remoteIp).createTime(new Date()).build();
         this.natMapper.insert(entity);
         this.eventService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
         return ResultUtil.success(this.initNat(entity));
     }
+
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> deleteComponentNat(int natId){
+    public ResultUtil<Void> deleteComponentNat(int natId) {
         NatEntity entity = this.natMapper.selectById(natId);
         if (entity == null) {
             return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NAT_NOT_FOUND, "Nat配置不存在");
         }
-         this.natMapper.deleteById(natId);
-         this.eventService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
-        return ResultUtil.success( );
+        this.natMapper.deleteById(natId);
+        this.eventService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
+        return ResultUtil.success();
     }
 }

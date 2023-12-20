@@ -82,13 +82,13 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         String body = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/network/network.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(5);
-        map.put("index",index);
-        map.put("ip",ip);
-        map.put("gateway",gateway);
-        map.put("netmask",netmask);
+        map.put("index", index);
+        map.put("ip", ip);
+        map.put("gateway", gateway);
+        map.put("netmask", netmask);
         map.put("otherIpList", otherIpList);
-        List<String> dnsList=Arrays.stream(dns.split(",")).filter(ObjectUtils::isNotEmpty).collect(Collectors.toList());
-        map.put("dnsList",dnsList);
+        List<String> dnsList = Arrays.stream(dns.split(",")).filter(ObjectUtils::isNotEmpty).collect(Collectors.toList());
+        map.put("dnsList", dnsList);
         return jinjava.render(body, map).replaceAll("(?m)^[ \t]*\r?\n", "");
     }
 }

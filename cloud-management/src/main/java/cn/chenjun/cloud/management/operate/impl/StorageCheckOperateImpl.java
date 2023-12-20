@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate, ResultUtil<List<StorageInfo>>> {
 
 
-
     @Override
     public void operate(StorageCheckOperate param) {
 

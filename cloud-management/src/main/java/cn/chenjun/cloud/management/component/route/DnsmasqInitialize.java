@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
  */
 @Component
 public class DnsmasqInitialize implements RouteComponentQmaInitialize {
+    private final int MIN_DHCP_SIZE = 2;
     @Autowired
     protected GuestNetworkMapper guestNetworkMapper;
     @Autowired
     protected NetworkMapper networkMapper;
     @Autowired
     protected GuestMapper guestMapper;
-    private final int MIN_DHCP_SIZE = 2;
 
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
@@ -66,9 +66,9 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         map.put("vip", component.getComponentVip());
         map.put("startIp", startIp);
         map.put("endIp", endIp);
-        if(network.getBasicNetworkId()>0) {
+        if (network.getBasicNetworkId() > 0) {
             map.put("gateway", component.getComponentVip());
-        }else{
+        } else {
             map.put("gateway", network.getGateway());
         }
         map.put("mask", network.getMask());

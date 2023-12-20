@@ -43,10 +43,10 @@ public class GuestService extends AbstractService {
     @Autowired
     private MetaMapper metaMapper;
 
-    private void initGuestMetaData(int guestId,String password){
-        GuestEntity guest=this.guestMapper.selectById(guestId);
+    private void initGuestMetaData(int guestId, String password) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
         Map<String, String> metaDataMap = new HashMap<>(4);
-        String hostname="VM-" +guest.getGuestIp().replace(".", "-");
+        String hostname = "VM-" + guest.getGuestIp().replace(".", "-");
         metaDataMap.put("hostname", hostname);
         metaDataMap.put("local-hostname", hostname);
         metaDataMap.put("instance-id", guest.getName());
@@ -85,7 +85,6 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
         }
     }
-
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -250,7 +249,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, String password,int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, String password, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
@@ -263,7 +262,7 @@ public class GuestService extends AbstractService {
         this.checkSystemComponentComplete(guest.getNetworkId());
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
-        this.initGuestMetaData(guestId,password);
+        this.initGuestMetaData(guestId, password);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
@@ -402,10 +401,10 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> migrate (int guestId,int hostId) {
+    public ResultUtil<GuestModel> migrate(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
-            if(hostId==guest.getHostId()){
+            if (hostId == guest.getHostId()) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "迁移目标主机选择错误.");
             }
             BaseOperateParam operateParam = MigrateGuestOperate.builder()

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(DestroyNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());

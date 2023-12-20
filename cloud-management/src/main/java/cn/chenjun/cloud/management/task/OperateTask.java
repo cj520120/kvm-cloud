@@ -60,8 +60,9 @@ public class OperateTask extends AbstractTask {
                 .build();
         taskMapper.insert(task);
     }
+
     public void keepTask(String taskId) {
-        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS)));
+        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + +TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS)));
     }
 
     @Override
@@ -76,24 +77,24 @@ public class OperateTask extends AbstractTask {
         List<TaskEntity> taskList = this.taskMapper.selectList(wrapper);
         for (TaskEntity entity : taskList) {
             try {
-                    Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS));
-                    if (this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0) {
-                        Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
-                        BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
-                        this.lockRun(() -> {
-                            this.operateEngine.process(operateParam);
-                        });
-                    }
-                } catch (Exception err) {
-                    ResultUtil<?> resultUtil;
-                    if (err instanceof CodeException) {
-                        CodeException codeException = (CodeException) err;
-                        resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
-                    } else {
-                        log.error("调用任务出现未知错误.param={}", entity.getParam(), err);
-                        resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
-                    }
-                    this.onTaskFinish(entity.getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
+                Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS));
+                if (this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0) {
+                    Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
+                    BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
+                    this.lockRun(() -> {
+                        this.operateEngine.process(operateParam);
+                    });
+                }
+            } catch (Exception err) {
+                ResultUtil<?> resultUtil;
+                if (err instanceof CodeException) {
+                    CodeException codeException = (CodeException) err;
+                    resultUtil = ResultUtil.error(codeException.getCode(), codeException.getMessage());
+                } else {
+                    log.error("调用任务出现未知错误.param={}", entity.getParam(), err);
+                    resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
+                }
+                this.onTaskFinish(entity.getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
             }
         }
 
@@ -108,12 +109,12 @@ public class OperateTask extends AbstractTask {
             Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(task.getType());
             BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(task.getParam(), paramClass);
             try {
-                    this.lockRun(() -> {
-                        this.operateEngine.onFinish(operateParam, result);
-                    });
-                    this.taskMapper.deleteById(taskId);
-                } catch (Exception err) {
-                    log.error("任务回调失败.param={} result={}", operateParam, result, err);
+                this.lockRun(() -> {
+                    this.operateEngine.onFinish(operateParam, result);
+                });
+                this.taskMapper.deleteById(taskId);
+            } catch (Exception err) {
+                log.error("任务回调失败.param={} result={}", operateParam, result, err);
             }
         } catch (Exception err) {
             log.error("解析任务参数出错:task={} result={}", task, result);

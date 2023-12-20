@@ -18,10 +18,9 @@ import java.util.Objects;
  * @author chenjun
  */
 public abstract class AbstractWsService implements ApplicationContextAware {
-    private Session session;
-
     private static List<WsAction> ACTION_LIST;
     private static WsSessionManager SESSION_MANAGER;
+    private Session session;
 
     @SneakyThrows
     @OnOpen
@@ -53,6 +52,7 @@ public abstract class AbstractWsService implements ApplicationContextAware {
     public void onClose() {
         SESSION_MANAGER.unRegister(session);
     }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ACTION_LIST = new ArrayList<>(applicationContext.getBeansOfType(WsAction.class).values());

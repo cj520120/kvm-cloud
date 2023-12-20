@@ -25,7 +25,6 @@ public class RouteComponentService extends AbstractComponentService {
     private final List<RouteComponentQmaInitialize> componentQmaInitializeList;
 
 
-
     public RouteComponentService(@Autowired List<RouteComponentQmaInitialize> componentQmaInitializeList) {
 
         componentQmaInitializeList.sort(Comparator.comparingInt(Ordered::getOrder));
@@ -41,8 +40,6 @@ public class RouteComponentService extends AbstractComponentService {
     public String getComponentName() {
         return "Route VM";
     }
-
-
 
 
     @Override

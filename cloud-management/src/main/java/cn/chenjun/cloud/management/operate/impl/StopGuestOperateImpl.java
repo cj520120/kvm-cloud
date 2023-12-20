@@ -27,7 +27,6 @@ import java.lang.reflect.Type;
 public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(StopGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());

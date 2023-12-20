@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(DestroyStorageOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())

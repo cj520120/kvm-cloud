@@ -31,6 +31,7 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     private GuestNetworkMapper guestNetworkMapper;
     @Autowired
     private NetworkMapper networkMapper;
+
     private static Map<String, Object> buildVrrp(String name, String nic, String vip, ComponentEntity component, int guestId) {
         List<Integer> slaveIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
         }.getType());

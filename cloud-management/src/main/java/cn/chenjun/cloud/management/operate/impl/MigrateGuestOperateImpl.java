@@ -26,7 +26,6 @@ import java.util.UUID;
 public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(MigrateGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -65,15 +64,15 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setHostId(param.getToHostId());
                 guest.setLastHostId(param.getToHostId());
-            }else{
+            } else {
                 guest.setHostId(param.getSourceHostId());
                 guest.setLastHostId(param.getSourceHostId());
             }
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
-            GuestInfoOperate operate=GuestInfoOperate.builder()
+            GuestInfoOperate operate = GuestInfoOperate.builder()
                     .taskId(UUID.randomUUID().toString())
-                    .title("获取客户机VNC信息["+guest.getName()+"]")
+                    .title("获取客户机VNC信息[" + guest.getName() + "]")
                     .guestId(param.getGuestId())
                     .build();
             this.operateTask.addTask(operate);

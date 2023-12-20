@@ -23,8 +23,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class NioSelector {
-
-    private final static long SELECTOR_TIMEOUT = 1;
     private final ScheduledThreadPoolExecutor poolExecutor;
     private final Selector selector;
     private final Map<SocketChannel, NioClient> channelMap = new ConcurrentHashMap<>();

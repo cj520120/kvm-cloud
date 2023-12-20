@@ -61,7 +61,7 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING) {
             this.allocateService.initHostAllocate();
-            if(resultUtil.getCode()==ErrorCode.SUCCESS) {
+            if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 this.vncService.updateVncPort(param.getGuestId(), resultUtil.getData().getVnc());
             }
         }
