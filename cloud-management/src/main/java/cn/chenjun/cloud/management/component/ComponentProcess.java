@@ -5,6 +5,9 @@ import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import org.springframework.plugin.core.Plugin;
 
+/**
+ * @author chenjun
+ */
 public interface ComponentProcess extends Plugin<Integer> {
     /**
      * 检查并启动组件

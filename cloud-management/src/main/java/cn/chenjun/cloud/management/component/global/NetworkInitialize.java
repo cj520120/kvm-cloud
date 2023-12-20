@@ -61,7 +61,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         //安装网络检测脚本
         String networkCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/network_check_shell.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(1);
         map.put("commands", routeCommands);
         networkCheckScript = jinjava.render(networkCheckScript, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/network_check.sh").fileBody(networkCheckScript).build())).build());
