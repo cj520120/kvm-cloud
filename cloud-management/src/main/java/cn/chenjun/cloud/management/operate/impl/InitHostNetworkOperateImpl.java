@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 @Component
 @Slf4j
-public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkOperate, ResultUtil<Void>> {
+public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostNetworkOperate, ResultUtil<Void>> {
 
 
     @Override

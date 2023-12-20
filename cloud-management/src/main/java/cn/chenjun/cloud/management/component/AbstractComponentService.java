@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.component;
 
+import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -17,19 +18,19 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
  */
 @Slf4j
-public abstract class AbstractComponentService extends AbstractService implements ComponentProcess {
+public abstract class AbstractComponentService<T extends ComponentQmaInitialize> extends AbstractService implements ComponentProcess {
 
     @Autowired
     protected AllocateService allocateService;
@@ -41,6 +42,12 @@ public abstract class AbstractComponentService extends AbstractService implement
     @Autowired
     protected ApplicationConfig applicationConfig;
 
+    private final List<T> componentQmaInitializeList;
+
+    protected AbstractComponentService(List<T> componentQmaInitializeList) {
+        componentQmaInitializeList.sort(Comparator.comparingInt(Ordered::getOrder));
+        this.componentQmaInitializeList = componentQmaInitializeList;
+    }
 
     /**
      * 创建系统组件
@@ -299,5 +306,20 @@ public abstract class AbstractComponentService extends AbstractService implement
      */
     public abstract String getComponentName();
 
-
+    @Override
+    public GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId) {
+        List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
+        GuestQmaRequest request = GuestQmaRequest.builder().build();
+        request.setName("");
+        request.setTimeout((int) TimeUnit.MINUTES.toSeconds(5));
+        request.setCommands(commands);
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
+        for (ComponentQmaInitialize componentQmaInitialize : componentQmaInitializeList) {
+            List<GuestQmaRequest.QmaBody> childCommands = componentQmaInitialize.initialize(component, guestId);
+            if (!ObjectUtils.isEmpty(childCommands)) {
+                commands.addAll(childCommands);
+            }
+        }
+        return request;
+    }
 }

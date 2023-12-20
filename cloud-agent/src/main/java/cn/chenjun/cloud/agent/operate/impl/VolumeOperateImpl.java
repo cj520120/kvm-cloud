@@ -2,6 +2,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.operate.VolumeOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.agent.util.StorageUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -10,7 +11,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpUtil;
 import com.hubspot.jinjava.Jinjava;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -32,27 +32,12 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class VolumeOperateImpl implements VolumeOperate {
-    @Synchronized
-    private StoragePool getStorage(Connect connect, String name) {
-        try {
-            StoragePool storagePool = connect.storagePoolLookupByName(name);
-            synchronized (name.intern()) {
-                try {
-                    storagePool.refresh(0);
-                } catch (Exception ignored) {
 
-                }
-            }
-            return storagePool;
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
 
     @DispatchBind(command = Constant.Command.VOLUME_INFO)
     @Override
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
-        StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage());
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
         }
@@ -82,7 +67,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             String storage = entry.getKey();
             Map<String, VolumeInfo> map = new HashMap<>(4);
             Set<String> volumeNameList = entry.getValue().stream().map(VolumeInfoRequest::getSourceName).collect(Collectors.toSet());
-            StoragePool storagePool = this.getStorage(connect, storage);
+            StoragePool storagePool = StorageUtil.findStorage(connect, storage);
             if (storagePool != null) {
                 String[] names = storagePool.listVolumes();
                 for (String name : names) {
@@ -126,7 +111,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         Jinjava jinjava = new Jinjava();
         xml = jinjava.render(xml, map);
         log.info("create volume xml={}", xml);
-        StoragePool storagePool = this.getStorage(connect, request.getTargetStorage());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getTargetStorage());
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
         }
@@ -150,7 +135,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @DispatchBind(command = Constant.Command.VOLUME_DESTROY)
     @Override
     public Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
-        StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage());
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
         }
@@ -165,7 +150,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @Override
     public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
 
-        StoragePool storagePool = this.getStorage(connect, request.getSourceStorage());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage());
         StorageVol findVol = this.findVol(storagePool, request.getSourceName());
         if (findVol == null) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘不存在:" + request.getSourceName());
@@ -211,7 +196,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD)
     @Override
     public VolumeInfo download(Connect connect, VolumeDownloadRequest request) {
-        StoragePool targetStoragePool = this.getStorage(connect, request.getTargetStorage());
+        StoragePool targetStoragePool = StorageUtil.findStorage(connect, request.getTargetStorage());
         if (targetStoragePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
         }
@@ -261,11 +246,11 @@ public class VolumeOperateImpl implements VolumeOperate {
     @DispatchBind(command = Constant.Command.VOLUME_CLONE)
     @Override
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
-        StoragePool sourceStoragePool = this.getStorage(connect, request.getSourceStorage());
+        StoragePool sourceStoragePool = StorageUtil.findStorage(connect, request.getSourceStorage());
         if (sourceStoragePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
         }
-        StoragePool targetStoragePool = this.getStorage(connect, request.getTargetStorage());
+        StoragePool targetStoragePool = StorageUtil.findStorage(connect, request.getTargetStorage());
         if (targetStoragePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
         }

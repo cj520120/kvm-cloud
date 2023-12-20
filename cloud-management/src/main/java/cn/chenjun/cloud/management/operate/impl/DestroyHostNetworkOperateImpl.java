@@ -27,7 +27,7 @@ import java.util.UUID;
  */
 @Component
 @Slf4j
-public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNetworkOperate, ResultUtil<Void>> {
+public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<DestroyHostNetworkOperate, ResultUtil<Void>> {
 
 
     @Override
@@ -64,20 +64,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
                 }
-                BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .bridge(basicNetworkEntity.getBridge())
-                        .ip(host.getHostIp())
-                        .geteway(basicNetworkEntity.getGateway())
-                        .nic(host.getNic())
-                        .netmask(basicNetworkEntity.getMask()).build();
-                VlanNetwork vlan = VlanNetwork.builder()
-                        .vlanId(network.getVlanId())
-                        .netmask(network.getMask())
-                        .basic(basicBridgeNetwork)
-                        .ip(null)
-                        .bridge(network.getBridge())
-                        .geteway(network.getGateway())
-                        .build();
+                VlanNetwork vlan = buildVlanRequest(basicNetworkEntity, host, network);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_VLAN, vlan);
             }
             break;
@@ -86,6 +73,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         }
 
     }
+
 
     @Override
     public Type getCallResultType() {

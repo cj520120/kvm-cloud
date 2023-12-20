@@ -155,4 +155,5 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
      * @return
      */
     public abstract int getType();
+
 }

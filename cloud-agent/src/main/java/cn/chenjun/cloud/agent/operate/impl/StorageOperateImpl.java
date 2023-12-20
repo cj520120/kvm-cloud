@@ -2,6 +2,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.agent.util.StorageUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageDestroyRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
@@ -48,7 +49,7 @@ public class StorageOperateImpl implements StorageOperate {
     @DispatchBind(command = Constant.Command.STORAGE_INFO)
     @Override
     public StorageInfo getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception {
-        StoragePool storagePool = this.findStorage(connect, request.getName());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getName());
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在:" + request.getName());
         }
@@ -66,7 +67,7 @@ public class StorageOperateImpl implements StorageOperate {
     public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
         List<StorageInfo> list = new ArrayList<>();
         for (StorageInfoRequest request : batchRequest) {
-            StoragePool storagePool = this.findStorage(connect, request.getName());
+            StoragePool storagePool = StorageUtil.findStorage(connect, request.getName());
             StorageInfo model = null;
             if (storagePool != null) {
                 StoragePoolInfo storagePoolInfo = storagePool.getInfo();
@@ -94,7 +95,7 @@ public class StorageOperateImpl implements StorageOperate {
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
             }
-            StoragePool storagePool = this.findStorage(connect, request.getName());
+            StoragePool storagePool = StorageUtil.findStorage(connect, request.getName());
             if (storagePool != null) {
                 StoragePoolInfo storagePoolInfo = storagePool.getInfo();
                 if (storagePoolInfo.state != StoragePoolInfo.StoragePoolState.VIR_STORAGE_POOL_RUNNING) {
@@ -128,7 +129,7 @@ public class StorageOperateImpl implements StorageOperate {
     @Override
     public Void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
         synchronized (request.getName().intern()) {
-            StoragePool storagePool = this.findStorage(connect, request.getName());
+            StoragePool storagePool = StorageUtil.findStorage(connect, request.getName());
             if (storagePool != null) {
                 storagePool.destroy();
             }
@@ -136,19 +137,5 @@ public class StorageOperateImpl implements StorageOperate {
         }
     }
 
-    private StoragePool findStorage(Connect connect, String name) {
-        try {
-            StoragePool storagePool = connect.storagePoolLookupByName(name);
-            synchronized (name.intern()) {
-                try {
-                    storagePool.refresh(0);
-                } catch (Exception ignored) {
 
-                }
-            }
-            return storagePool;
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
 }

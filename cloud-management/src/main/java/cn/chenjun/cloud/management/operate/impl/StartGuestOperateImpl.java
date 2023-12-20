@@ -26,7 +26,7 @@ import java.util.*;
  */
 @Component
 @Slf4j
-public class StartGuestOperateImpl<T extends StartGuestOperate> extends AbstractOperate<T, ResultUtil<GuestInfo>> {
+public class StartGuestOperateImpl<T extends StartGuestOperate> extends AbstractOsOperate<T, ResultUtil<GuestInfo>> {
 
 
     @Autowired
@@ -135,39 +135,6 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         return disks;
     }
 
-
-    protected OsCdRoom getGuestCdRoom(GuestEntity guest) {
-        OsCdRoom cdRoom = OsCdRoom.builder().build();
-        if (guest.getCdRoom() > 0) {
-            List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, guest.getCdRoom()));
-            Collections.shuffle(templateVolumeList);
-            if (!templateVolumeList.isEmpty()) {
-                TemplateVolumeEntity templateVolume = templateVolumeList.get(0);
-                if (templateVolume != null) {
-                    StorageEntity storageEntity = this.storageMapper.selectById(templateVolume.getStorageId());
-                    if (storageEntity == null) {
-                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]光盘[" + templateVolume.getName() + "]所属存储池不存在");
-                    }
-                    if (storageEntity.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
-                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]光盘[" + templateVolume.getName() + "]所属存储池未就绪:" + storageEntity.getStatus());
-                    }
-                    Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
-                    }.getType());
-                    Storage storage = Storage.builder()
-                            .name(storageEntity.getName())
-                            .type(storageEntity.getType())
-                            .param(storageParam)
-                            .mountPath(storageEntity.getMountPath())
-                            .build();
-                    Volume cdVolume = Volume.builder().name(templateVolume.getName()).type(templateVolume.getType()).path(templateVolume.getPath()).storage(storage).build();
-                    cdRoom.setVolume(cdVolume);
-                }
-            } else {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "光盘镜像未就绪");
-            }
-        }
-        return cdRoom;
-    }
 
     protected GuestQmaRequest getStartQmaRequest(T param) {
 
