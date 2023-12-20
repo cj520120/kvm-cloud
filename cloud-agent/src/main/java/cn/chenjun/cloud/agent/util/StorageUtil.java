@@ -13,12 +13,10 @@ public class StorageUtil {
         synchronized (SYNC_OBJ) {
             try {
                 StoragePool storagePool = connect.storagePoolLookupByName(name);
-                synchronized (name.intern()) {
-                    try {
-                        storagePool.refresh(0);
-                    } catch (Exception ignored) {
+                try {
+                    storagePool.refresh(0);
+                } catch (Exception ignored) {
 
-                    }
                 }
                 return storagePool;
             } catch (Exception ignored) {
