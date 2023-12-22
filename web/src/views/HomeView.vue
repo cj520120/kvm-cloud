@@ -1,110 +1,123 @@
 <template>
-	<div>
-		<el-container>
-			<el-main>
-				<el-card class="box-card">
-					<div slot="header" class="clearfix">
-						<span>系统汇总</span>
-					</div>
-					<el-row :gutter="20">
-						<el-col :span="4">
-							<div>
-								<el-statistic group-separator="," :value="this.networks.length" title="网络数量"></el-statistic>
-							</div>
-						</el-col>
-						<el-col :span="4">
-							<div>
-								<el-statistic group-separator="," :value="this.storages.length" title="存储池数量"></el-statistic>
-							</div>
-						</el-col>
-						<el-col :span="4">
-							<div>
-								<el-statistic group-separator="," :value="this.hosts.length" title="主机数量"></el-statistic>
-							</div>
-						</el-col>
-						<el-col :span="4">
-							<div>
-								<el-statistic group-separator="," :value="this.guests.length" title="虚拟机数量">
-									<template slot="formatter">{{ get_runing_guest_number() }} /{{ this.guests.length }}</template>
-								</el-statistic>
-							</div>
-						</el-col>
-						<el-col :span="4">
-							<div>
-								<el-statistic group-separator="," :value="this.volumes.length" title="磁盘数量"></el-statistic>
-							</div>
-						</el-col>
-					</el-row>
-					<el-divider></el-divider>
-					<el-card>
-						<div slot="header" class="clearfix">
-							<span>主机信息</span>
-						</div>
+	<div class="dashboard-container">
+		<el-row class="panel-group">
+			<div class="card-panel">
+				<div class="card-panel-icon-wrapper icon-message">
+					<i class="el-icon-platform-eleme" style="font-size: 48px" />
+				</div>
+				<div class="card-panel-description">
+					<div class="card-panel-text">网络数量</div>
+					<span class="card-panel-num">{{ this.networks.length }}</span>
+				</div>
+			</div>
+			<div class="card-panel">
+				<div class="card-panel-icon-wrapper icon-message">
+					<i class="el-icon-coin" style="font-size: 48px" />
+				</div>
+				<div class="card-panel-description">
+					<div class="card-panel-text">存储池数量</div>
+					<span class="card-panel-num">{{ this.storages.length }}</span>
+				</div>
+			</div>
 
-						<div class="component">
-							<div>
+			<div class="card-panel">
+				<div class="card-panel-icon-wrapper icon-message">
+					<i class="el-icon-monitor" style="font-size: 48px" class-name="card-panel-icon" />
+				</div>
+				<div class="card-panel-description">
+					<div class="card-panel-text">主机数量</div>
+					<span class="card-panel-num">{{ this.hosts.length }}</span>
+				</div>
+			</div>
+			<div class="card-panel">
+				<div class="card-panel-icon-wrapper icon-message">
+					<i class="el-icon-s-platform" style="font-size: 48px" class-name="card-panel-icon" />
+				</div>
+				<div class="card-panel-description">
+					<div class="card-panel-text">虚拟机数量</div>
+					<span class="card-panel-num">{{ get_runing_guest_number() }} /{{ this.guests.length }}</span>
+				</div>
+			</div>
+			<div class="card-panel">
+				<div class="card-panel-icon-wrapper icon-message">
+					<i class="el-icon-bank-card" style="font-size: 48px" class-name="card-panel-icon" />
+				</div>
+				<div class="card-panel-description">
+					<div class="card-panel-text">磁盘数量</div>
+					<span class="card-panel-num">{{ this.volumes.length }}</span>
+				</div>
+			</div>
+		</el-row>
+		<el-row>
+			<el-card>
+				<div slot="header" class="clearfix">
+					<span>主机信息</span>
+				</div>
+				<el-container>
+					<el-aside width="300px">
+						<el-row>
+							<el-col :span="12">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + get_allocat_cpu() + '核 / 总共:' + get_total_cpu() + '核'" placement="top">
 									<el-progress :format="get_cpu_progress_title" type="circle" :percentage="totalCpuPercentage" color="#67C23A"></el-progress>
 								</el-tooltip>
-							</div>
-							<div>
+							</el-col>
+							<el-col :span="12">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(get_allocat_memory()) + ' / 总共:' + get_memory_desplay(get_total_memory())" placement="top">
 									<el-progress :format="get_memory_progress_title" type="circle" :percentage="totalMemoryePercentage" color="#67C23A"></el-progress>
 								</el-tooltip>
-							</div>
-							<div>
-								<el-table :data="hosts" style="width:100%">
-									<el-table-column label="名称" prop="displayName" max-width="200"  show-overflow-tooltip/>
-									<el-table-column label="主机IP" prop="hostIp" width="150"  show-overflow-tooltip/>
-									<el-table-column label="CPU"  max-width="150" >
-										<template #default="scope">
-											<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
-												<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
-											</el-tooltip>
-										</template>
-									</el-table-column>
-									<el-table-column label="内存"  max-width="150"  >
-										<template #default="scope">
-											<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
-												<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
-											</el-tooltip>
-										</template>
-									</el-table-column>
-									<el-table-column></el-table-column>
-								</el-table>
-							</div>
-						</div>
-					</el-card>
-					<el-divider></el-divider>
-					<el-card>
-						<div slot="header" class="clearfix">
-							<span>存储池</span>
-						</div>
-						<div class="storage_component">
-							<div>
-								<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(get_allocat_storage()) + ' / 总共:' + get_storage_desplay(get_total_capacity())" placement="top">
-									<el-progress type="circle" :format="get_storage_progress_title" :percentage="totalStoragePercentage" color="#67C23A"></el-progress>
-								</el-tooltip>
-							</div>
-							<div>
-								<el-table :data="storages">
-									<el-table-column label="名称" prop="description" max-width="200"  show-overflow-tooltip/>
-									<el-table-column label="类型" prop="type" width="120" />
-									<el-table-column label="容量" prop="capacity" width="150">
-										<template #default="scope">
-											<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
-												<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
-											</el-tooltip>
-										</template>
-									</el-table-column>
-									<el-table-column></el-table-column>
-								</el-table>
-							</div>
-						</div>
-					</el-card>
-				</el-card>
-			</el-main>
-		</el-container>
+							</el-col>
+						</el-row>
+					</el-aside>
+					<el-container>
+						<el-table :data="hosts" style="width: 100%">
+							<el-table-column label="名称" prop="displayName" max-width="200" show-overflow-tooltip />
+							<el-table-column label="主机IP" prop="hostIp" width="150" show-overflow-tooltip />
+							<el-table-column label="CPU" max-width="150">
+								<template #default="scope">
+									<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
+										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
+									</el-tooltip>
+								</template>
+							</el-table-column>
+							<el-table-column label="内存" max-width="150">
+								<template #default="scope">
+									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
+										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
+									</el-tooltip>
+								</template>
+							</el-table-column>
+							<el-table-column></el-table-column>
+						</el-table>
+					</el-container>
+				</el-container>
+			</el-card>
+			<el-card class="dashbord-card">
+				<div slot="header" class="clearfix">
+					<span>存储池</span>
+				</div>
+				<el-container>
+					<el-aside width="200px">
+						<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(get_allocat_storage()) + ' / 总共:' + get_storage_desplay(get_total_capacity())" placement="top">
+							<el-progress type="circle" :format="get_storage_progress_title" :percentage="totalStoragePercentage" color="#67C23A"></el-progress>
+						</el-tooltip>
+					</el-aside>
+					<el-container>
+						<el-table :data="storages">
+							<el-table-column label="名称" prop="description" width="250" show-overflow-tooltip />
+							<el-table-column label="类型" prop="type" width="120" />
+							<el-table-column label="容量" prop="capacity" width="200">
+								<template #default="scope">
+									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
+										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
+									</el-tooltip>
+								</template>
+							</el-table-column>
+							<el-table-column></el-table-column>
+						</el-table>
+					</el-container>
+				</el-container>
+			</el-card>
+		</el-row>
 	</div>
 </template>
 <script>
@@ -234,21 +247,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.like {
-	cursor: pointer;
-	font-size: 25px;
-	display: inline-block;
-}
-.component {
-	display: grid;
-	grid-template-columns: 150px 150px auto;
-	max-width: 100%;
-	overflow: hidden;
-}
-.storage_component {
-	display: grid;
-	grid-template-columns: 150px auto;
-	max-width: 100%;
-	overflow: hidden;
-}
 </style>

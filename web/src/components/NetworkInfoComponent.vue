@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-card class="box-card" v-show="this.show_type === 0" v-loading="network_loading">
+		<el-card v-show="this.show_type === 0" v-loading="network_loading">
 			<el-row slot="header">
 				<el-page-header @back="on_back_click" content="网络详情"></el-page-header>
 			</el-row>
@@ -33,7 +33,7 @@
 				</el-descriptions>
 
 				<br />
-				<el-card class="box-card">
+				<el-card>
 					<div slot="header" class="clearfix">
 						<span>系统组件</span>
 						<el-button style="float: right; padding: 3px 0" @click="dialog_create_network_component_visible = true" type="text">添加组件</el-button>
@@ -68,31 +68,33 @@
 								<el-button size="mini" type="danger" plain v-if="component.componentType != 1" @click="destroy_network_component(component)">删除</el-button>
 							</el-col>
 						</el-row>
-						<el-card class="box-card" v-show="component.is_show" style="margin: 10px 0">
-							<div slot="header" class="clearfix">
-								<span>系统虚拟机</span>
-								<div style="float: right; padding: 3px 0">
-									<el-button size="mini" type="text" v-if="component.componentType === 2" @click="show_network_component_nat_list(component)">Nat转发管理</el-button>
-									<el-button size="mini" type="text" v-if="component.componentType === 1" @click="show_network_dns_list()">Dns管理</el-button>
+						<div class="component_card" v-show="component.is_show">
+							<div>
+								<div class="header">
+									<span>系统虚拟机</span>
+									<div style="float: right; padding: 3px 0">
+										<el-button size="mini" type="text" v-if="component.componentType === 2" @click="show_network_component_nat_list(component)">Nat转发管理</el-button>
+										<el-button size="mini" type="text" v-if="component.componentType === 1" @click="show_network_dns_list()">Dns管理</el-button>
+									</div>
 								</div>
+								<el-table :data="component.guests" style="width: 100%" size="small">
+									<el-table-column label="ID" prop="guestId" width="80" />
+									<el-table-column label="实例名" prop="name" width="200" />
+									<el-table-column label="标签" prop="description" width="200" />
+									<el-table-column label="IP地址" prop="guestIp" width="150" />
+									<el-table-column label="状态" prop="status" width="100">
+										<template #default="scope">
+											<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
+										</template>
+									</el-table-column>
+									<el-table-column label="操作">
+										<template #default="scope">
+											<el-button type="text" @click="go_guest_info(scope.row.guestId)">详情</el-button>
+										</template>
+									</el-table-column>
+								</el-table>
 							</div>
-							<el-table :data="component.guests" style="width: 100%">
-								<el-table-column label="ID" prop="guestId" width="80" />
-								<el-table-column label="实例名" prop="name" width="200" />
-								<el-table-column label="标签" prop="description" width="200" />
-								<el-table-column label="IP地址" prop="guestIp" width="150" />
-								<el-table-column label="状态" prop="status" width="100">
-									<template #default="scope">
-										<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
-									</template>
-								</el-table-column>
-								<el-table-column label="操作">
-									<template #default="scope">
-										<el-button type="text" @click="go_guest_info(scope.row.guestId)">详情</el-button>
-									</template>
-								</el-table-column>
-							</el-table>
-						</el-card>
+						</div>
 					</div>
 				</el-card>
 			</el-row>
@@ -679,23 +681,4 @@ export default {
 }
 </script>
 <style scoped>
-.table_tr {
-	color: #909399;
-	padding: 12px 0;
-	text-align: left;
-	width: 100%;
-	font-size: 14px;
-	text-indent: initial;
-	border-bottom: 1px solid #dcdfe6;
-	margin-left: 10px;
-}
-.table_td {
-	font-size: 14px;
-	color: #606266;
-	padding: 12px 0;
-	text-align: left;
-	width: 100%;
-	border-bottom: 1px solid #dcdfe6;
-	margin-left: 10px;
-}
 </style>
