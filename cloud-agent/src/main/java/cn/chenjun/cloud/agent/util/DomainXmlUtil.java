@@ -156,7 +156,16 @@ public class DomainXmlUtil {
             Map<String, Object> ovs = new HashMap<>(1);
             ovs.put("vlan", nic.getVlanId());
             map.put("ovs", ovs);
+            map.put("network", nic.getBridgeName());
+        }else{
+            map.put("network", nic.getBridgeName() + "-vlan-" + nic.getVlanId());
         }
+        if (nic.getVlanId() > 0) {
+            map.put("portgroup", "no-vlan");
+        } else {
+            map.put("portgroup", "vlan-" + nic.getVlanId());
+        }
+
         return map;
     }
 
