@@ -231,7 +231,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
+        String xml = DomainXmlUtil.buildNicXml(request);
         log.info("attachNic xml={}", xml);
         domain.attachDevice(xml);
         return null;
@@ -247,7 +247,7 @@ public class OsOperateImpl implements OsOperate {
         if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
         }
-        String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
+        String xml = DomainXmlUtil.buildNicXml(request);
         log.info("detachNic xml={}", xml);
         domain.detachDevice(xml);
         return null;
@@ -263,7 +263,7 @@ public class OsOperateImpl implements OsOperate {
             }
             domain.destroy();
         }
-        String xml = DomainXmlUtil.buildDomainXml(applicationConfig.getNetworkType(), request);
+        String xml = DomainXmlUtil.buildDomainXml(request);
         log.info("create vm={}", xml);
         domain = connect.domainCreateXML(xml, 0);
         if (Objects.nonNull(request.getQmaRequest())) {

@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.common.bean;
 
+import cn.chenjun.cloud.common.util.Constant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,10 @@ public class BasicBridgeNetwork {
      * 桥接名称
      */
     private String bridge;
+    /**
+     * 桥接方式
+     */
+    private  Constant.NetworkBridgeType bridgeType;
     /**
      * 网卡名称
      */

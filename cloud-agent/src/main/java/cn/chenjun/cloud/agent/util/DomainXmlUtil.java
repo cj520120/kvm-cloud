@@ -7,10 +7,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author chenjun
@@ -20,7 +17,7 @@ public class DomainXmlUtil {
     public static final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     public static final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
 
-    public static String buildDomainXml(String networkType, GuestStartRequest request) {
+    public static String buildDomainXml(GuestStartRequest request) {
         Map<String, Object> map = new HashMap<>(0);
         map.put("name", request.getName());
         map.put("description", request.getDescription());
@@ -29,7 +26,7 @@ public class DomainXmlUtil {
         map.put("emulator", request.getEmulator());
         map.put("cd", getCdContext(request.getOsCdRoom()));
         map.put("disks", getDisksContext(request.getBus(), request.getOsDisks()));
-        map.put("networks", getNicsContext(networkType, request.getNetworkInterfaces()));
+        map.put("networks", getBatchNicContext(request.getNetworkInterfaces()));
         map.put("vnc", getVncContext(request.getVncPassword()));
         String xml = ResourceUtil.readUtf8Str("tpl/domain.xml");
         Jinjava jinjava = new Jinjava();
@@ -54,11 +51,11 @@ public class DomainXmlUtil {
         return jinjava.render(xml, map);
     }
 
-    public static String buildNicXml(String nicType, OsNic nic) {
+    public static String buildNicXml(OsNic nic) {
         String xml = ResourceUtil.readUtf8Str("tpl/nic.xml");
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(0);
-        map.put("nic", getNicContext(nicType, nic));
+        map.put("nic", getNicContext(nic));
         return jinjava.render(xml, map);
     }
 
@@ -140,22 +137,22 @@ public class DomainXmlUtil {
         return map;
     }
 
-    private static List<Map<String, Object>> getNicsContext(String type, List<OsNic> networks) {
+    private static List<Map<String, Object>> getBatchNicContext(List<OsNic> networks) {
         List<Map<String, Object>> list = new ArrayList<>(0);
         for (OsNic nic : networks) {
-            list.add(getNicContext(type, nic));
+            list.add(getNicContext(nic));
         }
         return list;
     }
 
-    private static Map<String, Object> getNicContext(String type, OsNic nic) {
+    private static Map<String, Object> getNicContext(OsNic nic) {
         int deviceId = nic.getDeviceId() + MIN_NIC_DEVICE_ID;
         Map<String, Object> map = new HashMap<>(0);
         map.put("address", nic.getMac());
         map.put("type", nic.getDriveType());
         map.put("bridge", nic.getBridgeName());
         map.put("slot", String.format("0x%02x", deviceId));
-        if (NetworkType.OPEN_SWITCH.equalsIgnoreCase(type)) {
+        if (Objects.equals(nic.getBridgeType(), Constant.NetworkBridgeType.OPEN_SWITCH)) {
             Map<String, Object> ovs = new HashMap<>(1);
             ovs.put("vlan", nic.getVlanId());
             map.put("ovs", ovs);

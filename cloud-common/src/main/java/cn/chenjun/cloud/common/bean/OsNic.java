@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.common.bean;
 
+import cn.chenjun.cloud.common.util.Constant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,6 @@ public class OsNic {
     private int deviceId;
     private String mac;
     private String bridgeName;
-
+    private Constant.NetworkBridgeType bridgeType;
     private int vlanId;
 }

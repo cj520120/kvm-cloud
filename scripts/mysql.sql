@@ -276,6 +276,7 @@ CREATE TABLE `tbl_network_info` (
   `network_gateway` varchar(20) NOT NULL,
   `network_mask` varchar(20) NOT NULL,
   `network_bridge_name` varchar(20) NOT NULL,
+  `network_bridge_type` int NOT NULL,
   `network_subnet` varchar(45) NOT NULL,
   `network_broadcast` varchar(45) DEFAULT NULL,
   `network_dns` varchar(128) NOT NULL,
@@ -287,7 +288,7 @@ CREATE TABLE `tbl_network_info` (
   `network_domain` varchar(64) NOT NULL DEFAULT 'cj.kvm.internal',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

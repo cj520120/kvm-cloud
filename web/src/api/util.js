@@ -1,5 +1,15 @@
 export default {
   methods: {
+    get_bridge_type(network) {
+      switch (network.bridgeType) {
+        case 0:
+          return "基础桥接";
+        case 1:
+          return "OpenSwitch";
+        default:
+          return `未知桥接[${network.bridgeType}]`;
+      }
+    },
     get_guest_status(guest) {
       switch (guest.status) {
         case 0:

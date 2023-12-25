@@ -1,9 +1,42 @@
 package cn.chenjun.cloud.common.util;
 
+import org.springframework.util.StringUtils;
+
+import java.util.Arrays;
+
 /**
  * @author chenjun
  */
 public class Constant {
+    public enum NetworkBridgeType {
+
+        /**
+         * 基础网络
+         */
+        BASIC(0, "bridge"),
+        OPEN_SWITCH(1,"OpenSwitch");
+        private final String bridgeName;
+        private final int bridgeType;
+
+        NetworkBridgeType(int bridgeType,String bridgeName) {
+            this.bridgeType = bridgeType;
+            this.bridgeName = bridgeName;
+        }
+
+        public int bridgeType(){
+            return this.bridgeType;
+        }
+        public String bridgeName(){
+            return this.bridgeName;
+        }
+        public static NetworkBridgeType fromBridgeValue(String value){
+            return Arrays.stream(NetworkBridgeType.values()).filter(br-> StringUtils.endsWithIgnoreCase(br.bridgeName,value)).findFirst().orElse(null);
+        }
+        public static NetworkBridgeType fromBridgeType(int type){
+            return Arrays.stream(NetworkBridgeType.values()).filter(br-> br.bridgeType ==type).findFirst().orElse(null);
+        }
+    }
+
     public static class VolumeType {
         public static final String RAW = "raw";
         public static final String QCOW = "qcow";

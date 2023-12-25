@@ -53,6 +53,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                         .bridge(network.getBridge())
+                        .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                         .ip(host.getHostIp())
                         .geteway(network.getGateway())
                         .nic(host.getNic())

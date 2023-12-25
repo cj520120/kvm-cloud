@@ -35,6 +35,7 @@ public class NetworkEntity {
     public static final String NETWORK_VLAN_ID = "network_vlan_id";
     public static final String NETWORK_SECRET = "network_secret";
     public static final String NETWORK_DOMAIN = "network_domain";
+    public static final String NETWORK_BRIDGE_TYPE = "network_bridge_type";
     public static final String NETWORK_BASIC_NETWORK_ID = "network_basic_network_id";
     public static final String CREATE_TIME = "create_time";
 
@@ -57,6 +58,8 @@ public class NetworkEntity {
     private String broadcast;
     @TableField(NETWORK_BRIDGE_NAME)
     private String bridge;
+    @TableField(NETWORK_BRIDGE_TYPE)
+    private Integer bridgeType;
     @TableField(NETWORK_DNS)
     private String dns;
     @TableField(NETWORK_TYPE)

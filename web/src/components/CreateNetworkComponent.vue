@@ -60,9 +60,17 @@
 				</el-row>
 
 				<el-row :gutter="24">
-					<el-col :span="8">
-						<el-form-item label="桥接网卡" prop="bridge" v-if="create_network.type === 0">
+					<el-col :span="8" v-if="create_network.type === 0">
+						<el-form-item label="桥接网卡" prop="bridge">
 							<el-input v-model="create_network.bridge"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8" v-if="create_network.type === 0">
+						<el-form-item label="桥接方式" prop="bridgeType">
+							<el-select v-model="create_network.bridgeType" style="width: 100%">
+								<el-option label="基础桥接" :value="0"></el-option>
+								<el-option label="OpenSwitch桥接" :value="1"></el-option>
+							</el-select>
 						</el-form-item>
 					</el-col>
 					<el-col :span="8" v-if="create_network.type === 1">
@@ -96,6 +104,7 @@ export default {
 				subnet: '',
 				broadcast: '',
 				bridge: '',
+				bridgeType: 0,
 				dns: '',
 				type: 0,
 				domain: 'cj.kvm.internal',

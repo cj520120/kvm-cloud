@@ -11,6 +11,11 @@
 							<el-table-column label="ID" prop="networkId" width="80" />
 							<el-table-column label="名称" prop="name" width="120" show-overflow-tooltip />
 							<el-table-column label="桥接网卡" prop="bridge" width="120" />
+							<el-table-column label="桥接方式" prop="bridgeType" width="150">
+								<template #default="scope">
+									<el-tag>{{ get_bridge_type(scope.row) }}</el-tag>
+								</template>
+							</el-table-column>
 							<el-table-column label="子网" prop="subnet" width="150">
 								<template #default="scope">{{ scope.row.subnet }}/{{ netmask2CIDR(scope.row.mask) }}</template>
 							</el-table-column>

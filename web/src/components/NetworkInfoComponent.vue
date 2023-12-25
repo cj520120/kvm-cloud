@@ -22,8 +22,12 @@
 					<el-descriptions-item label="DNS">{{ show_network.dns }}</el-descriptions-item>
 					<el-descriptions-item label="搜索域">{{ show_network.domain }}</el-descriptions-item>
 					<el-descriptions-item label="桥接网卡">{{ show_network.bridge }}</el-descriptions-item>
+					<el-descriptions-item label="桥接方式">
+						<el-tag>{{ get_bridge_type(show_network) }}</el-tag>
+					</el-descriptions-item>
 					<el-descriptions-item label="网络类型">{{ get_network_type(show_network) }}</el-descriptions-item>
 					<el-descriptions-item label="VLAN ID" v-if="show_network.type === 1">{{ show_network.vlanId }}</el-descriptions-item>
+
 					<el-descriptions-item label="基础网络" v-if="show_network.type === 1">
 						<el-button type="text">{{ get_parent_network(show_network).name }}</el-button>
 					</el-descriptions-item>

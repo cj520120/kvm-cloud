@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
@@ -15,6 +16,7 @@ public abstract class AbstractNetworkOperate<T extends BaseOperateParam, V exten
 
         BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                 .bridge(basicNetworkEntity.getBridge())
+                .bridgeType(Constant.NetworkBridgeType.fromBridgeType(basicNetworkEntity.getBridgeType()))
                 .ip(host.getHostIp())
                 .geteway(basicNetworkEntity.getGateway())
                 .nic(host.getNic())

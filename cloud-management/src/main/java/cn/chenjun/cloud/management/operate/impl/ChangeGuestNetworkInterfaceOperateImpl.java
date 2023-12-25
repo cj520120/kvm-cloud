@@ -38,6 +38,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
                     .name(guest.getName())
                     .deviceId(guestNetwork.getDeviceId())
                     .bridgeName(network.getBridge())
+                    .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                     .build();
             if (param.isAttach()) {
                 this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_NIC, nic);

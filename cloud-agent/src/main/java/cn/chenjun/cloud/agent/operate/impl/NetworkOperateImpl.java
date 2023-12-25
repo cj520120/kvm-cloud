@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
@@ -11,7 +10,6 @@ import com.hubspot.jinjava.Jinjava;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.Network;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -27,19 +25,16 @@ import java.util.Map;
 public class NetworkOperateImpl implements NetworkOperate {
 
 
-    @Autowired
-    private ApplicationConfig applicationConfig;
-
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_BASIC)
     @Override
     public Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
-        log.info("创建基础网络:{} type={}", request, applicationConfig.getNetworkType());
+        log.info("创建基础网络:{} type={}", request, request.getBridgeType().bridgeName());
         List<String> networkNames = Arrays.asList(connect.listNetworks());
         if (!networkNames.contains(request.getBridge())) {
             Map<String, Object> map = new HashMap<>(3);
             map.put("name", request.getBridge());
             map.put("bridge", request.getBridge());
-            map.put("type", applicationConfig.getNetworkType());
+            map.put("type", request.getBridgeType().bridgeName());
             String xml = ResourceUtil.readUtf8Str("tpl/network.xml");
             Jinjava jinjava = new Jinjava();
             connect.networkCreateXML(jinjava.render(xml, map));

@@ -51,6 +51,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
             if (Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC, network.getType())) {
                 basicBridgeNetworkMap.put(network.getNetworkId(), BasicBridgeNetwork.builder()
                         .bridge(network.getBridge())
+                        .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                         .ip(host.getHostIp())
                         .geteway(network.getGateway())
                         .nic(host.getNic())

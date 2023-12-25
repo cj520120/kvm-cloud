@@ -64,7 +64,7 @@ public class NetworkService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId) {
+    public ResultUtil<NetworkModel> createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId,int bridgeType) {
 
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");
@@ -111,11 +111,16 @@ public class NetworkService extends AbstractService {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络不存在");
             }
             bridge = basicNetwork.getBridge();
+            if(!Objects.equals(basicNetwork.getBridgeType(), cn.chenjun.cloud.common.util.Constant.NetworkBridgeType.OPEN_SWITCH.bridgeType())){
+                throw new CodeException(ErrorCode.PARAM_ERROR, "vlan所属基础网络必须未OpenSwitch网络类型");
+            }
+            bridgeType=basicNetwork.getBridgeType();
         }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
                 .startIp(startIp)
                 .endIp(endIp)
+                .bridgeType(bridgeType)
                 .gateway(gateway)
                 .mask(mask)
                 .subnet(subnet)
