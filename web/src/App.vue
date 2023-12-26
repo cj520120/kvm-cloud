@@ -2,19 +2,15 @@
 	<div id="app">
 		<el-header height="60px" style="background-color: #34495e; padding: 0; color: white" v-if="!isFullScreen">
 			<el-container style="height: 60px">
-				<el-aside width="200px">
+				<div @click="go_route('/')" style="cursor: pointer; width: 200px; height: 100%">
 					<img src="./assets/logo.png" style="width: 32px; height: 32px; margin-left: 20px; margin-top: 18px; float: left" />
 					<div style="font-size: 18px; line-height: 50px; font-weight: bold; margin-left: 60px; margin-top: 8px">KVM Cloud</div>
-				</el-aside>
-				<el-container style="padding: 0; float: right; margin-top: 5px">
-					<el-header>
-						<el-menu style="float: right" mode="horizontal" @select="menu_select" background-color="transparent" text-color="#fff" active-text-color="#ffd04b">
-							<el-menu-item index="support">联系&amp;支持</el-menu-item>
-							<el-menu-item index="password">修改密码</el-menu-item>
-							<el-menu-item index="quit">退出</el-menu-item>
-						</el-menu>
-					</el-header>
-				</el-container>
+				</div>
+				<div style="padding: 0; float: right; margin-top: 0px; width: 100%; margin-right: 10px">
+					<el-link :underline="false" class="right_menu" @click="menu_select('quit')">退出</el-link>
+					<el-link :underline="false" class="right_menu" @click="menu_select('password')">修改密码</el-link>
+					<el-link :underline="false" class="right_menu" @click="menu_select('support')">联系&amp;支持</el-link>
+				</div>
 			</el-container>
 		</el-header>
 
@@ -120,6 +116,9 @@ export default {
 		this.isCollapse = localStorage.getItem('menu_is_collapse') === '0' ? false : true
 	},
 	methods: {
+		go_route(path) {
+			this.$router.push({ path: path })
+		},
 		shrinkMenu() {
 			this.isCollapse = !this.isCollapse
 			localStorage.setItem('menu_is_collapse', this.isCollapse ? '1' : '0')
@@ -192,4 +191,28 @@ export default {
 </script>
 
 <style>
+.wx {
+	width: 320px;
+	height: 320px;
+	background: url('@/assets/wx.png');
+	background-size: contain;
+}
+.zfb {
+	width: 320px;
+	height: 320px;
+	background: url('@/assets/zfb.png');
+	background-size: contain;
+}
+.right_menu {
+	float: right !important;
+	color: white !important;
+	line-height: 60px;
+	padding-left: 15px !important;
+	padding-right: 15px !important;
+	font-size: 14px !important;
+	font-weight: 400 !important;
+}
+.right_menu:hover {
+	background-color: rgb(42, 58, 78) !important;
+}
 </style>

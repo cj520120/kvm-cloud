@@ -35,6 +35,7 @@ export default {
 		return {
 			modify_guest_dialog_visiable: false,
 			groups: [],
+			schemes: [],
 			modify_guest: {
 				guestId: 0,
 				groupId: 0,

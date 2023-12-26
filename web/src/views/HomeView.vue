@@ -2,7 +2,7 @@
 	<div class="dashboard-container">
 		<el-row class="panel-group">
 			<div class="card-panel">
-				<div class="card-panel-icon-wrapper icon-message">
+				<div class="card-panel-icon-wrapper icon-message" @click="go_route('Network')">
 					<i class="el-icon-platform-eleme" style="font-size: 48px" />
 				</div>
 				<div class="card-panel-description">
@@ -11,7 +11,7 @@
 				</div>
 			</div>
 			<div class="card-panel">
-				<div class="card-panel-icon-wrapper icon-message">
+				<div class="card-panel-icon-wrapper icon-message" @click="go_route('Storage')">
 					<i class="el-icon-coin" style="font-size: 48px" />
 				</div>
 				<div class="card-panel-description">
@@ -21,7 +21,7 @@
 			</div>
 
 			<div class="card-panel">
-				<div class="card-panel-icon-wrapper icon-message">
+				<div class="card-panel-icon-wrapper icon-message" @click="go_route('Host')">
 					<i class="el-icon-monitor" style="font-size: 48px" class-name="card-panel-icon" />
 				</div>
 				<div class="card-panel-description">
@@ -30,7 +30,7 @@
 				</div>
 			</div>
 			<div class="card-panel">
-				<div class="card-panel-icon-wrapper icon-message">
+				<div class="card-panel-icon-wrapper icon-message" @click="go_route('Guest')">
 					<i class="el-icon-s-platform" style="font-size: 48px" class-name="card-panel-icon" />
 				</div>
 				<div class="card-panel-description">
@@ -39,7 +39,7 @@
 				</div>
 			</div>
 			<div class="card-panel">
-				<div class="card-panel-icon-wrapper icon-message">
+				<div class="card-panel-icon-wrapper icon-message" @click="go_route('Volume')">
 					<i class="el-icon-bank-card" style="font-size: 48px" class-name="card-panel-icon" />
 				</div>
 				<div class="card-panel-description">
@@ -141,6 +141,9 @@ export default {
 		this.init_data()
 	},
 	methods: {
+		go_route(path) {
+			this.$router.push({ path: path })
+		},
 		init_data() {
 			getHostList().then((res) => {
 				if (res.code === 0) {

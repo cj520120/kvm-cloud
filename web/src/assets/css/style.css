@@ -92,7 +92,6 @@ html,
     float: left;
     width: calc(calc(100% / 5) - 10px) !important;
     height: 108px;
-    cursor: pointer;
     font-size: 12px;
     position: relative;
     overflow: hidden;
@@ -101,23 +100,18 @@ html,
     box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.05);
 
-    &:hover {
-      .icon-message {
-        background-color: #36a3f7;
-        color: white;
-      }
-    }
-
-    .icon-message {
-      color: #36a3f7;
-    }
-
     .card-panel-icon-wrapper {
       float: left;
       margin: 14px 0 0 14px;
       padding: 16px;
       transition: all 0.38s ease-out;
       border-radius: 6px;
+      color: #36a3f7;
+      cursor: pointer;
+    }
+    .card-panel-icon-wrapper:hover {
+      background-color: #36a3f7;
+      color: white;
     }
 
     .card-panel-icon {
