@@ -26,7 +26,7 @@ setenforce 0
 vi /etc/selinux/config
 SELINUX=permissive
 ```
-### SELinux配置 
+### Sysctl配置 
 ```sh
 vim /etc/sysctl.conf 
 net.ipv4.ip_forward=1               # 设置转发并保存
