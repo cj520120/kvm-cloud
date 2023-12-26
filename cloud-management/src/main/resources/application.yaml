@@ -5,7 +5,7 @@ app:
   systemComponentMemory: 524288
   systemComponentCpuSpeed: 0
   destroyDelayMinute: 3
-  manager-uri: http://localhost:8080/
+  manager-uri: http://192.168.2.193:8080/
   over-cpu: 4.0
   over-memory: 2.0
   #pip3加速源，国内用户可配置，海外无需配置

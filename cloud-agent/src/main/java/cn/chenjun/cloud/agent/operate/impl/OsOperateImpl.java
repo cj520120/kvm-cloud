@@ -263,6 +263,17 @@ public class OsOperateImpl implements OsOperate {
             }
             domain.destroy();
         }
+        OsCpu osCpu = request.getOsCpu();
+        NodeInfo nodeInfo = connect.nodeInfo();
+        if (osCpu.getCore() <= 0) {
+            osCpu.setCore(nodeInfo.cores);
+        }
+        if (osCpu.getSocket() <= 0) {
+            osCpu.setCore(nodeInfo.sockets);
+        }
+        if (osCpu.getThread() <= 0) {
+            osCpu.setCore(nodeInfo.threads);
+        }
         String xml = DomainXmlUtil.buildDomainXml(request);
         log.info("create vm={}", xml);
         domain = connect.domainCreateXML(xml, 0);
