@@ -22,6 +22,7 @@ public class OsNic {
     private int deviceId;
     private String mac;
     private String bridgeName;
+    private String poolId;
     private Constant.NetworkBridgeType bridgeType;
     private int vlanId;
 }

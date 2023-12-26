@@ -18,6 +18,7 @@ import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,7 @@ public class NetworkService extends AbstractService {
         }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
+                .poolId(DigestUtil.md5Hex(UUID.randomUUID().toString()))
                 .startIp(startIp)
                 .endIp(endIp)
                 .bridgeType(bridgeType)

@@ -51,6 +51,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<Destro
         switch (network.getType()) {
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
+                        .poolId(network.getPoolId())
                         .bridge(network.getBridge())
                         .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                         .ip(host.getHostIp())

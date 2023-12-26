@@ -21,6 +21,7 @@ import java.util.Date;
 @TableName("tbl_network_info")
 public class NetworkEntity {
     public static final String NETWORK_ID = "network_id";
+    public static final String NETWORK_POOL_ID = "network_pool_id";
     public static final String NETWORK_NAME = "network_name";
     public static final String NETWORK_START_IP = "network_start_ip";
     public static final String NETWORK_STOP_IP = "network_stop_ip";
@@ -42,6 +43,8 @@ public class NetworkEntity {
     @TableId(type = IdType.AUTO)
     @TableField(NETWORK_ID)
     private Integer networkId;
+    @TableField(NETWORK_POOL_ID)
+    private String poolId;
     @TableField(NETWORK_NAME)
     private String name;
     @TableField(NETWORK_START_IP)

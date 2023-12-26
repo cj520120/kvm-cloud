@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class VlanNetwork {
-    private int id;
+    private String poolId;
     /**
      * vlan id 1-4096
      */

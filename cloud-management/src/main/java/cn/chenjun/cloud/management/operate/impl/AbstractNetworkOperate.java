@@ -15,6 +15,7 @@ public abstract class AbstractNetworkOperate<T extends BaseOperateParam, V exten
     protected VlanNetwork buildVlanRequest(NetworkEntity basicNetworkEntity, HostEntity host, NetworkEntity network) {
 
         BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
+                .poolId(basicNetworkEntity.getPoolId())
                 .bridge(basicNetworkEntity.getBridge())
                 .bridgeType(Constant.NetworkBridgeType.fromBridgeType(basicNetworkEntity.getBridgeType()))
                 .ip(host.getHostIp())
@@ -22,6 +23,7 @@ public abstract class AbstractNetworkOperate<T extends BaseOperateParam, V exten
                 .nic(host.getNic())
                 .netmask(basicNetworkEntity.getMask()).build();
         return VlanNetwork.builder()
+                .poolId(network.getPoolId())
                 .vlanId(network.getVlanId())
                 .netmask(network.getMask())
                 .basic(basicBridgeNetwork)

@@ -50,6 +50,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         for (NetworkEntity network : networkList) {
             if (Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC, network.getType())) {
                 basicBridgeNetworkMap.put(network.getNetworkId(), BasicBridgeNetwork.builder()
+                        .poolId(network.getPoolId())
                         .bridge(network.getBridge())
                         .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                         .ip(host.getHostIp())
@@ -65,6 +66,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
                 BasicBridgeNetwork basicBridgeNetwork = basicBridgeNetworkMap.get(network.getBasicNetworkId());
                 if (basicBridgeNetwork != null) {
                     vlanNetworkList.add(VlanNetwork.builder()
+                            .poolId(network.getPoolId())
                             .vlanId(network.getVlanId())
                             .netmask(network.getMask())
                             .basic(basicBridgeNetwork)

@@ -158,6 +158,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 }
             }
             OsNic nic = OsNic.builder()
+                    .poolId(network.getPoolId())
                     .mac(entity.getMac())
                     .driveType(entity.getDriveType())
                     .name(guest.getName())

@@ -52,6 +52,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
         switch (network.getType()) {
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
+                        .poolId(network.getPoolId())
                         .bridge(network.getBridge())
                         .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                         .ip(host.getHostIp())
@@ -67,12 +68,14 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
                 }
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
+                        .poolId(basicNetworkEntity.getPoolId())
                         .bridge(basicNetworkEntity.getBridge())
                         .ip(host.getHostIp())
                         .geteway(basicNetworkEntity.getGateway())
                         .nic(host.getNic())
                         .netmask(basicNetworkEntity.getMask()).build();
                 VlanNetwork vlan = VlanNetwork.builder()
+                        .poolId(network.getPoolId())
                         .vlanId(network.getVlanId())
                         .netmask(network.getMask())
                         .basic(basicBridgeNetwork)

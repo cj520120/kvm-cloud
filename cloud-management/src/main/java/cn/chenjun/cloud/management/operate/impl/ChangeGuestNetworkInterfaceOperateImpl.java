@@ -33,6 +33,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
             HostEntity host = hostMapper.selectById(guest.getHostId());
             NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
             OsNic nic = OsNic.builder()
+                    .poolId(network.getPoolId())
                     .mac(guestNetwork.getMac())
                     .driveType(guestNetwork.getDriveType())
                     .name(guest.getName())

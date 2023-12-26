@@ -91,20 +91,12 @@
 
         <!--网卡-->
         {% for nic in networks %}
-        <interface type="bridge">
+        <interface type="network">
             <mac address="{{nic.address}}"/>
             <model type="{{nic.type}}"/>
-            <source bridge="{{nic.bridge}}"/>
+            <source network='{{nic.network}}'/>
             <address type="pci" domain="0x0000" bus="0x00" slot="{{nic.slot}}" function="0x0"/>
             <link state="up"/>
-            {% if nic.ovs %}
-            <virtualport type="openvswitch"/>
-            {% if nic.ovs.vlan > 0 %}
-            <vlan trunk="no">
-                <tag id="{{nic.ovs.vlan}}"/>
-            </vlan>
-            {% endif %}
-            {% endif %}
         </interface>
         {% endfor %}
 

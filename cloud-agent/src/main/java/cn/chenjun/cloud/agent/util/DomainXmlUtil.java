@@ -7,7 +7,10 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenjun
@@ -152,19 +155,17 @@ public class DomainXmlUtil {
         map.put("type", nic.getDriveType());
         map.put("bridge", nic.getBridgeName());
         map.put("slot", String.format("0x%02x", deviceId));
-        if (Objects.equals(nic.getBridgeType(), Constant.NetworkBridgeType.OPEN_SWITCH)) {
-            Map<String, Object> ovs = new HashMap<>(1);
-            ovs.put("vlan", nic.getVlanId());
-            map.put("ovs", ovs);
-            map.put("network", nic.getBridgeName());
-        }else{
-            map.put("network", nic.getBridgeName() + "-vlan-" + nic.getVlanId());
-        }
-        if (nic.getVlanId() > 0) {
-            map.put("portgroup", "no-vlan");
-        } else {
-            map.put("portgroup", "vlan-" + nic.getVlanId());
-        }
+        map.put("network", nic.getPoolId());
+//        if (Objects.equals(nic.getBridgeType(), Constant.NetworkBridgeType.OPEN_SWITCH)) {
+//            Map<String, Object> ovs = new HashMap<>(1);
+//            ovs.put("vlan", nic.getVlanId());
+//            map.put("ovs", ovs);
+//        }
+//        if (nic.getVlanId() > 0) {
+//            map.put("portgroup", "no-vlan");
+//        } else {
+//            map.put("portgroup", "vlan-" + nic.getVlanId());
+//        }
 
         return map;
     }

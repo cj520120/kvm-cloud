@@ -270,6 +270,7 @@ DROP TABLE IF EXISTS `tbl_network_info`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_network_info` (
   `network_id` int NOT NULL AUTO_INCREMENT,
+  `network_pool_id` varchar(36) NOT NULL COMMENT 'MD5(UUID())',
   `network_name` varchar(45) NOT NULL,
   `network_start_ip` varchar(20) NOT NULL,
   `network_stop_ip` varchar(20) NOT NULL,
@@ -287,9 +288,9 @@ CREATE TABLE `tbl_network_info` (
   `network_status` int NOT NULL,
   `network_domain` varchar(64) NOT NULL DEFAULT 'cj.kvm.internal',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`network_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  PRIMARY KEY (`network_id`),
+  UNIQUE KEY `IX_NETWORK_POOL_ID` (`network_pool_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Table structure for table `tbl_scheme_info`
@@ -490,4 +491,6 @@ insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('18','4核8G','4','8388608','0','2','1','2','2021-05-18 03:23:26');
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('19','4核16G','4','16777216','0','2','1','2','2021-05-18 03:23:26');
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('21','8核16G','8','16777216','0','0','0','0','2021-05-18 03:23:26');
+
+update tbl_network_info set network_pool_id=md5(uuid()) where network_pool_id='';
 

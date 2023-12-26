@@ -31,6 +31,7 @@
 					<el-descriptions-item label="基础网络" v-if="show_network.type === 1">
 						<el-button type="text">{{ get_parent_network(show_network).name }}</el-button>
 					</el-descriptions-item>
+					<el-descriptions-item label="Pool ID">{{ show_network.poolId }}</el-descriptions-item>
 					<el-descriptions-item label="网络状态">
 						<el-tag :type="show_network.status === 2 ? 'success' : 'danger'">{{ get_network_status(show_network) }}</el-tag>
 					</el-descriptions-item>
