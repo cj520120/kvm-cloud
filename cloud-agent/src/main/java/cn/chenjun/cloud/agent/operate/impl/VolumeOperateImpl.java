@@ -82,7 +82,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                                 .allocation(storageVolInfo.allocation)
                                 .build();
                         this.init(storageVol, volume);
-                        map.put(storageVol.getPath(), volume);
+                        map.put(name, volume);
                     }
                 }
             }
