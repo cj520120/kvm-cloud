@@ -18,18 +18,12 @@ public abstract class AbstractNetworkOperate<T extends BaseOperateParam, V exten
                 .poolId(basicNetworkEntity.getPoolId())
                 .bridge(basicNetworkEntity.getBridge())
                 .bridgeType(Constant.NetworkBridgeType.fromBridgeType(basicNetworkEntity.getBridgeType()))
-                .ip(host.getHostIp())
-                .geteway(basicNetworkEntity.getGateway())
-                .nic(host.getNic())
-                .netmask(basicNetworkEntity.getMask()).build();
+                .build();
         return VlanNetwork.builder()
                 .poolId(network.getPoolId())
                 .vlanId(network.getVlanId())
-                .netmask(network.getMask())
                 .basic(basicBridgeNetwork)
-                .ip(null)
                 .bridge(network.getBridge())
-                .geteway(network.getGateway())
                 .build();
     }
 }

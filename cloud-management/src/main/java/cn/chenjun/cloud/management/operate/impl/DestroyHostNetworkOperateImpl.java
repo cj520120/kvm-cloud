@@ -54,10 +54,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<Destro
                         .poolId(network.getPoolId())
                         .bridge(network.getBridge())
                         .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
-                        .ip(host.getHostIp())
-                        .geteway(network.getGateway())
-                        .nic(host.getNic())
-                        .netmask(network.getMask()).build();
+                        .build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_BASIC, basicBridgeNetwork);
             }
             break;

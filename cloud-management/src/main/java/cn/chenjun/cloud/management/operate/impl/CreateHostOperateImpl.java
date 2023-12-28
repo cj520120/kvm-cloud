@@ -53,10 +53,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
                         .poolId(network.getPoolId())
                         .bridge(network.getBridge())
                         .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
-                        .ip(host.getHostIp())
-                        .geteway(network.getGateway())
-                        .nic(host.getNic())
-                        .netmask(network.getMask()).build());
+                        .build());
             }
         }
 
@@ -68,11 +65,8 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
                     vlanNetworkList.add(VlanNetwork.builder()
                             .poolId(network.getPoolId())
                             .vlanId(network.getVlanId())
-                            .netmask(network.getMask())
                             .basic(basicBridgeNetwork)
-                            .ip(null)
                             .bridge(network.getBridge())
-                            .geteway(network.getGateway())
                             .build());
                 }
             }

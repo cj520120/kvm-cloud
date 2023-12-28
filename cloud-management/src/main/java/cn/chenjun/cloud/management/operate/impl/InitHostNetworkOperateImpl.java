@@ -55,10 +55,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                         .poolId(network.getPoolId())
                         .bridge(network.getBridge())
                         .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
-                        .ip(host.getHostIp())
-                        .geteway(network.getGateway())
-                        .nic(host.getNic())
-                        .netmask(network.getMask()).build();
+                        .build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
             }
             break;
@@ -70,18 +67,13 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                         .poolId(basicNetworkEntity.getPoolId())
                         .bridge(basicNetworkEntity.getBridge())
-                        .ip(host.getHostIp())
-                        .geteway(basicNetworkEntity.getGateway())
-                        .nic(host.getNic())
-                        .netmask(basicNetworkEntity.getMask()).build();
+                        .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
+                        .build();
                 VlanNetwork vlan = VlanNetwork.builder()
                         .poolId(network.getPoolId())
                         .vlanId(network.getVlanId())
-                        .netmask(network.getMask())
                         .basic(basicBridgeNetwork)
-                        .ip(null)
-                        .bridge(network.getBridge())
-                        .geteway(network.getGateway())
+                        .bridge(basicNetworkEntity.getBridge())
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_VLAN, vlan);
             }

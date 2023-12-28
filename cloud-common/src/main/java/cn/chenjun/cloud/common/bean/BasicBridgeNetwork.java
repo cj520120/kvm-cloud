@@ -25,21 +25,5 @@ public class BasicBridgeNetwork {
      * 桥接方式
      */
     private  Constant.NetworkBridgeType bridgeType;
-    /**
-     * 网卡名称
-     */
-    private String nic;
-    /**
-     * IP
-     */
-    private String ip;
-    /**
-     * 子网
-     */
-    private String netmask;
-    /**
-     * 网关
-     */
-    private String geteway;
 
 }

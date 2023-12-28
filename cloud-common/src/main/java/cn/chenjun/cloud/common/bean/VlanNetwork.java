@@ -24,18 +24,6 @@ public class VlanNetwork {
      * vlan 桥接网卡名称
      */
     private String bridge;
-    /**
-     * IP
-     */
-    private String ip;
-    /**
-     * 子网
-     */
-    private String netmask;
-    /**
-     * 网关
-     */
-    private String geteway;
 
     /**
      * 基础网络

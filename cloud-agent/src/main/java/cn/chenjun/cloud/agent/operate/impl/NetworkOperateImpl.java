@@ -132,7 +132,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     public Void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
         log.info("销毁基础网络:{}", bridge);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
-        if (!networkNames.contains(bridge.getPoolId())) {
+        if (networkNames.contains(bridge.getPoolId())) {
             try {
                 Network network = connect.networkLookupByName(bridge.getPoolId());
                 network.destroy();
@@ -150,7 +150,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     public Void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
         log.info("销毁Vlan网络:{}", vlan);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
-        if (!networkNames.contains(vlan.getPoolId())) {
+        if (networkNames.contains(vlan.getPoolId())) {
             try {
                 Network network = connect.networkLookupByName(vlan.getPoolId());
                 network.destroy();
