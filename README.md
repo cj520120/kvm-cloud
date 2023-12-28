@@ -151,7 +151,7 @@ systemctl restart libvirtd
 ```
 #### 项目编译
 ```sh
-mvn clean package
+mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
 ```
 ### 完成配置
 1、导入mysql表及相关数据
