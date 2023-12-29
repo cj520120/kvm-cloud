@@ -101,10 +101,12 @@ export default {
     <style scoped>
 .main {
 	margin: 0px;
+	padding: 0px;
 	background-color: rgb(40, 40, 40);
 	min-height: 100vh;
+	min-width: 100vw;
 	height: fit-content;
-	width: 100vw;
+	width: fit-content;
 	display: flex;
 	flex-direction: column;
 }
