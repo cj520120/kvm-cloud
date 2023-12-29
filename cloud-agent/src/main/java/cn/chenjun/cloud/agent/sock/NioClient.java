@@ -2,7 +2,6 @@ package cn.chenjun.cloud.agent.sock;
 
 import lombok.Getter;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -14,7 +13,7 @@ public class NioClient {
     @Getter
     private final NioCallback callback;
     private final SocketChannel socketChannel;
-    private boolean isClosed=false;
+    private boolean isClosed = false;
 
     public NioClient(SocketChannel socketChannel, NioCallback callback) {
         this.callback = callback;
@@ -35,8 +34,8 @@ public class NioClient {
     }
 
     public void close() {
-        if(!isClosed) {
-            this.isClosed=true;
+        if (!isClosed) {
+            this.isClosed = true;
             try {
                 this.socketChannel.shutdownInput();
                 this.socketChannel.shutdownOutput();

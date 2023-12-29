@@ -26,7 +26,7 @@ public class NioSelector {
     private final ScheduledThreadPoolExecutor poolExecutor;
     private final Selector selector;
     private final Map<SocketChannel, NioClient> channelMap = new ConcurrentHashMap<>();
-    private final  ByteBuffer socketReceiveBuffer = ByteBuffer.allocate(10240);
+    private final ByteBuffer socketReceiveBuffer = ByteBuffer.allocate(10240);
 
     private boolean isRunning = true;
 

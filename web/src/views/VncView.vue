@@ -2,12 +2,18 @@
 	<div class="main">
 		<el-container>
 			<el-header class="tool_tip" height="40px" align="middle" justify="center">
-				<div style="text-align: center; height: 40px; align: center; float: left">
-					<img src="../assets/logo.png" style="margin-top: 10px; width: 16px; height: 16px" />
+				<div class="logo">
+					<div style="text-align: center; height: 40px; align: center; float: left">
+						<img src="../assets/logo.png" style="margin-top: 10px; width: 16px; height: 16px" />
+					</div>
+					<div style="float: left; margin-left: 5px; font: bold 14px Helvetica; color: grary; padding-top: 11px; width: 100px">KVM Cloud</div>
 				</div>
-				<div style="float: left; margin-left: 5px; font: bold 14px Helvetica; color: grary; padding-top: 11px">KVM Cloud</div>
-				<div class="tooltip_status">{{ status }}</div>
-				<div class="btn_ctr_alt_del" @click="on_send_ctrl_alt_del">发送 Ctrl+Alt+Del</div>
+				<div class="status">
+					{{ status }}
+				</div>
+				<div class="controller">
+					<div @click="on_send_ctrl_alt_del" class="btn">发送 Ctrl+Alt+Del</div>
+				</div>
 			</el-header>
 			<el-main><div ref="vncContainer"></div></el-main>
 			<el-footer class="footer" height="40px">
@@ -43,7 +49,7 @@ export default {
 			protocol = 'ws'
 		}
 		this.status = `正在连接[${this.description}]...`
-		this.url = process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}/api/vnc/${this.id}` : `${protocol}://localhost:8080/api/vnc/${this.id}`
+		this.url = process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}/api/vnc/${this.id}` : `${protocol}://192.168.2.193:8080/api/vnc/${this.id}`
 		this.connect()
 	},
 	beforeDestroy() {
@@ -94,9 +100,10 @@ export default {
     
     <style scoped>
 .main {
-	margin: 20, 20px;
+	margin: 0px;
 	background-color: rgb(40, 40, 40);
-	height: 100vh;
+	min-height: 100vh;
+	height: fit-content;
 	width: 100vw;
 	display: flex;
 	flex-direction: column;
@@ -106,6 +113,22 @@ export default {
 	color: white;
 	font: bold 12px Helvetica;
 	border-bottom: 1px outset;
+	padding: 0px;
+	border-bottom: 1px outset;
+}
+.tool_tip .logo {
+	padding: 0px;
+	padding-left: 20px;
+	margin-top: 0px;
+	width: 200px;
+	height: 100%;
+	float: left;
+}
+.tool_tip .status {
+	width: calc(100% - 400px) !important;
+	height: 100%;
+	float: left;
+	line-height: 40px;
 }
 footer {
 	color: white;
@@ -115,15 +138,19 @@ footer {
 .tooltip_status {
 	padding-top: 12px;
 }
-.btn_ctr_alt_del {
-	position: fixed;
-	top: 8px;
-	right: 5px;
-	border: 1px outset;
-	cursor: pointer;
-	padding: 5px;
+.tool_tip .controller {
+	widows: 200px;
+	height: 40px;
 }
-
+.tool_tip .controller .btn {
+	float: right;
+	cursor: pointer;
+	color: white;
+	margin: 10px;
+	padding: 5px;
+	padding-left: 5px;
+	border: 1px outset;
+}
 #screen {
 	flex: 1; /* fill remaining space */
 	overflow: hidden;

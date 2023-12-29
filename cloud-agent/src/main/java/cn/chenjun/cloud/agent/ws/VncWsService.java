@@ -110,6 +110,7 @@ public class VncWsService implements NioCallback {
         }
         return values.get(0);
     }
+
     @OnClose
     public void onVncClose() {
         this.close();
@@ -118,7 +119,7 @@ public class VncWsService implements NioCallback {
     @SneakyThrows
     @OnMessage
     public void onVncMessage(byte[] messages, Session session) {
-            this.vncClient.send(messages);
+        this.vncClient.send(messages);
     }
 
     @OnError

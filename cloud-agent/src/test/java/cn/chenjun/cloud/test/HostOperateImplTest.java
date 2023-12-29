@@ -4,9 +4,11 @@ import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.impl.HostOperateImpl;
 import cn.chenjun.cloud.common.bean.HostInfo;
+import cn.chenjun.cloud.common.bean.InitHostRequest;
 import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 
+@Slf4j
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class HostOperateImplTest extends AbstractTest {
     @InjectMocks
@@ -48,6 +51,16 @@ public class HostOperateImplTest extends AbstractTest {
     public void test_01_getHostInfo() {
         HostInfo hostInfo = this.hostOperate.getHostInfo(connect, NoneRequest.builder().build());
         Assert.assertNotNull(hostInfo);
+    }
+    @Test
+    @SneakyThrows
+    public void test_02_initHost(){
+        InitHostRequest request= InitHostRequest.builder().basicBridgeNetworkList(new ArrayList<>(0))
+                .vlanNetworkList(new ArrayList<>())
+                .storageList(new ArrayList<>())
+                .build();
+        HostInfo hostInfo =  this.hostOperate.initHost(connect,request);
+        log.info("host={}",hostInfo);
     }
 
 }

@@ -6,9 +6,15 @@ import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
-import org.dom4j.*;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
 import org.libvirt.NodeInfo;
@@ -17,8 +23,8 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author chenjun
@@ -48,71 +54,84 @@ public class HostOperateImpl implements HostOperate {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    private static String getEmulator(String xml, String hostArch) throws SAXException, DocumentException {
-        String emulator = null;
+    private static String getVendor(String xml) throws SAXException, DocumentException {
+
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
             reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
-            String path = "/capabilities/guest";
-            List<Element> nodes = doc.selectNodes(path);
-            for (Element node : nodes) {
-                Object osType = node.selectObject("os_type");
-                Object arch = node.selectObject("arch");
-                boolean isHvm = false;
-                boolean isArch = false;
-                if (osType instanceof Element) {
-                    isHvm = "hvm".equals(((Element) osType).getData());
-                }
-                if (arch instanceof Element) {
-                    String archValue = ((Element) node.selectObject("arch")).attribute("name").getText();
-                    isArch = Objects.equals(hostArch, archValue);
-                }
-                if (isHvm && isArch) {
-
-                    Object emulatorNode = node.selectObject("arch/emulator");
-                    if (emulatorNode instanceof Element) {
-                        emulator = ((Element) emulatorNode).getTextTrim();
-                    }
-                    List<Element> domainNodes = node.selectNodes("arch/domain");
-                    for (Element domainNode : domainNodes) {
-                        Attribute attribute = domainNode.attribute("type");
-                        if (attribute != null && Objects.equals(attribute.getValue(), "kvm")) {
-                            emulatorNode = domainNode.selectObject("emulator");
-                            if (emulatorNode instanceof Element) {
-                                emulator = ((Element) emulatorNode).getTextTrim();
-                            }
-                        }
-                    }
-                }
-
-            }
+            return getNodeText(doc, "/capabilities/host/cpu/vendor", "Intel");
         }
-        return emulator;
     }
 
-    @DispatchBind(command = Constant.Command.HOST_INFO)
-    @Override
-    public HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception {
-        OsInfo osInfo = SystemUtil.getOsInfo();
-        String xml = connect.getCapabilities();
-        String arch = getArch(xml);
-        String emulator = getEmulator(xml, arch);
+
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    private HostInfo getHostInfo(Connect connect) {
         NodeInfo nodeInfo = connect.nodeInfo();
-        return HostInfo.builder().hostName(connect.getHostName())
+        OsInfo osInfo = SystemUtil.getOsInfo();
+        HostInfo hostInfo = HostInfo.builder().hostName(connect.getHostName())
+                .name(osInfo.getName())
+                .osVersion(osInfo.getVersion())
+                .arch(osInfo.getArch())
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(nodeInfo.memory)
                 .cpu(nodeInfo.cpus)
                 .hypervisor(connect.getType())
-                .arch(arch)
-                .name(osInfo.getName())
                 .cores(nodeInfo.cores)
                 .threads(nodeInfo.threads)
                 .sockets(nodeInfo.sockets)
-                .emulator(emulator)
                 .build();
+        try (StringReader sr = new StringReader(connect.getCapabilities())) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+            Node archNode = doc.selectSingleNode("/capabilities/host/cpu/arch");
+            if (archNode != null) {
+                hostInfo.setArch(archNode.getText());
+            }
+            Node vendorNode = doc.selectSingleNode("/capabilities/host/cpu/vendor");
+            if (vendorNode != null) {
+                hostInfo.setVendor(vendorNode.getText());
+            }
+            Node topologyNode = doc.selectSingleNode("/capabilities/host/cpu/topology");
+            if (topologyNode instanceof Element) {
+                hostInfo.setSockets(NumberUtil.parseInt(((Element) topologyNode).attributeValue("sockets")));
+                hostInfo.setCores(NumberUtil.parseInt(((Element) topologyNode).attributeValue("cores")));
+                hostInfo.setThreads(NumberUtil.parseInt(((Element) topologyNode).attributeValue("threads")));
+            }
+            List<Element> guestNodes = Collections.unmodifiableList(doc.selectNodes("/capabilities/guest"));
+            for (Element guestNode : guestNodes) {
+                String osType = guestNode.selectSingleNode("os_type").getText();
+                String arch = ((Element) guestNode.selectSingleNode("arch")).attributeValue("name");
+                if (StringUtils.equalsIgnoreCase(osType, "hvm") && StringUtils.equalsIgnoreCase(arch, hostInfo.getArch())) {
+                    Node emulatorNode = guestNode.selectSingleNode("arch/emulator");
+                    if (emulatorNode != null) {
+                        hostInfo.setEmulator(emulatorNode.getText());
+                    }
+                    List<Element> guestDomainNodes = guestNode.selectNodes("arch/domain");
+                    for (Element guestDomainNode : guestDomainNodes) {
+                        emulatorNode = guestDomainNode.selectSingleNode("emulator");
+                        if (emulatorNode != null) {
+                            hostInfo.setEmulator(emulatorNode.getText());
+                            break;
+                        }
+                    }
+                }
+                if (!StringUtils.isEmpty(hostInfo.getEmulator())) {
+                    break;
+                }
+            }
+        }
+        return hostInfo;
+    }
+
+    @DispatchBind(command = Constant.Command.HOST_INFO)
+    @Override
+    public HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception {
+
+        return getHostInfo(connect);
     }
 
     @DispatchBind(command = Constant.Command.HOST_INIT)
