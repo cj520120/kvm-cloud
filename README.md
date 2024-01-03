@@ -130,10 +130,18 @@ group = "root"
  
 1)、修改/etc/sysconfig/libvirtd 配置
 ```sh
-LIBVIRTD_ARGS="--listen"
-```
-3)、重启libvirtd
-```sh
+vi /etc/libvirt/libvirtd.conf
+listen_tls = 0
+listen_tcp = 1
+unix_sock_group = "root"
+unix_sock_rw_perms = "0777"
+auth_unix_ro = "none"
+auth_unix_rw = "none"
+tcp_port = "16509"
+listen_addr = "0.0.0.0"
+auth_tcp = "none"
+vi /etc/sysconfig/libvirtd
+    LIBVIRTD_ARGS="--listen"
 systemctl restart libvirtd 
 ```
 #### 项目编译

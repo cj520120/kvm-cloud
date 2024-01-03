@@ -4,7 +4,6 @@
     <description>{{description}}</description>
     <forward mode='bridge'/>
     <bridge name='{{bridge}}'/>
-    <port isolated='yes'/>
     {% if type == 'OpenSwitch' %}
     <virtualport type='openvswitch'/>
     {% endif %}
