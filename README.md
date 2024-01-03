@@ -26,7 +26,7 @@ setenforce 0
 vi /etc/selinux/config
 SELINUX=permissive
 ```
-### Sysctl配置 
+### sysctl配置 
 ```sh
 vim /etc/sysctl.conf 
 net.ipv4.ip_forward=1               # 设置转发并保存
@@ -58,29 +58,19 @@ mkdir -p /data/nfs
 #### 4、编辑配置
 ```sh
 vi /etc/exports
-/data/nfs *(rw,async,no_root_squash)
+/data/nfs *(rw,sync,no_root_squash)
 ```
 #### 5、重新加载exportfs文件
 ```sh
   exportfs -a
 ```
-#### 6、编辑nfs配置
-```sh
-vi /etc/sysconfig/nfs
-    LOCKD_TCPPORT=32803
-    LOCKD_UDPPORT=32769
-    MOUNTD_PORT=892
-    RQUOTAD_PORT=875
-    STATD_PORT=662
-    STATD_OUTGOING_PORT=2020
-```
-#### 7、重新服务
+#### 6、重新服务
 ```sh
 systemctl restart rpcbind
 systemctl restart nfs-server
 ```
 
-#### 8、测试挂载是否正常
+#### 7、测试挂载是否正常
 ```sh
 mount -t nfs 127.0.0.1:/data/nfs /mnt
 df -h        ###查看有了代表成功
@@ -102,51 +92,48 @@ yum install java-1.8.0-openjdk* -y
 #### 3、配置KVM 主机网桥，增加一个网桥
 这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期配置的虚拟机无法正常被访问到！
 确认网卡名无误后配置网桥：
-```sh
-vi /etc/sysconfig/network-scripts/ifcfg-br0
-    DEVICE=br0
-    TYPE=Bridge
-    ONBOOT=yes
-    BOOTPROTO=static
-    IPADDR=192.168.2.130
-    NATMASK=255.255.255.0
-    PREFIX=24
-    GATEWAY=192.168.2.1
-    DNS1=8.8.4.4
-    DNS2=8.8.8.8
 
-# 务必使用 ip addr 命令查看你的实际网卡名，他很可能不是eth0
-# 如需ovs配置，请参考[OVS 网卡设置参考.txt](scripts%2FOVS%20%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E5%8F%82%E8%80%83.txt)
-# 下面这个编辑命令注意改成 ifcfg-实际网卡名
-vi /etc/sysconfig/network-scripts/ifcfg-eth0
-# 下面这个DEVICE注意改成 实际网卡名
-    BOOTPROTO=none
-    NAME=eth0
-    DEVICE=eth0
-    ONBOOT=yes
-    NM_CONTRLLED=no
-    BRIDGE=br0
+1)、创建桥接网卡文件/etc/sysconfig/network-scripts/ifcfg-br0
+```sh
+DEVICE=br0
+TYPE=Bridge
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=192.168.2.130
+NATMASK=255.255.255.0
+PREFIX=24
+GATEWAY=192.168.2.1
+DNS1=8.8.4.4
+DNS2=8.8.8.8 
 ```
+2)、修改默认网卡配置
 
-#### 4、VNC 配置  
+ **下面这个编辑 注意改成 ifcfg-实际网卡名,例如eth0，对应文件为:/etc/sysconfig/network-scripts/ifcfg-eth0**
+```sh 
+BOOTPROTO=none
+NAME=eth0
+DEVICE=eth0
+ONBOOT=yes
+NM_CONTRLLED=no
+BRIDGE=br0
+```
+3)、如需ovs配置，请参考[OVS 网卡设置参考.txt](scripts%2FOVS%20%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E5%8F%82%E8%80%83.txt)
+
+#### 4、VNC配置
+修改 /etc/libvirt/qemu.conf
 ```sh
-vi /etc/libvirt/qemu.conf
-    vnc_listen="0.0.0.0"
+vnc_listen="0.0.0.0"
+user = "root"
+group = "root"
 ```
 #### 5、Libvirtd配置
+ 
+1)、修改/etc/sysconfig/libvirtd 配置
 ```sh
-vi /etc/libvirt/libvirtd.conf
-    listen_tls = 0
-    listen_tcp = 1
-    unix_sock_group = "root"
-    unix_sock_rw_perms = "0777"
-    auth_unix_ro = "none"
-    auth_unix_rw = "none"
-    tcp_port = "16509"
-    listen_addr = "0.0.0.0"
-    auth_tcp = "none"
-vi /etc/sysconfig/libvirtd
-    LIBVIRTD_ARGS="--listen"
+LIBVIRTD_ARGS="--listen"
+```
+3)、重启libvirtd
+```sh
 systemctl restart libvirtd 
 ```
 #### 项目编译
@@ -177,8 +164,8 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 ![](images/network.png)
 
 
-7、创建主机
-
+7、创建主机`
+`
 
 ![](images/host.png)
 
@@ -190,7 +177,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 9、下载基础模版(系统模版选择cloud/v3/Cloud-System-V3.1.qcow2)
 
-> **链接: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn 提取码: 1bpn**
+> **百度网盘链接: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn 提取码: 1bpn**
 
 
 10、安装nginx，配置基础下载地址,并在页面完成模版配置
