@@ -19,7 +19,7 @@
     V3.0升级时请重新上传系统模版文件Cloud-System-v3.1.qcow2(md5:2696ca0d762279bc386b03c8cea82cd7),并在模版页面点击重新下载
     新版本不在支持采用backingfile方式，升级前请确保所有磁盘文件没有父磁盘的依赖，如果有请通过clone方式将磁盘重新克隆，取消依赖关系，否则删除模版将导致磁盘不可用
 ### 操作系统
-Linux(intel)
+Linux(intel、amd)
 ### SELinux配置
 ```sh
 setenforce 0
