@@ -265,39 +265,39 @@ public class OsOperateImpl implements OsOperate {
         }
         OsCpu osCpu = request.getOsCpu();
         NodeInfo nodeInfo = connect.nodeInfo();
-        if (osCpu.getCore() <= 0 || osCpu.getSocket() <= 0 || osCpu.getThread() <= 0) {
-            int cores = nodeInfo.cores;
-            int sockets = nodeInfo.sockets;
-            int threads = nodeInfo.threads;
-            int maxCpu = osCpu.getNumber();
+//        if (osCpu.getCore() <= 0 || osCpu.getSocket() <= 0 || osCpu.getThread() <= 0) {
+//            int cores = nodeInfo.cores;
+//            int sockets = nodeInfo.sockets;
+//            int threads = nodeInfo.threads;
+//            int maxCpu = osCpu.getNumber();
 
-            do {
-                int totalCpu = cores * sockets * threads;
-
-                if (totalCpu <= maxCpu) {
-                    //如果刚好合适或者无法计算出合适值，则保存最后设置
-                    break;
-                }
-                if (sockets > 1) {
-                    //最小保证1个socket
-                    sockets--;
-                    continue;
-                }
-                if (cores > 1) {
-                    //最小保证1个core
-                    cores--;
-                    continue;
-                }
-                if (threads > 1) {
-                    //最小保证1个thread
-                    threads--;
-                    continue;
-                }
-            } while (false);
-            osCpu.setCore(cores);
-            osCpu.setSocket(sockets);
-            osCpu.setThread(threads);
-        }
+//            do {
+//                int totalCpu = cores * sockets * threads;
+//
+//                if (totalCpu <= maxCpu) {
+//                    //如果刚好合适或者无法计算出合适值，则保存最后设置
+//                    break;
+//                }
+//                if (sockets > 1) {
+//                    //最小保证1个socket
+//                    sockets--;
+//                    continue;
+//                }
+//                if (cores > 1) {
+//                    //最小保证1个core
+//                    cores--;
+//                    continue;
+//                }
+//                if (threads > 1) {
+//                    //最小保证1个thread
+//                    threads--;
+//                    continue;
+//                }
+//            } while (false);
+//            osCpu.setCore(cores);
+//            osCpu.setSocket(sockets);
+//            osCpu.setThread(threads);
+//        }
         String xml = DomainXmlUtil.buildDomainXml(request);
         log.info("create vm={}", xml);
         domain = connect.domainCreateXML(xml, 0);
