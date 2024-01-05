@@ -42,10 +42,12 @@ public class VncWsService {
         GuestEntity guest = guestMapper.selectById(id);
         if (guest == null || guest.getHostId() <= 0) {
             session.close();
+            log.info("虚拟机未运行或不存在.id={}", id);
             return;
         }
         if (!Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING) && !Objects.equals(guest.getStatus(), Constant.GuestStatus.STARTING)) {
             session.close();
+            log.info("虚拟机当前状态不属于运行状态.id={}", id);
             return;
         }
 
@@ -64,6 +66,8 @@ public class VncWsService {
         String data = GsonBuilderUtil.create().toJson(map);
         Map<String, String> header = new HashMap<>(1);
         header.put("x-data", data);
+
+        log.info("开始连接虚拟机VNC.id={},vnc={}", id, url.toASCIIString());
         this.proxy = new VncClient(session, new URI(url.toASCIIString()), header);
         this.proxy.connect();
 

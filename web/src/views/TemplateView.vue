@@ -44,6 +44,7 @@
 							<el-descriptions-item label="ID">{{ show_template.templateId }}</el-descriptions-item>
 							<el-descriptions-item label="模版名">{{ show_template.name }}</el-descriptions-item>
 							<el-descriptions-item label="下载地址" v-if="show_template.uri && show_template.uri.indexOf('http') === 0">{{ show_template.uri }}</el-descriptions-item>
+							<el-descriptions-item label="MD5" v-if="show_template.uri && show_template.uri.indexOf('http') === 0">{{ show_template.md5 }}</el-descriptions-item>
 							<el-descriptions-item label="模版类型">
 								<el-tag>{{ get_template_type(show_template) }}</el-tag>
 							</el-descriptions-item>
@@ -82,6 +83,9 @@
 							<el-form-item label=" 下载地址" prop="uri">
 								<el-input v-model="create_template.uri"></el-input>
 							</el-form-item>
+							<el-form-item label="文件MD5" prop="uri">
+								<el-input v-model="create_template.md5"></el-input>
+							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="create_template_click">立即创建</el-button>
 								<el-button @click="show_template_list">取消</el-button>
@@ -109,7 +113,8 @@ export default {
 				name: '',
 				templateType: 0,
 				volumeType: 'qcow2',
-				uri: ''
+				uri: '',
+				md5: ''
 			},
 			templates: []
 		}
@@ -185,7 +190,8 @@ export default {
 				name: this.create_template.name,
 				templateType: this.create_template.templateType,
 				uri: this.create_template.uri,
-				volumeType: this.create_template.volumeType
+				volumeType: this.create_template.volumeType,
+				md5: this.create_template.md5
 			}
 			if (this.create_template.templateType === 0) {
 				data.volumeType = 'raw'

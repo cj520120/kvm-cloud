@@ -53,7 +53,7 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createTemplate(String name, String uri, int templateType, String volumeType) {
+    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String volumeType) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版名称");
         }
@@ -63,7 +63,7 @@ public class TemplateService extends AbstractService {
         if (StringUtils.isEmpty(volumeType)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘类型");
         }
-        TemplateEntity template = TemplateEntity.builder().uri(uri).name(name).templateType(templateType).volumeType(volumeType).status(Constant.TemplateStatus.DOWNLOAD).build();
+        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).volumeType(volumeType.trim()).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).build();
         this.templateMapper.insert(template);
         this.eventService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());

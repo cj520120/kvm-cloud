@@ -385,16 +385,16 @@ DROP TABLE IF EXISTS `tbl_template_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_template_info` (
-  `template_id` int NOT NULL AUTO_INCREMENT,
-  `template_name` varchar(45) NOT NULL,
+  `template_id` int(11) NOT NULL AUTO_INCREMENT,
+  `template_name` varchar(128) NOT NULL,
   `template_uri` varchar(1024) NOT NULL,
-  `template_type` int NOT NULL,
+  `template_md5` varchar(45) NOT NULL DEFAULT '',
+  `template_type` int(11) NOT NULL,
   `template_volume_type` varchar(10) NOT NULL,
-  `template_status` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `template_status` int(11) NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=270 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Table structure for table `tbl_template_volume`

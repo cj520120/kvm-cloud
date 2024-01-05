@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VolumeDownloadRequest {
+    private String md5;
     private String sourceUri;
     private String targetStorage;
     private String targetName;

@@ -46,6 +46,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
 
         VolumeDownloadRequest request = VolumeDownloadRequest.builder()
                 .sourceUri(template.getUri())
+                .md5(template.getMd5())
                 .targetStorage(targetStorage.getName())
                 .targetName(templateVolume.getName())
                 .targetType(templateVolume.getType())

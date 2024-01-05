@@ -8,7 +8,9 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.http.HttpUtil;
 import com.hubspot.jinjava.Jinjava;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
 import org.libvirt.StorageVolInfo;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.StringReader;
@@ -200,26 +203,52 @@ public class VolumeOperateImpl implements VolumeOperate {
         if (targetStoragePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getTargetStorage());
         }
-        File tempFile = FileUtil.createTempFile();
-        File targetFile = null;
+        String targetFilePath = "/mnt/" + request.getTargetStorage() + "/" + request.getTargetName();
+        File targetFile = new File(targetFilePath);
         try {
-            HttpUtil.downloadFile(request.getSourceUri(), tempFile);
-            VolumeInfo volumeInfo = this.create(connect, VolumeCreateRequest.builder()
-                    .targetStorage(request.getTargetStorage())
-                    .targetName(request.getTargetName())
-                    .targetSize(tempFile.length() / 1024)
-                    .targetType(request.getTargetType()).build());
-            targetFile = new File(volumeInfo.getPath());
-            FileUtil.copy(tempFile, new File(volumeInfo.getPath()), true);
+            HttpUtil.downloadFile(request.getSourceUri(), targetFile, new StreamProgress() {
+                int lastPercent = 0;
+
+                @Override
+                public void start() {
+                    log.info("开始下载文件:uri={},file={}", request.getSourceUri(), targetFilePath);
+                }
+
+                @Override
+                public void progress(long total, long progressSize) {
+                    if (total > 0) {
+                        int percent = (int) (progressSize * 100 / total);
+                        if (percent != lastPercent) {
+                            lastPercent = percent;
+                            log.info("{} 下载进度 {}%", targetFilePath, lastPercent);
+                        }
+                    }
+                }
+
+                @Override
+                public void finish() {
+                    log.info("文件下载完毕:{}", targetFilePath);
+
+                }
+            });
+            if (targetFile.length() <= 0) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "文件下载错误，大小为0");
+            }
+            if (!ObjectUtils.isEmpty(request.getMd5())) {
+                log.info("开始计算文件MD5:{}", targetFilePath);
+                String md5 = DigestUtil.md5Hex(targetFile);
+                log.info("文件md5:{}={}", md5, targetFilePath);
+                if (!md5.equalsIgnoreCase(request.getMd5())) {
+                    log.info("文件检验md5失败，下载失败.file={},fileMd5={},checkMd5={}", targetFilePath, md5, request.getMd5());
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "文件下载MD5错误");
+                }
+                log.info("下载文件md5检验通过:{}", targetFilePath);
+            }
             return this.getInfo(connect, VolumeInfoRequest.builder().sourceStorage(request.getTargetStorage()).sourceName(request.getTargetName()).build());
         } catch (Exception err) {
-            if (targetFile != null) {
-                FileUtil.del(targetFile);
-            }
+            FileUtil.del(targetFile);
             log.error("下载导入模版出错.", err);
             throw new CodeException(ErrorCode.SERVER_ERROR, "下载文件出错:" + err.getMessage());
-        } finally {
-            FileUtil.del(tempFile);
         }
     }
 
