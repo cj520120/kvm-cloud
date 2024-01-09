@@ -54,8 +54,22 @@ public class MetaService {
         return String.join("\r\n", metaNames);
     }
 
+    public String findGuestVendorData(String ip, String nonce, String sign) {
+        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip));
+        if (guestNetwork == null) {
+            return "";
+        }
+        NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
+        if (network == null) {
+            return "";
+        }
+        if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce + ":" + ip).equals(sign)) {
+            return "";
+        }
+        return "#cloud-config\nbootcmd:\n - echo ----------complete-------------";
+    }
     public String loadAllGuestUserData(String ip, String nonce, String sign) {
-        String data = "#cloud-config\r\n";
+        String data = "#cloud-config\n";
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip));
         if (guestNetwork == null) {
             return data;
@@ -75,8 +89,8 @@ public class MetaService {
         String password = util.decrypt(entity.getPassword());
         if (!StringUtils.isEmpty(password)) {
 
-            data += "password: " + password + "\r\n";
-            data += "chpasswd: {expire: False}\r\n";
+            data += "password: " + password + "\n";
+            data += "chpasswd: {expire: False}\n";
             data += "ssh_pwauth: True";
         }
         return data;

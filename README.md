@@ -269,7 +269,7 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     datasource_list: [  NoCloud ]
 
 2、系统模板在安装cloud-init后手动设置相关配置
-    1)、设置允许密码登录:设置ssh_pwauth:   1
+    1)、设置允许密码登录:设置ssh_pwauth: 1
     2)、可设置允许root登录:disable_root: 1 
     3)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
     4)、目前只测试了Centos与Ubuntu，Windows请自行实现相关初始化行为

@@ -30,6 +30,14 @@ public class MetaController {
     }
 
     @SneakyThrows
+    @GetMapping(value = "/vendor-data")
+    public void findGuestVendorData(HttpServletRequest request, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {
+        String allMetaData = metaService.findGuestVendorData(ip, nonce, sign);
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType("text/cloud-config;charset=utf-8");
+        response.getWriter().write(allMetaData);
+    }
+    @SneakyThrows
     @GetMapping(value = "/user-data")
     public void listGuestUserData(HttpServletResponse response, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign) {
         response.setStatus(HttpStatus.OK.value());
