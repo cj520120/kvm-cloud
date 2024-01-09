@@ -260,16 +260,15 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 4、现在验证嵌套虚拟化功能是否启用
     cat /sys/module/kvm_intel/parameters/nested
 ``` 
-8、cloud-init相关配置(如需禁用，请在管理配置文件中设置app.route.type:dhcp)
+8、cloud-init相关配置
 ```$xslt
-1、cloud-init只支持dnsmasq下发方式
-2、cloud-init数据源采用NoCloud,请修改cloud相关配置如下:
+1、cloud-init数据源采用NoCloud,请修改cloud相关配置如下:
     datasource:
       NoCloud:
         seedfrom: http://169.254.169.254/
     datasource_list: [  NoCloud ]
 
-3、系统模板在安装cloud-init后手动设置相关配置
+2、系统模板在安装cloud-init后手动设置相关配置
     1)、设置允许密码登录:设置ssh_pwauth:   1
     2)、可设置允许root登录:disable_root: 1 
     3)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
@@ -279,7 +278,7 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     7)、对系统模板请安装qemu-command-agent，并进行相关配置
     
     
-4、目前只提供Centos7及Ubuntu18.04的系统模版，其他系统模版，请自行实现
+3、目前只提供Centos7及Ubuntu18.04的系统模版，其他系统模版，请自行实现
     1）、Centos默认用户名为centos，密码为创建系统时输入的密码
     2）、Ubuntu默认用户名为ubuntu，密码为创建系统输入的密码
     3）、系统模版不支持root用户名密码登录，如需root登录，请自行修改
