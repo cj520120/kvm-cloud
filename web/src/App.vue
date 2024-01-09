@@ -9,7 +9,7 @@
 				<div style="padding: 0; float: right; margin-top: 0px; width: 100%; margin-right: 10px">
 					<el-link :underline="false" class="right_menu" @click="menu_select('quit')">退出</el-link>
 					<el-link :underline="false" class="right_menu" @click="menu_select('password')">修改密码</el-link>
-					<!-- <el-link :underline="false" class="right_menu" @click="menu_select('support')">联系&amp;支持</el-link> -->
+					<el-link :underline="false" class="right_menu" @click="menu_select('support')">联系&amp;支持</el-link>
 				</div>
 			</el-container>
 		</el-header>
