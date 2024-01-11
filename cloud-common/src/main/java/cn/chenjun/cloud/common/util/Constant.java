@@ -103,6 +103,7 @@ public class Constant {
         public static final String VIRTIO = "virtio";
         public static final String IDE = "ide";
         public static final String SCSI = "scsi";
+        public static final String SATA = "sata";
 
     }
 
