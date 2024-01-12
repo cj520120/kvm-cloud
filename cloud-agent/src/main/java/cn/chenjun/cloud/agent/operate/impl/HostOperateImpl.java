@@ -12,7 +12,6 @@ import cn.hutool.system.SystemUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
@@ -20,7 +19,6 @@ import org.libvirt.Connect;
 import org.libvirt.NodeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
 import java.io.StringReader;
 import java.util.Collections;
@@ -36,33 +34,6 @@ public class HostOperateImpl implements HostOperate {
     @Autowired
     private StorageOperate storageOperate;
 
-    private static String getNodeText(Document doc, String path, String defaultValue) {
-        Node node = doc.selectSingleNode(path);
-        if (node != null) {
-            return node.getText();
-        }
-        return defaultValue;
-    }
-
-    private static String getArch(String xml) throws SAXException, DocumentException {
-
-        try (StringReader sr = new StringReader(xml)) {
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            return getNodeText(doc, "/capabilities/host/cpu/arch", "x86_64");
-        }
-    }
-
-    private static String getVendor(String xml) throws SAXException, DocumentException {
-
-        try (StringReader sr = new StringReader(xml)) {
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            return getNodeText(doc, "/capabilities/host/cpu/vendor", "Intel");
-        }
-    }
 
 
     @SuppressWarnings("unchecked")
@@ -129,7 +100,7 @@ public class HostOperateImpl implements HostOperate {
 
     @DispatchBind(command = Constant.Command.HOST_INFO)
     @Override
-    public HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception {
+    public HostInfo getHostInfo(Connect connect, NoneRequest request) {
 
         return getHostInfo(connect);
     }

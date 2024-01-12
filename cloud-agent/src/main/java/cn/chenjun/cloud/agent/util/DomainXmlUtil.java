@@ -1,24 +1,16 @@
 package cn.chenjun.cloud.agent.util;
 
-import cn.chenjun.cloud.agent.operate.bean.DomainContext;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.RuntimeUtil;
 import com.hubspot.jinjava.Jinjava;
-import lombok.SneakyThrows;
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 
-import java.io.File;
-import java.io.StringReader;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenjun
@@ -27,69 +19,6 @@ public class DomainXmlUtil {
     public static final int MAX_DEVICE_COUNT = 5;
     public static final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
     public static final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
-    public static DomainContext DOMAIN_CONTEXT;
-
-    static {
-        try {
-            String capabilities = RuntimeUtil.execForStr("virsh domcapabilities");
-            DOMAIN_CONTEXT = initDomainContext(capabilities);
-        } catch (Exception err) {
-            DOMAIN_CONTEXT = new DomainContext();
-        }
-        System.out.println(DOMAIN_CONTEXT);
-    }
-
-
-    private static String getNodeText(Document doc, String path) {
-        Node node = doc.selectSingleNode(path);
-        if (node != null) {
-            return node.getText();
-        }
-        return null;
-    }
-
-    @SneakyThrows
-    private static DomainContext initDomainContext(String xml) {
-        try (StringReader sr = new StringReader(xml)) {
-            DomainContext domainContext = new DomainContext();
-            DomainContext.Loader loader = new DomainContext.Loader();
-            domainContext.setLoader(loader);
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            domainContext.setPath(getNodeText(doc, "/domainCapabilities/path"));
-            domainContext.setDomain(getNodeText(doc, "/domainCapabilities/domain"));
-            domainContext.setMachine(getNodeText(doc, "/domainCapabilities/machine"));
-            domainContext.setArch(getNodeText(doc, "/domainCapabilities/arch"));
-            List<Element> osEnumElementList = (List<Element>) doc.selectNodes("/domainCapabilities/os/enum");
-            for (Element element : osEnumElementList) {
-                if (Objects.equals("firmware", element.attributeValue("name"))) {
-                    domainContext.setFirmware(element.selectSingleNode("value").getText());
-                }
-            }
-            Element loaderElement = (Element) doc.selectSingleNode("/domainCapabilities/os/loader");
-            if (loaderElement != null) {
-                boolean supported = Objects.equals("yes", loaderElement.attributeValue("supported"));
-                loader.setSupported(supported);
-                if (supported) {
-                    loader.setPath(loaderElement.selectSingleNode("value").getText());
-                    loader.setInstall(new File(loader.getPath()).exists());
-                    List<Element> loaderEnumElementList = (List<Element>) doc.selectNodes("/domainCapabilities/os/loader/enum");
-                    for (Element element : loaderEnumElementList) {
-                        if (Objects.equals("type", element.attributeValue("name"))) {
-                            List<Element> valueElementList = (List<Element>) element.selectNodes("value");
-                            loader.setType(valueElementList.stream().map(Element::getText).collect(Collectors.toList()));
-
-                        } else if (Objects.equals("secure", element.attributeValue("name"))) {
-                            List<Element> valueElementList = (List<Element>) element.selectNodes("value");
-                            loader.setSecure(valueElementList.stream().map(Element::getText).map(val -> Objects.equals(val, "yes")).isParallel());
-                        }
-                    }
-                }
-            }
-            return domainContext;
-        }
-    }
 
 
     public static String buildDomainXml(GuestStartRequest request) {
@@ -228,17 +157,6 @@ public class DomainXmlUtil {
         map.put("bridge", nic.getBridgeName());
         map.put("slot", String.format("0x%02x", deviceId));
         map.put("network", nic.getPoolId());
-//        if (Objects.equals(nic.getBridgeType(), Constant.NetworkBridgeType.OPEN_SWITCH)) {
-//            Map<String, Object> ovs = new HashMap<>(1);
-//            ovs.put("vlan", nic.getVlanId());
-//            map.put("ovs", ovs);
-//        }
-//        if (nic.getVlanId() > 0) {
-//            map.put("portgroup", "no-vlan");
-//        } else {
-//            map.put("portgroup", "vlan-" + nic.getVlanId());
-//        }
-
         return map;
     }
 
