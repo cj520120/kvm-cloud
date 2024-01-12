@@ -135,7 +135,7 @@ export default {
     get_template_type(template) {
       switch (template.templateType) {
         case 0:
-          return "IOS 文件";
+          return "ISO 文件";
         case 1:
           return "系统模版";
         case 2:
