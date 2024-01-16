@@ -1,9 +1,9 @@
 <pool type="netfs">
     <name>{{name}}</name>
     <source>
-        <host name="{{host}}"/>
+        <host name='{{uri}}'/>
         <dir path="{{path}}"/>
-        <format type="{{format}}"/>
+        <format type="nfs"/>
     </source>
     <target>
         <path>{{mount}}</path>

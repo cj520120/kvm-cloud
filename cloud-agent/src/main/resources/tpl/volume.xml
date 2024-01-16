@@ -1,4 +1,4 @@
-<volume type="file">
+<volume>
     <name>{{name}}</name>
     {% if capacity > 0 %}
     <capacity unit="bytes">{{capacity}}</capacity>

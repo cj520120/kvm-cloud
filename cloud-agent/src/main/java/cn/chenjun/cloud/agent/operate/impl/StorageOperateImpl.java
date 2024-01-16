@@ -3,6 +3,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.StorageUtil;
+import cn.chenjun.cloud.agent.util.TemplateUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageDestroyRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
@@ -30,21 +31,7 @@ import java.util.Map;
 @Slf4j
 @Component
 public class StorageOperateImpl implements StorageOperate {
-    private static Map<String, Object> buildStorageContext(StorageCreateRequest request, String nfsUri, String nfsPath) {
-        Map<String, Object> map = new HashMap<>(4);
-        map.put("name", request.getName());
-        map.put("host", nfsUri);
-        map.put("path", nfsPath);
-        map.put("mount", request.getMountPath());
-        if (request.getType().equals(Constant.StorageType.GLUSTERFS)) {
-            map.put("format", "glusterfs");
-        } else if (request.getType().equals(Constant.StorageType.NFS)) {
-            map.put("format", "nfs");
-        } else {
-            map.put("format", "auto");
-        }
-        return map;
-    }
+
 
     @DispatchBind(command = Constant.Command.STORAGE_INFO)
     @Override
@@ -88,13 +75,6 @@ public class StorageOperateImpl implements StorageOperate {
     @Override
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
         synchronized (request.getName().intern()) {
-            switch (request.getType()) {
-                case Constant.StorageType.NFS:
-                case Constant.StorageType.GLUSTERFS:
-                    break;
-                default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
-            }
             StoragePool storagePool = StorageUtil.findStorage(connect, request.getName());
             if (storagePool != null) {
                 StoragePoolInfo storagePoolInfo = storagePool.getInfo();
@@ -103,16 +83,46 @@ public class StorageOperateImpl implements StorageOperate {
                     storagePool = null;
                 }
             }
+
             if (storagePool == null) {
-                String nfsUri = request.getParam().get("uri").toString();
-                String nfsPath = request.getParam().get("path").toString();
-                FileUtil.mkdir(request.getMountPath());
-                String xml = ResourceUtil.readUtf8Str("tpl/storage.xml");
-                Map<String, Object> map = buildStorageContext(request, nfsUri, nfsPath);
-                Jinjava jinjava = new Jinjava();
-                xml = jinjava.render(xml, map);
-                log.info("createStorage xml={}", xml);
-                storagePool = connect.storagePoolCreateXML(xml, 0);
+                switch (request.getType()) {
+                    case Constant.StorageType.NFS: {
+                        String nfsUri = request.getParam().get("uri").toString();
+                        String nfsPath = request.getParam().get("path").toString();
+                        FileUtil.mkdir(request.getMountPath());
+                        String xml = ResourceUtil.readUtf8Str("tpl/nfs_storage.xml");
+
+                        Map<String, Object> map = new HashMap<>(5);
+                        map.put("name", request.getName());
+                        map.put("uri", nfsUri);
+                        map.put("path", nfsPath);
+                        map.put("mount", request.getMountPath());
+
+                        Jinjava jinjava = TemplateUtil.create();
+                        xml = jinjava.render(xml, map);
+                        log.info("createStorage xml={}", xml);
+                        storagePool = connect.storagePoolCreateXML(xml, 0);
+                    }
+                    break;
+                    case Constant.StorageType.GLUSTERFS: {
+                        String glusterUri = request.getParam().get("uri").toString();
+                        String volume = request.getParam().get("path").toString();
+                        FileUtil.mkdir(request.getMountPath());
+                        String xml = ResourceUtil.readUtf8Str("tpl/glusterfs_storage.xml");
+                        Map<String, Object> map = new HashMap<>(4);
+                        map.put("name", request.getName());
+                        map.put("host", glusterUri);
+                        map.put("volume", volume);
+                        map.put("mount", request.getMountPath());
+                        Jinjava jinjava = TemplateUtil.create();
+                        xml = jinjava.render(xml, map);
+                        log.info("createStorage xml={}", xml);
+                        storagePool = connect.storagePoolCreateXML(xml, 0);
+                    }
+                    break;
+                    default:
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
+                }
             }
             storagePool.refresh(0);
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();

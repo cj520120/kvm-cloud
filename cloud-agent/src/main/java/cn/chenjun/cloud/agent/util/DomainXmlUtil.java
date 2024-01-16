@@ -33,13 +33,13 @@ public class DomainXmlUtil {
         map.put("networks", getBatchNicContext(request.getNetworkInterfaces()));
         map.put("vnc", getVncContext(request.getVncPassword()));
         String xml = ResourceUtil.readUtf8Str("tpl/domain.xml");
-        Jinjava jinjava = new Jinjava();
+        Jinjava jinjava = TemplateUtil.create();
         return jinjava.render(xml, map);
     }
 
     public static String buildCdXml(OsCdRoom cdRoom) {
         String xml = ResourceUtil.readUtf8Str("tpl/cd.xml");
-        Jinjava jinjava = new Jinjava();
+        Jinjava jinjava = TemplateUtil.create();
         Map<String, Object> map = new HashMap<>(0);
         map.put("cd", getCdContext(cdRoom));
         return jinjava.render(xml, map);
@@ -47,7 +47,7 @@ public class DomainXmlUtil {
 
     public static String buildDiskXml(String busType, OsDisk disk) {
         String xml = ResourceUtil.readUtf8Str("tpl/disk.xml");
-        Jinjava jinjava = new Jinjava();
+        Jinjava jinjava = TemplateUtil.create();
 
         Map<String, Object> map = new HashMap<>(0);
         map.put("disk", getDiskContext(busType, disk));
@@ -57,7 +57,7 @@ public class DomainXmlUtil {
 
     public static String buildNicXml(OsNic nic) {
         String xml = ResourceUtil.readUtf8Str("tpl/nic.xml");
-        Jinjava jinjava = new Jinjava();
+        Jinjava jinjava = TemplateUtil.create();
         Map<String, Object> map = new HashMap<>(0);
         map.put("nic", getNicContext(nic));
         return jinjava.render(xml, map);

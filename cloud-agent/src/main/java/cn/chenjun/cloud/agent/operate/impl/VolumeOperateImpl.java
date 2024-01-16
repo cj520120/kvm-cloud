@@ -3,6 +3,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.operate.VolumeOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.StorageUtil;
+import cn.chenjun.cloud.agent.util.TemplateUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -18,9 +19,9 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
+import org.libvirt.LibvirtUtil;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
-import org.libvirt.StorageVolInfo;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 /**
  * @author chenjun
@@ -48,7 +50,8 @@ public class VolumeOperateImpl implements VolumeOperate {
         if (findVol == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在:" + request.getSourceName());
         }
-        StorageVolInfo storageVolInfo = findVol.getInfo();
+
+        LibvirtUtil.StorageVolInfo storageVolInfo = LibvirtUtil.getVolInfo(findVol);
         VolumeInfo volume = VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(request.getSourceName())
                 .path(findVol.getPath())
@@ -76,7 +79,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                 for (String name : names) {
                     if (volumeNameList.contains(name)) {
                         StorageVol storageVol = storagePool.storageVolLookupByName(name);
-                        StorageVolInfo storageVolInfo = storageVol.getInfo();
+                        LibvirtUtil.StorageVolInfo storageVolInfo = LibvirtUtil.getVolInfo(storageVol);
                         VolumeInfo volume = VolumeInfo.builder().storage(storage)
                                 .name("")
                                 .path(storageVol.getPath())
@@ -111,7 +114,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         map.put("allocation", request.getTargetSize());
         map.put("format", request.getTargetType());
         String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
-        Jinjava jinjava = new Jinjava();
+        Jinjava jinjava = TemplateUtil.create();
         xml = jinjava.render(xml, map);
         log.info("create volume xml={}", xml);
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getTargetStorage());
@@ -123,7 +126,8 @@ public class VolumeOperateImpl implements VolumeOperate {
             targetVol.delete(0);
         }
         StorageVol storageVol = storagePool.storageVolCreateXML(xml, 0);
-        StorageVolInfo storageVolInfo = storageVol.getInfo();
+        LibvirtUtil.StorageVolInfo storageVolInfo = LibvirtUtil.getVolInfo(storageVol);
+
         VolumeInfo volumeInfo = VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .path(storageVol.getPath())
@@ -159,7 +163,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘不存在:" + request.getSourceName());
         }
         findVol.resize(request.getSize(), 0);
-        StorageVolInfo storageVolInfo = findVol.getInfo();
+        LibvirtUtil.StorageVolInfo storageVolInfo = LibvirtUtil.getVolInfo(findVol);
         VolumeInfo volumeInfo = VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(findVol.getName())
                 .type(storageVolInfo.type.toString())
@@ -289,14 +293,16 @@ public class VolumeOperateImpl implements VolumeOperate {
             targetVol.delete(0);
         }
         String xml = ResourceUtil.readUtf8Str("tpl/volume.xml");
+        LibvirtUtil.StorageVolInfo storageVolInfo = LibvirtUtil.getVolInfo(sourceVol);
         Map<String, Object> map = new HashMap<>(2);
         map.put("name", request.getTargetName());
         map.put("format", request.getTargetType());
-        Jinjava jinjava = new Jinjava();
+        map.put("capacity", storageVolInfo.capacity);
+        Jinjava jinjava = TemplateUtil.create();
         xml = jinjava.render(xml, map);
         log.info("clone volume xml={}", xml);
         targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
-        StorageVolInfo storageVolInfo = targetVol.getInfo();
+        storageVolInfo = LibvirtUtil.getVolInfo(targetVol);
         VolumeInfo volumeInfo = VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .type(storageVolInfo.type.toString())

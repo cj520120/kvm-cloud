@@ -2,6 +2,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.agent.util.TemplateUtil;
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -71,7 +72,7 @@ public class NetworkOperateImpl implements NetworkOperate {
             map.put("type", request.getBridgeType().bridgeName());
             map.put("vlanId", 0);
             String xml = ResourceUtil.readUtf8Str("tpl/network.xml");
-            Jinjava jinjava = new Jinjava();
+            Jinjava jinjava = TemplateUtil.create();
             xml = jinjava.render(xml, map);
             log.info("create basic network xml={}", xml);
             connect.networkCreateXML(xml);
@@ -115,7 +116,7 @@ public class NetworkOperateImpl implements NetworkOperate {
                 map.put("type", vlan.getBasic().getBridgeType().bridgeName());
                 map.put("vlanId", vlan.getVlanId());
                 String xml = ResourceUtil.readUtf8Str("tpl/network.xml");
-                Jinjava jinjava = new Jinjava();
+                Jinjava jinjava = TemplateUtil.create();
                 xml = jinjava.render(xml, map);
                 log.info("create vlan network xml={}", xml);
                 connect.networkCreateXML(xml);
