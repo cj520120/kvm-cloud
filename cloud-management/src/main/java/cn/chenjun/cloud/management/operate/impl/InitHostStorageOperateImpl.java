@@ -33,6 +33,9 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
 
         }
+        if(param.getNextHostIds()==null||param.getNextHostIds().isEmpty()){
+            throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]无法创建，没有可用的主机分配");
+        }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
         if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
             //主机未就绪直接提交成功
