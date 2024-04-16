@@ -115,20 +115,35 @@
 				</el-row>
 				<el-row>
 					<el-col :span="12">
+						<el-form-item label="操作系统">
+							<el-select v-model="create_guest.systemCategory" style="width: 100%" placeholder="操作系统">
+								<el-option label="Centos" :value="101" />
+								<el-option label="Ubuntu" :value="102" />
+								<el-option label="Windows" :value="300" />
+								<el-option label="Deepin" :value="103" />
+								<el-option label="RedHat" :value="104" />
+								<el-option label="Debian" :value="105" />
+								<el-option label="OpenEuler" :value="106" />
+								<el-option label="Linux" :value="100" />
+								<el-option label="Unix" :value="200" />
+								<el-option label="Android" :value="400" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="密码" v-if="create_guest.type === 1 && create_guest.systemCategory != 300">
+							<el-input v-model="create_guest.password" :show-password="true" type="password"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="12">
 						<el-form-item label="群组">
 							<el-select v-model="create_guest.groupId" style="width: 100%" placeholder="请选择群组">
 								<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
-
-					<el-col :span="12">
-						<el-form-item label="密码" v-if="create_guest.type === 1">
-							<el-input v-model="create_guest.password" :show-password="true" type="password"></el-input>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row>
 					<el-col :span="12">
 						<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
 							<el-input v-model="create_guest.size"></el-input>
@@ -164,6 +179,7 @@ export default {
 				snapshotVolumeId: '',
 				volumeId: '',
 				storageId: 0,
+				systemCategory: 101,
 				size: 100
 			},
 			iso_template: [],
@@ -257,6 +273,7 @@ export default {
 			this.create_guest.volumeId = ''
 			this.create_guest.type = 0
 			this.create_guest.groupId = 0
+			this.create_guest.systemCategory = 101
 		},
 		create_guest_click() {
 			switch (this.create_guest.type) {
@@ -302,3 +319,5 @@ export default {
 	}
 }
 </script>
+<style scoped>
+</style>

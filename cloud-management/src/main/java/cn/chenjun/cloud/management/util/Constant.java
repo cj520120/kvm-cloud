@@ -53,7 +53,8 @@ public class Constant {
         public static final int READY = 2;
         public static final int MAINTENANCE = 3;
         public static final int DESTROY = 4;
-        public static final int ERROR = 5;
+        public static final int INSTALL = 5;
+        public static final int ERROR = 6;
     }
 
     public static class GuestStatus {

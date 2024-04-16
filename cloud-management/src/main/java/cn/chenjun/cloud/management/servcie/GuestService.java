@@ -68,18 +68,6 @@ public class GuestService extends AbstractService {
         }
     }
 
-    private boolean checkComponentComplete(int networkId, int componentType) {
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, componentType).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
-        if (component == null) {
-            return true;
-        }
-        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-        }.getType());
-        componentGuestIds.add(component.getMasterGuestId());
-        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
-        return !componentGuestList.isEmpty();
-    }
-
     private void checkSystemComponentComplete(int networkId) {
         if (!this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
@@ -130,7 +118,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(int groupId, String description, String busType
+    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                               int storageId, String volumeType, String password, long size) {
@@ -160,6 +148,7 @@ public class GuestService extends AbstractService {
                 .groupId(groupId)
                 .name(GuestNameUtil.getName())
                 .description(description)
+                .systemCategory(systemCategory)
                 .busType(busType)
                 .cpu(scheme.getCpu())
                 .speed(scheme.getSpeed())
@@ -255,7 +244,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, String password, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, String password, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
@@ -268,6 +257,7 @@ public class GuestService extends AbstractService {
         this.checkSystemComponentComplete(guest.getNetworkId());
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
+        guest.setSystemCategory(systemCategory);
         this.initGuestMetaData(guestId, password);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
@@ -665,7 +655,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> modifyGuest(int guestId, int groupId, String busType, String description, int schemeId) {
+    public ResultUtil<GuestModel> modifyGuest(int guestId, int systemCategory, int groupId, String busType, String description, int schemeId) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的描述信息");
         }
@@ -690,6 +680,7 @@ public class GuestService extends AbstractService {
                 guest.setCpu(scheme.getCpu());
                 guest.setMemory(scheme.getMemory());
                 guest.setSpeed(scheme.getSpeed());
+                guest.setSystemCategory(systemCategory);
                 this.guestMapper.updateById(guest);
                 this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));

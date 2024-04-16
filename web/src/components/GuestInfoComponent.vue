@@ -25,6 +25,10 @@
 					<el-descriptions-item label="ID">{{ show_guest_info.current_guest.guestId }}</el-descriptions-item>
 					<el-descriptions-item label="实例名">{{ show_guest_info.current_guest.name }}</el-descriptions-item>
 					<el-descriptions-item label="标签">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
+					<el-descriptions-item label="操作系统">
+						<img :src="get_system_cagetory_image(show_guest_info.current_guest)" style="width: 24px; height: 24px; float: left" />
+						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_cagetory_name(show_guest_info.current_guest) }}</div>
+					</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>

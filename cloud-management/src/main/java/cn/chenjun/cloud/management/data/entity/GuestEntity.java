@@ -37,6 +37,7 @@ public class GuestEntity {
     public static final String OTHER_ID = "other_id";
     public static final String GUEST_TYPE = "guest_type";
     public static final String GUEST_STATUS = "guest_status";
+    public static final String SYSTEM_CATEGORY = "system_category";
     public static final String LAST_START_TIME = "last_start_time";
     public static final String CREATE_TIME = "create_time";
 
@@ -71,6 +72,8 @@ public class GuestEntity {
     private String guestIp;
     @TableField(OTHER_ID)
     private Integer otherId;
+    @TableField(SYSTEM_CATEGORY)
+    private Integer systemCategory;
     @TableField(GUEST_TYPE)
     private Integer type;
     @TableField(GUEST_STATUS)

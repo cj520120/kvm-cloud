@@ -6,8 +6,8 @@
 					<el-row slot="header" class="clearfix" style="height: 30px">
 						<div style="float: left">
 							<el-form :inline="true" class="demo-form-inline">
-								<el-form-item><el-button size="mini" type="primary" @click="show_create_volume">创建磁盘</el-button></el-form-item>
-								<el-form-item><el-button size="mini" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-button></el-form-item>
+								<el-form-item><el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_volume">创建磁盘</el-button></el-form-item>
+								<el-form-item><el-button size="mini" class="el-icon-delete" :disabled="!select_volumes.length" type="danger" @click="batch_destroy_volume_click">批量删除</el-button></el-form-item>
 
 								<el-form-item label="存储池">
 									<el-select v-model="select_storage_id" style="width: 100%" @change="update_show_page">

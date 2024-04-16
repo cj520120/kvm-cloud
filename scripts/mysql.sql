@@ -116,6 +116,7 @@ DROP TABLE IF EXISTS `tbl_guest_info`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_guest_info` (
   `guest_id` int NOT NULL AUTO_INCREMENT,
+  `system_category` int NOT NULL DEFAULT '100',
   `guest_name` varchar(45) NOT NULL,
   `guest_description` varchar(45) NOT NULL,
   `guest_bus_type` varchar(10) NOT NULL,
@@ -135,7 +136,7 @@ CREATE TABLE `tbl_guest_info` (
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=524 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -493,4 +494,5 @@ insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('21','8核16G','8','16777216','0','0','0','0','2021-05-18 03:23:26');
 
 update tbl_network_info set network_pool_id=md5(uuid()) where network_pool_id='';
+update tbl_guest_info set system_category=101 where guest_id>0 and guest_type=0;
 

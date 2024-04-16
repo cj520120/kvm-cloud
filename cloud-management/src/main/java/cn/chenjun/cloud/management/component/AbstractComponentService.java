@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.component;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
@@ -57,11 +58,11 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     public void checkAndStart(NetworkEntity network, ComponentEntity component) {
         GuestEntity masterGuest = checkAndStartMasterComponent(network, component);
         if (masterGuest == null) {
-            return;
+            return ;
         }
         if (masterGuest.getStatus() == Constant.GuestStatus.RUNNING) {
             if (!checkComponentSlaveNumber(component)) {
-                return;
+                return ;
             }
             checkAndStartSlaveComponent(component, network);
         }
@@ -216,6 +217,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .name(GuestNameUtil.getName())
                 .groupId(0)
                 .description(name)
+                .systemCategory(SystemCategory.CENTOS)
                 .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
                 .cpu(applicationConfig.getSystemComponentCpu())
                 .speed(applicationConfig.getSystemComponentCpuSpeed())

@@ -6,7 +6,7 @@
 					<el-row slot="header">
 						<el-form :inline="true" class="demo-form-inline">
 							<el-form-item>
-								<el-button size="mini" icon="el-icon-circle-plus-outline" @click="show_create_guest_click">创建虚拟机</el-button>
+								<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_guest_click">创建虚拟机</el-button>
 								<el-button size="mini" :disabled="!select_guests.length" type="success" icon="el-icon-video-play" @click="batch_start_guest_click">批量启动</el-button>
 								<el-button size="mini" :disabled="!select_guests.length" type="danger" icon="el-icon-video-pause" @click="batch_stop_guest_click">批量停止</el-button>
 							</el-form-item>
@@ -36,6 +36,13 @@
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="guestId" width="80" />
 							<el-table-column label="实例名" prop="name" width="180" show-overflow-tooltip />
+							<el-table-column label="系统" prop="systemCategory" width="100">
+								<template #default="scope">
+									<el-tooltip class="item" effect="dark" :content="get_system_cagetory_name(scope.row)" placement="bottom">
+										<img :src="get_system_cagetory_image(scope.row)" style="width: 24px; height: 24px; float: left" />
+									</el-tooltip>
+								</template>
+							</el-table-column>
 							<el-table-column label="标签" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="配置" prop="cpu" width="150">

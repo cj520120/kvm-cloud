@@ -30,6 +30,7 @@ public class GuestModel {
     private int networkId;
     private int groupId;
     private int status;
+    private int systemCategory;
     private String guestIp;
     private Date lastStartTime;
     private Date createTime;

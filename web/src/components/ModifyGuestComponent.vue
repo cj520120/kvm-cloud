@@ -11,6 +11,20 @@
 					<el-option label="scsi" value="scsi" />
 				</el-select>
 			</el-form-item>
+			<el-form-item label="操作系统">
+				<el-select v-model="modify_guest.systemCategory" style="width: 100%" placeholder="操作系统">
+					<el-option label="Centos" :value="101" />
+					<el-option label="Ubuntu" :value="102" />
+					<el-option label="Windows" :value="300" />
+					<el-option label="Deepin" :value="103" />
+					<el-option label="RedHat" :value="104" />
+					<el-option label="Debian" :value="105" />
+					<el-option label="OpenEuler" :value="106" />
+					<el-option label="Linux" :value="100" />
+					<el-option label="Unix" :value="200" />
+					<el-option label="Android" :value="400" />
+				</el-select>
+			</el-form-item>
 			<el-form-item label="计算方案">
 				<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择计算方案">
 					<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
@@ -41,7 +55,8 @@ export default {
 				groupId: 0,
 				busType: '',
 				description: '',
-				schemeId: ''
+				schemeId: '',
+				systemCategory: 101
 			}
 		}
 	},
@@ -54,6 +69,7 @@ export default {
 			this.modify_guest.schemeId = guest.schemeId
 			this.modify_guest.busType = guest.busType
 			this.modify_guest_dialog_visiable = true
+			this.modify_guest.systemCategory = guest.systemCategory
 			await this.load_all_schemes()
 			await this.load_all_groups()
 		},

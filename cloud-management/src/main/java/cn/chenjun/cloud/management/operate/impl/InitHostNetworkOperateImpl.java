@@ -103,7 +103,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                     switch (network.getStatus()) {
                         case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
                         case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                            network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY);
+                            network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.INSTALL);
                             networkMapper.updateById(network);
                         default:
                             break;

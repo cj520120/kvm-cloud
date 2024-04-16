@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -54,6 +56,18 @@ public abstract class AbstractService {
     protected EventService eventService;
     @Autowired
     protected ComponentMapper componentMapper;
+
+    protected boolean checkComponentComplete(int networkId, int componentType) {
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, componentType).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
+        if (component == null) {
+            return true;
+        }
+        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
+        }.getType());
+        componentGuestIds.add(component.getMasterGuestId());
+        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
+        return !componentGuestList.isEmpty();
+    }
 
     public GuestModel initGuestInfo(GuestEntity entity) {
         GuestModel model;

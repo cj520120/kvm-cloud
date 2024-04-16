@@ -148,13 +148,17 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         int baseDeviceId = 0;
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
-            if (network.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
+            if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
+                if (network.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
+                }
             }
             if (network.getBasicNetworkId() > 0) {
                 NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
-                if (parentNetwork.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
+                if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
+                    if (parentNetwork.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
+                    }
                 }
             }
             OsNic nic = OsNic.builder()

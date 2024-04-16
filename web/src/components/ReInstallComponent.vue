@@ -63,13 +63,31 @@
 				</el-row>
 				<el-row>
 					<el-col :span="12">
-						<el-form-item label="密码" v-if="reinstall_guest.type !== 0">
+						<el-form-item label="密码" v-if="reinstall_guest.type !== 0 && create_guest.systemCategory != 300">
 							<el-input v-model="reinstall_guest.password" prefix-icon="el-icon-lock" type="password" :show-password="true"></el-input>
 						</el-form-item>
 					</el-col>
 					<el-col :span="12">
 						<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
 							<el-input v-model="reinstall_guest.size"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="操作系统">
+							<el-select v-model="reinstall_guest.systemCategory" style="width: 100%" placeholder="操作系统">
+								<el-option label="Centos" :value="101" />
+								<el-option label="Ubuntu" :value="102" />
+								<el-option label="Windows" :value="300" />
+								<el-option label="Deepin" :value="103" />
+								<el-option label="RedHat" :value="104" />
+								<el-option label="Debian" :value="105" />
+								<el-option label="OpenEuler" :value="106" />
+								<el-option label="Linux" :value="100" />
+								<el-option label="Unix" :value="200" />
+								<el-option label="Android" :value="400" />
+							</el-select>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -96,7 +114,8 @@ export default {
 				volumeId: '',
 				storageId: 0,
 				password: '',
-				size: 100
+				size: 100,
+				systemCategory: 100
 			},
 			iso_template: [],
 			attach_volumes: [],
@@ -151,6 +170,7 @@ export default {
 			this.reinstall_guest.volumeId = ''
 			this.reinstall_guest.password = ''
 			this.reinstall_guest.type = 0
+			this.reinstall_guest.systemCategory = guest.systemCategory
 		},
 		reinstall_guest_click() {
 			switch (this.reinstall_guest.type) {
