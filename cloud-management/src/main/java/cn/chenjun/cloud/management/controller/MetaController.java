@@ -22,8 +22,8 @@ public class MetaController {
 
     @SneakyThrows
     @GetMapping(value = "/meta-data")
-    public void listGuestMetaData(HttpServletRequest request, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {
-        String allMetaData = metaService.loadAllGuestMetaData(ip, nonce, sign);
+    public void listGuestMetaData(HttpServletRequest request, @RequestHeader(value = "X-Network-ID", defaultValue = "0") int networkId,@RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {
+        String allMetaData = metaService.loadAllGuestMetaData(networkId,ip, nonce, sign);
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("text/cloud-config;charset=utf-8");
         response.getWriter().write(allMetaData);
@@ -31,17 +31,17 @@ public class MetaController {
 
     @SneakyThrows
     @GetMapping(value = "/vendor-data")
-    public void findGuestVendorData(HttpServletRequest request, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {
-        String allMetaData = metaService.findGuestVendorData(ip, nonce, sign);
+    public void findGuestVendorData(HttpServletRequest request, @RequestHeader(value = "X-Network-ID", defaultValue = "0") int networkId,@RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {
+        String allMetaData = metaService.findGuestVendorData(networkId,ip, nonce, sign);
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("text/cloud-config;charset=utf-8");
         response.getWriter().write(allMetaData);
     }
     @SneakyThrows
     @GetMapping(value = "/user-data")
-    public void listGuestUserData(HttpServletResponse response, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign) {
+    public void listGuestUserData(HttpServletResponse response, @RequestHeader(value = "X-Network-ID", defaultValue = "0") int networkId, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign) {
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("text/cloud-config;charset=utf-8");
-        response.getWriter().write(this.metaService.loadAllGuestUserData(ip, nonce, sign));
+        response.getWriter().write(this.metaService.loadAllGuestUserData(networkId,ip, nonce, sign));
     }
 }

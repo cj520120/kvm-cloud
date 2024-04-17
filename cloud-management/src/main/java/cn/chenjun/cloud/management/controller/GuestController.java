@@ -1,16 +1,19 @@
 package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.servcie.VolumeService;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -64,9 +67,10 @@ public class GuestController extends BaseController {
 
     @PutMapping("/api/guest/create")
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
-                                              @RequestParam(value = "systemCategory", defaultValue = "0") int systemCategory,
+                                              @RequestParam(value = "systemCategory") int systemCategory,
                                               @RequestParam("busType") String busType,
-                                              @RequestParam(value = "password", defaultValue = "") String password,
+                                              @RequestParam(value = "metaData", defaultValue = "{}") String metaData,
+                                              @RequestParam(value = "userData", defaultValue = "{}") String userData,
                                               @RequestParam("groupId") int groupId,
                                               @RequestParam("hostId") int hostId,
                                               @RequestParam("schemeId") int schemeId,
@@ -79,9 +83,11 @@ public class GuestController extends BaseController {
                                               @RequestParam("volumeId") int volumeId,
                                               @RequestParam("storageId") int storageId,
                                               @RequestParam("size") long size) {
-
-
-        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, password, size * 1024 * 1024 * 1024));
+        Map<String, String> metaMap = GsonBuilderUtil.create().fromJson(metaData, new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, Object>>() {
+        }.getType());
+        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, metaMap, userMap, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/reinstall")
@@ -93,11 +99,16 @@ public class GuestController extends BaseController {
                                             @RequestParam("volumeId") int volumeId,
                                             @RequestParam("storageId") int storageId,
                                             @RequestParam("volumeType") String volumeType,
-                                            @RequestParam(value = "password", defaultValue = "") String password,
+                                            @RequestParam(value = "metaData", defaultValue = "{}") String metaData,
+                                            @RequestParam(value = "userData", defaultValue = "{}") String userData,
                                             @RequestParam("size") long size) {
 
+        Map<String, String> metaMap = GsonBuilderUtil.create().fromJson(metaData, new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, Object>>() {
+        }.getType());
 
-        return this.lockRun(() -> this.guestService.reInstall(guestId, systemCategory, password, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.reInstall(guestId, systemCategory, metaMap, userMap, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/start/batch")

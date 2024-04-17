@@ -2,7 +2,6 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
@@ -16,8 +15,8 @@ import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.GuestNameUtil;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,18 +42,20 @@ public class GuestService extends AbstractService {
     @Autowired
     private MetaMapper metaMapper;
 
-    private void initGuestMetaData(int guestId, String password) {
+    private void initGuestMetaData(int guestId, Map<String, String> metaData, Map<String, String> userData) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         Map<String, String> metaDataMap = new HashMap<>(4);
         String hostname = "VM-" + guest.getGuestIp().replace(".", "-");
         metaDataMap.put("hostname", hostname);
         metaDataMap.put("local-hostname", hostname);
         metaDataMap.put("instance-id", guest.getName());
+        metaDataMap.putAll(metaData);
         this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestId));
         for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
             MetaDataEntity metaDataEntity = MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
             this.metaMapper.insert(metaDataEntity);
         }
+        String password = userData.get("password");
         this.guestPasswordMapper.deleteById(guestId);
         if (!StringUtils.isEmpty(password)) {
             SymmetricCryptoUtil util = SymmetricCryptoUtil.build();
@@ -65,6 +66,11 @@ public class GuestService extends AbstractService {
                     .password(util.encrypt(password))
                     .build();
             this.guestPasswordMapper.insert(entity);
+        }
+        String sshId = userData.getOrDefault("sshId","");
+        if (!StringUtils.isEmpty(sshId)) {
+            this.guestSshMapper.delete(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID, guestId));
+            this.guestSshMapper.insert(GuestSshEntity.builder().sshId(NumberUtil.parseInt(sshId)).guestId(guestId).build());
         }
     }
 
@@ -121,7 +127,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, String password, long size) {
+                                              int storageId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
@@ -172,7 +178,7 @@ public class GuestService extends AbstractService {
         this.guestNetworkMapper.updateById(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {
-            createGuest(hostId, diskTemplateId, snapshotVolumeId, volumeType, password, size, uid, guest, storage);
+            createGuest(hostId, diskTemplateId, snapshotVolumeId, volumeType, metaData, userData, size, uid, guest, storage);
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
@@ -198,9 +204,9 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    private void createGuest(int hostId, int diskTemplateId, int snapshotVolumeId, String volumeType, String password, long size, String uid, GuestEntity guest, StorageEntity storage) {
+    private void createGuest(int hostId, int diskTemplateId, int snapshotVolumeId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, String uid, GuestEntity guest, StorageEntity storage) {
         GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, uid, guest, storage);
-        this.initGuestMetaData(guest.getGuestId(), password);
+        this.initGuestMetaData(guest.getGuestId(), metaData, userData);
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
                 .snapshotVolumeId(snapshotVolumeId)
@@ -244,7 +250,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, String password, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
@@ -258,7 +264,7 @@ public class GuestService extends AbstractService {
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
         guest.setSystemCategory(systemCategory);
-        this.initGuestMetaData(guestId, password);
+        this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
         if (volumeId <= 0) {

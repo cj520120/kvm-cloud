@@ -437,6 +437,35 @@ CREATE TABLE `tbl_user_info` (
   UNIQUE KEY `IX_LOGIN_NAME` (`login_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ;
 /*!40101 SET character_set_client = @saved_cs_client */;
+--
+-- Table structure for table `tbl_ssh_authorized_keys`
+--
+
+DROP TABLE IF EXISTS `tbl_ssh_authorized_keys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_ssh_authorized_keys` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `ssh_name` VARCHAR(45) NOT NULL,
+  `ssh_key` TEXT(8192) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+/*!40101 SET character_set_client = @saved_cs_client */;
+--
+-- Table structure for table `tbl_guest_ssh_info`
+--
+
+DROP TABLE IF EXISTS `tbl_guest_ssh_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE  `tbl_guest_ssh_info` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `guest_id` INT NOT NULL,
+  `ssh_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `IX_GUEST_SSH` (`guest_id` ASC, `ssh_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `tbl_volume_info`

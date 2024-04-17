@@ -646,3 +646,35 @@ export const destroyGroup = (data = {}) => {
     method: "DELETE",
   });
 };
+
+
+//ssh
+export const getSshList = (params = {}) => {
+  return axios.request({
+    url: "api/ssh/all",
+    params,
+  });
+};
+export const createSsh = (data = {}) => {
+  return axios.request({
+    url: "api/ssh/create",
+    data,
+    method: "PUT",
+  });
+};
+
+ 
+
+export const getSshInfo = (params = {}) => {
+  return axios.request({
+    url: "api/ssh/info",
+    params,
+  });
+};
+export const destroySsh = (data = {}) => {
+  return axios.request({
+    url: "api/ssh/destroy",
+    data,
+    method: "DELETE",
+  });
+};

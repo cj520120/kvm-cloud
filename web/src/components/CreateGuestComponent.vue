@@ -131,22 +131,41 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="12">
-						<el-form-item label="密码" v-if="create_guest.type === 1 && create_guest.systemCategory != 300">
-							<el-input v-model="create_guest.password" :show-password="true" type="password"></el-input>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
 						<el-form-item label="群组">
 							<el-select v-model="create_guest.groupId" style="width: 100%" placeholder="请选择群组">
 								<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
+				</el-row>
+				<el-row>
 					<el-col :span="12">
 						<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
 							<el-input v-model="create_guest.size"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="" v-if="create_guest.type === 1 && create_guest.systemCategory != 300">
+							<el-checkbox v-model="is_advance_config">高级配置</el-checkbox>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row v-if="create_guest.type === 1 && create_guest.systemCategory != 300 && is_advance_config">
+					<el-col :span="12">
+						<el-form-item label="主机名">
+							<el-input v-model="meta_config.hostName"></el-input>
+						</el-form-item>
+						<el-form-item label="密码">
+							<el-input v-model="user_config.password" :show-password="true" type="password"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row v-if="create_guest.type === 1 && create_guest.systemCategory != 300 && is_advance_config">
+					<el-col :span="12">
+						<el-form-item label="登录密钥">
+							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥">
+								<el-option v-for="item in this.sshs" :key="item.id" :label="item.name" :value="item.id" />
+							</el-select>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -159,14 +178,13 @@
 	</el-card>
 </template>
 <script>
-import { getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getNetworkList, getHostList, getSchemeList, createGuest, getGroupList } from '@/api/api'
+import { getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getNetworkList, getHostList, getSchemeList, createGuest, getGroupList, getSshList } from '@/api/api'
 export default {
 	data() {
 		return {
 			create_guest: {
 				type: 0,
 				groupId: 0,
-				password: '',
 				description: '',
 				busType: 'virtio',
 				hostId: 0,
@@ -182,6 +200,14 @@ export default {
 				systemCategory: 101,
 				size: 100
 			},
+			meta_config: {
+				hostName: ''
+			},
+			user_config: {
+				password: '',
+				sshId: 0
+			},
+			is_advance_config: false,
 			iso_template: [],
 			attach_volumes: [],
 			disk_template: [],
@@ -190,7 +216,8 @@ export default {
 			schemes: [],
 			hosts: [],
 			networks: [],
-			groups: []
+			groups: [],
+			sshs: [{ id: 0, name: '无' }]
 		}
 	},
 	methods: {
@@ -216,6 +243,13 @@ export default {
 			await getStorageList().then((res) => {
 				if (res.code == 0) {
 					this.storages = res.data.filter((v) => v.status == 1)
+				}
+			})
+		},
+		async load_all_ssh() {
+			await getSshList().then((res) => {
+				if (res.code == 0) {
+					this.sshs = [{ id: 0, name: '无' }, ...res.data]
 				}
 			})
 		},
@@ -263,17 +297,22 @@ export default {
 			this.load_all_networks()
 			this.load_all_snapshot()
 			this.load_all_groups()
+			this.load_all_ssh()
 			if (this.$refs['createForm']) {
 				this.$refs['createForm'].resetFields()
 			}
 			this.create_guest.isoTemplateId = ''
 			this.create_guest.diskTemplateId = ''
 			this.create_guest.snapshotVolumeId = ''
-			this.create_guest.password = ''
 			this.create_guest.volumeId = ''
 			this.create_guest.type = 0
 			this.create_guest.groupId = 0
 			this.create_guest.systemCategory = 101
+
+			this.is_advance_config = false
+			this.user_config.password = ''
+			this.user_config.sshId = 0
+			this.meta_config.hostName = ''
 		},
 		create_guest_click() {
 			switch (this.create_guest.type) {
@@ -302,7 +341,21 @@ export default {
 					this.create_guest.size = 0
 					break
 			}
-			createGuest(this.create_guest).then((res) => {
+			let meta_map = {}
+			let user_map = {}
+			if (this.is_advance_config) {
+				if (this.meta_config.hostName) {
+					meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
+				}
+				if (this.user_config.password) {
+					user_map = { ...user_map, password: this.user_config.password }
+				}
+				if (this.user_config.sshId > 0) {
+					user_map = { ...user_map, sshId: this.user_config.sshId + '' }
+				}
+			}
+			let create_request_data = { ...this.create_guest, metaData: JSON.stringify(meta_map), userData: JSON.stringify(user_map) }
+			createGuest(create_request_data).then((res) => {
 				if (res.code === 0) {
 					this.$emit('onGuestUpdate', res.data)
 					this.$nextTick(() => {

@@ -56,6 +56,10 @@ public abstract class AbstractService {
     protected EventService eventService;
     @Autowired
     protected ComponentMapper componentMapper;
+    @Autowired
+    protected SshAuthorizedMapper sshAuthorizedMapper;
+    @Autowired
+    protected GuestSshMapper guestSshMapper;
 
     protected boolean checkComponentComplete(int networkId, int componentType) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, componentType).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
@@ -110,6 +114,9 @@ public abstract class AbstractService {
         return new BeanConverter<>(NetworkModel.class).convert(entity, null);
     }
 
+    protected SshAuthorizedModel initSshAuthorized(SshAuthorizedEntity entity) {
+        return SshAuthorizedModel.builder().id(entity.getId()).name(entity.getSshName()).key(entity.getSshKey()).build();
+    }
     protected GuestNetworkModel initGuestNetwork(GuestNetworkEntity entity) {
         return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())
                 .networkId(entity.getNetworkId())

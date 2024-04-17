@@ -35,6 +35,7 @@ public class MetaServiceInitialize implements RouteComponentQmaInitialize {
         Map<String, Object> map = new HashMap<>(2);
         map.put("managerUri", this.applicationConfig.getManagerUri());
         map.put("secret", network.getSecret());
+        map.put("networkId", network.getNetworkId());
         Jinjava jinjava = new Jinjava();
         metaPython = jinjava.render(metaPython, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/meta-service/meta.py").fileBody(metaPython).build())).build());

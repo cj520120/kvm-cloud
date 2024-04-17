@@ -63,18 +63,6 @@
 				</el-row>
 				<el-row>
 					<el-col :span="12">
-						<el-form-item label="密码" v-if="reinstall_guest.type !== 0 && create_guest.systemCategory != 300">
-							<el-input v-model="reinstall_guest.password" prefix-icon="el-icon-lock" type="password" :show-password="true"></el-input>
-						</el-form-item>
-					</el-col>
-					<el-col :span="12">
-						<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
-							<el-input v-model="reinstall_guest.size"></el-input>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
 						<el-form-item label="操作系统">
 							<el-select v-model="reinstall_guest.systemCategory" style="width: 100%" placeholder="操作系统">
 								<el-option label="Centos" :value="101" />
@@ -91,6 +79,37 @@
 						</el-form-item>
 					</el-col>
 				</el-row>
+				<el-row>
+					<el-col :span="12">
+						<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
+							<el-input v-model="reinstall_guest.size"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="12">
+						<el-form-item label="" v-if="reinstall_guest.type === 1 && reinstall_guest.systemCategory != 300">
+							<el-checkbox v-model="is_advance_config">高级配置</el-checkbox>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row v-if="reinstall_guest.type === 1 && reinstall_guest.systemCategory != 300 && is_advance_config">
+					<el-col :span="12">
+						<el-form-item label="主机名">
+							<el-input v-model="meta_config.hostName"></el-input>
+						</el-form-item>
+						<el-form-item label="密码">
+							<el-input v-model="user_config.password" :show-password="true" type="password"></el-input>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row v-if="reinstall_guest.type === 1 && reinstall_guest.systemCategory != 300 && is_advance_config">
+					<el-col :span="12">
+						<el-form-item label="登录密钥">
+							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥">
+								<el-option v-for="item in this.sshs" :key="item.id" :label="item.name" :value="item.id" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
 				<el-form-item>
 					<el-button type="primary" @click="reinstall_guest_click">立即重装</el-button>
 					<el-button @click="on_back_click">取消</el-button>
@@ -100,7 +119,7 @@
 	</el-card>
 </template>
 <script>
-import { reInstallGuest, getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList } from '@/api/api'
+import { reInstallGuest, getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getSshList } from '@/api/api'
 export default {
 	data() {
 		return {
@@ -113,15 +132,23 @@ export default {
 				snapshotVolumeId: '',
 				volumeId: '',
 				storageId: 0,
-				password: '',
 				size: 100,
 				systemCategory: 100
 			},
+			meta_config: {
+				hostName: ''
+			},
+			user_config: {
+				password: '',
+				sshId: 0
+			},
+			is_advance_config: false,
 			iso_template: [],
 			attach_volumes: [],
 			disk_template: [],
 			storages: [],
-			snapshot_template: []
+			snapshot_template: [],
+			sshs: [{ id: 0, name: '无' }]
 		}
 	},
 	methods: {
@@ -157,20 +184,31 @@ export default {
 				}
 			})
 		},
+		async load_all_ssh() {
+			await getSshList().then((res) => {
+				if (res.code == 0) {
+					this.sshs = [{ id: 0, name: '无' }, ...res.data]
+				}
+			})
+		},
 		async init(guest) {
 			this.show_type = 0
 			this.load_all_attach_volumes()
 			this.load_all_template()
 			this.load_all_storage()
 			this.load_all_snapshot()
+			this.load_all_ssh()
 			this.reinstall_guest.guestId = guest.guestId
 			this.reinstall_guest.isoTemplateId = ''
 			this.reinstall_guest.diskTemplateId = ''
 			this.reinstall_guest.snapshotVolumeId = ''
 			this.reinstall_guest.volumeId = ''
-			this.reinstall_guest.password = ''
 			this.reinstall_guest.type = 0
 			this.reinstall_guest.systemCategory = guest.systemCategory
+			this.is_advance_config = false
+			this.user_config.password = ''
+			this.user_config.sshId = 0
+			this.meta_config.hostName = ''
 		},
 		reinstall_guest_click() {
 			switch (this.reinstall_guest.type) {
@@ -204,7 +242,21 @@ export default {
 				type: 'warning'
 			})
 				.then(() => {
-					reInstallGuest(this.reinstall_guest).then((res) => {
+					let meta_map = {}
+					let user_map = {}
+					if (this.is_advance_config) {
+						if (this.meta_config.hostName) {
+							meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
+						}
+						if (this.user_config.password) {
+							user_map = { ...user_map, password: this.user_config.password }
+						}
+						if (this.user_config.sshId > 0) {
+							user_map = { ...user_map, sshId: this.user_config.sshId + '' }
+						}
+					}
+					let reinstall_guest_data = { ...this.reinstall_guest, metaData: JSON.stringify(meta_map), userData: JSON.stringify(user_map) }
+					reInstallGuest(reinstall_guest_data).then((res) => {
 						if (res.code === 0) {
 							this.$emit('finish', res.data)
 						} else {

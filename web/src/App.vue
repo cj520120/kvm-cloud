@@ -104,6 +104,7 @@ export default {
 				{ path: '/Network', title: '网络管理', icon: 'el-icon-platform-eleme' },
 				{ path: '/Storage', title: '存储池管理', icon: 'el-icon-coin' },
 				{ path: '/Template', title: '模版管理', icon: 'el-icon-price-tag' },
+				{ path: '/Ssh', title: '密钥管理', icon: 'el-icon-key' },
 				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' },
 				{ path: '/Volume', title: '磁盘管理', icon: 'el-icon-bank-card' },
 				{ path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },

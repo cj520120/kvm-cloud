@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
+import cn.chenjun.cloud.management.data.mapper.GuestSshMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestVncMapper;
 import cn.chenjun.cloud.management.data.mapper.MetaMapper;
 import cn.chenjun.cloud.management.operate.bean.DestroyGuestOperate;
@@ -36,6 +37,8 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
     private GuestPasswordMapper guestPasswordMapper;
     @Autowired
     private MetaMapper metaMapper;
+    @Autowired
+    private GuestSshMapper guestSshMapper;
 
 
     @Override
@@ -88,6 +91,8 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
             this.guestMapper.deleteById(guest.getGuestId());
             this.guestPasswordMapper.deleteById(guest.getGuestId());
             this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));
+
+            this.guestSshMapper.delete(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID,guest.getGuestId()));
             this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
             this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());

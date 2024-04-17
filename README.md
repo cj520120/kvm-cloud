@@ -13,6 +13,8 @@
     11、支持cloud-init配置系统密码
     12、支持内部dns解析
     13、支持nat转发
+    14、支持密钥管理登录
+    15、支持主机名定制
 
 ### 关于升级
     目前不支持V1、V2升级到最新版本
@@ -278,11 +280,14 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     7)、对系统模板请安装qemu-command-agent，并进行相关配置
     
     
-3、目前只提供Centos7及Ubuntu22.04的系统模版，其他系统模版，请自行实现
+3、目前只提供Centos及Ubuntu22.04的系统模版，其他系统模版，请自行实现
     1）、Centos默认用户名为centos，密码为创建系统时输入的密码
     2）、Ubuntu默认用户名为ubuntu，密码为创建系统输入的密码
     3）、系统模版不支持root用户名密码登录，如需root登录，请自行修改
-
+    
+3、关于自制模版中Ubuntu 22.04无法使用密钥登录问题，执行如下命令
+    1）、echo 'PubkeyAcceptedAlgorithms=+ssh-rsa' >> /etc/ssh/sshd_config
+    2）、systemctl restart sshd
 ```
 9、页面删除主机后，如需要重新加入主机，请删除该主机Agent目录下config.json，然后重启Agent
 

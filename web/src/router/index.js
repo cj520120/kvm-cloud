@@ -13,6 +13,7 @@ import VncView from "../views/VncView.vue";
 import HomeView from "../views/HomeView.vue";
 import UserView from "../views/UserView.vue";
 import LoginView from "../views/LoginView.vue";
+import SshView  from "@/views/SshView.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -60,6 +61,11 @@ const routes = [
     path: "/Volume",
     name: "Volume",
     component: VolumeView,
+  },
+  {
+    path: "/Ssh",
+    name: "Ssh",
+    component: SshView,
   },
   {
     path: "/Scheme",
