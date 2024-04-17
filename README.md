@@ -285,7 +285,7 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
     2）、Ubuntu默认用户名为ubuntu，密码为创建系统输入的密码
     3）、系统模版不支持root用户名密码登录，如需root登录，请自行修改
     
-3、关于自制模版中Ubuntu 22.04无法使用密钥登录问题，执行如下命令
+4、关于自制模版中Ubuntu 22.04无法使用密钥登录问题，执行如下命令
     1）、echo 'PubkeyAcceptedAlgorithms=+ssh-rsa' >> /etc/ssh/sshd_config
     2）、systemctl restart sshd
 ```
