@@ -647,7 +647,6 @@ export const destroyGroup = (data = {}) => {
   });
 };
 
-
 //ssh
 export const getSshList = (params = {}) => {
   return axios.request({
@@ -655,16 +654,21 @@ export const getSshList = (params = {}) => {
     params,
   });
 };
-export const createSsh = (data = {}) => {
+export const importSSh = (data = {}) => {
+  return axios.request({
+    url: "api/ssh/import",
+    data,
+    method: "PUT",
+  });
+};
+
+export const createSSh = (data = {}) => {
   return axios.request({
     url: "api/ssh/create",
     data,
     method: "PUT",
   });
 };
-
- 
-
 export const getSshInfo = (params = {}) => {
   return axios.request({
     url: "api/ssh/info",

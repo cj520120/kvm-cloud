@@ -5,6 +5,7 @@
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_ssh_click">创建密钥</el-button>
+						<el-button size="mini" type="primary" icon="el-icon-upload" @click="show_import_ssh_click">导入密钥</el-button>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="sshs" style="width: 100%">
@@ -18,19 +19,21 @@
 						</el-table>
 					</el-row>
 				</el-card>
-				<CreateSshComponent ref="CreateSshComponentRef" @back="show_ssh_list()" @onSshUpdate="update_ssh" v-show="this.show_type === 1" />
+				<ImportSshComponent ref="ImportSshComponentRef" @back="show_ssh_list()" @onSshUpdate="update_ssh" v-show="this.show_type === 1" />
+				<CreateSshComponent ref="CreateSshComponentRef" @back="show_ssh_list()" @onSshUpdate="update_ssh" v-show="this.show_type === 2" />
 			</el-main>
 		</el-container>
 	</div>
 </template>
 <script>
 import { getSshList, destroySsh } from '@/api/api'
-import CreateSshComponent from '@/components/CreateSshComponent'
+import ImportSshComponent from '@/components/ImportSshComponent'
+import CreateSshComponent from '@/components/CreateSshComponent.vue'
 import Notify from '@/api/notify'
 import util from '@/api/util'
 export default {
 	name: 'sshAuthorizedView',
-	components: { CreateSshComponent },
+	components: { ImportSshComponent, CreateSshComponent },
 	data() {
 		return {
 			data_loading: false,
@@ -97,8 +100,12 @@ export default {
 		show_ssh_list() {
 			this.show_type = 0
 		},
-		show_create_ssh_click() {
+		show_import_ssh_click() {
 			this.show_type = 1
+			this.$refs.ImportSshComponentRef.init()
+		},
+		show_create_ssh_click() {
+			this.show_type = 2
 			this.$refs.CreateSshComponentRef.init()
 		},
 		destroy_sshAuthorized(ssh) {

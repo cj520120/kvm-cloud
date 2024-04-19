@@ -12,8 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SshAuthorizedModel {
+public class CreateSshAuthorizedModel {
     private Integer id;
     private String name;
     private String publicKey;
+    private String privateKey;
 }

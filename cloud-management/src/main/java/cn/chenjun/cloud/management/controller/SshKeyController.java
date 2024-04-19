@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.model.CreateSshAuthorizedModel;
 import cn.chenjun.cloud.management.model.SshAuthorizedModel;
 import cn.chenjun.cloud.management.servcie.SshAuthorizedService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,14 @@ public class SshKeyController extends BaseController {
         return this.lockRun(() -> this.sshAuthorizedService.getSshKey(id));
     }
 
+    @PutMapping("/api/ssh/import")
+    public ResultUtil<SshAuthorizedModel> importSshKey(@RequestParam("name") String name, @RequestParam("key") String key) {
+        return this.lockRun(() -> this.sshAuthorizedService.importSshKey(name, key));
+    }
+
     @PutMapping("/api/ssh/create")
-    public ResultUtil<SshAuthorizedModel> createSshKey(@RequestParam("name") String name, @RequestParam("key") String key) {
-        return this.lockRun(() -> this.sshAuthorizedService.createSshKey(name, key));
+    public ResultUtil<CreateSshAuthorizedModel> createKey(@RequestParam("name") String name) {
+        return this.lockRun(() -> this.sshAuthorizedService.createSshKey(name));
     }
 
 
