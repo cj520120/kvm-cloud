@@ -24,6 +24,7 @@ import com.google.common.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -166,7 +167,8 @@ public class NetworkService extends AbstractService {
             componentVip.setAllocateId(component.getComponentId());
             componentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
             this.guestNetworkMapper.updateById(componentVip);
-            if (type == Constant.NetworkType.VLAN) {
+            if (type == Constant.NetworkType.VLAN && ObjectUtils.isEmpty(gateway)) {
+                //如果没有硬件网关地址，则将VIP设置为模拟网关
                 basicComponentVip.setAllocateId(component.getComponentId());
                 basicComponentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
                 this.guestNetworkMapper.updateById(componentVip);

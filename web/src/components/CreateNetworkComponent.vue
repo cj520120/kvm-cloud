@@ -30,6 +30,19 @@
 					</el-col>
 				</el-row>
 
+				<el-row :gutter="24" v-if="create_network.type === 1">
+					<el-col :span="8">
+						<el-form-item label="网关类型" prop="mask">
+							<el-select v-model="gateway_type" style="width: 100%">
+								<el-option label="模拟网关" :value="0"></el-option>
+								<el-option label="硬件网关" :value="1"></el-option>
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="网关地址" prop="gateway" v-if="gateway_type == 1"><el-input v-model="create_network.gateway"></el-input></el-form-item>
+					</el-col>
+				</el-row>
 				<el-row :gutter="24">
 					<el-col :span="8">
 						<el-form-item label="子网掩码" prop="mask"><el-input v-model="create_network.mask"></el-input></el-form-item>
@@ -110,7 +123,8 @@ export default {
 				domain: 'cj.kvm.internal',
 				vlanId: 100,
 				basicNetworkId: ''
-			}
+			},
+			gateway_type: 0
 		}
 	},
 	methods: {
@@ -124,6 +138,7 @@ export default {
 			if (this.$refs['createForm']) {
 				this.$refs['createForm'].resetFields()
 			}
+			this.gateway_type = 0
 			await getNetworkList()
 				.then((res) => {
 					if (res.code == 0) {
@@ -138,6 +153,9 @@ export default {
 			if (this.create_network.type === 0) {
 				this.create_network.vlanId = 0
 				this.create_network.basicNetworkId = 0
+			}
+			if (this.create_network.type === 1 && this.gateway_type === 0) {
+				this.create_network.gateway = ''
 			}
 			createNetwork(this.create_network).then((res) => {
 				if (res.code === 0) {

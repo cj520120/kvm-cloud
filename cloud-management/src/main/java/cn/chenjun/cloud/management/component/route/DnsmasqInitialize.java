@@ -66,11 +66,12 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         map.put("vip", component.getComponentVip());
         map.put("startIp", startIp);
         map.put("endIp", endIp);
-        if (network.getBasicNetworkId() > 0) {
-            map.put("gateway", component.getComponentVip());
-        } else {
-            map.put("gateway", network.getGateway());
-        }
+//        if (network.getBasicNetworkId() > 0) {
+//            map.put("gateway", component.getComponentVip());
+//        } else {
+//            map.put("gateway", network.getGateway());
+//        }
+        map.put("gateway", network.getGateway());
         map.put("mask", network.getMask());
         map.put("domain", network.getDomain());
         map.put("dnsList", Arrays.asList(network.getDns().split(",")));
