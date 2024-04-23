@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.*;
 /**
  * @author chenjun
  */
+@Slf4j
 public class DomainXmlUtil {
     public static final int MAX_DEVICE_COUNT = 5;
     public static final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
@@ -92,6 +94,11 @@ public class DomainXmlUtil {
     private static Map<String, Object> getCdContext(OsCdRoom cdRoom,ApplicationConfig config) {
         Map<String, Object> map = new HashMap<>(0);
         map.put("type", "file");
+        if (config.getCd() != null && !ObjectUtils.isEmpty(config.getCd().getBus())) {
+            map.put("bus", config.getCd().getBus());
+        } else {
+            map.put("bus", "ide");
+        }
         Volume volume = cdRoom.getVolume();
         if (volume != null) {
             Map<String, Object> storage = new HashMap<>(0);
@@ -101,11 +108,6 @@ public class DomainXmlUtil {
             storage.put("type", volume.getStorage().getType());
             map.put("storage", storage);
             map.put("name", volume.getName());
-            if(config.getCd()!=null&&!ObjectUtils.isEmpty(config.getCd().getBus())){
-                map.put("bus", config.getCd().getBus());
-            }else{
-                map.put("bus","ide");
-            }
             switch (volume.getStorage().getType()) {
                 case Constant.StorageType.GLUSTERFS:
                     map.put("type", "network");
