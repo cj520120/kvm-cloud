@@ -1,16 +1,16 @@
 package cn.chenjun.cloud.agent.util;
 
+import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.hubspot.jinjava.Jinjava;
+import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author chenjun
@@ -21,27 +21,43 @@ public class DomainXmlUtil {
     public static final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
 
 
-    public static String buildDomainXml(GuestStartRequest request) {
+    public static String buildDomainXml(GuestStartRequest request, ApplicationConfig config) {
         Map<String, Object> map = new HashMap<>(0);
         map.put("name", request.getName());
         map.put("description", request.getDescription());
         map.put("memory", request.getOsMemory().getMemory());
         map.put("cpu", getCpuContext(request.getOsCpu()));
         map.put("emulator", request.getEmulator());
-        map.put("cd", getCdContext(request.getOsCdRoom()));
+        map.put("cd", getCdContext(request.getOsCdRoom(),config));
         map.put("disks", getDisksContext(request.getBus(), request.getOsDisks()));
         map.put("networks", getBatchNicContext(request.getNetworkInterfaces()));
         map.put("vnc", getVncContext(request.getVncPassword()));
+
+        if (config.getMachine() != null && !ObjectUtils.isEmpty(config.getMachine().getName())) {
+            Map<String, Object> machineMap = new HashMap<>(2);
+            machineMap.put("name", config.getMachine().getName().toLowerCase());
+            machineMap.put("arch", config.getMachine().getArch());
+            map.put("machine", machineMap);
+        }
+        if (Objects.equals(request.getBootstrapType(), BootstrapType.UEFI)) {
+            if (config.getUefi() == null || ObjectUtils.isEmpty(config.getUefi().getType()) || ObjectUtils.isEmpty(config.getUefi().getType())) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "该主机不支持UEFI");
+            }
+            Map<String, Object> uefiMap = new HashMap<>(2);
+            uefiMap.put("type", config.getUefi().getType());
+            uefiMap.put("path", config.getUefi().getPath());
+            map.put("uefi", uefiMap);
+        }
         String xml = ResourceUtil.readUtf8Str("tpl/domain.xml");
         Jinjava jinjava = TemplateUtil.create();
         return jinjava.render(xml, map);
     }
 
-    public static String buildCdXml(OsCdRoom cdRoom) {
+    public static String buildCdXml(OsCdRoom cdRoom,ApplicationConfig config) {
         String xml = ResourceUtil.readUtf8Str("tpl/cd.xml");
         Jinjava jinjava = TemplateUtil.create();
         Map<String, Object> map = new HashMap<>(0);
-        map.put("cd", getCdContext(cdRoom));
+        map.put("cd", getCdContext(cdRoom,config));
         return jinjava.render(xml, map);
     }
 
@@ -73,7 +89,7 @@ public class DomainXmlUtil {
         return map;
     }
 
-    private static Map<String, Object> getCdContext(OsCdRoom cdRoom) {
+    private static Map<String, Object> getCdContext(OsCdRoom cdRoom,ApplicationConfig config) {
         Map<String, Object> map = new HashMap<>(0);
         map.put("type", "file");
         Volume volume = cdRoom.getVolume();
@@ -85,6 +101,11 @@ public class DomainXmlUtil {
             storage.put("type", volume.getStorage().getType());
             map.put("storage", storage);
             map.put("name", volume.getName());
+            if(config.getCd()!=null&&!ObjectUtils.isEmpty(config.getCd().getBus())){
+                map.put("bus", config.getCd().getBus());
+            }else{
+                map.put("bus","ide");
+            }
             switch (volume.getStorage().getType()) {
                 case Constant.StorageType.GLUSTERFS:
                     map.put("type", "network");
@@ -163,6 +184,7 @@ public class DomainXmlUtil {
     private static Map<String, Object> getVncContext(String password) {
         Map<String, Object> map = new HashMap<>(0);
         map.put("password", password);
+        map.put("type", "vnc");
         return map;
     }
 

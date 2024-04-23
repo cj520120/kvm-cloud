@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
+import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.HostOperate;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
@@ -33,7 +34,8 @@ public class HostOperateImpl implements HostOperate {
     private NetworkOperate networkOperate;
     @Autowired
     private StorageOperate storageOperate;
-
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
 
     @SuppressWarnings("unchecked")
@@ -41,6 +43,7 @@ public class HostOperateImpl implements HostOperate {
     private HostInfo getHostInfo(Connect connect) {
         NodeInfo nodeInfo = connect.nodeInfo();
         OsInfo osInfo = SystemUtil.getOsInfo();
+
         HostInfo hostInfo = HostInfo.builder().hostName(connect.getHostName())
                 .name(osInfo.getName())
                 .osVersion(osInfo.getVersion())
@@ -54,6 +57,10 @@ public class HostOperateImpl implements HostOperate {
                 .threads(nodeInfo.threads)
                 .sockets(nodeInfo.sockets)
                 .build();
+        if (applicationConfig.getUefi() != null) {
+            hostInfo.setUefiType(applicationConfig.getUefi().getType());
+            hostInfo.setUefiPath(applicationConfig.getUefi().getPath());
+        }
         try (StringReader sr = new StringReader(connect.getCapabilities())) {
             SAXReader reader = new SAXReader();
             reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);

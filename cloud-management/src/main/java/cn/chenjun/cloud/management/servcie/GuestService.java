@@ -124,7 +124,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, String busType
+    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                               int storageId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size) {
@@ -155,6 +155,7 @@ public class GuestService extends AbstractService {
                 .name(GuestNameUtil.getName())
                 .description(description)
                 .systemCategory(systemCategory)
+                .bootstrapType(bootstrapType)
                 .busType(busType)
                 .cpu(scheme.getCpu())
                 .speed(scheme.getSpeed())
@@ -250,7 +251,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, int bootstrapType, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
                                             int storageId, String volumeType, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
@@ -264,6 +265,7 @@ public class GuestService extends AbstractService {
         String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
         guest.setSystemCategory(systemCategory);
+        guest.setBootstrapType(bootstrapType);
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
@@ -661,7 +663,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> modifyGuest(int guestId, int systemCategory, int groupId, String busType, String description, int schemeId) {
+    public ResultUtil<GuestModel> modifyGuest(int guestId, int systemCategory, int bootstrapType, int groupId, String busType, String description, int schemeId) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的描述信息");
         }
@@ -687,6 +689,7 @@ public class GuestService extends AbstractService {
                 guest.setMemory(scheme.getMemory());
                 guest.setSpeed(scheme.getSpeed());
                 guest.setSystemCategory(systemCategory);
+                guest.setBootstrapType(bootstrapType);
                 this.guestMapper.updateById(guest);
                 this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));

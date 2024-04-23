@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDownloadRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -41,7 +42,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
         }
-        HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+        HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
         StorageEntity targetStorage = storageMapper.selectById(templateVolume.getStorageId());
 
         VolumeDownloadRequest request = VolumeDownloadRequest.builder()

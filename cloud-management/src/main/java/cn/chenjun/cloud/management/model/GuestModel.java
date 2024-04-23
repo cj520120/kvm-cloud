@@ -31,6 +31,7 @@ public class GuestModel {
     private int groupId;
     private int status;
     private int systemCategory;
+    private int bootstrapType;
     private String guestIp;
     private Date lastStartTime;
     private Date createTime;

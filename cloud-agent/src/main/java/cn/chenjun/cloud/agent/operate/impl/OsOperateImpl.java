@@ -170,7 +170,7 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = DomainXmlUtil.buildCdXml(request);
+        String xml = DomainXmlUtil.buildCdXml(request,this.applicationConfig);
         domain.updateDeviceFlags(xml, 1);
         return null;
 
@@ -183,7 +183,7 @@ public class OsOperateImpl implements OsOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = DomainXmlUtil.buildCdXml(request);
+        String xml = DomainXmlUtil.buildCdXml(request,this.applicationConfig);
         log.info("attachCdRoom xml={}", xml);
         domain.updateDeviceFlags(xml, 1);
         return null;
@@ -298,7 +298,7 @@ public class OsOperateImpl implements OsOperate {
             osCpu.setSocket(sockets);
             osCpu.setThread(threads);
         }
-        String xml = DomainXmlUtil.buildDomainXml(request);
+        String xml = DomainXmlUtil.buildDomainXml(request, this.applicationConfig);
         log.info("create vm={}", xml);
         domain = connect.domainCreateXML(xml, 0);
         if (Objects.nonNull(request.getQmaRequest())) {

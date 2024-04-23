@@ -26,5 +26,7 @@ public class GuestStartRequest {
     private List<OsNic> networkInterfaces;
     private String vncPassword;
     private GuestQmaRequest qmaRequest;
+    private int systemCategory;
+    private int bootstrapType;
 
 }

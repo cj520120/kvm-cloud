@@ -78,6 +78,15 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
+
+					<el-col :span="12">
+						<el-form-item label="启动方式">
+							<el-select v-model="reinstall_guest.bootstrapType" style="width: 100%" placeholder="启动方式">
+								<el-option label="BIOS" :value="0" />
+								<el-option label="UEFI" :value="1" />
+							</el-select>
+						</el-form-item>
+					</el-col>
 				</el-row>
 				<el-row>
 					<el-col :span="12">
@@ -133,6 +142,7 @@ export default {
 				volumeId: '',
 				storageId: 0,
 				size: 100,
+				bootstrapType: 0,
 				systemCategory: 100
 			},
 			meta_config: {
@@ -205,6 +215,7 @@ export default {
 			this.reinstall_guest.volumeId = ''
 			this.reinstall_guest.type = 0
 			this.reinstall_guest.systemCategory = guest.systemCategory
+			this.reinstall_guest.bootstrapType = guest.bootstrapType
 			this.is_advance_config = false
 			this.user_config.password = ''
 			this.user_config.sshId = 0

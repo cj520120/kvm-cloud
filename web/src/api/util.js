@@ -10,6 +10,16 @@ export default {
           return `未知桥接[${network.bridgeType}]`;
       }
     },
+    get_bootstrap_type_name(guest) { 
+      switch (guest.bootstrapType) { 
+        case 0:
+          return "BIOS"
+        case 1:
+          return "UEFI"
+        default:
+          return "UNKNOW"
+      }
+    },
     get_system_cagetory_name(guest) {
       switch (guest.systemCategory) {
         case 100:

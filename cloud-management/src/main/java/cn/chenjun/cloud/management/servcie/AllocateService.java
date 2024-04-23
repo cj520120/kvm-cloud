@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
@@ -12,6 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,12 +56,12 @@ public class AllocateService extends AbstractService {
         return guestNetwork;
     }
 
-    public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
+    public HostEntity allocateHost(int hostId, int bootstrapType, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
             host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
             host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
-            if (!hostVerify(host, cpu, memory)) {
+            if (!hostVerify(host, bootstrapType, cpu, memory)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }
             return host;
@@ -69,7 +71,7 @@ public class AllocateService extends AbstractService {
                 host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
                 host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
             }
-            list = list.stream().filter(t -> hostVerify(t, cpu, memory))
+            list = list.stream().filter(t -> hostVerify(t, bootstrapType, cpu, memory))
                     .collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
@@ -83,9 +85,14 @@ public class AllocateService extends AbstractService {
         }
     }
 
-    private boolean hostVerify(HostEntity host, int cpu, long memory) {
+    private boolean hostVerify(HostEntity host, int bootstrapType, int cpu, long memory) {
         if (!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
             return false;
+        }
+        if (Objects.equals(bootstrapType, BootstrapType.UEFI)) {
+            if (ObjectUtils.isEmpty(host.getUefiPath()) || ObjectUtils.isEmpty(host.getUefiType())) {
+                return false;
+            }
         }
         int allocateCpu = host.getAllocationCpu() + cpu;
         long allocationMemory = host.getAllocationMemory() + memory;

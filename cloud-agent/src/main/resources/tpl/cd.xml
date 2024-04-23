@@ -1,6 +1,6 @@
 <disk type="{{cd.type}}" device="cdrom">
     <driver name="qemu"/>
-    <target dev="hda" bus="ide"/>
+    <target dev="hda" bus="{{cd.bus}}"/>
     {% if cd.storage.type == 'nfs' %}
     <source file="{{cd.storage.path}}/{{cd.name}}"/>
     {% elif cd.storage.type == 'glusterfs' %}

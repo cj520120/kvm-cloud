@@ -32,6 +32,8 @@
 				<el-descriptions-item label="Sockets">{{ show_host.sockets }}</el-descriptions-item>
 				<el-descriptions-item label="Threads">{{ show_host.threads }}</el-descriptions-item>
 				<el-descriptions-item label="Eemulator">{{ show_host.emulator }}</el-descriptions-item>
+				<el-descriptions-item label="UEFI Type">{{ show_host.uefiType }}</el-descriptions-item>
+				<el-descriptions-item label="UEFI Path">{{ show_host.uefiPath }}</el-descriptions-item>
 				<el-descriptions-item label="状态">
 					<el-tag :type="show_host.status === 1 ? 'success' : 'danger'">{{ get_host_status(show_host) }}</el-tag>
 				</el-descriptions-item>

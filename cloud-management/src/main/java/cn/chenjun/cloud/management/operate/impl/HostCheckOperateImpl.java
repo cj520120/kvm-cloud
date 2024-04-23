@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.operate.bean.HostCheckOperate;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Type;
 
@@ -47,6 +48,16 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             updateHost.setSockets(hostInfo.getSockets());
             updateHost.setThreads(hostInfo.getThreads());
             updateHost.setArch(hostInfo.getArch());
+            if (!ObjectUtils.isEmpty(hostInfo.getUefiPath())) {
+                updateHost.setUefiPath(hostInfo.getUefiPath());
+            } else {
+                updateHost.setUefiPath("");
+            }
+            if (!ObjectUtils.isEmpty(hostInfo.getUefiType())) {
+                updateHost.setUefiType(hostInfo.getUefiType());
+            } else {
+                updateHost.setUefiType("");
+            }
             updateHost.setHypervisor(hostInfo.getHypervisor());
             updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
         } else {

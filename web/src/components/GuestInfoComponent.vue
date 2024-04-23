@@ -30,6 +30,7 @@
 						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_cagetory_name(show_guest_info.current_guest) }}</div>
 					</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
+					<el-descriptions-item label="启动方式">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
 					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>

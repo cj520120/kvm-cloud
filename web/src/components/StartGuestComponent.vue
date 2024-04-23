@@ -4,7 +4,7 @@
 			<el-form-item label="选择主机">
 				<el-select v-model="start_guest.hostId" style="width: 100%">
 					<el-option label="随机" :value="0"></el-option>
-					<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" :v-loading="true" />
+					<el-option v-for="item in select_host" :key="item.hostId" :label="item.displayName" :value="item.hostId" :v-loading="true" />
 				</el-select>
 			</el-form-item>
 		</el-form>
@@ -20,6 +20,7 @@ export default {
 	data() {
 		return {
 			start_dialog_visiable: false,
+			start_guest_bootstrapType: 0,
 			start_guest: {
 				hostId: 0,
 				guestId: 0
@@ -27,9 +28,24 @@ export default {
 			hosts: []
 		}
 	},
+	computed: {
+		select_host() {
+			return this.hosts.filter((v) => {
+				if (this.start_guest_bootstrapType === 0) {
+					return true
+				} else if (this.start_guest_bootstrapType === 1) {
+					if (v.uefiType && v.uefiType != '' && v.uefiPath && v.uefiPath != '') {
+						return true
+					}
+				}
+				return false
+			})
+		}
+	},
 	methods: {
 		async init(guest) {
 			this.start_guest.guestId = guest.guestId
+			this.start_guest_bootstrapType = guest.bootstrapType
 			this.start_guest.hostId = 0
 			this.start_dialog_visiable = true
 			await this.load_all_host()

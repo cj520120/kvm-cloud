@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeInfoRequest;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -37,7 +38,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
             List<VolumeInfoRequest> requests = volumeList.stream().map(t -> VolumeInfoRequest.builder().sourceName(t.getName()).sourceStorage(storage.getName()).build()).collect(Collectors.toList());
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_VOLUME_INFO, requests);
         }
     }

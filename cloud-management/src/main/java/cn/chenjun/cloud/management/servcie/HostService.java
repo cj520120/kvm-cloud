@@ -68,7 +68,7 @@ public class HostService extends AbstractService {
         String clientId = AppUtils.getAppId();
         String clientSecret = AppUtils.getAppSecret(clientId);
         HostEntity host = HostEntity.builder().hostIp(ip).displayName(name)
-                .uri(uri).arch("").emulator("").nic(nic).hypervisor("")
+                .uri(uri).arch("").emulator("").nic(nic).hypervisor("").uefiType("").uefiPath("")
                 .clientId(clientId)
                 .clientSecret(clientSecret)
                 .totalMemory(0L)

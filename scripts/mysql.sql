@@ -130,13 +130,14 @@ CREATE TABLE `tbl_guest_info` (
   `guest_ip` varchar(48) NOT NULL DEFAULT '',
   `network_id` varchar(45) NOT NULL DEFAULT '0',
   `guest_type` int NOT NULL,
+  `guest_bootstrap_type` int NOT NULL DEFAULT '0',
   `group_id` int NOT NULL DEFAULT '0',
   `other_id` int NOT NULL,
   `guest_status` int NOT NULL,
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,10 +220,12 @@ CREATE TABLE `tbl_host_info` (
   `host_cpu_cores` int NOT NULL DEFAULT '0',
   `host_cpu_sockets` int NOT NULL DEFAULT '0',
   `host_cpu_threads` int NOT NULL DEFAULT '0',
+  `host_uefi_type` varchar(25) NOT NULL DEFAULT '',
+  `host_uefi_path` varchar(256) NOT NULL DEFAULT '',
   `host_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`host_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

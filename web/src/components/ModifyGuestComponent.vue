@@ -25,6 +25,12 @@
 					<el-option label="Android" :value="400" />
 				</el-select>
 			</el-form-item>
+			<el-form-item label="启动方式">
+				<el-select v-model="modify_guest.bootstrapType" style="width: 100%" placeholder="启动方式">
+					<el-option label="BIOS" :value="0" />
+					<el-option label="UEFI" :value="1" />
+				</el-select>
+			</el-form-item>
 			<el-form-item label="计算方案">
 				<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择计算方案">
 					<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
@@ -56,6 +62,7 @@ export default {
 				busType: '',
 				description: '',
 				schemeId: '',
+				bootstrapType: 0,
 				systemCategory: 101
 			}
 		}
@@ -70,6 +77,7 @@ export default {
 			this.modify_guest.busType = guest.busType
 			this.modify_guest_dialog_visiable = true
 			this.modify_guest.systemCategory = guest.systemCategory
+			this.modify_guest.bootstrapType = guest.bootstrapType
 			await this.load_all_schemes()
 			await this.load_all_groups()
 		},

@@ -77,4 +77,13 @@ public class HostInfo implements Serializable {
      * 系统版本
      */
     private String osVersion;
+    /**
+     *  UEFI type
+     */
+
+    private String uefiType;
+    /**
+     *  UEFI path
+     */
+    private String uefiPath;
 }

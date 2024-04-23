@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.bean.StorageInfoRequest;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -36,7 +37,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
             List<StorageInfoRequest> requests = storageList.stream().map(t -> StorageInfoRequest.builder().name(t.getName()).build()).collect(Collectors.toList());
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_STORAGE_INFO, requests);
         }
     }

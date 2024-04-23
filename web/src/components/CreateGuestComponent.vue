@@ -27,7 +27,7 @@
 						<el-form-item label="运行主机">
 							<el-select v-model="create_guest.hostId" style="width: 100%">
 								<el-option label="随机" :value="0"></el-option>
-								<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+								<el-option v-for="item in select_host" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
@@ -131,6 +131,16 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="12">
+						<el-form-item label="启动方式">
+							<el-select v-model="create_guest.bootstrapType" style="width: 100%" placeholder="启动方式">
+								<el-option label="BIOS" :value="0" />
+								<el-option label="UEFI" :value="1" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="12">
 						<el-form-item label="群组">
 							<el-select v-model="create_guest.groupId" style="width: 100%" placeholder="请选择群组">
 								<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
@@ -198,7 +208,8 @@ export default {
 				volumeId: '',
 				storageId: 0,
 				systemCategory: 101,
-				size: 100
+				size: 100,
+				bootstrapType: 0
 			},
 			meta_config: {
 				hostName: ''
@@ -218,6 +229,23 @@ export default {
 			networks: [],
 			groups: [],
 			sshs: [{ id: 0, name: '无' }]
+		}
+	},
+	computed: {
+		select_host() {
+			return this.hosts.filter((v) => {
+				if (this.create_guest.bootstrapType === 0) {
+					return true
+				} else if (this.create_guest.bootstrapType === 1) {
+					if (v.uefiType && v.uefiType != '' && v.uefiPath && v.uefiPath != '') {
+						return true
+					}
+				}
+				if (v.hostId === this.create_guest.hostId) {
+					this.create_guest.hostId = 0
+				}
+				return false
+			})
 		}
 	},
 	methods: {
@@ -308,7 +336,7 @@ export default {
 			this.create_guest.type = 0
 			this.create_guest.groupId = 0
 			this.create_guest.systemCategory = 101
-
+			this.create_guest.bootstrapType = 0
 			this.is_advance_config = false
 			this.user_config.password = ''
 			this.user_config.sshId = 0

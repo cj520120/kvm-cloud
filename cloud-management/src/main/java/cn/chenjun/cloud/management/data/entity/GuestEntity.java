@@ -25,6 +25,7 @@ public class GuestEntity {
     public static final String GUEST_NAME = "guest_name";
     public static final String GUEST_DESCRIPTION = "guest_description";
     public static final String GUEST_BUS_TYPE = "guest_bus_type";
+    public static final String GUEST_BOOTSTRAP_TYPE = "guest_bootstrap_type";
     public static final String GUEST_CPU = "guest_cpu";
     public static final String GUEST_CPU_SPEED = "guest_cpu_speed";
     public static final String GUEST_MEMORY = "guest_memory";
@@ -76,6 +77,8 @@ public class GuestEntity {
     private Integer systemCategory;
     @TableField(GUEST_TYPE)
     private Integer type;
+    @TableField(GUEST_BOOTSTRAP_TYPE)
+    private Integer bootstrapType;
     @TableField(GUEST_STATUS)
     private Integer status;
     @TableField(LAST_START_TIME)

@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
 import cn.chenjun.cloud.management.servcie.VncService;
@@ -32,6 +33,8 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     @Autowired
     private VncService vncService;
 
+    @Autowired
+    private ApplicationConfig config;
 
     @Override
     public void operate(T param) {
@@ -40,7 +43,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
 
-        HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), param.getHostId(), guest.getCpu(), guest.getMemory());
+        HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), guest.getBootstrapType(), param.getHostId(), guest.getCpu(), guest.getMemory());
         List<OsDisk> disks = getGuestDisk(guest);
         List<OsNic> networkInterfaces = getGuestNetwork(guest);
         OsCdRoom cdRoom = getGuestCdRoom(guest);
@@ -56,9 +59,12 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             cpu.setThread(scheme.getThreads());
             cpu.setSocket(scheme.getSockets());
         }
+
         GuestStartRequest request = GuestStartRequest.builder()
                 .emulator(host.getEmulator())
                 .name(guest.getName())
+                .systemCategory(guest.getSystemCategory())
+                .bootstrapType(guest.getBootstrapType())
                 .description(guest.getDescription())
                 .bus(guest.getBusType())
                 .osCpu(cpu)

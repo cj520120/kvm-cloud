@@ -293,4 +293,21 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 
 10、关于提示签名错误问题，请确保管理端跟agent端时间同步
 
+11、修改默认machine设置
+```$xslt
+由于各操作系统支持不同，可以在agent的配置文件中增加如下配置修改（示例为ubuntu 22.04中的配置）:
+app.machine.name = q35
+app.machine.arch = x86_64
+app.cd.bus = sata (根据machine修改光驱的设置)
+具体支持的配置需要根据操作系统决定,具体查询命令如下:
+Centos: /usr/libexec/qemu-kvm -machine help
+Ubuntu: qemu-system-i386 -machine help
+```
+
+12、UEFI 配置
+```$xslt
+由于各操作系统支持不同，可以在agent的配置增加uefi路径配置（示例为ubuntu 22.04中的配置）:
+app.uefi.type = pflash
+app.uefi.path= /usr/share/OVMF/OVMF_CODE.fd
+```
 

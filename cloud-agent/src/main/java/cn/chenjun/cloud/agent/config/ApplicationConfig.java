@@ -12,4 +12,34 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
     private int taskThreadSize;
+
+    private Machine machine;
+    private UefiConfig uefi;
+    private Vnc vnc;
+    private Cd cd;
+
+    @Data
+    public static class Machine {
+
+        private String name;
+        private String arch;
+    }
+
+    @Data
+    public static class UefiConfig {
+
+        private String type;
+        private String path;
+    }
+
+    @Data
+    public static class Vnc {
+
+        private String type;
+    }
+    @Data
+    public static class Cd {
+
+        private String bus;
+    }
 }

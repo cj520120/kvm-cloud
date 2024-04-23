@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.component;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -183,7 +184,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             case Constant.GuestStatus.STOP:
                 masterGuest.setStatus(Constant.GuestStatus.STARTING);
                 guestMapper.updateById(masterGuest);
-                HostEntity host = this.allocateService.allocateHost(masterGuest.getLastHostId(), 0, masterGuest.getCpu(), masterGuest.getMemory());
+                HostEntity host = this.allocateService.allocateHost(masterGuest.getLastHostId(), masterGuest.getBootstrapType(), 0, masterGuest.getCpu(), masterGuest.getMemory());
                 BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(masterGuest.getGuestId()).hostId(host.getHostId()).componentType(this.getComponentType()).build();
                 this.operateTask.addTask(operateParam);
                 this.eventService.publish(NotifyData.<Void>builder().id(masterGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -218,6 +219,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .groupId(0)
                 .description(name)
                 .systemCategory(SystemCategory.CENTOS)
+                .bootstrapType(BootstrapType.BIOS)
                 .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
                 .cpu(applicationConfig.getSystemComponentCpu())
                 .speed(applicationConfig.getSystemComponentCpuSpeed())
