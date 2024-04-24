@@ -8,6 +8,7 @@ import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.SystemPropsUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import lombok.SneakyThrows;
@@ -38,16 +39,14 @@ public class HostOperateImpl implements HostOperate {
     private ApplicationConfig applicationConfig;
 
 
-    @SuppressWarnings("unchecked")
     @SneakyThrows
     private HostInfo getHostInfo(Connect connect) {
         NodeInfo nodeInfo = connect.nodeInfo();
-        OsInfo osInfo = SystemUtil.getOsInfo();
 
         HostInfo hostInfo = HostInfo.builder().hostName(connect.getHostName())
-                .name(osInfo.getName())
-                .osVersion(osInfo.getVersion())
-                .arch(osInfo.getArch())
+                .name(SystemPropsUtil.get("os.name",""))
+                .osVersion(SystemPropsUtil.get("os.version",""))
+                .arch(SystemPropsUtil.get("os.arch",""))
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(nodeInfo.memory)
@@ -60,6 +59,9 @@ public class HostOperateImpl implements HostOperate {
         if (applicationConfig.getUefi() != null) {
             hostInfo.setUefiType(applicationConfig.getUefi().getType());
             hostInfo.setUefiPath(applicationConfig.getUefi().getPath());
+        }
+        if (applicationConfig.getMachine() != null) {
+            hostInfo.setMachine(applicationConfig.getMachine().getName());
         }
         try (StringReader sr = new StringReader(connect.getCapabilities())) {
             SAXReader reader = new SAXReader();

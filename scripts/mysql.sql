@@ -202,30 +202,35 @@ DROP TABLE IF EXISTS `tbl_host_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_host_info` (
-  `host_id` int NOT NULL AUTO_INCREMENT,
+  `host_id` int(11) NOT NULL AUTO_INCREMENT,
   `host_display_name` varchar(45) NOT NULL,
   `client_id` varchar(45) NOT NULL,
   `client_secret` varchar(45) NOT NULL,
-  `host_name` varchar(45) NOT NULL DEFAULT '',
+  `host_name` varchar(64) NOT NULL DEFAULT '',
+  `host_os_name` varchar(64) NOT NULL,
+  `host_os_version` varchar(64) NOT NULL,
+  `host_vendor` varchar(45) NOT NULL,
   `host_ip` varchar(20) NOT NULL,
   `host_nic_name` varchar(20) NOT NULL,
   `host_uri` varchar(128) NOT NULL,
-  `host_allocation_memory` bigint NOT NULL,
-  `host_allocation_cpu` int NOT NULL,
-  `host_total_memory` bigint NOT NULL,
-  `host_total_cpu` int NOT NULL,
+  `host_allocation_memory` bigint(20) NOT NULL,
+  `host_allocation_cpu` int(11) NOT NULL,
+  `host_total_memory` bigint(20) NOT NULL,
+  `host_total_cpu` int(11) NOT NULL,
   `host_arch` varchar(20) NOT NULL,
   `host_hypervisor` varchar(20) NOT NULL,
   `host_emulator` varchar(128) NOT NULL,
-  `host_cpu_cores` int NOT NULL DEFAULT '0',
-  `host_cpu_sockets` int NOT NULL DEFAULT '0',
-  `host_cpu_threads` int NOT NULL DEFAULT '0',
+  `host_guest_machine` varchar(45) NOT NULL DEFAULT '',
+  `host_cpu_cores` int(11) NOT NULL DEFAULT '0',
+  `host_cpu_sockets` int(11) NOT NULL DEFAULT '0',
+  `host_cpu_threads` int(11) NOT NULL DEFAULT '0',
   `host_uefi_type` varchar(25) NOT NULL DEFAULT '',
   `host_uefi_path` varchar(256) NOT NULL DEFAULT '',
-  `host_status` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `host_status` int(11) NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`host_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

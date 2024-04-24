@@ -17,6 +17,9 @@
 				<el-descriptions-item label="网卡名称">{{ show_host.nic }}</el-descriptions-item>
 				<el-descriptions-item label="通信地址">{{ show_host.uri }}</el-descriptions-item>
 				<el-descriptions-item label="主机架构">{{ show_host.arch }}</el-descriptions-item>
+				<el-descriptions-item label="操作系统">{{ show_host.osName }}</el-descriptions-item>
+				<el-descriptions-item label="系统版本">{{ show_host.osVersion }}</el-descriptions-item>
+				<el-descriptions-item label="制造商">{{ show_host.vendor }}</el-descriptions-item>
 				<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 				<el-descriptions-item label="内存">
 					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(show_host.allocationMemory) + ' / 总共:' + get_memory_display_size(show_host.totalMemory)" placement="top">
@@ -31,6 +34,7 @@
 				<el-descriptions-item label="Cores">{{ show_host.cores }}</el-descriptions-item>
 				<el-descriptions-item label="Sockets">{{ show_host.sockets }}</el-descriptions-item>
 				<el-descriptions-item label="Threads">{{ show_host.threads }}</el-descriptions-item>
+				<el-descriptions-item label="Machine">{{ show_host.machine }}</el-descriptions-item>
 				<el-descriptions-item label="Eemulator">{{ show_host.emulator }}</el-descriptions-item>
 				<el-descriptions-item label="UEFI Type">{{ show_host.uefiType }}</el-descriptions-item>
 				<el-descriptions-item label="UEFI Path">{{ show_host.uefiPath }}</el-descriptions-item>

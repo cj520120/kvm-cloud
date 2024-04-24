@@ -41,6 +41,8 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
         HostEntity updateHost = HostEntity.builder().hostId(param.getHostId()).build();
         if (hostInfo != null) {
             updateHost.setHostName(hostInfo.getHostName());
+            updateHost.setOsName(hostInfo.getName());
+            updateHost.setOsVersion(hostInfo.getOsVersion());
             updateHost.setTotalCpu(hostInfo.getCpu());
             updateHost.setTotalMemory(hostInfo.getMemory());
             updateHost.setEmulator(hostInfo.getEmulator());
@@ -48,6 +50,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             updateHost.setSockets(hostInfo.getSockets());
             updateHost.setThreads(hostInfo.getThreads());
             updateHost.setArch(hostInfo.getArch());
+            updateHost.setVendor(hostInfo.getVendor());
             if (!ObjectUtils.isEmpty(hostInfo.getUefiPath())) {
                 updateHost.setUefiPath(hostInfo.getUefiPath());
             } else {
@@ -57,6 +60,11 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
                 updateHost.setUefiType(hostInfo.getUefiType());
             } else {
                 updateHost.setUefiType("");
+            }
+            if (!ObjectUtils.isEmpty(hostInfo.getMachine())) {
+                updateHost.setMachine(hostInfo.getMachine());
+            } else {
+                updateHost.setMachine("");
             }
             updateHost.setHypervisor(hostInfo.getHypervisor());
             updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);

@@ -80,8 +80,12 @@ public class HostInfo implements Serializable {
     /**
      *  UEFI type
      */
-
     private String uefiType;
+
+    /**
+     * machine
+     */
+    private String machine;
     /**
      *  UEFI path
      */

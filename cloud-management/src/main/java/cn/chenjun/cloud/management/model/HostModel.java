@@ -26,10 +26,14 @@ public class HostModel {
     private long totalMemory;
     private int totalCpu;
     private String arch;
+    private String vendor;
     private String uefiType;
     private String uefiPath;
     private String hypervisor;
     private String emulator;
+    private String osName;
+    private String osVersion;
+    private String machine;
     private int cores;
     private int threads;
     private int sockets;
