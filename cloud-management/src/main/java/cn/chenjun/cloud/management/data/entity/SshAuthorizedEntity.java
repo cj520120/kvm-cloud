@@ -20,13 +20,16 @@ import lombok.NoArgsConstructor;
 public class SshAuthorizedEntity {
     public static final String SSH_AUTHORIZED_ID = "id";
     public static final String SSH_NAME = "ssh_name";
-    public static final String SSH_KEY = "ssh_key";
+    public static final String SSH_PUBLIC_KEY = "ssh_public_key";
+    public static final String SSH_PRIVATE_KEY = "ssh_private_key";
 
     @TableId(type = IdType.AUTO)
     @TableField(SSH_AUTHORIZED_ID)
     private Integer id;
     @TableField(SSH_NAME)
     private String sshName;
-    @TableField(SSH_KEY)
-    private String sshKey;
+    @TableField(SSH_PUBLIC_KEY)
+    private String sshPublicKey;
+    @TableField(SSH_PRIVATE_KEY)
+    private String sshPrivateKey;
 }

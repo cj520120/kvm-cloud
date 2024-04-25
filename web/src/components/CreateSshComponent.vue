@@ -38,26 +38,11 @@ export default {
 				this.$refs['createForm'].resetFields()
 			}
 		},
-		download_file(filename, body) {
-			let contentType = 'text/plain;charset=utf-8'
-			var blob = new Blob([body], { type: contentType })
-			let downlaodUri = window.URL.createObjectURL(blob)
-			let downloadLink = document.createElement('a')
-			downloadLink.style.display = 'none'
-			document.body.appendChild(downloadLink)
-			downloadLink.href = downlaodUri
-			downloadLink.target = '_self'
-			downloadLink.download = filename
-			downloadLink.click()
-			downloadLink.remove()
-			URL.revokeObjectURL(downlaodUri)
-		},
 		create_ssh_click() {
 			createSSh(this.create_ssh).then((res) => {
 				if (res.code === 0) {
 					this.on_notify_update_sshAuthorized(res.data)
 					this.on_back_click()
-					this.download_file(`${decodeURIComponent(res.data.name)}-${res.data.id}.rsa`, res.data.privateKey)
 				} else {
 					this.$notify.error({
 						title: '错误',

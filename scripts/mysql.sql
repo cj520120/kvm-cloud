@@ -453,11 +453,12 @@ DROP TABLE IF EXISTS `tbl_ssh_authorized_keys`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_ssh_authorized_keys` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `ssh_name` VARCHAR(45) NOT NULL,
-  `ssh_key` TEXT(8192) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ssh_name` varchar(45) NOT NULL,
+  `ssh_public_key` text NOT NULL,
+  `ssh_private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 --
 -- Table structure for table `tbl_guest_ssh_info`

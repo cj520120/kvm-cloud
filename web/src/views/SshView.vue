@@ -13,6 +13,7 @@
 							<el-table-column label="名称" prop="name" show-overflow-tooltip />
 							<el-table-column label="操作" min-width="380">
 								<template #default="scope">
+									<el-button @click="download_sshAuthorized_privateKey(scope.row)" type="primary" size="mini">下载私钥</el-button>
 									<el-button @click="destroy_sshAuthorized(scope.row)" type="danger" size="mini">删除</el-button>
 								</template>
 							</el-table-column>
@@ -26,7 +27,7 @@
 	</div>
 </template>
 <script>
-import { getSshList, destroySsh } from '@/api/api'
+import { getSshList, destroySsh, createSshDownloadKey } from '@/api/api'
 import ImportSshComponent from '@/components/ImportSshComponent'
 import CreateSshComponent from '@/components/CreateSshComponent.vue'
 import Notify from '@/api/notify'
@@ -107,6 +108,22 @@ export default {
 		show_create_ssh_click() {
 			this.show_type = 2
 			this.$refs.CreateSshComponentRef.init()
+		},
+		download_sshAuthorized_privateKey(ssh) {
+			console.log(ssh)
+			createSshDownloadKey({ id: ssh.id }).then((res) => {
+				if (res.code === 0) {
+					console.log(res.data)
+					let href = process.env.NODE_ENV === 'production' ? `//${window.location.host}/api/ssh/download?token=${res.data}` : `//192.168.2.193:8080/api/ssh/download?token=${res.data}`
+
+					window.open(href, '_blank')
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: `创建密钥下载Key失败:${res.message}`
+					})
+				}
+			})
 		},
 		destroy_sshAuthorized(ssh) {
 			this.$confirm('删除密钥, 是否继续?', '提示', {

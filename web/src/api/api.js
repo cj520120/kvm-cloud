@@ -682,3 +682,10 @@ export const destroySsh = (data = {}) => {
     method: "DELETE",
   });
 };
+export const createSshDownloadKey = (data = {}) => {
+  return axios.request({
+    url: "/api/ssh/download/key",
+    data,
+    method: "POST",
+  });
+};

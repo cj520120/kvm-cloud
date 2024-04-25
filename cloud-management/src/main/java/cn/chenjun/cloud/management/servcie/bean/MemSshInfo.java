@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.model;
+package cn.chenjun.cloud.management.servcie.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,11 +8,13 @@ import lombok.NoArgsConstructor;
 /**
  * @author chenjun
  */
-@Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class SshAuthorizedModel {
-    private Integer id;
+@Data
+public class MemSshInfo {
+    private int id;
     private String name;
+    private String publicKey;
+    private String privateKey;
 }

@@ -115,7 +115,7 @@ public abstract class AbstractService {
     }
 
     protected SshAuthorizedModel initSshAuthorized(SshAuthorizedEntity entity) {
-        return SshAuthorizedModel.builder().id(entity.getId()).name(entity.getSshName()).publicKey(entity.getSshKey()).build();
+        return SshAuthorizedModel.builder().id(entity.getId()).name(entity.getSshName()).build();
     }
     protected GuestNetworkModel initGuestNetwork(GuestNetworkEntity entity) {
         return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())

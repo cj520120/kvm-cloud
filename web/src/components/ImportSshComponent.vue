@@ -9,7 +9,10 @@
 					<el-input v-model="import_ssh.name"></el-input>
 				</el-form-item>
 				<el-form-item label="公钥内容" prop="key">
-					<el-input v-model="import_ssh.key" type="textarea" :autosize="{ minRows: 10, maxRows: 1000 }"></el-input>
+					<el-input v-model="import_ssh.publciKey" type="textarea" :autosize="{ minRows: 10, maxRows: 1000 }"></el-input>
+				</el-form-item>
+				<el-form-item label="私钥内容" prop="key">
+					<el-input v-model="import_ssh.private" type="textarea" :autosize="{ minRows: 10, maxRows: 1000 }"></el-input>
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="import_ssh_click">导入</el-button>
@@ -26,7 +29,8 @@ export default {
 		return {
 			import_ssh: {
 				name: '',
-				key: ''
+				publciKey: '',
+				privateKey: ''
 			}
 		}
 	},

@@ -59,11 +59,11 @@ public class LinuxUserDataService implements UserDataService {
             if (sshAuthorizedEntity == null) {
                 break;
             }
-            if (ObjectUtils.isEmpty(sshAuthorizedEntity.getSshKey())) {
+            if (ObjectUtils.isEmpty(sshAuthorizedEntity.getSshPublicKey())) {
                 break;
             }
             data.append("ssh_authorized_keys:\n");
-            data.append("  - ").append(sshAuthorizedEntity.getSshKey());
+            data.append("  - ").append(sshAuthorizedEntity.getSshPublicKey());
             data.append("\n");
         } while (false);
         return data.toString();
