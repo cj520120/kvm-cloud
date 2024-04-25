@@ -28,6 +28,7 @@ public class MetaService extends AbstractService {
     private PluginRegistry<MetaDataService, Integer> metaDataPluginRegistry;
     @Autowired
     private PluginRegistry<UserDataService, Integer> userDataPluginRegistry;
+    @Autowired
     private PluginRegistry<VendorDataService, Integer> vendorDataPluginRegistry;
 
 
