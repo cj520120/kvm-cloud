@@ -6,12 +6,12 @@
 		<el-row>
 			<el-form ref="createForm" :model="create_guest" label-width="100px" class="demo-ruleForm">
 				<el-row>
-					<el-col :span="12">
-						<el-form-item label="标签" prop="description">
+					<el-col :span="8">
+						<el-form-item label="名称" prop="description">
 							<el-input v-model="create_guest.description"></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="总线方式">
 							<el-select v-model="create_guest.busType" style="width: 100%" placeholder="总线方式">
 								<el-option label="virtio" value="virtio" />
@@ -21,9 +21,32 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
+					<el-col :span="8">
+						<el-form-item label="固件类型">
+							<el-select v-model="create_guest.bootstrapType" style="width: 100%">
+								<el-option label="BIOS" :value="0" />
+								<el-option label="UEFI" :value="1" />
+							</el-select>
+						</el-form-item>
+					</el-col>
 				</el-row>
 				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
+						<el-form-item label="配置">
+							<el-select v-model="create_guest.schemeId" style="width: 100%" placeholder="请选择虚拟机配置">
+								<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="存储池">
+							<el-select v-model="create_guest.storageId" style="width: 100%">
+								<el-option label="随机" :value="0"></el-option>
+								<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
 						<el-form-item label="运行主机">
 							<el-select v-model="create_guest.hostId" style="width: 100%">
 								<el-option label="随机" :value="0"></el-option>
@@ -31,23 +54,16 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="架构">
-							<el-select v-model="create_guest.schemeId" style="width: 100%" placeholder="请选择架构">
-								<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
-							</el-select>
-						</el-form-item>
-					</el-col>
 				</el-row>
 				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="网络">
 							<el-select v-model="create_guest.networkId" style="width: 100%" placeholder="请选择网络">
 								<el-option v-for="item in this.networks" :key="item.networkId" :label="item.name" :value="item.networkId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="网络驱动">
 							<el-select v-model="create_guest.networkDeviceType" style="width: 100%" placeholder="请选择网卡驱动">
 								<el-option label="virtio" value="virtio" />
@@ -56,21 +72,9 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
-						<el-form-item label="安装方式">
-							<el-select v-model="create_guest.type" style="width: 100%" placeholder="请选择安装方式">
-								<el-option label="ISO镜像" :value="0" />
-								<el-option label="模版安装" :value="1" />
-								<el-option label="快照安装" :value="2" />
-								<el-option label="现有磁盘" :value="3" />
-							</el-select>
-						</el-form-item>
-					</el-col>
-					<el-col :span="12">
-						<el-form-item label="磁盘类型" v-if="create_guest.type !== 3">
-							<el-select v-model="create_guest.volumeType" style="width: 100%">
+					<el-col :span="8">
+						<el-form-item label="磁盘类型">
+							<el-select v-model="create_guest.volumeType" style="width: 100%" :disabled="create_guest.type === 3">
 								<el-option label="raw" value="raw"></el-option>
 								<el-option label="qcow" value="qcow"></el-option>
 								<el-option label="qcow2" value="qcow2"></el-option>
@@ -82,7 +86,33 @@
 					</el-col>
 				</el-row>
 				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
+						<el-form-item label="安装方式">
+							<el-select v-model="create_guest.type" style="width: 100%" placeholder="请选择安装方式">
+								<el-option label="ISO镜像" :value="0" />
+								<el-option label="模版安装" :value="1" />
+								<el-option label="快照安装" :value="2" />
+								<el-option label="现有磁盘" :value="3" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="操作系统">
+							<el-select v-model="create_guest.systemCategory" style="width: 100%" placeholder="操作系统">
+								<el-option label="Centos" :value="101" />
+								<el-option label="Ubuntu" :value="102" />
+								<el-option label="Windows" :value="300" />
+								<el-option label="Deepin" :value="103" />
+								<el-option label="RedHat" :value="104" />
+								<el-option label="Debian" :value="105" />
+								<el-option label="OpenEuler" :value="106" />
+								<el-option label="Linux" :value="100" />
+								<el-option label="Unix" :value="200" />
+								<el-option label="Android" :value="400" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
 						<el-form-item label="ISO模版" v-if="create_guest.type === 0">
 							<el-select v-model="create_guest.isoTemplateId" style="width: 100%" placeholder="请选择光盘镜像">
 								<el-option v-for="item in this.iso_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
@@ -104,76 +134,35 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="存储池" v-if="create_guest.type !== 3">
-							<el-select v-model="create_guest.storageId" style="width: 100%">
-								<el-option label="随机" :value="0"></el-option>
-								<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
-							</el-select>
-						</el-form-item>
-					</el-col>
 				</el-row>
 				<el-row>
-					<el-col :span="12">
-						<el-form-item label="操作系统">
-							<el-select v-model="create_guest.systemCategory" style="width: 100%" placeholder="操作系统">
-								<el-option label="Centos" :value="101" />
-								<el-option label="Ubuntu" :value="102" />
-								<el-option label="Windows" :value="300" />
-								<el-option label="Deepin" :value="103" />
-								<el-option label="RedHat" :value="104" />
-								<el-option label="Debian" :value="105" />
-								<el-option label="OpenEuler" :value="106" />
-								<el-option label="Linux" :value="100" />
-								<el-option label="Unix" :value="200" />
-								<el-option label="Android" :value="400" />
-							</el-select>
-						</el-form-item>
-					</el-col>
-					<el-col :span="12">
-						<el-form-item label="启动方式">
-							<el-select v-model="create_guest.bootstrapType" style="width: 100%" placeholder="启动方式">
-								<el-option label="BIOS" :value="0" />
-								<el-option label="UEFI" :value="1" />
-							</el-select>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="群组">
 							<el-select v-model="create_guest.groupId" style="width: 100%" placeholder="请选择群组">
 								<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
+					<el-col :span="8">
+						<el-form-item label="磁盘大小">
+							<el-input v-model="create_guest.size" :disabled="create_guest.type !== 0"><template slot="append">GB</template></el-input>
+						</el-form-item>
+					</el-col>
 				</el-row>
 				<el-row>
-					<el-col :span="12">
-						<el-form-item label="磁盘大小" v-if="create_guest.type === 0">
-							<el-input v-model="create_guest.size"></el-input>
-						</el-form-item>
-					</el-col>
-					<el-col :span="12">
-						<el-form-item label="" v-if="create_guest.type === 1 && create_guest.systemCategory != 300">
-							<el-checkbox v-model="is_advance_config">高级配置</el-checkbox>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row v-if="create_guest.type === 1 && create_guest.systemCategory != 300 && is_advance_config">
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="主机名">
-							<el-input v-model="meta_config.hostName"></el-input>
-						</el-form-item>
-						<el-form-item label="密码">
-							<el-input v-model="user_config.password" :show-password="true" type="password"></el-input>
+							<el-input v-model="meta_config.hostName" :disabled="create_guest.type !== 1 || create_guest.systemCategory == 300"></el-input>
 						</el-form-item>
 					</el-col>
-				</el-row>
-				<el-row v-if="create_guest.type === 1 && create_guest.systemCategory != 300 && is_advance_config">
-					<el-col :span="12">
+					<el-col :span="8">
+						<el-form-item label="密码">
+							<el-input v-model="user_config.password" :show-password="true" type="password" :disabled="create_guest.type !== 1 || create_guest.systemCategory == 300"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
 						<el-form-item label="登录密钥">
-							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥">
+							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥" :disabled="create_guest.type !== 1 || create_guest.systemCategory == 300">
 								<el-option v-for="item in this.sshs" :key="item.id" :label="item.name" :value="item.id" />
 							</el-select>
 						</el-form-item>
@@ -218,7 +207,6 @@ export default {
 				password: '',
 				sshId: 0
 			},
-			is_advance_config: false,
 			iso_template: [],
 			attach_volumes: [],
 			disk_template: [],
@@ -337,7 +325,6 @@ export default {
 			this.create_guest.groupId = 0
 			this.create_guest.systemCategory = 101
 			this.create_guest.bootstrapType = 0
-			this.is_advance_config = false
 			this.user_config.password = ''
 			this.user_config.sshId = 0
 			this.meta_config.hostName = ''
@@ -371,16 +358,14 @@ export default {
 			}
 			let meta_map = {}
 			let user_map = {}
-			if (this.is_advance_config) {
-				if (this.meta_config.hostName) {
-					meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
-				}
-				if (this.user_config.password) {
-					user_map = { ...user_map, password: this.user_config.password }
-				}
-				if (this.user_config.sshId > 0) {
-					user_map = { ...user_map, sshId: this.user_config.sshId + '' }
-				}
+			if (this.meta_config.hostName) {
+				meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
+			}
+			if (this.user_config.password) {
+				user_map = { ...user_map, password: this.user_config.password }
+			}
+			if (this.user_config.sshId > 0) {
+				user_map = { ...user_map, sshId: this.user_config.sshId + '' }
 			}
 			let create_request_data = { ...this.create_guest, metaData: JSON.stringify(meta_map), userData: JSON.stringify(user_map) }
 			createGuest(create_request_data).then((res) => {

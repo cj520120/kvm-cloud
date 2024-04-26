@@ -91,13 +91,17 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         } catch (Exception err) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
         }
-        String uri = String.format("%s/api/operate", host.getUri());
+        String url = host.getUri();
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        url += "api/operate";
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
         map.forEach((k, v) -> requestMap.add(k, v.toString()));
         RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
-                .post(URI.create(uri))
+                .post(URI.create(url))
                 .headers(httpHeaders)
                 .body(requestMap);
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);

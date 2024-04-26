@@ -24,13 +24,13 @@
 				<el-descriptions :column="2" size="medium" border>
 					<el-descriptions-item label="ID">{{ show_guest_info.current_guest.guestId }}</el-descriptions-item>
 					<el-descriptions-item label="实例名">{{ show_guest_info.current_guest.name }}</el-descriptions-item>
-					<el-descriptions-item label="标签">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
+					<el-descriptions-item label="名称">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
 					<el-descriptions-item label="操作系统">
 						<img :src="get_system_cagetory_image(show_guest_info.current_guest)" style="width: 24px; height: 24px; float: left" />
 						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_cagetory_name(show_guest_info.current_guest) }}</div>
 					</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
-					<el-descriptions-item label="启动方式">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>
+					<el-descriptions-item label="固件">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
 					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
@@ -39,7 +39,7 @@
 						<el-button @click="show_host_info(show_guest_info.host.hostId)" type="text" v-show="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-button>
 						<span v-show="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
 					</el-descriptions-item>
-					<el-descriptions-item label="架构方案">
+					<el-descriptions-item label="配置">
 						<el-button @click="show_scheme_info(show_guest_info.scheme.schemeId)" type="text" v-show="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-button>
 						<span v-show="show_guest_info.scheme.schemeId === 0" :underline="false">{{ show_guest_info.scheme.name }}</span>
 					</el-descriptions-item>

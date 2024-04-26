@@ -6,7 +6,7 @@
 		<el-row>
 			<el-form ref="reInstallForm" :model="reinstall_guest" label-width="100px" class="demo-ruleForm">
 				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="安装方式">
 							<el-select v-model="reinstall_guest.type" style="width: 100%" placeholder="请选择安装方式">
 								<el-option label="ISO镜像" :value="0" />
@@ -16,9 +16,9 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="磁盘类型" v-if="reinstall_guest.type !== 3">
-							<el-select v-model="reinstall_guest.volumeType" style="width: 100%">
+					<el-col :span="8">
+						<el-form-item label="磁盘类型">
+							<el-select v-model="reinstall_guest.volumeType" style="width: 100%" :disabled="reinstall_guest.type === 3">
 								<el-option label="raw" value="raw"></el-option>
 								<el-option label="qcow" value="qcow"></el-option>
 								<el-option label="qcow2" value="qcow2"></el-option>
@@ -28,9 +28,7 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="ISO模版" v-if="reinstall_guest.type === 0">
 							<el-select v-model="reinstall_guest.isoTemplateId" style="width: 100%" placeholder="请选择光盘镜像">
 								<el-option v-for="item in this.iso_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
@@ -52,17 +50,17 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="存储池" v-if="reinstall_guest.type !== 3">
-							<el-select v-model="reinstall_guest.storageId" style="width: 100%">
+				</el-row>
+				<el-row>
+					<el-col :span="8">
+						<el-form-item label="存储池">
+							<el-select v-model="reinstall_guest.storageId" style="width: 100%" :disabled="reinstall_guest.type === 3">
 								<el-option label="随机" :value="0"></el-option>
 								<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="操作系统">
 							<el-select v-model="reinstall_guest.systemCategory" style="width: 100%" placeholder="操作系统">
 								<el-option label="Centos" :value="101" />
@@ -79,9 +77,9 @@
 						</el-form-item>
 					</el-col>
 
-					<el-col :span="12">
-						<el-form-item label="启动方式">
-							<el-select v-model="reinstall_guest.bootstrapType" style="width: 100%" placeholder="启动方式">
+					<el-col :span="8">
+						<el-form-item label="固件">
+							<el-select v-model="reinstall_guest.bootstrapType" style="width: 100%">
 								<el-option label="BIOS" :value="0" />
 								<el-option label="UEFI" :value="1" />
 							</el-select>
@@ -89,33 +87,30 @@
 					</el-col>
 				</el-row>
 				<el-row>
-					<el-col :span="12">
-						<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
-							<el-input v-model="reinstall_guest.size"></el-input>
-						</el-form-item>
-					</el-col>
-					<el-col :span="12">
-						<el-form-item label="" v-if="reinstall_guest.type === 1 && reinstall_guest.systemCategory != 300">
-							<el-checkbox v-model="is_advance_config">高级配置</el-checkbox>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row v-if="reinstall_guest.type === 1 && reinstall_guest.systemCategory != 300 && is_advance_config">
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="主机名">
-							<el-input v-model="meta_config.hostName"></el-input>
-						</el-form-item>
-						<el-form-item label="密码">
-							<el-input v-model="user_config.password" :show-password="true" type="password"></el-input>
+							<el-input v-model="meta_config.hostName" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300"></el-input>
 						</el-form-item>
 					</el-col>
-				</el-row>
-				<el-row v-if="reinstall_guest.type === 1 && reinstall_guest.systemCategory != 300 && is_advance_config">
-					<el-col :span="12">
+					<el-col :span="8">
+						<el-form-item label="主机名">
+							<el-input v-model="meta_config.hostName" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
 						<el-form-item label="登录密钥">
-							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥">
+							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300">
 								<el-option v-for="item in this.sshs" :key="item.id" :label="item.name" :value="item.id" />
 							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="8">
+						<el-form-item label="磁盘大小">
+							<el-input v-model="reinstall_guest.size" :disabled="reinstall_guest.type !== 0">
+								<template slot="append">GB</template>
+							</el-input>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -152,7 +147,6 @@ export default {
 				password: '',
 				sshId: 0
 			},
-			is_advance_config: false,
 			iso_template: [],
 			attach_volumes: [],
 			disk_template: [],
@@ -216,7 +210,6 @@ export default {
 			this.reinstall_guest.type = 0
 			this.reinstall_guest.systemCategory = guest.systemCategory
 			this.reinstall_guest.bootstrapType = guest.bootstrapType
-			this.is_advance_config = false
 			this.user_config.password = ''
 			this.user_config.sshId = 0
 			this.meta_config.hostName = ''
@@ -255,16 +248,14 @@ export default {
 				.then(() => {
 					let meta_map = {}
 					let user_map = {}
-					if (this.is_advance_config) {
-						if (this.meta_config.hostName) {
-							meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
-						}
-						if (this.user_config.password) {
-							user_map = { ...user_map, password: this.user_config.password }
-						}
-						if (this.user_config.sshId > 0) {
-							user_map = { ...user_map, sshId: this.user_config.sshId + '' }
-						}
+					if (this.meta_config.hostName) {
+						meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
+					}
+					if (this.user_config.password) {
+						user_map = { ...user_map, password: this.user_config.password }
+					}
+					if (this.user_config.sshId > 0) {
+						user_map = { ...user_map, sshId: this.user_config.sshId + '' }
 					}
 					let reinstall_guest_data = { ...this.reinstall_guest, metaData: JSON.stringify(meta_map), userData: JSON.stringify(user_map) }
 					reInstallGuest(reinstall_guest_data).then((res) => {

@@ -85,7 +85,7 @@
 								<el-table :data="component.guests" style="width: 100%" size="small">
 									<el-table-column label="ID" prop="guestId" width="80" />
 									<el-table-column label="实例名" prop="name" width="200" />
-									<el-table-column label="标签" prop="description" width="200" />
+									<el-table-column label="名称" prop="description" width="200" />
 									<el-table-column label="IP地址" prop="guestIp" width="150" />
 									<el-table-column label="状态" prop="status" width="100">
 										<template #default="scope">

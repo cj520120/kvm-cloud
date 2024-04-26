@@ -43,9 +43,9 @@
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							<el-table-column label="标签" prop="description" width="180" />
+							<el-table-column label="名称" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
-							<el-table-column label="启动方式" width="100">
+							<el-table-column label="固件" width="100">
 								<template #default="scope">
 									{{ get_bootstrap_type_name(scope.row) }}
 								</template>

@@ -61,7 +61,12 @@ public class OperateDispatchImpl implements OperateDispatch, BeanPostProcessor {
                     map.put("timestamp", System.currentTimeMillis());
                     String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
                     map.put("sign", sign);
-                    HttpUtil.post(clientService.getManagerUri() + "api/agent/task/report", map);
+                    String url = clientService.getManagerUri();
+                    if (!url.endsWith("/")) {
+                        url += "/";
+                    }
+                    url += "api/agent/task/report";
+                    HttpUtil.post(url, map);
                 } catch (Exception err) {
                     log.error("上报任务出现异常。command={} param={} result={}", task.getCommand(), task.getData(), result, err);
                 } finally {

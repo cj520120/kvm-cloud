@@ -25,14 +25,14 @@
 					<el-option label="Android" :value="400" />
 				</el-select>
 			</el-form-item>
-			<el-form-item label="启动方式">
-				<el-select v-model="modify_guest.bootstrapType" style="width: 100%" placeholder="启动方式">
+			<el-form-item label="固件">
+				<el-select v-model="modify_guest.bootstrapType" style="width: 100%">
 					<el-option label="BIOS" :value="0" />
 					<el-option label="UEFI" :value="1" />
 				</el-select>
 			</el-form-item>
-			<el-form-item label="计算方案">
-				<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择计算方案">
+			<el-form-item label="配置">
+				<el-select v-model="modify_guest.schemeId" style="width: 100%" placeholder="请选择虚拟机配置">
 					<el-option v-for="item in this.schemes" :key="item.schemeId" :label="item.name" :value="item.schemeId" />
 				</el-select>
 			</el-form-item>
