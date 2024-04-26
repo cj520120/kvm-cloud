@@ -93,8 +93,8 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
-						<el-form-item label="主机名">
-							<el-input v-model="meta_config.hostName" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300"></el-input>
+						<el-form-item label="密码">
+							<el-input v-model="user_config.password" :show-password="true" type="password" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300"></el-input>
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
