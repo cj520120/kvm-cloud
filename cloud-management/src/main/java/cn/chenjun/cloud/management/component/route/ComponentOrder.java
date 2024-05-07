@@ -15,7 +15,7 @@ public class ComponentOrder {
     public static final int CLOUD = 7;
     public static final int NGINX = 8;
     public static final int FIREWALLD = 9;
-    public static final int KEEPALIVE = 10;
+    public static final int KEEP_ALIVE = 10;
 
     public static final int NAT = 11;
 }

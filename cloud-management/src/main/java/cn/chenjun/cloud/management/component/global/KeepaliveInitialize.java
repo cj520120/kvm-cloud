@@ -88,6 +88,6 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
 
     @Override
     public int getOrder() {
-        return ComponentOrder.KEEPALIVE;
+        return ComponentOrder.KEEP_ALIVE;
     }
 }

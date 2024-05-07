@@ -40,17 +40,6 @@ app:
     thread:
       size: 1
 
-oauth2:
-  auth-uri: https://192.168.1.2:8083/oauth2/authorize
-  client-id: NLMAv72e
-  client-secret: fd74a2cb8b62d4011ff5945b0204d07f68366848
-  enable: false
-  id-path:
-    - userId
-  redirect-uri: http://192.168.2.107:8081/#/Login
-  title: Oauth2 Login
-  token-uri: https://192.168.1.2:8083/oauth2/token
-  user-uri: https://192.168.1.2:8083/oauth2/user/info
 server:
   port: 8080
   servlet:

@@ -84,9 +84,9 @@ public class GuestController extends BaseController {
                                               @RequestParam("volumeId") int volumeId,
                                               @RequestParam("storageId") int storageId,
                                               @RequestParam("size") long size) {
-        Map<String, String> metaMap = GsonBuilderUtil.create().fromJson(metaData, new TypeToken<Map<String, Object>>() {
+        Map<String, String> metaMap = GsonBuilderUtil.create().fromJson(metaData, new TypeToken<Map<String, String>>() {
         }.getType());
-        Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, Object>>() {
+        Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
         return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, metaMap, userMap, size * 1024 * 1024 * 1024));
     }
@@ -105,9 +105,9 @@ public class GuestController extends BaseController {
                                             @RequestParam(value = "userData", defaultValue = "{}") String userData,
                                             @RequestParam("size") long size) {
 
-        Map<String, String> metaMap = GsonBuilderUtil.create().fromJson(metaData, new TypeToken<Map<String, Object>>() {
+        Map<String, String> metaMap = GsonBuilderUtil.create().fromJson(metaData, new TypeToken<Map<String, String>>() {
         }.getType());
-        Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, Object>>() {
+        Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
 
         return this.lockRun(() -> this.guestService.reInstall(guestId, systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024));
