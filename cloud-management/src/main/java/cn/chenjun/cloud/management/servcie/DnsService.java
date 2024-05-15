@@ -11,7 +11,6 @@ import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +35,7 @@ public class DnsService {
     private EventService eventService;
 
     public ResultUtil<List<DnsModel>> listDnsByNetworkId(int networkId) {
-        QueryWrapper<DnsEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("network_id", networkId);
-        List<DnsEntity> entityList = this.mapper.selectList(wrapper);
+        List<DnsEntity> entityList = this.mapper.findByNetworkId(networkId);
         return ResultUtil.<List<DnsModel>>builder().data(entityList.stream().map(this::initDns).collect(Collectors.toList())).build();
     }
 
@@ -49,11 +46,11 @@ public class DnsService {
             return new ArrayList<>();
         }
         List<DnsModel> list = new ArrayList<>();
-        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.NETWORK_ID, networkId));
+        List<GuestEntity> guestList = this.guestMapper.findGuestByNetworkId(networkId);
         for (GuestEntity guest : guestList) {
             list.add(DnsModel.builder().domain(guest.getName() + "." + network.getDomain()).ip(guest.getGuestIp()).build());
         }
-        List<DnsEntity> entityList = this.mapper.selectList(new QueryWrapper<DnsEntity>().eq(DnsEntity.NETWORK_ID, networkId));
+        List<DnsEntity> entityList = this.mapper.findByNetworkId(networkId);
         for (DnsEntity entity : entityList) {
             list.add(this.initDns(entity));
         }
