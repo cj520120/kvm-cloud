@@ -40,6 +40,8 @@ systemctl stop firewalld
 systemctl disable firewalld
 systemctl stop iptables
 systemctl disable iptables
+systemctl stop NetworkManager
+systemctl disable NetworkManager
 ```
 ### NFS配置
 #### 1、安装NFS软件包
@@ -310,4 +312,7 @@ Ubuntu: qemu-system-i386 -machine help
 app.uefi.type = pflash
 app.uefi.path= /usr/share/OVMF/OVMF_CODE.fd
 ```
-
+13、关于网络不通问题
+```$xslt
+尽量使用纯净系统安装，如果网络不通，请检查防火墙、iptables、关闭NetworkManager服务等
+```
