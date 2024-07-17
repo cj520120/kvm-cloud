@@ -356,14 +356,11 @@ public class OsOperateImpl implements OsOperate {
                 if (System.currentTimeMillis() - stopTime > timeout) {
                     domain.destroy();
                 } else {
-                    switch (domain.getInfo().state) {
-                        case VIR_DOMAIN_SHUTDOWN:
-                        case VIR_DOMAIN_SHUTOFF:
-                            domain.destroy();
-                        default:
-                            domain.shutdown();
-                            ThreadUtil.sleep(5, TimeUnit.SECONDS);
-                            break;
+                    if (Objects.requireNonNull(domain.getInfo().state) == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
+                        domain.shutdown();
+                        ThreadUtil.sleep(5, TimeUnit.SECONDS);
+                    } else {
+                        domain.destroy();
                     }
                 }
             } catch (LibvirtException err) {
@@ -407,6 +404,7 @@ public class OsOperateImpl implements OsOperate {
         Connect toConnect = new Connect(String.format("qemu+tcp://%s/system", request.getHost()));
         long liveMigrationFlag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
         domain.migrate(toConnect, liveMigrationFlag, null, null, 0);
+        this.stopDomain(connect,request.getName(),10000);
         return null;
     }
 
