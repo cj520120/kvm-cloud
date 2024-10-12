@@ -26,8 +26,22 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
-        <hutool.version>5.8.15</hutool.version>
+        <hutool.version>5.8.32</hutool.version>
         <swagger.version>2.9.2</swagger.version>
+        <dom4j.version>2.1.4</dom4j.version>
+        <jinjava.version>2.6.0</jinjava.version>
+        <mockito.version>2.7.19</mockito.version>
+        <commons-io.version>2.17.0</commons-io.version>
+        <junit.version>4.13</junit.version>
+        <libvirt.version>0.5.2</libvirt.version>
+        <jna.version>5.12.1</jna.version>
+        <gson.version>2.11.0</gson.version>
+        <jasypt.version>1.9.3</jasypt.version>
+        <redission.version>3.20.0</redission.version>
+        <jwt.version>4.3.0</jwt.version>
+        <websocket.version>1.5.3</websocket.version>
+        <druid.version>1.2.16</druid.version>
+        <jsch.version>0.1.55</jsch.version>
     </properties>
     <dependencies>
 
@@ -38,7 +52,7 @@
         <dependency>
             <groupId>org.jasypt</groupId>
             <artifactId>jasypt</artifactId>
-            <version>1.9.3</version>
+            <version>${jasypt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

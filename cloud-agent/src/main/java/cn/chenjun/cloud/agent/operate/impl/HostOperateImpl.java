@@ -39,6 +39,7 @@ public class HostOperateImpl implements HostOperate {
     private ApplicationConfig applicationConfig;
 
 
+
     @SneakyThrows
     private HostInfo getHostInfo(Connect connect) {
         NodeInfo nodeInfo = connect.nodeInfo();
@@ -54,7 +55,7 @@ public class HostOperateImpl implements HostOperate {
                 .hypervisor(connect.getType())
                 .cores(nodeInfo.cores)
                 .threads(nodeInfo.threads)
-                .sockets(nodeInfo.sockets)
+                .sockets(nodeInfo.cpus/(nodeInfo.sockets*nodeInfo.cores*nodeInfo.threads))
                 .build();
         if (applicationConfig.getUefi() != null) {
             hostInfo.setUefiType(applicationConfig.getUefi().getType());
@@ -75,23 +76,17 @@ public class HostOperateImpl implements HostOperate {
             if (vendorNode != null) {
                 hostInfo.setVendor(vendorNode.getText());
             }
-            Node topologyNode = doc.selectSingleNode("/capabilities/host/cpu/topology");
-            if (topologyNode instanceof Element) {
-                hostInfo.setSockets(NumberUtil.parseInt(((Element) topologyNode).attributeValue("sockets")));
-                hostInfo.setCores(NumberUtil.parseInt(((Element) topologyNode).attributeValue("cores")));
-                hostInfo.setThreads(NumberUtil.parseInt(((Element) topologyNode).attributeValue("threads")));
-            }
-            List<Element> guestNodes = Collections.unmodifiableList(doc.selectNodes("/capabilities/guest"));
-            for (Element guestNode : guestNodes) {
-                String osType = guestNode.selectSingleNode("os_type").getText();
-                String arch = ((Element) guestNode.selectSingleNode("arch")).attributeValue("name");
+            List<Node> guestNodes = doc.selectNodes("/capabilities/guest");
+            for (Node node : guestNodes) {
+                String osType = node.selectSingleNode("os_type").getText();
+                String arch = ((Element) node.selectSingleNode("arch")).attributeValue("name");
                 if (StringUtils.equalsIgnoreCase(osType, "hvm") && StringUtils.equalsIgnoreCase(arch, hostInfo.getArch())) {
-                    Node emulatorNode = guestNode.selectSingleNode("arch/emulator");
+                    Node emulatorNode = node.selectSingleNode("arch/emulator");
                     if (emulatorNode != null) {
                         hostInfo.setEmulator(emulatorNode.getText());
                     }
-                    List<Element> guestDomainNodes = guestNode.selectNodes("arch/domain");
-                    for (Element guestDomainNode : guestDomainNodes) {
+                    List<Node> guestDomainNodes = node.selectNodes("arch/domain");
+                    for (Node guestDomainNode : guestDomainNodes) {
                         emulatorNode = guestDomainNode.selectSingleNode("emulator");
                         if (emulatorNode != null) {
                             hostInfo.setEmulator(emulatorNode.getText());

@@ -8,6 +8,7 @@ import org.springframework.plugin.core.Plugin;
 public interface VendorDataService extends Plugin<Integer> {
 
     /**
+     * 获取用户数据
      * @param guestId
      * @return
      */

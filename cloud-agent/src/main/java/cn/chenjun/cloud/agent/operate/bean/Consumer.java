@@ -13,6 +13,7 @@ public interface Consumer<T, V> {
      * @param connect
      * @param param
      * @return
+     * @throws Exception
      */
     V dispatch(Connect connect, T param) throws Exception;
 }

@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.test;
 
+import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.impl.HostOperateImpl;
@@ -31,6 +32,8 @@ public class HostOperateImplTest extends AbstractTest {
     private NetworkOperate networkOperate;
     @Mock
     private StorageOperate storageOperate;
+    @Mock
+    private ApplicationConfig applicationConfig;
 
 
     @SneakyThrows
@@ -51,6 +54,7 @@ public class HostOperateImplTest extends AbstractTest {
     public void test_01_getHostInfo() {
         HostInfo hostInfo = this.hostOperate.getHostInfo(connect, NoneRequest.builder().build());
         Assert.assertNotNull(hostInfo);
+        log.info("host={}",hostInfo);
     }
     @Test
     @SneakyThrows
