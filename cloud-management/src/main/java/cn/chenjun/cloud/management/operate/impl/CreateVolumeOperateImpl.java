@@ -56,7 +56,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                         .targetStorage(storage.getName())
                         .targetName(volume.getName())
                         .targetType(volume.getType())
-
+                        .size(volume.getCapacity())
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 

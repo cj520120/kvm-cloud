@@ -27,6 +27,7 @@ public class TemplateEntity {
     public static final String TEMPLATE_VOLUME_TYPE = "template_volume_type";
     public static final String TEMPLATE_STATUS = "template_status";
     public static final String TEMPLATE_MD5 = "template_md5";
+    public static final String TEMPLATE_INIT_SCRIPT = "template_cloud_init_script";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO)
@@ -44,6 +45,8 @@ public class TemplateEntity {
     private Integer status;
     @TableField(TEMPLATE_MD5)
     private String md5;
+    @TableField(TEMPLATE_INIT_SCRIPT)
+    private String script;
     @TableField(CREATE_TIME)
     private Date createTime;
 }

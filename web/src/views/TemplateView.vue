@@ -23,6 +23,7 @@
 							</el-table-column>
 							<el-table-column label="操作" min-width="200">
 								<template #default="scope">
+									<el-button @click="show_template_script(scope.row)" type="" size="mini" v-if="scope.row.templateType === 2">初始化脚本</el-button>
 									<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>
 									<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.uri.indexOf('http://') === 0 || scope.row.uri.indexOf('https://') === 0">重新下载</el-button>
 									<el-button @click="destroy_template(scope.row)" type="danger" size="mini">销毁模版</el-button>
@@ -70,6 +71,7 @@
 									<el-option label="用户模版" :value="2"></el-option>
 								</el-select>
 							</el-form-item>
+
 							<el-form-item label="磁盘类型" prop="volumeType" v-if="create_template.templateType === 2">
 								<el-select v-model="create_template.volumeType" style="width: 100%">
 									<el-option label="raw" value="raw"></el-option>
@@ -86,6 +88,9 @@
 							<el-form-item label="文件MD5" prop="uri">
 								<el-input v-model="create_template.md5"></el-input>
 							</el-form-item>
+							<el-form-item label="初始化脚本">
+								<el-input v-model="create_template.script" :rows="10" type="textarea"></el-input>
+							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="create_template_click">立即创建</el-button>
 								<el-button @click="show_template_list">取消</el-button>
@@ -95,15 +100,17 @@
 				</el-card>
 			</el-main>
 		</el-container>
+		<ShowTemplateScript ref="ShowTemplateScriptComponentRef" />
 	</div>
 </template>
 <script>
 import { getTemplateList, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
 import Notify from '@/api/notify'
 import util from '@/api/util'
+import ShowTemplateScript from '@/components/ShowTemplateScript.vue'
 export default {
 	name: 'templateView',
-	components: {},
+	components: { ShowTemplateScript },
 	data() {
 		return {
 			data_loading: false,
@@ -114,7 +121,8 @@ export default {
 				templateType: 0,
 				volumeType: 'qcow2',
 				uri: '',
-				md5: ''
+				md5: '',
+				script: '#cloud-config\n'
 			},
 			templates: []
 		}
@@ -160,6 +168,9 @@ export default {
 		show_template_info(template) {
 			this.show_template = template
 			this.show_type = 1
+		},
+		show_template_script(template) {
+			this.$refs.ShowTemplateScriptComponentRef.init(template)
 		},
 		update_template_info(template) {
 			let findIndex = this.templates.findIndex((item) => item.templateId === template.templateId)

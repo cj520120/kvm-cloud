@@ -53,7 +53,7 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String volumeType) {
+    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String volumeType, String initScript) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版名称");
         }
@@ -63,10 +63,23 @@ public class TemplateService extends AbstractService {
         if (StringUtils.isEmpty(volumeType)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘类型");
         }
-        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).volumeType(volumeType.trim()).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).build();
+        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).volumeType(volumeType.trim()).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
         this.templateMapper.insert(template);
         this.eventService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<TemplateModel> updateTemplateScript(int id, String initScript) {
+
+        TemplateEntity template = templateMapper.selectById(id);
+        if (template == null) {
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+        }
+        template.setScript(initScript);
+        templateMapper.updateById(template);
+        this.eventService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        return ResultUtil.success(this.initTemplateModel(template));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -103,7 +116,7 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
+    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name, String initScript) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘状态未就绪");
@@ -122,6 +135,7 @@ public class TemplateService extends AbstractService {
         this.volumeMapper.updateById(volume);
         TemplateEntity template = TemplateEntity.builder().uri(String.valueOf(volumeId))
                 .name(name).templateType(Constant.TemplateType.VOLUME)
+                .script(initScript)
                 .volumeType(cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2)
                 .status(Constant.TemplateStatus.CREATING).build();
         this.templateMapper.insert(template);

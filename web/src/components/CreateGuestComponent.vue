@@ -145,7 +145,7 @@
 					</el-col>
 					<el-col :span="8">
 						<el-form-item label="磁盘大小">
-							<el-input v-model="create_guest.size" :disabled="create_guest.type !== 0"><template slot="append">GB</template></el-input>
+							<el-input v-model="create_guest.size" :disabled="create_guest.type !== 0 && create_guest.type !== 1"><template slot="append">GB</template></el-input>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -341,7 +341,6 @@ export default {
 					this.create_guest.isoTemplateId = 0
 					this.create_guest.snapshotVolumeId = 0
 					this.create_guest.volumeId = 0
-					this.create_guest.size = 0
 					break
 				case 2:
 					this.create_guest.isoTemplateId = 0

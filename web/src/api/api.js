@@ -221,6 +221,13 @@ export const createTemplate = (data = {}) => {
     method: "PUT",
   });
 };
+export const updateTemplateScript = (data = {}) => {
+  return axios.request({
+    url: "api/template/script",
+    data,
+    method: "POST",
+  });
+};
 
 export const createVolumeTemplate = (data = {}) => {
   return axios.request({

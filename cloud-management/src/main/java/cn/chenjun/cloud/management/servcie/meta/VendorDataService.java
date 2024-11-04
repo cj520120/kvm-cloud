@@ -1,11 +1,9 @@
 package cn.chenjun.cloud.management.servcie.meta;
 
-import org.springframework.plugin.core.Plugin;
-
 /**
  * @author chenjun
  */
-public interface VendorDataService extends Plugin<Integer> {
+public interface VendorDataService {
 
     /**
      * 获取用户数据

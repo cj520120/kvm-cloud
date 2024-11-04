@@ -18,4 +18,5 @@ public class VolumeCloneRequest {
     private String targetStorage;
     private String targetName;
     private String targetType;
+    private long size;
 }

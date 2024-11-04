@@ -29,7 +29,7 @@ public class MetaService extends AbstractService {
     @Autowired
     private PluginRegistry<UserDataService, Integer> userDataPluginRegistry;
     @Autowired
-    private PluginRegistry<VendorDataService, Integer> vendorDataPluginRegistry;
+    private VendorDataService vendorDataService;
 
 
     public String loadAllGuestMetaData(int networkId, String ip, String nonce, String sign) {
@@ -57,7 +57,7 @@ public class MetaService extends AbstractService {
 
     public String findGuestVendorData(int networkId, String ip, String nonce, String sign) {
 
-        StringBuilder data = new StringBuilder("#cloud-config\n");
+        StringBuilder data = new StringBuilder();
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip).eq(GuestNetworkEntity.NETWORK_ID, networkId));
         if (guestNetwork == null) {
             return data.toString();
@@ -73,11 +73,6 @@ public class MetaService extends AbstractService {
         if (guest == null) {
             return data.toString();
         }
-        Optional<VendorDataService> optional = vendorDataPluginRegistry.getPluginFor(guest.getSystemCategory());
-        if (!optional.isPresent()) {
-            return data.toString();
-        }
-        VendorDataService vendorDataService = optional.get();
         data.append(vendorDataService.loadVendorData(guest.getGuestId()));
         return data.toString();
     }

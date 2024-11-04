@@ -33,8 +33,15 @@ public class TemplateController extends BaseController {
                                                     @RequestParam("uri") String uri,
                                                     @RequestParam("md5") String md5,
                                                     @RequestParam("templateType") int templateType,
-                                                    @RequestParam("volumeType") String volumeType) {
-        return this.lockRun(() -> templateService.createTemplate(name, uri, md5, templateType, volumeType));
+                                                    @RequestParam("volumeType") String volumeType,
+                                                    @RequestParam(value = "script", defaultValue = "") String script) {
+        return this.lockRun(() -> templateService.createTemplate(name, uri, md5, templateType, volumeType, script));
+    }
+
+    @PostMapping("/api/template/script")
+    public ResultUtil<TemplateModel> updateTemplateScript(@RequestParam("templateId") int id,
+                                                          @RequestParam(value = "script", defaultValue = "") String script) {
+        return this.lockRun(() -> templateService.updateTemplateScript(id, script));
     }
 
     @PostMapping("/api/template/download")
@@ -45,8 +52,9 @@ public class TemplateController extends BaseController {
 
     @PutMapping("/api/template/volume/create")
     public ResultUtil<TemplateModel> createVolumeTemplate(@RequestParam("volumeId") int volumeId,
-                                                          @RequestParam("name") String name) {
-        return this.lockRun(() -> templateService.createVolumeTemplate(volumeId, name));
+                                                          @RequestParam("name") String name,
+                                                          @RequestParam(value = "script", defaultValue = "") String script) {
+        return this.lockRun(() -> templateService.createVolumeTemplate(volumeId, name, script));
 
 
     }

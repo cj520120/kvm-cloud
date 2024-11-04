@@ -303,6 +303,10 @@ public class VolumeOperateImpl implements VolumeOperate {
         log.info("clone volume xml={}", xml);
         targetVol = targetStoragePool.storageVolCreateXMLFrom(xml, sourceVol, 0);
         storageVolInfo = LibvirtUtil.getVolInfo(targetVol);
+        if(storageVolInfo.capacity< request.getSize()){
+            targetVol.resize( request.getSize(), 0);
+        }
+        storageVolInfo = LibvirtUtil.getVolInfo(targetVol);
         VolumeInfo volumeInfo = VolumeInfo.builder().storage(request.getTargetStorage())
                 .name(request.getTargetName())
                 .type(storageVolInfo.type.toString())
@@ -310,6 +314,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                 .capacity(storageVolInfo.capacity)
                 .allocation(storageVolInfo.allocation)
                 .build();
+
         this.init(targetVol, volumeInfo);
         return volumeInfo;
     }

@@ -400,10 +400,12 @@ CREATE TABLE `tbl_template_info` (
   `template_md5` varchar(45) NOT NULL DEFAULT '',
   `template_type` int(11) NOT NULL,
   `template_volume_type` varchar(10) NOT NULL,
+  `template_cloud_init_script` text NOT NULL,
   `template_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=270 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 --
 -- Table structure for table `tbl_template_volume`
