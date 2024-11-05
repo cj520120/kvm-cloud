@@ -29,7 +29,7 @@ public class MetaService extends AbstractService {
     @Autowired
     private PluginRegistry<UserDataService, Integer> userDataPluginRegistry;
     @Autowired
-    private VendorDataService vendorDataService;
+    private PluginRegistry<VendorDataService, Integer> vendorDataPluginRegistry;
 
 
     public String loadAllGuestMetaData(int networkId, String ip, String nonce, String sign) {
@@ -52,9 +52,31 @@ public class MetaService extends AbstractService {
         if (!optional.isPresent()) {
             return "";
         }
-        return optional.get().loadMetaData(guest.getGuestId());
+        return optional.get().buildCloudInitMetaData(guest.getGuestId());
     }
 
+    public String findMetaDataByKey(String key, int networkId, String ip, String nonce, String sign) {
+        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip).eq(GuestNetworkEntity.NETWORK_ID, networkId));
+        if (guestNetwork == null) {
+            return "";
+        }
+        NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
+        if (network == null) {
+            return "";
+        }
+        if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce + ":" + ip).equals(sign)) {
+            return "";
+        }
+        GuestEntity guest = guestMapper.selectById(guestNetwork.getAllocateId());
+        if (guest == null) {
+            return "";
+        }
+        Optional<MetaDataService> optional = metaDataPluginRegistry.getPluginFor(guest.getSystemCategory());
+        if (!optional.isPresent()) {
+            return "";
+        }
+        return optional.get().buildCloudInitMetaData(guest.getGuestId());
+    }
     public String findGuestVendorData(int networkId, String ip, String nonce, String sign) {
 
         StringBuilder data = new StringBuilder();
@@ -73,7 +95,11 @@ public class MetaService extends AbstractService {
         if (guest == null) {
             return data.toString();
         }
-        data.append(vendorDataService.loadVendorData(guest.getGuestId()));
+        Optional<VendorDataService> optional = vendorDataPluginRegistry.getPluginFor(guest.getSystemCategory());
+        if (!optional.isPresent()) {
+            return data.toString();
+        }
+        data.append(optional.get().loadVendorData(guest.getGuestId()));
         return data.toString();
     }
 

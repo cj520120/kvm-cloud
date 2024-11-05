@@ -71,13 +71,6 @@ public class LinuxUserDataService implements UserDataService {
 
     @Override
     public boolean supports(@NonNull Integer systemCategory) {
-        switch (systemCategory) {
-            case SystemCategory.WINDOWS:
-            case SystemCategory.ANDROID:
-                return false;
-            default:
-                return true;
-
-        }
+        return systemCategory != SystemCategory.WINDOWS;
     }
 }

@@ -12,5 +12,14 @@ public interface MetaDataService extends Plugin<Integer> {
      * @param guestId
      * @return
      */
-    String loadMetaData(int guestId);
+    String buildCloudInitMetaData(int guestId);
+
+    /**
+     * 获取meta数据
+     *
+     * @param guestId
+     * @param key
+     * @return
+     */
+    String findMetaDataByKey(int guestId, String key);
 }

@@ -3,8 +3,6 @@ package cn.chenjun.cloud.management.servcie.meta.impl;
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.GuestPasswordEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
-import cn.chenjun.cloud.management.data.mapper.GuestSshMapper;
-import cn.chenjun.cloud.management.data.mapper.SshAuthorizedMapper;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +15,6 @@ import org.springframework.util.StringUtils;
  */
 @Service
 public class WindowsUserDataService implements UserDataService {
-    @Autowired
-    protected GuestSshMapper guestSshMapper;
-    @Autowired
-    protected SshAuthorizedMapper sshAuthorizedMapper;
     @Autowired
     private GuestPasswordMapper guestPasswordMapper;
 

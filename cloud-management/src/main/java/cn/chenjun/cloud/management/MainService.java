@@ -4,6 +4,7 @@ import cn.chenjun.cloud.management.component.ComponentProcess;
 import cn.chenjun.cloud.management.operate.Operate;
 import cn.chenjun.cloud.management.servcie.meta.MetaDataService;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
+import cn.chenjun.cloud.management.servcie.meta.VendorDataService;
 import cn.chenjun.cloud.management.websocket.cluster.process.ClusterMessageProcess;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 @SpringBootApplication
 @EnableTransactionManagement
-@EnablePluginRegistries({ClusterMessageProcess.class, Operate.class, ComponentProcess.class, MetaDataService.class, UserDataService.class})
+@EnablePluginRegistries({ClusterMessageProcess.class, Operate.class, ComponentProcess.class, VendorDataService.class, MetaDataService.class, UserDataService.class})
 @MapperScan("cn.chenjun.cloud.management.data")
 public class MainService {
     public static void main(String[] args) {

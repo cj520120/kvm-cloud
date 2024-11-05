@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,14 @@ public class MetaController {
         response.getWriter().write(allMetaData);
     }
 
+    @SneakyThrows
+    @GetMapping(value = "/{meta_path}/meta-data/{name}")
+    public void findMetaDataByKey(HttpServletRequest request, @PathVariable("key") String key, @RequestHeader(value = "X-Network-ID", defaultValue = "0") int networkId, @RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {
+        String allMetaData = metaService.findMetaDataByKey(key, networkId, ip, nonce, sign);
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType("text/cloud-config;charset=utf-8");
+        response.getWriter().write(allMetaData);
+    }
     @SneakyThrows
     @GetMapping(value = "/vendor-data")
     public void findGuestVendorData(HttpServletRequest request, @RequestHeader(value = "X-Network-ID", defaultValue = "0") int networkId,@RequestHeader(value = "X-Real-IP", defaultValue = "127.0.0.1") String ip, @RequestHeader("X-Nonce") String nonce, @RequestHeader("X-Sign") String sign, HttpServletResponse response) {

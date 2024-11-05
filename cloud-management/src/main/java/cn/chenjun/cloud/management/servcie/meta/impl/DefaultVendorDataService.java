@@ -1,14 +1,14 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
+import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
-import cn.chenjun.cloud.management.data.mapper.GuestDiskMapper;
-import cn.chenjun.cloud.management.data.mapper.TemplateMapper;
-import cn.chenjun.cloud.management.data.mapper.VolumeMapper;
+import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.servcie.meta.VendorDataService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -17,6 +17,12 @@ import org.springframework.util.ObjectUtils;
  */
 @Service
 public class DefaultVendorDataService implements VendorDataService {
+    @Autowired
+    protected GuestSshMapper guestSshMapper;
+    @Autowired
+    protected SshAuthorizedMapper sshAuthorizedMapper;
+    @Autowired
+    private GuestPasswordMapper guestPasswordMapper;
     @Autowired
     private VolumeMapper mapper;
     @Autowired
@@ -48,5 +54,9 @@ public class DefaultVendorDataService implements VendorDataService {
         return sb.toString();
     }
 
+    @Override
+    public boolean supports(@NonNull Integer systemCategory) {
+        return systemCategory != SystemCategory.WINDOWS;
+    }
 
 }
