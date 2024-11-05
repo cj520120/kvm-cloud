@@ -42,7 +42,7 @@ public class LinuxUserDataService implements UserDataService {
                 break;
             }
 
-            data.append("password: ").append(password).append("\n");
+            data.append("password: \"").append(password).append("\"\n");
             data.append("chpasswd: {expire: False}\n");
             data.append("ssh_pwauth: True\n");
         } while (false);
