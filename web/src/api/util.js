@@ -20,7 +20,7 @@ export default {
           return "UNKNOW"
       }
     },
-    get_system_cagetory_name(guest) {
+    get_system_category_name(guest) {
       switch (guest.systemCategory) {
         case 100:
           return "Linux";
@@ -44,11 +44,13 @@ export default {
           return "OpenEuler";
         case 107:
           return "UOS";
+        case 108:
+          return "Oracle Linux";
         default:
-          return "Unknow";
+          return "Unknown";
       }
     },
-    get_system_cagetory_image(guest) {
+    get_system_category_image(guest) {
       switch (guest.systemCategory) {
         case 100:
           return require("@/assets/system/Linux.png");
@@ -72,6 +74,8 @@ export default {
           return require("@/assets/system/OpenEuler.png");
         case 107:
           return require("@/assets/system/UOS.png");
+        case 108:
+          return require("@/assets/system/Oracle.png");
         default:
           return require("@/assets/system/Linux.png");
       }

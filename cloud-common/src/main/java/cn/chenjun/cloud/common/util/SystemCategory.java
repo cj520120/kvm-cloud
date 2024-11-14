@@ -15,4 +15,5 @@ public class SystemCategory {
     public static final int DEBIAN = BASE_LINUX + 5;
     public static final int OPEN_EULER  = BASE_LINUX + 6;
     public static final int UOS  = BASE_LINUX + 7;
+    public static final int ORACLE_LINUX  = BASE_LINUX + 8;
 }

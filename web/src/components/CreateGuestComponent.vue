@@ -106,6 +106,8 @@
 								<el-option label="RedHat" :value="104" />
 								<el-option label="Debian" :value="105" />
 								<el-option label="OpenEuler" :value="106" />
+								<el-option label="UOS" :value="107" />
+								<el-option label="OracleLinux" :value="108" />
 								<el-option label="Linux" :value="100" />
 								<el-option label="Unix" :value="200" />
 								<el-option label="Android" :value="400" />

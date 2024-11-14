@@ -26,8 +26,8 @@
 					<el-descriptions-item label="实例名">{{ show_guest_info.current_guest.name }}</el-descriptions-item>
 					<el-descriptions-item label="名称">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
 					<el-descriptions-item label="操作系统">
-						<img :src="get_system_cagetory_image(show_guest_info.current_guest)" style="width: 24px; height: 24px; float: left" />
-						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_cagetory_name(show_guest_info.current_guest) }}</div>
+						<img :src="get_system_category_image(show_guest_info.current_guest)" style="width: 24px; height: 24px; float: left" />
+						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_category_name(show_guest_info.current_guest) }}</div>
 					</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
 					<el-descriptions-item label="固件">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>

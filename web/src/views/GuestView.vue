@@ -38,8 +38,8 @@
 							<el-table-column label="实例名" prop="name" width="180" show-overflow-tooltip />
 							<el-table-column label="系统" prop="systemCategory" width="100">
 								<template #default="scope">
-									<el-tooltip class="item" effect="dark" :content="get_system_cagetory_name(scope.row)" placement="bottom">
-										<img :src="get_system_cagetory_image(scope.row)" style="width: 24px; height: 24px; float: left" />
+									<el-tooltip class="item" effect="dark" :content="get_system_category_name(scope.row)" placement="bottom">
+										<img :src="get_system_category_image(scope.row)" style="width: 24px; height: 24px; float: left" />
 									</el-tooltip>
 								</template>
 							</el-table-column>
