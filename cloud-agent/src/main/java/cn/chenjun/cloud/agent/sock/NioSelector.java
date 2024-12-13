@@ -5,6 +5,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -46,21 +47,20 @@ public class NioSelector {
                         SelectionKey sk = iterator.next();
                         if (sk.isValid() && sk.isReadable()) {
                             SocketChannel channel = (SocketChannel) sk.channel();
-                            ((Buffer) socketReceiveBuffer).clear();
-                            int len = channel.read(socketReceiveBuffer);
-                            if (len == 0) {
-                                channel.register(this.selector, SelectionKey.OP_READ);
-                            } else if (len < 0) {
-                                NioClient nioClient = channelMap.remove(channel);
-                                if (nioClient != null && nioClient.getCallback() != null) {
-                                    nioClient.close();
+                            try {
+                                ((Buffer) socketReceiveBuffer).clear();
+                                int len = channel.read(socketReceiveBuffer);
+                                if (len < 0) {
+                                    closeChannel(channel);
+                                } else if (len > 0) {
+                                    ((Buffer) socketReceiveBuffer).flip();
+                                    NioClient client = channelMap.get(channel);
+                                    if (client != null && client.getCallback() != null) {
+                                        client.getCallback().onData(socketReceiveBuffer);
+                                    }
                                 }
-                            } else {
-                                ((Buffer) socketReceiveBuffer).flip();
-                                NioClient client = channelMap.get(channel);
-                                if (client != null && client.getCallback() != null) {
-                                    client.getCallback().onData(socketReceiveBuffer);
-                                }
+                            }catch (Exception err){
+                                closeChannel(channel);
                             }
                         }
                     } catch (Throwable err) {
@@ -73,6 +73,13 @@ public class NioSelector {
         } catch (Throwable err) {
             log.error("处理nio检测出错", err);
         }
+    }
+    private void closeChannel(SocketChannel channel) throws IOException {
+        NioClient nioClient = channelMap.remove(channel);
+        if (nioClient != null) {
+            nioClient.close();
+        }
+        channel.close();
     }
 
     public NioClient createClient(String host, int port, NioCallback callback) throws Exception {
