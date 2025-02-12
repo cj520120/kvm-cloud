@@ -259,7 +259,7 @@ public class GuestService extends AbstractService {
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() != Constant.GuestStatus.STOP) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态对主机进行重装");
+            throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态的主机进行重装操作");
         }
         this.checkSystemComponentComplete(guest.getNetworkId());
         String uid = UUID.randomUUID().toString().replace("-", "");
@@ -532,7 +532,7 @@ public class GuestService extends AbstractService {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未挂载");
                 }
                 if (guestDisk.getGuestId() != guestId) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未挂载");
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已挂载");
                 }
                 VolumeEntity volume = this.volumeMapper.selectById(guestDisk.getVolumeId());
                 if (volume.getStatus() != Constant.VolumeStatus.READY) {
