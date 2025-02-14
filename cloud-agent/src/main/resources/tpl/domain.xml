@@ -38,6 +38,7 @@
             <entry name='product'>CJ KVM Cloud</entry>
             <entry name='version'>3.1</entry>
             <entry name='manufacturer'>chenjun</entry>
+            <entry name='serial'>ds=nocloud;s=http://169.254.169.254/</entry>
         </system>
     </sysinfo>
     <features>

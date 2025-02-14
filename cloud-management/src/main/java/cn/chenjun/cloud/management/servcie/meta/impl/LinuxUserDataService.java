@@ -7,7 +7,9 @@ import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestSshMapper;
 import cn.chenjun.cloud.management.data.mapper.SshAuthorizedMapper;
+import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
+import cn.chenjun.cloud.management.util.MetaDataType;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class LinuxUserDataService implements UserDataService {
     private GuestPasswordMapper guestPasswordMapper;
 
     @Override
-    public String loadUserData(int guestId) {
+    public MetaData load(int guestId) {
         StringBuilder data = new StringBuilder();
         do {
             GuestPasswordEntity entity = guestPasswordMapper.selectById(guestId);
@@ -66,7 +68,7 @@ public class LinuxUserDataService implements UserDataService {
             data.append("  - ").append(sshAuthorizedEntity.getSshPublicKey());
             data.append("\n");
         } while (false);
-        return data.toString();
+        return MetaData.builder().type(MetaDataType.CLOUD).body(data.toString()).build();
     }
 
     @Override

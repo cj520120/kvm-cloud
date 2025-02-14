@@ -3,7 +3,9 @@ package cn.chenjun.cloud.management.servcie.meta.impl;
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.MetaDataEntity;
 import cn.chenjun.cloud.management.data.mapper.MetaMapper;
+import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.MetaDataService;
+import cn.chenjun.cloud.management.util.MetaDataType;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -24,10 +26,10 @@ public class DefaultMetaDataService implements MetaDataService {
 
 
     @Override
-    public String buildCloudInitMetaData(int guestId) {
+    public MetaData buildCloudInitMetaData(int guestId) {
         List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestId));
         Set<String> metaNames = list.stream().map(t -> t.getMetaKey() + ": " + t.getMetaValue()).collect(Collectors.toSet());
-        return String.join("\r\n", metaNames);
+        return MetaData.builder().type(MetaDataType.CLOUD).body(String.join("\r\n", metaNames)).build();
     }
 
     @Override

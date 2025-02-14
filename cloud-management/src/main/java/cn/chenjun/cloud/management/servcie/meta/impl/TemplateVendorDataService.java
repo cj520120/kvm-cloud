@@ -5,7 +5,9 @@ import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.data.mapper.*;
+import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.VendorDataService;
+import cn.chenjun.cloud.management.util.MetaDataType;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -16,7 +18,7 @@ import org.springframework.util.ObjectUtils;
  * @author chenjun
  */
 @Service
-public class DefaultVendorDataService implements VendorDataService {
+public class TemplateVendorDataService implements VendorDataService {
     @Autowired
     protected GuestSshMapper guestSshMapper;
     @Autowired
@@ -30,7 +32,7 @@ public class DefaultVendorDataService implements VendorDataService {
     @Autowired
     private TemplateMapper templateMapper;
     @Override
-    public String loadVendorData(int guestId) {
+    public MetaData load(int guestId) {
         StringBuilder sb = new StringBuilder();
         do {
             GuestDiskEntity guestDisk = diskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0).last("limit 1"));
@@ -51,7 +53,7 @@ public class DefaultVendorDataService implements VendorDataService {
             }
             sb.append(script);
         } while (false);
-        return sb.toString();
+        return MetaData.builder().type(MetaDataType.CLOUD).body(sb.toString()).build();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie.meta;
 
+import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import org.springframework.plugin.core.Plugin;
 
 /**
@@ -12,5 +13,5 @@ public interface UserDataService extends Plugin<Integer> {
      * @param guestId
      * @return
      */
-    String loadUserData(int guestId);
+    MetaData load(int guestId);
 }

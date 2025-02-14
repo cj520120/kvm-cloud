@@ -147,7 +147,6 @@ export default {
 
 		sendKey(keysym, code = '', down = true) {
 			if (keysym && this.rfb) {
-				console.log(keysym)
 				this.rfb.sendKey(this[keysym], code, down)
 			}
 		},
@@ -187,8 +186,8 @@ export default {
 <style scoped>
 .vnc-container {
 	background: #2c3e50;
-	min-height: 100vh;
-	min-width: 100vw;
+	min-height: calc(100vh - 40px);
+	/* min-width: 100vw; */
 }
 
 .toolbar {

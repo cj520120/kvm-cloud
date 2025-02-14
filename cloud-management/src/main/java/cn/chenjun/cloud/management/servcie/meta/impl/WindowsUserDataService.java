@@ -3,7 +3,9 @@ package cn.chenjun.cloud.management.servcie.meta.impl;
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.GuestPasswordEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
+import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
+import cn.chenjun.cloud.management.util.MetaDataType;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -19,7 +21,7 @@ public class WindowsUserDataService implements UserDataService {
     private GuestPasswordMapper guestPasswordMapper;
 
     @Override
-    public String loadUserData(int guestId) {
+    public MetaData load(int guestId) {
         StringBuilder data = new StringBuilder();
         do {
             GuestPasswordEntity entity = guestPasswordMapper.selectById(guestId);
@@ -35,7 +37,7 @@ public class WindowsUserDataService implements UserDataService {
         } while (false);
 
 
-        return data.toString();
+        return MetaData.builder().type(MetaDataType.CLOUD).body(data.toString()).build();
     }
 
     @Override
