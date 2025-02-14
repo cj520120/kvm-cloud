@@ -319,5 +319,5 @@ app.uefi.path= /usr/share/OVMF/OVMF_CODE.fd
 14、关于ubuntu无法启动虚拟机问题
 ```$xslt
 ubuntu 提示qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory
-在/etc/sysctl.conf 中追加 vm.nr_hugepages=512 #具体值请根据实际情况修改
+在/etc/sysctl.conf 中追加 vm.nr_hugepages=10240 #具体值请根据实际情况修改
 ```

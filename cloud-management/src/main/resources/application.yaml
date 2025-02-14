@@ -5,12 +5,14 @@ app:
   systemComponentMemory: 524288
   systemComponentCpuSpeed: 0
   destroyDelayMinute: 3
+  # 是否启用大页内存，如果启用，在宿主机为ubuntu下请设置vm.nr_hugepages，否则虚拟机无法启动
+  enableMemoryHugePages: false
   manager-uri: http://192.168.2.193:8080/
   over-cpu: 4.0
   over-memory: 2.0
   #pip3加速源，国内用户可配置，海外无需配置
   pip-source: https://pypi.tuna.tsinghua.edu.cn/simple
-#  #yum加速源，国内用户可配置，海外无需配置
+#  系统组件yum加速源，国内用户可配置，海外无需配置，如果启用该配置，需保证加速源正常访问
 #  yum-source: |
 #    [base]
 #    name=CentOS-$releasever - Base

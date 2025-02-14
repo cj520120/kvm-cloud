@@ -14,6 +14,7 @@ public class ApplicationConfig {
     private String managerUri;
     private float overCpu = 1.0f;
     private float overMemory = 1.0f;
+    private boolean enableMemoryHugePages;
     private String yumSource = "";
     private String pipSource = "";
     /**

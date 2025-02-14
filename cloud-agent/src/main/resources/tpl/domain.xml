@@ -3,9 +3,11 @@
     <description>{{description}}</description>
     <memory unit="KiB">{{memory}}</memory>
     <currentMemory unit="KiB">{{memory}}</currentMemory>
+    {% if enableMemoryHugePages %}
     <memoryBacking>
         <hugepages/>
     </memoryBacking>
+    {% endif %}
     <vcpu placement="static">{{cpu.number}}</vcpu>
     {% if cpu.share > 0 %}
     <cputune>

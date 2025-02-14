@@ -34,6 +34,7 @@ public class DomainXmlUtil {
         map.put("disks", getDisksContext(request.getBus(), request.getOsDisks()));
         map.put("networks", getBatchNicContext(request.getNetworkInterfaces()));
         map.put("vnc", getVncContext(request.getVncPassword()));
+        map.put("enableMemoryHugePages", request.isEnableMemoryHugePages());
 
         if (config.getMachine() != null && !ObjectUtils.isEmpty(config.getMachine().getName())) {
             Map<String, Object> machineMap = new HashMap<>(2);

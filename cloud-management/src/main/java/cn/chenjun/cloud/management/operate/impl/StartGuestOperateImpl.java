@@ -74,6 +74,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 .networkInterfaces(networkInterfaces)
                 .vncPassword(guestVncEntity.getPassword())
                 .qmaRequest(this.getStartQmaRequest(param))
+                .enableMemoryHugePages(config.isEnableMemoryHugePages())
                 .build();
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 

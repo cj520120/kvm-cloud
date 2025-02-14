@@ -28,5 +28,6 @@ public class GuestStartRequest {
     private GuestQmaRequest qmaRequest;
     private int systemCategory;
     private int bootstrapType;
+    private boolean enableMemoryHugePages;
 
 }
