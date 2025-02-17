@@ -56,6 +56,17 @@ public class AllocateService extends AbstractService {
         return guestNetwork;
     }
 
+    public List<HostEntity> listAllocateHost(int bootstrapType, int cpu, long memory) {
+        List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
+        for (HostEntity host : list) {
+            host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
+            host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
+        }
+        list = list.stream().filter(t -> hostVerify(t, bootstrapType, cpu, memory))
+                .collect(Collectors.toList());
+        return list;
+    }
+
     public HostEntity allocateHost(int hostId, int bootstrapType, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
