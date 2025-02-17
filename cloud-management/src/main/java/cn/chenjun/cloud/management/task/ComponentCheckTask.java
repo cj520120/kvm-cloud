@@ -108,4 +108,9 @@ public class ComponentCheckTask extends AbstractTask {
     protected String getName() {
         return "系统组件检测";
     }
+
+    @Override
+    protected boolean canRunning() {
+        return true;
+    }
 }

@@ -22,7 +22,7 @@ public class UpdateSnapshotProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<SnapshotModel> resultUtil = this.volumeService.getSnapshotInfo(msg.getId());
-        NotifyData<ResultUtil<SnapshotModel>> sendMsg = NotifyData.<ResultUtil<SnapshotModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).data(resultUtil).build();
+        NotifyData<ResultUtil<SnapshotModel>> sendMsg = NotifyData.<ResultUtil<SnapshotModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

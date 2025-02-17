@@ -29,7 +29,6 @@ public class HostSyncTask extends AbstractTask {
 
     @Override
     protected void dispatch() {
-
         List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : hostList) {
             switch (host.getStatus()) {
@@ -53,5 +52,10 @@ public class HostSyncTask extends AbstractTask {
     @Override
     protected String getName() {
         return "宿主机检测";
+    }
+
+    @Override
+    protected boolean canRunning() {
+        return !this.operateTask.hasTask(HostCheckOperate.class);
     }
 }

@@ -33,7 +33,7 @@ public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess {
             dnsModelList = this.dnsService.listLocalNetworkDns(msg.getId());
         }
         List<ComponentEntity> components = mapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, msg.getId()));
-        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModelList).build();
+        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModelList).version(System.currentTimeMillis()).build();
 
         for (ComponentEntity component : components) {
             wsSessionManager.sendComponentNotify(component.getComponentId(), sendMsg);

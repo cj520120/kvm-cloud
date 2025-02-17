@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.data.mapper.*;
@@ -32,10 +33,10 @@ public class TemplateVendorDataService implements VendorDataService {
     @Autowired
     private TemplateMapper templateMapper;
     @Override
-    public MetaData load(int guestId) {
+    public MetaData load(GuestEntity guest) {
         StringBuilder sb = new StringBuilder();
         do {
-            GuestDiskEntity guestDisk = diskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0).last("limit 1"));
+            GuestDiskEntity guestDisk = diskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()).eq(GuestDiskEntity.DEVICE_ID, 0).last("limit 1"));
             if (guestDisk == null) {
                 break;
             }
@@ -57,8 +58,8 @@ public class TemplateVendorDataService implements VendorDataService {
     }
 
     @Override
-    public boolean supports(@NonNull Integer systemCategory) {
-        return systemCategory != SystemCategory.WINDOWS;
+    public boolean supports(@NonNull GuestEntity guest) {
+        return guest.getSystemCategory() != SystemCategory.WINDOWS;
     }
 
 }

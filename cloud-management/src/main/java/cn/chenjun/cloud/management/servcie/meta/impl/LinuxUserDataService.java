@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestPasswordEntity;
 import cn.chenjun.cloud.management.data.entity.GuestSshEntity;
 import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
@@ -31,10 +32,10 @@ public class LinuxUserDataService implements UserDataService {
     private GuestPasswordMapper guestPasswordMapper;
 
     @Override
-    public MetaData load(int guestId) {
+    public MetaData load(GuestEntity guest) {
         StringBuilder data = new StringBuilder();
         do {
-            GuestPasswordEntity entity = guestPasswordMapper.selectById(guestId);
+            GuestPasswordEntity entity = guestPasswordMapper.selectById(guest.getGuestId());
             if (entity == null) {
                 break;
             }
@@ -50,7 +51,7 @@ public class LinuxUserDataService implements UserDataService {
         } while (false);
 
         do {
-            GuestSshEntity guestSshEntity = this.guestSshMapper.selectOne(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID, guestId));
+            GuestSshEntity guestSshEntity = this.guestSshMapper.selectOne(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID, guest.getGuestId()));
             if (guestSshEntity == null) {
                 break;
             }
@@ -72,7 +73,7 @@ public class LinuxUserDataService implements UserDataService {
     }
 
     @Override
-    public boolean supports(@NonNull Integer systemCategory) {
-        return systemCategory != SystemCategory.WINDOWS;
+    public boolean supports(@NonNull GuestEntity guest) {
+        return guest.getSystemCategory() != SystemCategory.WINDOWS;
     }
 }

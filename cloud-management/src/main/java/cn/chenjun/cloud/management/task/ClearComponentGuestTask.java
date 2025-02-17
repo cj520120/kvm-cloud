@@ -63,4 +63,9 @@ public class ClearComponentGuestTask extends AbstractTask {
     protected String getName() {
         return "清理未关联的组件虚拟机";
     }
+
+    @Override
+    protected boolean canRunning() {
+        return true;
+    }
 }

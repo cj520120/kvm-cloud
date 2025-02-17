@@ -10,9 +10,9 @@ app:
   manager-uri: http://192.168.2.193:8080/
   over-cpu: 4.0
   over-memory: 2.0
-  #pip3加速源，国内用户可配置，海外无需配置
+  #系统组 pip3加速源，国内用户可配置，海外无需配置
   pip-source: https://pypi.tuna.tsinghua.edu.cn/simple
-#  系统组件yum加速源，国内用户可配置，海外无需配置，如果启用该配置，需保证加速源正常访问
+#  系统组件yum加速源(centos7)，国内用户可配置，海外无需配置，如果启用该配置，需保证加速源正常访问
 #  yum-source: |
 #    [base]
 #    name=CentOS-$releasever - Base

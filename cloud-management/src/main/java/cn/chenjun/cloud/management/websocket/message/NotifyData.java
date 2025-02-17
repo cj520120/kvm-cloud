@@ -16,4 +16,5 @@ public class NotifyData<T> {
     private int type;
     private int id;
     private T data;
+    private long version;
 }

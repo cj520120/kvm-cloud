@@ -39,7 +39,7 @@ public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<
 
     @Override
     public void onMessage(CharSequence channel, NotifyData<?> msg) {
-        RLock rLock = redissonClient.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY);
+        RLock rLock = redissonClient.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY + "." + msg.getId());
         try {
             rLock.lock(1, TimeUnit.MINUTES);
             Optional<ClusterMessageProcess> optional = this.processPluginRegistry.getPluginFor(msg.getType());

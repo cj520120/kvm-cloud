@@ -46,4 +46,9 @@ public class TaskIdSyncTask extends AbstractTask {
     protected String getName() {
         return "检测主机任务列表";
     }
+
+    @Override
+    protected boolean canRunning() {
+        return !this.operateTask.hasTask(SyncHostTaskIdOperate.class);
+    }
 }

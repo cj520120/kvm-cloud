@@ -44,7 +44,7 @@ public class UpdateComponentProcess extends AbstractClusterMessageProcess {
             resultUtil = ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件未找到");
         }
 
-        NotifyData<ResultUtil<ComponentModel>> sendMsg = NotifyData.<ResultUtil<ComponentModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_COMPONENT).data(resultUtil).build();
+        NotifyData<ResultUtil<ComponentModel>> sendMsg = NotifyData.<ResultUtil<ComponentModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_COMPONENT).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

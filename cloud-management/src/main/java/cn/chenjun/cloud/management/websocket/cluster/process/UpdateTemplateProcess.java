@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @author chenjun
  */
 @Component
-public class UpdateTemplaterocess extends AbstractClusterMessageProcess {
+public class UpdateTemplateProcess extends AbstractClusterMessageProcess {
     @Autowired
     private WsSessionManager wsSessionManager;
     @Autowired
@@ -22,7 +22,7 @@ public class UpdateTemplaterocess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<TemplateModel> resultUtil = this.templateService.getTemplateInfo(msg.getId());
-        NotifyData<ResultUtil<TemplateModel>> sendMsg = NotifyData.<ResultUtil<TemplateModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_TEMPLATE).data(resultUtil).build();
+        NotifyData<ResultUtil<TemplateModel>> sendMsg = NotifyData.<ResultUtil<TemplateModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_TEMPLATE).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

@@ -26,7 +26,7 @@ public class UpdateComponentNatProcess extends AbstractClusterMessageProcess {
     public void process(NotifyData<?> msg) {
         ResultUtil<List<NatModel>> resultUtil = this.networkService.listComponentNat(msg.getId());
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_NAT).data(resultUtil.getData()).build();
+            NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_NAT).data(resultUtil.getData()).version(System.currentTimeMillis()).build();
             wsSessionManager.sendComponentNotify(msg.getId(), sendMsg);
         }
     }

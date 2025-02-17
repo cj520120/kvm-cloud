@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.MetaDataEntity;
 import cn.chenjun.cloud.management.data.mapper.MetaMapper;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
@@ -26,20 +27,20 @@ public class DefaultMetaDataService implements MetaDataService {
 
 
     @Override
-    public MetaData buildCloudInitMetaData(int guestId) {
-        List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestId));
+    public MetaData buildCloudInitMetaData(GuestEntity guest) {
+        List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));
         Set<String> metaNames = list.stream().map(t -> t.getMetaKey() + ": " + t.getMetaValue()).collect(Collectors.toSet());
         return MetaData.builder().type(MetaDataType.CLOUD).body(String.join("\r\n", metaNames)).build();
     }
 
     @Override
-    public String findMetaDataByKey(int guestId, String key) {
-        MetaDataEntity entity = this.metaMapper.selectOne(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestId).eq(MetaDataEntity.META_KEY, key));
+    public String findMetaDataByKey(GuestEntity guest, String key) {
+        MetaDataEntity entity = this.metaMapper.selectOne(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()).eq(MetaDataEntity.META_KEY, key));
         return entity == null ? "" : entity.getMetaValue();
     }
 
     @Override
-    public boolean supports(@NonNull Integer systemCategory) {
-        return systemCategory != SystemCategory.WINDOWS;
+    public boolean supports(@NonNull GuestEntity guest) {
+        return guest.getSystemCategory() != SystemCategory.WINDOWS;
     }
 }

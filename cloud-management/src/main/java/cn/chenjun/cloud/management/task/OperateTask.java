@@ -49,6 +49,15 @@ public class OperateTask extends AbstractTask {
         taskMapper.insert(task);
     }
 
+    @Override
+    protected boolean canRunning() {
+        return true;
+    }
+
+    public boolean hasTask(Class taskType) {
+        return this.taskMapper.selectCount(new QueryWrapper<TaskEntity>().eq(TaskEntity.TASK_TYPE, taskType.getName())) > 0;
+    }
+
     public void addTask(BaseOperateParam operateParam, int delayMinute) {
         TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
                 .version(0)

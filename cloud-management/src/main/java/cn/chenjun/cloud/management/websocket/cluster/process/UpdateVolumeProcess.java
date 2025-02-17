@@ -22,7 +22,7 @@ public class UpdateVolumeProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<VolumeModel> resultUtil = this.volumeService.getVolumeInfo(msg.getId());
-        NotifyData<ResultUtil<VolumeModel>> sendMsg = NotifyData.<ResultUtil<VolumeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_VOLUME).data(resultUtil).build();
+        NotifyData<ResultUtil<VolumeModel>> sendMsg = NotifyData.<ResultUtil<VolumeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_VOLUME).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

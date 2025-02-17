@@ -29,11 +29,11 @@ public class MetaService extends AbstractService {
     @Autowired
     private GuestMapper guestMapper;
     @Autowired
-    private PluginRegistry<MetaDataService, Integer> metaDataPluginRegistry;
+    private PluginRegistry<MetaDataService, GuestEntity> metaDataPluginRegistry;
     @Autowired
-    private PluginRegistry<UserDataService, Integer> userDataPluginRegistry;
+    private PluginRegistry<UserDataService, GuestEntity> userDataPluginRegistry;
     @Autowired
-    private PluginRegistry<VendorDataService, Integer> vendorDataPluginRegistry;
+    private PluginRegistry<VendorDataService, GuestEntity> vendorDataPluginRegistry;
 
 
     public MetaData loadAllGuestMetaData(int networkId, String ip, String nonce, String sign) {
@@ -53,9 +53,9 @@ public class MetaService extends AbstractService {
             if (guest == null) {
                 break;
             }
-            Optional<MetaDataService> metaDataServiceOptional = metaDataPluginRegistry.getPluginFor(guest.getSystemCategory());
+            Optional<MetaDataService> metaDataServiceOptional = metaDataPluginRegistry.getPluginFor(guest);
             if(metaDataServiceOptional.isPresent()){
-                MetaData metaData = metaDataServiceOptional.get().buildCloudInitMetaData(guest.getGuestId());
+                MetaData metaData = metaDataServiceOptional.get().buildCloudInitMetaData(guest);
                 return metaData;
             }
         } while (false);
@@ -80,11 +80,11 @@ public class MetaService extends AbstractService {
             if (guest == null) {
                 break;
             }
-            Optional<MetaDataService> optional = metaDataPluginRegistry.getPluginFor(guest.getSystemCategory());
+            Optional<MetaDataService> optional = metaDataPluginRegistry.getPluginFor(guest);
             if (!optional.isPresent()) {
                 break;
             }
-            String metaData = optional.get().findMetaDataByKey(guest.getGuestId(), key);
+            String metaData = optional.get().findMetaDataByKey(guest, key);
             if (!ObjectUtils.isEmpty(metaData)) {
                 data.append(metaData).append("\n");
             }
@@ -110,9 +110,9 @@ public class MetaService extends AbstractService {
             if (guest == null) {
                 break;
             }
-            List<VendorDataService> vendorDataServiceList = vendorDataPluginRegistry.getPluginsFor(guest.getSystemCategory());
+            List<VendorDataService> vendorDataServiceList = vendorDataPluginRegistry.getPluginsFor(guest);
             for (VendorDataService vendorDataService : vendorDataServiceList) {
-                MetaData metaData = vendorDataService.load(guest.getGuestId());
+                MetaData metaData = vendorDataService.load(guest);
                 if (!ObjectUtils.isEmpty(metaData.getBody())) {
                     metaDataList.add(metaData);
                 }
@@ -139,9 +139,9 @@ public class MetaService extends AbstractService {
             if (guest == null) {
                 break;
             }
-            List<UserDataService> userDataServiceList = userDataPluginRegistry.getPluginsFor(guest.getSystemCategory());
+            List<UserDataService> userDataServiceList = userDataPluginRegistry.getPluginsFor(guest);
             for (UserDataService userDataService : userDataServiceList) {
-                MetaData metaData = userDataService.load(guest.getGuestId());
+                MetaData metaData = userDataService.load(guest);
                 if (!ObjectUtils.isEmpty(metaData.getBody())) {
                     metaDataList.add(metaData);
                 }

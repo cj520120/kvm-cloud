@@ -48,4 +48,9 @@ public class VolumeSyncTask extends AbstractTask {
     protected String getName() {
         return "检测存储池磁盘";
     }
+
+    @Override
+    protected boolean canRunning() {
+        return !this.operateTask.hasTask(VolumeCheckOperate.class);
+    }
 }

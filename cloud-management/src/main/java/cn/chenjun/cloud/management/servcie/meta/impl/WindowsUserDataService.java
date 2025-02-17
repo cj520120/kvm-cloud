@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestPasswordEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
@@ -21,10 +22,10 @@ public class WindowsUserDataService implements UserDataService {
     private GuestPasswordMapper guestPasswordMapper;
 
     @Override
-    public MetaData load(int guestId) {
+    public MetaData load(GuestEntity guest) {
         StringBuilder data = new StringBuilder();
         do {
-            GuestPasswordEntity entity = guestPasswordMapper.selectById(guestId);
+            GuestPasswordEntity entity = guestPasswordMapper.selectById(guest.getGuestId());
             if (entity == null) {
                 break;
             }
@@ -41,7 +42,7 @@ public class WindowsUserDataService implements UserDataService {
     }
 
     @Override
-    public boolean supports(@NonNull Integer systemCategory) {
-        return systemCategory == SystemCategory.WINDOWS;
+    public boolean supports(@NonNull GuestEntity guest) {
+        return guest.getSystemCategory() == SystemCategory.WINDOWS;
     }
 }

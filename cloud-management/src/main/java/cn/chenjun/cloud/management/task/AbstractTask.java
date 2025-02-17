@@ -29,9 +29,11 @@ public abstract class AbstractTask implements CommandLineRunner {
         this.lastStartTime = System.currentTimeMillis() + this.getDelaySeconds();
         this.bossExecutor.scheduleAtFixedRate(this::call, 0, 1, TimeUnit.SECONDS);
     }
-
     private void call() {
         try {
+            if(!canRunning()){
+                return;
+            }
             String key = RedisKeyUtil.TASK_CLUSTER + this.getClass().getName();
             RBucket<String> rBucket = redissonClient.getBucket(key);
             boolean isCurrentServer;
@@ -78,4 +80,11 @@ public abstract class AbstractTask implements CommandLineRunner {
      * @return
      */
     protected abstract String getName();
+
+    /**
+     * 判断当前任务是否可以执行
+     *
+     * @return
+     */
+    protected abstract boolean canRunning();
 }

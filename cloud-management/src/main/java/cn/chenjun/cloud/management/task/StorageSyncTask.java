@@ -36,4 +36,9 @@ public class StorageSyncTask extends AbstractTask {
     protected String getName() {
         return "存储池检测";
     }
+
+    @Override
+    protected boolean canRunning() {
+        return !this.operateTask.hasTask(StorageCheckOperate.class);
+    }
 }
