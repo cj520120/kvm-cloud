@@ -30,7 +30,6 @@ public class NatServiceInitialize implements NatComponentQmaInitialize {
         NetworkEntity network = networkMapper.selectById(component.getNetworkId());
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/nat-service/"}).checkSuccess(true).build())).build());
-        String natServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nat/nat_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String natService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nat/nat_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String natPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nat/nat_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(3);
@@ -41,9 +40,7 @@ public class NatServiceInitialize implements NatComponentQmaInitialize {
         Jinjava jinjava = new Jinjava();
         natPython = jinjava.render(natPython, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/nat-service/nat.py").fileBody(natPython).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/nat-service/service.sh").fileBody(natServiceShell).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/nat-service.service").fileBody(natService).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"a+x", "/usr/local/nat-service/service.sh"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"daemon-reload"}).checkSuccess(true).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "nat-service"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "nat-service"}).build())).build());

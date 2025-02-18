@@ -26,7 +26,7 @@ public class YumSourceCommand implements GlobalComponentQmaInitialize {
         String source = applicationConfig.getYumSource().replace("\r", "").trim();
         if (!StringUtils.isEmpty(source)) {
             //写入yum源
-            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/yum.repos.d/CentOS-Base.repo").fileBody(applicationConfig.getYumSource().replace("\r", "")).build())).build());
+            commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/yum.repos.d/oracle-linux-ol9.repo").fileBody(applicationConfig.getYumSource().replace("\r", "")).build())).build());
             //清除yum缓存
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("yum").args(new String[]{"clean", "all"}).checkSuccess(true).build())).build());
             //重新生成yum缓存文件

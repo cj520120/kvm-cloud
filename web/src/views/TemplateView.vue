@@ -88,7 +88,7 @@
 							<el-form-item label="文件MD5" prop="uri">
 								<el-input v-model="create_template.md5"></el-input>
 							</el-form-item>
-							<el-form-item label="初始化脚本">
+							<el-form-item label="初始化脚本" v-if="create_template.templateType === 2">
 								<el-input v-model="create_template.script" :rows="10" type="textarea"></el-input>
 							</el-form-item>
 							<el-form-item>

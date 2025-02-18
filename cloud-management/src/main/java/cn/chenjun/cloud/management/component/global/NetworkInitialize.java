@@ -57,7 +57,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
             commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/sysconfig/network-scripts/ifcfg-eth" + index).fileBody(networkConfig).build())).build());
         }
         //重启网卡
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("service").args(new String[]{"network", "restart"}).checkSuccess(true).build())).build());
+        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("service").args(new String[]{"NetworkManager", "restart"}).checkSuccess(true).build())).build());
         //安装网络检测脚本
         String networkCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/network_check_shell.tpl")), StandardCharsets.UTF_8);
         Jinjava jinjava = new Jinjava();

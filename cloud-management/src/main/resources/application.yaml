@@ -2,7 +2,7 @@ app:
   #系统组件网卡默认驱动，可选值为virtio e1000 rtl8139,变更该值需要删除原系统组件重建，切为最新版本的系统组件模版文件
   systemComponentNetworkDriver: virtio
   systemComponentCpu: 1
-  systemComponentMemory: 524288
+  systemComponentMemory: 1048576
   systemComponentCpuSpeed: 0
   destroyDelayMinute: 3
   # 是否启用大页内存，如果启用，在宿主机为ubuntu下请设置vm.nr_hugepages，否则虚拟机无法启动
@@ -12,32 +12,99 @@ app:
   over-memory: 2.0
   #系统组 pip3加速源，国内用户可配置，海外无需配置
   pip-source: https://pypi.tuna.tsinghua.edu.cn/simple
-#  系统组件yum加速源(centos7)，国内用户可配置，海外无需配置，如果启用该配置，需保证加速源正常访问
+#  系统组件yum加速源(Oracle linux 9.4.0)，国内用户可配置，海外无需配置，如果启用该配置，需保证加速源正常访问
 #  yum-source: |
-#    [base]
-#    name=CentOS-$releasever - Base
-#    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/os/$basearch/
+#    [ol9_baseos_latest]
+#    name=Oracle Linux 9 BaseOS Latest ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/baseos/latest/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 #    gpgcheck=1
-#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+#    enabled=1
 #
-#    [updates]
-#    name=CentOS-$releasever - Updates
-#    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/updates/$basearch/
+#    [ol9_appstream]
+#    name=Oracle Linux 9 Application Stream Packages ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/appstream/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 #    gpgcheck=1
-#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+#    enabled=1
 #
-#    [extras]
-#    name=CentOS-$releasever - Extras
-#    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/extras/$basearch/
-#    gpgcheck=1
-#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-#
-#    [centosplus]
-#    name=CentOS-$releasever - Plus
-#    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/centosplus/$basearch/
+#    [ol9_u0_baseos_base]
+#    name=Oracle Linux 9 BaseOS GA ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/0/baseos/base/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 #    gpgcheck=1
 #    enabled=0
-#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+#
+#    [ol9_u1_baseos_base]
+#    name=Oracle Linux 9.1 BaseOS ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/1/baseos/base/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_u2_baseos_base]
+#    name=Oracle Linux 9.2 BaseOS ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/2/baseos/base/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_u3_baseos_base]
+#    name=Oracle Linux 9.3 BaseOS ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/3/baseos/base/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_u4_baseos_base]
+#    name=Oracle Linux 9.4 BaseOS ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/4/baseos/base/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_u5_baseos_base]
+#    name=Oracle Linux 9.5 BaseOS ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/5/baseos/base/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_addons]
+#    name=Oracle Linux 9 Addons ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/addons/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_codeready_builder]
+#    name=Oracle Linux 9 CodeReady Builder ($basearch) - (Unsupported)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/codeready/builder/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_distro_builder]
+#    name=Oracle Linux 9 Distro Builder ($basearch) - (Unsupported)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/distro/builder/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
+#
+#    [ol9_MODRHCK]
+#    name=Latest RHCK with fixes from Oracle for Oracle Linux $releasever ($basearch)
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/MODRHCK/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    priority=20
+#    enabled=0
+#
+#    [ol9_u3_security_validation]
+#    name=Oracle Linux $releasever Update 3 ($basearch) Security Validations
+#    baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL9/3/security/validation/$basearch/
+#    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+#    gpgcheck=1
+#    enabled=0
   work:
     thread:
       size: 1

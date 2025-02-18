@@ -29,7 +29,6 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
         NetworkEntity network = networkMapper.selectById(component.getNetworkId());
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/cloud-service/"}).checkSuccess(true).build())).build());
-        String cloudServiceShell = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/cloud/cloud_shell.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String cloudService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/cloud/cloud_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         String cloudPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/cloud/cloud_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(3);
@@ -40,9 +39,7 @@ public class CloudServiceInitialize implements RouteComponentQmaInitialize {
         Jinjava jinjava = new Jinjava();
         cloudPython = jinjava.render(cloudPython, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/cloud-service/cloud.py").fileBody(cloudPython).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/cloud-service/service.sh").fileBody(cloudServiceShell).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/cloud-service.service").fileBody(cloudService).build())).build());
-        commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("chmod").args(new String[]{"a+x", "/usr/local/cloud-service/service.sh"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"daemon-reload"}).checkSuccess(true).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"enable", "cloud-service"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"restart", "cloud-service"}).build())).build());

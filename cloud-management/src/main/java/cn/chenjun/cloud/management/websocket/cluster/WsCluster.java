@@ -6,9 +6,7 @@ import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.cluster.process.ClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RTopic;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.redisson.api.listener.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * @author chenjun

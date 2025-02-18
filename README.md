@@ -18,7 +18,7 @@
 
 ### 关于升级
     目前不支持V1、V2升级到最新版本
-    V3.0升级时请重新上传系统模版文件Cloud-System-v3.1.qcow2(md5:2696ca0d762279bc386b03c8cea82cd7),并在模版页面点击重新下载
+    V3.2升级时请重新上传系统模版文件Cloud-System-v3.3.qcow2(md5:d91d1d3e4e9d78593f5727faebf0510e),停止现有网络组件，并重新初始化
     新版本不在支持采用backingfile方式，升级前请确保所有磁盘文件没有父磁盘的依赖，如果有请通过clone方式将磁盘重新克隆，取消依赖关系，否则删除模版将导致磁盘不可用
 ### 操作系统
 Linux(intel、amd)
@@ -187,7 +187,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 ![](images/storage.png)
 
-9、下载基础模版(系统模版选择cloud/v3/Cloud-System-V3.1.qcow2)
+9、下载基础模版(系统模版选择cloud/v3/Cloud-System-V3.3.qcow2)
 
 > **百度网盘链接: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn 提取码: 1bpn**
 
@@ -314,7 +314,7 @@ app.uefi.path= /usr/share/OVMF/OVMF_CODE.fd
 ```
 13、关于网络不通问题
 ```$xslt
-尽量使用纯净系统安装，如果网络不通，请检查防火墙、iptables、关闭NetworkManager服务等
+尽量使用纯净系统安装，如果网络不通，请检查防火墙、iptables等
 ```
 14、关于ubuntu无法启动虚拟机问题
 ```$xslt

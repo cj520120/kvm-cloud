@@ -41,7 +41,7 @@
 							<KeyboardController v-if="activeInputType === 4" @send-controller-key="sendControllerKey" />
 						</el-main>
 
-						<el-footer v-if="[0, 1, 2].includes(activeInputType)">
+						<el-footer v-if="[0, 1, 2, 3].includes(activeInputType)">
 							<!-- 公共按键 -->
 							<KeyboardGlobal @send-key="sendKey" />
 						</el-footer>
