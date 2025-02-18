@@ -202,7 +202,8 @@ export default {
 				templateType: this.create_template.templateType,
 				uri: this.create_template.uri,
 				volumeType: this.create_template.volumeType,
-				md5: this.create_template.md5
+				md5: this.create_template.md5,
+				script: this.create_template.script
 			}
 			if (this.create_template.templateType === 0) {
 				data.volumeType = 'raw'
