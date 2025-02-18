@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.servcie.EventService;
+import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -40,7 +41,7 @@ public class ComponentCheckTask extends AbstractTask {
     @Autowired
     private PluginRegistry<ComponentProcess, Integer> processPluginRegistry;
     @Autowired
-    private RedissonClient redissonClient;
+    private LockRunner lockRunner;
     @Autowired
     private ComponentMapper componentMapper;
 
@@ -52,28 +53,14 @@ public class ComponentCheckTask extends AbstractTask {
                 List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
 
                 for (ComponentEntity component : components) {
-                    RLock rLock = redissonClient.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY);
-                    try {
-                        rLock.lock(1, TimeUnit.MINUTES);
+                        lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY,()->processPluginRegistry.getPluginFor(component.getComponentType()).ifPresent(componentProcess -> componentProcess.checkAndStart(network, component)));
 
-                        processPluginRegistry.getPluginFor(component.getComponentType()).ifPresent(componentProcess -> componentProcess.checkAndStart(network, component));
-                    } finally {
-                        try {
-                            if (rLock.isHeldByCurrentThread()) {
-                                rLock.unlock();
-                            }
-                        } catch (Exception ignored) {
-
-                        }
-                    }
                 }
-                RLock rLock = redissonClient.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY);
-                try {
-                    rLock.lock(1, TimeUnit.MINUTES);
+                lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY,()->{
                     //检测Route组件
                     ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, network.getNetworkId()).last("limit 0 ,1"));
                     if (component == null) {
-                        continue;
+                        return;
                     }
                     List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
                     }.getType());
@@ -90,15 +77,7 @@ public class ComponentCheckTask extends AbstractTask {
                         networkMapper.updateById(network);
                         this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
                     }
-                } finally {
-                    try {
-                        if (rLock.isHeldByCurrentThread()) {
-                            rLock.unlock();
-                        }
-                    } catch (Exception ignored) {
-
-                    }
-                }
+                });
             }
         }
 

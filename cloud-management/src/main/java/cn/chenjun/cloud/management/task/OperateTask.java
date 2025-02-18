@@ -8,6 +8,7 @@ import cn.chenjun.cloud.management.data.entity.TaskEntity;
 import cn.chenjun.cloud.management.data.mapper.TaskMapper;
 import cn.chenjun.cloud.management.operate.OperateEngine;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class OperateTask extends AbstractTask {
     @Autowired
     private TaskMapper taskMapper;
     @Autowired
-    private RedissonClient redissonClient;
+    private LockRunner lockRunner;
 
     public void addTask(BaseOperateParam operateParam) {
         TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
@@ -90,7 +91,7 @@ public class OperateTask extends AbstractTask {
                 if (this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0) {
                     Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
                     BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
-                    this.lockRun(() -> {
+                    lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY,() -> {
                         this.operateEngine.process(operateParam);
                     });
                 }
@@ -118,7 +119,7 @@ public class OperateTask extends AbstractTask {
             Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(task.getType());
             BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(task.getParam(), paramClass);
             try {
-                this.lockRun(() -> {
+                lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY,() -> {
                     this.operateEngine.onFinish(operateParam, result);
                 });
                 this.taskMapper.deleteById(taskId);
@@ -131,21 +132,7 @@ public class OperateTask extends AbstractTask {
 
     }
 
-    private void lockRun(Runnable runnable) {
-        RLock rLock = redissonClient.getLock(RedisKeyUtil.GLOBAL_LOCK_KEY);
-        try {
-            rLock.lock(1, TimeUnit.MINUTES);
-            runnable.run();
-        } finally {
-            try {
-                if (rLock.isHeldByCurrentThread()) {
-                    rLock.unlock();
-                }
-            } catch (Exception ignored) {
 
-            }
-        }
-    }
 
     @Override
     protected String getName() {

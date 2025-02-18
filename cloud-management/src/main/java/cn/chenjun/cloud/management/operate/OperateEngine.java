@@ -30,7 +30,6 @@ public class OperateEngine {
 
     @Transactional(rollbackFor = Exception.class)
     public void onFinish(BaseOperateParam operateParam, String result) {
-        runner.lockRun(RedisKeyUtil.GLOBAL_RW_LOCK_KET, true, () -> {
             log.info("onFinish type={} param={} result={}", operateParam.getClass().getName(), operateParam, result);
             Optional<Operate> optional = this.operatePluginRegistry.getPluginFor(operateParam.getType());
             optional.ifPresent(operate -> {
@@ -42,16 +41,14 @@ public class OperateEngine {
                 }
                 operate.onComplete(operateParam, resultUtil);
             });
-        });
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void process(BaseOperateParam operateParam) {
-        runner.lockRun(RedisKeyUtil.GLOBAL_RW_LOCK_KET, false, () -> {
             log.info("process type={} param={}", operateParam.getClass().getName(), operateParam);
             Optional<Operate> optional = this.operatePluginRegistry.getPluginFor(operateParam.getType());
             optional.ifPresent(operate -> operate.process(operateParam));
-        });
+
 
     }
 }

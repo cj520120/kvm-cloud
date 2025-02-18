@@ -15,11 +15,10 @@ import java.util.concurrent.TimeUnit;
 public class LockRunner {
     @Autowired
     private RedissonClient redissonClient;
-    public void lockRun(String key,boolean isRead,Runnable runnable){
+    public void lockRun(String key,  Runnable runnable){
         RLock lock =null;
         try {
-            RReadWriteLock rwLock = redissonClient.getReadWriteLock(key);
-            lock =isRead? rwLock.readLock() :  rwLock.writeLock();
+            lock = redissonClient.getLock(key);
             lock.lock(30, TimeUnit.SECONDS);
             runnable.run();
         } catch (Exception err) {
@@ -33,5 +32,34 @@ public class LockRunner {
 
             }
         }
+    }
+    public <T> T lockCall(String key,  LockAction<T> runnable){
+        RLock lock =null;
+        try {
+            lock = redissonClient.getLock(key);
+            lock.lock(30, TimeUnit.SECONDS);
+            return runnable.run();
+        } catch (Exception err) {
+            log.error("执行失败.lock-key:{}",key,err);
+            throw err;
+        } finally {
+            try {
+                if (lock!=null&&lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
+            } catch (Exception err) {
+
+            }
+        }
+    }
+    @FunctionalInterface
+    public interface LockAction<T> {
+
+        /**
+         * 执行
+         *
+         * @return
+         */
+        T run();
     }
 }
