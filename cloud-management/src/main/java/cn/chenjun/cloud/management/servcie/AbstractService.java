@@ -5,7 +5,6 @@ import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.model.*;
-import cn.chenjun.cloud.management.task.OperateTask;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -44,7 +43,7 @@ public abstract class AbstractService {
     protected TemplateVolumeMapper templateVolumeMapper;
     @Autowired
     @Lazy
-    protected OperateTask operateTask;
+    protected TaskService operateTask;
     @Autowired
     protected ApplicationConfig applicationConfig;
     @Autowired
@@ -53,7 +52,7 @@ public abstract class AbstractService {
     @Autowired
     protected SchemeMapper schemeMapper;
     @Autowired
-    protected EventService eventService;
+    protected NotifyService notifyService;
     @Autowired
     protected ComponentMapper componentMapper;
     @Autowired

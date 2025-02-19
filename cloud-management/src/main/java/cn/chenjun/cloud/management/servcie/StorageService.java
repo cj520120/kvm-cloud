@@ -67,7 +67,7 @@ public class StorageService extends AbstractService {
         this.storageMapper.insert(storage);
         BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
         this.operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
         return ResultUtil.success(this.initStorageModel(storage));
     }
 
@@ -86,7 +86,7 @@ public class StorageService extends AbstractService {
                 this.storageMapper.updateById(storage);
                 BaseOperateParam operateParam = CreateStorageOperate.builder().taskId(UUID.randomUUID().toString()).title("注册存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
-                this.eventService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
@@ -105,7 +105,7 @@ public class StorageService extends AbstractService {
             case Constant.StorageStatus.ERROR:
                 storage.setStatus(Constant.StorageStatus.MAINTENANCE);
                 this.storageMapper.updateById(storage);
-                this.eventService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
@@ -128,7 +128,7 @@ public class StorageService extends AbstractService {
                 this.storageMapper.updateById(storage);
                 BaseOperateParam operateParam = DestroyStorageOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
-                this.eventService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
                 return ResultUtil.success(this.initStorageModel(storage));
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");

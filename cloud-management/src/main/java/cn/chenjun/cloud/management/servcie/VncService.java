@@ -20,7 +20,7 @@ public class VncService {
     @Autowired
     private HostMapper hostMapper;
     @Autowired
-    private EventService eventService;
+    private NotifyService notifyService;
 
     public GuestVncEntity getGuestVnc(int guestId) {
         GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guestId);

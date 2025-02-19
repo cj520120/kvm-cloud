@@ -49,7 +49,7 @@ public class ChangeGuestCdRoomOperateImpl extends AbstractOsOperate<ChangeGuestC
     @Override
     public void onFinish(ChangeGuestCdRoomOperate param, ResultUtil<Void> resultUtil) {
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

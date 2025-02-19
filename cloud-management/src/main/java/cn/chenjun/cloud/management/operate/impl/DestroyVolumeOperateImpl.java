@@ -61,7 +61,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
             volumeMapper.deleteById(param.getVolumeId());
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

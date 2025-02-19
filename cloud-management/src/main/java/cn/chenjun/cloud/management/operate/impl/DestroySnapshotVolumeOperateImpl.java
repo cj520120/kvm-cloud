@@ -64,7 +64,7 @@ public class DestroySnapshotVolumeOperateImpl extends AbstractOperate<DestroySna
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
     }
 
     @Override

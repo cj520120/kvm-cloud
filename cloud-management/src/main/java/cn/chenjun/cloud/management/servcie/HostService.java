@@ -87,7 +87,7 @@ public class HostService extends AbstractService {
                 .title("添加主机[" + host.getDisplayName() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
     }
 
@@ -103,7 +103,7 @@ public class HostService extends AbstractService {
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
                 .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
     }
 
@@ -116,7 +116,7 @@ public class HostService extends AbstractService {
 
         host.setStatus(Constant.HostStatus.MAINTENANCE);
         this.hostMapper.updateById(host);
-        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success(this.initHost(host));
 
     }
@@ -128,7 +128,7 @@ public class HostService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         this.hostMapper.deleteById(hostId);
-        this.eventService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success();
     }
 }

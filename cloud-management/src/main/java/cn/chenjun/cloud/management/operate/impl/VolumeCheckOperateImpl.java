@@ -78,7 +78,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
                             .path(info.getPath())
                             .build();
                     this.volumeMapper.updateById(updateVolume);
-                    this.eventService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());
+                    this.notifyService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());
                 }
             }
         }

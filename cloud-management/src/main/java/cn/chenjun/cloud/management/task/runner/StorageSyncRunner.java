@@ -1,10 +1,10 @@
-package cn.chenjun.cloud.management.task;
+package cn.chenjun.cloud.management.task.runner;
 
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
+import cn.chenjun.cloud.management.servcie.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -14,22 +14,21 @@ import java.util.UUID;
  */
 @Slf4j
 @Component
-public class StorageSyncTask extends AbstractTask {
+public class StorageSyncRunner extends AbstractRunner {
 
 
     @Autowired
-    @Lazy
-    private OperateTask operateTask;
+    private TaskService taskService;
 
     @Override
-    protected int getPeriodSeconds() {
+    public int getPeriodSeconds() {
         return 60;
     }
 
     @Override
     protected void dispatch() {
         BaseOperateParam operateParam = StorageCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测存储池使用情况").build();
-        this.operateTask.addTask(operateParam);
+        this.taskService.addTask(operateParam);
     }
 
     @Override
@@ -39,6 +38,6 @@ public class StorageSyncTask extends AbstractTask {
 
     @Override
     protected boolean canRunning() {
-        return !this.operateTask.hasTask(StorageCheckOperate.class);
+        return !this.taskService.hasTask(StorageCheckOperate.class);
     }
 }

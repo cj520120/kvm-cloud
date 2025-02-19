@@ -115,7 +115,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             volumeMapper.updateById(volume);
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
 
     }
 

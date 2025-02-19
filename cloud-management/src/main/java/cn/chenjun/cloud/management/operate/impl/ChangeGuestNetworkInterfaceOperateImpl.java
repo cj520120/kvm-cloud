@@ -67,7 +67,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOperate<Chan
                 guestNetworkMapper.updateById(guestNetwork);
             }
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 
     }
 

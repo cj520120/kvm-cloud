@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.component.global;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
+import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
@@ -29,6 +30,8 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
     private GuestNetworkMapper guestNetworkMapper;
     @Autowired
     private NetworkMapper networkMapper;
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
@@ -63,6 +66,11 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         Jinjava jinjava = new Jinjava();
         Map<String, Object> map = new HashMap<>(1);
         map.put("commands", routeCommands);
+        if (ObjectUtils.isEmpty(this.applicationConfig.getNetworkCheckAddress())) {
+            map.put("check-address", this.applicationConfig.getNetworkCheckAddress());
+        } else {
+            map.put("check-address", "8.8.8.8");
+        }
         networkCheckScript = jinjava.render(networkCheckScript, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/network_check.sh").fileBody(networkCheckScript).build())).build());
 

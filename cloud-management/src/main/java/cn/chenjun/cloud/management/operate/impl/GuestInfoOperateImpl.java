@@ -65,7 +65,7 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
                 this.vncService.updateVncPort(param.getGuestId(), resultUtil.getData().getVnc());
             }
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

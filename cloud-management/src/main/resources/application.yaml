@@ -4,6 +4,10 @@ app:
   systemComponentCpu: 1
   systemComponentMemory: 1048576
   systemComponentCpuSpeed: 0
+  guestQmaExecuteTimeoutMinutes: 60
+  guestQmaCheckTimeoutMinutes: 10
+  #如果纯内网使用,将改地址修改为自建yum源服务器地址，并且将yum-source地址修改为自建源
+  networkCheckAddress: 8.8.8.8
   destroyDelayMinute: 3
   # 是否启用大页内存，如果启用，在宿主机为ubuntu下请设置vm.nr_hugepages，否则虚拟机无法启动
   enableMemoryHugePages: false

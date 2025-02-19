@@ -75,9 +75,9 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
                     .title("获取客户机VNC信息[" + guest.getName() + "]")
                     .guestId(param.getGuestId())
                     .build();
-            this.operateTask.addTask(operate);
+            this.taskService.addTask(operate);
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

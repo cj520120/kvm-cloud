@@ -68,7 +68,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
             this.templateMapper.deleteById(template);
             this.guestMapper.detachCdByTemplateId(template.getTemplateId());
-            this.eventService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            this.notifyService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
 
     }

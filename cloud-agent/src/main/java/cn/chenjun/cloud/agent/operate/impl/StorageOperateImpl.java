@@ -101,7 +101,7 @@ public class StorageOperateImpl implements StorageOperate {
                         Jinjava jinjava = TemplateUtil.create();
                         xml = jinjava.render(xml, map);
                         log.info("createStorage xml={}", xml);
-                        storagePool = connect.storagePoolCreateXML(xml, 0);
+                        connect.storagePoolCreateXML(xml, 0);
                     }
                     break;
                     case Constant.StorageType.GLUSTERFS: {
@@ -117,14 +117,14 @@ public class StorageOperateImpl implements StorageOperate {
                         Jinjava jinjava = TemplateUtil.create();
                         xml = jinjava.render(xml, map);
                         log.info("createStorage xml={}", xml);
-                        storagePool = connect.storagePoolCreateXML(xml, 0);
+                        connect.storagePoolCreateXML(xml, 0);
                     }
                     break;
                     default:
                         throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型:" + request.getType());
                 }
             }
-            storagePool.refresh(0);
+            storagePool = StorageUtil.findStorage(connect, request.getName());
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();
             return StorageInfo.builder().name(request.getName())
                     .state(storagePoolInfo.state.toString())

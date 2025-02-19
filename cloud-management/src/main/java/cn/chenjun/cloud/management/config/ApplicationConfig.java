@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
     private String managerUri;
+    private int guestQmaExecuteTimeoutMinutes = 60;
+    private int guestQmaCheckTimeoutMinutes = 10;
+    private String networkCheckAddress = "8.8.8.8";
     private float overCpu = 1.0f;
     private float overMemory = 1.0f;
     private boolean enableMemoryHugePages;

@@ -128,7 +128,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
             }
             this.hostMapper.updateById(host);
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
 
     }
 

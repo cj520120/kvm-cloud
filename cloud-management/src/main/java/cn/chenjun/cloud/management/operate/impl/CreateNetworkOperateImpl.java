@@ -39,7 +39,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
                 .networkId(param.getNetworkId())
                 .nextHostIds(hostIds)
                 .build();
-        this.operateTask.addTask(operate);
+        this.taskService.addTask(operate);
         this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
     }
 
@@ -59,7 +59,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
 
     }
 

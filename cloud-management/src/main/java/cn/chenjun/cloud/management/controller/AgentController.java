@@ -5,7 +5,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.SignRequire;
 import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.servcie.HostService;
-import cn.chenjun.cloud.management.task.OperateTask;
+import cn.chenjun.cloud.management.servcie.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,15 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AgentController {
     @Autowired
-    private OperateTask operateTask;
+    private TaskService taskService;
     @Autowired
     private HostService hostService;
 
     @SignRequire
     @PostMapping("/api/agent/task/report")
     public ResultUtil<Void> report(@RequestParam("taskId") String taskId, @RequestParam("data") String data) {
-
-        operateTask.onTaskFinish(taskId, data);
+        taskService.submitTaskFinish(taskId, data);
         return ResultUtil.success();
     }
 

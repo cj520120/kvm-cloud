@@ -67,7 +67,7 @@ public class SchemeService extends AbstractService {
         verifySchemeParam(name, cpu, memory, speed, sockets, cores, threads);
         SchemeEntity entity = SchemeEntity.builder().name(name).cpu(cpu).memory(memory).speed(speed).sockets(sockets).cores(cores).threads(threads).build();
         this.schemeMapper.insert(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
 
         return ResultUtil.success(this.initScheme(entity));
     }
@@ -87,14 +87,14 @@ public class SchemeService extends AbstractService {
         entity.setCores(cores);
         entity.setThreads(threads);
         this.schemeMapper.updateById(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return ResultUtil.success(this.initScheme(entity));
     }
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyScheme(int schemeId) {
         this.schemeMapper.deleteById(schemeId);
-        this.eventService.publish(NotifyData.<Void>builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return ResultUtil.success();
     }
 }

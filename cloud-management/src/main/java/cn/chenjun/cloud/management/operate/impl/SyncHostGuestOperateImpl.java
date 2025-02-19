@@ -69,7 +69,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
                 }
                 if (!Objects.equals(guest.getHostId(), param.getHostId()) || Objects.equals(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP, guest.getStatus())) {
                     BaseOperateParam operate = DestroyHostGuestOperate.builder().hostId(param.getHostId()).name(guestName).title("同步停止主机:" + guest.getGuestId()).taskId(UUID.randomUUID().toString()).build();
-                    this.operateTask.addTask(operate);
+                    this.taskService.addTask(operate);
                 }
             }
         }
@@ -87,7 +87,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
                         BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guest.getGuestId()).force(true)
                                 .taskId(UUID.randomUUID().toString())
                                 .title("强制同步客户机状态，开始关闭客户机[" + guest.getDescription() + "]").build();
-                        this.operateTask.addTask(operateParam);
+                        this.taskService.addTask(operateParam);
                     }
                 }
             }

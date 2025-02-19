@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.task;
+package cn.chenjun.cloud.management.task.runner;
 
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author chenjun
  */
 @Component
-public class ClearComponentGuestTask extends AbstractTask {
+public class ClearComponentGuestRunner extends AbstractRunner {
 
     @Autowired
     private GuestMapper guestMapper;
@@ -32,7 +32,7 @@ public class ClearComponentGuestTask extends AbstractTask {
     private GuestService guestService;
 
     @Override
-    protected int getPeriodSeconds() {
+    public int getPeriodSeconds() {
         return 60;
     }
 

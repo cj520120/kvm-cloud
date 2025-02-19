@@ -89,7 +89,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
                     templateMapper.updateById(template);
                 }
             }
-            this.eventService.publish(NotifyData.<Void>builder().id(templateVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            this.notifyService.publish(NotifyData.<Void>builder().id(templateVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
 
         }
     }

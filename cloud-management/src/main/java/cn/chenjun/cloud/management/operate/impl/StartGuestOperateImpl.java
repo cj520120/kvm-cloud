@@ -103,7 +103,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 
     }
 

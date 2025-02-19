@@ -178,7 +178,7 @@ public class NetworkService extends AbstractService {
         }
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -192,7 +192,7 @@ public class NetworkService extends AbstractService {
         this.networkMapper.updateById(network);
         BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -204,7 +204,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(Constant.NetworkStatus.MAINTENANCE);
         this.networkMapper.updateById(network);
-        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -236,7 +236,7 @@ public class NetworkService extends AbstractService {
         }
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
@@ -257,7 +257,7 @@ public class NetworkService extends AbstractService {
         }
         entity.setComponentSlaveNumber(slaveNumber);
         this.componentMapper.updateById(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
         return ResultUtil.success(this.initComponent(entity));
     }
 
@@ -285,7 +285,7 @@ public class NetworkService extends AbstractService {
             basicComponentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
             this.guestNetworkMapper.updateById(basicComponentVip);
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
         return ResultUtil.success(this.initComponent(component));
     }
 
@@ -311,7 +311,7 @@ public class NetworkService extends AbstractService {
         this.componentMapper.deleteById(component);
         this.natMapper.delete(new QueryWrapper<NatEntity>().eq(NatEntity.COMPONENT_ID, component.getComponentId()));
 
-        this.eventService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
         return ResultUtil.<Void>builder().build();
     }
 
@@ -330,7 +330,7 @@ public class NetworkService extends AbstractService {
         }
         NatEntity entity = NatEntity.builder().componentId(componentId).localPort(localPort).protocol(protocol).remotePort(remotePort).remoteIp(remoteIp).createTime(new Date()).build();
         this.natMapper.insert(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
         return ResultUtil.success(this.initNat(entity));
     }
 
@@ -341,7 +341,7 @@ public class NetworkService extends AbstractService {
             return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NAT_NOT_FOUND, "Nat配置不存在");
         }
         this.natMapper.deleteById(natId);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
         return ResultUtil.success();
     }
 }

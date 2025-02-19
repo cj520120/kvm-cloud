@@ -12,8 +12,8 @@ import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.operate.Operate;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.AllocateService;
-import cn.chenjun.cloud.management.servcie.EventService;
-import cn.chenjun.cloud.management.task.OperateTask;
+import cn.chenjun.cloud.management.servcie.NotifyService;
+import cn.chenjun.cloud.management.servcie.TaskService;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -61,10 +61,10 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected AllocateService allocateService;
     @Autowired
-    protected EventService eventService;
+    protected NotifyService notifyService;
     @Autowired
     @Lazy
-    protected OperateTask operateTask;
+    protected TaskService taskService;
     @Autowired
     protected ApplicationConfig applicationConfig;
     @Autowired
@@ -134,7 +134,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
 
 
     protected void onSubmitFinishEvent(String taskId, V result) {
-        this.operateTask.onTaskFinish(taskId, GsonBuilderUtil.create().toJson(result));
+        this.taskService.submitTaskFinish(taskId, GsonBuilderUtil.create().toJson(result));
     }
 
 

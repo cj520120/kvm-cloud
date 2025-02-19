@@ -73,7 +73,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                         .storageId(param.getStorageId())
                         .nextHostIds(hostIds)
                         .build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             } else {
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
                 if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
@@ -90,7 +90,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
     }
 
     @Override

@@ -1,14 +1,14 @@
-package cn.chenjun.cloud.management.task;
+package cn.chenjun.cloud.management.task.runner;
 
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.SyncHostGuestOperate;
+import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,16 +20,15 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class HostGuestSyncTask extends AbstractTask {
+public class HostGuestSyncRunner extends AbstractRunner {
 
     @Autowired
     private HostMapper hostMapper;
     @Autowired
-    @Lazy
-    private OperateTask operateTask;
+    private TaskService taskService;
 
     @Override
-    protected int getPeriodSeconds() {
+    public int getPeriodSeconds() {
         return (int) TimeUnit.SECONDS.toSeconds(30);
     }
 
@@ -39,7 +38,7 @@ public class HostGuestSyncTask extends AbstractTask {
         for (HostEntity host : hostList) {
             if (host.getStatus() == Constant.HostStatus.ONLINE) {
                 BaseOperateParam operate = SyncHostGuestOperate.builder().hostId(host.getHostId()).title("同步主机客户机信息").taskId(UUID.randomUUID().toString()).build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             }
         }
     }
@@ -51,6 +50,6 @@ public class HostGuestSyncTask extends AbstractTask {
 
     @Override
     protected boolean canRunning() {
-        return !this.operateTask.hasTask(SyncHostGuestOperate.class);
+        return true;
     }
 }

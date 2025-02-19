@@ -134,7 +134,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 if (slaveGuest == null) {
                     slaveList.set(i, 0);
                     isUpdateSlave = true;
-                    this.eventService.publish(NotifyData.<Void>builder().id(slaveGuestId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                    this.notifyService.publish(NotifyData.<Void>builder().id(slaveGuestId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 }
             } else {
                 //创建已经删除或无效的slave组件
@@ -144,7 +144,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 slaveGuest = this.createSystemComponentGuest(component.getComponentId(), "Slave " + this.getComponentName(), network, templateId);
                 slaveList.set(i, slaveGuest.getGuestId());
                 isUpdateSlave = true;
-                this.eventService.publish(NotifyData.<Void>builder().id(slaveGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(slaveGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
             }
             if (slaveGuest != null) {
@@ -165,7 +165,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 return null;
             }
             masterGuest = createSystemComponentGuest(component.getComponentId(), "Master " + this.getComponentName(), network, templateId);
-            this.eventService.publish(NotifyData.<Void>builder().id(masterGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+            this.notifyService.publish(NotifyData.<Void>builder().id(masterGuest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
             component.setMasterGuestId(masterGuest.getGuestId());
             this.componentMapper.updateById(component);
         }
@@ -200,7 +200,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 guestMapper.updateById(guest);
                 BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(lastHostId).componentType(this.getComponentType()).build();
                 this.operateTask.addTask(operateParam);
-                this.eventService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 break;
             case Constant.GuestStatus.ERROR:
                 this.guestService.destroyGuest(guest.getGuestId());
@@ -330,7 +330,8 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         GuestQmaRequest request = GuestQmaRequest.builder().build();
         request.setName("");
-        request.setTimeout((int) TimeUnit.MINUTES.toSeconds(5));
+        request.setQmaExecuteTimeout((int) TimeUnit.MINUTES.toSeconds(this.applicationConfig.getGuestQmaExecuteTimeoutMinutes()));
+        request.setQmaCheckTimeout((int) TimeUnit.MINUTES.toSeconds(this.applicationConfig.getGuestQmaCheckTimeoutMinutes()));
         request.setCommands(commands);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
         for (ComponentQmaInitialize componentQmaInitialize : componentQmaInitializeList) {

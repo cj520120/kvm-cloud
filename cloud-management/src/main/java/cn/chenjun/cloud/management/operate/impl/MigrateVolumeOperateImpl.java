@@ -93,14 +93,14 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 //提交源磁盘的销毁任务
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
-                this.operateTask.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
+                this.taskService.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
             } else {
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
                 volumeMapper.updateById(volume);
             }
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

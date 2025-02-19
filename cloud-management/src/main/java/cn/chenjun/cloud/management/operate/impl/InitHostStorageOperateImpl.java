@@ -82,7 +82,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                             .storageId(param.getStorageId())
                             .nextHostIds(hostIds)
                             .build();
-                    this.operateTask.addTask(operate);
+                    this.taskService.addTask(operate);
                 } else {
                     storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.READY);
                 }
@@ -95,7 +95,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                 storageMapper.updateById(storage);
             }
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

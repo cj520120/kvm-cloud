@@ -1,9 +1,10 @@
-package cn.chenjun.cloud.management.task;
+package cn.chenjun.cloud.management.task.runner;
 
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.SyncHostTaskIdOperate;
+import cn.chenjun.cloud.management.servcie.TaskService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +19,17 @@ import java.util.UUID;
  */
 @Slf4j
 @Component
-public class TaskIdSyncTask extends AbstractTask {
+public class TaskIdSyncRunner extends AbstractRunner {
 
     @Autowired
     private HostMapper hostMapper;
     @Autowired
-    private OperateTask operateTask;
+    private TaskService taskService;
 
 
     @Override
-    protected int getPeriodSeconds() {
-        return 5;
+    public int getPeriodSeconds() {
+        return 10;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class TaskIdSyncTask extends AbstractTask {
         for (HostEntity host : hostList) {
             if (Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
                 BaseOperateParam operateParam = SyncHostTaskIdOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).title("同步主机任务列表").build();
-                this.operateTask.addTask(operateParam);
+                this.taskService.addTask(operateParam);
             }
         }
     }
@@ -49,6 +50,6 @@ public class TaskIdSyncTask extends AbstractTask {
 
     @Override
     protected boolean canRunning() {
-        return !this.operateTask.hasTask(SyncHostTaskIdOperate.class);
+        return true;
     }
 }

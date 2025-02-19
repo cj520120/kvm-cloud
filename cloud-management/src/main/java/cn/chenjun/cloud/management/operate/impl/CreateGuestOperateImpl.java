@@ -34,7 +34,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
                         guest.setStatus(Constant.GuestStatus.STARTING);
                         guestMapper.updateById(guest);
                         BaseOperateParam operateParam = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").hostId(param.getHostId()).guestId(param.getGuestId()).build();
-                        this.operateTask.addTask(operateParam);
+                        this.taskService.addTask(operateParam);
                     } else {
                         guest.setStatus(Constant.GuestStatus.STOP);
                         guestMapper.updateById(guest);
@@ -53,9 +53,9 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
                 guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
             }
-            this.eventService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

@@ -40,41 +40,51 @@ public class OsOperateImpl implements OsOperate {
 
     @SuppressWarnings({"unchecked"})
     private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.Execute execute) throws LibvirtException {
-        Gson gson = new Gson();
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("execute", "guest-exec");
-        Map<String, Object> arguments = new HashMap<>(3);
-        map.put("arguments", arguments);
-        arguments.put("path", execute.getCommand());
-        arguments.put("arg", execute.getArgs());
-        String commandBody = gson.toJson(map);
-        String response = domain.qemuAgentCommand(commandBody, request.getTimeout(), 0);
-        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
-        }.getType());
-        String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
-        map.clear();
-        arguments.clear();
-        arguments.put("pid", NumberUtil.parseInt(pid));
-        map.put("execute", "guest-exec-status");
-        map.put("arguments", arguments);
-        String statusRequest = gson.toJson(map);
-        boolean isExit;
-        do {
-            response = domain.qemuAgentCommand(statusRequest, request.getTimeout(), 0);
-            result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
+        try {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("execute", "guest-exec");
+            Map<String, Object> arguments = new HashMap<>(3);
+            map.put("arguments", arguments);
+            arguments.put("path", execute.getCommand());
+            arguments.put("arg", execute.getArgs());
+            String commandBody = gson.toJson(map);
+            log.info("开始执行命令:domain={} command={}", domain.getName(), commandBody);
+            String response = domain.qemuAgentCommand(commandBody, request.getQmaExecuteTimeout(), 0);
+            Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
             }.getType());
-            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
-            if (!isExit) {
-                ThreadUtil.sleep(1, TimeUnit.SECONDS);
-            } else {
-                int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
-                if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:domain=" + domain.getName() + "command={}" + commandBody + ".response=" + response);
+            String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
+            map.clear();
+            arguments.clear();
+            arguments.put("pid", NumberUtil.parseInt(pid));
+            map.put("execute", "guest-exec-status");
+            map.put("arguments", arguments);
+            String statusRequest = gson.toJson(map);
+            boolean isExit;
+            log.info("查询命令并等待返回结果:domain={} command={}", domain.getName(), execute);
+            do {
+                response = domain.qemuAgentCommand(statusRequest, request.getQmaExecuteTimeout(), 0);
+                result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
+                }.getType());
+                isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
+                if (!isExit) {
+                    ThreadUtil.sleep(5, TimeUnit.SECONDS);
                 } else {
-                    log.info("执行命令成功:domain={} command={} result={}", domain.getName(), execute, response);
+                    int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
+                    if (code != 0) {
+                        log.error("执行命令失败:domain={} command={} result={}", domain.getName(), commandBody, response);
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:domain=" + domain.getName() + "command={}" + commandBody + ".response=" + response);
+                    } else {
+                        log.info("执行命令成功:domain={} command={} result={}", domain.getName(), commandBody, response);
+                    }
                 }
+            } while (!isExit);
+        } catch (Exception err) {
+            boolean isCodeError = err instanceof CodeException;
+            if (!isCodeError) {
+                log.error("执行命令出现未知错误:domain={} command={}", domain.getName(), execute, err);
             }
-        } while (!isExit);
+        }
 
     }
 
@@ -307,9 +317,9 @@ public class OsOperateImpl implements OsOperate {
             map.put("execute", "guest-info");
             Gson gson = new Gson();
             String checkQmaReadyCommand = gson.toJson(map);
-            while ((System.currentTimeMillis() - start) < TimeUnit.SECONDS.toMillis(request.getQmaRequest().getTimeout())) {
+            while ((System.currentTimeMillis() - start) < TimeUnit.SECONDS.toMillis(request.getQmaRequest().getQmaCheckTimeout())) {
                 try {
-                    String response = domain.qemuAgentCommand(checkQmaReadyCommand, request.getQmaRequest().getTimeout(), 0);
+                    String response = domain.qemuAgentCommand(checkQmaReadyCommand, request.getQmaRequest().getQmaExecuteTimeout(), 0);
                     if (!StringUtils.isEmpty(response)) {
                         break;
                     }

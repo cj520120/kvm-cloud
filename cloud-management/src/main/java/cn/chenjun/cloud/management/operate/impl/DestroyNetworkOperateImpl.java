@@ -38,7 +38,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
                 .networkId(param.getNetworkId())
                 .nextHostIds(hostIds)
                 .build();
-        this.operateTask.addTask(operate);
+        this.taskService.addTask(operate);
         this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
     }
 
@@ -57,7 +57,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
     }
 
     @Override

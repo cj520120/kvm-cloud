@@ -73,7 +73,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
                                 .allocation(info.getAllocation())
                                 .build();
                         this.storageMapper.updateById(updateStorage);
-                        this.eventService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
+                        this.notifyService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
                     }
                 }
             }

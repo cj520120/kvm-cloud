@@ -108,7 +108,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                         default:
                             break;
                     }
-                    this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                    this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
@@ -116,7 +116,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                         .networkId(param.getNetworkId())
                         .nextHostIds(hostIds)
                         .build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
@@ -129,7 +129,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                     default:
                         break;
                 }
-                this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
     }

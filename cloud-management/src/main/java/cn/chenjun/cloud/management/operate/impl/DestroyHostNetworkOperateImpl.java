@@ -101,7 +101,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<Destro
                         .networkId(param.getNetworkId())
                         .nextHostIds(hostIds)
                         .build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
@@ -111,7 +111,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<Destro
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
     }
 
     @Override
