@@ -88,8 +88,9 @@
             <source file="{{disk.storage.path}}/{{disk.name}}"/>
             {% elif disk.storage.type == 'glusterfs' %}
             <source protocol="gluster" name="{{disk.storage.param.path}}/{{disk.name}}">
-                <host name="{{disk.storage.param.uri}}"/>
+                <host name='{{disk.storage.glusterfs.address}}' port='{{disk.storage.glusterfs.port}}'/>
             </source>
+
             {% endif %}
             {% if disk.bus=='virtio' %}
             <!-- virtio 驱动-->

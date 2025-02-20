@@ -31,12 +31,11 @@ public class StorageOperateImplTest extends AbstractTest {
     @SneakyThrows
     public void test_01_create() {
         Map<String, Object> param = new HashMap<>(2);
-        param.put("uri", "192.168.1.90");
-        param.put("path", "/data/nfs/kvm");
+        param.put("uri", "192.168.1.119:24007,192.168.1.131:24007,192.168.1.132:24007,192.168.1.134:24007");
+        param.put("path", "libvirt");
         StorageCreateRequest request = StorageCreateRequest.builder()
                 .name(STORAGE_NAME)
-                .type(Constant.StorageType.NFS)
-                .mountPath("/mnt/" + STORAGE_NAME)
+                .type(Constant.StorageType.GLUSTERFS)
                 .param(param).build();
         storageOperate.create(this.connect, request);
     }

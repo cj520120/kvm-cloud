@@ -15,7 +15,9 @@ import lombok.NoArgsConstructor;
 public class VolumeDownloadRequest {
     private String md5;
     private String sourceUri;
-    private String targetStorage;
-    private String targetName;
-    private String targetType;
+//    private String targetStorage;
+//    private String targetName;
+//    private String targetType;
+
+    private Volume volume;
 }

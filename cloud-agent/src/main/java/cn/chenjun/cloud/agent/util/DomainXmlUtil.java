@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -153,6 +154,8 @@ public class DomainXmlUtil {
         map.put("storage", storage);
         switch (volumeStorage.getType()) {
             case Constant.StorageType.GLUSTERFS:
+                List<Map<String, String>> uriMap = DomainXmlUtil.parseGlusterfsHosts(volumeStorage.getParam().get("uri").toString());
+                storage.put("glusterfs", uriMap.get(0));
                 map.put("type", "network");
                 break;
             case Constant.StorageType.NFS:
@@ -191,5 +194,22 @@ public class DomainXmlUtil {
         return map;
     }
 
-
+    public static List<Map<String, String>> parseGlusterfsHosts(String glusterUri) {
+        List<String> uriList = Arrays.stream(glusterUri.split(",")).map(String::trim).filter(uri -> !ObjectUtils.isEmpty(uri)).collect(Collectors.toList());
+        Collections.shuffle(uriList);
+        List<Map<String, String>> hostList = new ArrayList<>();
+        for (String uri : uriList) {
+            String[] uriPort = uri.split(":");
+            Map<String, String> map = new HashMap<>();
+            if (uriPort.length == 1) {
+                map.put("address", uriPort[0]);
+                map.put("port", "24007");
+            } else {
+                map.put("address", uriPort[0]);
+                map.put("port", uriPort[1]);
+            }
+            hostList.add(map);
+        }
+        return hostList;
+    }
 }

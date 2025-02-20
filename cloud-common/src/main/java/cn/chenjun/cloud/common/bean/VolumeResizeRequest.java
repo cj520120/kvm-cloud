@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VolumeResizeRequest {
-    private String sourceStorage;
-    private String sourceName;
+//    private String sourceStorage;
+//    private String sourceName;
+
+    private Volume volume;
     private long size;
 }

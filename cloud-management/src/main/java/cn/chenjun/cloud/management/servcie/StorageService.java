@@ -53,12 +53,16 @@ public class StorageService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "存储池参数不正确");
         }
         String storageName = UUID.randomUUID().toString().toLowerCase().replace("-", "");
+        String mountPath = "";
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.NFS.equals(type)) {
+            mountPath = "/mnt/" + storageName;
+        }
         StorageEntity storage = StorageEntity.builder()
                 .description(description)
                 .name(storageName)
                 .type(type)
                 .param(param)
-                .mountPath("/mnt/" + storageName)
+                .mountPath(mountPath)
                 .allocation(0L)
                 .capacity(0L)
                 .available(0L)

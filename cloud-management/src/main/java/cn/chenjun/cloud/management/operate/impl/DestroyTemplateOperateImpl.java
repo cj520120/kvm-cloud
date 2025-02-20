@@ -47,8 +47,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
             if (storage != null) {
                 HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
                 VolumeDestroyRequest request = VolumeDestroyRequest.builder()
-                        .sourceStorage(storage.getName())
-                        .sourceName(volume.getName())
+                        .volume(initVolume(storage, volume))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
             }

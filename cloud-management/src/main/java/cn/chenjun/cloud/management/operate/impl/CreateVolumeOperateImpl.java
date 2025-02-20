@@ -51,12 +51,8 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
 
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
-                        .sourceStorage(parentStorage.getName())
-                        .sourceName(templateVolume.getName())
-                        .targetStorage(storage.getName())
-                        .targetName(volume.getName())
-                        .targetType(volume.getType())
-                        .size(volume.getCapacity())
+                        .sourceVolume(initVolume(parentStorage, templateVolume))
+                        .targetVolume(initVolume(storage, volume))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 
@@ -67,20 +63,15 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 }
                 StorageEntity parentStorage = storageMapper.selectById(snapshotVolume.getStorageId());
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
-                        .sourceStorage(parentStorage.getName())
-                        .sourceName(snapshotVolume.getName())
-                        .targetStorage(storage.getName())
-                        .targetName(volume.getName())
-                        .targetType(volume.getType())
+                        .sourceVolume(initVolume(parentStorage, snapshotVolume))
+                        .targetVolume(initVolume(storage, volume))
+
 
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
             } else {
                 VolumeCreateRequest request = VolumeCreateRequest.builder()
-                        .targetStorage(storage.getName())
-                        .targetName(volume.getName())
-                        .targetType(volume.getType())
-                        .targetSize(volume.getCapacity())
+                        .volume(initVolume(storage, volume))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
             }

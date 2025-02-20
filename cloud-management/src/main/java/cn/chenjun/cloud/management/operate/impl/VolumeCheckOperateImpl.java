@@ -67,6 +67,7 @@ public class VolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOperate, 
                 if (!Objects.equals(sourceVolume.getCapacity(), info.getCapacity()) ||
                         !Objects.equals(sourceVolume.getAllocation(), info.getAllocation()) ||
                         !Objects.equals(sourceVolume.getType(), info.getType()) ||
+                        !Objects.equals(sourceVolume.getPath(), info.getPath()) ||
                         !Objects.equals(sourceVolume.getBackingPath(), info.getBackingPath())
                 ) {
                     VolumeEntity updateVolume = VolumeEntity.builder()

@@ -1,13 +1,15 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.bean.Storage;
 import cn.chenjun.cloud.common.bean.TaskRequest;
+import cn.chenjun.cloud.common.bean.Volume;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
-import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.operate.Operate;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
@@ -160,4 +162,39 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
      */
     public abstract int getType();
 
+    protected Volume initVolume(StorageEntity storageEntity, VolumeEntity volumeEntity) {
+        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Storage storage = Storage.builder()
+                .name(storageEntity.getName())
+                .type(storageEntity.getType())
+                .param(storageParam)
+                .mountPath(storageEntity.getMountPath())
+                .build();
+        return Volume.builder().storage(storage).name(volumeEntity.getName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+    }
+
+    protected Volume initVolume(StorageEntity storageEntity, TemplateVolumeEntity volumeEntity) {
+        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Storage storage = Storage.builder()
+                .name(storageEntity.getName())
+                .type(storageEntity.getType())
+                .param(storageParam)
+                .mountPath(storageEntity.getMountPath())
+                .build();
+        return Volume.builder().storage(storage).name(volumeEntity.getName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+    }
+
+    protected Volume initVolume(StorageEntity storageEntity, SnapshotVolumeEntity volumeEntity) {
+        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Storage storage = Storage.builder()
+                .name(storageEntity.getName())
+                .type(storageEntity.getType())
+                .param(storageParam)
+                .mountPath(storageEntity.getMountPath())
+                .build();
+        return Volume.builder().storage(storage).name(volumeEntity.getVolumeName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+    }
 }

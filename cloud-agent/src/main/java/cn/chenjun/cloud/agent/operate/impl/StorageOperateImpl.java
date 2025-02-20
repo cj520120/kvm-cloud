@@ -2,6 +2,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.agent.util.DomainXmlUtil;
 import cn.chenjun.cloud.agent.util.StorageUtil;
 import cn.chenjun.cloud.agent.util.TemplateUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
@@ -107,11 +108,10 @@ public class StorageOperateImpl implements StorageOperate {
                     case Constant.StorageType.GLUSTERFS: {
                         String glusterUri = request.getParam().get("uri").toString();
                         String volume = request.getParam().get("path").toString();
-                        FileUtil.mkdir(request.getMountPath());
                         String xml = ResourceUtil.readUtf8Str("tpl/glusterfs_storage.xml");
                         Map<String, Object> map = new HashMap<>(4);
                         map.put("name", request.getName());
-                        map.put("host", glusterUri);
+                        map.put("hostList", DomainXmlUtil.parseGlusterfsHosts(glusterUri));
                         map.put("volume", volume);
                         map.put("mount", request.getMountPath());
                         Jinjava jinjava = TemplateUtil.create();

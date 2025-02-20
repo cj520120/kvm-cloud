@@ -36,10 +36,11 @@ public final class ErrorCode {
     public static final int STORAGE_NOT_SPACE = BASE_STORAGE_ERROR + 2;
     public static final int STORAGE_BUSY = BASE_STORAGE_ERROR + 3;
     public static final int STORAGE_NOT_READY = BASE_STORAGE_ERROR + 4;
-    public static final int BASE_VOLUME_ERROR = BASE_ERROR * 4;
+    public static final int STORAGE_NOT_SUPPORT = BASE_STORAGE_ERROR + 5;
     /**
      * Volume
      */
+    public static final int BASE_VOLUME_ERROR = BASE_ERROR * 4;
     public static final int VOLUME_NOT_FOUND = BASE_VOLUME_ERROR + 1;
     public static final int VOLUME_NOT_READY = BASE_VOLUME_ERROR + 2;
     public static final int BASE_TEMPLATE_ERROR = BASE_ERROR * 5;
