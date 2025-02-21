@@ -86,6 +86,11 @@ public final class ErrorCode {
     public static final int SSH_AUTHORIZED_NOT_FOUND = BASE_SSH_AUTHORIZED_ERROR+1;
     public static final int SSH_AUTHORIZED_CREATE_ERROR = BASE_SSH_AUTHORIZED_ERROR+2;
 
+    /**
+     * Agent
+     */
+    public static final int BASE_AGENT_ERROR = BASE_ERROR * 13;
+    public static final int BASE_TASK_BUSY = BASE_AGENT_ERROR + 1;
     private ErrorCode() {
 
     }
