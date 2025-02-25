@@ -89,16 +89,6 @@
 									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 								</el-select>
 							</el-form-item>
-							<el-form-item label="磁盘类型" prop="volumeType">
-								<el-select v-model="create_volume.volumeType" style="width: 100%">
-									<el-option label="raw" value="raw"></el-option>
-									<el-option label="qcow" value="qcow"></el-option>
-									<el-option label="qcow2" value="qcow2"></el-option>
-									<el-option label="vdi" value="vdi"></el-option>
-									<el-option label="vmdk" value="vmdk"></el-option>
-									<el-option label="vpc" value="vpc"></el-option>
-								</el-select>
-							</el-form-item>
 							<el-form-item label="磁盘大小(GB)" prop="volumeSize">
 								©
 								<el-input v-model="create_volume.volumeSize"></el-input>
@@ -145,7 +135,6 @@ export default {
 			create_volume: {
 				description: '',
 				storageId: 0,
-				volumeType: 'qcow2',
 				volumeSize: 100
 			},
 			keyword: '',

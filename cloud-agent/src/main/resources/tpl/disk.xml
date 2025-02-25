@@ -4,9 +4,18 @@
     {% if disk.storage.type == 'nfs' %}
     <source file="{{disk.storage.path}}/{{disk.name}}"/>
     {% elif disk.storage.type == 'glusterfs' %}
-    <source protocol="gluster" name="{{disk.storage.param.path}}/{{disk.name}}">
+    <source protocol="gluster" name="{{disk.storage.param.volume}}/{{disk.name}}">
         <host name='{{disk.storage.glusterfs.address}}' port='{{disk.storage.glusterfs.port}}'/>
     </source>
+    {% elif disk.storage.type == 'ceph-rbd' %}
+    <source protocol="rbd" name="{{disk.storage.param.pool}}/{{disk.name}}">
+        {% for host in disk.storage.ceph.hostList %}
+        <host name='{{host.address}}' port='{{host.port}}'/>
+        {% endfor %}
+    </source>
+    <auth username='{{disk.storage.param.username}}'>
+        <secret type='ceph' uuid='{{disk.storage.name}}'/>
+    </auth>
     {% endif %}
 
     {% if disk.bus=='virtio' %}

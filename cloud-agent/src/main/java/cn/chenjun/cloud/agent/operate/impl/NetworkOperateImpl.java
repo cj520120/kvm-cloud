@@ -45,25 +45,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     public Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
         log.info("创建基础网络:{} type={}", request, request.getBridgeType().bridgeName());
         List<String> networkNames = Arrays.asList(connect.listNetworks());
-        boolean canCreated;
         if (!networkNames.contains(request.getPoolId())) {
-            canCreated = true;
-
-        } else {
-            Network network = connect.networkLookupByName(request.getPoolId());
-            String xml = network.getXMLDesc(0);
-            log.info("网络配置已存在 XML:{}={}", request.getPoolId(), xml);
-            canCreated = ObjectUtils.notEqual(request.getBridge(), getNodeAttr(xml, "/network/bridge", "name"))
-                    || ObjectUtils.notEqual("bridge", getNodeAttr(xml, "/network/forward", "mode"));
-            if (!canCreated && Objects.requireNonNull(request.getBridgeType()) == Constant.NetworkBridgeType.OPEN_SWITCH) {
-                canCreated = ObjectUtils.notEqual("openvswitch", getNodeAttr(xml, "/network/virtualport", "type"));
-            }
-            if (canCreated) {
-                log.info("网络配置不匹配，删除旧的网络配置:{}", request.getPoolId());
-                network.destroy();
-            }
-        }
-        if (canCreated) {
             Map<String, Object> map = new HashMap<>(3);
             map.put("name", request.getPoolId());
             map.put("uuid", request.getPoolId());
@@ -75,7 +57,14 @@ public class NetworkOperateImpl implements NetworkOperate {
             Jinjava jinjava = TemplateUtil.create();
             xml = jinjava.render(xml, map);
             log.info("create basic network xml={}", xml);
-            connect.networkCreateXML(xml);
+            Network network = connect.networkDefineXML(xml);
+            network.setAutostart(true);
+            network.create();
+        } else {
+            Network network = connect.networkLookupByName(request.getPoolId());
+            if (network.isActive() == 0) {
+                network.create();
+            }
         }
         return null;
 
@@ -137,6 +126,7 @@ public class NetworkOperateImpl implements NetworkOperate {
             try {
                 Network network = connect.networkLookupByName(bridge.getPoolId());
                 network.destroy();
+                network.undefine();
             } catch (Exception ignored) {
 
             }
@@ -155,6 +145,7 @@ public class NetworkOperateImpl implements NetworkOperate {
             try {
                 Network network = connect.networkLookupByName(vlan.getPoolId());
                 network.destroy();
+                network.undefine();
             } catch (Exception ignored) {
 
             }

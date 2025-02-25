@@ -30,7 +30,7 @@ public abstract class AbstractRunner {
                     if (rBucket.isExists()) {
                         return;
                     }
-                    rBucket.set(System.currentTimeMillis(), this.getPeriodSeconds(), TimeUnit.SECONDS);
+                    rBucket.set(System.currentTimeMillis(), Math.max(1,this.getPeriodSeconds()), TimeUnit.SECONDS);
                     if (!canRunning()) {
                         return;
                     }

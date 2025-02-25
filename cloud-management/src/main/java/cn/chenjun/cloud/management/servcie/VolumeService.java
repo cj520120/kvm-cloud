@@ -97,14 +97,15 @@ public class VolumeService extends AbstractService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, String volumeType, long volumeSize) {
+    public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, long volumeSize) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
-        if (StringUtils.isEmpty(volumeType)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择磁盘类型");
-        }
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
@@ -113,7 +114,6 @@ public class VolumeService extends AbstractService {
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
-                .backingPath("")
                 .capacity(volumeSize)
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
@@ -128,11 +128,13 @@ public class VolumeService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId, String volumeType) {
-        if (StringUtils.isEmpty(volumeType)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择磁盘类型");
-        }
+    public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId) {
+
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
@@ -154,7 +156,6 @@ public class VolumeService extends AbstractService {
                 .description(description)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
-                .backingPath("")
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
@@ -195,11 +196,12 @@ public class VolumeService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId, String volumeType) {
-        if (StringUtils.isEmpty(volumeType)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择迁移后磁盘类型");
-        }
+    public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         String volumeName = UUID.randomUUID().toString();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
@@ -221,7 +223,6 @@ public class VolumeService extends AbstractService {
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
-                .backingPath("")
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
@@ -300,15 +301,17 @@ public class VolumeService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId, String snapshotName, String snapshotVolumeType) {
+    public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId, String snapshotName) {
+        StorageEntity storage = this.allocateService.allocateStorage(0);
+        String snapshotVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            snapshotVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         if (StringUtils.isEmpty(snapshotName)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择快照类型");
         }
-        if (StringUtils.isEmpty(snapshotVolumeType)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择快照磁盘类型");
-        }
-        StorageEntity storage = this.allocateService.allocateStorage(0);
         VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.CREATE_SNAPSHOT);
+
         GuestEntity guest = this.getVolumeGuest(volumeId);
         if (guest != null) {
             switch (guest.getStatus()) {

@@ -251,14 +251,17 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .build();
         this.guestMapper.insert(guest);
         StorageEntity storage = this.allocateService.allocateStorage(0);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
                 .capacity(0L)
                 .storageId(storage.getStorageId())
                 .name(uid)
                 .path(storage.getMountPath() + "/" + uid)
-                .type(cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2)
-                .backingPath("")
+                .type(volumeType)
                 .templateId(diskTemplateId)
                 .allocation(0L)
                 .capacity(0L)

@@ -29,7 +29,7 @@ public class TaskService {
     private TaskMapper taskMapper;
     @Transactional
     public void addTask(BaseOperateParam operateParam) {
-        this.addTask(operateParam, 1);
+        this.addTask(operateParam, 0);
     }
 
     @Transactional
@@ -39,8 +39,8 @@ public class TaskService {
                 .title(operateParam.getTitle())
                 .type(operateParam.getClass().getName())
                 .param(GsonBuilderUtil.create().toJson(operateParam))
-                .expireTime(new Date(System.currentTimeMillis()))
-                .createTime(new Date(System.currentTimeMillis()))
+                .expireTime(new Date(System.currentTimeMillis()+ TimeUnit.MINUTES.toMillis(delayMinute)))
+                .createTime(new Date(System.currentTimeMillis() ))
                 .build();
         taskMapper.insert(task);
     }

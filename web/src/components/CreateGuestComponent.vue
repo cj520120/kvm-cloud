@@ -72,18 +72,6 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="8">
-						<el-form-item label="磁盘类型">
-							<el-select v-model="create_guest.volumeType" style="width: 100%" :disabled="create_guest.type === 3">
-								<el-option label="raw" value="raw"></el-option>
-								<el-option label="qcow" value="qcow"></el-option>
-								<el-option label="qcow2" value="qcow2"></el-option>
-								<el-option label="vdi" value="vdi"></el-option>
-								<el-option label="vmdk" value="vmdk"></el-option>
-								<el-option label="vpc" value="vpc"></el-option>
-							</el-select>
-						</el-form-item>
-					</el-col>
 				</el-row>
 				<el-row>
 					<el-col :span="8">
@@ -91,7 +79,7 @@
 							<el-select v-model="create_guest.type" style="width: 100%" placeholder="请选择安装方式">
 								<el-option label="ISO镜像" :value="0" />
 								<el-option label="模版安装" :value="1" />
-								<el-option label="快照安装" :value="2" />
+								<!-- <el-option label="快照安装" :value="2" /> -->
 								<el-option label="现有磁盘" :value="3" />
 							</el-select>
 						</el-form-item>
@@ -192,7 +180,6 @@ export default {
 				schemeId: '',
 				networkId: '',
 				networkDeviceType: 'virtio',
-				volumeType: 'qcow2',
 				isoTemplateId: '',
 				diskTemplateId: '',
 				snapshotVolumeId: '',

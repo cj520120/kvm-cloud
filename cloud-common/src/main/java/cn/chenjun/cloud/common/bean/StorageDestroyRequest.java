@@ -17,5 +17,9 @@ public class StorageDestroyRequest {
      * 存储池名称
      */
     private String name;
+    /**
+     * 存储池类型
+     */
+    private String type;
 
 }

@@ -127,7 +127,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                              int storageId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size) {
+                                              int storageId, Map<String, String> metaData, Map<String, String> userData, long size) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
@@ -178,6 +178,10 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         if (volumeId <= 0) {
             createGuest(hostId, diskTemplateId, snapshotVolumeId, volumeType, metaData, userData, size, uid, guest, storage);
         } else {
@@ -235,7 +239,6 @@ public class GuestService extends AbstractService {
                 .templateId(diskTemplateId)
                 .allocation(0L)
                 .capacity(size)
-                .backingPath("")
                 .status(Constant.VolumeStatus.CREATING)
                 .build();
         this.volumeMapper.insert(volume);
@@ -252,7 +255,7 @@ public class GuestService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, int bootstrapType, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
-                                            int storageId, String volumeType, long size) {
+                                            int storageId, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
@@ -269,6 +272,10 @@ public class GuestService extends AbstractService {
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         if (volumeId <= 0) {
             GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, uid, guest, storage);
             guest.setStatus(Constant.GuestStatus.CREATING);
@@ -625,10 +632,10 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> destroyGuest(int guestId) {
+    public ResultUtil<GuestModel> destroyGuest(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest == null) {
-            return ResultUtil.<Void>builder().code(ErrorCode.GUEST_NOT_FOUND).build();
+            return ResultUtil.<GuestModel>builder().code(ErrorCode.GUEST_NOT_FOUND).build();
         }
         switch (guest.getStatus()) {
             case Constant.GuestStatus.ERROR: {
@@ -640,7 +647,6 @@ public class GuestService extends AbstractService {
                 break;
             }
             case Constant.GuestStatus.STOP: {
-
                 guest.setStatus(Constant.GuestStatus.DESTROY);
                 this.guestMapper.updateById(guest);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -651,7 +657,7 @@ public class GuestService extends AbstractService {
             default:
                 return ResultUtil.error(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
         }
-        return ResultUtil.success();
+        return ResultUtil.success(this.initGuestInfo(guest));
     }
 
     public ResultUtil<String> getVncPassword(int guestId) {

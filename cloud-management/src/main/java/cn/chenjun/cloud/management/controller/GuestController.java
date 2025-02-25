@@ -77,7 +77,6 @@ public class GuestController extends BaseController {
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("networkId") int networkId,
                                               @RequestParam("networkDeviceType") String networkDeviceType,
-                                              @RequestParam("volumeType") String volumeType,
                                               @RequestParam("isoTemplateId") int isoTemplateId,
                                               @RequestParam("diskTemplateId") int diskTemplateId,
                                               @RequestParam("snapshotVolumeId") int snapshotVolumeId,
@@ -88,7 +87,7 @@ public class GuestController extends BaseController {
         }.getType());
         Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
-        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, metaMap, userMap, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, metaMap, userMap, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/reinstall")
@@ -100,7 +99,6 @@ public class GuestController extends BaseController {
                                             @RequestParam("snapshotVolumeId") int snapshotVolumeId,
                                             @RequestParam("volumeId") int volumeId,
                                             @RequestParam("storageId") int storageId,
-                                            @RequestParam("volumeType") String volumeType,
                                             @RequestParam(value = "metaData", defaultValue = "{}") String metaData,
                                             @RequestParam(value = "userData", defaultValue = "{}") String userData,
                                             @RequestParam("size") long size) {
@@ -110,7 +108,7 @@ public class GuestController extends BaseController {
         Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
 
-        return this.lockRun(() -> this.guestService.reInstall(guestId, systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, volumeType, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.reInstall(guestId, systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, snapshotVolumeId, volumeId, storageId, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/start/batch")
@@ -200,7 +198,7 @@ public class GuestController extends BaseController {
     }
 
     @DeleteMapping("/api/guest/destroy")
-    public ResultUtil<Void> destroyGuest(@RequestParam("guestId") int guestId) {
+    public ResultUtil<GuestModel> destroyGuest(@RequestParam("guestId") int guestId) {
         return this.lockRun(() -> this.guestService.destroyGuest(guestId));
     }
 

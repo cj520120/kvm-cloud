@@ -4,9 +4,6 @@
 			<el-form-item label="模版名称">
 				<el-input v-model="template_volume.name" placeholder="请输入模版名称"></el-input>
 			</el-form-item>
-			<el-form-item label="初始化脚本">
-				<el-input v-model="template_volume.script" :rows="10" type="textarea"></el-input>
-			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="template_dialog_visiable = false">取 消</el-button>
@@ -30,7 +27,6 @@ export default {
 		init(volume) {
 			this.template_volume.volumeId = volume.volumeId
 			this.template_volume.name = ''
-			this.template_volume.script = '#cloud-config\n'
 			this.template_dialog_visiable = true
 		},
 

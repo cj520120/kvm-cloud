@@ -24,7 +24,6 @@ public class TemplateEntity {
     public static final String TEMPLATE_NAME = "template_name";
     public static final String TEMPLATE_URI = "template_uri";
     public static final String TEMPLATE_TYPE = "template_type";
-    public static final String TEMPLATE_VOLUME_TYPE = "template_volume_type";
     public static final String TEMPLATE_STATUS = "template_status";
     public static final String TEMPLATE_MD5 = "template_md5";
     public static final String TEMPLATE_INIT_SCRIPT = "template_cloud_init_script";
@@ -39,8 +38,6 @@ public class TemplateEntity {
     private String uri;
     @TableField(TEMPLATE_TYPE)
     private Integer templateType;
-    @TableField(TEMPLATE_VOLUME_TYPE)
-    private String volumeType;
     @TableField(TEMPLATE_STATUS)
     private Integer status;
     @TableField(TEMPLATE_MD5)

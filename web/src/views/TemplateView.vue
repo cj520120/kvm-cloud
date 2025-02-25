@@ -4,13 +4,15 @@
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
+						<el-select v-model="selectTemplateType" placeholder="请选择" size="mini">
+							<el-option v-for="item in templatesFilterType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+						</el-select>
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_template">创建模版</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="templates" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="show_table_templates" style="width: 100%">
 							<el-table-column label="ID" prop="templateId" width="80" />
 							<el-table-column label="名称" prop="name" show-overflow-tooltip />
-							<el-table-column label="磁盘类型" prop="volumeType" width="120" />
 							<el-table-column label="类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ get_template_type(scope.row) }}</el-tag>
@@ -71,17 +73,6 @@
 									<el-option label="用户模版" :value="2"></el-option>
 								</el-select>
 							</el-form-item>
-
-							<el-form-item label="磁盘类型" prop="volumeType" v-if="create_template.templateType === 2">
-								<el-select v-model="create_template.volumeType" style="width: 100%">
-									<el-option label="raw" value="raw"></el-option>
-									<el-option label="qcow" value="qcow"></el-option>
-									<el-option label="qcow2" value="qcow2"></el-option>
-									<el-option label="vdi" value="vdi"></el-option>
-									<el-option label="vmdk" value="vmdk"></el-option>
-									<el-option label="vpc" value="vpc"></el-option>
-								</el-select>
-							</el-form-item>
 							<el-form-item label=" 下载地址" prop="uri">
 								<el-input v-model="create_template.uri"></el-input>
 							</el-form-item>
@@ -119,12 +110,30 @@ export default {
 			create_template: {
 				name: '',
 				templateType: 0,
-				volumeType: 'qcow2',
 				uri: '',
 				md5: '',
 				script: '#cloud-config\n'
 			},
-			templates: []
+			templates: [],
+			templatesFilterType: [
+				{
+					value: -1,
+					label: '全部'
+				},
+				{
+					value: 0,
+					label: 'ISO镜像文件'
+				},
+				{
+					value: 1,
+					label: '系统模版'
+				},
+				{
+					value: 2,
+					label: '用户模版'
+				}
+			],
+			selectTemplateType: -1
 		}
 	},
 	mixins: [Notify, util],
@@ -139,6 +148,13 @@ export default {
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
 		this.unsubscribe_connect_notify(this.$options.name)
+	},
+	computed: {
+		show_table_templates() {
+			return this.templates.filter((v) => {
+				return this.selectTemplateType === -1 || v.templateType === this.selectTemplateType
+			})
+		}
 	},
 	methods: {
 		async reload_page() {
@@ -201,14 +217,8 @@ export default {
 				name: this.create_template.name,
 				templateType: this.create_template.templateType,
 				uri: this.create_template.uri,
-				volumeType: this.create_template.volumeType,
 				md5: this.create_template.md5,
 				script: this.create_template.script
-			}
-			if (this.create_template.templateType === 0) {
-				data.volumeType = 'raw'
-			} else if (this.create_template.templateType === 1) {
-				data.volumeType = 'qcow2'
 			}
 			createTemplate(data).then((res) => {
 				if (res.code === 0) {

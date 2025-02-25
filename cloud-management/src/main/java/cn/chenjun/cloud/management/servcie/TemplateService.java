@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,17 +54,14 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String volumeType, String initScript) {
+    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String initScript) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版名称");
         }
         if (StringUtils.isEmpty(uri)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版地址");
         }
-        if (StringUtils.isEmpty(volumeType)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘类型");
-        }
-        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).volumeType(volumeType.trim()).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
+        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
         this.templateMapper.insert(template);
         this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
@@ -92,12 +90,16 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.ERROR:
                 this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
                 String uid = UUID.randomUUID().toString();
+                String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+                if (Objects.equals(template.getTemplateType(), Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+                    volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+                }
                 TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                         .storageId(storage.getStorageId())
                         .name(uid)
                         .templateId(template.getTemplateId())
                         .path(storage.getMountPath() + "/" + uid)
-                        .type(template.getVolumeType())
+                        .type(volumeType)
                         .allocation(0L)
                         .capacity(0L)
                         .status(Constant.TemplateStatus.DOWNLOAD)
@@ -116,7 +118,7 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name, String initScript) {
+    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘状态未就绪");
@@ -133,20 +135,24 @@ public class TemplateService extends AbstractService {
         }
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);
         this.volumeMapper.updateById(volume);
+
+        StorageEntity storage = allocateService.allocateStorage(0);
+        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         TemplateEntity template = TemplateEntity.builder().uri(String.valueOf(volumeId))
                 .name(name).templateType(Constant.TemplateType.VOLUME)
-                .script(initScript)
-                .volumeType(cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2)
+                .script("")
                 .status(Constant.TemplateStatus.CREATING).build();
         this.templateMapper.insert(template);
         String uid = UUID.randomUUID().toString();
-        StorageEntity storage = allocateService.allocateStorage(0);
         TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .name(uid)
                 .templateId(template.getTemplateId())
                 .path(storage.getMountPath() + "/" + uid)
-                .type(template.getVolumeType())
+                .type(volumeType)
                 .capacity(0L)
                 .allocation(0L)
                 .status(Constant.TemplateStatus.CREATING)

@@ -97,7 +97,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setCapacity(resultUtil.getData().getCapacity());
                 volume.setType(resultUtil.getData().getType());
-                volume.setBackingPath(resultUtil.getData().getBackingPath());
                 volume.setPath(resultUtil.getData().getPath());
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             } else {

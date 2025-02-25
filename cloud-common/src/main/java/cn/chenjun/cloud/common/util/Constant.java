@@ -96,6 +96,7 @@ public class Constant {
     public static class StorageType {
         public static final String NFS = "nfs";
         public static final String GLUSTERFS = "glusterfs";
+        public static final String CEPH_RBD = "ceph-rbd";
         public static final String LOCAL = "local";
     }
 

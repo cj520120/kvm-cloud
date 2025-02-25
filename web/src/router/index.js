@@ -4,7 +4,7 @@ import NetworkView from "../views/NetworkView.vue";
 import HostView from "../views/HostView.vue";
 import StorageView from "../views/StorageView.vue";
 import TemplateView from "../views/TemplateView.vue";
-import SnapshotView from "../views/SnapshotView.vue";
+// import SnapshotView from "../views/SnapshotView.vue";
 import VolumeView from "../views/VolumeView.vue";
 import SchemeView from "../views/SchemeView.vue";
 import GroupView from "../views/GroupView.vue";
@@ -52,11 +52,11 @@ const routes = [
     name: "Template",
     component: TemplateView,
   },
-  {
-    path: "/Snapshot",
-    name: "Snapshot",
-    component: SnapshotView,
-  },
+  // {
+  //   path: "/Snapshot",
+  //   name: "Snapshot",
+  //   component: SnapshotView,
+  // },
   {
     path: "/Volume",
     name: "Volume",

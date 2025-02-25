@@ -107,7 +107,7 @@ export default {
 				{ path: '/Ssh', title: '密钥管理', icon: 'el-icon-key' },
 				{ path: '/Scheme', title: '计算方案', icon: 'el-icon-cpu' },
 				{ path: '/Volume', title: '磁盘管理', icon: 'el-icon-bank-card' },
-				{ path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },
+				// { path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },
 				{ path: '/Group', title: '群组管理', icon: 'el-icon-folder' },
 				{ path: '/User', title: '用户管理', icon: 'el-icon-s-custom' }
 			]

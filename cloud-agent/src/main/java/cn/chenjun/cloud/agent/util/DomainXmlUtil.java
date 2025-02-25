@@ -106,16 +106,27 @@ public class DomainXmlUtil {
             Map<String, Object> storage = new HashMap<>(0);
             storage.put("name", volume.getStorage().getName());
             storage.put("param", volume.getStorage().getParam());
-            storage.put("path", volume.getStorage().getMountPath());
             storage.put("type", volume.getStorage().getType());
+            storage.put("path", volume.getStorage().getMountPath());
             map.put("storage", storage);
             map.put("name", volume.getName());
             switch (volume.getStorage().getType()) {
                 case Constant.StorageType.GLUSTERFS:
+                    List<Map<String, String>> uriMap = DomainXmlUtil.parseUrlList(volume.getStorage().getParam().get("uri").toString(), "24007");
+                    storage.put("glusterfs", uriMap.get(0));
                     map.put("type", "network");
+                    break;
+
+                case Constant.StorageType.CEPH_RBD:
+                    map.put("type", "network");
+                    List<Map<String, String>> hostList = DomainXmlUtil.parseUrlList(volume.getStorage().getParam().get("uri").toString(), "6789");
+                    Map<String, List<Map<String, String>>> cephConfig = new HashMap<>();
+                    cephConfig.put("hostList", hostList);
+                    storage.put("ceph", cephConfig);
                     break;
                 case Constant.StorageType.NFS:
                     map.put("type", "file");
+                    storage.put("path", volume.getStorage().getMountPath());
                     break;
                 default:
                     throw new CodeException(ErrorCode.BASE_STORAGE_ERROR, "不支持的存储池类型");
@@ -144,7 +155,7 @@ public class DomainXmlUtil {
         storage.put("param", volumeStorage.getParam());
         storage.put("path", volumeStorage.getMountPath());
         storage.put("type", volumeStorage.getType());
-        String dev = "" + (char) ('a' + deviceId);
+        String dev = "" + (char) ('a' + disk.getDeviceId());
         Map<String, Object> map = new HashMap<>(0);
         map.put("name", volume.getName());
         map.put("bus", bus);
@@ -154,12 +165,19 @@ public class DomainXmlUtil {
         map.put("storage", storage);
         switch (volumeStorage.getType()) {
             case Constant.StorageType.GLUSTERFS:
-                List<Map<String, String>> uriMap = DomainXmlUtil.parseGlusterfsHosts(volumeStorage.getParam().get("uri").toString());
+                List<Map<String, String>> uriMap = DomainXmlUtil.parseUrlList(volumeStorage.getParam().get("uri").toString(), "24007");
                 storage.put("glusterfs", uriMap.get(0));
                 map.put("type", "network");
                 break;
             case Constant.StorageType.NFS:
                 map.put("type", "file");
+                break;
+            case Constant.StorageType.CEPH_RBD:
+                map.put("type", "network");
+                List<Map<String, String>> hostList = DomainXmlUtil.parseUrlList(volumeStorage.getParam().get("uri").toString(), "6789");
+                Map<String, List<Map<String, String>>> cephConfig = new HashMap<>();
+                cephConfig.put("hostList", hostList);
+                storage.put("ceph", cephConfig);
                 break;
             default:
                 throw new CodeException(ErrorCode.BASE_STORAGE_ERROR, "不支持的存储池类型");
@@ -194,7 +212,7 @@ public class DomainXmlUtil {
         return map;
     }
 
-    public static List<Map<String, String>> parseGlusterfsHosts(String glusterUri) {
+    public static List<Map<String, String>> parseUrlList(String glusterUri, String defaultPort) {
         List<String> uriList = Arrays.stream(glusterUri.split(",")).map(String::trim).filter(uri -> !ObjectUtils.isEmpty(uri)).collect(Collectors.toList());
         Collections.shuffle(uriList);
         List<Map<String, String>> hostList = new ArrayList<>();
@@ -203,7 +221,7 @@ public class DomainXmlUtil {
             Map<String, String> map = new HashMap<>();
             if (uriPort.length == 1) {
                 map.put("address", uriPort[0]);
-                map.put("port", "24007");
+                map.put("port", defaultPort);
             } else {
                 map.put("address", uriPort[0]);
                 map.put("port", uriPort[1]);

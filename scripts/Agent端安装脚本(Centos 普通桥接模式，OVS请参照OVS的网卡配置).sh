@@ -25,7 +25,7 @@ fi
 # 检查libvirtd是否安装
 if ! command -v libvirtd >/dev/null 2>&1; then
     echo "libvirtd is not installed. Installing libvirt..."
-    yum install -y libvirt libvirt-client libvirt-python qemu-kvm virt-install virt-viewer virt-manager
+    yum install -y libvirt qemu-kvm
     systemctl start libvirtd
     systemctl enable libvirtd
 fi

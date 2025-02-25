@@ -72,9 +72,18 @@
             {% if cd.storage.type == 'nfs' %}
             <source file="{{cd.storage.path}}/{{cd.name}}"/>
             {% elif cd.storage.type == 'glusterfs' %}
-            <source protocol="gluster" name="{{cd.storage.param.path}}/{{cd.name}}">
-                <host name="{{cd.storage.param.uri}}"/>
+            <source protocol="gluster" name="{{cd.storage.param.volume}}/{{cd.name}}">
+                <host name='{{cd.storage.glusterfs.address}}' port='{{cd.storage.glusterfs.port}}'/>
             </source>
+            {% elif cd.storage.type == 'ceph-rbd' %}
+            <source protocol="rbd" name="{{cd.storage.param.pool}}/{{cd.name}}">
+                {% for host in cd.storage.ceph.hostList %}
+                <host name='{{host.address}}' port='{{host.port}}'/>
+                {% endfor %}
+            </source>
+            <auth username='{{cd.storage.param.username}}'>
+                <secret type='ceph' uuid='{{cd.storage.name}}'/>
+            </auth>
             {% endif %}
             <readonly/>
             <address type="drive" controller="0" bus="0" target="0" unit="0"/>
@@ -84,14 +93,24 @@
         <disk type="{{disk.type}}" device="disk" cache="none" aio="native">
             <target dev="{{disk.dev}}" bus="{{disk.bus}}"/>
             <driver name="qemu" type="{{disk.volumeType}}" cache="none" aio="native"/>
+
             {% if disk.storage.type == 'nfs' %}
             <source file="{{disk.storage.path}}/{{disk.name}}"/>
             {% elif disk.storage.type == 'glusterfs' %}
-            <source protocol="gluster" name="{{disk.storage.param.path}}/{{disk.name}}">
+            <source protocol="gluster" name="{{disk.storage.param.volume}}/{{disk.name}}">
                 <host name='{{disk.storage.glusterfs.address}}' port='{{disk.storage.glusterfs.port}}'/>
             </source>
-
+            {% elif disk.storage.type == 'ceph-rbd' %}
+            <source protocol="rbd" name="{{disk.storage.param.pool}}/{{disk.name}}">
+                {% for host in disk.storage.ceph.hostList %}
+                <host name='{{host.address}}' port='{{host.port}}'/>
+                {% endfor %}
+            </source>
+            <auth username='{{disk.storage.param.username}}'>
+                <secret type='ceph' uuid='{{disk.storage.name}}'/>
+            </auth>
             {% endif %}
+
             {% if disk.bus=='virtio' %}
             <!-- virtio 驱动-->
             <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>

@@ -37,10 +37,36 @@ import java.util.stream.Collectors;
 public class VolumeOperateImpl implements VolumeOperate {
 
 
+    private static String getVolumePath(Volume volume) {
+        String path;
+        switch (volume.getStorage().getType()) {
+            case Constant.StorageType.NFS:
+                path = "/mnt/" + volume.getStorage().getName() + "/" + volume.getName();
+                break;
+            case Constant.StorageType.LOCAL:
+                path = volume.getStorage().getMountPath() + "/" + volume.getName();
+                break;
+            case Constant.StorageType.GLUSTERFS:
+                String glusterfsUri = (String) volume.getStorage().getParam().get("uri");
+                List<String> uriList = Arrays.stream(glusterfsUri.split(",")).map(String::trim).filter(uri -> !ObjectUtils.isEmpty(uri)).collect(Collectors.toList());
+                Collections.shuffle(uriList);
+                String glusterfsVolume = (String) volume.getStorage().getParam().get("path");
+                path = "gluster+tcp://" + uriList.get(0) + "/" + glusterfsVolume + "/" + volume.getName();
+                break;
+            case Constant.StorageType.CEPH_RBD:
+                String pool = volume.getStorage().getParam().get("pool").toString();
+                path = "rbd:" + pool + "/" + volume.getName();
+                break;
+            default:
+                throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "未知的存储池类型:" + volume.getStorage().getType());
+        }
+        return path;
+    }
+
     @DispatchBind(command = Constant.Command.VOLUME_INFO)
     @Override
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
-        StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage(), false);
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getSourceStorage());
         }
@@ -70,7 +96,7 @@ public class VolumeOperateImpl implements VolumeOperate {
             String storage = entry.getKey();
             Map<String, VolumeInfo> map = new HashMap<>(4);
             Set<String> volumeNameList = entry.getValue().stream().map(VolumeInfoRequest::getSourceName).collect(Collectors.toSet());
-            StoragePool storagePool = StorageUtil.findStorage(connect, storage);
+            StoragePool storagePool = StorageUtil.findStorage(connect, storage, false);
             if (storagePool != null) {
                 String[] names = storagePool.listVolumes();
                 for (String name : names) {
@@ -102,28 +128,6 @@ public class VolumeOperateImpl implements VolumeOperate {
         return modelList;
     }
 
-    private static String getVolumePath(Volume volume) {
-        String path;
-        switch (volume.getStorage().getType()) {
-            case Constant.StorageType.NFS:
-                path = "/mnt/" + volume.getStorage().getName() + "/" + volume.getName();
-                break;
-            case Constant.StorageType.LOCAL:
-                path = volume.getStorage().getMountPath() + "/" + volume.getName();
-                break;
-            case Constant.StorageType.GLUSTERFS:
-                String glusterUri = (String) volume.getStorage().getParam().get("uri");
-                List<String> uriList = Arrays.stream(glusterUri.split(",")).map(String::trim).filter(uri -> !ObjectUtils.isEmpty(uri)).collect(Collectors.toList());
-                Collections.shuffle(uriList);
-                String glusterVolume = (String) volume.getStorage().getParam().get("path");
-                path = "gluster+tcp://" + uriList.get(0) + "/" + glusterVolume + "/" + volume.getName();
-                break;
-            default:
-                throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "未知的存储池类型:" + volume.getStorage().getType());
-        }
-        return path;
-    }
-
     @DispatchBind(command = Constant.Command.VOLUME_CREATE)
     @Override
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
@@ -141,7 +145,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     @DispatchBind(command = Constant.Command.VOLUME_DESTROY)
     @Override
     public Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
-        StoragePool storagePool = StorageUtil.findStorage(connect, request.getVolume().getStorage().getName());
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getVolume().getStorage().getName(), false);
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池未就绪:" + request.getVolume().getStorage().getName());
         }
@@ -291,19 +295,9 @@ public class VolumeOperateImpl implements VolumeOperate {
             SAXReader reader = new SAXReader();
             reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
-            Element backingStoreNode = (Element) doc.selectSingleNode("/volume/backingStore/path");
-            if (backingStoreNode != null) {
-                info.setBackingPath(backingStoreNode.getText());
-            }
             Element formatNode = (Element) doc.selectSingleNode("/volume/target/format");
             if (formatNode != null) {
                 info.setType(formatNode.attributeValue("type"));
-            }
-            Element pathNode = (Element) doc.selectSingleNode("/volume/target/path");
-            if (backingStoreNode != null) {
-                info.setPath(pathNode.getText());
-            } else {
-                info.setBackingPath("");
             }
         }
 
