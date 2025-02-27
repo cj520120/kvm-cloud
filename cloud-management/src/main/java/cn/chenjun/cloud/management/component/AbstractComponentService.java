@@ -4,7 +4,6 @@ import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.SystemCategory;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
@@ -12,6 +11,7 @@ import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.chenjun.cloud.management.servcie.AbstractService;
 import cn.chenjun.cloud.management.servcie.AllocateService;
+import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.GuestNameUtil;
@@ -43,7 +43,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     protected GuestService guestService;
 
     @Autowired
-    protected ApplicationConfig applicationConfig;
+    protected ConfigService configService;
 
     private final List<T> componentQmaInitializeList;
 
@@ -59,7 +59,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     @Transactional(rollbackFor = Exception.class)
     public void checkAndStart(NetworkEntity network, ComponentEntity component) {
 
-        List<HostEntity> hostList = allocateService.listAllocateHost(BootstrapType.BIOS, applicationConfig.getSystemComponentCpu(), applicationConfig.getSystemComponentMemory());
+        List<HostEntity> hostList = allocateService.listAllocateHost(BootstrapType.BIOS, configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU), (int) configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024);
         List<Integer> hostIds = hostList.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         if (hostIds.isEmpty()) {
             log.info("没有可用的主机，无法启动组件:{}", this.getComponentName());
@@ -236,9 +236,9 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .systemCategory(SystemCategory.CENTOS)
                 .bootstrapType(BootstrapType.BIOS)
                 .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
-                .cpu(applicationConfig.getSystemComponentCpu())
-                .speed(applicationConfig.getSystemComponentCpuSpeed())
-                .memory(applicationConfig.getSystemComponentMemory())
+                .cpu(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU))
+                .share(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE))
+                .memory(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY))
                 .cdRoom(0)
                 .hostId(0)
                 .lastHostId(0)
@@ -251,7 +251,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .build();
         this.guestMapper.insert(guest);
         StorageEntity storage = this.allocateService.allocateStorage(0);
-        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -277,7 +277,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         GuestNetworkEntity guestNetwork;
         guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
         guestNetwork.setDeviceId(0);
-        guestNetwork.setDriveType(this.applicationConfig.getSystemComponentNetworkDriver());
+        guestNetwork.setDriveType(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
@@ -290,7 +290,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
             GuestNetworkEntity basicGuestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
             basicGuestNetwork.setDeviceId(0);
-            basicGuestNetwork.setDriveType(applicationConfig.getSystemComponentNetworkDriver());
+            basicGuestNetwork.setDriveType(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
             basicGuestNetwork.setAllocateId(guest.getGuestId());
             basicGuestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
             this.guestNetworkMapper.updateById(basicGuestNetwork);
@@ -329,16 +329,18 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     public abstract String getComponentName();
 
     @Override
-    public GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId) {
+    public GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
+        int qmaExecuteExpire = this.configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES);
+        int qmaCheckExpire = this.configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES);
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         GuestQmaRequest request = GuestQmaRequest.builder().build();
         request.setName("");
-        request.setQmaExecuteTimeout((int) TimeUnit.MINUTES.toSeconds(this.applicationConfig.getGuestQmaExecuteTimeoutMinutes()));
-        request.setQmaCheckTimeout((int) TimeUnit.MINUTES.toSeconds(this.applicationConfig.getGuestQmaCheckTimeoutMinutes()));
+        request.setQmaExecuteTimeout((int) TimeUnit.MINUTES.toSeconds(qmaExecuteExpire));
+        request.setQmaCheckTimeout((int) TimeUnit.MINUTES.toSeconds(qmaCheckExpire));
         request.setCommands(commands);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("hostnamectl").args(new String[]{"set-hostname", this.getComponentName()}).checkSuccess(true).build())).build());
         for (ComponentQmaInitialize componentQmaInitialize : componentQmaInitializeList) {
-            List<GuestQmaRequest.QmaBody> childCommands = componentQmaInitialize.initialize(component, guestId);
+            List<GuestQmaRequest.QmaBody> childCommands = componentQmaInitialize.initialize(component, guestId, sysconfig);
             if (!ObjectUtils.isEmpty(childCommands)) {
                 commands.addAll(childCommands);
             }

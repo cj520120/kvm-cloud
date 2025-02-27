@@ -696,3 +696,32 @@ export const createSshDownloadKey = (data = {}) => {
     method: "POST",
   });
 };
+//config
+export const getConfigList = (params = {}) => {
+  return axios.request({
+    url: "api/config/search",
+    params,
+  });
+};
+export const createConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config/create",
+    data,
+    method: "PUT",
+  });
+};
+
+export const modifyConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config/update",
+    data,
+    method: "POST",
+  });
+};
+export const destroyConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config/destroy",
+    data,
+    method: "DELETE",
+  });
+};

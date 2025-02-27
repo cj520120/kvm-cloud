@@ -4,12 +4,12 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -42,17 +42,15 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.<StorageInfo>builder().build());
             return;
         }
-        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storage.getParam(), new TypeToken<Map<String, Object>>() {
-        }.getType());
-        StorageCreateRequest request = StorageCreateRequest.builder()
-                .name(storage.getName())
-                .type(storage.getType())
-                .param(storageParam)
-                .mountPath(storage.getMountPath())
-                .build();
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
+        StorageCreateRequest request = buildStorageCreateRequest(storage, sysconfig);
         this.asyncInvoker(host, param, Constant.Command.STORAGE_CREATE, request);
 
     }
+
 
     @Override
     public Type getCallResultType() {

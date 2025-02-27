@@ -8,14 +8,12 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -31,8 +29,6 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends AbstractOperate<T, ResultUtil<VolumeInfo>> {
-    @Autowired
-    private ApplicationConfig applicationConfig;
 
 
     @Override
@@ -65,8 +61,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
                         .sourceVolume(initVolume(parentStorage, snapshotVolume))
                         .targetVolume(initVolume(storage, volume))
-
-
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
             } else {

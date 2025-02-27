@@ -31,7 +31,7 @@ public class VolumeSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return 600;
+        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND);
     }
 
     @Override

@@ -16,18 +16,19 @@ import java.util.List;
 @Builder
 public class GuestStartRequest {
     private String name;
-    private String description;
-    private String emulator;
-    private OsMemory osMemory;
-    private OsCpu osCpu;
-    private OsCdRoom osCdRoom;
-    private String bus;
-    private List<OsDisk> osDisks;
-    private List<OsNic> networkInterfaces;
-    private String vncPassword;
+    private String xml;
+//    private String description;
+//    private String emulator;
+//    private OsMemory osMemory;
+//    private OsCpu osCpu;
+//    private OsCdRoom osCdRoom;
+//    private String bus;
+//    private List<OsDisk> osDisks;
+//    private List<OsNic> networkInterfaces;
+//    private String vncPassword;
     private GuestQmaRequest qmaRequest;
-    private int systemCategory;
-    private int bootstrapType;
-    private boolean enableMemoryHugePages;
+//    private int systemCategory;
+//    private int bootstrapType;
+//    private boolean enableMemoryHugePages;
 
 }

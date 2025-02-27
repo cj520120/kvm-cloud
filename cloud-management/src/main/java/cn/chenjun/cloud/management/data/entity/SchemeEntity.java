@@ -24,7 +24,7 @@ public class SchemeEntity {
     public static final String SCHEME_NAME = "scheme_name";
     public static final String SCHEME_CPU = "scheme_cpu";
     public static final String SCHEME_MEMORY = "scheme_memory";
-    public static final String SCHEME_CPU_SPEED = "scheme_cpu_speed";
+    public static final String SCHEME_CPU_SHARE = "scheme_cpu_share";
     public static final String SCHEME_CPU_SOCKETS = "scheme_cpu_sockets";
     public static final String SCHEME_CPU_CORES = "scheme_cpu_cores";
     public static final String SCHEME_CPU_THREADS = "scheme_cpu_threads";
@@ -39,8 +39,8 @@ public class SchemeEntity {
     private Integer cpu;
     @TableField(SCHEME_MEMORY)
     private Long memory;
-    @TableField(SCHEME_CPU_SPEED)
-    private Integer speed;
+    @TableField(SCHEME_CPU_SHARE)
+    private Integer share;
     @TableField(SCHEME_CPU_SOCKETS)
     private Integer sockets;
     @TableField(SCHEME_CPU_CORES)

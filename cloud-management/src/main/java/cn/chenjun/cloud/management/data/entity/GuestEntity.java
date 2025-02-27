@@ -27,7 +27,7 @@ public class GuestEntity {
     public static final String GUEST_BUS_TYPE = "guest_bus_type";
     public static final String GUEST_BOOTSTRAP_TYPE = "guest_bootstrap_type";
     public static final String GUEST_CPU = "guest_cpu";
-    public static final String GUEST_CPU_SPEED = "guest_cpu_speed";
+    public static final String GUEST_CPU_SPEED = "guest_cpu_share";
     public static final String GUEST_MEMORY = "guest_memory";
     public static final String GUEST_CD_ROOM = "guest_cd_room";
     public static final String HOST_ID = "host_id";
@@ -56,7 +56,7 @@ public class GuestEntity {
     @TableField(GUEST_CPU)
     private Integer cpu;
     @TableField(GUEST_CPU_SPEED)
-    private Integer speed;
+    private Integer share;
     @TableField(GUEST_MEMORY)
     private Long memory;
     @TableField(GUEST_CD_ROOM)

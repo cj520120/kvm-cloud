@@ -3,7 +3,6 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.OsOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
-import cn.chenjun.cloud.agent.util.DomainXmlUtil;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -175,91 +174,74 @@ public class OsOperateImpl implements OsOperate {
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_CD_ROOM)
     @Override
-    public Void detachCdRoom(Connect connect, OsCdRoom request) throws Exception {
+    public Void detachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = DomainXmlUtil.buildCdXml(request,this.applicationConfig);
-        domain.updateDeviceFlags(xml, 1);
+        log.info("detachCdRoom xml={}", request.getXml());
+        domain.updateDeviceFlags(request.getXml(), 1);
         return null;
 
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_CD_ROOM)
     @Override
-    public Void attachCdRoom(Connect connect, OsCdRoom request) throws Exception {
+    public Void attachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = DomainXmlUtil.buildCdXml(request,this.applicationConfig);
-        log.info("attachCdRoom xml={}", xml);
-        domain.updateDeviceFlags(xml, 1);
+        log.info("attachCdRoom xml={}", request.getXml());
+        domain.updateDeviceFlags(request.getXml(), 1);
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_DISK)
     @Override
-    public Void attachDisk(Connect connect, OsDisk request) throws Exception {
+    public Void attachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
-        }
-        String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
-        log.info("attachDisk xml={}", xml);
-        domain.attachDevice(xml);
+        log.info("attachDisk xml={}", request.getXml());
+        domain.attachDevice(request.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_DISK)
     @Override
-    public Void detachDisk(Connect connect, OsDisk request) throws Exception {
+    public Void detachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
-        }
-        String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
-        log.info("detachDisk xml={}", xml);
-        domain.detachDevice(xml);
+        log.info("detachDisk xml={}", request.getXml());
+        domain.detachDevice(request.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_NIC)
     @Override
-    public Void attachNic(Connect connect, OsNic request) throws Exception {
+    public Void attachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
-        }
-        String xml = DomainXmlUtil.buildNicXml(request);
-        log.info("attachNic xml={}", xml);
-        domain.attachDevice(xml);
+        log.info("attachNic xml={}", request.getXml());
+        domain.attachDevice(request.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_NIC)
     @Override
-    public Void detachNic(Connect connect, OsNic request) throws Exception {
+    public Void detachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
-        }
-        String xml = DomainXmlUtil.buildNicXml(request);
-        log.info("detachNic xml={}", xml);
-        domain.detachDevice(xml);
+        log.info("detachNic xml={}", request.getXml());
+        domain.detachDevice(request.getXml());
         return null;
     }
 
@@ -273,44 +255,8 @@ public class OsOperateImpl implements OsOperate {
             }
             domain.destroy();
         }
-        OsCpu osCpu = request.getOsCpu();
-        NodeInfo nodeInfo = connect.nodeInfo();
-        if (osCpu.getCore() <= 0 || osCpu.getSocket() <= 0 || osCpu.getThread() <= 0) {
-            int cores = nodeInfo.cores;
-            int sockets = nodeInfo.sockets;
-            int threads = nodeInfo.threads;
-            int maxCpu = osCpu.getNumber();
-
-            do {
-                int totalCpu = cores * sockets * threads;
-
-                if (totalCpu <= maxCpu) {
-                    //如果刚好合适或者无法计算出合适值，则保存最后设置
-                    break;
-                }
-                if (sockets > 1) {
-                    //最小保证1个socket
-                    sockets--;
-                    continue;
-                }
-                if (cores > 1) {
-                    //最小保证1个core
-                    cores--;
-                    continue;
-                }
-                if (threads > 1) {
-                    //最小保证1个thread
-                    threads--;
-                    continue;
-                }
-            } while (true);
-            osCpu.setCore(cores);
-            osCpu.setSocket(sockets);
-            osCpu.setThread(threads);
-        }
-        String xml = DomainXmlUtil.buildDomainXml(request, this.applicationConfig);
-        log.info("create vm={}", xml);
-        domain = connect.domainCreateXML(xml, 0);
+        log.info("create vm={}", request.getXml());
+        domain = connect.domainCreateXML(request.getXml(), 0);
         if (Objects.nonNull(request.getQmaRequest())) {
             long start = System.currentTimeMillis();
             Map<String, Object> map = new HashMap<>(2);

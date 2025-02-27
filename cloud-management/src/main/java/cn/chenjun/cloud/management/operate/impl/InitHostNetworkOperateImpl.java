@@ -9,16 +9,14 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author chenjun
@@ -49,13 +47,15 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
             return;
         }
+
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
+
         switch (network.getType()) {
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
-                BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .poolId(network.getPoolId())
-                        .bridge(network.getBridge())
-                        .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
-                        .build();
+                BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
             }
             break;
@@ -64,17 +64,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
                 }
-                BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .poolId(basicNetworkEntity.getPoolId())
-                        .bridge(basicNetworkEntity.getBridge())
-                        .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
-                        .build();
-                VlanNetwork vlan = VlanNetwork.builder()
-                        .poolId(network.getPoolId())
-                        .vlanId(network.getVlanId())
-                        .basic(basicBridgeNetwork)
-                        .bridge(basicNetworkEntity.getBridge())
-                        .build();
+                VlanNetwork vlan = buildVlanCreateRequest(basicNetworkEntity, network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_VLAN, vlan);
             }
             break;
@@ -83,6 +73,7 @@ public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostN
         }
 
     }
+
 
     @Override
     public Type getCallResultType() {

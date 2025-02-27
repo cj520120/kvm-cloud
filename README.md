@@ -295,20 +295,15 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 
 11、修改默认machine设置
 ```$xslt
-由于各操作系统支持不同，可以在agent的配置文件中增加如下配置修改（示例为ubuntu 22.04中的配置）:
-app.machine.name = q35
-app.machine.arch = x86_64
-app.cd.bus = sata (根据machine修改光驱的设置)
+需要调整系统配置项vm.machine.name和vm.machine.arch
 具体支持的配置需要根据操作系统决定,具体查询命令如下:
 Centos: /usr/libexec/qemu-kvm -machine help
 Ubuntu: qemu-system-i386 -machine help
 ```
 
-12、UEFI 配置
+12、UEFI 支持
 ```$xslt
-由于各操作系统支持不同，可以在agent的配置增加uefi路径配置（示例为ubuntu 22.04中的配置）:
-app.uefi.type = pflash
-app.uefi.path= /usr/share/OVMF/OVMF_CODE.fd
+需要调整系统配置项vm.uefi.loader.type和vm.uefi.loader.path
 ```
 13、关于网络不通问题
 ```$xslt
@@ -316,6 +311,7 @@ app.uefi.path= /usr/share/OVMF/OVMF_CODE.fd
 ```
 14、关于ubuntu无法启动虚拟机问题
 ```$xslt
+
 ubuntu 提示qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory
-在/etc/sysctl.conf 中追加 vm.nr_hugepages=10240 #具体值请根据实际情况修改
+关闭大页缓存，修改配置vm.memory.huge.pages.enable和vm.memory.huge.pages.size，或在/etc/sysctl.conf 中追加 vm.nr_hugepages=10240 #具体值请根据实际情况修改
 ```

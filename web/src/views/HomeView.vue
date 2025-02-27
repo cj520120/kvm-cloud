@@ -58,12 +58,12 @@
 						<el-row>
 							<el-col :span="12">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + get_allocat_cpu() + '核 / 总共:' + get_total_cpu() + '核'" placement="top">
-									<el-progress :format="get_cpu_progress_title" type="circle" :percentage="totalCpuPercentage" color="#67C23A"></el-progress>
+									<el-progress :format="get_cpu_progress_title" type="circle" :percentage="Math.min(100, totalCpuPercentage)" color="#67C23A"></el-progress>
 								</el-tooltip>
 							</el-col>
 							<el-col :span="12">
 								<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(get_allocat_memory()) + ' / 总共:' + get_memory_desplay(get_total_memory())" placement="top">
-									<el-progress :format="get_memory_progress_title" type="circle" :percentage="totalMemoryePercentage" color="#67C23A"></el-progress>
+									<el-progress :format="get_memory_progress_title" type="circle" :percentage="Math.min(100, totalMemoryePercentage)" color="#67C23A"></el-progress>
 								</el-tooltip>
 							</el-col>
 						</el-row>
@@ -75,14 +75,14 @@
 							<el-table-column label="CPU" max-width="150">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
-										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.min(100, Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu))"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
 							<el-table-column label="内存" max-width="150">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_desplay(scope.row.allocationMemory) + ' / 总共:' + get_memory_desplay(scope.row.totalMemory)" placement="top">
-										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.min(100, Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory))"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
@@ -98,7 +98,7 @@
 				<el-container>
 					<el-aside width="200px">
 						<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(get_allocat_storage()) + ' / 总共:' + get_storage_desplay(get_total_capacity())" placement="top">
-							<el-progress type="circle" :format="get_storage_progress_title" :percentage="totalStoragePercentage" color="#67C23A"></el-progress>
+							<el-progress type="circle" :format="get_storage_progress_title" :percentage="Math.min(100, totalStoragePercentage)" color="#67C23A"></el-progress>
 						</el-tooltip>
 					</el-aside>
 					<el-container>
@@ -108,7 +108,7 @@
 							<el-table-column label="容量" prop="capacity" width="200">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已用:' + get_storage_desplay(scope.row.allocation) + ' / 总共:' + get_storage_desplay(scope.row.capacity)" placement="top">
-										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.min(100, Math.floor((scope.row.allocation * 100) / scope.row.capacity))"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>

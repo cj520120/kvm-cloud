@@ -12,9 +12,9 @@ import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
+import cn.chenjun.cloud.management.util.TemplateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.hubspot.jinjava.Jinjava;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +36,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
     protected GuestMapper guestMapper;
 
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
 
         NetworkEntity network = this.networkMapper.selectById(component.getNetworkId());
@@ -59,8 +59,9 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         String endIp = allGuestNetwork.get(allGuestNetwork.size() - 1).getIp();
 
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/route/dnsmasq.tpl")), StandardCharsets.UTF_8);
-        Jinjava jinjava = new Jinjava();
+
         Map<String, Object> map = new HashMap<>(0);
+        map.put("__SYS__", sysconfig);
         map.put("interface", "eth" + defaultGuestNetwork.getDeviceId());
         map.put("ip", defaultGuestNetwork.getIp());
         map.put("vip", component.getComponentVip());
@@ -77,7 +78,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
             return dhcp;
         }).collect(Collectors.toList());
         map.put("dhcpList", dhcpList);
-        String dnsmasqConfig = jinjava.render(config, map);
+        String dnsmasqConfig = TemplateUtil.create().render(config, map);
         //下载dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "dnsmasq"}).build())).build());
         //写入dnsmasq

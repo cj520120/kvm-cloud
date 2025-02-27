@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
@@ -29,7 +28,8 @@ public class HostGuestSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return (int) TimeUnit.SECONDS.toSeconds(30);
+
+        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND);
     }
 
     @Override

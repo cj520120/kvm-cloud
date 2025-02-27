@@ -52,8 +52,6 @@ public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<Destro
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                         .poolId(network.getPoolId())
-                        .bridge(network.getBridge())
-                        .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_BASIC, basicBridgeNetwork);
             }
@@ -63,7 +61,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<Destro
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
                 }
-                VlanNetwork vlan = buildVlanRequest(basicNetworkEntity, host, network);
+                VlanNetwork vlan = VlanNetwork.builder().poolId(network.getPoolId()).build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_VLAN, vlan);
             }
             break;

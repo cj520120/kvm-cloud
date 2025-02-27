@@ -39,6 +39,11 @@ public class ComponentCheckRunner extends AbstractRunner {
     private ComponentMapper componentMapper;
 
     @Override
+    public int getPeriodSeconds() {
+        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
+    }
+
+    @Override
     protected void dispatch() throws Exception {
         List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>());
         for (NetworkEntity network : networkList) {

@@ -23,25 +23,25 @@
 				<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 				<el-descriptions-item label="内存">
 					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(show_host.allocationMemory) + ' / 总共:' + get_memory_display_size(show_host.totalMemory)" placement="top">
-						<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
+						<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.min(100, Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory))"></el-progress>
 					</el-tooltip>
 				</el-descriptions-item>
 				<el-descriptions-item label="CPU">
 					<el-tooltip class="item" effect="dark" :content="'已使用:' + show_host.allocationCpu + '核 / 总共:' + show_host.totalCpu + '核'" placement="top" style="width: 150px">
-						<el-progress color="#67C23A" :percentage="show_host.totalCpu <= 0 ? 0 : Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu)"></el-progress>
+						<el-progress color="#67C23A" :percentage="show_host.totalCpu <= 0 ? 0 : Math.min(100, Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu))"></el-progress>
 					</el-tooltip>
 				</el-descriptions-item>
 				<el-descriptions-item label="Cores">{{ show_host.cores }}</el-descriptions-item>
 				<el-descriptions-item label="Sockets">{{ show_host.sockets }}</el-descriptions-item>
 				<el-descriptions-item label="Threads">{{ show_host.threads }}</el-descriptions-item>
-				<el-descriptions-item label="Machine">{{ show_host.machine }}</el-descriptions-item>
 				<el-descriptions-item label="Eemulator">{{ show_host.emulator }}</el-descriptions-item>
-				<el-descriptions-item label="UEFI Type">{{ show_host.uefiType }}</el-descriptions-item>
-				<el-descriptions-item label="UEFI Path">{{ show_host.uefiPath }}</el-descriptions-item>
 				<el-descriptions-item label="状态">
 					<el-tag :type="show_host.status === 1 ? 'success' : 'danger'">{{ get_host_status(show_host) }}</el-tag>
 				</el-descriptions-item>
 			</el-descriptions>
+		</el-row>
+		<el-row>
+			<ConfigComponent ref="ConfigComponentRef" />
 		</el-row>
 	</el-card>
 </template>
@@ -49,6 +49,8 @@
 import Notify from '@/api/notify'
 import util from '@/api/util'
 import { getHostInfo, pauseHost, registerHost, destroyHost } from '@/api/api'
+
+import ConfigComponent from '@/components/ConfigComponent.vue'
 export default {
 	name: 'HostInfoComponent',
 	data() {
@@ -77,6 +79,7 @@ export default {
 		}
 	},
 	mixins: [Notify, util],
+	components: { ConfigComponent },
 	created() {
 		this.show_host_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
@@ -127,6 +130,7 @@ export default {
 			this.show_host_id = host.hostId
 			this.show_host = host
 			this.host_loading = false
+			this.$refs.ConfigComponentRef.init(1, host.hostId)
 		},
 		refresh_host(host) {
 			if (this.show_host.hostId === host.hostId) {

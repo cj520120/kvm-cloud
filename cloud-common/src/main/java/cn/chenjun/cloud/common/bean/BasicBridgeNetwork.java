@@ -17,13 +17,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BasicBridgeNetwork {
     private String poolId;
-    /**
-     * 桥接名称
-     */
-    private String bridge;
-    /**
-     * 桥接方式
-     */
-    private  Constant.NetworkBridgeType bridgeType;
+    private String xml;
 
 }

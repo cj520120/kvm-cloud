@@ -1,0 +1,8 @@
+<interface type="network">
+    <mac address="{{network.mac}}"/>
+    <model type="{{network.type}}"/>
+    <source network='{{network.network}}'/>
+    <address type="pci" domain="0x0000" bus="0x00" slot="{{network.slot}}" function="0x0"/>
+    <link state="up"/>
+
+</interface>

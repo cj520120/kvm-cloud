@@ -5,6 +5,7 @@ import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.SyncHostTaskIdOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,8 @@ public class TaskIdSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return 10;
+
+        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND);
     }
 
     @Override

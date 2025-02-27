@@ -1,8 +1,0 @@
-<interface type="network">
-    <mac address="{{nic.address}}"/>
-    <model type="{{nic.type}}"/>
-    <source network='{{nic.network}}'/>
-    <address type="pci" domain="0x0000" bus="0x00" slot="{{nic.slot}}" function="0x0"/>
-    <link state="up"/>
-
-</interface>

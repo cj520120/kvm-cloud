@@ -5,6 +5,7 @@ import cn.chenjun.cloud.management.data.entity.TaskEntity;
 import cn.chenjun.cloud.management.data.mapper.TaskMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
+import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class TaskService {
-    private final static int TASK_TIMEOUT_SECONDS = 30;
+
     @Autowired
-    private ApplicationContext applicationContext;
-    @Autowired
-    private ExecutorService executorService;
+    protected ConfigService configService;
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private ApplicationContext applicationContext;
     @Transactional
     public void addTask(BaseOperateParam operateParam) {
         this.addTask(operateParam, 0);
@@ -47,7 +47,8 @@ public class TaskService {
 
     @Transactional
     public void keepTask(String taskId) {
-        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + +TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS)));
+        int expire = configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
+        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + +TimeUnit.SECONDS.toMillis(expire)));
     }
 
     @Transactional
@@ -65,7 +66,8 @@ public class TaskService {
 
     @Transactional
     public void updateTaskExpire(TaskEntity entity) {
-        Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(TASK_TIMEOUT_SECONDS));
+        int expireSecond = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
+        Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
         int version=entity.getVersion()+1;
         entity.setVersion(version);
         entity.setExpireTime(expireTime);

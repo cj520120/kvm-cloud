@@ -158,7 +158,7 @@ public class GuestService extends AbstractService {
                 .bootstrapType(bootstrapType)
                 .busType(busType)
                 .cpu(scheme.getCpu())
-                .speed(scheme.getSpeed())
+                .share(scheme.getShare())
                 .memory(scheme.getMemory())
                 .cdRoom(isoTemplateId)
                 .hostId(0)
@@ -178,7 +178,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
-        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -272,7 +272,7 @@ public class GuestService extends AbstractService {
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(storageId);
-        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2;
+        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -651,7 +651,7 @@ public class GuestService extends AbstractService {
                 this.guestMapper.updateById(guest);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 DestroyGuestOperate operate = DestroyGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? this.applicationConfig.getDestroyDelayMinute() : 0);
+                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE) : 0);
                 break;
             }
             default:
@@ -693,7 +693,7 @@ public class GuestService extends AbstractService {
                 guest.setSchemeId(scheme.getSchemeId());
                 guest.setCpu(scheme.getCpu());
                 guest.setMemory(scheme.getMemory());
-                guest.setSpeed(scheme.getSpeed());
+                guest.setShare(scheme.getShare());
                 guest.setSystemCategory(systemCategory);
                 guest.setBootstrapType(bootstrapType);
                 this.guestMapper.updateById(guest);

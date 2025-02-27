@@ -15,8 +15,8 @@
 					<el-input v-model="create_scheme.memory"></el-input>
 				</el-form-item>
 
-				<el-form-item label="配额" prop="speed">
-					<el-input v-model="create_scheme.speed"></el-input>
+				<el-form-item label="配额(Share)" prop="share">
+					<el-input v-model="create_scheme.share"></el-input>
 				</el-form-item>
 				<el-form-item label="Cores" prop="cores">
 					<el-input v-model="create_scheme.cores"></el-input>
@@ -44,7 +44,7 @@ export default {
 				name: '',
 				cpu: 1,
 				memory: 512,
-				speed: 0,
+				share: 0,
 				sockets: 0,
 				cores: 0,
 				threads: 0

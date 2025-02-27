@@ -5,6 +5,8 @@ import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import org.springframework.plugin.core.Plugin;
 
+import java.util.Map;
+
 /**
  * @author chenjun
  */
@@ -24,5 +26,5 @@ public interface ComponentProcess extends Plugin<Integer> {
      * @param guestId
      * @return
      */
-    GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId);
+    GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId, Map<String, Object> sysconfig);
 }

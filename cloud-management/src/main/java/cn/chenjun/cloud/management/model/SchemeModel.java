@@ -19,7 +19,7 @@ public class SchemeModel {
     private String name;
     private int cpu;
     private long memory;
-    private int speed;
+    private int share;
     private int sockets;
     private int cores;
     private int threads;

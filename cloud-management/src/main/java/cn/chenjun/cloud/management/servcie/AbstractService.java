@@ -1,10 +1,10 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.model.*;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -13,6 +13,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,8 +46,6 @@ public abstract class AbstractService {
     @Lazy
     protected TaskService operateTask;
     @Autowired
-    protected ApplicationConfig applicationConfig;
-    @Autowired
     protected GuestVncMapper guestVncMapper;
 
     @Autowired
@@ -59,6 +58,8 @@ public abstract class AbstractService {
     protected SshAuthorizedMapper sshAuthorizedMapper;
     @Autowired
     protected GuestSshMapper guestSshMapper;
+    @Autowired
+    protected ConfigService configService;
 
     protected boolean checkComponentComplete(int networkId, int componentType) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, componentType).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
@@ -128,9 +129,9 @@ public abstract class AbstractService {
     }
 
     protected HostModel initHost(HostEntity entity) {
-
-        entity.setTotalCpu((int) (entity.getTotalCpu() * applicationConfig.getOverCpu()));
-        entity.setTotalMemory((long) (entity.getTotalMemory() * applicationConfig.getOverMemory()));
+        List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(entity.getHostId()).build());
+        entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+        entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         return new BeanConverter<>(HostModel.class).convert(entity, null);
     }
 

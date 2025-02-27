@@ -68,7 +68,7 @@ public class HostService extends AbstractService {
         String clientId = AppUtils.getAppId();
         String clientSecret = AppUtils.getAppSecret(clientId);
         HostEntity host = HostEntity.builder().hostIp(ip).displayName(name)
-                .uri(uri).arch("").emulator("").nic(nic).hypervisor("").uefiType("").uefiPath("")
+                .uri(uri).arch("").emulator("").nic(nic).hypervisor("")
                 .osName("")
                 .osVersion("")
                 .vendor("")
@@ -128,6 +128,7 @@ public class HostService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         this.hostMapper.deleteById(hostId);
+        this.configService.deleteAllocateConfig(Constant.ConfigAllocateType.HOST, hostId);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success();
     }

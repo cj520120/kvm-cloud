@@ -32,11 +32,11 @@ public class SchemeController extends BaseController {
     public ResultUtil<SchemeModel> createScheme(@RequestParam("name") String name,
                                                 @RequestParam("cpu") int cpu,
                                                 @RequestParam("memory") long memory,
-                                                @RequestParam("speed") int speed,
+                                                @RequestParam("share") int share,
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, speed, sockets, cores, threads));
+        return this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
     }
 
 
@@ -45,11 +45,11 @@ public class SchemeController extends BaseController {
                                                 @RequestParam("name") String name,
                                                 @RequestParam("cpu") int cpu,
                                                 @RequestParam("memory") long memory,
-                                                @RequestParam("speed") int speed,
+                                                @RequestParam("share") int share,
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, speed, sockets, cores, threads));
+        return this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
     }
 
 

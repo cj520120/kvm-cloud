@@ -44,7 +44,7 @@ public class HostSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return 30;
+        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
     }
 
     @Override

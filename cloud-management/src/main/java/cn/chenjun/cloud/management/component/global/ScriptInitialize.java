@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenjun
@@ -18,7 +19,7 @@ import java.util.List;
 @Component
 public class ScriptInitialize implements GlobalComponentQmaInitialize {
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
 
         String serviceCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/check_install_service_shell.tpl")), StandardCharsets.UTF_8);

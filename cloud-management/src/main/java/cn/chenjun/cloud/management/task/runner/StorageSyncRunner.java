@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.task.runner;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.util.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,8 @@ public class StorageSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return 60;
+
+        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND);
     }
 
     @Override

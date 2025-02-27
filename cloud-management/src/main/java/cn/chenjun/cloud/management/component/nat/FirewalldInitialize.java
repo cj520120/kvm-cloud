@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenjun
@@ -15,7 +16,7 @@ import java.util.List;
 @Component
 public class FirewalldInitialize implements NatComponentQmaInitialize {
     @Override
-    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId) {
+    public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/open_firewalld.sh"}).build())).build());
         return commands;

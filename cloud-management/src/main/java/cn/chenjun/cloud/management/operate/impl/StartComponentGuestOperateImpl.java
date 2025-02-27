@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -29,14 +30,14 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
 
 
     @Override
-    protected GuestQmaRequest getStartQmaRequest(StartComponentGuestOperate param) {
+    protected GuestQmaRequest getStartQmaRequest(StartComponentGuestOperate param, Map<String, Object> sysconfig) {
         GuestEntity guest = this.guestMapper.selectById(param.getGuestId());
         ComponentEntity component = this.componentMapper.selectById(guest.getOtherId());
         if (component == null) {
             return null;
         }
         Optional<ComponentProcess> optional = componentPlugin.getPluginFor(component.getComponentType());
-        return optional.map(process -> process.getStartQmaRequest(component, guest.getGuestId())).orElse(null);
+        return optional.map(process -> process.getStartQmaRequest(component, guest.getGuestId(), sysconfig)).orElse(null);
     }
 
     @Override

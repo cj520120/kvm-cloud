@@ -1,14 +1,18 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.bean.GuestInfo;
+import cn.chenjun.cloud.common.bean.GuestQmaRequest;
+import cn.chenjun.cloud.common.bean.GuestStartRequest;
+import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
+import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.VncService;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.DomainUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Maps;
@@ -34,7 +38,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
     private VncService vncService;
 
     @Autowired
-    private ApplicationConfig config;
+    private ConfigService configService;
 
     @Override
     public void operate(T param) {
@@ -44,37 +48,27 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
         }
 
         HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), guest.getBootstrapType(), param.getHostId(), guest.getCpu(), guest.getMemory());
-        List<OsDisk> disks = getGuestDisk(guest);
-        List<OsNic> networkInterfaces = getGuestNetwork(guest);
-        OsCdRoom cdRoom = getGuestCdRoom(guest);
-        GuestVncEntity guestVncEntity = this.vncService.getGuestVnc(param.getGuestId());
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.GUEST).id(guest.getGuestId()).build());
+        Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
+        List<String> deviceXmlList = new ArrayList<>();
+        deviceXmlList.add(getGuestCdRoom(guest, sysconfig));
+        deviceXmlList.addAll(getGuestDisk(guest, sysconfig));
+        deviceXmlList.addAll(getGuestNetwork(guest, sysconfig));
+        GuestVncEntity vnc = this.vncService.getGuestVnc(param.getGuestId());
         guest.setHostId(host.getHostId());
         guest.setLastStartTime(new Date());
         this.guestMapper.updateById(guest);
         this.allocateService.initHostAllocate();
         SchemeEntity scheme = this.schemeMapper.selectById(guest.getSchemeId());
-        OsCpu cpu = OsCpu.builder().number(guest.getCpu()).share(guest.getSpeed()).build();
-        if (scheme != null) {
-            cpu.setCore(scheme.getCores());
-            cpu.setThread(scheme.getThreads());
-            cpu.setSocket(scheme.getSockets());
-        }
-
+        String tpl = this.configService.getConfig(queryList, cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DOMAIN_TPL);
+        String xml = DomainUtil.buildDomainXml(tpl, sysconfig, guest, host, scheme, vnc, deviceXmlList);
         GuestStartRequest request = GuestStartRequest.builder()
-                .emulator(host.getEmulator())
                 .name(guest.getName())
-                .systemCategory(guest.getSystemCategory())
-                .bootstrapType(guest.getBootstrapType())
-                .description(guest.getDescription())
-                .bus(guest.getBusType())
-                .osCpu(cpu)
-                .osMemory(OsMemory.builder().memory(guest.getMemory()).build())
-                .osCdRoom(cdRoom)
-                .osDisks(disks)
-                .networkInterfaces(networkInterfaces)
-                .vncPassword(guestVncEntity.getPassword())
-                .qmaRequest(this.getStartQmaRequest(param))
-                .enableMemoryHugePages(config.isEnableMemoryHugePages())
+                .qmaRequest(this.getStartQmaRequest(param, sysconfig))
+                .xml(xml)
                 .build();
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
@@ -107,16 +101,17 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
 
     }
 
-    protected List<OsDisk> getGuestDisk(GuestEntity guest) {
+    protected List<String> getGuestDisk(GuestEntity guest, Map<String, Object> sysconfig) {
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
-        List<OsDisk> disks = new ArrayList<>();
-        Map<Integer, Storage> storageMap = Maps.newHashMap();
-        for (GuestDiskEntity entity : guestDiskEntityList) {
-            VolumeEntity volume = volumeMapper.selectById(entity.getVolumeId());
+        List<String> disks = new ArrayList<>();
+        Map<Integer, StorageEntity> storageMap = Maps.newHashMap();
+
+        for (GuestDiskEntity guestDisk : guestDiskEntityList) {
+            VolumeEntity volume = volumeMapper.selectById(guestDisk.getVolumeId());
             if (volume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
             }
-            Storage storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
+            StorageEntity storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
                 StorageEntity storageEntity = this.storageMapper.selectById(storageId);
                 if (storageEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
@@ -124,35 +119,39 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                 if (storageEntity.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getStatus());
                 }
-                Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
-                }.getType());
-                return Storage.builder()
-                        .name(storageEntity.getName())
-                        .type(storageEntity.getType())
-                        .param(storageParam)
-                        .mountPath(storageEntity.getMountPath())
-                        .build();
+                return storageEntity;
             });
-            Volume diskVolume = Volume.builder().name(volume.getName()).type(volume.getType()).path(volume.getPath()).storage(storage).build();
-
-            OsDisk disk = OsDisk.builder().name(guest.getName()).volume(diskVolume).deviceId(entity.getDeviceId()).build();
-            disks.add(disk);
+            String configKey;
+            switch (storage.getType()) {
+                case Constant.StorageType.CEPH_RBD:
+                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_CEPH_RBD_TPL;
+                    break;
+                case Constant.StorageType.GLUSTERFS:
+                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_GLUSTERFS_TPL;
+                    break;
+                case Constant.StorageType.NFS:
+                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_NFS_TPL;
+                    break;
+                default:
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
+            }
+            String tpl = (String) sysconfig.get(configKey);
+            disks.add(DomainUtil.buildDiskXml(tpl, sysconfig, guest, storage, volume, guestDisk));
         }
-        disks.sort(Comparator.comparingInt(OsDisk::getDeviceId));
         return disks;
     }
 
 
-    protected GuestQmaRequest getStartQmaRequest(T param) {
+    protected GuestQmaRequest getStartQmaRequest(T param, Map<String, Object> sysconfig) {
 
         return null;
     }
 
-    protected List<OsNic> getGuestNetwork(GuestEntity guest) {
+    protected List<String> getGuestNetwork(GuestEntity guest, Map<String, Object> configParam) {
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
-        List<OsNic> networkInterfaces = new ArrayList<>();
-        int baseDeviceId = 0;
+        List<String> networkInterfaces = new ArrayList<>();
+        String tpl = (String) configParam.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_INTERFACE_TPL);
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
             if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
@@ -168,17 +167,7 @@ public class StartGuestOperateImpl<T extends StartGuestOperate> extends Abstract
                     }
                 }
             }
-            OsNic nic = OsNic.builder()
-                    .poolId(network.getPoolId())
-                    .mac(entity.getMac())
-                    .driveType(entity.getDriveType())
-                    .name(guest.getName())
-                    .deviceId(baseDeviceId + entity.getDeviceId())
-                    .bridgeName(network.getBridge())
-                    .bridgeType(Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType()))
-                    .vlanId(network.getVlanId())
-                    .build();
-            networkInterfaces.add(nic);
+            networkInterfaces.add(DomainUtil.buildNetworkInterfaceXml(tpl, configParam, network, entity));
         }
         return networkInterfaces;
     }

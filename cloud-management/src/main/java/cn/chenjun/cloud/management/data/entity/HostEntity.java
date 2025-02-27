@@ -36,14 +36,11 @@ public class HostEntity {
     public static final String HOST_TOTAL_CPU = "host_total_cpu";
     public static final String HOST_ARCH = "host_arch";
     public static final String HOST_VENDOR = "host_vendor";
-    public static final String HOST_UEFI_TYPE = "host_uefi_type";
-    public static final String HOST_UEFI_PATH = "host_uefi_path";
     public static final String HOST_HYPERVISOR = "host_hypervisor";
     public static final String HOST_EMULATOR = "host_emulator";
     public static final String HOST_CPU_CORES = "host_cpu_cores";
     public static final String HOST_CPU_THREADS = "host_cpu_threads";
     public static final String HOST_CPU_SOCKETS = "host_cpu_sockets";
-    public static final String HOST_GUEST_MACHINE = "host_guest_machine";
     public static final String HOST_STATUS = "host_status";
     public static final String CREATE_TIME = "create_time";
 
@@ -83,12 +80,6 @@ public class HostEntity {
     private Integer totalCpu;
     @TableField(HOST_ARCH)
     private String arch;
-    @TableField(HOST_GUEST_MACHINE)
-    private String machine;
-    @TableField(HOST_UEFI_TYPE)
-    private String uefiType;
-    @TableField(HOST_UEFI_PATH)
-    private String uefiPath;
     @TableField(HOST_HYPERVISOR)
     private String hypervisor;
     @TableField(HOST_EMULATOR)

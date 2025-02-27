@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.task.runner;
 
+import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,8 @@ public abstract class AbstractRunner {
 
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    protected ConfigService configService;
 
     @Autowired
     private LockRunner lockRunner;

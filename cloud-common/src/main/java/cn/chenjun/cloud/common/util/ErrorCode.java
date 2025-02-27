@@ -91,6 +91,13 @@ public final class ErrorCode {
      */
     public static final int BASE_AGENT_ERROR = BASE_ERROR * 13;
     public static final int BASE_TASK_BUSY = BASE_AGENT_ERROR + 1;
+    public static final int BASE_CONFIG_ERROR = BASE_ERROR*14;
+    /**
+     * Config
+     */
+    public static final int CONFIG_EXISTS_ERROR = BASE_CONFIG_ERROR+1;
+    public static final int CONFIG_NOT_EXISTS_ERROR = BASE_CONFIG_ERROR+1;
+
     private ErrorCode() {
 
     }

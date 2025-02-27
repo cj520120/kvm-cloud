@@ -1,0 +1,21 @@
+<network>
+    <name>{{network.name}}</name>
+    <uuid>{{network.uuid}}</uuid>
+    <description>{{network.description}}</description>
+    <forward mode='bridge'/>
+    <bridge name='{{network.bridge}}'/>
+    <virtualport type='openvswitch'/>
+    {% if network.vlanId > 0 %}
+    <vlan trunk='yes'>
+        <tag id='{{network.vlanId}}'/>
+    </vlan>
+    {% endif %}
+    <portgroup name="defaultNetwork" default='yes'>
+        {% if network.vlanId > 0 %}
+        <vlan>
+            <tag id="{{network.vlanId}}"/>
+        </vlan>
+        {% endif %}
+    </portgroup>
+</network>
+

@@ -16,14 +16,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class VlanNetwork {
     private String poolId;
-    /**
-     * vlan id 1-4096
-     */
-    private int vlanId;
-    /**
-     * vlan 桥接网卡名称
-     */
-    private String bridge;
+
+    private String xml;
 
     /**
      * 基础网络

@@ -10,7 +10,7 @@
 			<el-descriptions :column="2" size="medium" border>
 				<el-descriptions-item label="ID">{{ show_scheme.schemeId }}</el-descriptions-item>
 				<el-descriptions-item label="名称">{{ show_scheme.name }}</el-descriptions-item>
-				<el-descriptions-item label="配额">{{ show_scheme.speed }}</el-descriptions-item>
+				<el-descriptions-item label="配额">{{ show_scheme.share }}</el-descriptions-item>
 				<el-descriptions-item label="CPU">{{ show_scheme.cpu }}</el-descriptions-item>
 				<el-descriptions-item label="内存">{{ get_memory_display_size(show_scheme.memory) }}</el-descriptions-item>
 				<el-descriptions-item label="Cores">{{ show_scheme.cores }}</el-descriptions-item>
@@ -30,7 +30,7 @@ export default {
 		return {
 			schme_loading: false,
 			show_scheme_id: 0,
-			show_scheme: { schemeId: 0, name: '-', cpu: 0, memory: 0, speed: 0, sockets: 0, cores: 0, threads: 0 }
+			show_scheme: { schemeId: 0, name: '-', cpu: 0, memory: 0, share: 0, sockets: 0, cores: 0, threads: 0 }
 		}
 	},
 	mixins: [Notify, util],

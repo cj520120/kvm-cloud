@@ -1,24 +1,18 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,8 +20,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AllocateService extends AbstractService {
-    @Autowired
-    private ApplicationConfig applicationConfig;
 
     public StorageEntity allocateStorage(int storageId) {
         StorageEntity storage;
@@ -59,8 +51,9 @@ public class AllocateService extends AbstractService {
     public List<HostEntity> listAllocateHost(int bootstrapType, int cpu, long memory) {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
-            host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
-            host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         }
         list = list.stream().filter(t -> hostVerify(t, bootstrapType, cpu, memory))
                 .collect(Collectors.toList());
@@ -70,8 +63,10 @@ public class AllocateService extends AbstractService {
     public HostEntity allocateHost(int hostId, int bootstrapType, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-            host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
-            host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
+
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             if (!hostVerify(host, bootstrapType, cpu, memory)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }
@@ -79,8 +74,10 @@ public class AllocateService extends AbstractService {
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : list) {
-                host.setTotalCpu((int) (host.getTotalCpu() * applicationConfig.getOverCpu()));
-                host.setTotalMemory((long) (host.getTotalMemory() * applicationConfig.getOverMemory()));
+
+                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+                host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+                host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             }
             list = list.stream().filter(t -> hostVerify(t, bootstrapType, cpu, memory))
                     .collect(Collectors.toList());
@@ -99,11 +96,6 @@ public class AllocateService extends AbstractService {
     private boolean hostVerify(HostEntity host, int bootstrapType, int cpu, long memory) {
         if (!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
             return false;
-        }
-        if (Objects.equals(bootstrapType, BootstrapType.UEFI)) {
-            if (ObjectUtils.isEmpty(host.getUefiPath()) || ObjectUtils.isEmpty(host.getUefiType())) {
-                return false;
-            }
         }
         int allocateCpu = host.getAllocationCpu() + cpu;
         long allocationMemory = host.getAllocationMemory() + memory;

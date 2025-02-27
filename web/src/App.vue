@@ -109,7 +109,8 @@ export default {
 				{ path: '/Volume', title: '磁盘管理', icon: 'el-icon-bank-card' },
 				// { path: '/Snapshot', title: '快照管理', icon: 'el-icon-copy-document' },
 				{ path: '/Group', title: '群组管理', icon: 'el-icon-folder' },
-				{ path: '/User', title: '用户管理', icon: 'el-icon-s-custom' }
+				{ path: '/User', title: '用户管理', icon: 'el-icon-s-custom' },
+				{ path: '/Config', title: '系统配置', icon: 'el-icon-s-tools' }
 			]
 		}
 	},

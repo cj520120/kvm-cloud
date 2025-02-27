@@ -21,7 +21,7 @@ public class GuestModel {
     private String busType;
     private int cpu;
     private long memory;
-    private int speed;
+    private int share;
     private int cdRoom;
     private int hostId;
     private int schemeId;

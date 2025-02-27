@@ -7,10 +7,7 @@ import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.util.Constant;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.SystemPropsUtil;
-import cn.hutool.system.OsInfo;
-import cn.hutool.system.SystemUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -23,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.StringReader;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -57,13 +53,6 @@ public class HostOperateImpl implements HostOperate {
                 .threads(nodeInfo.threads)
                 .sockets(nodeInfo.cpus/(nodeInfo.sockets*nodeInfo.cores*nodeInfo.threads))
                 .build();
-        if (applicationConfig.getUefi() != null) {
-            hostInfo.setUefiType(applicationConfig.getUefi().getType());
-            hostInfo.setUefiPath(applicationConfig.getUefi().getPath());
-        }
-        if (applicationConfig.getMachine() != null) {
-            hostInfo.setMachine(applicationConfig.getMachine().getName());
-        }
         try (StringReader sr = new StringReader(connect.getCapabilities())) {
             SAXReader reader = new SAXReader();
             reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);

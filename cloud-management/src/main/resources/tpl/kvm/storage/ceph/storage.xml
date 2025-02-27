@@ -1,0 +1,13 @@
+<pool type="rbd">
+    <name>{{storage.name}}</name>
+    <source>
+        {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}
+        {% for __host in __hostList %}
+        <host name='{{__host.address}}' port='{{__host.port}}'/>
+        {% endfor %}
+        <name>{{storage.param.pool}}</name>
+        <auth type='ceph' username='{{storage.param.username}}'>
+            <secret uuid='{{storage.name}}'/>
+        </auth>
+    </source>
+</pool>

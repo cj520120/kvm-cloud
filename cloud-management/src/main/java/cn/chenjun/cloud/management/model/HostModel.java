@@ -27,8 +27,6 @@ public class HostModel {
     private int totalCpu;
     private String arch;
     private String vendor;
-    private String uefiType;
-    private String uefiPath;
     private String hypervisor;
     private String emulator;
     private String osName;

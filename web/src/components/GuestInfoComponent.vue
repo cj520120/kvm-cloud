@@ -33,7 +33,7 @@
 					<el-descriptions-item label="固件">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
-					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
+					<el-descriptions-item label="Cpu配额(Share)">{{ show_guest_info.current_guest.share }}</el-descriptions-item>
 					<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 					<el-descriptions-item label="运行主机">
 						<el-button @click="show_host_info(show_guest_info.host.hostId)" type="text" v-show="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-button>
@@ -93,6 +93,9 @@
 							</el-table-column>
 						</el-table>
 					</el-tab-pane>
+					<el-tab-pane label="系统配置">
+						<ConfigComponent ref="ConfigComponentRef" />
+					</el-tab-pane>
 				</el-tabs>
 			</el-row>
 		</el-card>
@@ -122,7 +125,7 @@ import HostInfoComponent from '@/components/HostInfoComponent.vue'
 import SchemeInfoComponent from './SchemeInfoComponent.vue'
 import VolumeInfoComponent from '@/components/VolumeInfoComponent'
 import MigrateGuestComponent from '@/components/MigrateGuestComponent'
-
+import ConfigComponent from '@/components/ConfigComponent.vue'
 import Notify from '@/api/notify'
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 
@@ -139,7 +142,8 @@ export default {
 		ReInstallComponentVue,
 		HostInfoComponent,
 		SchemeInfoComponent,
-		VolumeInfoComponent
+		VolumeInfoComponent,
+		ConfigComponent
 	},
 	mixins: [Notify, util],
 	created() {
@@ -170,7 +174,7 @@ export default {
 					busType: 'virtio',
 					cpu: 1,
 					memory: 524288,
-					speed: 500,
+					share: 500,
 					cdRoom: 0,
 					hostId: 0,
 					schemeId: 0,
@@ -282,6 +286,7 @@ export default {
 			await this.load_current_guest_scheme(guest)
 			await this.load_current_guest_volume(guest)
 			await this.load_current_guest_network(guest)
+			await this.$refs.ConfigComponentRef.init(2, guest.guestId)
 		},
 		async initGuestId(guestId) {
 			this.show_guest_id = guestId
