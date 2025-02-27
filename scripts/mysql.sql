@@ -1,32 +1,14 @@
-/*
-SQLyog Ultimate v12.08 (64 bit)
-MySQL - 5.7.22 : Database - cj_kvm_cloud
-*********************************************************************
-*/
 
-
-/*!40101 SET NAMES utf8 */;
-
-/*!40101 SET SQL_MODE=''*/;
-
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`cj_kvm_cloud` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
-
-USE `cj_kvm_cloud`;
-
--- MySQL dump 10.13  Distrib 8.0.32, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.34, for macos13 (x86_64)
 --
--- Host: localhost    Database: cj_kvm_cloud
+-- Host: 192.168.1.90    Database: cj_kvm_cloud
 -- ------------------------------------------------------
 -- Server version	8.0.32
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -37,6 +19,9 @@ USE `cj_kvm_cloud`;
 --
 -- Table structure for table `tbl_component_info`
 --
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`cj_kvm_cloud` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+
+USE `cj_kvm_cloud`;
 
 DROP TABLE IF EXISTS `tbl_component_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -52,7 +37,7 @@ CREATE TABLE `tbl_component_info` (
   `slave_guest_ids` varchar(128) NOT NULL DEFAULT '[]',
   PRIMARY KEY (`component_id`),
   KEY `IX_NETWORK_COMPONENT` (`component_type`,`network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=234 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +55,7 @@ CREATE TABLE `tbl_dns_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`dns_id`),
   UNIQUE KEY `IX_NETWORK_DOMAIN` (`network_id`,`dns_domain`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -85,7 +70,7 @@ CREATE TABLE `tbl_group_info` (
   `group_name` varchar(64) NOT NULL,
   `create_time` timestamp NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=658 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=658 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +89,7 @@ CREATE TABLE `tbl_guest_disk` (
   PRIMARY KEY (`guest_disk_id`),
   UNIQUE KEY `IX_GUEST_VOLUME` (`guest_id`,`device_id`),
   UNIQUE KEY `IX_VOLUME_ID` (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=587 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=7052 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -121,7 +106,7 @@ CREATE TABLE `tbl_guest_info` (
   `guest_description` varchar(45) NOT NULL,
   `guest_bus_type` varchar(10) NOT NULL,
   `guest_cpu` int NOT NULL,
-  `guest_cpu_speed` int NOT NULL DEFAULT '0',
+  `guest_cpu_share` int NOT NULL DEFAULT '0',
   `guest_memory` bigint NOT NULL,
   `guest_cd_room` int NOT NULL,
   `host_id` int NOT NULL,
@@ -137,7 +122,7 @@ CREATE TABLE `tbl_guest_info` (
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=6975 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +143,7 @@ CREATE TABLE `tbl_guest_network` (
   `allocate_type` int NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL,
   PRIMARY KEY (`guest_network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=133180 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=134248 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,7 +159,23 @@ CREATE TABLE `tbl_guest_password` (
   `iv_key` varchar(20) NOT NULL,
   `guest_password` varchar(1024) NOT NULL,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tbl_guest_ssh_info`
+--
+
+DROP TABLE IF EXISTS `tbl_guest_ssh_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_guest_ssh_info` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `guest_id` int NOT NULL,
+  `ssh_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `IX_GUEST_SSH` (`guest_id`,`ssh_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,7 +192,7 @@ CREATE TABLE `tbl_guest_vnc` (
   `vnc_token` varchar(45) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -202,35 +203,31 @@ DROP TABLE IF EXISTS `tbl_host_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_host_info` (
-  `host_id` int(11) NOT NULL AUTO_INCREMENT,
+  `host_id` int NOT NULL AUTO_INCREMENT,
   `host_display_name` varchar(45) NOT NULL,
   `client_id` varchar(45) NOT NULL,
   `client_secret` varchar(45) NOT NULL,
-  `host_name` varchar(64) NOT NULL DEFAULT '',
+  `host_name` varchar(45) NOT NULL DEFAULT '',
   `host_os_name` varchar(64) NOT NULL,
   `host_os_version` varchar(64) NOT NULL,
   `host_vendor` varchar(45) NOT NULL,
   `host_ip` varchar(20) NOT NULL,
   `host_nic_name` varchar(20) NOT NULL,
   `host_uri` varchar(128) NOT NULL,
-  `host_allocation_memory` bigint(20) NOT NULL,
-  `host_allocation_cpu` int(11) NOT NULL,
-  `host_total_memory` bigint(20) NOT NULL,
-  `host_total_cpu` int(11) NOT NULL,
+  `host_allocation_memory` bigint NOT NULL,
+  `host_allocation_cpu` int NOT NULL,
+  `host_total_memory` bigint NOT NULL,
+  `host_total_cpu` int NOT NULL,
   `host_arch` varchar(20) NOT NULL,
   `host_hypervisor` varchar(20) NOT NULL,
   `host_emulator` varchar(128) NOT NULL,
-  `host_guest_machine` varchar(45) NOT NULL DEFAULT '',
-  `host_cpu_cores` int(11) NOT NULL DEFAULT '0',
-  `host_cpu_sockets` int(11) NOT NULL DEFAULT '0',
-  `host_cpu_threads` int(11) NOT NULL DEFAULT '0',
-  `host_uefi_type` varchar(25) NOT NULL DEFAULT '',
-  `host_uefi_path` varchar(256) NOT NULL DEFAULT '',
-  `host_status` int(11) NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `host_cpu_cores` int NOT NULL DEFAULT '0',
+  `host_cpu_sockets` int NOT NULL DEFAULT '0',
+  `host_cpu_threads` int NOT NULL DEFAULT '0',
+  `host_status` int NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`host_id`)
-) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4;
-
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,7 +244,7 @@ CREATE TABLE `tbl_meta_data` (
   `meta_value` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `IX_GUEST_META` (`guest_id`,`meta_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=331 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=478 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -267,7 +264,7 @@ CREATE TABLE `tbl_nat_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`nat_id`),
   UNIQUE KEY `IX_NAT` (`component_id`,`nat_local_port`,`nat_protocol`)
-) ENGINE=InnoDB AUTO_INCREMENT=119 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -299,7 +296,8 @@ CREATE TABLE `tbl_network_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`network_id`),
   UNIQUE KEY `IX_NETWORK_POOL_ID` (`network_pool_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `tbl_scheme_info`
@@ -313,13 +311,13 @@ CREATE TABLE `tbl_scheme_info` (
   `scheme_name` varchar(45) NOT NULL,
   `scheme_cpu` int NOT NULL,
   `scheme_memory` bigint NOT NULL,
-  `scheme_cpu_speed` int NOT NULL DEFAULT '0',
+  `scheme_cpu_share` int NOT NULL DEFAULT '0',
   `scheme_cpu_sockets` int NOT NULL DEFAULT '0',
   `scheme_cpu_cores` int NOT NULL DEFAULT '0',
   `scheme_cpu_threads` int NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`scheme_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -341,7 +339,23 @@ CREATE TABLE `tbl_snapshot_volume` (
   `volume_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`snapshot_volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tbl_ssh_authorized_keys`
+--
+
+DROP TABLE IF EXISTS `tbl_ssh_authorized_keys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_ssh_authorized_keys` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ssh_name` varchar(45) NOT NULL,
+  `ssh_public_key` text NOT NULL,
+  `ssh_private_key` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -364,7 +378,25 @@ CREATE TABLE `tbl_storage_info` (
   `storage_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`storage_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tbl_system_config`
+--
+
+DROP TABLE IF EXISTS `tbl_system_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_system_config` (
+  `config_id` int NOT NULL AUTO_INCREMENT,
+  `config_key` varchar(128) NOT NULL,
+  `config_allocate_type` int NOT NULL,
+  `config_allocate_id` int NOT NULL,
+  `config_value` text NOT NULL,
+  PRIMARY KEY (`config_id`),
+  KEY `IX_ALLOCATE_CONFIG` (`config_allocate_type`,`config_allocate_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -383,7 +415,7 @@ CREATE TABLE `tbl_task_info` (
   `create_time` timestamp NOT NULL,
   `expire_time` timestamp NOT NULL,
   PRIMARY KEY (`task_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -394,17 +426,17 @@ DROP TABLE IF EXISTS `tbl_template_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_template_info` (
-  `template_id` int(11) NOT NULL AUTO_INCREMENT,
-  `template_name` varchar(128) NOT NULL,
+  `template_id` int NOT NULL AUTO_INCREMENT,
+  `template_name` varchar(45) NOT NULL,
   `template_uri` varchar(1024) NOT NULL,
   `template_md5` varchar(45) NOT NULL DEFAULT '',
-  `template_type` int(11) NOT NULL,
+  `template_type` int NOT NULL,
   `template_cloud_init_script` text NOT NULL,
-  `template_status` int(11) NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `template_status` int NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `tbl_template_volume`
@@ -425,7 +457,7 @@ CREATE TABLE `tbl_template_volume` (
   `template_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -444,37 +476,7 @@ CREATE TABLE `tbl_user_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `IX_LOGIN_NAME` (`login_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ;
-/*!40101 SET character_set_client = @saved_cs_client */;
---
--- Table structure for table `tbl_ssh_authorized_keys`
---
-
-DROP TABLE IF EXISTS `tbl_ssh_authorized_keys`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tbl_ssh_authorized_keys` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `ssh_name` varchar(45) NOT NULL,
-  `ssh_public_key` text NOT NULL,
-  `ssh_private_key` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
---
--- Table structure for table `tbl_guest_ssh_info`
---
-
-DROP TABLE IF EXISTS `tbl_guest_ssh_info`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE  `tbl_guest_ssh_info` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `guest_id` INT NOT NULL,
-  `ssh_id` INT NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `IX_GUEST_SSH` (`guest_id` ASC, `ssh_id` ASC)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -497,7 +499,7 @@ CREATE TABLE `tbl_volume_info` (
   `volume_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=645 DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB AUTO_INCREMENT=7127 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -509,27 +511,28 @@ CREATE TABLE `tbl_volume_info` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-12-15  6:49:52
+-- Dump completed on 2025-02-27 19:19:52
+
 
 
 
 INSERT INTO`tbl_user_info`(`user_id`,`login_name`,`login_password`,`login_password_salt`,`login_state`,`create_time`)
 VALUES(1,'admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,now());
 
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('7','1核512MB','1','524288','0','0','0','0','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('8','1核1GB','1','1048576','0','0','0','0','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('9','1核2GB','1','2097152','0','0','0','0','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('10','1核4GB','1','4194304','0','0','0','0','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('11','1核8GB','1','8388608','0','0','0','0','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('12','2核1GB','2','1048576','0','1','1','2','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('13','2核2GB','2','2097152','0','1','1','2','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('14','2核4GB','2','4194304','0','1','1','2','2022-12-28 10:51:27');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('15','2核8GB','2','8388608','0','1','1','2','2021-05-18 03:23:26');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('16','2核16GB','2','16777216','0','1','1','2','2021-05-18 03:23:26');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('17','4核4G','4','4194304','0','2','1','2','2021-05-18 03:23:26');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('18','4核8G','4','8388608','0','2','1','2','2021-05-18 03:23:26');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('19','4核16G','4','16777216','0','2','1','2','2021-05-18 03:23:26');
-insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_speed`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('21','8核16G','8','16777216','0','0','0','0','2021-05-18 03:23:26');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('7','1核512MB','1','524288','0','0','0','0','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('8','1核1GB','1','1048576','0','0','0','0','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('9','1核2GB','1','2097152','0','0','0','0','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('10','1核4GB','1','4194304','0','0','0','0','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('11','1核8GB','1','8388608','0','0','0','0','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('12','2核1GB','2','1048576','0','1','1','2','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('13','2核2GB','2','2097152','0','1','1','2','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('14','2核4GB','2','4194304','0','1','1','2','2022-12-28 10:51:27');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('15','2核8GB','2','8388608','0','1','1','2','2021-05-18 03:23:26');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('16','2核16GB','2','16777216','0','1','1','2','2021-05-18 03:23:26');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('17','4核4G','4','4194304','0','2','1','2','2021-05-18 03:23:26');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('18','4核8G','4','8388608','0','2','1','2','2021-05-18 03:23:26');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('19','4核16G','4','16777216','0','2','1','2','2021-05-18 03:23:26');
+insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('21','8核16G','8','16777216','0','0','0','0','2021-05-18 03:23:26');
 
 update tbl_network_info set network_pool_id=md5(uuid()) where network_pool_id='';
 update tbl_guest_info set system_category=101 where guest_id>0 and guest_type=0;
