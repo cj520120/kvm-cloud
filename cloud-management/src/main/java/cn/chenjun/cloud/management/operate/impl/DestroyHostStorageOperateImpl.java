@@ -6,7 +6,6 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.management.data.entity.SnapshotVolumeEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostStorageOperate;
@@ -79,7 +78,6 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                 if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
                     storageMapper.deleteById(param.getStorageId());
                     templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, param.getStorageId()));
-                    snapshotVolumeMapper.delete(new QueryWrapper<SnapshotVolumeEntity>().eq(SnapshotVolumeEntity.STORAGE_ID, param.getStorageId()));
                 }
             }
         } else {

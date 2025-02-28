@@ -175,25 +175,6 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_SNAPSHOT)
-    @Override
-    public VolumeInfo snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception {
-        return clone(connect, VolumeCloneRequest.builder()
-                .sourceVolume(request.getSourceVolume())
-                .targetVolume(request.getTargetVolume())
-                .build());
-    }
-
-    @DispatchBind(command = Constant.Command.VOLUME_TEMPLATE)
-    @Override
-    public VolumeInfo template(Connect connect, VolumeCreateTemplateRequest request) throws Exception {
-
-        return clone(connect, VolumeCloneRequest.builder()
-                .sourceVolume(request.getSourceVolume())
-                .targetVolume(request.getTargetVolume())
-                .build());
-    }
-
     @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD)
     @Override
     public VolumeInfo download(Connect connect, VolumeDownloadRequest request) {

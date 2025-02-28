@@ -10,14 +10,14 @@ export default {
           return `未知桥接[${network.bridgeType}]`;
       }
     },
-    get_bootstrap_type_name(guest) { 
-      switch (guest.bootstrapType) { 
+    get_bootstrap_type_name(guest) {
+      switch (guest.bootstrapType) {
         case 0:
-          return "BIOS"
+          return "BIOS";
         case 1:
-          return "UEFI"
+          return "UEFI";
         default:
-          return "UNKNOW"
+          return "UNKNOW";
       }
     },
     get_system_category_name(guest) {
@@ -253,6 +253,18 @@ export default {
         default:
           return "未知";
       }
+    },
+    get_support_category_html(category) {
+      let html = "";
+      if ((category & 1) == 1) {
+        html +=
+          '<el-tag style="margin-right: 10px;background-color: #f0f9eb;border-color: #e1f3d8;color: #67c23a;padding: 0 10px;line-height: 30px;border-width: 1px;border-style: solid; border-radius: 4px;box-sizing: border-box; white-space: nowrap;">模版</el-tag>';
+      }
+      if ((category & 2) == 2) {
+        html +=
+          '<el-tag style="background-color: #f0f9eb;border-color: #e1f3d8;color: #67c23a;padding: 0 10px;line-height: 30px;border-width: 1px;border-style: solid; border-radius: 4px;box-sizing: border-box; white-space: nowrap;">磁盘</el-tag>';
+      }
+      return html;
     },
     get_volume_display_size(size) {
       if (size >= 1024 * 1024 * 1024 * 1024) {

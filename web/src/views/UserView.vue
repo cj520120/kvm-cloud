@@ -7,15 +7,15 @@
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_user_click">注册用户</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="users" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="users" style="width: 100%" border>
 							<el-table-column label="ID" prop="userId" width="80" />
-							<el-table-column label="用户名" prop="loginName" width="200" />
+							<el-table-column label="用户名" prop="loginName" min-width="200" />
 							<el-table-column label="状态" prop="state" width="180">
 								<template #default="scope">
 									<el-tag :type="scope.row.state === 0 ? 'success' : 'danger'">{{ scope.row.state === 0 ? '启用' : '禁用' }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作">
+							<el-table-column label="操作" width="500">
 								<template #default="scope">
 									<el-button @click="show_reset_password_click(scope.row)" type="" size="mini">重置密码</el-button>
 									<el-button @click="update_user_state_click(scope.row, 0)" type="success" size="mini" v-if="scope.row.state === 1">启用</el-button>

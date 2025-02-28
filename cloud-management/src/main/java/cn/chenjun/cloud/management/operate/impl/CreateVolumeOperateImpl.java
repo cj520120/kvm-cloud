@@ -51,18 +51,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 
-            } else if (param.getSnapshotVolumeId() > 0) {
-                SnapshotVolumeEntity snapshotVolume = snapshotVolumeMapper.selectById(param.getSnapshotVolumeId());
-                if (snapshotVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.SnapshotStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前快照未就绪");
-                }
-                StorageEntity parentStorage = storageMapper.selectById(snapshotVolume.getStorageId());
-                VolumeCloneRequest request = VolumeCloneRequest.builder()
-                        .sourceVolume(initVolume(parentStorage, snapshotVolume))
-                        .targetVolume(initVolume(storage, volume))
-                        .build();
-                this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
-            } else {
+            }   else {
                 VolumeCreateRequest request = VolumeCreateRequest.builder()
                         .volume(initVolume(storage, volume))
                         .build();

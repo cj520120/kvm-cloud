@@ -6,7 +6,6 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
-import cn.chenjun.cloud.management.model.SnapshotModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.Constant;
@@ -97,11 +96,11 @@ public class VolumeService extends AbstractService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, int snapshotVolumeId, long volumeSize) {
+    public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, long volumeSize) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
-        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -120,7 +119,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(volume);
-        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).snapshotVolumeId(snapshotVolumeId).build();
+        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
         operateTask.addTask(operateParam);
         VolumeModel model = this.initVolume(volume);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
@@ -130,7 +129,7 @@ public class VolumeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId) {
 
-        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
         String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -197,7 +196,7 @@ public class VolumeService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
-        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -280,90 +279,6 @@ public class VolumeService extends AbstractService {
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
-        }
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<List<SnapshotModel>> listSnapshot() {
-        List<SnapshotVolumeEntity> snapshotVolumeList = this.snapshotVolumeMapper.selectList(new QueryWrapper<>());
-        List<SnapshotModel> models = snapshotVolumeList.stream().map(this::initSnapshot).collect(Collectors.toList());
-        return ResultUtil.success(models);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SnapshotModel> getSnapshotInfo(int snapshotVolumeId) {
-        SnapshotVolumeEntity snapshotVolume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);
-        if (snapshotVolume == null) {
-            return ResultUtil.error(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
-        }
-        this.notifyService.publish(NotifyData.<Void>builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
-        return ResultUtil.success(this.initSnapshot(snapshotVolume));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SnapshotModel> createVolumeSnapshot(int volumeId, String snapshotName) {
-        StorageEntity storage = this.allocateService.allocateStorage(0);
-        String snapshotVolumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
-            snapshotVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        }
-        if (StringUtils.isEmpty(snapshotName)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择快照类型");
-        }
-        VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.CREATE_SNAPSHOT);
-
-        GuestEntity guest = this.getVolumeGuest(volumeId);
-        if (guest != null) {
-            switch (guest.getStatus()) {
-                case Constant.GuestStatus.STOP:
-                case Constant.GuestStatus.ERROR:
-                    break;
-                default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
-            }
-        }
-        volume.setStatus(Constant.VolumeStatus.CREATE_SNAPSHOT);
-        this.volumeMapper.updateById(volume);
-        String volumeName = UUID.randomUUID().toString();
-        SnapshotVolumeEntity snapshotVolume = SnapshotVolumeEntity.builder()
-                .name(snapshotName)
-                .storageId(storage.getStorageId())
-                .volumeName(volumeName)
-                .volumePath(storage.getMountPath() + "/" + volumeName)
-                .type(snapshotVolumeType)
-                .capacity(0L)
-                .allocation(0L)
-                .status(Constant.SnapshotStatus.CREATING)
-                .createTime(new Date())
-                .build();
-        this.snapshotVolumeMapper.insert(snapshotVolume);
-        BaseOperateParam operateParam = CreateVolumeSnapshotOperate.builder().taskId(volumeName).title("创建磁盘快照[" + snapshotVolume.getName() + "]").sourceVolumeId(volume.getVolumeId()).snapshotVolumeId(snapshotVolume.getSnapshotVolumeId()).build();
-        operateTask.addTask(operateParam);
-        SnapshotModel model = this.initSnapshot(snapshotVolume);
-        this.notifyService.publish(NotifyData.<Void>builder().id(snapshotVolume.getSnapshotVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(model);
-    }
-
-
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SnapshotModel> destroySnapshot(int snapshotVolumeId) {
-        SnapshotVolumeEntity volume = this.snapshotVolumeMapper.selectById(snapshotVolumeId);
-        if (volume == null) {
-            return ResultUtil.error(ErrorCode.SNAPSHOT_NOT_FOUND, "快照不存在");
-        }
-        switch (volume.getStatus()) {
-            case Constant.SnapshotStatus.ERROR:
-            case Constant.SnapshotStatus.READY:
-                volume.setStatus(Constant.SnapshotStatus.DESTROY);
-                this.snapshotVolumeMapper.updateById(volume);
-                BaseOperateParam operate = DestroySnapshotVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("删除磁盘快照[" + volume.getName() + "]").snapshotVolumeId(snapshotVolumeId).build();
-                operateTask.addTask(operate, this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
-                SnapshotModel source = this.initSnapshot(volume);
-                this.notifyService.publish(NotifyData.<Void>builder().id(snapshotVolumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SNAPSHOT).build());
-                return ResultUtil.success(source);
-            default:
-                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");
         }
     }
 

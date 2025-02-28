@@ -7,10 +7,10 @@
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_crate_group_click">创建群组</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="groups" style="width: 100%">
-							<el-table-column label="ID" prop="groupId" width="80" />
-							<el-table-column label="名称" prop="groupName" show-overflow-tooltip />
-							<el-table-column label="操作" min-width="380">
+						<el-table :v-loading="data_loading" :data="groups" style="width: 100%" border>
+							<el-table-column label="ID" prop="groupId" min-width="100" />
+							<el-table-column label="名称" prop="groupName" min-width="400" show-overflow-tooltip />
+							<el-table-column label="操作" min-width="400">
 								<template #default="scope">
 									<el-button @click="show_modify_group(scope.row)" type="" size="mini">修改</el-button>
 									<el-button @click="destroy_group(scope.row)" type="danger" size="mini">删除</el-button>

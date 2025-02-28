@@ -73,27 +73,25 @@ public class StorageOperateImpl implements StorageOperate {
     @DispatchBind(command = Constant.Command.STORAGE_CREATE)
     @Override
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
+        if (!ObjectUtils.isEmpty(request.getSecretXml())){
+            Secret secret;
+            try{
+                secret = connect.secretLookupByUUIDString(request.getName());
+            }catch (Exception err){
+                log.info("创建 secret:{} xml={}", request.getName(), request.getSecretXml());
+                secret = connect.secretDefineXML(request.getSecretXml());
+            }
+            secret.setValue(Base64.decode(request.getSecretValue()));
+        }
         synchronized (request.getName().intern()) {
             StoragePool storagePool = StorageUtil.findStorage(connect, request.getName(), true);
             if (storagePool == null) {
-
-
-                if (!ObjectUtils.isEmpty(request.getSecretXml())) {
-                    boolean hasSecret = Arrays.asList(connect.listSecrets()).contains(request.getName());
-                    Secret secret;
-                    if (!hasSecret) {
-                        log.info("创建 secret:{} xml={}", request.getName(), request.getSecretXml());
-                        secret = connect.secretDefineXML(request.getSecretXml());
-                    } else {
-                        secret = connect.secretLookupByUUIDString(request.getName());
-                    }
-                    secret.setValue(Base64.decode(request.getSecretValue()));
-                }
+                log.info("创建 storage:{} xml={}", request.getName(), request.getStorageXml());
                 storagePool = connect.storagePoolDefineXML(request.getStorageXml(), 0);
                 storagePool.setAutostart(1);
-                if (storagePool.isActive() == 0) {
-                    storagePool.create(0);
-                }
+            }
+            if (storagePool.isActive() == 0) {
+                storagePool.create(0);
             }
             StoragePoolInfo storagePoolInfo = storagePool.getInfo();
             return StorageInfo.builder().name(request.getName())

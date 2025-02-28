@@ -319,29 +319,6 @@ CREATE TABLE `tbl_scheme_info` (
   PRIMARY KEY (`scheme_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tbl_snapshot_volume`
---
-
-DROP TABLE IF EXISTS `tbl_snapshot_volume`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tbl_snapshot_volume` (
-  `snapshot_volume_id` int NOT NULL AUTO_INCREMENT,
-  `snapshot_name` varchar(45) NOT NULL,
-  `storage_id` int NOT NULL,
-  `volume_name` varchar(45) NOT NULL,
-  `volume_path` varchar(1024) NOT NULL,
-  `volume_capacity` bigint NOT NULL,
-  `volume_allocation` bigint NOT NULL,
-  `volume_type` varchar(20) NOT NULL,
-  `volume_status` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`snapshot_volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Table structure for table `tbl_ssh_authorized_keys`
 --
@@ -366,19 +343,20 @@ DROP TABLE IF EXISTS `tbl_storage_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_storage_info` (
-  `storage_id` int NOT NULL AUTO_INCREMENT,
+  `storage_id` int(11) NOT NULL AUTO_INCREMENT,
   `storage_description` varchar(45) NOT NULL,
   `storage_name` varchar(64) NOT NULL,
+  `storage_support_category` int(11) NOT NULL DEFAULT '0',
   `storage_type` varchar(20) NOT NULL,
   `storage_parm` text NOT NULL,
   `storage_mount_path` varchar(1024) NOT NULL,
-  `storage_capacity` bigint NOT NULL,
-  `storage_available` bigint NOT NULL,
-  `storage_allocation` bigint NOT NULL,
-  `storage_status` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `storage_capacity` bigint(20) NOT NULL,
+  `storage_available` bigint(20) NOT NULL,
+  `storage_allocation` bigint(20) NOT NULL,
+  `storage_status` int(11) NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`storage_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -534,6 +512,4 @@ insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('19','4核16G','4','16777216','0','2','1','2','2021-05-18 03:23:26');
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('21','8核16G','8','16777216','0','0','0','0','2021-05-18 03:23:26');
 
-update tbl_network_info set network_pool_id=md5(uuid()) where network_pool_id='';
-update tbl_guest_info set system_category=101 where guest_id>0 and guest_type=0;
 

@@ -253,7 +253,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        StorageEntity storage = this.allocateService.allocateStorage(0);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,0);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -300,7 +300,6 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         }
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
-                .snapshotVolumeId(0)
                 .templateId(diskTemplateId)
                 .volumeId(volume.getVolumeId())
                 .start(true)

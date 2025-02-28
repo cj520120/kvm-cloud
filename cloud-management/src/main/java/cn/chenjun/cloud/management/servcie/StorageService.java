@@ -42,7 +42,7 @@ public class StorageService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> createStorage(String description, String type, String param) {
+    public ResultUtil<StorageModel> createStorage(int supportCategory, String description, String type, String param) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入存储池名称");
         }
@@ -63,6 +63,7 @@ public class StorageService extends AbstractService {
                 .type(type)
                 .param(param)
                 .mountPath(mountPath)
+                .supportCategory(supportCategory)
                 .allocation(0L)
                 .capacity(0L)
                 .available(0L)
@@ -97,6 +98,19 @@ public class StorageService extends AbstractService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<StorageModel> updateStorageSupportCategory(int storageId, int supportCategory) {
+        StorageEntity storage = this.storageMapper.selectById(storageId);
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
+        }
+        storage.setSupportCategory(supportCategory);
+        this.storageMapper.updateById(storage);
+
+        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        return ResultUtil.success(this.initStorageModel(storage));
+
+    }
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);

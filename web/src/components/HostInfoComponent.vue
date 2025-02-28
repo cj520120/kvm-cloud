@@ -40,7 +40,7 @@
 				</el-descriptions-item>
 			</el-descriptions>
 		</el-row>
-		<el-row>
+		<el-row style="text-align: left; margin: 20px 0">
 			<ConfigComponent ref="ConfigComponentRef" />
 		</el-row>
 	</el-card>

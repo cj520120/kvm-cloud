@@ -27,11 +27,6 @@
 								<el-option v-for="item in this.disk_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
 							</el-select>
 						</el-form-item>
-						<el-form-item label="快照模版" v-if="reinstall_guest.type === 2">
-							<el-select v-model="reinstall_guest.snapshotVolumeId" style="width: 100%" placeholder="请选择系统快照">
-								<el-option v-for="item in this.snapshot_template" :key="item.snapshotVolumeId" :label="item.name" :value="item.snapshotVolumeId" />
-							</el-select>
-						</el-form-item>
 						<el-form-item label="可用磁盘" v-if="reinstall_guest.type === 3">
 							<el-select v-model="reinstall_guest.volumeId" style="width: 100%" placeholder="请选择系统磁盘">
 								<el-option v-for="item in this.attach_volumes" :key="item.volumeId" :label="item.description" :value="item.volumeId" />
@@ -111,7 +106,7 @@
 	</el-card>
 </template>
 <script>
-import { reInstallGuest, getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getSshList } from '@/api/api'
+import { reInstallGuest, getNotAttachVolumeList, getTemplateList, getStorageList, getSshList } from '@/api/api'
 export default {
 	data() {
 		return {
@@ -120,7 +115,6 @@ export default {
 				type: 0,
 				isoTemplateId: '',
 				diskTemplateId: '',
-				snapshotVolumeId: '',
 				volumeId: '',
 				storageId: 0,
 				size: 100,
@@ -138,7 +132,6 @@ export default {
 			attach_volumes: [],
 			disk_template: [],
 			storages: [],
-			snapshot_template: [],
 			sshs: [{ id: 0, name: '无' }]
 		}
 	},
@@ -168,13 +161,6 @@ export default {
 				}
 			})
 		},
-		async load_all_snapshot() {
-			await getSnapshotList().then((res) => {
-				if (res.code == 0) {
-					this.snapshot_template = res.data.filter((v) => v.status == 1)
-				}
-			})
-		},
 		async load_all_ssh() {
 			await getSshList().then((res) => {
 				if (res.code == 0) {
@@ -187,12 +173,10 @@ export default {
 			this.load_all_attach_volumes()
 			this.load_all_template()
 			this.load_all_storage()
-			this.load_all_snapshot()
 			this.load_all_ssh()
 			this.reinstall_guest.guestId = guest.guestId
 			this.reinstall_guest.isoTemplateId = ''
 			this.reinstall_guest.diskTemplateId = ''
-			this.reinstall_guest.snapshotVolumeId = ''
 			this.reinstall_guest.volumeId = ''
 			this.reinstall_guest.type = 0
 			this.reinstall_guest.systemCategory = guest.systemCategory
@@ -205,12 +189,10 @@ export default {
 			switch (this.reinstall_guest.type) {
 				case 0:
 					this.reinstall_guest.diskTemplateId = 0
-					this.reinstall_guest.snapshotVolumeId = 0
 					this.reinstall_guest.volumeId = 0
 					break
 				case 1:
 					this.reinstall_guest.isoTemplateId = 0
-					this.reinstall_guest.snapshotVolumeId = 0
 					this.reinstall_guest.volumeId = 0
 					this.reinstall_guest.size = 0
 					break
@@ -223,7 +205,6 @@ export default {
 				case 3:
 					this.reinstall_guest.isoTemplateId = 0
 					this.reinstall_guest.diskTemplateId = 0
-					this.reinstall_guest.snapshotVolumeId = 0
 					this.reinstall_guest.size = 0
 					break
 			}

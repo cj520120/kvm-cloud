@@ -68,25 +68,7 @@ public interface VolumeOperate {
      */
     VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception;
 
-    /**
-     * 创建磁盘快照
-     *
-     * @param connect
-     * @param request
-     * @return
-     * @throws Exception
-     */
-    VolumeInfo snapshot(Connect connect, VolumeCreateSnapshotRequest request) throws Exception;
 
-    /**
-     * 创建磁盘模版
-     *
-     * @param connect
-     * @param request
-     * @return
-     * @throws Exception
-     */
-    VolumeInfo template(Connect connect, VolumeCreateTemplateRequest request) throws Exception;
 
     /**
      * 下载磁盘

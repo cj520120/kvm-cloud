@@ -8,7 +8,6 @@
 				<el-button @click="show_resize_volume_click(show_volume)" type="primary" size="mini">扩容磁盘</el-button>
 				<el-button @click="show_clone_volume_click(show_volume)" type="primary" size="mini">克隆磁盘</el-button>
 				<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
-				<!-- <el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button> -->
 				<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
 				<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
 			</el-row>
@@ -46,13 +45,11 @@
 
 		<ResizeVolumeComponent ref="ResizeVolumeComponentRef" @onVolumeUpdate="notify_volume_update" />
 		<CreateVolumeTemplateComponent ref="CreateVolumeTemplateComponentRef" />
-		<CreateVolumeSnapshotComponent ref="CreateVolumeSnapshotComponentRef" />
 	</div>
 </template>
 <script>
 import ResizeVolumeComponent from '@/components/ResizeVolumeComponent'
 import CreateVolumeTemplateComponent from '@/components/CreateVolumeTemplateComponent'
-import CreateVolumeSnapshotComponent from '@/components/CreateVolumeSnapshotComponent.vue'
 import CloneVolumeComponent from '@/components/CloneVolumeComponent'
 import MigrateVolumeComponent from '@/components/MigrateVolumeComponent.vue'
 import StorageInfoComponent from '@/components/StorageInfoComponent'
@@ -71,7 +68,7 @@ export default {
 			show_volume_id: 0
 		}
 	},
-	components: { ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent },
+	components: { ResizeVolumeComponent, CreateVolumeTemplateComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent },
 	beforeCreate() {
 		this.$options.components.GuestInfoComponent = require('./GuestInfoComponent.vue').default
 	},
@@ -171,9 +168,6 @@ export default {
 		},
 		show_create_volume_template_click(volume) {
 			this.$refs.CreateVolumeTemplateComponentRef.init(volume)
-		},
-		show_create_volume_snapshot_click(volume) {
-			this.$refs.CreateVolumeSnapshotComponentRef.init(volume)
 		},
 		show_guest_info(guestId) {
 			this.$refs.GuestInfoComponentRef.initGuestId(guestId)

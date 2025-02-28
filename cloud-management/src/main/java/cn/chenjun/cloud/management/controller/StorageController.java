@@ -30,23 +30,30 @@ public class StorageController extends BaseController {
 
     @PutMapping("/api/storage/create")
     public ResultUtil<StorageModel> createStorage(@RequestParam("description") String description,
+                                                  @RequestParam("supportCategory") int supportCategory,
                                                   @RequestParam("type") String type,
                                                   @RequestParam("param") String param) {
-        return this.lockRun(() -> storageService.createStorage(description, type, param));
+        return this.lockRun(() -> storageService.createStorage(supportCategory,description, type, param));
+    }
+
+
+    @PostMapping("/api/storage/support/category/update")
+    public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestParam("storageId") int storageId,  @RequestParam("supportCategory") int supportCategory) {
+        return this.lockRun(() -> storageService.updateStorageSupportCategory(storageId,supportCategory));
     }
 
     @PostMapping("/api/storage/register")
-    public ResultUtil<StorageModel> registerStorage(int storageId) {
+    public ResultUtil<StorageModel> registerStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.registerStorage(storageId));
     }
 
     @PostMapping("/api/storage/maintenance")
-    public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
+    public ResultUtil<StorageModel> maintenanceStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.maintenanceStorage(storageId));
     }
 
     @DeleteMapping("/api/storage/destroy")
-    public ResultUtil<StorageModel> destroyStorage(int storageId) {
+    public ResultUtil<StorageModel> destroyStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.destroyStorage(storageId));
 
     }

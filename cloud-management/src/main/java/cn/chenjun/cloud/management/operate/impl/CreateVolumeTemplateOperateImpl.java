@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.VolumeCreateTemplateRequest;
+import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -37,12 +37,12 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
             }
             HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
-            VolumeCreateTemplateRequest request = VolumeCreateTemplateRequest.builder()
+            VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceVolume(initVolume(storage, volume))
                     .targetVolume(initVolume(targetStorage, targetVolume))
                     .build();
 
-            this.asyncInvoker(host, param, Constant.Command.VOLUME_TEMPLATE, request);
+            this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "原磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
         }

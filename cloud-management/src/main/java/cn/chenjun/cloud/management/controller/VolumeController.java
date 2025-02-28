@@ -3,7 +3,6 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
-import cn.chenjun.cloud.management.model.SnapshotModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.servcie.VolumeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ public class VolumeController extends BaseController {
     public ResultUtil<VolumeModel> createVolume(@RequestParam("description") String description,
                                                 @RequestParam("storageId") int storageId,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        return this.lockRun(() -> this.volumeService.createVolume(description, storageId, 0, 0, volumeSize * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.volumeService.createVolume(description, storageId,  0, volumeSize * 1024 * 1024 * 1024));
     }
 
     @PutMapping("/api/volume/clone")
@@ -76,25 +75,6 @@ public class VolumeController extends BaseController {
         return this.lockRun(() -> this.volumeService.batchDestroyVolume(volumeIds));
     }
 
-    @GetMapping("/api/snapshot/all")
-    public ResultUtil<List<SnapshotModel>> listSnapshot() {
-        return this.lockRun(() -> this.volumeService.listSnapshot());
-    }
 
-    @GetMapping("/api/snapshot/info")
-    public ResultUtil<SnapshotModel> getSnapshotInfo(@RequestParam("snapshotVolumeId") int snapshotVolumeId) {
-        return this.lockRun(() -> this.volumeService.getSnapshotInfo(snapshotVolumeId));
-    }
-
-    @PutMapping("/api/snapshot/create")
-    public ResultUtil<SnapshotModel> createVolumeSnapshot(@RequestParam("volumeId") int volumeId,
-                                                          @RequestParam("snapshotName") String snapshotName) {
-        return this.lockRun(() -> this.volumeService.createVolumeSnapshot(volumeId, snapshotName));
-    }
-
-    @DeleteMapping("/api/snapshot/destroy")
-    public ResultUtil<SnapshotModel> destroySnapshot(@RequestParam("snapshotVolumeId") int snapshotVolumeId) {
-        return this.lockRun(() -> this.volumeService.destroySnapshot(snapshotVolumeId));
-    }
 }
 

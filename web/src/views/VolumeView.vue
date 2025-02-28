@@ -22,10 +22,10 @@
 						</div>
 					</el-row>
 					<el-row>
-						<el-table ref="volumeTable" :v-loading="true" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange">
+						<el-table ref="volumeTable" :v-loading="true" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange" border>
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="volumeId" width="80" />
-							<el-table-column label="名称" prop="description" show-overflow-tooltip />
+							<el-table-column label="名称" prop="description" min-width="100" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ scope.row.type }}</el-tag>
@@ -41,7 +41,7 @@
 									{{ get_volume_display_size(scope.row.allocation) }}
 								</template>
 							</el-table-column>
-							<el-table-column label="挂载机器" prop="allocation" width="120" show-overflow-tooltip>
+							<el-table-column label="挂载机器" prop="allocation" min-width="120" show-overflow-tooltip>
 								<template #default="scope">
 									<el-button type="text" @click="show_guest_info(scope.row.attach.guestId)" v-if="scope.row.attach" :underline="false">{{ scope.row.attach ? scope.row.attach.description : '-' }}</el-button>
 									<span v-if="!scope.row.attach">{{ scope.row.attach ? scope.row.attach.description : '-' }}</span>
@@ -52,7 +52,7 @@
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_volume_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" width="250">
+							<el-table-column label="操作" width="150">
 								<template #default="scope">
 									<el-dropdown size="small" @click="show_volume_info(scope.row)" split-button placement="bottom-end" type="primary" @command="menu_command_click">
 										磁盘管理
@@ -61,7 +61,6 @@
 											<el-dropdown-item :command="{ volume: scope.row, command: 'resize' }" divided>扩容磁盘</el-dropdown-item>
 											<el-dropdown-item :command="{ volume: scope.row, command: 'clone' }">克隆磁盘</el-dropdown-item>
 											<el-dropdown-item :command="{ volume: scope.row, command: 'migrate' }">迁移磁盘</el-dropdown-item>
-											<el-dropdown-item :command="{ volume: scope.row, command: 'snapshote' }" divided>创建快照</el-dropdown-item>
 											<el-dropdown-item :command="{ volume: scope.row, command: 'template' }">创建模版</el-dropdown-item>
 											<el-dropdown-item :command="{ volume: scope.row, command: 'destroy' }" divided>销毁磁盘</el-dropdown-item>
 										</el-dropdown-menu>
@@ -86,7 +85,7 @@
 							<el-form-item label="存储池" prop="type">
 								<el-select v-model="create_volume.storageId" style="width: 100%">
 									<el-option label="随机" :value="0"></el-option>
-									<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
+									<el-option v-for="item in this.storages.filter((v) => v.status === 1 && (v.supportCategory & 2) === 2)" :key="item.storageId" :label="item.description" :value="item.storageId" />
 								</el-select>
 							</el-form-item>
 							<el-form-item label="磁盘大小(GB)" prop="volumeSize">
@@ -108,7 +107,6 @@
 
 				<ResizeVolumeComponent ref="ResizeVolumeComponentRef" @onVolumeUpdate="update_volume_info" />
 				<CreateVolumeTemplateComponent ref="CreateVolumeTemplateComponentRef" />
-				<CreateVolumeSnapshotComponent ref="CreateVolumeSnapshotComponentRef" />
 			</el-main>
 		</el-container>
 	</div>
@@ -120,13 +118,12 @@ import util from '@/api/util'
 import GuestInfoComponent from '@/components/GuestInfoComponent'
 import ResizeVolumeComponent from '@/components/ResizeVolumeComponent'
 import CreateVolumeTemplateComponent from '@/components/CreateVolumeTemplateComponent'
-import CreateVolumeSnapshotComponent from '@/components/CreateVolumeSnapshotComponent.vue'
 import CloneVolumeComponent from '@/components/CloneVolumeComponent'
 import MigrateVolumeComponent from '@/components/MigrateVolumeComponent.vue'
 import VolumeInfoComponent from '@/components/VolumeInfoComponent'
 export default {
 	name: 'volumeView',
-	components: { GuestInfoComponent, ResizeVolumeComponent, CreateVolumeTemplateComponent, CreateVolumeSnapshotComponent, CloneVolumeComponent, MigrateVolumeComponent, VolumeInfoComponent },
+	components: { GuestInfoComponent, ResizeVolumeComponent, CreateVolumeTemplateComponent, CloneVolumeComponent, MigrateVolumeComponent, VolumeInfoComponent },
 	data() {
 		return {
 			data_loading: false,

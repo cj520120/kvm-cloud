@@ -68,9 +68,9 @@ public class Constant {
         public static final String VOLUME_RESIZE = "ResizeVolume";
 
         public static final String VOLUME_MIGRATE = "MigrateVolume";
-        public static final String VOLUME_SNAPSHOT = "SnapshotVolume";
+//        public static final String VOLUME_SNAPSHOT = "SnapshotVolume";
 
-        public static final String VOLUME_TEMPLATE = "TemplateVolume";
+//        public static final String VOLUME_TEMPLATE = "TemplateVolume";
         public static final String VOLUME_DOWNLOAD = "DownloadVolume";
 
         public static final String GUEST_DESTROY = "DeleteGuest";
@@ -139,7 +139,6 @@ public class Constant {
         public static final int UPDATE_NETWORK = 3;
         public static final int UPDATE_HOST = 4;
         public static final int UPDATE_TEMPLATE = 5;
-        public static final int UPDATE_SNAPSHOT = 6;
         public static final int UPDATE_STORAGE = 7;
         public static final int UPDATE_SCHEME = 8;
         public static final int UPDATE_GROUP = 9;

@@ -200,6 +200,13 @@ export const destroyStorage = (data = {}) => {
     method: "DELETE",
   });
 };
+export const updateStorageSupportCategory = (data = {}) => {
+  return axios.request({
+    url: "api/storage/support/category/update",
+    data,
+    method: "POST",
+  });
+};
 
 /** Template */
 export const getTemplateList = (params = {}) => {

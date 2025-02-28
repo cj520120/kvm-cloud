@@ -10,9 +10,9 @@
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_template">创建模版</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="show_table_templates" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="show_table_templates" style="width: 100%" border>
 							<el-table-column label="ID" prop="templateId" width="80" />
-							<el-table-column label="名称" prop="name" show-overflow-tooltip />
+							<el-table-column label="名称" prop="name" min-width="200" show-overflow-tooltip />
 							<el-table-column label="类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ get_template_type(scope.row) }}</el-tag>
@@ -23,7 +23,7 @@
 									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_template_status(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="操作" min-width="200">
+							<el-table-column label="操作" width="400">
 								<template #default="scope">
 									<el-button @click="show_template_script(scope.row)" type="" size="mini" v-if="scope.row.templateType === 2">初始化脚本</el-button>
 									<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>

@@ -10,7 +10,7 @@
 						<el-option label="随机" :value="0"></el-option>
 						<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 					</el-select>
-				</el-form-item> 
+				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="migrate_volume_click">迁移</el-button>
 					<el-button @click="go_back">取消</el-button>
@@ -39,11 +39,11 @@ export default {
 			this.$emit('onVolumeUpdate', volume)
 		},
 		async init(volume) {
-			this.migrate_volume.sourceVolumeId = volume.volumeId 
+			this.migrate_volume.sourceVolumeId = volume.volumeId
 			this.migrate_volume.storageId = volume.storageId
 			await getStorageList().then((res) => {
 				if (res.code == 0) {
-					this.storages = res.data
+					this.storages = res.data.filter((v) => v.status === 1 && (v.supportCategory & 2) === 2)
 				}
 			})
 		},

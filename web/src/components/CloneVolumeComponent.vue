@@ -48,7 +48,7 @@ export default {
 			this.clone_volume.storageId = volume.storageId
 			await getStorageList().then((res) => {
 				if (res.code == 0) {
-					this.storages = res.data
+					this.storages = res.data.filter((v) => v.status === 1 && (v.supportCategory & 2) === 2)
 				}
 			})
 		},

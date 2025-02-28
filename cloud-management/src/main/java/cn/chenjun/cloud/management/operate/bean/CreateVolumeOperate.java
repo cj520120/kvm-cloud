@@ -16,7 +16,6 @@ import lombok.experimental.SuperBuilder;
 public class CreateVolumeOperate extends BaseOperateParam {
     private int volumeId;
     private int templateId;
-    private int snapshotVolumeId;
 
     @Override
     public int getType() {

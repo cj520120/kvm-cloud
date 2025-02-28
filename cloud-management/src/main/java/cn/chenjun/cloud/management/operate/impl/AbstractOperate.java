@@ -61,8 +61,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected SchemeMapper schemeMapper;
     @Autowired
-    protected SnapshotVolumeMapper snapshotVolumeMapper;
-    @Autowired
     protected AllocateService allocateService;
     @Autowired
     protected NotifyService notifyService;
@@ -186,18 +184,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
                 .mountPath(storageEntity.getMountPath())
                 .build();
         return Volume.builder().storage(storage).name(volumeEntity.getName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
-    }
-
-    protected Volume initVolume(StorageEntity storageEntity, SnapshotVolumeEntity volumeEntity) {
-        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
-        }.getType());
-        Storage storage = Storage.builder()
-                .name(storageEntity.getName())
-                .type(storageEntity.getType())
-                .param(storageParam)
-                .mountPath(storageEntity.getMountPath())
-                .build();
-        return Volume.builder().storage(storage).name(volumeEntity.getVolumeName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
     }
 
     protected StorageCreateRequest buildStorageCreateRequest(StorageEntity storage, Map<String, Object> sysconfig) {

@@ -79,7 +79,6 @@
 							<el-select v-model="create_guest.type" style="width: 100%" placeholder="请选择安装方式">
 								<el-option label="ISO镜像" :value="0" />
 								<el-option label="模版安装" :value="1" />
-								<!-- <el-option label="快照安装" :value="2" /> -->
 								<el-option label="现有磁盘" :value="3" />
 							</el-select>
 						</el-form-item>
@@ -111,11 +110,6 @@
 						<el-form-item label="系统模版" v-if="create_guest.type === 1">
 							<el-select v-model="create_guest.diskTemplateId" style="width: 100%" placeholder="请选择模版">
 								<el-option v-for="item in this.disk_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
-							</el-select>
-						</el-form-item>
-						<el-form-item label="快照模版" v-if="create_guest.type === 2">
-							<el-select v-model="create_guest.snapshotVolumeId" style="width: 100%" placeholder="请选择系统快照">
-								<el-option v-for="item in this.snapshot_template" :key="item.snapshotVolumeId" :label="item.name" :value="item.snapshotVolumeId" />
 							</el-select>
 						</el-form-item>
 						<el-form-item label="可用磁盘" v-if="create_guest.type === 3">
@@ -167,7 +161,7 @@
 	</el-card>
 </template>
 <script>
-import { getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getNetworkList, getHostList, getSchemeList, createGuest, getGroupList, getSshList } from '@/api/api'
+import { getNotAttachVolumeList, getTemplateList, getStorageList, getNetworkList, getHostList, getSchemeList, createGuest, getGroupList, getSshList } from '@/api/api'
 export default {
 	data() {
 		return {
@@ -182,7 +176,6 @@ export default {
 				networkDeviceType: 'virtio',
 				isoTemplateId: '',
 				diskTemplateId: '',
-				snapshotVolumeId: '',
 				volumeId: '',
 				storageId: 0,
 				systemCategory: 101,
@@ -200,7 +193,6 @@ export default {
 			attach_volumes: [],
 			disk_template: [],
 			storages: [],
-			snapshot_template: [],
 			schemes: [],
 			hosts: [],
 			networks: [],
@@ -247,7 +239,7 @@ export default {
 		async load_all_storage() {
 			await getStorageList().then((res) => {
 				if (res.code == 0) {
-					this.storages = res.data.filter((v) => v.status == 1)
+					this.storages = res.data.filter((v) => v.status == 1 && (v.supportCategory & 2) === 2)
 				}
 			})
 		},
@@ -255,13 +247,6 @@ export default {
 			await getSshList().then((res) => {
 				if (res.code == 0) {
 					this.sshs = [{ id: 0, name: '无' }, ...res.data]
-				}
-			})
-		},
-		async load_all_snapshot() {
-			await getSnapshotList().then((res) => {
-				if (res.code == 0) {
-					this.snapshot_template = res.data.filter((v) => v.status == 1)
 				}
 			})
 		},
@@ -300,7 +285,6 @@ export default {
 			this.load_all_storage()
 			this.load_all_schemes()
 			this.load_all_networks()
-			this.load_all_snapshot()
 			this.load_all_groups()
 			this.load_all_ssh()
 			if (this.$refs['createForm']) {
@@ -308,7 +292,6 @@ export default {
 			}
 			this.create_guest.isoTemplateId = ''
 			this.create_guest.diskTemplateId = ''
-			this.create_guest.snapshotVolumeId = ''
 			this.create_guest.volumeId = ''
 			this.create_guest.type = 0
 			this.create_guest.groupId = 0
@@ -322,13 +305,11 @@ export default {
 			switch (this.create_guest.type) {
 				case 0:
 					this.create_guest.diskTemplateId = 0
-					this.create_guest.snapshotVolumeId = 0
 					this.create_guest.volumeId = 0
 					this.create_guest.password = ''
 					break
 				case 1:
 					this.create_guest.isoTemplateId = 0
-					this.create_guest.snapshotVolumeId = 0
 					this.create_guest.volumeId = 0
 					break
 				case 2:
@@ -340,7 +321,6 @@ export default {
 				case 3:
 					this.create_guest.isoTemplateId = 0
 					this.create_guest.diskTemplateId = 0
-					this.create_guest.snapshotVolumeId = 0
 					this.create_guest.size = 0
 					break
 			}

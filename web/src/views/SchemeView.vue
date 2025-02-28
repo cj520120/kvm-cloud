@@ -7,9 +7,9 @@
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_crate_scheme_info_click">创建计算方案</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="schemes" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="schemes" style="width: 100%" border>
 							<el-table-column label="ID" prop="schemeId" width="80" />
-							<el-table-column label="名称" prop="name" show-overflow-tooltip />
+							<el-table-column label="名称" prop="name" min-width="200" show-overflow-tooltip />
 							<el-table-column label="CPU" prop="cpu" width="120" />
 							<el-table-column label="内存" prop="memory" width="200">
 								<template #default="scope">

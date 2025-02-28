@@ -25,6 +25,7 @@ public class StorageEntity {
     public static final String STORAGE_NAME = "storage_name";
     public static final String STORAGE_TYPE = "storage_type";
     public static final String STORAGE_PARM = "storage_parm";
+    public static final String STORAGE_SUPPORT_CATEGORY = "storage_support_category";
     public static final String STORAGE_MOUNT_PATH = "storage_mount_path";
     public static final String STORAGE_CAPACITY = "storage_capacity";
     public static final String STORAGE_AVAILABLE = "storage_available";
@@ -51,6 +52,8 @@ public class StorageEntity {
     private Long available;
     @TableField(STORAGE_ALLOCATION)
     private Long allocation;
+    @TableField(STORAGE_SUPPORT_CATEGORY)
+    private Integer supportCategory;
     @TableField(STORAGE_STATUS)
     private Integer status;
     @TableField(CREATE_TIME)

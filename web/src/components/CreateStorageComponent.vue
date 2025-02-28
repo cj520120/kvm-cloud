@@ -39,6 +39,12 @@
 				<el-form-item label="Ceph地址" prop="uri" v-if="this.create_storage.type === 'ceph-rbd'">
 					<el-input v-model="create_storage.uri"></el-input>
 				</el-form-item>
+				<el-form-item label="允许范围">
+					<el-checkbox-group v-model="storage_support_category_select">
+						<el-checkbox :label="1">模版</el-checkbox>
+						<el-checkbox :label="2">磁盘</el-checkbox>
+					</el-checkbox-group>
+				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="create_storage_click">立即创建</el-button>
 					<el-button @click="on_back_click">取消</el-button>
@@ -52,7 +58,9 @@ import { createStorage } from '@/api/api'
 export default {
 	data() {
 		return {
+			storage_support_category_select: [1, 2],
 			create_storage: {
+				supportCategory: 0,
 				description: '',
 				type: 'nfs',
 				param: '',
@@ -78,10 +86,15 @@ export default {
 			}
 		},
 		create_storage_click() {
+			let supportCategory = 0
+			this.storage_support_category_select.forEach((val) => {
+				supportCategory |= val
+			})
 			let data = {
 				description: this.create_storage.description,
 				name: this.create_storage.name,
 				type: this.create_storage.type,
+				supportCategory: supportCategory,
 				param: '{}'
 			}
 			if (this.create_storage.type === 'nfs') {

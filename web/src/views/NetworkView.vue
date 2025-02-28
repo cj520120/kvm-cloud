@@ -7,16 +7,16 @@
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_network">创建网络</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="networks" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="networks" style="width: 100%" border>
 							<el-table-column label="ID" prop="networkId" width="80" />
-							<el-table-column label="名称" prop="name" width="120" show-overflow-tooltip />
-							<el-table-column label="桥接网卡" prop="bridge" width="120" />
-							<el-table-column label="桥接方式" prop="bridgeType" width="150">
+							<el-table-column label="名称" prop="name" min-width="100" show-overflow-tooltip />
+							<el-table-column label="桥接网卡" prop="bridge" min-width="100" show-overflow-tooltip />
+							<el-table-column label="桥接方式" prop="bridgeType" width="120">
 								<template #default="scope">
 									<el-tag>{{ get_bridge_type(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="子网" prop="subnet" width="150">
+							<el-table-column label="子网" prop="subnet" min-width="150">
 								<template #default="scope">{{ scope.row.subnet }}/{{ netmask2CIDR(scope.row.mask) }}</template>
 							</el-table-column>
 							<el-table-column label="网络类型" prop="type" width="100">
@@ -24,7 +24,7 @@
 									<el-tag>{{ get_network_type(scope.row) }}</el-tag>
 								</template>
 							</el-table-column>
-							<el-table-column label="状态" prop="status" width="100">
+							<el-table-column label="状态" prop="status" width="80">
 								<template #default="scope">
 									<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_network_status(scope.row) }}</el-tag>
 								</template>

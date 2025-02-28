@@ -27,6 +27,11 @@ public class Constant {
         public static final int ERROR = 4;
     }
 
+    public static class StorageSupportCategory {
+        public static final int TEMPLATE = 1 << 0;
+        public static final int VOLUME = 1 << 1;
+    }
+
     public static class SnapshotStatus {
         public static final int CREATING = 0;
         public static final int READY = 1;

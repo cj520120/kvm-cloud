@@ -60,8 +60,8 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
 
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/route/dnsmasq.tpl")), StandardCharsets.UTF_8);
 
-        Map<String, Object> map = new HashMap<>(0);
-        map.put("__SYS__", sysconfig);
+
+        Map<String, Object> map = new HashMap<>();
         map.put("interface", "eth" + defaultGuestNetwork.getDeviceId());
         map.put("ip", defaultGuestNetwork.getIp());
         map.put("vip", component.getComponentVip());
@@ -78,6 +78,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
             return dhcp;
         }).collect(Collectors.toList());
         map.put("dhcpList", dhcpList);
+        map.put("__SYS__", sysconfig);
         String dnsmasqConfig = TemplateUtil.create().render(config, map);
         //下载dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "dnsmasq"}).build())).build());

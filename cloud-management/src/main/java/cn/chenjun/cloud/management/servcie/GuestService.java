@@ -126,7 +126,7 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
-                                              int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+                                              int isoTemplateId, int diskTemplateId,  int volumeId,
                                               int storageId, Map<String, String> metaData, Map<String, String> userData, long size) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
@@ -137,7 +137,7 @@ public class GuestService extends AbstractService {
         if (StringUtils.isEmpty(networkDeviceType)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择网卡驱动");
         }
-        if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
+        if (isoTemplateId <= 0 && diskTemplateId <= 0  && volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
         }
         if (schemeId <= 0) {
@@ -177,13 +177,13 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
-        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            createGuest(hostId, diskTemplateId, snapshotVolumeId, volumeType, metaData, userData, size, uid, guest, storage);
+            createGuest(hostId, diskTemplateId,   volumeType, metaData, userData, size, uid, guest, storage);
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
@@ -209,12 +209,11 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    private void createGuest(int hostId, int diskTemplateId, int snapshotVolumeId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, String uid, GuestEntity guest, StorageEntity storage) {
+    private void createGuest(int hostId, int diskTemplateId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, String uid, GuestEntity guest, StorageEntity storage) {
         GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, uid, guest, storage);
         this.initGuestMetaData(guest.getGuestId(), metaData, userData);
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
-                .snapshotVolumeId(snapshotVolumeId)
                 .templateId(diskTemplateId)
                 .volumeId(guestDisk.getVolumeId())
                 .start(true)
@@ -254,10 +253,10 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, int bootstrapType, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId, int snapshotVolumeId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, int bootstrapType, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId,  int volumeId,
                                             int storageId, long size) {
 
-        if (isoTemplateId <= 0 && diskTemplateId <= 0 && snapshotVolumeId <= 0 && volumeId <= 0) {
+        if (isoTemplateId <= 0 && diskTemplateId <= 0   && volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -271,7 +270,7 @@ public class GuestService extends AbstractService {
         guest.setBootstrapType(bootstrapType);
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
-        StorageEntity storage = this.allocateService.allocateStorage(storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -282,7 +281,6 @@ public class GuestService extends AbstractService {
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
-                    .snapshotVolumeId(snapshotVolumeId)
                     .templateId(diskTemplateId)
                     .volumeId(guestDisk.getVolumeId())
                     .taskId(uid)

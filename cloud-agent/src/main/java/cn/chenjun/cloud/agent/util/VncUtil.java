@@ -29,16 +29,4 @@ public final class VncUtil {
             return Integer.parseInt(node.attribute("port").getValue());
         }
     }
-
-    public static String getVncPassword(String xml) throws DocumentException, SAXException {
-        try (StringReader sr = new StringReader(xml)) {
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            String path = "/domain/devices/graphics";
-            Element node = (Element) doc.selectSingleNode(path);
-            Attribute attribute = node.attribute("passwd");
-            return attribute == null ? "" : attribute.getStringValue();
-        }
-    }
 }

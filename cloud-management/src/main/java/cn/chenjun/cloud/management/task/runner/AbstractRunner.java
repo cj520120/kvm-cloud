@@ -39,7 +39,7 @@ public abstract class AbstractRunner {
                     }
                 }
                 try {
-                    log.info("开始执行周期任务: {}", this.getName());
+                    log.info("开始执行周期任务: {}，当前任务周期 {}s", this.getName(),this.getPeriodSeconds());
                     this.dispatch();
                 } catch (Exception err) {
                     log.info("执行周期任务失败: {}", this.getName(), err);

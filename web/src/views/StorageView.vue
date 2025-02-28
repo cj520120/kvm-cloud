@@ -3,22 +3,26 @@
 		<el-container>
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
-					<el-row slot="header" class="clearfix" style="height: 20px">
+					<el-row slot="header" class="clearfix" style="height: 20px" border>
 						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_storage">创建存储池</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="storages" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="storages" style="width: 100%" border>
 							<el-table-column label="ID" prop="storageId" width="80" />
-							<el-table-column label="名称" prop="description" show-overflow-tooltip />
-							<el-table-column label="类型" prop="type" width="120" />
-							<el-table-column label="容量" prop="capacity" width="120">
+							<el-table-column label="名称" prop="description" min-width="100" show-overflow-tooltip />
+
+							<el-table-column label="允许范围" prop="supportCategory" min-width="120" show-overflow-tooltip>
+								<template #default="scope"><div v-html="get_support_category_html(scope.row.supportCategory)" /></template>
+							</el-table-column>
+							<el-table-column label="类型" prop="type" width="100" />
+							<el-table-column label="容量" prop="capacity" min-width="120">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已用:' + get_volume_display_size(scope.row.allocation) + ' / 总共:' + get_volume_display_size(scope.row.capacity)" placement="top">
 										<el-progress color="#67C23A" :percentage="scope.row.capacity <= 0 ? 0 : Math.floor((scope.row.allocation * 100) / scope.row.capacity)"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							<el-table-column label="状态" prop="status" width="110">
+							<el-table-column label="状态" prop="status" min-width="110">
 								<template #default="scope">
 									<el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ get_storage_status(scope.row) }}</el-tag>
 								</template>

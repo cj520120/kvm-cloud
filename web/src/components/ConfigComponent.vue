@@ -12,11 +12,11 @@
 				</el-form>
 			</el-row>
 			<el-row>
-				<el-table :v-loading="data_loading_visable" :data="show_filter_config_list" style="width: 100%">
-					<el-table-column label="名称" prop="key" width="500" show-overflow-tooltip />
-					<el-table-column label="描述" prop="description" width="500" show-overflow-tooltip />
-					<el-table-column label="值" prop="value" width="300" show-overflow-tooltip />
-					<el-table-column label="操作" min-width="300">
+				<el-table :v-loading="data_loading_visable" :data="show_filter_config_list" style="width: 100%" border>
+					<el-table-column label="名称" prop="key" min-width="200" show-overflow-tooltip />
+					<el-table-column label="描述" prop="description" min-width="200" show-overflow-tooltip />
+					<el-table-column label="值" prop="value" min-width="200" show-overflow-tooltip />
+					<el-table-column label="操作" width="300">
 						<template #default="scope">
 							<el-button @click="show_config_info_dialog(scope.row)" type="" size="mini">查看</el-button>
 							<el-button @click="show_edit_dialog(scope.row)" type="" size="mini">编辑</el-button>

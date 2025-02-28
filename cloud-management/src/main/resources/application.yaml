@@ -3,7 +3,7 @@ app:
   manager-uri: http://192.168.2.193:8080/
   work:
     thread:
-      size: 1
+      size: 8
 server:
   port: 8080
   servlet:
@@ -28,17 +28,10 @@ spring:
       max-open-prepared-statements: 32
       max-pool-prepared-statement-per-connection-size: 32
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-
     password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
     username: root
-  servlet:
-    multipart:
-      enabled: true
-      file-size-threshold: 0
-      max-file-size: 100GB
-      max-request-size: 100GB
   redis:
     redisson:
       config: |

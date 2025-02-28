@@ -5,6 +5,7 @@
 		</el-row>
 		<el-row style="text-align: left; margin: 20px 0">
 			<el-button @click="register_storage(show_storage)" type="success" size="mini">重新注册</el-button>
+			<el-button @click="show_modify_storage_support_category_dialog(show_storage)" type="success" size="mini">修改支持范围</el-button>
 			<el-button @click="pasue_storage(show_storage)" type="warning" size="mini" v-if="show_storage.status !== 3">开始维护</el-button>
 			<el-button @click="destroy_storage(show_storage)" type="danger" size="mini">销毁存储池</el-button>
 		</el-row>
@@ -13,6 +14,7 @@
 				<el-descriptions-item label="ID">{{ show_storage.storageId }}</el-descriptions-item>
 				<el-descriptions-item label="存储池名">{{ show_storage.description }}</el-descriptions-item>
 				<el-descriptions-item label="存储池类型">{{ show_storage.type }}</el-descriptions-item>
+				<el-descriptions-item label="允许范围"><div v-html="get_support_category_html(show_storage.supportCategory)" /></el-descriptions-item>
 				<el-descriptions-item label="挂载路径" v-if="show_storage.type === 'nfs'">{{ show_storage.mountPath }}</el-descriptions-item>
 				<el-descriptions-item label="NFS路径" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
 				<el-descriptions-item label="NFS地址" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
@@ -32,19 +34,36 @@
 				</el-descriptions-item>
 			</el-descriptions>
 		</el-row>
+
+		<el-dialog title="修改存储支持范围" :visible.sync="update_dialog_visable" width="30%">
+			<el-form label-width="100px" class="demo-ruleForm">
+				<el-form-item label="可选范围" prop="value">
+					<el-checkbox-group v-model="storage_support_category_select">
+						<el-checkbox :label="1">模版</el-checkbox>
+						<el-checkbox :label="2">磁盘</el-checkbox>
+					</el-checkbox-group>
+				</el-form-item>
+			</el-form>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="update_dialog_visable = false">取 消</el-button>
+				<el-button type="primary" @click="modify_storage_support_category_click">确 定</el-button>
+			</span>
+		</el-dialog>
 	</el-card>
 </template>
 <script>
 import Notify from '@/api/notify'
 import util from '@/api/util'
-import { destroyStorage, getStorageInfo, pauseStorage, registerStorage } from '@/api/api'
+import { destroyStorage, getStorageInfo, pauseStorage, registerStorage, updateStorageSupportCategory } from '@/api/api'
 export default {
 	name: 'StorageInfoComponent',
 	data() {
 		return {
 			show_storage_id: 0,
+			update_dialog_visable: false,
 			storage_loading: false,
-			show_storage: {}
+			show_storage: {},
+			storage_support_category_select: []
 		}
 	},
 	mixins: [Notify, util],
@@ -93,6 +112,7 @@ export default {
 		async init_storage(storage) {
 			this.show_storage = storage
 			this.show_storage_id = storage.storageId
+
 			this.storage_loading = false
 		},
 		async init(storageId) {
@@ -169,6 +189,35 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		show_modify_storage_support_category_dialog(storage) {
+			this.storage_support_category_select = []
+			if ((storage.supportCategory & 1) == 1) {
+				this.storage_support_category_select.push(1)
+			}
+			if ((storage.supportCategory & 2) == 2) {
+				this.storage_support_category_select.push(2)
+			}
+			console.log(this.storage_support_category_select)
+			this.update_dialog_visable = true
+		},
+		modify_storage_support_category_click() {
+			let supportCategory = 0
+			this.storage_support_category_select.forEach((val) => {
+				supportCategory |= val
+			})
+			updateStorageSupportCategory({ storageId: this.show_storage.storageId, supportCategory: supportCategory }).then((res) => {
+				if (res.code === 0) {
+					this.show_storage = res.data
+					this.update_dialog_visable = false
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: `修改支持范围失败:${res.message}`
+					})
+				}
+			})
+			console.log(supportCategory)
 		},
 		dispatch_notify_message(notify) {
 			if (notify.type === 7 && this.show_storage.storageId == notify.id) {

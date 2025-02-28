@@ -57,8 +57,8 @@ public class ConfigService {
         initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND, 30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null);
         initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND, 60, "宿主机存储池检测间隔(秒)", Constant.ConfigValueType.INT, null);
         initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, 600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND, 10, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, 30, "任务过期时间(秒)", Constant.ConfigValueType.INT, null);
+        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null);
+        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, 120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null);
 
 
         initDefaultConfig(Constant.ConfigKey.VM_MEMORY_HUGE_PAGES_ENABLE, Constant.Enable.NO, "是否启用大页内存", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO));

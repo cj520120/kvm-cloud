@@ -32,10 +32,10 @@
 						</el-form>
 					</el-row>
 					<el-row>
-						<el-table ref="guestTable" :v-loading="data_loading" :data="show_table_guests" style="width: 100%" @selection-change="handleSelectionChange">
+						<el-table ref="guestTable" :v-loading="data_loading" :data="show_table_guests" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="guestId" width="80" />
-							<el-table-column label="实例名" prop="name" width="180" show-overflow-tooltip />
+							<el-table-column label="实例名" prop="name" min-width="180" show-overflow-tooltip />
 							<el-table-column label="系统" prop="systemCategory" width="100">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="get_system_category_name(scope.row)" placement="bottom">
@@ -43,7 +43,7 @@
 									</el-tooltip>
 								</template>
 							</el-table-column>
-							<el-table-column label="名称" prop="description" width="180" />
+							<el-table-column label="名称" prop="description" min-width="180" show-overflow-tooltip />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
 							<el-table-column label="固件" width="100">
 								<template #default="scope">

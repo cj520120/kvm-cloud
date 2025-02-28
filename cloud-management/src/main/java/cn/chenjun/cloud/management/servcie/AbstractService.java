@@ -33,8 +33,6 @@ public abstract class AbstractService {
     @Autowired
     protected VolumeMapper volumeMapper;
     @Autowired
-    protected SnapshotVolumeMapper snapshotVolumeMapper;
-    @Autowired
     protected GuestDiskMapper guestDiskMapper;
     @Autowired
     protected NetworkMapper networkMapper;
@@ -152,10 +150,6 @@ public abstract class AbstractService {
         return model;
     }
 
-    protected SnapshotModel initSnapshot(SnapshotVolumeEntity volume) {
-
-        return new BeanConverter<>(SnapshotModel.class).convert(volume, null);
-    }
 
     protected ComponentModel initComponent(ComponentEntity entity) {
 

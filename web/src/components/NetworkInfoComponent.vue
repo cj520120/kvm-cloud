@@ -43,64 +43,58 @@
 						<span>系统组件</span>
 						<el-button style="float: right; padding: 3px 0" @click="dialog_create_network_component_visible = true" type="text">添加组件</el-button>
 					</div>
-					<el-row class="table_tr" type="flex">
-						<el-col style="width: 80px">&nbsp;</el-col>
-						<el-col style="width: 150px">ID</el-col>
-						<el-col style="width: 200px">类型</el-col>
-						<el-col style="width: 200px">VIP</el-col>
-						<el-col style="width: 200px">Base VIP</el-col>
-						<el-col style="width: 200px">Slave 数量</el-col>
-						<el-col style="width: 300px">状态</el-col>
-						<el-col style="width: 100%">操作</el-col>
-					</el-row>
-					<div v-for="(component, index) in components" :key="component.componentId">
-						<el-row class="table_td" type="flex">
-							<el-col style="width: 80px; text-align: center"><i :class="`${component.is_show ? 'el-icon-arrow-down' : 'el-icon-arrow-right'}`" style="cursor: pointer" @click="change_componet_show(index, component)" /></el-col>
-							<el-col style="width: 150px">{{ component.componentId }}</el-col>
-							<el-col style="width: 200px">
-								<el-tag size="small">{{ get_component_type(component.componentType) }}</el-tag>
-							</el-col>
-							<el-col style="width: 200px">{{ component.componentVip }}</el-col>
-							<el-col style="width: 200px">{{ component.basicComponentVip }}</el-col>
-							<el-col style="width: 200px">{{ component.componentSlaveNumber }}</el-col>
-							<el-col style="width: 300px">
-								<span v-for="guest in component.guests" :key="guest.guestId">
+					<el-table :data="components" style="width: 100%" size="small" border>
+						<el-table-column type="expand">
+							<template #default="scoped">
+								<el-card class="box-card">
+									<div slot="header" class="clearfix">
+										<span>系统虚拟机列表</span>
+
+										<el-button style="float: right; padding: 3px 0" size="mini" type="text" v-if="scoped.row.componentType === 2" @click="show_network_component_nat_list(scoped.row)">Nat转发管理</el-button>
+										<el-button style="float: right; padding: 3px 0" size="mini" type="text" v-if="scoped.row.componentType === 1" @click="show_network_dns_list()">Dns管理</el-button>
+									</div>
+									<el-table :data="scoped.row.guests" size="small" border style="width: 100%">
+										<el-table-column label="ID" prop="guestId" width="100" />
+										<el-table-column label="实例名" prop="name" min-width="150" />
+										<el-table-column label="名称" prop="description" min-width="150" />
+										<el-table-column label="IP地址" prop="guestIp" min-width="150" />
+										<el-table-column label="状态" prop="status" min-width="100">
+											<template #default="guest_scope">
+												<el-tag :type="guest_scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(guest_scope.row) }}</el-tag>
+											</template>
+										</el-table-column>
+										<el-table-column label="操作" min-width="100">
+											<template #default="guest_scope">
+												<el-button type="text" @click="go_guest_info(guest_scope.row.guestId)">详情</el-button>
+											</template>
+										</el-table-column>
+									</el-table>
+								</el-card>
+							</template>
+						</el-table-column>
+						<el-table-column label="ID" prop="componentId" width="80"></el-table-column>
+						<el-table-column label="类型" prop="guestId" width="80">
+							<template #default="scoped">
+								<el-tag size="small">{{ get_component_type(scoped.row.componentType) }}</el-tag>
+							</template>
+						</el-table-column>
+						<el-table-column label="VIP" prop="componentVip" min-width="200" />
+						<el-table-column label="Base VIP" prop="basicComponentVip" min-width="200" />
+						<el-table-column label="Slave 数量" prop="componentSlaveNumber" min-width="80" />
+						<el-table-column label="状态" prop="guestIp" min-width="80">
+							<template #default="scoped">
+								<span v-for="guest in scoped.row.guests" :key="guest.guestId">
 									<i :style="guest.status === 2 ? 'color: #67c23a' : 'color:#F56C6C'" :class="guest.status === 2 ? 'el-icon-success' : 'el-icon-error'" />
 								</span>
-							</el-col>
-							<el-col style="width: 100%">
-								<el-button size="mini" type="primary" plain @click="show_update_component_slave_number(component)">修改Slave数量</el-button>
-								<el-button size="mini" type="danger" plain v-if="component.componentType != 1" @click="destroy_network_component(component)">删除</el-button>
-							</el-col>
-						</el-row>
-						<div class="component_card" v-show="component.is_show">
-							<div>
-								<div class="header">
-									<span>系统虚拟机</span>
-									<div style="float: right; padding: 3px 0">
-										<el-button size="mini" type="text" v-if="component.componentType === 2" @click="show_network_component_nat_list(component)">Nat转发管理</el-button>
-										<el-button size="mini" type="text" v-if="component.componentType === 1" @click="show_network_dns_list()">Dns管理</el-button>
-									</div>
-								</div>
-								<el-table :data="component.guests" style="width: 100%" size="small">
-									<el-table-column label="ID" prop="guestId" width="80" />
-									<el-table-column label="实例名" prop="name" width="200" />
-									<el-table-column label="名称" prop="description" width="200" />
-									<el-table-column label="IP地址" prop="guestIp" width="150" />
-									<el-table-column label="状态" prop="status" width="100">
-										<template #default="scope">
-											<el-tag :type="scope.row.status === 2 ? 'success' : 'danger'">{{ get_guest_status(scope.row) }}</el-tag>
-										</template>
-									</el-table-column>
-									<el-table-column label="操作">
-										<template #default="scope">
-											<el-button type="text" @click="go_guest_info(scope.row.guestId)">详情</el-button>
-										</template>
-									</el-table-column>
-								</el-table>
-							</div>
-						</div>
-					</div>
+							</template>
+						</el-table-column>
+						<el-table-column label="操作" prop="guestIp" min-width="200">
+							<template #default="scoped">
+								<el-button size="mini" type="primary" plain @click="show_update_component_slave_number(scoped.row)">修改Slave数量</el-button>
+								<el-button size="mini" type="danger" plain v-if="scoped.row.componentType != 1" @click="destroy_network_component(scoped.row)">删除</el-button>
+							</template>
+						</el-table-column>
+					</el-table>
 				</el-card>
 			</el-row>
 		</el-card>
@@ -276,15 +270,9 @@ export default {
 	},
 	computed: {},
 	methods: {
-		print_scope(s) {
-			console.log(s)
-		},
 		on_back_click() {
 			this.show_network_id = 0
 			this.$emit('back')
-		},
-		change_componet_show(index, component) {
-			this.$set(this.components, index, { ...component, is_show: !component.is_show })
 		},
 		on_notify_update_networkt_info(network) {
 			this.refresh_network(network)
@@ -550,7 +538,6 @@ export default {
 				type: 'warning'
 			})
 				.then(() => {
-					console.log(natId)
 					destroyNetworkComponentNat({ natId: natId }).then((res) => {
 						if (res.code === 0) {
 							let findIndex = this.network_component_nat_list.findIndex((v) => v.natId === natId)

@@ -8,9 +8,9 @@
 						<el-button size="mini" type="primary" icon="el-icon-upload" @click="show_import_ssh_click">导入密钥</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="sshs" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="sshs" style="width: 100%" border>
 							<el-table-column label="ID" prop="id" width="80" />
-							<el-table-column label="名称" prop="name" show-overflow-tooltip />
+							<el-table-column label="名称" prop="name" width="300" show-overflow-tooltip />
 							<el-table-column label="操作" min-width="380">
 								<template #default="scope">
 									<el-button @click="download_sshAuthorized_privateKey(scope.row)" type="primary" size="mini">下载私钥</el-button>
