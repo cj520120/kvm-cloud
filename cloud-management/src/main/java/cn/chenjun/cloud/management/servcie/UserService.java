@@ -4,8 +4,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
-import cn.chenjun.cloud.management.config.Oauth2Config;
 import cn.chenjun.cloud.management.data.entity.UserInfoEntity;
 import cn.chenjun.cloud.management.data.mapper.UserInfoMapper;
 import cn.chenjun.cloud.management.model.LoginSignatureModel;
@@ -27,6 +25,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -34,14 +34,11 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserService extends AbstractService {
-    private static final int HOUR = 1000 * 60 * 60;
     @Autowired
     private UserInfoMapper loginInfoMapper;
 
     @Autowired
-    private Oauth2Config oauth2Config;
-    @Autowired
-    private ApplicationConfig config;
+    private ConfigService configService;
 
 
     public ResultUtil<TokenModel> login(String loginName, String password, String nonce) {
@@ -80,12 +77,13 @@ public class UserService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "token不能为空");
         }
         try {
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(this.config.getJwtPassword())).withIssuer(this.config.getJwtIssuer()).build();
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256((String) this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_PASSWORD))).withIssuer((String) this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_ISSUER)).build();
             DecodedJWT jwt = jwtVerifier.verify(token);
             LoginUserModel loginUser = GsonBuilderUtil.create().fromJson(jwt.getClaim("User").asString(), LoginUserModel.class);
-            if (this.oauth2Config.isEnable() && !Constant.UserType.OAUTH2.equals(loginUser.getType())) {
+            boolean isEnableOauth2 = Objects.equals(this.configService.getConfig(Constant.ConfigKey.OAUTH2_ENABLE), Constant.Enable.YES);
+            if (isEnableOauth2 && !Constant.UserType.OAUTH2.equals(loginUser.getType())) {
                 throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "Token过期");
-            } else if (!this.oauth2Config.isEnable() && !Constant.UserType.LOCAL.equals(loginUser.getType())) {
+            } else if (!isEnableOauth2 && !Constant.UserType.LOCAL.equals(loginUser.getType())) {
                 throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "Token过期");
             }
             return ResultUtil.success(loginUser);
@@ -189,15 +187,15 @@ public class UserService extends AbstractService {
     }
 
     private TokenModel getToken(String userType, Object userId) {
-        Date expire = new Date(System.currentTimeMillis() + HOUR);
-
+        int expireMinutes = this.configService.getConfig(Constant.ConfigKey.LOGIN_JWT_EXPIRE_MINUTES);
+        Date expire = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(expireMinutes));
         LoginUserModel user = LoginUserModel.builder().id(userId).type(userType).build();
         String token = JWT.create()
-                .withIssuer(this.config.getJwtIssuer())
+                .withIssuer(this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_ISSUER))
                 .withIssuedAt(new Date())
                 .withClaim("User", GsonBuilderUtil.create().toJson(user))
                 .withExpiresAt(expire)
-                .sign(Algorithm.HMAC256(this.config.getJwtPassword()));
+                .sign(Algorithm.HMAC256((String) this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_PASSWORD)));
 
 
         return TokenModel.builder().expire(expire).token(token).build();

@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -38,14 +39,11 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.SnapshotStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
-                    .sourceStorage(storage.getName())
-                    .sourceName(volume.getName())
-                    .targetStorage(targetStorage.getName())
-                    .targetName(targetVolume.getVolumeName())
-                    .targetType(targetVolume.getType())
+                    .sourceVolume(initVolume(storage, volume))
+                    .targetVolume(initVolume(targetStorage, targetVolume))
                     .build();
 
             this.asyncInvoker(host, param, Constant.Command.VOLUME_TEMPLATE, request);
@@ -82,9 +80,9 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
             this.snapshotVolumeMapper.updateById(targetVolume);
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSnapshotVolumeId()).type(Constant.NotifyType.UPDATE_SNAPSHOT).build());
 
     }
 

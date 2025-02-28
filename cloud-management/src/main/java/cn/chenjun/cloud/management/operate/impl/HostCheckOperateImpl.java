@@ -20,7 +20,6 @@ import java.lang.reflect.Type;
 public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, ResultUtil<HostInfo>> {
 
 
-
     @Override
     public void operate(HostCheckOperate param) {
 
@@ -41,6 +40,8 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
         HostEntity updateHost = HostEntity.builder().hostId(param.getHostId()).build();
         if (hostInfo != null) {
             updateHost.setHostName(hostInfo.getHostName());
+            updateHost.setOsName(hostInfo.getName());
+            updateHost.setOsVersion(hostInfo.getOsVersion());
             updateHost.setTotalCpu(hostInfo.getCpu());
             updateHost.setTotalMemory(hostInfo.getMemory());
             updateHost.setEmulator(hostInfo.getEmulator());
@@ -48,6 +49,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             updateHost.setSockets(hostInfo.getSockets());
             updateHost.setThreads(hostInfo.getThreads());
             updateHost.setArch(hostInfo.getArch());
+            updateHost.setVendor(hostInfo.getVendor());
             updateHost.setHypervisor(hostInfo.getHypervisor());
             updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
         } else {

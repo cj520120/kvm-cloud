@@ -22,7 +22,7 @@ public class UpdateStorageProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<StorageModel> resultUtil = this.storageService.getStorageInfo(msg.getId());
-        NotifyData<ResultUtil<StorageModel>> sendMsg = NotifyData.<ResultUtil<StorageModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_STORAGE).data(resultUtil).build();
+        NotifyData<ResultUtil<StorageModel>> sendMsg = NotifyData.<ResultUtil<StorageModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_STORAGE).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

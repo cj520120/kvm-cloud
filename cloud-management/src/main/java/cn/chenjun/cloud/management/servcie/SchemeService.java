@@ -38,8 +38,7 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SchemeModel> createScheme(String name, int cpu, long memory, int speed, int sockets, int cores, int threads) {
+    private static void verifySchemeParam(String name, int cpu, long memory, int share, int sockets, int cores, int threads) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入架构名称");
         }
@@ -49,7 +48,7 @@ public class SchemeService extends AbstractService {
         if (memory <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入内存");
         }
-        if (speed < 0) {
+        if (share < 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的配额");
         }
         if (sockets < 0) {
@@ -61,57 +60,45 @@ public class SchemeService extends AbstractService {
         if (threads < 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的Threads");
         }
-        SchemeEntity entity = SchemeEntity.builder().name(name).cpu(cpu).memory(memory).speed(speed).sockets(sockets).cores(cores).threads(threads).build();
+        int coreCpu = sockets * cores * threads;
+        if (coreCpu != 0 && cpu != coreCpu) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "Cpu架构设置不正确,sockets、core、threads 参数相乘需要等于Cpu数量");
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<SchemeModel> createScheme(String name, int cpu, long memory, int share, int sockets, int cores, int threads) {
+        verifySchemeParam(name, cpu, memory, share, sockets, cores, threads);
+        SchemeEntity entity = SchemeEntity.builder().name(name).cpu(cpu).memory(memory).share(share).sockets(sockets).cores(cores).threads(threads).build();
         this.schemeMapper.insert(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
 
         return ResultUtil.success(this.initScheme(entity));
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SchemeModel> updateScheme(int schemeId, String name, int cpu, long memory, int speed, int sockets, int cores, int threads) {
-        if (StringUtils.isEmpty(name)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入架构名称");
-        }
-        if (cpu <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入CPU");
-        }
-        if (memory <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入内存");
-        }
-        if (speed < 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的配额");
-        }
-        if (sockets < 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的Sockets");
-        }
-        if (cores < 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的Cores");
-        }
-        if (threads < 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的Threads");
-        }
+    public ResultUtil<SchemeModel> updateScheme(int schemeId, String name, int cpu, long memory, int share, int sockets, int cores, int threads) {
+        verifySchemeParam(name, cpu, memory, share, sockets, cores, threads);
         SchemeEntity entity = this.schemeMapper.selectById(schemeId);
         if (entity == null) {
             throw new CodeException(ErrorCode.SCHEME_NOT_FOUND, "计算方案不存在");
         }
-
         entity.setName(name);
         entity.setCpu(cpu);
         entity.setMemory(memory);
-        entity.setSpeed(speed);
+        entity.setShare(share);
         entity.setSockets(sockets);
         entity.setCores(cores);
         entity.setThreads(threads);
         this.schemeMapper.updateById(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return ResultUtil.success(this.initScheme(entity));
     }
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyScheme(int schemeId) {
         this.schemeMapper.deleteById(schemeId);
-        this.eventService.publish(NotifyData.<Void>builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return ResultUtil.success();
     }
 }

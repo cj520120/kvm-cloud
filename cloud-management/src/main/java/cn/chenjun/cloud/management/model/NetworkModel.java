@@ -17,6 +17,7 @@ import java.util.Date;
 public class NetworkModel {
 
     private int networkId;
+    private String poolId;
     private String name;
     private String startIp;
     private String endIp;
@@ -25,6 +26,7 @@ public class NetworkModel {
     private String subnet;
     private String broadcast;
     private String bridge;
+    private int bridgeType;
     private String dns;
     private String domain;
     private int type;

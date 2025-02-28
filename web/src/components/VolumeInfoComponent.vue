@@ -8,7 +8,7 @@
 				<el-button @click="show_resize_volume_click(show_volume)" type="primary" size="mini">扩容磁盘</el-button>
 				<el-button @click="show_clone_volume_click(show_volume)" type="primary" size="mini">克隆磁盘</el-button>
 				<el-button @click="show_migrate_volume_click(show_volume)" type="primary" size="mini">迁移磁盘</el-button>
-				<el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button>
+				<!-- <el-button @click="show_create_volume_snapshot_click(show_volume)" type="primary" size="mini">创建快照</el-button> -->
 				<el-button @click="show_create_volume_template_click(show_volume)" type="primary" size="mini">创建模版</el-button>
 				<el-button @click="destroy_volume(show_volume)" type="danger" size="mini">销毁磁盘</el-button>
 			</el-row>
@@ -16,7 +16,7 @@
 				<el-descriptions :column="2" size="medium" border>
 					<el-descriptions-item label="ID">{{ show_volume.volumeId }}</el-descriptions-item>
 					<el-descriptions-item label="磁盘名">{{ show_volume.description }}</el-descriptions-item>
-					<el-descriptions-item label="磁盘类型">{{ show_volume.type }}</el-descriptions-item>
+					<el-descriptions-item label="磁盘格式">{{ show_volume.type }}</el-descriptions-item>
 					<el-descriptions-item label="磁盘路径">{{ show_volume.path }}</el-descriptions-item>
 					<el-descriptions-item label="磁盘模版">{{ this.template ? this.template.name : '-' }}</el-descriptions-item>
 					<el-descriptions-item label="父级路径">{{ show_volume.backingPath }}</el-descriptions-item>

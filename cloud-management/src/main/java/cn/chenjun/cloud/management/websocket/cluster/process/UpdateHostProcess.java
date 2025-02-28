@@ -22,7 +22,7 @@ public class UpdateHostProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<HostModel> resultUtil = this.hostService.getHostInfo(msg.getId());
-        NotifyData<ResultUtil<HostModel>> sendMsg = NotifyData.<ResultUtil<HostModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_HOST).data(resultUtil).build();
+        NotifyData<ResultUtil<HostModel>> sendMsg = NotifyData.<ResultUtil<HostModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_HOST).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

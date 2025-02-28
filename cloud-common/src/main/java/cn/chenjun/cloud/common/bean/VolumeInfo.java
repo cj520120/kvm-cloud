@@ -34,10 +34,6 @@ public class VolumeInfo implements Serializable {
      */
     private String path;
     /**
-     * 父文件路径
-     */
-    private String backingPath;
-    /**
      * 类型
      */
     private String type;

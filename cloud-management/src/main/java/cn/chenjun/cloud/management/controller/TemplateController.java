@@ -31,9 +31,16 @@ public class TemplateController extends BaseController {
     @PutMapping("/api/template/create")
     public ResultUtil<TemplateModel> createTemplate(@RequestParam("name") String name,
                                                     @RequestParam("uri") String uri,
+                                                    @RequestParam("md5") String md5,
                                                     @RequestParam("templateType") int templateType,
-                                                    @RequestParam("volumeType") String volumeType) {
-        return this.lockRun(() -> templateService.createTemplate(name, uri, templateType, volumeType));
+                                                    @RequestParam(value = "script", defaultValue = "") String script) {
+        return this.lockRun(() -> templateService.createTemplate(name, uri, md5, templateType, script));
+    }
+
+    @PostMapping("/api/template/script")
+    public ResultUtil<TemplateModel> updateTemplateScript(@RequestParam("templateId") int id,
+                                                          @RequestParam(value = "script", defaultValue = "") String script) {
+        return this.lockRun(() -> templateService.updateTemplateScript(id, script));
     }
 
     @PostMapping("/api/template/download")

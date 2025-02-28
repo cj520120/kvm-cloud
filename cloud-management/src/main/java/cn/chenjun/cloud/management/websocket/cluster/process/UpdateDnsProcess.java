@@ -22,7 +22,7 @@ public class UpdateDnsProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<DnsModel> resultUtil = this.dnsService.getDnsInfo(msg.getId());
-        NotifyData<ResultUtil<DnsModel>> sendMsg = NotifyData.<ResultUtil<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_DNS).data(resultUtil).build();
+        NotifyData<ResultUtil<DnsModel>> sendMsg = NotifyData.<ResultUtil<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_DNS).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

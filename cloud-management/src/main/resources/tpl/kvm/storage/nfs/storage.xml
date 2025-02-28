@@ -1,0 +1,16 @@
+<pool type="netfs">
+    <name>{{storage.name}}</name>
+    <source>
+        <host name='{{storage.param.uri}}'/>
+        <dir path="{{storage.param.path}}"/>
+        <format type="nfs"/>
+    </source>
+    <target>
+        <path>{{storage.mount}}</path>
+        <permissions>
+            <mode>0777</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </target>
+</pool>

@@ -17,15 +17,18 @@
 				<el-descriptions-item label="网卡名称">{{ show_host.nic }}</el-descriptions-item>
 				<el-descriptions-item label="通信地址">{{ show_host.uri }}</el-descriptions-item>
 				<el-descriptions-item label="主机架构">{{ show_host.arch }}</el-descriptions-item>
+				<el-descriptions-item label="操作系统">{{ show_host.osName }}</el-descriptions-item>
+				<el-descriptions-item label="系统版本">{{ show_host.osVersion }}</el-descriptions-item>
+				<el-descriptions-item label="制造商">{{ show_host.vendor }}</el-descriptions-item>
 				<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 				<el-descriptions-item label="内存">
 					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(show_host.allocationMemory) + ' / 总共:' + get_memory_display_size(show_host.totalMemory)" placement="top">
-						<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory)"></el-progress>
+						<el-progress color="#67C23A" :percentage="show_host.totalMemory <= 0 ? 0 : Math.min(100, Math.floor((show_host.allocationMemory * 100) / show_host.totalMemory))"></el-progress>
 					</el-tooltip>
 				</el-descriptions-item>
 				<el-descriptions-item label="CPU">
 					<el-tooltip class="item" effect="dark" :content="'已使用:' + show_host.allocationCpu + '核 / 总共:' + show_host.totalCpu + '核'" placement="top" style="width: 150px">
-						<el-progress color="#67C23A" :percentage="show_host.totalCpu <= 0 ? 0 : Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu)"></el-progress>
+						<el-progress color="#67C23A" :percentage="show_host.totalCpu <= 0 ? 0 : Math.min(100, Math.floor((show_host.allocationCpu * 100) / show_host.totalCpu))"></el-progress>
 					</el-tooltip>
 				</el-descriptions-item>
 				<el-descriptions-item label="Cores">{{ show_host.cores }}</el-descriptions-item>
@@ -37,12 +40,17 @@
 				</el-descriptions-item>
 			</el-descriptions>
 		</el-row>
+		<el-row>
+			<ConfigComponent ref="ConfigComponentRef" />
+		</el-row>
 	</el-card>
 </template>
 <script>
 import Notify from '@/api/notify'
 import util from '@/api/util'
 import { getHostInfo, pauseHost, registerHost, destroyHost } from '@/api/api'
+
+import ConfigComponent from '@/components/ConfigComponent.vue'
 export default {
 	name: 'HostInfoComponent',
 	data() {
@@ -71,6 +79,7 @@ export default {
 		}
 	},
 	mixins: [Notify, util],
+	components: { ConfigComponent },
 	created() {
 		this.show_host_id = 0
 		this.subscribe_notify(this.$options.name, this.dispatch_notify_message)
@@ -121,6 +130,7 @@ export default {
 			this.show_host_id = host.hostId
 			this.show_host = host
 			this.host_loading = false
+			this.$refs.ConfigComponentRef.init(1, host.hostId)
 		},
 		refresh_host(host) {
 			if (this.show_host.hostId === host.hostId) {

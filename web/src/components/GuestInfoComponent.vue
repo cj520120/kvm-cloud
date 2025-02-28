@@ -13,7 +13,7 @@
 				<el-button style="width: 90px" @click="show_migrate_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">迁移虚拟机</el-button>
 			</el-row>
 			<el-row style="text-align: left; margin: 20px 0">
-				<el-button style="width: 90px" @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2">远程桌面</el-button>
+				<el-button style="width: 90px" @click="vnc_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 2 && show_guest_info.current_guest.status !== 1">远程桌面</el-button>
 				<el-button style="width: 90px" @click="show_modify_guest_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.status !== 4" v-show="show_guest_info.current_guest.type !== 0">修改配置</el-button>
 				<el-button style="width: 90px" @click="show_attach_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom !== 0" v-show="show_guest_info.current_guest.type !== 0">挂载光驱</el-button>
 				<el-button style="width: 90px" @click="detach_guest_cd_room_click(show_guest_info.current_guest)" type="primary" size="mini" :disabled="show_guest_info.current_guest.cdRoom === 0" v-show="show_guest_info.current_guest.type !== 0">卸载光驱</el-button>
@@ -24,17 +24,22 @@
 				<el-descriptions :column="2" size="medium" border>
 					<el-descriptions-item label="ID">{{ show_guest_info.current_guest.guestId }}</el-descriptions-item>
 					<el-descriptions-item label="实例名">{{ show_guest_info.current_guest.name }}</el-descriptions-item>
-					<el-descriptions-item label="标签">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
+					<el-descriptions-item label="名称">{{ show_guest_info.current_guest.description }}</el-descriptions-item>
+					<el-descriptions-item label="操作系统">
+						<img :src="get_system_category_image(show_guest_info.current_guest)" style="width: 24px; height: 24px; float: left" />
+						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_category_name(show_guest_info.current_guest) }}</div>
+					</el-descriptions-item>
 					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
+					<el-descriptions-item label="固件">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
-					<el-descriptions-item label="配额">{{ show_guest_info.current_guest.speed }}</el-descriptions-item>
+					<el-descriptions-item label="Cpu配额(Share)">{{ show_guest_info.current_guest.share }}</el-descriptions-item>
 					<el-descriptions-item label="光盘">{{ show_guest_info.template.name }}</el-descriptions-item>
 					<el-descriptions-item label="运行主机">
 						<el-button @click="show_host_info(show_guest_info.host.hostId)" type="text" v-show="show_guest_info.host.hostId !== 0" :underline="false">{{ show_guest_info.host.displayName }}</el-button>
 						<span v-show="show_guest_info.host.hostId === 0" :underline="false">{{ show_guest_info.host.displayName }}</span>
 					</el-descriptions-item>
-					<el-descriptions-item label="架构方案">
+					<el-descriptions-item label="配置">
 						<el-button @click="show_scheme_info(show_guest_info.scheme.schemeId)" type="text" v-show="show_guest_info.scheme.schemeId !== 0" :underline="false">{{ show_guest_info.scheme.name }}</el-button>
 						<span v-show="show_guest_info.scheme.schemeId === 0" :underline="false">{{ show_guest_info.scheme.name }}</span>
 					</el-descriptions-item>
@@ -88,6 +93,9 @@
 							</el-table-column>
 						</el-table>
 					</el-tab-pane>
+					<el-tab-pane label="系统配置">
+						<ConfigComponent ref="ConfigComponentRef" />
+					</el-tab-pane>
 				</el-tabs>
 			</el-row>
 		</el-card>
@@ -117,7 +125,7 @@ import HostInfoComponent from '@/components/HostInfoComponent.vue'
 import SchemeInfoComponent from './SchemeInfoComponent.vue'
 import VolumeInfoComponent from '@/components/VolumeInfoComponent'
 import MigrateGuestComponent from '@/components/MigrateGuestComponent'
-
+import ConfigComponent from '@/components/ConfigComponent.vue'
 import Notify from '@/api/notify'
 import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
 
@@ -134,7 +142,8 @@ export default {
 		ReInstallComponentVue,
 		HostInfoComponent,
 		SchemeInfoComponent,
-		VolumeInfoComponent
+		VolumeInfoComponent,
+		ConfigComponent
 	},
 	mixins: [Notify, util],
 	created() {
@@ -165,7 +174,7 @@ export default {
 					busType: 'virtio',
 					cpu: 1,
 					memory: 524288,
-					speed: 500,
+					share: 500,
 					cdRoom: 0,
 					hostId: 0,
 					schemeId: 0,
@@ -277,6 +286,7 @@ export default {
 			await this.load_current_guest_scheme(guest)
 			await this.load_current_guest_volume(guest)
 			await this.load_current_guest_network(guest)
+			await this.$refs.ConfigComponentRef.init(2, guest.guestId)
 		},
 		async initGuestId(guestId) {
 			this.show_guest_id = guestId

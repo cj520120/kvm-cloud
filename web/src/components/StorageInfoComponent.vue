@@ -13,11 +13,17 @@
 				<el-descriptions-item label="ID">{{ show_storage.storageId }}</el-descriptions-item>
 				<el-descriptions-item label="存储池名">{{ show_storage.description }}</el-descriptions-item>
 				<el-descriptions-item label="存储池类型">{{ show_storage.type }}</el-descriptions-item>
-				<el-descriptions-item label="挂载路径">{{ show_storage.mountPath }}</el-descriptions-item>
+				<el-descriptions-item label="挂载路径" v-if="show_storage.type === 'nfs'">{{ show_storage.mountPath }}</el-descriptions-item>
 				<el-descriptions-item label="NFS路径" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
 				<el-descriptions-item label="NFS地址" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
-				<el-descriptions-item label="Glusterfs磁盘" v-if="show_storage.type === 'glusterfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
+
+				<el-descriptions-item label="Glusterfs磁盘" v-if="show_storage.type === 'glusterfs'">{{ JSON.parse(show_storage.param).volume }}</el-descriptions-item>
 				<el-descriptions-item label="Glusterfs地址" v-if="show_storage.type === 'glusterfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
+
+				<el-descriptions-item label="Ceph地址" v-if="show_storage.type === 'ceph-rbd'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
+				<el-descriptions-item label="Ceph存储池名称" v-if="show_storage.type === 'ceph-rbd'">{{ JSON.parse(show_storage.param).pool }}</el-descriptions-item>
+				<el-descriptions-item label="Ceph用户" v-if="show_storage.type === 'ceph-rbd'">{{ JSON.parse(show_storage.param).username }}</el-descriptions-item>
+
 				<el-descriptions-item label="容量">{{ get_volume_display_size(show_storage.capacity) }}</el-descriptions-item>
 				<el-descriptions-item label="可用">{{ get_volume_display_size(show_storage.available) }}</el-descriptions-item>
 				<el-descriptions-item label="已申请">{{ get_volume_display_size(show_storage.allocation) }}</el-descriptions-item>

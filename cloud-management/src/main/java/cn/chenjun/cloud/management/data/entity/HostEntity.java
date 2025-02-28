@@ -26,6 +26,8 @@ public class HostEntity {
     public static final String CLIENT_SECRET = "client_secret";
     public static final String HOST_IP = "host_ip";
     public static final String HOST_NAME = "host_name";
+    public static final String HOST_OS_NAME = "host_os_name";
+    public static final String HOST_OS_VERSION = "host_os_version";
     public static final String HOST_NIC_NAME = "host_nic_name";
     public static final String HOST_URI = "host_uri";
     public static final String HOST_ALLOCATION_MEMORY = "host_allocation_memory";
@@ -33,6 +35,7 @@ public class HostEntity {
     public static final String HOST_TOTAL_MEMORY = "host_total_memory";
     public static final String HOST_TOTAL_CPU = "host_total_cpu";
     public static final String HOST_ARCH = "host_arch";
+    public static final String HOST_VENDOR = "host_vendor";
     public static final String HOST_HYPERVISOR = "host_hypervisor";
     public static final String HOST_EMULATOR = "host_emulator";
     public static final String HOST_CPU_CORES = "host_cpu_cores";
@@ -57,6 +60,12 @@ public class HostEntity {
     private String hostIp;
     @TableField(HOST_NAME)
     private String hostName;
+    @TableField(HOST_VENDOR)
+    private String vendor;
+    @TableField(HOST_OS_NAME)
+    private String osName;
+    @TableField(HOST_OS_VERSION)
+    private String osVersion;
     @TableField(HOST_NIC_NAME)
     private String nic;
     @TableField(HOST_URI)
@@ -83,8 +92,6 @@ public class HostEntity {
     private Integer sockets;
     @TableField(HOST_STATUS)
     private Integer status;
-
-
     @TableField(CREATE_TIME)
     private Date createTime;
 

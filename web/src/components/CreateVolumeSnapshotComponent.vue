@@ -4,16 +4,6 @@
 			<el-form-item label="快照名称">
 				<el-input v-model="snapshot_volume.snapshotName" placeholder="请输入快照名称"></el-input>
 			</el-form-item>
-			<el-form-item label="磁盘类型" prop="volumeType">
-				<el-select v-model="snapshot_volume.snapshotVolumeType" style="width: 100%">
-					<el-option label="raw" value="raw"></el-option>
-					<el-option label="qcow" value="qcow"></el-option>
-					<el-option label="qcow2" value="qcow2"></el-option>
-					<el-option label="vdi" value="vdi"></el-option>
-					<el-option label="vmdk" value="vmdk"></el-option>
-					<el-option label="vpc" value="vpc"></el-option>
-				</el-select>
-			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="snapshot_dialog_visiable = false">取 消</el-button>
@@ -28,8 +18,7 @@ export default {
 		return {
 			snapshot_volume: {
 				volumeId: 0,
-				snapshotName: '',
-				snapshotVolumeType: 'qcow2'
+				snapshotName: ''
 			},
 			snapshot_dialog_visiable: false
 		}
@@ -38,7 +27,6 @@ export default {
 		init(volume) {
 			this.snapshot_volume.volumeId = volume.volumeId
 			this.snapshot_volume.name = ''
-			this.snapshot_volume.snapshotVolumeType = volume.type
 			this.snapshot_dialog_visiable = true
 		},
 		create_volume_snapshot_click() {

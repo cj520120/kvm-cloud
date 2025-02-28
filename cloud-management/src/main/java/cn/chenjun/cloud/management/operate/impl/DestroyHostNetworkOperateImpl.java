@@ -27,8 +27,7 @@ import java.util.UUID;
  */
 @Component
 @Slf4j
-public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNetworkOperate, ResultUtil<Void>> {
-
+public class DestroyHostNetworkOperateImpl extends AbstractNetworkOperate<DestroyHostNetworkOperate, ResultUtil<Void>> {
 
 
     @Override
@@ -52,11 +51,8 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         switch (network.getType()) {
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .bridge(network.getBridge())
-                        .ip(host.getHostIp())
-                        .geteway(network.getGateway())
-                        .nic(host.getNic())
-                        .netmask(network.getMask()).build();
+                        .poolId(network.getPoolId())
+                        .build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_BASIC, basicBridgeNetwork);
             }
             break;
@@ -65,20 +61,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
                 }
-                BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .bridge(basicNetworkEntity.getBridge())
-                        .ip(host.getHostIp())
-                        .geteway(basicNetworkEntity.getGateway())
-                        .nic(host.getNic())
-                        .netmask(basicNetworkEntity.getMask()).build();
-                VlanNetwork vlan = VlanNetwork.builder()
-                        .vlanId(network.getVlanId())
-                        .netmask(network.getMask())
-                        .basic(basicBridgeNetwork)
-                        .ip(null)
-                        .bridge(network.getBridge())
-                        .geteway(network.getGateway())
-                        .build();
+                VlanNetwork vlan = VlanNetwork.builder().poolId(network.getPoolId()).build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_VLAN, vlan);
             }
             break;
@@ -87,6 +70,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
         }
 
     }
+
 
     @Override
     public Type getCallResultType() {
@@ -115,7 +99,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
                         .networkId(param.getNetworkId())
                         .nextHostIds(hostIds)
                         .build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
@@ -125,7 +109,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
     }
 
     @Override

@@ -40,25 +40,22 @@ public class VolumeController extends BaseController {
     @PutMapping("/api/volume/create")
     public ResultUtil<VolumeModel> createVolume(@RequestParam("description") String description,
                                                 @RequestParam("storageId") int storageId,
-                                                @RequestParam("volumeType") String volumeType,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        return this.lockRun(() -> this.volumeService.createVolume(description, storageId, 0, 0, volumeType, volumeSize * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.volumeService.createVolume(description, storageId, 0, 0, volumeSize * 1024 * 1024 * 1024));
     }
 
     @PutMapping("/api/volume/clone")
     public ResultUtil<CloneModel> cloneVolume(@RequestParam("description") String description,
                                               @RequestParam("sourceVolumeId") int sourceVolumeId,
-                                              @RequestParam("storageId") int storageId,
-                                              @RequestParam("volumeType") String volumeType) {
-        return this.lockRun(() -> this.volumeService.cloneVolume(description, sourceVolumeId, storageId, volumeType));
+                                              @RequestParam("storageId") int storageId) {
+        return this.lockRun(() -> this.volumeService.cloneVolume(description, sourceVolumeId, storageId));
     }
 
     @PutMapping("/api/volume/migrate")
     public ResultUtil<MigrateModel> migrateVolume(
             @RequestParam("sourceVolumeId") int sourceVolumeId,
-            @RequestParam("storageId") int storageId,
-            @RequestParam("volumeType") String volumeType) {
-        return this.lockRun(() -> this.volumeService.migrateVolume(sourceVolumeId, storageId, volumeType));
+            @RequestParam("storageId") int storageId) {
+        return this.lockRun(() -> this.volumeService.migrateVolume(sourceVolumeId, storageId));
     }
 
     @PostMapping("/api/volume/resize")
@@ -91,9 +88,8 @@ public class VolumeController extends BaseController {
 
     @PutMapping("/api/snapshot/create")
     public ResultUtil<SnapshotModel> createVolumeSnapshot(@RequestParam("volumeId") int volumeId,
-                                                          @RequestParam("snapshotName") String snapshotName,
-                                                          @RequestParam("snapshotVolumeType") String snapshotVolumeType) {
-        return this.lockRun(() -> this.volumeService.createVolumeSnapshot(volumeId, snapshotName, snapshotVolumeType));
+                                                          @RequestParam("snapshotName") String snapshotName) {
+        return this.lockRun(() -> this.volumeService.createVolumeSnapshot(volumeId, snapshotName));
     }
 
     @DeleteMapping("/api/snapshot/destroy")

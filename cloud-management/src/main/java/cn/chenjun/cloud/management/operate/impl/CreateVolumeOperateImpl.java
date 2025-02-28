@@ -5,16 +5,15 @@ import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
 import cn.chenjun.cloud.common.bean.VolumeCreateRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -30,9 +29,6 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends AbstractOperate<T, ResultUtil<VolumeInfo>> {
-    @Autowired
-    private ApplicationConfig applicationConfig;
-
 
 
     @Override
@@ -43,7 +39,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             if (param.getTemplateId() > 0) {
                 List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
                 Collections.shuffle(templateVolumeList);
@@ -51,13 +47,9 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
 
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
-                            .sourceStorage(parentStorage.getName())
-                        .sourceName(templateVolume.getName())
-                            .targetStorage(storage.getName())
-                            .targetName(volume.getName())
-                            .targetType(volume.getType())
-
-                            .build();
+                        .sourceVolume(initVolume(parentStorage, templateVolume))
+                        .targetVolume(initVolume(storage, volume))
+                        .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 
             } else if (param.getSnapshotVolumeId() > 0) {
@@ -67,20 +59,13 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 }
                 StorageEntity parentStorage = storageMapper.selectById(snapshotVolume.getStorageId());
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
-                        .sourceStorage(parentStorage.getName())
-                        .sourceName(snapshotVolume.getName())
-                        .targetStorage(storage.getName())
-                        .targetName(volume.getName())
-                        .targetType(volume.getType())
-
+                        .sourceVolume(initVolume(parentStorage, snapshotVolume))
+                        .targetVolume(initVolume(storage, volume))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
             } else {
                 VolumeCreateRequest request = VolumeCreateRequest.builder()
-                        .targetStorage(storage.getName())
-                        .targetName(volume.getName())
-                        .targetType(volume.getType())
-                        .targetSize(volume.getCapacity())
+                        .volume(initVolume(storage, volume))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
             }
@@ -106,7 +91,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setCapacity(resultUtil.getData().getCapacity());
                 volume.setType(resultUtil.getData().getType());
-                volume.setBackingPath(resultUtil.getData().getBackingPath());
                 volume.setPath(resultUtil.getData().getPath());
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             } else {
@@ -115,7 +99,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             volumeMapper.updateById(volume);
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
 
     }
 

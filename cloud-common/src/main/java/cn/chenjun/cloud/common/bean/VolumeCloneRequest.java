@@ -13,9 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VolumeCloneRequest {
-    private String sourceStorage;
-    private String sourceName;
-    private String targetStorage;
-    private String targetName;
-    private String targetType;
+    private Volume sourceVolume;
+    private Volume targetVolume;
+
 }

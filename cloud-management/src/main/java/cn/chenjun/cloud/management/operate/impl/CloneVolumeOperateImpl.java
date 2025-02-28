@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -29,23 +30,19 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
     public void operate(CloneVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
         if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CLONE) {
-            StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+            StorageEntity sourceStorage = storageMapper.selectById(volume.getStorageId());
+            if (sourceStorage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
             VolumeEntity cloneVolume = volumeMapper.selectById(param.getTargetVolumeId());
             if (cloneVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(cloneVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
-                    .sourceStorage(storage.getName())
-                    .sourceName(volume.getName())
-                    .targetStorage(targetStorage.getName())
-                    .targetName(cloneVolume.getName())
-                    .targetType(cloneVolume.getType())
-
+                    .sourceVolume(initVolume(sourceStorage, volume))
+                    .targetVolume(initVolume(targetStorage, cloneVolume))
                     .build();
 
             this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
@@ -76,15 +73,14 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
                 targetVolume.setType(resultUtil.getData().getType());
-                targetVolume.setBackingPath(resultUtil.getData().getBackingPath());
                 targetVolume.setPath(resultUtil.getData().getPath());
             } else {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);
             }
             volumeMapper.updateById(targetVolume);
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

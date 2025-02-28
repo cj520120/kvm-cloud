@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeDestroyRequest;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -44,10 +45,9 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         for (TemplateVolumeEntity volume : volumes) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
             if (storage != null) {
-                HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+                HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
                 VolumeDestroyRequest request = VolumeDestroyRequest.builder()
-                        .sourceStorage(storage.getName())
-                        .sourceName(volume.getName())
+                        .volume(initVolume(storage, volume))
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
             }
@@ -67,7 +67,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
             this.templateMapper.deleteById(template);
             this.guestMapper.detachCdByTemplateId(template.getTemplateId());
-            this.eventService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            this.notifyService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
 
     }

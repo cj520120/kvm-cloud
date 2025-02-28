@@ -10,17 +10,7 @@
 						<el-option label="随机" :value="0"></el-option>
 						<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 					</el-select>
-				</el-form-item>
-				<el-form-item label="磁盘类型" prop="volumeType">
-					<el-select v-model="migrate_volume.volumeType" style="width: 100%">
-						<el-option label="raw" value="raw"></el-option>
-						<el-option label="qcow" value="qcow"></el-option>
-						<el-option label="qcow2" value="qcow2"></el-option>
-						<el-option label="vdi" value="vdi"></el-option>
-						<el-option label="vmdk" value="vmdk"></el-option>
-						<el-option label="vpc" value="vpc"></el-option>
-					</el-select>
-				</el-form-item>
+				</el-form-item> 
 				<el-form-item>
 					<el-button type="primary" @click="migrate_volume_click">迁移</el-button>
 					<el-button @click="go_back">取消</el-button>
@@ -36,8 +26,7 @@ export default {
 		return {
 			migrate_volume: {
 				sourceVolumeId: 0,
-				storageId: 0,
-				volumeType: 'qcow2'
+				storageId: 0
 			},
 			storages: []
 		}
@@ -50,8 +39,7 @@ export default {
 			this.$emit('onVolumeUpdate', volume)
 		},
 		async init(volume) {
-			this.migrate_volume.sourceVolumeId = volume.volumeId
-			this.migrate_volume.volumeType = volume.type
+			this.migrate_volume.sourceVolumeId = volume.volumeId 
 			this.migrate_volume.storageId = volume.storageId
 			await getStorageList().then((res) => {
 				if (res.code == 0) {

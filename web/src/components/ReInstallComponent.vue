@@ -6,31 +6,17 @@
 		<el-row>
 			<el-form ref="reInstallForm" :model="reinstall_guest" label-width="100px" class="demo-ruleForm">
 				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="安装方式">
 							<el-select v-model="reinstall_guest.type" style="width: 100%" placeholder="请选择安装方式">
 								<el-option label="ISO镜像" :value="0" />
 								<el-option label="模版安装" :value="1" />
-								<el-option label="快照安装" :value="2" />
+								<!-- <el-option label="快照安装" :value="2" /> -->
 								<el-option label="现有磁盘" :value="3" />
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="磁盘类型" v-if="reinstall_guest.type !== 3">
-							<el-select v-model="reinstall_guest.volumeType" style="width: 100%">
-								<el-option label="raw" value="raw"></el-option>
-								<el-option label="qcow" value="qcow"></el-option>
-								<el-option label="qcow2" value="qcow2"></el-option>
-								<el-option label="vdi" value="vdi"></el-option>
-								<el-option label="vmdk" value="vmdk"></el-option>
-								<el-option label="vpc" value="vpc"></el-option>
-							</el-select>
-						</el-form-item>
-					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
+					<el-col :span="8">
 						<el-form-item label="ISO模版" v-if="reinstall_guest.type === 0">
 							<el-select v-model="reinstall_guest.isoTemplateId" style="width: 100%" placeholder="请选择光盘镜像">
 								<el-option v-for="item in this.iso_template" :key="item.templateId" :label="item.name" :value="item.templateId" />
@@ -52,24 +38,67 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="存储池" v-if="reinstall_guest.type !== 3">
-							<el-select v-model="reinstall_guest.storageId" style="width: 100%">
+				</el-row>
+				<el-row>
+					<el-col :span="8">
+						<el-form-item label="存储池">
+							<el-select v-model="reinstall_guest.storageId" style="width: 100%" :disabled="reinstall_guest.type === 3">
 								<el-option label="随机" :value="0"></el-option>
 								<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
-				</el-row>
-				<el-row>
-					<el-col :span="12">
-						<el-form-item label="密码" v-if="reinstall_guest.type !== 0">
-							<el-input v-model="reinstall_guest.password" prefix-icon="el-icon-lock" type="password" :show-password="true"></el-input>
+					<el-col :span="8">
+						<el-form-item label="操作系统">
+							<el-select v-model="reinstall_guest.systemCategory" style="width: 100%" placeholder="操作系统">
+								<el-option label="Centos" :value="101" />
+								<el-option label="Ubuntu" :value="102" />
+								<el-option label="Windows" :value="300" />
+								<el-option label="Deepin" :value="103" />
+								<el-option label="RedHat" :value="104" />
+								<el-option label="Debian" :value="105" />
+								<el-option label="OpenEuler" :value="106" />
+								<el-option label="Linux" :value="100" />
+								<el-option label="Unix" :value="200" />
+								<el-option label="Android" :value="400" />
+							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :span="12">
-						<el-form-item label="磁盘大小" v-if="reinstall_guest.type === 0">
-							<el-input v-model="reinstall_guest.size"></el-input>
+
+					<el-col :span="8">
+						<el-form-item label="固件">
+							<el-select v-model="reinstall_guest.bootstrapType" style="width: 100%">
+								<el-option label="BIOS" :value="0" />
+								<el-option label="UEFI" :value="1" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="8">
+						<el-form-item label="主机名">
+							<el-input v-model="meta_config.hostName" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="密码">
+							<el-input v-model="user_config.password" :show-password="true" type="password" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
+						<el-form-item label="登录密钥">
+							<el-select v-model="user_config.sshId" style="width: 100%" placeholder="登录密钥" :disabled="reinstall_guest.type !== 1 || reinstall_guest.systemCategory == 300">
+								<el-option v-for="item in this.sshs" :key="item.id" :label="item.name" :value="item.id" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="8">
+						<el-form-item label="磁盘大小">
+							<el-input v-model="reinstall_guest.size" :disabled="reinstall_guest.type === 3">
+								<template slot="append">GB</template>
+							</el-input>
 						</el-form-item>
 					</el-col>
 				</el-row>
@@ -82,27 +111,35 @@
 	</el-card>
 </template>
 <script>
-import { reInstallGuest, getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList } from '@/api/api'
+import { reInstallGuest, getNotAttachVolumeList, getTemplateList, getStorageList, getSnapshotList, getSshList } from '@/api/api'
 export default {
 	data() {
 		return {
 			reinstall_guest: {
 				guestId: 0,
 				type: 0,
-				volumeType: 'qcow2',
 				isoTemplateId: '',
 				diskTemplateId: '',
 				snapshotVolumeId: '',
 				volumeId: '',
 				storageId: 0,
+				size: 100,
+				bootstrapType: 0,
+				systemCategory: 100
+			},
+			meta_config: {
+				hostName: ''
+			},
+			user_config: {
 				password: '',
-				size: 100
+				sshId: 0
 			},
 			iso_template: [],
 			attach_volumes: [],
 			disk_template: [],
 			storages: [],
-			snapshot_template: []
+			snapshot_template: [],
+			sshs: [{ id: 0, name: '无' }]
 		}
 	},
 	methods: {
@@ -138,19 +175,31 @@ export default {
 				}
 			})
 		},
+		async load_all_ssh() {
+			await getSshList().then((res) => {
+				if (res.code == 0) {
+					this.sshs = [{ id: 0, name: '无' }, ...res.data]
+				}
+			})
+		},
 		async init(guest) {
 			this.show_type = 0
 			this.load_all_attach_volumes()
 			this.load_all_template()
 			this.load_all_storage()
 			this.load_all_snapshot()
+			this.load_all_ssh()
 			this.reinstall_guest.guestId = guest.guestId
 			this.reinstall_guest.isoTemplateId = ''
 			this.reinstall_guest.diskTemplateId = ''
 			this.reinstall_guest.snapshotVolumeId = ''
 			this.reinstall_guest.volumeId = ''
-			this.reinstall_guest.password = ''
 			this.reinstall_guest.type = 0
+			this.reinstall_guest.systemCategory = guest.systemCategory
+			this.reinstall_guest.bootstrapType = guest.bootstrapType
+			this.user_config.password = ''
+			this.user_config.sshId = 0
+			this.meta_config.hostName = ''
 		},
 		reinstall_guest_click() {
 			switch (this.reinstall_guest.type) {
@@ -184,7 +233,19 @@ export default {
 				type: 'warning'
 			})
 				.then(() => {
-					reInstallGuest(this.reinstall_guest).then((res) => {
+					let meta_map = {}
+					let user_map = {}
+					if (this.meta_config.hostName) {
+						meta_map = { ...user_map, hostname: this.meta_config.hostName, 'local-hostname': this.meta_config.hostName }
+					}
+					if (this.user_config.password) {
+						user_map = { ...user_map, password: this.user_config.password }
+					}
+					if (this.user_config.sshId > 0) {
+						user_map = { ...user_map, sshId: this.user_config.sshId + '' }
+					}
+					let reinstall_guest_data = { ...this.reinstall_guest, metaData: JSON.stringify(meta_map), userData: JSON.stringify(user_map) }
+					reInstallGuest(reinstall_guest_data).then((res) => {
 						if (res.code === 0) {
 							this.$emit('finish', res.data)
 						} else {

@@ -1,0 +1,111 @@
+<domain type="kvm" >
+    <name>{{vm.name}}</name>
+    <description>{{vm.description}}</description>
+    <memory unit="KiB">{{vm.memory}}</memory>
+    <currentMemory unit="KiB">{{vm.memory}}</currentMemory>
+    {% if __SYS__["vm.memory.huge.pages.enable"] =="yes" %}
+    <memoryBacking>
+        <hugepages>
+            {% if __SYS__["vm.memory.huge.pages.size"] > 0 %}
+            <page size='__SYS__["vm.memory.huge.pages.size"]' unit='GiB'/>
+            {% endif %}
+        </hugepages>
+    </memoryBacking>
+    {% endif %}
+    <vcpu placement="static">{{cpu.number}}</vcpu>
+    {% if cpu.share > 0 %}
+    <cputune>
+        <shares>{{cpu.share}}</shares>
+    </cputune>
+    {% endif %}
+    <cpu mode="host-passthrough" check="partial">
+        <model fallback="allow">Nehalem</model>
+        {% if cpu.socket > 0 and cpu.core > 0 and cpu.thread > 0 %}
+        <topology sockets="{{cpu.socket}}" cores="{{cpu.core}}" threads="{{cpu.thread}}"/>
+        {% endif %}
+        {% if __SYS__["vm.cpu.cache.enable"] == "yes" %}
+        <cache mode='passthrough'/>
+        {% endif %}
+        {% if __SYS__["vm.cpu.virtualization.enable"] == "yes" %}
+        <feature policy='require' name='{{__SYS__["vm.cpu.virtualization.name"]}}'/>
+        {% endif %}
+    </cpu>
+    <os>
+        {% if __SYS__["vm.machine.arch"] and __SYS__["vm.machine.name"] %}
+        <type arch="{{__SYS__['vm.machine.arch']}}" machine="{{__SYS__['vm.machine.name']}}">hvm</type>
+        {% else %}
+        <type>hvm</type>
+        {% endif %}
+        {% if vm.bootstrapType=="uefi" %}
+        <loader readyonly="yes" type="{{__SYS__['vm.uefi.loader.type']}}">{{__SYS__["vm.uefi.loader.path"]}}</loader>
+        {% endif %}
+        <boot dev="hd"/>
+        <boot dev="cdrom"/>
+        <bootmenu enable="yes" timeout="5000"/>
+        <smbios mode='sysinfo'/>
+        <bios useserial='yes' rebootTimeout='0'/>
+    </os>
+    <sysinfo type='smbios'>
+        <system>
+            <entry name='product'>CJ KVM Cloud</entry>
+            <entry name='version'>3.1</entry>
+            <entry name='manufacturer'>chenjun</entry>
+            <entry name='serial'>ds=nocloud;s=http://169.254.169.254/</entry>
+        </system>
+    </sysinfo>
+    <features>
+        <acpi/>
+        <apic/>
+        <pae/>
+        <hap state="on"/>
+        <privnet/>
+        <!-- 启用各种功能，以改善运行 Microsoft Windows 的虚机的行为。 -->
+        <hyperv>
+            <!-- 放宽对计时器的约束 -->
+            <relaxed state='on'/>
+            <!-- 启用虚拟 APIC -->
+            <vapic state='on'/>
+            <!-- 启用自旋锁支持 -->
+            <spinlocks state='on' retries='4096'/>
+        </hyperv>
+    </features>
+    <clock offset="{{__SYS__['vm.clock.type']}}"/>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+    <devices>
+        <emulator>{{host.emulator}}</emulator>
+
+        <!-- 磁盘 -->
+         {{device.xml}}
+        <!-- 视频驱动 -->
+
+        <video>
+            <model type="cirrus" vram="16384" heads="1" primary="yes"/>
+            <driver name='qemu'/>
+        </video>
+
+        <memballoon model="virtio">
+            <stats period="10"/>
+        </memballoon>
+
+        <!-- 主机和虚拟机专用通信通道 -->
+        <channel type="unix">
+            <source mode="bind" path="/var/lib/libvirt/qemu/{{vm.name}}.org.qemu.guest_agent.0"/>
+            <target type="virtio" name="org.qemu.guest_agent.0"/>
+        </channel>
+        <input type="tablet" bus="usb"/>
+        <input type="mouse" bus="ps2"/>
+        <input type="keyboard" bus="ps2"/>
+        <serial type="pty">
+            <target port="0"/>
+        </serial>
+        <!-- 控制台设置 -->
+        <console type="pty">
+            <target type="serial" port="0"/>
+        </console>
+        <!-- vnc 图形交互 -->
+        <graphics type="{{vnc.type}}" port="-1" autoport="yes" listen="0.0.0.0" keymap="en-us" passwd="{{vnc.password}}"/>
+
+    </devices>
+</domain>

@@ -26,7 +26,7 @@ public class GroupService extends AbstractService {
     public ResultUtil<GroupModel> createGroup(String groupName) {
         GroupInfoEntity entity = GroupInfoEntity.builder().groupName(groupName).createTime(new Date()).build();
         mapper.insert(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
 
         return ResultUtil.success(this.initGroup(entity));
     }
@@ -46,7 +46,7 @@ public class GroupService extends AbstractService {
         }
         entity.setGroupName(groupName);
         mapper.updateById(entity);
-        this.eventService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
         return ResultUtil.success(this.initGroup(entity));
     }
 

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,20 +54,30 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createTemplate(String name, String uri, int templateType, String volumeType) {
+    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String initScript) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版名称");
         }
         if (StringUtils.isEmpty(uri)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版地址");
         }
-        if (StringUtils.isEmpty(volumeType)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘类型");
-        }
-        TemplateEntity template = TemplateEntity.builder().uri(uri).name(name).templateType(templateType).volumeType(volumeType).status(Constant.TemplateStatus.DOWNLOAD).build();
+        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
         this.templateMapper.insert(template);
-        this.eventService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<TemplateModel> updateTemplateScript(int id, String initScript) {
+
+        TemplateEntity template = templateMapper.selectById(id);
+        if (template == null) {
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+        }
+        template.setScript(initScript);
+        templateMapper.updateById(template);
+        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        return ResultUtil.success(this.initTemplateModel(template));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -79,12 +90,16 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.ERROR:
                 this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
                 String uid = UUID.randomUUID().toString();
+                String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+                if (Objects.equals(template.getTemplateType(), Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+                    volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+                }
                 TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                         .storageId(storage.getStorageId())
                         .name(uid)
                         .templateId(template.getTemplateId())
                         .path(storage.getMountPath() + "/" + uid)
-                        .type(template.getVolumeType())
+                        .type(volumeType)
                         .allocation(0L)
                         .capacity(0L)
                         .status(Constant.TemplateStatus.DOWNLOAD)
@@ -94,7 +109,7 @@ public class TemplateService extends AbstractService {
                 this.templateMapper.updateById(template);
                 BaseOperateParam operateParam = DownloadTemplateOperate.builder().taskId(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
-                this.eventService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(this.initTemplateModel(template));
 
             default:
@@ -120,19 +135,24 @@ public class TemplateService extends AbstractService {
         }
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);
         this.volumeMapper.updateById(volume);
+
+        StorageEntity storage = allocateService.allocateStorage(0);
+        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
         TemplateEntity template = TemplateEntity.builder().uri(String.valueOf(volumeId))
                 .name(name).templateType(Constant.TemplateType.VOLUME)
-                .volumeType(cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2)
+                .script("")
                 .status(Constant.TemplateStatus.CREATING).build();
         this.templateMapper.insert(template);
         String uid = UUID.randomUUID().toString();
-        StorageEntity storage = allocateService.allocateStorage(0);
         TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .name(uid)
                 .templateId(template.getTemplateId())
                 .path(storage.getMountPath() + "/" + uid)
-                .type(template.getVolumeType())
+                .type(volumeType)
                 .capacity(0L)
                 .allocation(0L)
                 .status(Constant.TemplateStatus.CREATING)
@@ -146,8 +166,8 @@ public class TemplateService extends AbstractService {
                 .title("创建磁盘模版[" + template.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
-        this.eventService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-        this.eventService.publish(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return ResultUtil.success(this.initTemplateModel(template));
 
     }
@@ -165,9 +185,9 @@ public class TemplateService extends AbstractService {
                 template.setStatus(Constant.TemplateStatus.DESTROY);
                 this.templateMapper.updateById(template);
                 BaseOperateParam operate = DestroyTemplateOperate.builder().taskId(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
-                operateTask.addTask(operate, this.applicationConfig.getDestroyDelayMinute());
+                operateTask.addTask(operate, configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
                 TemplateModel source = this.initTemplateModel(template);
-                this.eventService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(source);
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");

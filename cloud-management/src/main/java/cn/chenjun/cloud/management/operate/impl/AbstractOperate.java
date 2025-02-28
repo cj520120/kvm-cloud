@@ -1,19 +1,20 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.TaskRequest;
+import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.config.ApplicationConfig;
-import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.operate.Operate;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.AllocateService;
-import cn.chenjun.cloud.management.servcie.EventService;
-import cn.chenjun.cloud.management.task.OperateTask;
+import cn.chenjun.cloud.management.servcie.ConfigService;
+import cn.chenjun.cloud.management.servcie.NotifyService;
+import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.util.DomainUtil;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -61,12 +62,12 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected AllocateService allocateService;
     @Autowired
-    protected EventService eventService;
+    protected NotifyService notifyService;
     @Autowired
     @Lazy
-    protected OperateTask operateTask;
+    protected TaskService taskService;
     @Autowired
-    protected ApplicationConfig applicationConfig;
+    protected ConfigService configService;
     @Autowired
     protected RestTemplate restTemplate;
 
@@ -91,13 +92,17 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         } catch (Exception err) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
         }
-        String uri = String.format("%s/api/operate", host.getUri());
+        String url = host.getUri();
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        url += "api/operate";
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
         map.forEach((k, v) -> requestMap.add(k, v.toString()));
         RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
-                .post(URI.create(uri))
+                .post(URI.create(url))
                 .headers(httpHeaders)
                 .body(requestMap);
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
@@ -130,7 +135,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
 
 
     protected void onSubmitFinishEvent(String taskId, V result) {
-        this.operateTask.onTaskFinish(taskId, GsonBuilderUtil.create().toJson(result));
+        this.taskService.submitTaskFinish(taskId, GsonBuilderUtil.create().toJson(result));
     }
 
 
@@ -155,4 +160,115 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
      * @return
      */
     public abstract int getType();
+
+    protected Volume initVolume(StorageEntity storageEntity, VolumeEntity volumeEntity) {
+        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Storage storage = Storage.builder()
+                .name(storageEntity.getName())
+                .type(storageEntity.getType())
+                .param(storageParam)
+                .mountPath(storageEntity.getMountPath())
+                .build();
+        return Volume.builder().storage(storage).name(volumeEntity.getName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+    }
+
+    protected Volume initVolume(StorageEntity storageEntity, TemplateVolumeEntity volumeEntity) {
+        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Storage storage = Storage.builder()
+                .name(storageEntity.getName())
+                .type(storageEntity.getType())
+                .param(storageParam)
+                .mountPath(storageEntity.getMountPath())
+                .build();
+        return Volume.builder().storage(storage).name(volumeEntity.getName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+    }
+
+    protected Volume initVolume(StorageEntity storageEntity, SnapshotVolumeEntity volumeEntity) {
+        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
+        }.getType());
+        Storage storage = Storage.builder()
+                .name(storageEntity.getName())
+                .type(storageEntity.getType())
+                .param(storageParam)
+                .mountPath(storageEntity.getMountPath())
+                .build();
+        return Volume.builder().storage(storage).name(volumeEntity.getVolumeName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+    }
+
+    protected StorageCreateRequest buildStorageCreateRequest(StorageEntity storage, Map<String, Object> sysconfig) {
+        String configKey;
+        String secretKey = null;
+        String secretValue = null;
+        switch (storage.getType()) {
+            case Constant.StorageType.CEPH_RBD:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_CEPH_RBD_TPL;
+                secretKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL;
+
+                Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storage.getParam(), new TypeToken<Map<String, Object>>() {
+                }.getType());
+                secretValue = storageParam.getOrDefault("secret", "").toString();
+                break;
+            case Constant.StorageType.GLUSTERFS:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_GLUSTERFS_TPL;
+                break;
+            case Constant.StorageType.NFS:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_NFS_TPL;
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
+        }
+        String storageTpl = (String) sysconfig.get(configKey);
+        String storageXml = DomainUtil.buildStorageXml(storageTpl, sysconfig, storage);
+        String secretXml = null;
+        if (secretKey != null) {
+            String secretTpl = (String) sysconfig.get(secretKey);
+            secretXml = DomainUtil.buildStorageXml(secretTpl, sysconfig, storage);
+        }
+        StorageCreateRequest request = StorageCreateRequest.builder()
+                .name(storage.getName())
+                .storageXml(storageXml)
+                .secretXml(secretXml)
+                .secretValue(secretValue)
+                .build();
+        return request;
+    }
+
+    private String buildNetworkXml(NetworkEntity network, Map<String, Object> sysconfig) {
+        Constant.NetworkBridgeType type = Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType());
+        String configKey;
+        switch (type) {
+            case BASIC:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL;
+                break;
+            case OPEN_SWITCH:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.NETWORK_OVS_BRIDGE_TPL;
+                break;
+            default:
+                throw new CodeException(ErrorCode.BASE_NETWORK_ERROR, "不支持的桥接方式");
+        }
+        String tpl = (String) sysconfig.get(configKey);
+        String xml = DomainUtil.buildNetworkXml(tpl, sysconfig, network);
+        return xml;
+    }
+
+    protected BasicBridgeNetwork buildBasicNetworkRequest(NetworkEntity network, Map<String, Object> sysconfig) {
+        BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
+                .poolId(network.getPoolId())
+                .xml(buildNetworkXml(network, sysconfig))
+                .build();
+        return basicBridgeNetwork;
+    }
+
+    protected VlanNetwork buildVlanCreateRequest(NetworkEntity basicNetworkEntity, NetworkEntity network, Map<String, Object> sysconfig) {
+
+        BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(basicNetworkEntity, sysconfig);
+        VlanNetwork vlan = VlanNetwork.builder()
+                .poolId(network.getPoolId())
+                .xml(buildNetworkXml(network, sysconfig))
+                .basic(basicBridgeNetwork)
+                .build();
+        return vlan;
+    }
 }

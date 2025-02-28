@@ -9,23 +9,21 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author chenjun
  */
 @Component
 @Slf4j
-public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkOperate, ResultUtil<Void>> {
+public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostNetworkOperate, ResultUtil<Void>> {
 
 
     @Override
@@ -49,14 +47,15 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
             return;
         }
+
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
+
         switch (network.getType()) {
             case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
-                BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .bridge(network.getBridge())
-                        .ip(host.getHostIp())
-                        .geteway(network.getGateway())
-                        .nic(host.getNic())
-                        .netmask(network.getMask()).build();
+                BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
             }
             break;
@@ -65,20 +64,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
                 }
-                BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
-                        .bridge(basicNetworkEntity.getBridge())
-                        .ip(host.getHostIp())
-                        .geteway(basicNetworkEntity.getGateway())
-                        .nic(host.getNic())
-                        .netmask(basicNetworkEntity.getMask()).build();
-                VlanNetwork vlan = VlanNetwork.builder()
-                        .vlanId(network.getVlanId())
-                        .netmask(network.getMask())
-                        .basic(basicBridgeNetwork)
-                        .ip(null)
-                        .bridge(network.getBridge())
-                        .geteway(network.getGateway())
-                        .build();
+                VlanNetwork vlan = buildVlanCreateRequest(basicNetworkEntity, network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_VLAN, vlan);
             }
             break;
@@ -87,6 +73,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         }
 
     }
+
 
     @Override
     public Type getCallResultType() {
@@ -107,12 +94,12 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     switch (network.getStatus()) {
                         case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
                         case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                            network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY);
+                            network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.INSTALL);
                             networkMapper.updateById(network);
                         default:
                             break;
                     }
-                    this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                    this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
@@ -120,7 +107,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                         .networkId(param.getNetworkId())
                         .nextHostIds(hostIds)
                         .build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
@@ -133,7 +120,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     default:
                         break;
                 }
-                this.eventService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
     }

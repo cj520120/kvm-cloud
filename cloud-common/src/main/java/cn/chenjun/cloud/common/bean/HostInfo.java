@@ -46,6 +46,10 @@ public class HostInfo implements Serializable {
      */
     private String arch;
     /**
+     * 供应商 intel
+     */
+    private String vendor;
+    /**
      * 系统名称
      */
     private String name;
@@ -69,4 +73,8 @@ public class HostInfo implements Serializable {
      * cores
      */
     private Integer threads;
+    /**
+     * 系统版本
+     */
+    private String osVersion;
 }

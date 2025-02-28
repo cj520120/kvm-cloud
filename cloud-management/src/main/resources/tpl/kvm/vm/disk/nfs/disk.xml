@@ -1,0 +1,12 @@
+<disk type="file" device="disk" cache="none" aio="native">
+    <target dev="{{disk.device}}" bus="{{disk.bus}}"/>
+    <driver name="qemu" type="{{disk.type}}" cache="none" aio="native"/>
+    <source file="{{storage.mount}}/{{disk.name}}"/>
+    {% if disk.bus=='virtio' %}
+    <!-- virtio 驱动-->
+    <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>
+    {% else %}
+    <!-- ide/scsi/sata 驱动-->
+    <address type='drive' controller='0' bus='0' target='0' unit='1'/>
+    {% endif %}
+</disk>

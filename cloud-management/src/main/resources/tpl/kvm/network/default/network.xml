@@ -1,0 +1,8 @@
+<network>
+    <name>{{network.name}}</name>
+    <uuid>{{network.uuid}}</uuid>
+    <description>{{network.description}}</description>
+    <forward mode='bridge'/>
+    <bridge name='{{network.bridge}}'/>
+</network>
+

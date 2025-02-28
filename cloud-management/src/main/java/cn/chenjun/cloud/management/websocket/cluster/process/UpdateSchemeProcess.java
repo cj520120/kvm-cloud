@@ -22,7 +22,7 @@ public class UpdateSchemeProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ResultUtil<SchemeModel> resultUtil = this.schemeService.getSchemeInfo(msg.getId());
-        NotifyData<ResultUtil<SchemeModel>> sendMsg = NotifyData.<ResultUtil<SchemeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SCHEME).data(resultUtil).build();
+        NotifyData<ResultUtil<SchemeModel>> sendMsg = NotifyData.<ResultUtil<SchemeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SCHEME).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

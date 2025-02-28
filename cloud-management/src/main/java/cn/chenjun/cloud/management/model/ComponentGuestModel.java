@@ -18,4 +18,5 @@ public class ComponentGuestModel extends GuestModel {
     private int componentId;
     private int componentType;
     private String componentVip;
+    private String basicComponentVip;
 }

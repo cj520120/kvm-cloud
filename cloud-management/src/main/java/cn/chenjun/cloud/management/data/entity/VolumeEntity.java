@@ -29,7 +29,6 @@ public class VolumeEntity {
     public static final String VOLUME_CAPACITY = "volume_capacity";
     public static final String VOLUME_ALLOCATION = "volume_allocation";
     public static final String VOLUME_TYPE = "volume_type";
-    public static final String VOLUME_BACKING_PATH = "volume_backing_path";
     public static final String VOLUME_STATUS = "volume_status";
     public static final String CREATE_TIME = "create_time";
 
@@ -52,8 +51,6 @@ public class VolumeEntity {
     private Long allocation;
     @TableField(VOLUME_TYPE)
     private String type;
-    @TableField(VOLUME_BACKING_PATH)
-    private String backingPath;
     @TableField(VOLUME_STATUS)
     private Integer status;
     @TableField(CREATE_TIME)

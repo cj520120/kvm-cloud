@@ -21,7 +21,7 @@ public class GuestModel {
     private String busType;
     private int cpu;
     private long memory;
-    private int speed;
+    private int share;
     private int cdRoom;
     private int hostId;
     private int schemeId;
@@ -30,6 +30,8 @@ public class GuestModel {
     private int networkId;
     private int groupId;
     private int status;
+    private int systemCategory;
+    private int bootstrapType;
     private String guestIp;
     private Date lastStartTime;
     private Date createTime;

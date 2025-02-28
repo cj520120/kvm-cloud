@@ -3,7 +3,6 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.OsOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
-import cn.chenjun.cloud.agent.util.DomainXmlUtil;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -40,41 +39,51 @@ public class OsOperateImpl implements OsOperate {
 
     @SuppressWarnings({"unchecked"})
     private static void qmaExecuteShell(GuestQmaRequest request, Domain domain, GuestQmaRequest.Execute execute) throws LibvirtException {
-        Gson gson = new Gson();
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("execute", "guest-exec");
-        Map<String, Object> arguments = new HashMap<>(3);
-        map.put("arguments", arguments);
-        arguments.put("path", execute.getCommand());
-        arguments.put("arg", execute.getArgs());
-        String commandBody = gson.toJson(map);
-        String response = domain.qemuAgentCommand(commandBody, request.getTimeout(), 0);
-        Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
-        }.getType());
-        String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
-        map.clear();
-        arguments.clear();
-        arguments.put("pid", NumberUtil.parseInt(pid));
-        map.put("execute", "guest-exec-status");
-        map.put("arguments", arguments);
-        String statusRequest = gson.toJson(map);
-        boolean isExit;
-        do {
-            response = domain.qemuAgentCommand(statusRequest, request.getTimeout(), 0);
-            result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
+        try {
+            Gson gson = new Gson();
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("execute", "guest-exec");
+            Map<String, Object> arguments = new HashMap<>(3);
+            map.put("arguments", arguments);
+            arguments.put("path", execute.getCommand());
+            arguments.put("arg", execute.getArgs());
+            String commandBody = gson.toJson(map);
+            log.info("开始执行命令:domain={} command={}", domain.getName(), commandBody);
+            String response = domain.qemuAgentCommand(commandBody, request.getQmaExecuteTimeout(), 0);
+            Map<String, Object> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
             }.getType());
-            isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
-            if (!isExit) {
-                ThreadUtil.sleep(1, TimeUnit.SECONDS);
-            } else {
-                int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
-                if (code != 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:domain=" + domain.getName() + "command={}" + commandBody + ".response=" + response);
+            String pid = ((Map<String, Object>) result.get("return")).get("pid").toString();
+            map.clear();
+            arguments.clear();
+            arguments.put("pid", NumberUtil.parseInt(pid));
+            map.put("execute", "guest-exec-status");
+            map.put("arguments", arguments);
+            String statusRequest = gson.toJson(map);
+            boolean isExit;
+            log.info("查询命令并等待返回结果:domain={} command={}", domain.getName(), execute);
+            do {
+                response = domain.qemuAgentCommand(statusRequest, request.getQmaExecuteTimeout(), 0);
+                result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<Map<String, Object>>() {
+                }.getType());
+                isExit = Boolean.parseBoolean(((Map<String, Object>) result.get("return")).get("exited").toString());
+                if (!isExit) {
+                    ThreadUtil.sleep(5, TimeUnit.SECONDS);
                 } else {
-                    log.info("执行命令成功:domain={} command={} result={}", domain.getName(), execute, response);
+                    int code = NumberUtil.parseInt(((Map<String, Object>) result.get("return")).get("exitcode").toString());
+                    if (code != 0) {
+                        log.error("执行命令失败:domain={} command={} result={}", domain.getName(), commandBody, response);
+                        throw new CodeException(ErrorCode.SERVER_ERROR, "执行命令失败:domain=" + domain.getName() + "command={}" + commandBody + ".response=" + response);
+                    } else {
+                        log.info("执行命令成功:domain={} command={} result={}", domain.getName(), commandBody, response);
+                    }
                 }
+            } while (!isExit);
+        } catch (Exception err) {
+            boolean isCodeError = err instanceof CodeException;
+            if (!isCodeError) {
+                log.error("执行命令出现未知错误:domain={} command={}", domain.getName(), execute, err);
             }
-        } while (!isExit);
+        }
 
     }
 
@@ -165,91 +174,74 @@ public class OsOperateImpl implements OsOperate {
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_CD_ROOM)
     @Override
-    public Void detachCdRoom(Connect connect, OsCdRoom request) throws Exception {
+    public Void detachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = DomainXmlUtil.buildCdXml(request);
-        domain.updateDeviceFlags(xml, 1);
+        log.info("detachCdRoom xml={}", request.getXml());
+        domain.updateDeviceFlags(request.getXml(), 1);
         return null;
 
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_CD_ROOM)
     @Override
-    public Void attachCdRoom(Connect connect, OsCdRoom request) throws Exception {
+    public Void attachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        String xml = DomainXmlUtil.buildCdXml(request);
-        log.info("attachCdRoom xml={}", xml);
-        domain.updateDeviceFlags(xml, 1);
+        log.info("attachCdRoom xml={}", request.getXml());
+        domain.updateDeviceFlags(request.getXml(), 1);
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_DISK)
     @Override
-    public Void attachDisk(Connect connect, OsDisk request) throws Exception {
+    public Void attachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
-        }
-        String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
-        log.info("attachDisk xml={}", xml);
-        domain.attachDevice(xml);
+        log.info("attachDisk xml={}", request.getXml());
+        domain.attachDevice(request.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_DISK)
     @Override
-    public Void detachDisk(Connect connect, OsDisk request) throws Exception {
+    public Void detachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大磁盘数量");
-        }
-        String xml = DomainXmlUtil.buildDiskXml(Constant.DiskBus.VIRTIO, request);
-        log.info("detachDisk xml={}", xml);
-        domain.detachDevice(xml);
+        log.info("detachDisk xml={}", request.getXml());
+        domain.detachDevice(request.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_NIC)
     @Override
-    public Void attachNic(Connect connect, OsNic request) throws Exception {
+    public Void attachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
-        }
-        String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
-        log.info("attachNic xml={}", xml);
-        domain.attachDevice(xml);
+        log.info("attachNic xml={}", request.getXml());
+        domain.attachDevice(request.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_NIC)
     @Override
-    public Void detachNic(Connect connect, OsNic request) throws Exception {
+    public Void detachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        if (request.getDeviceId() >= DomainXmlUtil.MAX_DEVICE_COUNT) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "超过最大网卡数量");
-        }
-        String xml = DomainXmlUtil.buildNicXml(applicationConfig.getNetworkType(), request);
-        log.info("detachNic xml={}", xml);
-        domain.detachDevice(xml);
+        log.info("detachNic xml={}", request.getXml());
+        domain.detachDevice(request.getXml());
         return null;
     }
 
@@ -263,18 +255,17 @@ public class OsOperateImpl implements OsOperate {
             }
             domain.destroy();
         }
-        String xml = DomainXmlUtil.buildDomainXml(applicationConfig.getNetworkType(), request);
-        log.info("create vm={}", xml);
-        domain = connect.domainCreateXML(xml, 0);
+        log.info("create vm={}", request.getXml());
+        domain = connect.domainCreateXML(request.getXml(), 0);
         if (Objects.nonNull(request.getQmaRequest())) {
             long start = System.currentTimeMillis();
             Map<String, Object> map = new HashMap<>(2);
             map.put("execute", "guest-info");
             Gson gson = new Gson();
             String checkQmaReadyCommand = gson.toJson(map);
-            while ((System.currentTimeMillis() - start) < TimeUnit.SECONDS.toMillis(request.getQmaRequest().getTimeout())) {
+            while ((System.currentTimeMillis() - start) < TimeUnit.SECONDS.toMillis(request.getQmaRequest().getQmaCheckTimeout())) {
                 try {
-                    String response = domain.qemuAgentCommand(checkQmaReadyCommand, request.getQmaRequest().getTimeout(), 0);
+                    String response = domain.qemuAgentCommand(checkQmaReadyCommand, request.getQmaRequest().getQmaExecuteTimeout(), 0);
                     if (!StringUtils.isEmpty(response)) {
                         break;
                     }
@@ -321,14 +312,11 @@ public class OsOperateImpl implements OsOperate {
                 if (System.currentTimeMillis() - stopTime > timeout) {
                     domain.destroy();
                 } else {
-                    switch (domain.getInfo().state) {
-                        case VIR_DOMAIN_SHUTDOWN:
-                        case VIR_DOMAIN_SHUTOFF:
-                            domain.destroy();
-                        default:
-                            domain.shutdown();
-                            ThreadUtil.sleep(5, TimeUnit.SECONDS);
-                            break;
+                    if (Objects.requireNonNull(domain.getInfo().state) == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
+                        domain.shutdown();
+                        ThreadUtil.sleep(5, TimeUnit.SECONDS);
+                    } else {
+                        domain.destroy();
                     }
                 }
             } catch (LibvirtException err) {
@@ -372,6 +360,7 @@ public class OsOperateImpl implements OsOperate {
         Connect toConnect = new Connect(String.format("qemu+tcp://%s/system", request.getHost()));
         long liveMigrationFlag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
         domain.migrate(toConnect, liveMigrationFlag, null, null, 0);
+        this.stopDomain(connect,request.getName(),10000);
         return null;
     }
 

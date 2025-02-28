@@ -4,7 +4,7 @@
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-button style="float: left; padding: 3px 0" type="text" @click="show_crate_group_click">创建群组</el-button>
+						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_crate_group_click">创建群组</el-button>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="groups" style="width: 100%">

@@ -1,57 +1,9 @@
 app:
-  #系统组件网卡默认驱动，可选值为virtio e1000 rtl8139,变更该值需要删除原系统组件重建，切为最新版本的系统组件模版文件
-  systemComponentNetworkDriver: virtio
-  systemComponentCpu: 1
-  systemComponentMemory: 524288
-  systemComponentCpuSpeed: 0
-  systemComponentSlaveNumber: 1
-  destroyDelayMinute: 3
-  manager-uri: http://localhost:8080/
-  over-cpu: 4.0
-  over-memory: 2.0
-  #pip3加速源，国内用户可配置，海外无需配置
-  pip-source: https://pypi.tuna.tsinghua.edu.cn/simple
-  #yum加速源，国内用户可配置，海外无需配置
-  yum-source: |
-    [base]
-    name=CentOS-$releasever - Base
-    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/os/$basearch/
-    gpgcheck=1
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-    
-    [updates]
-    name=CentOS-$releasever - Updates
-    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/updates/$basearch/
-    gpgcheck=1
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-    
-    [extras]
-    name=CentOS-$releasever - Extras
-    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/extras/$basearch/
-    gpgcheck=1
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-    
-    [centosplus]
-    name=CentOS-$releasever - Plus
-    baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos/$releasever/centosplus/$basearch/
-    gpgcheck=1
-    enabled=0
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+  #启动后请修改系统配置项default.cluster.manager.uri
+  manager-uri: http://192.168.2.193:8080/
   work:
     thread:
       size: 1
-
-oauth2:
-  auth-uri: https://192.168.1.2:8083/oauth2/authorize
-  client-id: NLMAv72e
-  client-secret: fd74a2cb8b62d4011ff5945b0204d07f68366848
-  enable: false
-  id-path:
-    - userId
-  redirect-uri: http://192.168.2.107:8081/#/Login
-  title: Oauth2 Login
-  token-uri: https://192.168.1.2:8083/oauth2/token
-  user-uri: https://192.168.1.2:8083/oauth2/user/info
 server:
   port: 8080
   servlet:
@@ -104,7 +56,6 @@ spring:
          subscriptionConnectionPoolSize: 50
          connectionMinimumIdleSize: 32
          connectionPoolSize: 64
-         database: 2
          dnsMonitoringInterval: 5000
         threads: 16
         nettyThreads: 32

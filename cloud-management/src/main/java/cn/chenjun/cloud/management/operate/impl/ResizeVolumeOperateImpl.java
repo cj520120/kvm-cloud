@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeResizeRequest;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -33,10 +34,9 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             VolumeResizeRequest request = VolumeResizeRequest.builder()
-                    .sourceStorage(storage.getName())
-                    .sourceName(volume.getName())
+                    .volume(initVolume(storage, volume))
                     .size(param.getSize())
                     .build();
             this.asyncInvoker(host, param, Constant.Command.VOLUME_RESIZE, request);
@@ -61,12 +61,11 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setType(resultUtil.getData().getType());
                 volume.setPath(resultUtil.getData().getPath());
-                volume.setBackingPath(resultUtil.getData().getBackingPath());
             }
             volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

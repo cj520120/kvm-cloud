@@ -1,9 +1,42 @@
 package cn.chenjun.cloud.common.util;
 
+import org.springframework.util.StringUtils;
+
+import java.util.Arrays;
+
 /**
  * @author chenjun
  */
 public class Constant {
+    public enum NetworkBridgeType {
+
+        /**
+         * 基础网络
+         */
+        BASIC(0, "bridge"),
+        OPEN_SWITCH(1,"OpenSwitch");
+        private final String bridgeName;
+        private final int bridgeType;
+
+        NetworkBridgeType(int bridgeType,String bridgeName) {
+            this.bridgeType = bridgeType;
+            this.bridgeName = bridgeName;
+        }
+
+        public int bridgeType(){
+            return this.bridgeType;
+        }
+        public String bridgeName(){
+            return this.bridgeName;
+        }
+        public static NetworkBridgeType fromBridgeValue(String value){
+            return Arrays.stream(NetworkBridgeType.values()).filter(br-> StringUtils.endsWithIgnoreCase(br.bridgeName,value)).findFirst().orElse(null);
+        }
+        public static NetworkBridgeType fromBridgeType(int type){
+            return Arrays.stream(NetworkBridgeType.values()).filter(br-> br.bridgeType ==type).findFirst().orElse(null);
+        }
+    }
+
     public static class VolumeType {
         public static final String RAW = "raw";
         public static final String QCOW = "qcow";
@@ -63,6 +96,7 @@ public class Constant {
     public static class StorageType {
         public static final String NFS = "nfs";
         public static final String GLUSTERFS = "glusterfs";
+        public static final String CEPH_RBD = "ceph-rbd";
         public static final String LOCAL = "local";
     }
 
@@ -70,6 +104,7 @@ public class Constant {
         public static final String VIRTIO = "virtio";
         public static final String IDE = "ide";
         public static final String SCSI = "scsi";
+        public static final String SATA = "sata";
 
     }
 
@@ -92,8 +127,8 @@ public class Constant {
         public static final int COMPONENT_CONNECT_SUCCESS = 201;
         public static final int COMPONENT_CONNECT_FAIL = 202;
         public static final int COMPONENT_NOTIFY = 203;
-        public static final int COMPONENT_VNC_REQUEST = 205;
         public static final int COMPONENT_DNS_REQUEST = 206;
+        public static final int COMPONENT_NAT_REQUEST = 207;
     }
 
     public static class NotifyType {
@@ -109,11 +144,14 @@ public class Constant {
         public static final int UPDATE_SCHEME = 8;
         public static final int UPDATE_GROUP = 9;
         public static final int UPDATE_DNS = 10;
-        public static final int UPDATE_COMPONENT = 10;
+        public static final int UPDATE_COMPONENT = 11;
+        public static final int UPDATE_COMPONENT_NAT = 12;
+        public static final int UPDATE_SSH_KEY = 13;
 
-
-        public static final int COMPONENT_UPDATE_VNC = 100;
+ 
         public static final int COMPONENT_UPDATE_DNS = 101;
+        public static final int COMPONENT_UPDATE_NAT = 102;
+
     }
 
 }

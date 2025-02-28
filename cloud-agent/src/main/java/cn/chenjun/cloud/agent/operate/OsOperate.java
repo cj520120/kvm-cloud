@@ -75,7 +75,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    Void attachCdRoom(Connect connect, OsCdRoom request) throws Exception;
+    Void attachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception;
 
     /**
      * 卸载光驱
@@ -84,7 +84,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    Void detachCdRoom(Connect connect, OsCdRoom request) throws Exception;
+    Void detachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception;
 
     /**
      * 挂载磁盘
@@ -93,7 +93,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    Void attachDisk(Connect connect, OsDisk request) throws Exception;
+    Void attachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception;
 
     /**
      * 卸载磁盘
@@ -102,7 +102,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    Void detachDisk(Connect connect, OsDisk request) throws Exception;
+    Void detachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception;
 
     /**
      * 挂载网卡
@@ -111,7 +111,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    Void attachNic(Connect connect, OsNic request) throws Exception;
+    Void attachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception;
 
     /**
      * 卸载网卡
@@ -120,7 +120,7 @@ public interface OsOperate {
      * @param request
      * @throws Exception
      */
-    Void detachNic(Connect connect, OsNic request) throws Exception;
+    Void detachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception;
 
 
     /**

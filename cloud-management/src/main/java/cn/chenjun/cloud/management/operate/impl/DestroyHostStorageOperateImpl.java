@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -32,7 +33,12 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
 
     @Override
     public void operate(DestroyHostStorageOperate param) {
+        if(ObjectUtils.isEmpty(param.getNextHostIds())){
+            //主机为空，直接成功
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+            return;
 
+        }
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
         if (!Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
@@ -67,7 +73,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                         .storageId(param.getStorageId())
                         .nextHostIds(hostIds)
                         .build();
-                this.operateTask.addTask(operate);
+                this.taskService.addTask(operate);
             } else {
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
                 if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
@@ -84,7 +90,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
     }
 
     @Override

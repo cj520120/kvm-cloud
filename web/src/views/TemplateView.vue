@@ -4,13 +4,15 @@
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_template">创建模版</el-button>
+						<el-select v-model="selectTemplateType" placeholder="请选择" size="mini">
+							<el-option v-for="item in templatesFilterType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+						</el-select>
+						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_template">创建模版</el-button>
 					</el-row>
 					<el-row>
-						<el-table :v-loading="data_loading" :data="templates" style="width: 100%">
+						<el-table :v-loading="data_loading" :data="show_table_templates" style="width: 100%">
 							<el-table-column label="ID" prop="templateId" width="80" />
 							<el-table-column label="名称" prop="name" show-overflow-tooltip />
-							<el-table-column label="磁盘类型" prop="volumeType" width="120" />
 							<el-table-column label="类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ get_template_type(scope.row) }}</el-tag>
@@ -23,6 +25,7 @@
 							</el-table-column>
 							<el-table-column label="操作" min-width="200">
 								<template #default="scope">
+									<el-button @click="show_template_script(scope.row)" type="" size="mini" v-if="scope.row.templateType === 2">初始化脚本</el-button>
 									<el-button @click="show_template_info(scope.row)" type="" size="mini">模版详情</el-button>
 									<el-button @click="download_template(scope.row)" type="warning" size="mini" v-if="scope.row.uri.indexOf('http://') === 0 || scope.row.uri.indexOf('https://') === 0">重新下载</el-button>
 									<el-button @click="destroy_template(scope.row)" type="danger" size="mini">销毁模版</el-button>
@@ -44,6 +47,7 @@
 							<el-descriptions-item label="ID">{{ show_template.templateId }}</el-descriptions-item>
 							<el-descriptions-item label="模版名">{{ show_template.name }}</el-descriptions-item>
 							<el-descriptions-item label="下载地址" v-if="show_template.uri && show_template.uri.indexOf('http') === 0">{{ show_template.uri }}</el-descriptions-item>
+							<el-descriptions-item label="MD5" v-if="show_template.uri && show_template.uri.indexOf('http') === 0">{{ show_template.md5 }}</el-descriptions-item>
 							<el-descriptions-item label="模版类型">
 								<el-tag>{{ get_template_type(show_template) }}</el-tag>
 							</el-descriptions-item>
@@ -69,18 +73,14 @@
 									<el-option label="用户模版" :value="2"></el-option>
 								</el-select>
 							</el-form-item>
-							<el-form-item label="磁盘类型" prop="volumeType" v-if="create_template.templateType === 2">
-								<el-select v-model="create_template.volumeType" style="width: 100%">
-									<el-option label="raw" value="raw"></el-option>
-									<el-option label="qcow" value="qcow"></el-option>
-									<el-option label="qcow2" value="qcow2"></el-option>
-									<el-option label="vdi" value="vdi"></el-option>
-									<el-option label="vmdk" value="vmdk"></el-option>
-									<el-option label="vpc" value="vpc"></el-option>
-								</el-select>
-							</el-form-item>
 							<el-form-item label=" 下载地址" prop="uri">
 								<el-input v-model="create_template.uri"></el-input>
+							</el-form-item>
+							<el-form-item label="文件MD5" prop="uri">
+								<el-input v-model="create_template.md5"></el-input>
+							</el-form-item>
+							<el-form-item label="初始化脚本" v-if="create_template.templateType === 2">
+								<el-input v-model="create_template.script" :rows="10" type="textarea"></el-input>
 							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="create_template_click">立即创建</el-button>
@@ -91,15 +91,17 @@
 				</el-card>
 			</el-main>
 		</el-container>
+		<ShowTemplateScript ref="ShowTemplateScriptComponentRef" />
 	</div>
 </template>
 <script>
 import { getTemplateList, downloadTemplate, destroyTemplate, createTemplate } from '@/api/api'
 import Notify from '@/api/notify'
 import util from '@/api/util'
+import ShowTemplateScript from '@/components/ShowTemplateScript.vue'
 export default {
 	name: 'templateView',
-	components: {},
+	components: { ShowTemplateScript },
 	data() {
 		return {
 			data_loading: false,
@@ -108,10 +110,30 @@ export default {
 			create_template: {
 				name: '',
 				templateType: 0,
-				volumeType: 'qcow2',
-				uri: ''
+				uri: '',
+				md5: '',
+				script: '#cloud-config\n'
 			},
-			templates: []
+			templates: [],
+			templatesFilterType: [
+				{
+					value: -1,
+					label: '全部'
+				},
+				{
+					value: 0,
+					label: 'ISO镜像文件'
+				},
+				{
+					value: 1,
+					label: '系统模版'
+				},
+				{
+					value: 2,
+					label: '用户模版'
+				}
+			],
+			selectTemplateType: -1
 		}
 	},
 	mixins: [Notify, util],
@@ -126,6 +148,13 @@ export default {
 	beforeDestroy() {
 		this.unsubscribe_notify(this.$options.name)
 		this.unsubscribe_connect_notify(this.$options.name)
+	},
+	computed: {
+		show_table_templates() {
+			return this.templates.filter((v) => {
+				return this.selectTemplateType === -1 || v.templateType === this.selectTemplateType
+			})
+		}
 	},
 	methods: {
 		async reload_page() {
@@ -156,6 +185,9 @@ export default {
 			this.show_template = template
 			this.show_type = 1
 		},
+		show_template_script(template) {
+			this.$refs.ShowTemplateScriptComponentRef.init(template)
+		},
 		update_template_info(template) {
 			let findIndex = this.templates.findIndex((item) => item.templateId === template.templateId)
 			if (findIndex >= 0) {
@@ -185,12 +217,8 @@ export default {
 				name: this.create_template.name,
 				templateType: this.create_template.templateType,
 				uri: this.create_template.uri,
-				volumeType: this.create_template.volumeType
-			}
-			if (this.create_template.templateType === 0) {
-				data.volumeType = 'raw'
-			} else if (this.create_template.templateType === 1) {
-				data.volumeType = 'qcow2'
+				md5: this.create_template.md5,
+				script: this.create_template.script
 			}
 			createTemplate(data).then((res) => {
 				if (res.code === 0) {

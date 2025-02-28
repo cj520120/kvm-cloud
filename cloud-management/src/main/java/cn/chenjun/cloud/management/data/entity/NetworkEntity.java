@@ -21,6 +21,7 @@ import java.util.Date;
 @TableName("tbl_network_info")
 public class NetworkEntity {
     public static final String NETWORK_ID = "network_id";
+    public static final String NETWORK_POOL_ID = "network_pool_id";
     public static final String NETWORK_NAME = "network_name";
     public static final String NETWORK_START_IP = "network_start_ip";
     public static final String NETWORK_STOP_IP = "network_stop_ip";
@@ -35,12 +36,15 @@ public class NetworkEntity {
     public static final String NETWORK_VLAN_ID = "network_vlan_id";
     public static final String NETWORK_SECRET = "network_secret";
     public static final String NETWORK_DOMAIN = "network_domain";
+    public static final String NETWORK_BRIDGE_TYPE = "network_bridge_type";
     public static final String NETWORK_BASIC_NETWORK_ID = "network_basic_network_id";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO)
     @TableField(NETWORK_ID)
     private Integer networkId;
+    @TableField(NETWORK_POOL_ID)
+    private String poolId;
     @TableField(NETWORK_NAME)
     private String name;
     @TableField(NETWORK_START_IP)
@@ -57,6 +61,8 @@ public class NetworkEntity {
     private String broadcast;
     @TableField(NETWORK_BRIDGE_NAME)
     private String bridge;
+    @TableField(NETWORK_BRIDGE_TYPE)
+    private Integer bridgeType;
     @TableField(NETWORK_DNS)
     private String dns;
     @TableField(NETWORK_TYPE)

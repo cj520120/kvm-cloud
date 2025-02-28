@@ -4,7 +4,7 @@
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_host">创建主机</el-button>
+						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_host">创建主机</el-button>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="hosts" style="width: 100%">
@@ -14,14 +14,14 @@
 							<el-table-column label="CPU" prop="hostIp" width="120">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + scope.row.allocationCpu + '核 / 总共:' + scope.row.totalCpu + '核'" placement="top">
-										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.totalCpu <= 0 ? 0 : Math.min(100, Math.floor((scope.row.allocationCpu * 100) / scope.row.totalCpu))"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>
 							<el-table-column label="内存" prop="hostIp" width="120">
 								<template #default="scope">
 									<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(scope.row.allocationMemory) + ' / 总共:' + get_memory_display_size(scope.row.totalMemory)" placement="top">
-										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory)"></el-progress>
+										<el-progress color="#67C23A" :percentage="scope.row.totalMemory <= 0 ? 0 : Math.min(100, Math.floor((scope.row.allocationMemory * 100) / scope.row.totalMemory))"></el-progress>
 									</el-tooltip>
 								</template>
 							</el-table-column>

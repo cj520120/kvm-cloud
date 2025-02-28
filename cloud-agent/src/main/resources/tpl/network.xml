@@ -1,9 +1,0 @@
-<network>
-    <name>{{name}}</name>
-    <forward mode='bridge'/>
-    <bridge name='{{bridge}}'/>
-    {% if type == 'OpenSwitch' %}
-    <virtualport type='openvswitch'/>
-    {% endif %}
-</network>
-

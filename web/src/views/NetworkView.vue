@@ -4,13 +4,18 @@
 			<el-main>
 				<el-card class="box-card" v-show="this.show_type === 0">
 					<el-row slot="header" class="clearfix" style="height: 20px">
-						<el-button style="float: left; padding: 3px 0" type="text" @click="show_create_network">创建网络</el-button>
+						<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_network">创建网络</el-button>
 					</el-row>
 					<el-row>
 						<el-table :v-loading="data_loading" :data="networks" style="width: 100%">
 							<el-table-column label="ID" prop="networkId" width="80" />
 							<el-table-column label="名称" prop="name" width="120" show-overflow-tooltip />
 							<el-table-column label="桥接网卡" prop="bridge" width="120" />
+							<el-table-column label="桥接方式" prop="bridgeType" width="150">
+								<template #default="scope">
+									<el-tag>{{ get_bridge_type(scope.row) }}</el-tag>
+								</template>
+							</el-table-column>
 							<el-table-column label="子网" prop="subnet" width="150">
 								<template #default="scope">{{ scope.row.subnet }}/{{ netmask2CIDR(scope.row.mask) }}</template>
 							</el-table-column>

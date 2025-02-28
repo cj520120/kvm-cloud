@@ -23,6 +23,7 @@ public abstract class BaseOperateParam {
      * @return
      */
     public abstract int getType();
+
     @Override
     public String toString() {
         return GsonBuilderUtil.create().toJson(this);

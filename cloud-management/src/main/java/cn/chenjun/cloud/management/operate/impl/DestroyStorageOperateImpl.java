@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(DestroyStorageOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())
@@ -40,7 +39,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
                 .storageId(param.getStorageId())
                 .nextHostIds(hostIds)
                 .build();
-        this.operateTask.addTask(operate);
+        this.taskService.addTask(operate);
         this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
 
     }
@@ -61,7 +60,7 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
     }
 
     @Override

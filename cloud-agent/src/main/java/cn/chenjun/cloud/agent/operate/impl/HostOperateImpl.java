@@ -1,24 +1,26 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
+import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.HostOperate;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.util.Constant;
-import cn.hutool.system.OsInfo;
-import cn.hutool.system.SystemUtil;
-import org.dom4j.*;
+import cn.hutool.core.util.SystemPropsUtil;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
 import org.libvirt.NodeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
 import java.io.StringReader;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author chenjun
@@ -29,90 +31,71 @@ public class HostOperateImpl implements HostOperate {
     private NetworkOperate networkOperate;
     @Autowired
     private StorageOperate storageOperate;
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
-    private static String getNodeText(Document doc, String path, String defaultValue) {
-        Node node = doc.selectSingleNode(path);
-        if (node != null) {
-            return node.getText();
-        }
-        return defaultValue;
-    }
 
-    private static String getArch(String xml) throws SAXException, DocumentException {
 
-        try (StringReader sr = new StringReader(xml)) {
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            return getNodeText(doc, "/capabilities/host/cpu/arch", "x86_64");
-        }
-    }
-
-    @SuppressWarnings({"unchecked"})
-    private static String getEmulator(String xml, String hostArch) throws SAXException, DocumentException {
-        String emulator = null;
-        try (StringReader sr = new StringReader(xml)) {
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            String path = "/capabilities/guest";
-            List<Element> nodes = doc.selectNodes(path);
-            for (Element node : nodes) {
-                Object osType = node.selectObject("os_type");
-                Object arch = node.selectObject("arch");
-                boolean isHvm = false;
-                boolean isArch = false;
-                if (osType instanceof Element) {
-                    isHvm = "hvm".equals(((Element) osType).getData());
-                }
-                if (arch instanceof Element) {
-                    String archValue = ((Element) node.selectObject("arch")).attribute("name").getText();
-                    isArch = Objects.equals(hostArch, archValue);
-                }
-                if (isHvm && isArch) {
-
-                    Object emulatorNode = node.selectObject("arch/emulator");
-                    if (emulatorNode instanceof Element) {
-                        emulator = ((Element) emulatorNode).getTextTrim();
-                    }
-                    List<Element> domainNodes = node.selectNodes("arch/domain");
-                    for (Element domainNode : domainNodes) {
-                        Attribute attribute = domainNode.attribute("type");
-                        if (attribute != null && Objects.equals(attribute.getValue(), "kvm")) {
-                            emulatorNode = domainNode.selectObject("emulator");
-                            if (emulatorNode instanceof Element) {
-                                emulator = ((Element) emulatorNode).getTextTrim();
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-        return emulator;
-    }
-
-    @DispatchBind(command = Constant.Command.HOST_INFO)
-    @Override
-    public HostInfo getHostInfo(Connect connect, NoneRequest request) throws Exception {
-        OsInfo osInfo = SystemUtil.getOsInfo();
-        String xml = connect.getCapabilities();
-        String arch = getArch(xml);
-        String emulator = getEmulator(xml, arch);
+    @SneakyThrows
+    private HostInfo getHostInfo(Connect connect) {
         NodeInfo nodeInfo = connect.nodeInfo();
-        return HostInfo.builder().hostName(connect.getHostName())
+
+        HostInfo hostInfo = HostInfo.builder().hostName(connect.getHostName())
+                .name(SystemPropsUtil.get("os.name",""))
+                .osVersion(SystemPropsUtil.get("os.version",""))
+                .arch(SystemPropsUtil.get("os.arch",""))
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(nodeInfo.memory)
                 .cpu(nodeInfo.cpus)
                 .hypervisor(connect.getType())
-                .arch(arch)
-                .name(osInfo.getName())
                 .cores(nodeInfo.cores)
                 .threads(nodeInfo.threads)
-                .sockets(nodeInfo.sockets)
-                .emulator(emulator)
+                .sockets(nodeInfo.cpus/(nodeInfo.sockets*nodeInfo.cores*nodeInfo.threads))
                 .build();
+        try (StringReader sr = new StringReader(connect.getCapabilities())) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+            Node archNode = doc.selectSingleNode("/capabilities/host/cpu/arch");
+            if (archNode != null) {
+                hostInfo.setArch(archNode.getText());
+            }
+            Node vendorNode = doc.selectSingleNode("/capabilities/host/cpu/vendor");
+            if (vendorNode != null) {
+                hostInfo.setVendor(vendorNode.getText());
+            }
+            List<Node> guestNodes = doc.selectNodes("/capabilities/guest");
+            for (Node node : guestNodes) {
+                String osType = node.selectSingleNode("os_type").getText();
+                String arch = ((Element) node.selectSingleNode("arch")).attributeValue("name");
+                if (StringUtils.equalsIgnoreCase(osType, "hvm") && StringUtils.equalsIgnoreCase(arch, hostInfo.getArch())) {
+                    Node emulatorNode = node.selectSingleNode("arch/emulator");
+                    if (emulatorNode != null) {
+                        hostInfo.setEmulator(emulatorNode.getText());
+                    }
+                    List<Node> guestDomainNodes = node.selectNodes("arch/domain");
+                    for (Node guestDomainNode : guestDomainNodes) {
+                        emulatorNode = guestDomainNode.selectSingleNode("emulator");
+                        if (emulatorNode != null) {
+                            hostInfo.setEmulator(emulatorNode.getText());
+                            break;
+                        }
+                    }
+                }
+                if (!StringUtils.isEmpty(hostInfo.getEmulator())) {
+                    break;
+                }
+            }
+        }
+        return hostInfo;
+    }
+
+    @DispatchBind(command = Constant.Command.HOST_INFO)
+    @Override
+    public HostInfo getHostInfo(Connect connect, NoneRequest request) {
+
+        return getHostInfo(connect);
     }
 
     @DispatchBind(command = Constant.Command.HOST_INIT)

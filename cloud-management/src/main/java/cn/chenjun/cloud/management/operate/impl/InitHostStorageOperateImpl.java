@@ -4,12 +4,12 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -33,29 +33,31 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
 
         }
+        if(param.getNextHostIds()==null||param.getNextHostIds().isEmpty()){
+            throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]无法创建，没有可用的主机分配");
+        }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
         if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
             //主机未就绪直接提交成功
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.<StorageInfo>builder().build());
             return;
         }
-        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storage.getParam(), new TypeToken<Map<String, Object>>() {
-        }.getType());
-        StorageCreateRequest request = StorageCreateRequest.builder()
-                .name(storage.getName())
-                .type(storage.getType())
-                .param(storageParam)
-                .mountPath(storage.getMountPath())
-                .build();
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
+        StorageCreateRequest request = buildStorageCreateRequest(storage, sysconfig);
         this.asyncInvoker(host, param, Constant.Command.STORAGE_CREATE, request);
 
     }
+
 
     @Override
     public Type getCallResultType() {
         return new TypeToken<ResultUtil<StorageInfo>>() {
         }.getType();
     }
+
     @Override
     public void onFinish(InitHostStorageOperate param, ResultUtil<StorageInfo> resultUtil) {
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
@@ -78,7 +80,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                             .storageId(param.getStorageId())
                             .nextHostIds(hostIds)
                             .build();
-                    this.operateTask.addTask(operate);
+                    this.taskService.addTask(operate);
                 } else {
                     storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.READY);
                 }
@@ -91,7 +93,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                 storageMapper.updateById(storage);
             }
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

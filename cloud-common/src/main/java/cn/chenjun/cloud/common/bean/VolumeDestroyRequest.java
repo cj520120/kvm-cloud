@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VolumeDestroyRequest {
-    private String sourceStorage;
-    private String sourceName;
+//    private String sourceStorage;
+//    private String sourceName;
+
+    private Volume volume;
 }

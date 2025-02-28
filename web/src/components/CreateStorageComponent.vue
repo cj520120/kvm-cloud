@@ -4,7 +4,7 @@
 			<el-page-header @back="on_back_click()" content="创建存储池" style="color: #409eff"></el-page-header>
 		</el-row>
 		<el-row>
-			<el-form ref="createForm" :model="create_storage" label-width="100px" class="demo-ruleForm">
+			<el-form ref="createForm" :model="create_storage" label-width="150px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="description">
 					<el-input v-model="create_storage.description"></el-input>
 				</el-form-item>
@@ -12,18 +12,31 @@
 					<el-select v-model="create_storage.type" style="width: 100%">
 						<el-option label="NFS" value="nfs"></el-option>
 						<el-option label="Glusterfs" value="glusterfs"></el-option>
+						<el-option label="Ceph Rbd" value="ceph-rbd"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="路径" prop="path" v-if="create_storage.type === 'nfs'">
 					<el-input v-model="create_storage.path"></el-input>
 				</el-form-item>
-				<el-form-item label="磁盘名" prop="path" v-if="this.create_storage.type === 'glusterfs'">
-					<el-input v-model="create_storage.path"></el-input>
+				<el-form-item label="Glusterfs磁盘名" prop="path" v-if="this.create_storage.type === 'glusterfs'">
+					<el-input v-model="create_storage.volume"></el-input>
 				</el-form-item>
-				<el-form-item label="nfs地址" prop="uri" v-if="create_storage.type === 'nfs'">
+				<el-form-item label="存储池" prop="path" v-if="this.create_storage.type === 'ceph-rbd'">
+					<el-input v-model="create_storage.pool"></el-input>
+				</el-form-item>
+				<el-form-item label="用户" prop="path" v-if="this.create_storage.type === 'ceph-rbd'">
+					<el-input v-model="create_storage.username"></el-input>
+				</el-form-item>
+				<el-form-item label="密钥" prop="path" v-if="this.create_storage.type === 'ceph-rbd'">
+					<el-input v-model="create_storage.secret"></el-input>
+				</el-form-item>
+				<el-form-item label="NFS地址" prop="uri" v-if="create_storage.type === 'nfs'">
 					<el-input v-model="create_storage.uri"></el-input>
 				</el-form-item>
-				<el-form-item label="glusterfs地址" prop="uri" v-if="this.create_storage.type === 'glusterfs'">
+				<el-form-item label="Glusterfs地址" prop="uri" v-if="this.create_storage.type === 'glusterfs'">
+					<el-input v-model="create_storage.uri"></el-input>
+				</el-form-item>
+				<el-form-item label="Ceph地址" prop="uri" v-if="this.create_storage.type === 'ceph-rbd'">
 					<el-input v-model="create_storage.uri"></el-input>
 				</el-form-item>
 				<el-form-item>
@@ -43,7 +56,11 @@ export default {
 				description: '',
 				type: 'nfs',
 				param: '',
+				volume: '',
 				path: '',
+				pool: '',
+				username: '',
+				secret: '',
 				uri: ''
 			}
 		}
@@ -67,9 +84,21 @@ export default {
 				type: this.create_storage.type,
 				param: '{}'
 			}
-			if (this.create_storage.type === 'nfs' || this.create_storage.type === 'glusterfs') {
+			if (this.create_storage.type === 'nfs') {
 				data.param = JSON.stringify({
 					path: this.create_storage.path,
+					uri: this.create_storage.uri
+				})
+			} else if (this.create_storage.type === 'glusterfs') {
+				data.param = JSON.stringify({
+					volume: this.create_storage.volume,
+					uri: this.create_storage.uri
+				})
+			} else if (this.create_storage.type === 'ceph-rbd') {
+				data.param = JSON.stringify({
+					pool: this.create_storage.pool,
+					username: this.create_storage.username,
+					secret: this.create_storage.secret,
 					uri: this.create_storage.uri
 				})
 			} else {

@@ -15,6 +15,8 @@ public final class ErrorCode {
      */
     public static final int NETWORK_NOT_FOUND = BASE_NETWORK_ERROR + 1;
     public static final int NETWORK_NOT_SPACE = BASE_NETWORK_ERROR + 2;
+    public static final int NETWORK_COMPONENT_NOT_FOUND = BASE_NETWORK_ERROR + 3;
+    public static final int NETWORK_COMPONENT_NAT_NOT_FOUND = BASE_NETWORK_ERROR + 4;
     public static final int BASE_GUEST_ERROR = BASE_ERROR * 2;
     /**
      * GUEST
@@ -34,10 +36,11 @@ public final class ErrorCode {
     public static final int STORAGE_NOT_SPACE = BASE_STORAGE_ERROR + 2;
     public static final int STORAGE_BUSY = BASE_STORAGE_ERROR + 3;
     public static final int STORAGE_NOT_READY = BASE_STORAGE_ERROR + 4;
-    public static final int BASE_VOLUME_ERROR = BASE_ERROR * 4;
+    public static final int STORAGE_NOT_SUPPORT = BASE_STORAGE_ERROR + 5;
     /**
      * Volume
      */
+    public static final int BASE_VOLUME_ERROR = BASE_ERROR * 4;
     public static final int VOLUME_NOT_FOUND = BASE_VOLUME_ERROR + 1;
     public static final int VOLUME_NOT_READY = BASE_VOLUME_ERROR + 2;
     public static final int BASE_TEMPLATE_ERROR = BASE_ERROR * 5;
@@ -76,6 +79,24 @@ public final class ErrorCode {
      */
     public static final int BASE_DNS_ERROR = BASE_ERROR * 11;
     public static final int DNS_NOT_FOUND = BASE_DNS_ERROR + 1;
+    /**
+     * SSh
+     */
+    public static final int BASE_SSH_AUTHORIZED_ERROR = BASE_ERROR * 12;
+    public static final int SSH_AUTHORIZED_NOT_FOUND = BASE_SSH_AUTHORIZED_ERROR+1;
+    public static final int SSH_AUTHORIZED_CREATE_ERROR = BASE_SSH_AUTHORIZED_ERROR+2;
+
+    /**
+     * Agent
+     */
+    public static final int BASE_AGENT_ERROR = BASE_ERROR * 13;
+    public static final int BASE_TASK_BUSY = BASE_AGENT_ERROR + 1;
+    public static final int BASE_CONFIG_ERROR = BASE_ERROR*14;
+    /**
+     * Config
+     */
+    public static final int CONFIG_EXISTS_ERROR = BASE_CONFIG_ERROR+1;
+    public static final int CONFIG_NOT_EXISTS_ERROR = BASE_CONFIG_ERROR+1;
 
     private ErrorCode() {
 

@@ -17,6 +17,7 @@ public class WsClient {
     private Session session;
 
     private int networkId;
+    private int componentId;
 
     private short clientType;
 

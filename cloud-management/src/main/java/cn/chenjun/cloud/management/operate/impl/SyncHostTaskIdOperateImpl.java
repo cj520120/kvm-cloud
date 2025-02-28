@@ -5,11 +5,10 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.SyncHostTaskIdOperate;
-import cn.chenjun.cloud.management.task.OperateTask;
+import cn.chenjun.cloud.management.servcie.TaskService;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -23,8 +22,7 @@ import java.util.List;
 public class SyncHostTaskIdOperateImpl extends AbstractOperate<SyncHostTaskIdOperate, ResultUtil<List<String>>> {
 
     @Autowired
-    @Lazy
-    private OperateTask operateTask;
+    private TaskService taskService;
 
 
     @Override
@@ -44,7 +42,7 @@ public class SyncHostTaskIdOperateImpl extends AbstractOperate<SyncHostTaskIdOpe
         List<String> taskIds = resultUtil.getData();
         if (taskIds != null) {
             for (String taskId : taskIds) {
-                operateTask.keepTask(taskId);
+                taskService.keepTask(taskId);
             }
         }
 

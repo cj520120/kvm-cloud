@@ -1,5 +1,85 @@
 export default {
   methods: {
+    get_bridge_type(network) {
+      switch (network.bridgeType) {
+        case 0:
+          return "基础桥接";
+        case 1:
+          return "OpenSwitch";
+        default:
+          return `未知桥接[${network.bridgeType}]`;
+      }
+    },
+    get_bootstrap_type_name(guest) { 
+      switch (guest.bootstrapType) { 
+        case 0:
+          return "BIOS"
+        case 1:
+          return "UEFI"
+        default:
+          return "UNKNOW"
+      }
+    },
+    get_system_category_name(guest) {
+      switch (guest.systemCategory) {
+        case 100:
+          return "Linux";
+        case 200:
+          return "Unix";
+        case 300:
+          return "Windows";
+        case 400:
+          return "Android";
+        case 101:
+          return "Centos";
+        case 102:
+          return "Ubuntu";
+        case 103:
+          return "Deepin";
+        case 104:
+          return "RedHat";
+        case 105:
+          return "Debian";
+        case 106:
+          return "OpenEuler";
+        case 107:
+          return "UOS";
+        case 108:
+          return "Oracle Linux";
+        default:
+          return "Unknown";
+      }
+    },
+    get_system_category_image(guest) {
+      switch (guest.systemCategory) {
+        case 100:
+          return require("@/assets/system/Linux.png");
+        case 200:
+          return require("@/assets/system/Unix.png");
+        case 300:
+          return require("@/assets/system/Windows.png");
+        case 400:
+          return require("@/assets/system/Android.png");
+        case 101:
+          return require("@/assets/system/Centos.png");
+        case 102:
+          return require("@/assets/system/Ubuntu.png");
+        case 103:
+          return require("@/assets/system/Deepin.png");
+        case 104:
+          return require("@/assets/system/RedHat.png");
+        case 105:
+          return require("@/assets/system/Debian.png");
+        case 106:
+          return require("@/assets/system/OpenEuler.png");
+        case 107:
+          return require("@/assets/system/UOS.png");
+        case 108:
+          return require("@/assets/system/Oracle.png");
+        default:
+          return require("@/assets/system/Linux.png");
+      }
+    },
     get_guest_status(guest) {
       switch (guest.status) {
         case 0:
@@ -51,6 +131,8 @@ export default {
         case 4:
           return "正在销毁";
         case 5:
+          return "正在安装";
+        case 6:
           return "网络错误";
         default:
           return `未知状态[${network.status}]`;
@@ -125,7 +207,7 @@ export default {
     get_template_type(template) {
       switch (template.templateType) {
         case 0:
-          return "IOS 文件";
+          return "ISO 文件";
         case 1:
           return "系统模版";
         case 2:
@@ -164,8 +246,10 @@ export default {
     },
     get_component_type(componentType) {
       switch (componentType) {
-        case 0:
+        case 1:
           return "Route";
+        case 2:
+          return "Nat";
         default:
           return "未知";
       }

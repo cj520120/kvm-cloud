@@ -8,6 +8,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import javax.websocket.Session;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * @author chenjun
@@ -16,8 +17,8 @@ public class VncClient extends WebSocketClient {
 
     private final Session session;
 
-    public VncClient(Session session, URI serverUri) {
-        super(serverUri, new Draft_6455());
+    public VncClient(Session session, URI serverUri, Map<String, String> httpHeaders) {
+        super(serverUri, new Draft_6455(), httpHeaders);
         this.session = session;
 
     }
@@ -50,4 +51,5 @@ public class VncClient extends WebSocketClient {
         this.session.close();
         this.close();
     }
+
 }

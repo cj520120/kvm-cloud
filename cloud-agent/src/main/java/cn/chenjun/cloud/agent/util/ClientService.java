@@ -36,6 +36,12 @@ public class ClientService implements CommandLineRunner {
         if (!StringUtils.isEmpty(this.clientSecret) && !this.clientSecret.equalsIgnoreCase(clientSecret)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "节点已经被添加到其他集群");
         }
+        if (!managerUri.matches("^https?://.*$")) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "管理地址不合法");
+        }
+        if (!managerUri.endsWith("/")) {
+            managerUri += "/";
+        }
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.managerUri = managerUri;

@@ -4,7 +4,7 @@ import NetworkView from "../views/NetworkView.vue";
 import HostView from "../views/HostView.vue";
 import StorageView from "../views/StorageView.vue";
 import TemplateView from "../views/TemplateView.vue";
-import SnapshotView from "../views/SnapshotView.vue";
+// import SnapshotView from "../views/SnapshotView.vue";
 import VolumeView from "../views/VolumeView.vue";
 import SchemeView from "../views/SchemeView.vue";
 import GroupView from "../views/GroupView.vue";
@@ -13,6 +13,8 @@ import VncView from "../views/VncView.vue";
 import HomeView from "../views/HomeView.vue";
 import UserView from "../views/UserView.vue";
 import LoginView from "../views/LoginView.vue";
+import SshView from "@/views/SshView.vue";
+import ConfigView from "@/views/ConfigView.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -51,15 +53,20 @@ const routes = [
     name: "Template",
     component: TemplateView,
   },
-  {
-    path: "/Snapshot",
-    name: "Snapshot",
-    component: SnapshotView,
-  },
+  // {
+  //   path: "/Snapshot",
+  //   name: "Snapshot",
+  //   component: SnapshotView,
+  // },
   {
     path: "/Volume",
     name: "Volume",
     component: VolumeView,
+  },
+  {
+    path: "/Ssh",
+    name: "Ssh",
+    component: SshView,
   },
   {
     path: "/Scheme",
@@ -80,6 +87,11 @@ const routes = [
     path: "/Login",
     name: "Login",
     component: LoginView,
+  },
+  {
+    path: "/Config",
+    name: "Config",
+    component: ConfigView,
   },
 ];
 

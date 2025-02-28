@@ -1,29 +1,33 @@
 package cn.chenjun.cloud.management.websocket;
 
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.data.mapper.*;
+import cn.chenjun.cloud.common.util.AppUtils;
+import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.mapper.GuestMapper;
+import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.VncClient;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.reflect.TypeToken;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @ServerEndpoint(value = "/api/vnc/{id}")
 @Component
 public class VncWsService {
@@ -36,48 +40,35 @@ public class VncWsService {
     public void onVncConnect(Session session, @PathParam(value = "id") int id) {
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(id);
-        if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
+        if (guest == null || guest.getHostId() <= 0) {
             session.close();
+            log.info("虚拟机未运行或不存在.id={}", id);
             return;
         }
-        ComponentMapper componentMapper = SpringContextUtils.getBean(ComponentMapper.class);
-        ComponentEntity component = componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, guest.getNetworkId()).eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).last("limit 0,1"));
-        if (component == null) {
+        if (!Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING) && !Objects.equals(guest.getStatus(), Constant.GuestStatus.STARTING)) {
             session.close();
+            log.info("虚拟机当前状态不属于运行状态.id={}", id);
             return;
         }
-        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-        }.getType());
-        componentGuestIds.add(component.getMasterGuestId());
-        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
-        if (componentGuestList.isEmpty()) {
-            session.close();
-            return;
+
+        HostEntity host = SpringContextUtils.getBean(HostMapper.class).selectById(guest.getHostId());
+        URI url = new URI(host.getUri().replaceFirst("http", "ws") + "/api/vnc");
+        String nonce = String.valueOf(System.nanoTime());
+        Map<String, Object> map = new HashMap<>(6);
+        map.put("name", guest.getName());
+        map.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        try {
+            String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+            map.put("sign", sign);
+        } catch (Exception err) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
         }
-        Collections.shuffle(componentGuestList);
-        guest = componentGuestList.get(0);
-        if (guest == null || !Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)) {
-            session.close();
-            return;
-        }
-        GuestVncMapper guestVncMapper = SpringContextUtils.getBean(GuestVncMapper.class);
-        GuestVncEntity guestVnc = guestVncMapper.selectById(id);
-        if (guestVnc == null) {
-            return;
-        }
-        GuestNetworkMapper guestNetworkMapper = SpringContextUtils.getBean(GuestNetworkMapper.class);
-        NetworkMapper networkMapper = SpringContextUtils.getBean(NetworkMapper.class);
-        List<GuestNetworkEntity> guestNetworkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
-        String ip = "127.0.0.1";
-        for (GuestNetworkEntity guestNetworkEntity : guestNetworkList) {
-            ip = guestNetworkEntity.getIp();
-            NetworkEntity network = networkMapper.selectById(guestNetworkEntity.getNetworkId());
-            if (network.getType() == Constant.NetworkType.BASIC) {
-                break;
-            }
-        }
-        String uri = "ws://" + ip + ":8080/websockify/?token=" + guestVnc.getToken();
-        this.proxy = new VncClient(session, new URI(uri));
+        String data = GsonBuilderUtil.create().toJson(map);
+        Map<String, String> header = new HashMap<>(1);
+        header.put("x-data", data);
+
+        log.info("开始连接虚拟机VNC.id={},vnc={}", id, url.toASCIIString());
+        this.proxy = new VncClient(session, new URI(url.toASCIIString()), header);
         this.proxy.connect();
 
     }

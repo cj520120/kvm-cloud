@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.bean.VolumeMigrateRequest;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
@@ -41,14 +42,11 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
-                    .sourceStorage(storage.getName())
-                    .sourceName(volume.getName())
-                    .targetStorage(targetStorage.getName())
-                    .targetName(targetVolume.getName())
-                    .targetType(targetVolume.getType())
+                    .sourceVolume(initVolume(storage, volume))
+                    .targetVolume(initVolume(targetStorage, targetVolume))
 
                     .build();
 
@@ -76,7 +74,6 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
                 targetVolume.setType(resultUtil.getData().getType());
                 targetVolume.setPath(resultUtil.getData().getPath());
-                targetVolume.setBackingPath(resultUtil.getData().getBackingPath());
             } else {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);
             }
@@ -92,14 +89,14 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 //提交源磁盘的销毁任务
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
-                this.operateTask.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
+                this.taskService.addTask(DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
             } else {
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
                 volumeMapper.updateById(volume);
             }
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getTargetVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

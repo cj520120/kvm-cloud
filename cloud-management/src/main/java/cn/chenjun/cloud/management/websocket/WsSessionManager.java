@@ -24,8 +24,8 @@ public class WsSessionManager {
         return ws;
     }
 
-    public synchronized WsClient registerComponentClient(Session session, int networkId) {
-        WsClient ws = WsClient.builder().session(session).clientType(Constant.WsClientType.COMPONENT).networkId(networkId).build();
+    public synchronized WsClient registerComponentClient(Session session, int networkId, int componentId) {
+        WsClient ws = WsClient.builder().session(session).clientType(Constant.WsClientType.COMPONENT).networkId(networkId).componentId(componentId).build();
         this.wsClientSets.add(ws);
         return ws;
     }
@@ -50,10 +50,21 @@ public class WsSessionManager {
         });
     }
 
-    public synchronized <T> void sendComponentNotify(int networkId, NotifyData<T> message) {
+    public synchronized <T> void sendNetworkNotify(int networkId, NotifyData<T> message) {
 
         WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.COMPONENT_NOTIFY).data(message).build();
         wsClientSets.stream().filter(ws -> Objects.equals(networkId, ws.getNetworkId()) && Objects.equals(ws.getClientType(), Constant.WsClientType.COMPONENT)).forEach(ws -> {
+            try {
+                ws.send(wsMessage);
+            } catch (Exception ignored) {
+            }
+        });
+    }
+
+    public synchronized <T> void sendComponentNotify(int componentId, NotifyData<T> message) {
+
+        WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.COMPONENT_NOTIFY).data(message).build();
+        wsClientSets.stream().filter(ws -> Objects.equals(componentId, ws.getComponentId()) && Objects.equals(ws.getClientType(), Constant.WsClientType.COMPONENT)).forEach(ws -> {
             try {
                 ws.send(wsMessage);
             } catch (Exception ignored) {

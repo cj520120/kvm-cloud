@@ -1,19 +1,39 @@
 import axios from "./request";
+export const getNetworkComponentList = (params = {}) => {
+  return axios.request({
+    url: "api/network/component",
+    params,
+  });
+};
 export const getNetworkList = (params = {}) => {
   return axios.request({
-    url: "/api/network/all",
+    url: "api/network/all",
     params,
   });
 };
 export const getNetworkInfo = (params = {}) => {
   return axios.request({
-    url: "/api/network/info",
+    url: "api/network/info",
     params,
+  });
+};
+export const updateNetworkComponentSlaveNumber = (data = {}) => {
+  return axios.request({
+    url: "api/network/component/slave/update",
+    data,
+    method: "POST",
   });
 };
 export const createNetwork = (data = {}) => {
   return axios.request({
     url: "api/network/create",
+    data,
+    method: "PUT",
+  });
+};
+export const createNetworkComponent = (data = {}) => {
+  return axios.request({
+    url: "api/network/component/create",
     data,
     method: "PUT",
   });
@@ -28,7 +48,7 @@ export const pauseNetwork = (data = {}) => {
 
 export const registerNetwork = (data = {}) => {
   return axios.request({
-    url: "/api/network/register",
+    url: "api/network/register",
     data,
     method: "POST",
   });
@@ -41,6 +61,35 @@ export const destroyNetwork = (data = {}) => {
     method: "DELETE",
   });
 };
+
+export const getNetworkComponentNatList = (params = {}) => {
+  return axios.request({
+    url: "api/network/nat/list",
+    params,
+  });
+};
+export const createNetworkComponentNat = (data = {}) => {
+  return axios.request({
+    url: "api/network/nat/create",
+    data,
+    method: "PUT",
+  });
+};
+export const destroyNetworkComponentNat = (data = {}) => {
+  return axios.request({
+    url: "api/network/nat/destroy",
+    data,
+    method: "DELETE",
+  });
+};
+export const destroyNetworkComponent = (data = {}) => {
+  return axios.request({
+    url: "api/network/component/destroy",
+    data,
+    method: "DELETE",
+  });
+};
+
 export const destroyNetworDns = (data = {}) => {
   return axios.request({
     url: "api/dns/destroy",
@@ -51,13 +100,13 @@ export const destroyNetworDns = (data = {}) => {
 /** HOST */
 export const getHostList = (params = {}) => {
   return axios.request({
-    url: "/api/host/all",
+    url: "api/host/all",
     params,
   });
 };
 export const getHostInfo = (params = {}) => {
   return axios.request({
-    url: "/api/host/info",
+    url: "api/host/info",
     params,
   });
 };
@@ -79,7 +128,7 @@ export const pauseHost = (data = {}) => {
 
 export const registerHost = (data = {}) => {
   return axios.request({
-    url: "/api/host/register",
+    url: "api/host/register",
     data,
     method: "POST",
   });
@@ -88,7 +137,7 @@ export const registerHost = (data = {}) => {
 /** dns */
 export const getNetworkDnsList = (params = {}) => {
   return axios.request({
-    url: "/api/dns/list",
+    url: "api/dns/list",
     params,
   });
 };
@@ -106,16 +155,17 @@ export const destroyHost = (data = {}) => {
     method: "DELETE",
   });
 };
+
 /** STORAGE */
 export const getStorageList = (params = {}) => {
   return axios.request({
-    url: "/api/storage/all",
+    url: "api/storage/all",
     params,
   });
 };
 export const getStorageInfo = (params = {}) => {
   return axios.request({
-    url: "/api/storage/info",
+    url: "api/storage/info",
     params,
   });
 };
@@ -137,7 +187,7 @@ export const pauseStorage = (data = {}) => {
 
 export const registerStorage = (data = {}) => {
   return axios.request({
-    url: "/api/storage/register",
+    url: "api/storage/register",
     data,
     method: "POST",
   });
@@ -154,13 +204,13 @@ export const destroyStorage = (data = {}) => {
 /** Template */
 export const getTemplateList = (params = {}) => {
   return axios.request({
-    url: "/api/template/all",
+    url: "api/template/all",
     params,
   });
 };
 export const getTemplateInfo = (params = {}) => {
   return axios.request({
-    url: "/api/template/info",
+    url: "api/template/info",
     params,
   });
 };
@@ -169,6 +219,13 @@ export const createTemplate = (data = {}) => {
     url: "api/template/create",
     data,
     method: "PUT",
+  });
+};
+export const updateTemplateScript = (data = {}) => {
+  return axios.request({
+    url: "api/template/script",
+    data,
+    method: "POST",
   });
 };
 
@@ -197,13 +254,13 @@ export const destroyTemplate = (data = {}) => {
 /** Snapshot */
 export const getSnapshotList = (params = {}) => {
   return axios.request({
-    url: "/api/snapshot/all",
+    url: "api/snapshot/all",
     params,
   });
 };
 export const getSnapshotInfo = (params = {}) => {
   return axios.request({
-    url: "/api/snapshot/info",
+    url: "api/snapshot/info",
     params,
   });
 };
@@ -226,19 +283,19 @@ export const destroySnapshot = (data = {}) => {
 /** Volume */
 export const getVolumeList = (params = {}) => {
   return axios.request({
-    url: "/api/volume/all",
+    url: "api/volume/all",
     params,
   });
 };
 export const getNotAttachVolumeList = (params = {}) => {
   return axios.request({
-    url: "/api/volume/not/attach/all",
+    url: "api/volume/not/attach/all",
     params,
   });
 };
 export const getVolumeInfo = (params = {}) => {
   return axios.request({
-    url: "/api/volume/info",
+    url: "api/volume/info",
     params,
   });
 };
@@ -288,13 +345,13 @@ export const batchDestroyVolume = (data = {}) => {
 /** Scheme */
 export const getSchemeList = (params = {}) => {
   return axios.request({
-    url: "/api/scheme/all",
+    url: "api/scheme/all",
     params,
   });
 };
 export const getSchemeInfo = (params = {}) => {
   return axios.request({
-    url: "/api/scheme/info",
+    url: "api/scheme/info",
     params,
   });
 };
@@ -324,43 +381,43 @@ export const destroyScheme = (data = {}) => {
 /** Guest */
 export const getGuestInfo = (params = {}) => {
   return axios.request({
-    url: "/api/guest/info",
+    url: "api/guest/info",
     params,
   });
 };
 export const getGuestVncPassword = (params = {}) => {
   return axios.request({
-    url: "/api/guest/vnc/password",
+    url: "api/guest/vnc/password",
     params,
   });
 };
 export const getGuestVolumes = (params = {}) => {
   return axios.request({
-    url: "/api/guest/volume",
+    url: "api/guest/volume",
     params,
   });
 };
 export const getGuestNetworks = (params = {}) => {
   return axios.request({
-    url: "/api/guest/network",
+    url: "api/guest/network",
     params,
   });
 };
 export const getGuestList = (params = {}) => {
   return axios.request({
-    url: "/api/guest/all",
+    url: "api/guest/all",
     params,
   });
 };
 export const getSystemGuestList = (params = {}) => {
   return axios.request({
-    url: "/api/guest/system",
+    url: "api/guest/system",
     params,
   });
 };
 export const getUserGuestList = (params = {}) => {
   return axios.request({
-    url: "/api/guest/user",
+    url: "api/guest/user",
     params,
   });
 };
@@ -487,7 +544,7 @@ export const oauth2Login = (data = {}) => {
 };
 export const loginUser = (data = {}) => {
   return axios.request({
-    url: "/api/user/login",
+    url: "api/user/login",
     data,
     method: "POST",
   });
@@ -563,7 +620,7 @@ export const getSystemConfig = (data = {}) => {
 //group
 export const getGroupList = (params = {}) => {
   return axios.request({
-    url: "/api/group/all",
+    url: "api/group/all",
     params,
   });
 };
@@ -585,13 +642,85 @@ export const modifyGroup = (data = {}) => {
 
 export const getGroupInfo = (params = {}) => {
   return axios.request({
-    url: "/api/group/info",
+    url: "api/group/info",
     params,
   });
 };
 export const destroyGroup = (data = {}) => {
   return axios.request({
     url: "api/group/destroy",
+    data,
+    method: "DELETE",
+  });
+};
+
+//ssh
+export const getSshList = (params = {}) => {
+  return axios.request({
+    url: "api/ssh/all",
+    params,
+  });
+};
+export const importSSh = (data = {}) => {
+  return axios.request({
+    url: "api/ssh/import",
+    data,
+    method: "PUT",
+  });
+};
+
+export const createSSh = (data = {}) => {
+  return axios.request({
+    url: "api/ssh/create",
+    data,
+    method: "PUT",
+  });
+};
+export const getSshInfo = (params = {}) => {
+  return axios.request({
+    url: "api/ssh/info",
+    params,
+  });
+};
+export const destroySsh = (data = {}) => {
+  return axios.request({
+    url: "api/ssh/destroy",
+    data,
+    method: "DELETE",
+  });
+};
+export const createSshDownloadKey = (data = {}) => {
+  return axios.request({
+    url: "/api/ssh/download/key",
+    data,
+    method: "POST",
+  });
+};
+//config
+export const getConfigList = (params = {}) => {
+  return axios.request({
+    url: "api/config/search",
+    params,
+  });
+};
+export const createConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config/create",
+    data,
+    method: "PUT",
+  });
+};
+
+export const modifyConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config/update",
+    data,
+    method: "POST",
+  });
+};
+export const destroyConfig = (data = {}) => {
+  return axios.request({
+    url: "api/config/destroy",
     data,
     method: "DELETE",
   });

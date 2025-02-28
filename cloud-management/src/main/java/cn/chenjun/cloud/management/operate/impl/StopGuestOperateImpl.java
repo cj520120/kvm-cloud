@@ -27,7 +27,6 @@ import java.lang.reflect.Type;
 public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, ResultUtil<Void>> {
 
 
-
     @Override
     public void operate(StopGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
@@ -38,6 +37,9 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         if (host == null) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
         } else {
+            if (host.getStatus() != cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "客户机所在主机[" + host.getHostName() + "]状态不正确:" + host.getStatus());
+            }
             if (!param.isForce()) {
                 GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).build();
                 this.asyncInvoker(host, param, Constant.Command.GUEST_SHUTDOWN, request);
@@ -71,7 +73,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
             this.allocateService.initHostAllocate();
 
         }
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

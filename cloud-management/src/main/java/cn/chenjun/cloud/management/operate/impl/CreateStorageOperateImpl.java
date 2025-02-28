@@ -39,7 +39,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
                 .storageId(param.getStorageId())
                 .nextHostIds(hostIds)
                 .build();
-        this.operateTask.addTask(operate);
+        this.taskService.addTask(operate);
         this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
 
 
@@ -61,7 +61,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
             }
         }
 
-        this.eventService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
 
     }
 

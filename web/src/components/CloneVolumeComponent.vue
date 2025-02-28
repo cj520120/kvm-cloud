@@ -14,16 +14,6 @@
 						<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 					</el-select>
 				</el-form-item>
-				<el-form-item label="磁盘类型" prop="volumeType">
-					<el-select v-model="clone_volume.volumeType" style="width: 100%">
-						<el-option label="raw" value="raw"></el-option>
-						<el-option label="qcow" value="qcow"></el-option>
-						<el-option label="qcow2" value="qcow2"></el-option>
-						<el-option label="vdi" value="vdi"></el-option>
-						<el-option label="vmdk" value="vmdk"></el-option>
-						<el-option label="vpc" value="vpc"></el-option>
-					</el-select>
-				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="clone_volume_click">克隆</el-button>
 					<el-button @click="go_back">取消</el-button>
@@ -40,8 +30,7 @@ export default {
 			clone_volume: {
 				sourceVolumeId: 0,
 				description: '',
-				storageId: 0,
-				volumeType: 'qcow2'
+				storageId: 0
 			},
 			storages: []
 		}
@@ -55,7 +44,6 @@ export default {
 		},
 		async init(volume) {
 			this.clone_volume.sourceVolumeId = volume.volumeId
-			this.clone_volume.volumeType = volume.type
 			this.clone_volume.description = 'Clone-' + volume.description
 			this.clone_volume.storageId = volume.storageId
 			await getStorageList().then((res) => {

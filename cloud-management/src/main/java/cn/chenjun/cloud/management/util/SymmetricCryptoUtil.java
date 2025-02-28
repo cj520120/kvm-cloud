@@ -20,13 +20,23 @@ public class SymmetricCryptoUtil {
      */
     private final String encodeKey;
     private final String ivKey;
+
     private SymmetricCryptoUtil(String encodeKey, String ivKey) {
         this.encodeKey = encodeKey;
         this.ivKey = ivKey;
     }
-    private SymmetricCryptoUtil(){
-        this.encodeKey=ThreadLocalRandom.current().nextLong(1000000000000000L, 9999999999999999L) + "";
-        this.ivKey=ThreadLocalRandom.current().nextLong(1000000000000000L, 9999999999999999L) + "";
+
+    private SymmetricCryptoUtil() {
+        this.encodeKey = ThreadLocalRandom.current().nextLong(1000000000000000L, 9999999999999999L) + "";
+        this.ivKey = ThreadLocalRandom.current().nextLong(1000000000000000L, 9999999999999999L) + "";
+    }
+
+    public static SymmetricCryptoUtil build(String encodeKey, String ivKey) {
+        return new SymmetricCryptoUtil(encodeKey, ivKey);
+    }
+
+    public static SymmetricCryptoUtil build() {
+        return new SymmetricCryptoUtil();
     }
 
     public String getEncodeKey() {
@@ -37,17 +47,7 @@ public class SymmetricCryptoUtil {
         return ivKey;
     }
 
-    public static SymmetricCryptoUtil build(String encodeKey, String ivKey){
-        return new SymmetricCryptoUtil(encodeKey,ivKey);
-    }
-    public static SymmetricCryptoUtil build(){
-        return new SymmetricCryptoUtil();
-    }
-
-
-
-
-    public String encrypt(String data ) {
+    public String encrypt(String data) {
         AES aes;
         if (Mode.CBC == mode) {
             aes = new AES(mode, padding,
@@ -60,7 +60,7 @@ public class SymmetricCryptoUtil {
         return aes.encryptBase64(data, StandardCharsets.UTF_8);
     }
 
-    public String decrypt(String data ) {
+    public String decrypt(String data) {
         AES aes;
         if (Mode.CBC == mode) {
             aes = new AES(mode, padding,

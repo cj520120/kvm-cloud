@@ -16,7 +16,7 @@ public interface WsAction {
      * @param msg
      * @throws IOException
      */
-    void doAction(Session session, WsRequest  msg) throws IOException;
+    void doAction(Session session, WsRequest msg) throws IOException;
 
     /**
      * 消息类型

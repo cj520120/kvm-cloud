@@ -6,24 +6,28 @@
 					<el-row slot="header">
 						<el-form :inline="true" class="demo-form-inline">
 							<el-form-item>
-								<el-button type="primary" size="mini" @click="show_create_guest_click">创建虚拟机</el-button>
-							</el-form-item>
-							<el-form-item><el-button :disabled="!select_guests.length" type="primary" size="mini" @click="batch_start_guest_click">批量启动</el-button></el-form-item>
-							<el-form-item><el-button :disabled="!select_guests.length" type="danger" size="mini" @click="batch_stop_guest_click">批量停止</el-button></el-form-item>
-							<el-form-item label="群组">
-								<el-select v-model="select_group_id" style="width: 100%" @change="update_guest_show_page">
-									<el-option label="全部" :value="-1"></el-option>
-									<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
-								</el-select>
-							</el-form-item>
-							<el-form-item label="运行主机">
-								<el-select v-model="select_host_id" style="width: 100%" @change="update_guest_show_page">
-									<el-option label="全部" :value="0"></el-option>
-									<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
-								</el-select>
+								<el-button size="mini" type="primary" icon="el-icon-circle-plus-outline" @click="show_create_guest_click">创建虚拟机</el-button>
+								<el-button size="mini" :disabled="!select_guests.length" type="success" icon="el-icon-video-play" @click="batch_start_guest_click">批量启动</el-button>
+								<el-button size="mini" :disabled="!select_guests.length" type="danger" icon="el-icon-video-pause" @click="batch_stop_guest_click">批量停止</el-button>
 							</el-form-item>
 							<el-form-item>
-								<el-input style="margin-bottom: 10px" placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change"></el-input>
+								<el-form :inline="true">
+									<el-form-item label="群组">
+										<el-select v-model="select_group_id" @change="update_guest_show_page" size="mini">
+											<el-option label="全部" :value="-1"></el-option>
+											<el-option v-for="item in this.groups" :key="item.groupId" :label="item.groupName" :value="item.groupId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item label="运行主机">
+										<el-select v-model="select_host_id" @change="update_guest_show_page" size="mini">
+											<el-option label="全部" :value="0"></el-option>
+											<el-option v-for="item in this.hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+										</el-select>
+									</el-form-item>
+									<el-form-item>
+										<el-input placeholder="请输入搜索关键字" v-model="keyword" @input="on_key_word_change" size="mini"></el-input>
+									</el-form-item>
+								</el-form>
 							</el-form-item>
 						</el-form>
 					</el-row>
@@ -32,8 +36,20 @@
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="guestId" width="80" />
 							<el-table-column label="实例名" prop="name" width="180" show-overflow-tooltip />
-							<el-table-column label="标签" prop="description" width="180" />
+							<el-table-column label="系统" prop="systemCategory" width="100">
+								<template #default="scope">
+									<el-tooltip class="item" effect="dark" :content="get_system_category_name(scope.row)" placement="bottom">
+										<img :src="get_system_category_image(scope.row)" style="width: 24px; height: 24px; float: left" />
+									</el-tooltip>
+								</template>
+							</el-table-column>
+							<el-table-column label="名称" prop="description" width="180" />
 							<el-table-column label="IP地址" prop="guestIp" width="150" />
+							<el-table-column label="固件" width="100">
+								<template #default="scope">
+									{{ get_bootstrap_type_name(scope.row) }}
+								</template>
+							</el-table-column>
 							<el-table-column label="配置" prop="cpu" width="150">
 								<template #default="scope">{{ scope.row.cpu }}核/{{ get_memory_display_size(scope.row.memory) }}</template>
 							</el-table-column>
@@ -55,7 +71,7 @@
 											<el-dropdown-item :command="{ guest: scope.row, command: 'info' }">虚拟机详情</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'start' }" divided :disabled="scope.row.status !== 4">启动虚拟机</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'stop' }" :disabled="scope.row.status !== 2">停止虚拟机</el-dropdown-item>
-											<el-dropdown-item :command="{ guest: scope.row, command: 'vnc' }" :disabled="scope.row.status !== 2">远程桌面</el-dropdown-item>
+											<el-dropdown-item :command="{ guest: scope.row, command: 'vnc' }" :disabled="scope.row.status !== 2 && scope.row.status !== 1">远程桌面</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'reboot' }" :disabled="scope.row.status !== 2">重启虚拟机</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'attach_cd' }" :disabled="scope.row.cdRoom !== 0" v-if="scope.row.type !== 0">挂载光驱</el-dropdown-item>
 											<el-dropdown-item :command="{ guest: scope.row, command: 'detach_cd' }" :disabled="scope.row.cdRoom === 0" v-if="scope.row.type !== 0">卸载光驱</el-dropdown-item>
