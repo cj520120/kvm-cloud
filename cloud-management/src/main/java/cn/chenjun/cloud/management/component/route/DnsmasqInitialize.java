@@ -58,7 +58,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         String startIp = allGuestNetwork.get(0).getIp();
         String endIp = allGuestNetwork.get(allGuestNetwork.size() - 1).getIp();
 
-        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/route/dnsmasq.tpl")), StandardCharsets.UTF_8);
+        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/route/dnsmasq.tpl")), StandardCharsets.UTF_8);
 
         Map<String, Object> map = new HashMap<>(0);
         map.put("__SYS__", sysconfig);

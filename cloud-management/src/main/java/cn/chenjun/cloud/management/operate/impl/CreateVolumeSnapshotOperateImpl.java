@@ -4,7 +4,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeCloneRequest;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
@@ -39,7 +38,7 @@ public class CreateVolumeSnapshotOperateImpl extends AbstractOperate<CreateVolum
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.SnapshotStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, BootstrapType.BIOS, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceVolume(initVolume(storage, volume))

@@ -4,9 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.management.data.entity.StorageEntity;
-import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
+import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.util.DomainUtil;
@@ -24,7 +22,7 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
     @Autowired
     protected ConfigService configService;
 
-    protected String getGuestCdRoom(GuestEntity guest, Map<String, Object> configParam) {
+    protected String buildCdXml(GuestEntity guest, Map<String, Object> configParam) {
         TemplateVolumeEntity templateVolume = null;
         StorageEntity storage = null;
         if (guest.getCdRoom() > 0) {
@@ -65,5 +63,30 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
         }
         String tpl = (String) configParam.get(configKey);
         return DomainUtil.buildCdXml(tpl, configParam, storage, templateVolume);
+    }
+
+    protected String buildDiskXml(GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId, Map<String, Object> sysconfig) {
+
+        String configKey;
+        switch (storage.getType()) {
+            case Constant.StorageType.CEPH_RBD:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_CEPH_RBD_TPL;
+                break;
+            case Constant.StorageType.GLUSTERFS:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_GLUSTERFS_TPL;
+                break;
+            case Constant.StorageType.NFS:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_NFS_TPL;
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
+        }
+        String tpl = (String) sysconfig.get(configKey);
+        return DomainUtil.buildDiskXml(tpl, sysconfig, guest, storage, volume, deviceId);
+    }
+
+    public String buildInterfaceXml(NetworkEntity network, GuestNetworkEntity guestNetwork, Map<String, Object> systemConfig) {
+        String tpl = (String) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_INTERFACE_TPL);
+        return DomainUtil.buildNetworkInterfaceXml(tpl, systemConfig, network, guestNetwork);
     }
 }

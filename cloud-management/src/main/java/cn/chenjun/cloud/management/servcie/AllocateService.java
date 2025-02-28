@@ -48,26 +48,25 @@ public class AllocateService extends AbstractService {
         return guestNetwork;
     }
 
-    public List<HostEntity> listAllocateHost(int bootstrapType, int cpu, long memory) {
+    public List<HostEntity> listAllocateHost(int cpu, long memory) {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         }
-        list = list.stream().filter(t -> hostVerify(t, bootstrapType, cpu, memory))
+        list = list.stream().filter(t -> hostVerify(t, cpu, memory))
                 .collect(Collectors.toList());
         return list;
     }
 
-    public HostEntity allocateHost(int hostId, int bootstrapType, int mustHostId, int cpu, long memory) {
+    public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
-            if (!hostVerify(host, bootstrapType, cpu, memory)) {
+            if (!hostVerify(host, cpu, memory)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }
             return host;
@@ -79,7 +78,7 @@ public class AllocateService extends AbstractService {
                 host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
                 host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             }
-            list = list.stream().filter(t -> hostVerify(t, bootstrapType, cpu, memory))
+            list = list.stream().filter(t -> hostVerify(t, cpu, memory))
                     .collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
@@ -93,7 +92,7 @@ public class AllocateService extends AbstractService {
         }
     }
 
-    private boolean hostVerify(HostEntity host, int bootstrapType, int cpu, long memory) {
+    private boolean hostVerify(HostEntity host, int cpu, long memory) {
         if (!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
             return false;
         }

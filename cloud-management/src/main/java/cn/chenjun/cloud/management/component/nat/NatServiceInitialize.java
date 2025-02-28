@@ -28,8 +28,8 @@ public class NatServiceInitialize implements NatComponentQmaInitialize {
         NetworkEntity network = networkMapper.selectById(component.getNetworkId());
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/nat-service/"}).checkSuccess(true).build())).build());
-        String natService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nat/nat_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-        String natPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/nat/nat_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String natService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/nat/nat_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String natPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/nat/nat_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(3);
         map.put("__SYS__", sysconfig);
         map.put("secret", network.getSecret());

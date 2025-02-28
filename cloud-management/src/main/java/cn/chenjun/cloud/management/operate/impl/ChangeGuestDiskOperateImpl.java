@@ -5,18 +5,17 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestDiskOperate;
-import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
-import cn.chenjun.cloud.management.util.DomainUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskOperate, ResultUtil<Void>> {
+public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDiskOperate, ResultUtil<Void>> {
 
 
     @Override
@@ -45,31 +44,10 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
                     if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                         throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
                     }
-                    List<ConfigQuery> queryList = new ArrayList<>();
-                    queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
-                    queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
-                    queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.GUEST).id(guest.getGuestId()).build());
-                    Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
-                    String configKey;
-                    switch (storage.getType()) {
-                        case Constant.StorageType.CEPH_RBD:
-                            configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_CEPH_RBD_TPL;
-                            break;
-                        case Constant.StorageType.GLUSTERFS:
-                            configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_GLUSTERFS_TPL;
-                            break;
-                        case Constant.StorageType.NFS:
-                            configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_NFS_TPL;
-                            break;
-                        default:
-                            throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
-                    }
-                    String tpl = (String) sysconfig.get(configKey);
-                    GuestDiskEntity guestDisk = GuestDiskEntity.builder().deviceId(param.getDeviceId()).build();
-                    String xml = DomainUtil.buildDiskXml(tpl, sysconfig, guest, storage, volume, guestDisk);
+                    Map<String, Object> systemConfig = this.loadSystemConfig(host.getHostId(), guest.getGuestId());
+                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), systemConfig);
                     ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
                     if (param.isAttach()) {
-
                         this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
                     } else {
                         this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
@@ -85,6 +63,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOperate<ChangeGuestDiskO
         }
 
     }
+
 
     @Override
     public Type getCallResultType() {

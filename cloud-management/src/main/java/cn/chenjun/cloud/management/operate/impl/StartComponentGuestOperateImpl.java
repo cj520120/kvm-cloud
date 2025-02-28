@@ -21,28 +21,32 @@ import java.util.Optional;
  */
 @Component
 @Slf4j
-public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartComponentGuestOperate> {
+public class StartComponentGuestOperateImpl extends AbstractStartGuestOperateImpl<StartComponentGuestOperate> {
 
     @Autowired
     private ComponentMapper componentMapper;
     @Autowired
     private PluginRegistry<ComponentProcess, Integer> componentPlugin;
 
-
     @Override
-    protected GuestQmaRequest getStartQmaRequest(StartComponentGuestOperate param, Map<String, Object> sysconfig) {
+    protected GuestQmaRequest buildQmaRequest(StartComponentGuestOperate param, Map<String, Object> systemConfig) {
         GuestEntity guest = this.guestMapper.selectById(param.getGuestId());
         ComponentEntity component = this.componentMapper.selectById(guest.getOtherId());
         if (component == null) {
             return null;
         }
         Optional<ComponentProcess> optional = componentPlugin.getPluginFor(component.getComponentType());
-        return optional.map(process -> process.getStartQmaRequest(component, guest.getGuestId(), sysconfig)).orElse(null);
+        return optional.map(process -> process.getStartQmaRequest(component, guest.getGuestId(), systemConfig)).orElse(null);
+    }
+
+    @Override
+    public void operate(StartComponentGuestOperate param) {
+        super.start(param.getHostId(), param.getGuestId(), param);
     }
 
     @Override
     public void onFinish(StartComponentGuestOperate param, ResultUtil<GuestInfo> resultUtil) {
-        super.onFinish(param, resultUtil);
+        super.finish(param.getGuestId(), resultUtil);
 
     }
 
@@ -50,4 +54,6 @@ public class StartComponentGuestOperateImpl extends StartGuestOperateImpl<StartC
     public int getType() {
         return cn.chenjun.cloud.management.util.Constant.OperateType.START_COMPONENT_GUEST;
     }
+
+
 }

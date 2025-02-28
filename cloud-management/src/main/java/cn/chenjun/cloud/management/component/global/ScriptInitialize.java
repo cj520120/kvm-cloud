@@ -22,16 +22,16 @@ public class ScriptInitialize implements GlobalComponentQmaInitialize {
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
 
-        String serviceCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/check_install_service_shell.tpl")), StandardCharsets.UTF_8);
+        String serviceCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/script/check_install_service_shell.tpl")), StandardCharsets.UTF_8);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/check_install_service_shell.sh").fileBody(serviceCheckScript).build())).build());
 
-        String checkPythonScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/check_python_shell.tpl")), StandardCharsets.UTF_8);
+        String checkPythonScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/script/check_python_shell.tpl")), StandardCharsets.UTF_8);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/check_python_install.sh").fileBody(checkPythonScript).build())).build());
 
-        String firewalldScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/open_firewalld_shell.tpl")), StandardCharsets.UTF_8);
+        String firewalldScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/script/open_firewalld_shell.tpl")), StandardCharsets.UTF_8);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/open_firewalld.sh").fileBody(firewalldScript).build())).build());
 
-        String openFirewalldScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/open_firewalld_shell.tpl")), StandardCharsets.UTF_8);
+        String openFirewalldScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/script/open_firewalld_shell.tpl")), StandardCharsets.UTF_8);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/open_firewalld.sh").fileBody(openFirewalldScript).build())).build());
 
         return commands;

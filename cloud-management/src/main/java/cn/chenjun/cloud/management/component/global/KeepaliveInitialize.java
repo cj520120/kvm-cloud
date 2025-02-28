@@ -32,26 +32,26 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     @Autowired
     private NetworkMapper networkMapper;
 
-    private static Map<String, Object> buildVrrp(String name, String nic, String vip, ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
+    private static Map<String, Object> buildKeepAliveParam(String name, String nic, String vip, ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<Integer> slaveIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
         }.getType());
         int routeId = component.getComponentId() % 255;
         routeId = Math.max(1, routeId);
-        Map<String, Object> vrrp = new HashMap<>(3);
-        vrrp.put("__SYS__", sysconfig);
-        vrrp.put("name", name);
-        vrrp.put("interface", nic);
-        vrrp.put("vip", vip);
+        Map<String, Object> map = new HashMap<>(3);
+        map.put("__SYS__", sysconfig);
+        map.put("name", name);
+        map.put("interface", nic);
+        map.put("vip", vip);
         //非抢占模式全部为backup
-        vrrp.put("state", "BACKUP");
-        vrrp.put("routeId", routeId);
+        map.put("state", "BACKUP");
+        map.put("routeId", routeId);
         if (component.getMasterGuestId() == guestId) {
-            vrrp.put("priority", MASTER_PRIORITY);
+            map.put("priority", MASTER_PRIORITY);
         } else {
             int index = slaveIds.indexOf(guestId) + 1;
-            vrrp.put("priority", Math.max(1, SLAVE_PRIORITY - index));
+            map.put("priority", Math.max(1, SLAVE_PRIORITY - index));
         }
-        return vrrp;
+        return map;
     }
 
     @Override
@@ -72,13 +72,13 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
                 vip = component.getBasicComponentVip();
             }
             if (ObjectUtils.isNotEmpty(vip)) {
-                vrrpList.add(buildVrrp(name, nic, vip, component, guestId, sysconfig));
+                vrrpList.add(buildKeepAliveParam(name, nic, vip, component, guestId, sysconfig));
             }
         }
         Map<String, Object> map = new HashMap<>(1);
         map.put("__SYS__", sysconfig);
         map.put("vrrpList", vrrpList);
-        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/keepalived/keepalived.tpl")), StandardCharsets.UTF_8);
+        String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/keepalived/keepalived.tpl")), StandardCharsets.UTF_8);
         config = TemplateUtil.create().render(config, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "keepalived"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/keepalived/keepalived.conf").fileBody(config).build())).build());

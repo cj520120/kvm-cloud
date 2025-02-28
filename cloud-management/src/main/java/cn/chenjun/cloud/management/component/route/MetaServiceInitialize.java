@@ -27,8 +27,8 @@ public class MetaServiceInitialize implements RouteComponentQmaInitialize {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("mkdir").args(new String[]{"-p", "/usr/local/meta-service/"}).checkSuccess(true).build())).build());
 
-        String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/meta_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-        String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/meta_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String metaService = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/meta/meta_service.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String metaPython = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/meta/meta_py.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(4);
         map.put("__SYS__", sysconfig);
         map.put("secret", network.getSecret());

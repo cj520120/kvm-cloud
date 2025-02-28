@@ -59,7 +59,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     @Transactional(rollbackFor = Exception.class)
     public void checkAndStart(NetworkEntity network, ComponentEntity component) {
 
-        List<HostEntity> hostList = allocateService.listAllocateHost(BootstrapType.BIOS, configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU), (int) configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024);
+        List<HostEntity> hostList = allocateService.listAllocateHost(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU), (int) configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024);
         List<Integer> hostIds = hostList.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         if (hostIds.isEmpty()) {
             log.info("没有可用的主机，无法启动组件:{}", this.getComponentName());
@@ -229,6 +229,9 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
     private GuestEntity createSystemComponentGuest(int componentId, String name, NetworkEntity network, int diskTemplateId) {
         String uid = UUID.randomUUID().toString().replace("-", "");
+        int systemCpu=configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU);
+        int systemCpuShare=configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
+        long systemMemory=(int)configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY)*1024;
         GuestEntity guest = GuestEntity.builder()
                 .name(GuestNameUtil.getName())
                 .groupId(0)
@@ -236,9 +239,9 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .systemCategory(SystemCategory.CENTOS)
                 .bootstrapType(BootstrapType.BIOS)
                 .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
-                .cpu(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU))
-                .share(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE))
-                .memory(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY))
+                .cpu(systemCpu)
+                .share(systemCpuShare)
+                .memory(systemMemory)
                 .cdRoom(0)
                 .hostId(0)
                 .lastHostId(0)

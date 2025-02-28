@@ -9,7 +9,6 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
-import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -44,11 +43,8 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         HostEntity host = this.hostMapper.selectById(param.getHostId());
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.StorageStatus.READY, t.getStatus())).collect(Collectors.toList());
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY, t.getStatus())).collect(Collectors.toList());
-        List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
-        Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
-        List<StorageCreateRequest> createStorageRequest = storageList.stream().map(storage -> buildStorageCreateRequest(storage, sysconfig)).collect(Collectors.toList());
+        Map<String, Object> systemConfig = this.loadSystemConfig(param.getHostId(), 0);
+        List<StorageCreateRequest> createStorageRequest = storageList.stream().map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
         Map<Integer, NetworkEntity> basicBridgeNetworkMap = networkList.stream().collect(Collectors.toMap(NetworkEntity::getNetworkId, Function.identity()));
         List<BasicBridgeNetwork> basicBridgeNetworks = new ArrayList<>();
         List<VlanNetwork> vlanNetworkList = new ArrayList<>();
@@ -56,17 +52,17 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
             if (Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkType.VLAN, network.getType())) {
                 NetworkEntity basicBridgeNetwork = basicBridgeNetworkMap.get(network.getBasicNetworkId());
                 if (basicBridgeNetwork != null) {
-                    vlanNetworkList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, sysconfig));
+                    vlanNetworkList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, systemConfig));
                 }
             } else {
-                basicBridgeNetworks.add(this.buildBasicNetworkRequest(network, sysconfig));
+                basicBridgeNetworks.add(this.buildBasicNetworkRequest(network, systemConfig));
             }
         }
         String uri = String.format("%s/api/init", host.getUri());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
-        requestMap.add("managerUri", (String) sysconfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_CLUSTER_MANAGER_URI));
+        requestMap.add("managerUri", (String) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_CLUSTER_MANAGER_URI));
         requestMap.add("clientId", host.getClientId());
         requestMap.add("clientSecret", host.getClientSecret());
         RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity

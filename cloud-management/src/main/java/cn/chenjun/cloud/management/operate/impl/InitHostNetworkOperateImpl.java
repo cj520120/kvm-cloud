@@ -23,7 +23,7 @@ import java.util.*;
  */
 @Component
 @Slf4j
-public class InitHostNetworkOperateImpl extends AbstractNetworkOperate<InitHostNetworkOperate, ResultUtil<Void>> {
+public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkOperate, ResultUtil<Void>> {
 
 
     @Override

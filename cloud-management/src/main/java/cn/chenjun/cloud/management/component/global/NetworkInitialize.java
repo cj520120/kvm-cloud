@@ -62,7 +62,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         //重启网卡
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("service").args(new String[]{"NetworkManager", "restart"}).checkSuccess(true).build())).build());
         //安装网络检测脚本
-        String networkCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/script/network_check_shell.tpl")), StandardCharsets.UTF_8);
+        String networkCheckScript = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/script/network_check_shell.tpl")), StandardCharsets.UTF_8);
 
         Map<String, Object> map = new HashMap<>(1);
         map.put("__SYS__", sysconfig);
@@ -84,7 +84,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
     }
 
     protected String getNicConfig(int index, String ip, String netmask, String gateway, String dns, List<String> otherIpList, Map<String, Object> sysconfig) {
-        String body = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/network/network.tpl")), StandardCharsets.UTF_8);
+        String body = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/network/network.tpl")), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(5);
         map.put("__SYS__", sysconfig);
         map.put("index", index);

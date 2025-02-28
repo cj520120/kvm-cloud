@@ -14,6 +14,7 @@ import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -271,4 +274,17 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
                 .build();
         return vlan;
     }
+
+    protected Map<String, Object> loadSystemConfig(int hostId, int guestId) {
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        if (hostId > 0) {
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(hostId).build());
+        }
+        if (guestId > 0) {
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.GUEST).id(guestId).build());
+        }
+        return this.configService.loadSystemConfig(queryList);
+    }
+
 }

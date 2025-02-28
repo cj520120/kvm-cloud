@@ -34,15 +34,15 @@ public class TaskService {
 
     @Transactional
     public void addTask(BaseOperateParam operateParam, int delayMinute) {
-        TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
-                .version(0)
-                .title(operateParam.getTitle())
-                .type(operateParam.getClass().getName())
-                .param(GsonBuilderUtil.create().toJson(operateParam))
-                .expireTime(new Date(System.currentTimeMillis()+ TimeUnit.MINUTES.toMillis(delayMinute)))
-                .createTime(new Date(System.currentTimeMillis() ))
-                .build();
-        taskMapper.insert(task);
+            TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
+                    .version(0)
+                    .title(operateParam.getTitle())
+                    .type(operateParam.getClass().getName())
+                    .param(GsonBuilderUtil.create().toJson(operateParam))
+                    .expireTime(new Date(System.currentTimeMillis()+ TimeUnit.MINUTES.toMillis(delayMinute)))
+                    .createTime(new Date(System.currentTimeMillis() ))
+                    .build();
+            taskMapper.insert(task);
     }
 
     @Transactional

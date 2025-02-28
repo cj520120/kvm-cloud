@@ -26,7 +26,7 @@ public class NginxInitialize implements RouteComponentQmaInitialize {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         List<String> ipList = new ArrayList<>();
         ipList.add("169.254.169.254");
-        String nginxConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/meta/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        String nginxConfig = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/meta/nginx.tpl").getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         Map<String, Object> map = new HashMap<>(0);
         map.put("__SYS__", sysconfig);
         map.put("ipList", ipList);
