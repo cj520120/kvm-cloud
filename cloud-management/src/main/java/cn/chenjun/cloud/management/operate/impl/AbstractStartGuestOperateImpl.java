@@ -52,7 +52,8 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
         deviceXmlList.addAll(this.buildInterfaceListXml(guest, systemConfig));
         GuestVncEntity vnc = this.vncService.getGuestVnc(guestId);
-        guest.setHostId(hostId);
+        guest.setHostId(host.getHostId());
+        guest.setLastHostId(host.getHostId());
         guest.setLastStartTime(new Date());
         this.guestMapper.updateById(guest);
         this.allocateService.initHostAllocate();

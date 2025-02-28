@@ -4,7 +4,7 @@
 			<el-form-item label="选择主机">
 				<el-select v-model="start_guest.hostId" style="width: 100%">
 					<el-option label="随机" :value="0"></el-option>
-					<el-option v-for="item in select_host" :key="item.hostId" :label="item.displayName" :value="item.hostId" :v-loading="true" />
+					<el-option v-for="item in hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" :v-loading="true" />
 				</el-select>
 			</el-form-item>
 		</el-form>
@@ -55,6 +55,7 @@ export default {
 				if (res.code === 0) {
 					this.hosts = res.data.filter((v) => v.status == 1)
 				}
+				console.log(this.host)
 			})
 		},
 		start_guest_click() {
