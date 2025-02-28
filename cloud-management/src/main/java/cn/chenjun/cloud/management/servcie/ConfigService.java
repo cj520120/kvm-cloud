@@ -33,7 +33,7 @@ public class ConfigService {
         initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000));
         initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, "8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null);
         initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU, 1, "系统组件Cpu", Constant.ConfigValueType.INT, null);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY, 512, "系统组件Cpu内存(MB)", Constant.ConfigValueType.INT, null);
+        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY, 1024, "系统组件Cpu内存(MB)", Constant.ConfigValueType.INT, null);
         initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE, 0, "系统组件Cpu Share", Constant.ConfigValueType.INT, null);
         initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES, 60, "系统组件单个qma执行命令超时时间(分钟)", Constant.ConfigValueType.INT, null);
         initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES, 10, "系统组件qma启动超时时间(分钟)", Constant.ConfigValueType.INT, null);
