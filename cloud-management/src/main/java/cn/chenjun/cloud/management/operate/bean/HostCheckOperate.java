@@ -20,4 +20,9 @@ public class HostCheckOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.HOST_CHECK;
     }
+
+    @Override
+    public String getTaskId() {
+        return "HOST_CHECK:" + this.hostId;
+    }
 }

@@ -68,7 +68,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
             }
 
             if (!hostIds.isEmpty()) {
-                DestroyHostStorageOperate operate = DestroyHostStorageOperate.builder().taskId(UUID.randomUUID().toString())
+                DestroyHostStorageOperate operate = DestroyHostStorageOperate.builder().id(UUID.randomUUID().toString())
                         .storageId(param.getStorageId())
                         .nextHostIds(hostIds)
                         .build();

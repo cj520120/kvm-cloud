@@ -102,7 +102,7 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                     this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
             } else {
-                InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
+                InitHostNetworkOperate operate = InitHostNetworkOperate.builder().id(UUID.randomUUID().toString())
                         .networkId(param.getNetworkId())
                         .networkId(param.getNetworkId())
                         .nextHostIds(hostIds)

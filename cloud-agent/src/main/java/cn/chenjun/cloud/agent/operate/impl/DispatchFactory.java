@@ -50,7 +50,7 @@ public class DispatchFactory implements BeanPostProcessor {
                         throw (Exception) err.getCause();
                     }
                 };
-                Dispatch<Object, Object> dispatch = Dispatch.builder().paramType(paramType).consumer(consumer).build();
+                Dispatch<Object, Object> dispatch = Dispatch.builder().async(dispatchBind.async()).paramType(paramType).consumer(consumer).build();
                 dispatchMap.put(dispatchBind.command(), dispatch);
             }
 

@@ -90,7 +90,7 @@ public final class ErrorCode {
      * Agent
      */
     public static final int BASE_AGENT_ERROR = BASE_ERROR * 13;
-    public static final int BASE_TASK_BUSY = BASE_AGENT_ERROR + 1;
+    public static final int AGENT_TASK_ASYNC_WAIT = BASE_AGENT_ERROR + 1;
     public static final int BASE_CONFIG_ERROR = BASE_ERROR*14;
     /**
      * Config

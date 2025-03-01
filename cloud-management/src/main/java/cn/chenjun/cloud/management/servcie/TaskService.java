@@ -34,15 +34,18 @@ public class TaskService {
 
     @Transactional
     public void addTask(BaseOperateParam operateParam, int delayMinute) {
-            TaskEntity task = TaskEntity.builder().taskId(operateParam.getTaskId())
+        TaskEntity task = this.findTask(operateParam.getTaskId());
+        if (task == null) {
+            task = TaskEntity.builder().taskId(operateParam.getTaskId())
                     .version(0)
                     .title(operateParam.getTitle())
                     .type(operateParam.getClass().getName())
                     .param(GsonBuilderUtil.create().toJson(operateParam))
-                    .expireTime(new Date(System.currentTimeMillis()+ TimeUnit.MINUTES.toMillis(delayMinute)))
-                    .createTime(new Date(System.currentTimeMillis() ))
+                    .expireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(delayMinute)))
+                    .createTime(new Date(System.currentTimeMillis()))
                     .build();
             taskMapper.insert(task);
+        }
     }
 
     @Transactional
@@ -51,10 +54,6 @@ public class TaskService {
         taskMapper.keep(taskId, new Date(System.currentTimeMillis() + +TimeUnit.SECONDS.toMillis(expire)));
     }
 
-    @Transactional
-    public boolean hasTask(Class taskType) {
-        return this.taskMapper.selectCount(new QueryWrapper<TaskEntity>().eq(TaskEntity.TASK_TYPE, taskType.getName())) > 0;
-    }
 
     @Transactional
     public List<TaskEntity> listCanRunTask(int count) {

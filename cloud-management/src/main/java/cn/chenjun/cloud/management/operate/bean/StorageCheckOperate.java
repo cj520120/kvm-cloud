@@ -22,4 +22,9 @@ public class StorageCheckOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.STORAGE_CHECK;
     }
+
+    @Override
+    public String getTaskId() {
+        return "STORAGE_CHECK";
+    }
 }

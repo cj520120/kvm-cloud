@@ -3,7 +3,10 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
@@ -119,7 +122,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(volume);
-        BaseOperateParam operateParam = CreateVolumeOperate.builder().taskId(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
+        BaseOperateParam operateParam = CreateVolumeOperate.builder().id(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
         operateTask.addTask(operateParam);
         VolumeModel model = this.initVolume(volume);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
@@ -161,7 +164,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(cloneVolume);
-        BaseOperateParam operateParam = CloneVolumeOperate.builder().taskId(volumeName)
+        BaseOperateParam operateParam = CloneVolumeOperate.builder().id(volumeName)
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(cloneVolume.getVolumeId())
                 .title("克隆磁盘[" + volume.getName() + "]")
@@ -184,7 +187,7 @@ public class VolumeService extends AbstractService {
         volume.setCapacity(volume.getCapacity() + size);
         volume.setStatus(Constant.VolumeStatus.RESIZE);
         this.volumeMapper.updateById(volume);
-        BaseOperateParam operateParam = ResizeVolumeOperate.builder().taskId(UUID.randomUUID().toString())
+        BaseOperateParam operateParam = ResizeVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .title("更改磁盘大小[" + volume.getName() + "]")
                 .volumeId(volume.getVolumeId())
                 .size(volume.getCapacity())
@@ -228,7 +231,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(migrateVolume);
-        BaseOperateParam operateParam = MigrateVolumeOperate.builder().taskId(volumeName)
+        BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(volumeName)
                 .title("迁移磁盘[" + volume.getName() + "]")
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(migrateVolume.getVolumeId())
@@ -272,7 +275,7 @@ public class VolumeService extends AbstractService {
                 }
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
-                DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
+                DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate, volume.getStatus() == Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
                 VolumeModel source = this.initVolume(volume);
                 this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());

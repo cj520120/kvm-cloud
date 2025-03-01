@@ -200,7 +200,7 @@ public class GuestService extends AbstractService {
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .hostId(hostId)
-                    .taskId(uid)
+                    .id(uid)
                     .title("启动客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
@@ -218,7 +218,7 @@ public class GuestService extends AbstractService {
                 .volumeId(guestDisk.getVolumeId())
                 .start(true)
                 .hostId(hostId)
-                .taskId(uid)
+                .id(uid)
                 .title("创建客户机[" + guest.getDescription() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
@@ -283,7 +283,7 @@ public class GuestService extends AbstractService {
                     .guestId(guest.getGuestId())
                     .templateId(diskTemplateId)
                     .volumeId(guestDisk.getVolumeId())
-                    .taskId(uid)
+                    .id(uid)
                     .start(true)
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
@@ -304,7 +304,7 @@ public class GuestService extends AbstractService {
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .hostId(0)
-                    .taskId(uid)
+                    .id(uid)
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
@@ -356,7 +356,7 @@ public class GuestService extends AbstractService {
                 this.guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
                 BaseOperateParam operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("启动客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -380,7 +380,7 @@ public class GuestService extends AbstractService {
             guest.setStatus(Constant.GuestStatus.REBOOT);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId)
-                    .taskId(UUID.randomUUID().toString())
+                    .id(UUID.randomUUID().toString())
                     .title("重启客户机[" + guest.getDescription() + "]").build();
             this.operateTask.addTask(operateParam);
             this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -400,7 +400,7 @@ public class GuestService extends AbstractService {
                     .guestId(guestId)
                     .sourceHostId(guest.getHostId())
                     .toHostId(hostId)
-                    .taskId(UUID.randomUUID().toString())
+                    .id(UUID.randomUUID().toString())
                     .title("迁移客户机[" + guest.getDescription() + "]").build();
             guest.setStatus(Constant.GuestStatus.MIGRATE);
             guest.setHostId(hostId);
@@ -421,7 +421,7 @@ public class GuestService extends AbstractService {
                 guest.setStatus(Constant.GuestStatus.STOPPING);
                 this.guestMapper.updateById(guest);
                 BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("关闭客户机[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -447,7 +447,7 @@ public class GuestService extends AbstractService {
                 guest.setCdRoom(templateId);
                 this.guestMapper.updateById(guest);
                 BaseOperateParam operateParam = ChangeGuestCdRoomOperate.builder().guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("挂载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -466,7 +466,7 @@ public class GuestService extends AbstractService {
                 guest.setCdRoom(0);
                 this.guestMapper.updateById(guest);
                 BaseOperateParam operateParam = ChangeGuestCdRoomOperate.builder().guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("卸载光驱[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -511,7 +511,7 @@ public class GuestService extends AbstractService {
                 this.volumeMapper.updateById(volume);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
                         .deviceId(guestDisk.getDeviceId()).attach(true).volumeId(volumeId).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("挂载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -548,7 +548,7 @@ public class GuestService extends AbstractService {
                 this.guestDiskMapper.deleteById(guestDiskId);
                 BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
                         .deviceId(guestDisk.getDeviceId()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("卸载磁盘[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -591,7 +591,7 @@ public class GuestService extends AbstractService {
                 this.guestNetworkMapper.updateById(guestNetwork);
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("挂载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
 
@@ -619,7 +619,7 @@ public class GuestService extends AbstractService {
                 }
                 BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
-                        .taskId(UUID.randomUUID().toString())
+                        .id(UUID.randomUUID().toString())
                         .title("卸载网卡[" + guest.getDescription() + "]").build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
@@ -640,7 +640,7 @@ public class GuestService extends AbstractService {
                 guest.setStatus(Constant.GuestStatus.DESTROY);
                 this.guestMapper.updateById(guest);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                DestroyGuestOperate operate = DestroyGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
+                DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
                 operateTask.addTask(operate);
                 break;
             }
@@ -648,7 +648,7 @@ public class GuestService extends AbstractService {
                 guest.setStatus(Constant.GuestStatus.DESTROY);
                 this.guestMapper.updateById(guest);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                DestroyGuestOperate operate = DestroyGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
+                DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
                 operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE) : 0);
                 break;
             }

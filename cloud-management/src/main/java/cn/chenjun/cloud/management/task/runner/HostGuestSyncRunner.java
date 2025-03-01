@@ -37,7 +37,7 @@ public class HostGuestSyncRunner extends AbstractRunner {
         List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : hostList) {
             if (host.getStatus() == Constant.HostStatus.ONLINE) {
-                BaseOperateParam operate = SyncHostGuestOperate.builder().hostId(host.getHostId()).title("同步主机客户机信息").taskId(UUID.randomUUID().toString()).build();
+                BaseOperateParam operate = SyncHostGuestOperate.builder().hostId(host.getHostId()).title("同步主机客户机信息").id(UUID.randomUUID().toString()).build();
                 this.taskService.addTask(operate);
             }
         }
@@ -48,8 +48,4 @@ public class HostGuestSyncRunner extends AbstractRunner {
         return "同步主机虚拟机";
     }
 
-    @Override
-    protected boolean canRunning() {
-        return true;
-    }
 }

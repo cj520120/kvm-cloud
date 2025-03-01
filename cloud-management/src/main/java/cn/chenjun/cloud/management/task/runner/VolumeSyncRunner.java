@@ -38,7 +38,7 @@ public class VolumeSyncRunner extends AbstractRunner {
     protected void dispatch() {
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(t.getStatus(), Constant.StorageStatus.READY)).collect(Collectors.toList());
         for (StorageEntity storage : storageList) {
-            BaseOperateParam operateParam = VolumeCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测存储池磁盘使用情况").storageId(storage.getStorageId()).build();
+            BaseOperateParam operateParam = VolumeCheckOperate.builder().id(UUID.randomUUID().toString()).title("检测存储池磁盘使用情况").storageId(storage.getStorageId()).build();
             this.taskService.addTask(operateParam);
         }
     }
@@ -48,8 +48,4 @@ public class VolumeSyncRunner extends AbstractRunner {
         return "检测存储池磁盘";
     }
 
-    @Override
-    protected boolean canRunning() {
-        return !this.taskService.hasTask(VolumeCheckOperate.class);
-    }
 }

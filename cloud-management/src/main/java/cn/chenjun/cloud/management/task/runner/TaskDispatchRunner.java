@@ -26,11 +26,6 @@ public class TaskDispatchRunner extends AbstractRunner {
     @Autowired
     private TaskService taskService;
 
-    @Override
-    protected boolean canRunning() {
-        return true;
-    }
-
 
     @Override
     public int getPeriodSeconds() {

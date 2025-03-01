@@ -48,7 +48,7 @@ public class StorageOperateImpl implements StorageOperate {
                 .build();
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO)
+    @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO,async = true)
     @Override
     public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
         List<StorageInfo> list = new ArrayList<>();
@@ -70,7 +70,7 @@ public class StorageOperateImpl implements StorageOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.STORAGE_CREATE)
+    @DispatchBind(command = Constant.Command.STORAGE_CREATE,async = true)
     @Override
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
         if (!ObjectUtils.isEmpty(request.getSecretXml())){
@@ -103,7 +103,7 @@ public class StorageOperateImpl implements StorageOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.STORAGE_DESTROY)
+    @DispatchBind(command = Constant.Command.STORAGE_DESTROY,async = true)
     @Override
     public Void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
         synchronized (request.getName().intern()) {

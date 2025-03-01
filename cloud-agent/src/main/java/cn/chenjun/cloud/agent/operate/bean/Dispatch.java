@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
 @AllArgsConstructor
 public class Dispatch<T, V> {
     private Type paramType;
+    private boolean async;
     private Consumer<T, V> consumer;
 
 }

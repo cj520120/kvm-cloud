@@ -71,7 +71,7 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
             GuestInfoOperate operate = GuestInfoOperate.builder()
-                    .taskId(UUID.randomUUID().toString())
+                    .id(UUID.randomUUID().toString())
                     .title("获取客户机VNC信息[" + guest.getName() + "]")
                     .guestId(param.getGuestId())
                     .build();

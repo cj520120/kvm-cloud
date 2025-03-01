@@ -33,7 +33,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
     public void operate(DestroyNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
         List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
-        DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
+        DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().id(UUID.randomUUID().toString())
                 .title(param.getTitle())
                 .networkId(param.getNetworkId())
                 .nextHostIds(hostIds)

@@ -39,72 +39,71 @@ public class OperateDispatchImpl implements OperateDispatch, BeanPostProcessor {
     @Autowired
     private ClientService clientService;
 
-    @Override
-    public ResultUtil<Void> submitTask(String data) {
-        TaskRequest task = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
-        log.info("提交异步任务:taskId={},command={},data={}", task.getTaskId(), task.getCommand(), task.getData());
-        this.executor.submit(() -> {
-            ResultUtil<?> result = null;
-            try {
-                result = dispatch(task.getTaskId(), task.getCommand(), task.getData());
-            } catch (CodeException err) {
-                result = ResultUtil.error(err.getCode(), err.getMessage());
-            } catch (Exception err) {
-                result = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
-                log.error("执行任务出错.", err);
-            } finally {
-                try {
-                    String nonce = String.valueOf(System.nanoTime());
-                    Map<String, Object> map = new HashMap<>(5);
-                    map.put("taskId", task.getTaskId());
-                    map.put("data", GsonBuilderUtil.create().toJson(result));
-                    map.put("timestamp", System.currentTimeMillis());
-                    String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
-                    map.put("sign", sign);
-                    String url = clientService.getManagerUri();
-                    if (!url.endsWith("/")) {
-                        url += "/";
-                    }
-                    url += "api/agent/task/report";
-                    HttpUtil.post(url, map);
-                } catch (Exception err) {
-                    log.error("上报任务出现异常。command={} param={} result={}", task.getCommand(), task.getData(), result, err);
-                } finally {
-                    log.info("移除异步任务:{}", task.getTaskId());
-                }
 
-            }
-        });
-        return ResultUtil.success();
+    @Override
+    public ResultUtil<Object> dispatch(String data) {
+        TaskRequest task = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
+        Dispatch<?, ?> dispatch = this.dispatchFactory.getDispatch(task.getCommand());
+        if (dispatch == null) {
+            return ResultUtil.error(ErrorCode.SERVER_ERROR, "不支持的操作:" + task.getCommand());
+        }
+        TaskIdUtil.push(task.getTaskId());
+        if (dispatch.isAsync()) {
+            this.executor.submit(() -> {
+                dispatchTaskConsumer(task, dispatch);
+            });
+            return ResultUtil.builder().code(ErrorCode.AGENT_TASK_ASYNC_WAIT).build();
+        } else {
+            return dispatchTaskConsumer(task, dispatch);
+        }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Override
-    public ResultUtil<?> dispatch(String taskId, String command, String data) {
-
-        TaskIdUtil.push(taskId);
+    private ResultUtil<Object> dispatchTaskConsumer(TaskRequest task, Dispatch dispatch) {
+        ResultUtil<Object> executeResult = null;
         Connect connect = null;
         try {
+            long startTime=System.currentTimeMillis();
             connect = connectPool.borrowObject();
-            Dispatch<?, ?> dispatch = this.dispatchFactory.getDispatch(command);
-            if (dispatch == null) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的操作:" + command);
-            }
+            Object param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());
             Consumer consumer = dispatch.getConsumer();
-            Object param = StringUtils.isEmpty(data) ? null : GsonBuilderUtil.create().fromJson(data, dispatch.getParamType());
             Object result = consumer.dispatch(connect, param);
-            log.info("dispatch command={} param={} result={}", command, data, result);
-            return ResultUtil.builder().data(result).build();
+            log.info("dispatch async={} cost={}ms command={} param={} result={}",dispatch.isAsync(),System.currentTimeMillis()-startTime, task.getCommand(), task.getData(), result);
+            executeResult = ResultUtil.success(result);
         } catch (CodeException err) {
-            throw err;
+            executeResult = ResultUtil.error(err.getCode(), err.getMessage());
         } catch (Exception err) {
-            log.error("dispatch fail. taskId={} command={} data={}", taskId, command, data, err);
-            throw new CodeException(ErrorCode.SERVER_ERROR, err);
+            log.error("dispatch fail. taskId={} command={} data={}", task.getTaskId(), task.getCommand(), task.getData(), err);
+            executeResult = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         } finally {
-            TaskIdUtil.remove(taskId);
+            TaskIdUtil.remove(task.getTaskId());
+            if (dispatch.isAsync()) {
+                submitTaskCallback(task, executeResult);
+            }
             if (connect != null) {
                 connectPool.returnObject(connect);
             }
         }
+        return executeResult;
     }
+    private void submitTaskCallback(TaskRequest task, ResultUtil<Object> resultUtil) {
+        String result = GsonBuilderUtil.create().toJson(resultUtil);
+        try {
+            String nonce = String.valueOf(System.nanoTime());
+            Map<String, Object> map = new HashMap<>(5);
+            map.put("taskId", task.getTaskId());
+            map.put("data", result);
+            map.put("timestamp", System.currentTimeMillis());
+            String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
+            map.put("sign", sign);
+            String url = clientService.getManagerUri();
+            if (!url.endsWith("/")) {
+                url += "/";
+            }
+            url += "api/agent/task/report";
+            HttpUtil.post(url, map);
+        } catch (Exception err) {
+            log.error("上报任务出现异常.command={} param={} result={}", task.getCommand(), task.getData(), result, err);
+        }
+    }
+
 }

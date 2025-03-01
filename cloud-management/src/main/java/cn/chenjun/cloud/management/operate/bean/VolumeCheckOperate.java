@@ -20,4 +20,9 @@ public class VolumeCheckOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.VOLUME_CHECK;
     }
+
+    @Override
+    public String getTaskId() {
+        return "VOLUME_CHECK:" + this.storageId;
+    }
 }

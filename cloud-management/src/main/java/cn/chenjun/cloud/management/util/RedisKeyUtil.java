@@ -8,4 +8,8 @@ public class RedisKeyUtil {
     public static final String GLOBAL_LOCK_KEY = "Cloud.Lock";
     public static final String JOB_RUN_TIME = "Cloud.Job.";
 
+    public static String getHostLastKeepKey(int hostId){
+        return "Cloud.Host.Keep."+hostId;
+    }
+
 }

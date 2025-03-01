@@ -82,7 +82,7 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
                 for (VolumeEntity volume : guestVolumeList) {
                     volume.setStatus(Constant.VolumeStatus.DESTROY);
                     volumeMapper.updateById(volume);
-                    DestroyVolumeOperate operate = DestroyVolumeOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
+                    DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).build();
                     taskService.addTask(operate);
                     this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 }

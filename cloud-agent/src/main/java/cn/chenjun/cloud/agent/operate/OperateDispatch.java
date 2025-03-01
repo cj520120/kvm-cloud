@@ -7,16 +7,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
  */
 public interface OperateDispatch {
 
-    /**
-     * 操作分发
-     *
-     * @param taskId
-     * @param command
-     * @param data
-     * @return
-     */
-    ResultUtil<?> dispatch(String taskId, String command, String data);
-
 
     /**
      * 操作分发
@@ -24,5 +14,5 @@ public interface OperateDispatch {
      * @param data
      * @return
      */
-    ResultUtil<Void> submitTask(String data);
+    ResultUtil<Object> dispatch(String data);
 }

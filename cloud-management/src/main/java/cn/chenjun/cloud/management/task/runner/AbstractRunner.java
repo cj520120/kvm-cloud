@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractRunner {
 
     @Autowired
-    private RedissonClient redissonClient;
+    protected RedissonClient redissonClient;
     @Autowired
     protected ConfigService configService;
 
@@ -34,9 +34,6 @@ public abstract class AbstractRunner {
                         return;
                     }
                     rBucket.set(System.currentTimeMillis(), Math.max(1,this.getPeriodSeconds()), TimeUnit.SECONDS);
-                    if (!canRunning()) {
-                        return;
-                    }
                 }
                 try {
                     log.info("开始执行周期任务: {}，当前任务周期 {}s", this.getName(),this.getPeriodSeconds());
@@ -71,11 +68,4 @@ public abstract class AbstractRunner {
      * @return
      */
     protected abstract String getName();
-
-    /**
-     * 判断当前任务是否可以执行
-     *
-     * @return
-     */
-    protected abstract boolean canRunning();
 }

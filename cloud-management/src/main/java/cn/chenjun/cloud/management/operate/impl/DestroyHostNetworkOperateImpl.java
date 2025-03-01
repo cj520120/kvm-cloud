@@ -94,7 +94,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
                     guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, param.getNetworkId()));
                 }
             } else {
-                DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
+                DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().id(UUID.randomUUID().toString())
                         .networkId(param.getNetworkId())
                         .networkId(param.getNetworkId())
                         .nextHostIds(hostIds)

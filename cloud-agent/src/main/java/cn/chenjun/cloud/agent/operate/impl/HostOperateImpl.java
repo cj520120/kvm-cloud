@@ -98,7 +98,7 @@ public class HostOperateImpl implements HostOperate {
         return getHostInfo(connect);
     }
 
-    @DispatchBind(command = Constant.Command.HOST_INIT)
+    @DispatchBind(command = Constant.Command.HOST_INIT,async = true)
     @Override
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
 

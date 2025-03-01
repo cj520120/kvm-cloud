@@ -198,7 +198,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 guest.setLastHostId(lastHostId);
                 guestMapper.updateById(guest);
-                BaseOperateParam operateParam = StartComponentGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(lastHostId).componentType(this.getComponentType()).build();
+                BaseOperateParam operateParam = StartComponentGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(lastHostId).componentType(this.getComponentType()).build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 break;
@@ -304,7 +304,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .volumeId(volume.getVolumeId())
                 .start(true)
                 .hostId(0)
-                .taskId(uid)
+                .id(uid)
                 .title("创建系统主机[" + guest.getDescription() + "]")
                 .build();
         this.operateTask.addTask(operateParam);

@@ -62,9 +62,4 @@ public class ClearComponentGuestRunner extends AbstractRunner {
     protected String getName() {
         return "清理未关联的组件虚拟机";
     }
-
-    @Override
-    protected boolean canRunning() {
-        return true;
-    }
 }

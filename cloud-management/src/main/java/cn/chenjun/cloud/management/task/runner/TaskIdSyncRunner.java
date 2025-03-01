@@ -39,7 +39,7 @@ public class TaskIdSyncRunner extends AbstractRunner {
         List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : hostList) {
             if (Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
-                BaseOperateParam operateParam = SyncHostTaskIdOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString()).title("同步主机任务列表").build();
+                BaseOperateParam operateParam = SyncHostTaskIdOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString()).title("同步主机任务列表").build();
                 this.taskService.addTask(operateParam);
             }
         }
@@ -50,8 +50,4 @@ public class TaskIdSyncRunner extends AbstractRunner {
         return "检测主机任务列表";
     }
 
-    @Override
-    protected boolean canRunning() {
-        return true;
-    }
 }

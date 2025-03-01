@@ -195,7 +195,8 @@ public class Constant {
         public static final String DEFAULT_CLUSTER_DISK_TYPE = "default.cluster.disk.type";
         public static final String DEFAULT_CLUSTER_OVER_MEMORY = "default.cluster.over.memory";
         public static final String DEFAULT_CLUSTER_MANAGER_URI = "default.cluster.manager.uri";
-        public static final String DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE = "default.cluster.destroy.delay.timeout.minutes";
+
+         public static final String DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE = "default.cluster.destroy.delay.timeout.minutes";
 
         public static final String DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND = "default.cluster.component.clear.timeout.second";
         public static final String DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default_cluster_component.check.timeout.second";

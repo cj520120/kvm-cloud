@@ -176,7 +176,7 @@ public class NetworkService extends AbstractService {
                 this.networkMapper.updateById(network);
             }
         }
-        BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
+        BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
@@ -190,7 +190,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(Constant.NetworkStatus.CREATING);
         this.networkMapper.updateById(network);
-        BaseOperateParam operateParam = CreateNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
+        BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));
@@ -234,7 +234,7 @@ public class NetworkService extends AbstractService {
             this.componentMapper.deleteById(componentEntity);
             this.natMapper.delete(new QueryWrapper<NatEntity>().eq(NatEntity.COMPONENT_ID, componentEntity.getComponentId()));
         }
-        BaseOperateParam operateParam = DestroyNetworkOperate.builder().taskId(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
+        BaseOperateParam operateParam = DestroyNetworkOperate.builder().id(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return ResultUtil.success(this.initGuestNetwork(network));

@@ -29,17 +29,12 @@ public class StorageSyncRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() {
-        BaseOperateParam operateParam = StorageCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测存储池使用情况").build();
+        BaseOperateParam operateParam = StorageCheckOperate.builder().id(UUID.randomUUID().toString()).title("检测存储池使用情况").build();
         this.taskService.addTask(operateParam);
     }
 
     @Override
     protected String getName() {
         return "存储池检测";
-    }
-
-    @Override
-    protected boolean canRunning() {
-        return !this.taskService.hasTask(StorageCheckOperate.class);
     }
 }

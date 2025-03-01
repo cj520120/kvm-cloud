@@ -29,11 +29,12 @@ public class HostSyncRunner extends AbstractRunner {
     @Override
     protected void dispatch() {
         List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
+
         for (HostEntity host : hostList) {
             switch (host.getStatus()) {
                 case Constant.HostStatus.ONLINE:
                 case Constant.HostStatus.OFFLINE:
-                    BaseOperateParam operateParam = HostCheckOperate.builder().taskId(UUID.randomUUID().toString()).title("检测主机状态").hostId(host.getHostId()).build();
+                    BaseOperateParam operateParam = HostCheckOperate.builder().id(UUID.randomUUID().toString()).title("检测主机状态").hostId(host.getHostId()).build();
                     this.taskService.addTask(operateParam);
                     break;
                 default:
@@ -41,7 +42,6 @@ public class HostSyncRunner extends AbstractRunner {
             }
         }
     }
-
     @Override
     public int getPeriodSeconds() {
         return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
@@ -52,8 +52,4 @@ public class HostSyncRunner extends AbstractRunner {
         return "宿主机检测";
     }
 
-    @Override
-    protected boolean canRunning() {
-        return !this.taskService.hasTask(HostCheckOperate.class);
-    }
 }

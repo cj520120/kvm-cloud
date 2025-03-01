@@ -83,7 +83,7 @@ public class HostService extends AbstractService {
                 .cores(0)
                 .status(Constant.HostStatus.REGISTER).build();
         this.hostMapper.insert(host);
-        BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
+        BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString())
                 .title("添加主机[" + host.getDisplayName() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
@@ -100,7 +100,7 @@ public class HostService extends AbstractService {
             host.setClientSecret(AppUtils.getAppSecret(host.getClientId()));
         }
         this.hostMapper.updateById(host);
-        BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).taskId(UUID.randomUUID().toString())
+        BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString())
                 .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());

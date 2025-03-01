@@ -107,7 +107,7 @@ public class TemplateService extends AbstractService {
                 this.templateVolumeMapper.insert(templateVolume);
                 template.setStatus(Constant.TemplateStatus.DOWNLOAD);
                 this.templateMapper.updateById(template);
-                BaseOperateParam operateParam = DownloadTemplateOperate.builder().taskId(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
+                BaseOperateParam operateParam = DownloadTemplateOperate.builder().id(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(this.initTemplateModel(template));
@@ -160,7 +160,7 @@ public class TemplateService extends AbstractService {
         this.templateVolumeMapper.insert(templateVolume);
 
         BaseOperateParam operateParam = CreateVolumeTemplateOperate.builder()
-                .taskId(uid)
+                .id(uid)
                 .sourceVolumeId(volumeId)
                 .targetTemplateVolumeId(templateVolume.getTemplateVolumeId())
                 .title("创建磁盘模版[" + template.getName() + "]")
@@ -184,7 +184,7 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.DESTROY:
                 template.setStatus(Constant.TemplateStatus.DESTROY);
                 this.templateMapper.updateById(template);
-                BaseOperateParam operate = DestroyTemplateOperate.builder().taskId(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
+                BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
                 operateTask.addTask(operate, configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
                 TemplateModel source = this.initTemplateModel(template);
                 this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());

@@ -20,4 +20,9 @@ public class SyncHostTaskIdOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.SYNC_HOST_TASK_ID;
     }
+
+    @Override
+    public String getTaskId() {
+        return "SYNC_HOST_TASK_ID:" + this.hostId;
+    }
 }

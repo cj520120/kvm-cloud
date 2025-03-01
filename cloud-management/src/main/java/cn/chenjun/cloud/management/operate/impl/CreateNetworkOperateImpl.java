@@ -33,7 +33,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
     public void operate(CreateNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
         List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
-        InitHostNetworkOperate operate = InitHostNetworkOperate.builder().taskId(UUID.randomUUID().toString())
+        InitHostNetworkOperate operate = InitHostNetworkOperate.builder().id(UUID.randomUUID().toString())
                 .title(param.getTitle())
                 .networkId(param.getNetworkId())
                 .networkId(param.getNetworkId())

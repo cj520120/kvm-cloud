@@ -102,7 +102,7 @@ public class OsOperateImpl implements OsOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.ALL_GUEST_INFO)
+    @DispatchBind(command = Constant.Command.ALL_GUEST_INFO,async = true)
     @Override
     public List<GuestInfo> listAllGuestInfo(Connect connect, NoneRequest request) throws Exception {
         List<GuestInfo> list = new ArrayList<>();
@@ -119,7 +119,7 @@ public class OsOperateImpl implements OsOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_GUEST_INFO)
+    @DispatchBind(command = Constant.Command.BATCH_GUEST_INFO,async = true)
     @Override
     public List<GuestInfo> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception {
         Set<String> names = batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
@@ -145,7 +145,7 @@ public class OsOperateImpl implements OsOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN)
+    @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN,async = true)
     @Override
     public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         this.stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(5));
@@ -245,7 +245,7 @@ public class OsOperateImpl implements OsOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_START)
+    @DispatchBind(command = Constant.Command.GUEST_START,async = true)
     @Override
     public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
@@ -328,7 +328,7 @@ public class OsOperateImpl implements OsOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_QMA)
+    @DispatchBind(command = Constant.Command.GUEST_QMA,async = true)
     @Override
     public Void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
@@ -339,7 +339,7 @@ public class OsOperateImpl implements OsOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_DESTROY)
+    @DispatchBind(command = Constant.Command.GUEST_DESTROY,async = true)
     @Override
     public Void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
@@ -349,7 +349,7 @@ public class OsOperateImpl implements OsOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_MIGRATE)
+    @DispatchBind(command = Constant.Command.GUEST_MIGRATE,async = true)
     @Override
     public Void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());

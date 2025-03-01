@@ -20,4 +20,9 @@ public class SyncHostGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.SYNC_HOST_GUEST;
     }
+
+    @Override
+    public String getTaskId() {
+        return "SYNC_HOST_GUEST:" + this.hostId;
+    }
 }

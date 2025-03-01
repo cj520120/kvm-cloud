@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class TaskEngine implements CommandLineRunner {
     @Autowired
-    private ScheduledExecutorService bossExecutor;
+    private ScheduledExecutorService executor;
     @Autowired
     private List<AbstractRunner> runnerList;
 
     @Override
     public void run(String... args) throws Exception {
         for (AbstractRunner runner : runnerList) {
-            this.bossExecutor.scheduleAtFixedRate(runner::call, runner.getDelaySeconds(), 1, TimeUnit.SECONDS);
+            this.executor.scheduleAtFixedRate(runner::call, runner.getDelaySeconds(), 1, TimeUnit.SECONDS);
         }
     }
 

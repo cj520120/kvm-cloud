@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class BaseOperateParam {
-    private String taskId;
+    private String id;
     private String title;
 
     /**
@@ -24,8 +24,13 @@ public abstract class BaseOperateParam {
      */
     public abstract int getType();
 
+    public String getTaskId() {
+        return this.id;
+    }
+
     @Override
     public String toString() {
         return GsonBuilderUtil.create().toJson(this);
     }
+
 }

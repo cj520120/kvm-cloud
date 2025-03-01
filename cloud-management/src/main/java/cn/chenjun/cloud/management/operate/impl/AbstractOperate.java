@@ -17,6 +17,7 @@ import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import com.google.gson.reflect.TypeToken;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author chenjun
@@ -57,7 +59,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     protected TemplateVolumeMapper templateVolumeMapper;
     @Autowired
     protected VolumeMapper volumeMapper;
-
+    @Autowired
+    protected RedissonClient redissonClient;
     @Autowired
     protected SchemeMapper schemeMapper;
     @Autowired
@@ -72,6 +75,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     @Autowired
     protected RestTemplate restTemplate;
 
+    @Autowired
+    protected ScheduledExecutorService executor;
 
     @Override
     public boolean supports(@NonNull Integer type) {
@@ -79,46 +84,50 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     }
 
     protected void asyncInvoker(HostEntity host, T param, String command, Object data) {
-        TaskRequest taskRequest = TaskRequest.builder()
-                .command(command)
-                .data(GsonBuilderUtil.create().toJson(data))
-                .taskId(param.getTaskId()).build();
-        String nonce = String.valueOf(System.nanoTime());
-        Map<String, Object> map = new HashMap<>(6);
-        map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
-        map.put("timestamp", System.currentTimeMillis());
-        try {
-            String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
-            map.put("sign", sign);
-        } catch (Exception err) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "数据签名错误");
-        }
-        String url = host.getUri();
-        if (!url.endsWith("/")) {
-            url += "/";
-        }
-        url += "api/operate";
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
-        map.forEach((k, v) -> requestMap.add(k, v.toString()));
-        RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
-                .post(URI.create(url))
-                .headers(httpHeaders)
-                .body(requestMap);
-        ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
-        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "请求出错.status=" + responseEntity.getStatusCode());
-        }
-        String response = responseEntity.getBody();
-        ResultUtil<Void> resultUtil = GsonBuilderUtil.create().fromJson(response, new TypeToken<ResultUtil<Void>>() {
-        }.getType());
-        if (resultUtil == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "请求出错.response=" + response);
-        }
-        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
-            throw new CodeException(resultUtil.getCode(), resultUtil.getMessage());
-        }
+        this.executor.submit(() -> {
+            try {
+                TaskRequest taskRequest = TaskRequest.builder()
+                        .command(command)
+                        .data(GsonBuilderUtil.create().toJson(data))
+                        .taskId(param.getTaskId()).build();
+                String nonce = String.valueOf(System.nanoTime());
+                Map<String, Object> map = new HashMap<>(6);
+                map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
+                map.put("timestamp", System.currentTimeMillis());
+                String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+                map.put("sign", sign);
+                String url = host.getUri();
+                if (!url.endsWith("/")) {
+                    url += "/";
+                }
+                url += "api/operate";
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
+                map.forEach((k, v) -> requestMap.add(k, v.toString()));
+                RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
+                        .post(URI.create(url))
+                        .headers(httpHeaders)
+                        .body(requestMap);
+                ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
+                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "请求出错.status=" + responseEntity.getStatusCode());
+                }
+                String response = responseEntity.getBody();
+                ResultUtil<Object> resultUtil = GsonBuilderUtil.create().fromJson(response, this.getCallResultType());
+                if (resultUtil == null) {
+                    ResultUtil<V> submitResult = ResultUtil.error(ErrorCode.SERVER_ERROR, "请求出错.response=" + response);
+                    this.onSubmitFinishEvent(param.getTaskId(), (V) submitResult);
+                } else if (resultUtil.getCode() != ErrorCode.AGENT_TASK_ASYNC_WAIT) {
+                    this.onSubmitFinishEvent(param.getTaskId(), (V) resultUtil);
+                }
+            } catch (Exception err) {
+                ResultUtil<V> submitResult = ResultUtil.error(ErrorCode.SERVER_ERROR, "数据请求出错");
+                this.onSubmitFinishEvent(param.getTaskId(), (V) submitResult);
+            }
+        });
+
+
     }
 
 

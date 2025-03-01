@@ -76,7 +76,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                     storage.setAvailable(resultUtil.getData().getAvailable());
                 }
                 if (!hostIds.isEmpty()) {
-                    InitHostStorageOperate operate = InitHostStorageOperate.builder().taskId(UUID.randomUUID().toString())
+                    InitHostStorageOperate operate = InitHostStorageOperate.builder().id(UUID.randomUUID().toString())
                             .storageId(param.getStorageId())
                             .nextHostIds(hostIds)
                             .build();

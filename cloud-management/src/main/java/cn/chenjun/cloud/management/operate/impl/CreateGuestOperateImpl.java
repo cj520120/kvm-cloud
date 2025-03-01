@@ -33,7 +33,7 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
                     if (Objects.equals(Constant.GuestType.USER, guest.getType())) {
                         guest.setStatus(Constant.GuestStatus.STARTING);
                         guestMapper.updateById(guest);
-                        BaseOperateParam operateParam = StartGuestOperate.builder().taskId(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").hostId(param.getHostId()).guestId(param.getGuestId()).build();
+                        BaseOperateParam operateParam = StartGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").hostId(param.getHostId()).guestId(param.getGuestId()).build();
                         this.taskService.addTask(operateParam);
                     } else {
                         guest.setStatus(Constant.GuestStatus.STOP);
