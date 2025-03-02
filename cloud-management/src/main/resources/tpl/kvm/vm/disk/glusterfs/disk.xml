@@ -1,5 +1,5 @@
 <disk type="network" device="disk" cache="none" aio="native">
-    <target dev="{{disk.device}}" bus="{{disk.bus}}"/>
+    <target dev="{{disk.target}}" bus="{{disk.bus}}"/>
     <driver name="qemu" type="{{disk.type}}" cache="none" aio="native"/>
     <source protocol="gluster" name="{{storage.param.volume}}/{{disk.name}}">
         {% set __host=cloud:parseRandomFirstUri(storage.param.uri,"24007") %}
@@ -7,7 +7,7 @@
     </source>
     {% if disk.bus=='virtio' %}
     <!-- virtio 驱动-->
-    <address type="pci" domain="0x0000" bus="0x00" slot="{{disk.slot}}" function="0x0"/>
+    <address type="pci" domain="0x0000" bus="{{cloud:toHex(__SYS__['vm.disk.pci.bus'],4)}}" slot="{{cloud:toHex(__SYS__['vm.disk.pci.slot']+disk.deviceId,4)}}" function="{{cloud:toHex(__SYS__['vm.disk.pci.function'],4)}}"/>
     {% else %}
     <!-- ide/scsi/sata 驱动-->
     <address type='drive' controller='0' bus='0' target='0' unit='1'/>

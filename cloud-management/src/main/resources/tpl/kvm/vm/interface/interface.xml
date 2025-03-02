@@ -2,7 +2,7 @@
     <mac address="{{network.mac}}"/>
     <model type="{{network.type}}"/>
     <source network='{{network.network}}'/>
-    <address type="pci" domain="0x0000" bus="0x00" slot="{{network.slot}}" function="0x0"/>
+    <address type="pci" domain="0x0000" bus="{{cloud:toHex(__SYS__['vm.network.pci.bus'],4)}}" slot="{{cloud:toHex(__SYS__['vm.network.pci.slot']+network.deviceId,4)}}" function="{{cloud:toHex(__SYS__['vm.network.pci.function'],4)}}"/>
     <link state="up"/>
-
+    <alias name='net{{network.deviceId}}'/>
 </interface>

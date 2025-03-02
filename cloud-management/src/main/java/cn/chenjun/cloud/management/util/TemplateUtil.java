@@ -15,6 +15,7 @@ public class TemplateUtil {
         Jinjava jinjava = new Jinjava();
         jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseUrlList", TemplateUtil.class, "parseUrlList", String.class, String.class));
         jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseRandomFirstUri", TemplateUtil.class, "parseRandomFirstUri", String.class, String.class));
+        jinjava.registerFunction(new ELFunctionDefinition("cloud", "toHex", TemplateUtil.class, "toHex", Integer.class, Integer.class));
         return jinjava;
     }
 
@@ -39,5 +40,13 @@ public class TemplateUtil {
 
     public static Map<String, String> parseRandomFirstUri(String uriListStr, String defaultPort) {
         return parseUrlList(uriListStr, defaultPort).get(0);
+    }
+    public static String toHex(Integer decimal, Integer minLength) {
+        String hexString = Integer.toHexString(decimal);
+        while (hexString.length() < minLength) {
+            hexString = "0" + hexString;
+        }
+
+        return "0x"+hexString;
     }
 }

@@ -2,7 +2,6 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ConfigEntity;
@@ -68,7 +67,7 @@ public class ConfigService {
         initDefaultConfig(Constant.ConfigKey.VM_CPU_VIRTUALIZATION_NAME, "vmx", "嵌套虚拟化名称(intel:vmx,amd:svm)", Constant.ConfigValueType.SELECT, Arrays.asList("vmx","svm"));
 
         initDefaultConfig(Constant.ConfigKey.VM_CLOCK_TYPE, "utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime","timezone","variable"));
-        initDefaultConfig(Constant.ConfigKey.VM_CD_BUS, "ide", "默认光驱驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("ide", "sata"));
+        initDefaultConfig(Constant.ConfigKey.VM_CD_BUS, "ide", "默认光驱驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("ide", "sata","scsi"));
         initDefaultConfig(Constant.ConfigKey.VM_DEFAULT_UEFI_LOADER_TYPE, "pflash", "Uefi Loader Type", Constant.ConfigValueType.SELECT, Arrays.asList("pflash", "rom"));
         initDefaultConfig(Constant.ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH, "/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd", "Uefi Loader Path", Constant.ConfigValueType.STRING, null);
         initDefaultConfig(Constant.ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null);
@@ -81,6 +80,18 @@ public class ConfigService {
 
         initDefaultConfig(Constant.ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null);
         initDefaultConfig(Constant.ConfigKey.NETWORK_OVS_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null);
+
+        initDefaultConfig(Constant.ConfigKey.VM_PCI_DISK_BUS, 0, "磁盘P默认CI总线层级(bus)", Constant.ConfigValueType.INT,null);
+        initDefaultConfig(Constant.ConfigKey.VM_PCI_DISK_SLOT, 20, "磁盘PCI默认插槽(slot)", Constant.ConfigValueType.INT,null);
+        initDefaultConfig(Constant.ConfigKey.VM_PCI_DISK_FUNCTION, 0, "磁盘PCI默认功能标识(function)", Constant.ConfigValueType.INT,null);
+
+
+        initDefaultConfig(Constant.ConfigKey.VM_PCI_NETWORK_BUS, 0, "网卡P默认CI总线层级(bus)", Constant.ConfigValueType.INT,null);
+        initDefaultConfig(Constant.ConfigKey.VM_PCI_NETWORK_SLOT, 10, "网卡PCI默认插槽(slot)", Constant.ConfigValueType.INT,null);
+        initDefaultConfig(Constant.ConfigKey.VM_PCI_NETWORK_FUNCTION, 0, "网卡PCI默认功能标识(function)", Constant.ConfigValueType.INT,null);
+        initDefaultConfig(Constant.ConfigKey.VM_DEFAULT_DEVICE_TPL, "", "其他设备Xml配置", Constant.ConfigValueType.MULTI_STRING,null);
+
+
 
         initDefaultConfig(Constant.ConfigKey.VM_DOMAIN_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/vm.xml"), "VM模版", Constant.ConfigValueType.MULTI_STRING, null);
 
@@ -198,7 +209,7 @@ public class ConfigService {
                 model.setId(config.getId());
                 model.setValue(config.getConfigValue());
             } else {
-                model = ConfigModel.builder().defaultParam(false).key(config.getConfigKey()).allocateType(allocateType).allocateId(allocateId).value(config.getConfigValue()).valueType(Constant.ConfigValueType.MULTI_STRING).description("").valueOptions(null).build();
+                model = ConfigModel.builder().id(config.getId()).defaultParam(false).key(config.getConfigKey()).allocateType(allocateType).allocateId(allocateId).value(config.getConfigValue()).valueType(Constant.ConfigValueType.MULTI_STRING).description("").valueOptions(null).build();
                 list.add(model);
                 map.put(model.getKey(), model);
             }

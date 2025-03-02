@@ -68,12 +68,12 @@ public class ParamBuilder {
     }
 
     public static Map<String, Object> buildNetworkInterfaceParam(NetworkEntity network, GuestNetworkEntity guestNetwork) {
-        int deviceId = guestNetwork.getDeviceId() + DomainUtil.MIN_NIC_DEVICE_ID;
+//        int deviceId = guestNetwork.getDeviceId() + DomainUtil.MIN_NIC_DEVICE_ID;
         Map<String, Object> map = new HashMap<>();
         map.put("mac", guestNetwork.getMac());
         map.put("type", guestNetwork.getDriveType());
         map.put("network", network.getPoolId());
-        map.put("slot", String.format("0x%02x", deviceId));
+        map.put("deviceId", guestNetwork.getDeviceId());
         return map;
     }
 
@@ -101,11 +101,12 @@ public class ParamBuilder {
     public static Map<String, Object> buildDiskParam(GuestEntity guest, VolumeEntity volume, int deviceId) {
 
         String bus = deviceId == 0 ? guest.getBusType() : Constant.DiskBus.VIRTIO;
-        String deviceName = "vd" + (char) ('a' + deviceId );
+        String targetName = "vd" + (char) ('a' + deviceId );
         Map<String, Object> map = new HashMap<>();
-        map.put("device", deviceName);
+        map.put("deviceId", deviceId);
+        map.put("target", targetName);
         map.put("type", volume.getType());
-        map.put("slot", String.format("0x%02x", deviceId+ DomainUtil.MIN_DISK_DEVICE_ID));
+//        map.put("slot", String.format("0x%02x", deviceId+ DomainUtil.MIN_DISK_DEVICE_ID));
         map.put("bus", bus);
         map.put("name", volume.getName());
         return map;

@@ -9,6 +9,7 @@
 					<el-option label="virtio" value="virtio" />
 					<el-option label="ide" value="ide" />
 					<el-option label="scsi" value="scsi" />
+					<el-option label="sata" value="sata" />
 				</el-select>
 			</el-form-item>
 			<el-form-item label="操作系统">

@@ -4,7 +4,7 @@ package cn.chenjun.cloud.management.util;
  * @author chenjun
  */
 public class Constant {
-    public static int MAX_DEVICE_ID = 5;
+    public static int MAX_DEVICE_ID = 200;
 
     public static class NetworkAllocateType {
         public static final int GUEST = 0;
@@ -236,7 +236,15 @@ public class Constant {
 
         public static final String VM_DOMAIN_TPL = "vm.domain.tpl";
 
+        public static final String VM_PCI_DISK_BUS = "vm.disk.pci.bus";
+        public static final String VM_PCI_DISK_SLOT = "vm.disk.pci.slot";
+        public static final String VM_PCI_DISK_FUNCTION = "vm.disk.pci.function";
 
+        public static final String VM_PCI_NETWORK_BUS = "vm.network.pci.bus";
+        public static final String VM_PCI_NETWORK_SLOT = "vm.network.pci.slot";
+        public static final String VM_PCI_NETWORK_FUNCTION = "vm.network.pci.function";
+
+        public static final String VM_DEFAULT_DEVICE_TPL = "vm.device.default.tpl";
         public static final String VM_DISK_NFS_TPL = "vm.disk.nfs.tpl";
         public static final String VM_DISK_GLUSTERFS_TPL = "vm.disk.glusterfs.tpl";
         public static final String VM_DISK_CEPH_RBD_TPL = "vm.disk.ceph.rbd.tpl";
