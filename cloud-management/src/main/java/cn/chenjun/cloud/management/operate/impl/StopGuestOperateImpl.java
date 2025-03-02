@@ -37,8 +37,8 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
         if (host == null) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
         } else {
-            if (host.getStatus() != cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "客户机所在主机[" + host.getHostName() + "]状态不正确:" + host.getStatus());
+            if (host.getStatus() == cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE) {
+                this.onFinish(param, ResultUtil.success());
             }
             if (!param.isForce()) {
                 GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).build();
