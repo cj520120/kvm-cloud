@@ -36,7 +36,7 @@
         {% else %}
         <type>hvm</type>
         {% endif %}
-        {% if vm.bootstrapType=="uefi" %}
+        {% if vm.bootstrapType == 1 %}
         <loader readyonly="yes" type="{{__SYS__['vm.uefi.loader.type']}}">{{__SYS__["vm.uefi.loader.path"]}}</loader>
         {% endif %}
         <boot dev="hd"/>
@@ -48,7 +48,7 @@
     <sysinfo type='smbios'>
         <system>
             <entry name='product'>CJ KVM Cloud</entry>
-            <entry name='version'>3.1</entry>
+            <entry name='version'>4.0</entry>
             <entry name='manufacturer'>chenjun</entry>
             <entry name='serial'>ds=nocloud;s=http://169.254.169.254/</entry>
         </system>
@@ -84,10 +84,15 @@
             <source mode="bind" path="/var/lib/libvirt/qemu/{{vm.name}}.org.qemu.guest_agent.0"/>
             <target type="virtio" name="org.qemu.guest_agent.0"/>
         </channel>
+        <input type="mouse" bus="ps2"/>
+        <input type="keyboard" bus="ps2"/>
+        <serial type="pty">
+            <target port="0"/>
+        </serial>
         <console type="pty">
             <target type="serial" port="0"/>
         </console>
-        <graphics type="{{vnc.type}}" port="-1" autoport="yes" listen="0.0.0.0" keymap="en-us" passwd="{{vnc.password}}"/>
+        <graphics type="vnc" port="-1" autoport="yes" listen="0.0.0.0" keymap="en-us" passwd="{{vnc.password}}"/>
 
     </devices>
 </domain>

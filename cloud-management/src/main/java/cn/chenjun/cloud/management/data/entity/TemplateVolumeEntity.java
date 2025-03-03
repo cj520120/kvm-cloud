@@ -31,8 +31,7 @@ public class TemplateVolumeEntity {
     public static final String TEMPLATE_STATUS = "template_status";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(TEMPLATE_VOLUME_ID)
+    @TableId(type = IdType.AUTO,value = TEMPLATE_VOLUME_ID)
     private Integer templateVolumeId;
     @TableField(TEMPLATE_ID)
     private Integer templateId;

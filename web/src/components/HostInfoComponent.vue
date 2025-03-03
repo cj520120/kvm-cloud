@@ -20,6 +20,8 @@
 				<el-descriptions-item label="操作系统">{{ show_host.osName }}</el-descriptions-item>
 				<el-descriptions-item label="系统版本">{{ show_host.osVersion }}</el-descriptions-item>
 				<el-descriptions-item label="制造商">{{ show_host.vendor }}</el-descriptions-item>
+				<el-descriptions-item label="Cpu型号">{{ show_host.model }}</el-descriptions-item>
+				<el-descriptions-item label="Cpu主频">{{ (show_host.frequency / 1000000000).toFixed(2) }}G</el-descriptions-item>
 				<el-descriptions-item label="虚拟化类型">{{ show_host.hypervisor }}</el-descriptions-item>
 				<el-descriptions-item label="内存">
 					<el-tooltip class="item" effect="dark" :content="'已使用:' + get_memory_display_size(show_host.allocationMemory) + ' / 总共:' + get_memory_display_size(show_host.totalMemory)" placement="top">

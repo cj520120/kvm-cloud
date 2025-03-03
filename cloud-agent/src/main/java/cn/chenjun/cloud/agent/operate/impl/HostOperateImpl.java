@@ -1,12 +1,12 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.HostOperate;
 import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.SystemPropsUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,27 +32,21 @@ public class HostOperateImpl implements HostOperate {
     private NetworkOperate networkOperate;
     @Autowired
     private StorageOperate storageOperate;
-    @Autowired
-    private ApplicationConfig applicationConfig;
-
 
 
     @SneakyThrows
     private HostInfo getHostInfo(Connect connect) {
         NodeInfo nodeInfo = connect.nodeInfo();
-
+        List<HostInfo.Topology> cpuTopology = new ArrayList<>();
+        HostInfo.Cpu cpu = HostInfo.Cpu.builder().number(nodeInfo.cpus).topology(cpuTopology).build();
         HostInfo hostInfo = HostInfo.builder().hostName(connect.getHostName())
                 .name(SystemPropsUtil.get("os.name",""))
                 .osVersion(SystemPropsUtil.get("os.version",""))
-                .arch(SystemPropsUtil.get("os.arch",""))
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(nodeInfo.memory)
-                .cpu(nodeInfo.cpus)
                 .hypervisor(connect.getType())
-                .cores(nodeInfo.cores)
-                .threads(nodeInfo.threads)
-                .sockets(nodeInfo.cpus/(nodeInfo.sockets*nodeInfo.cores*nodeInfo.threads))
+                .cpu(cpu)
                 .build();
         try (StringReader sr = new StringReader(connect.getCapabilities())) {
             SAXReader reader = new SAXReader();
@@ -59,22 +54,53 @@ public class HostOperateImpl implements HostOperate {
             Document doc = reader.read(sr);
             Node archNode = doc.selectSingleNode("/capabilities/host/cpu/arch");
             if (archNode != null) {
-                hostInfo.setArch(archNode.getText());
+                cpu.setArch(archNode.getText());
+            }
+            Node counterNode = doc.selectSingleNode("/capabilities/host/cpu/counter");
+            if (counterNode != null) {
+                cpu.setFrequency(NumberUtil.parseLong(((Element) counterNode).attributeValue("frequency")));
+            }
+            Node cpuModelNodel = doc.selectSingleNode("/capabilities/host/cpu/model");
+            if (cpuModelNodel != null) {
+                cpu.setModel(cpuModelNodel.getText());
             }
             Node vendorNode = doc.selectSingleNode("/capabilities/host/cpu/vendor");
             if (vendorNode != null) {
-                hostInfo.setVendor(vendorNode.getText());
+                cpu.setVendor(vendorNode.getText());
+            }
+
+            List<Node> cpuCellNodes = doc.selectNodes("/capabilities/host/topology/cells/cell");
+            cpu.setSockets(cpuCellNodes.size());
+            cpu.setCores(nodeInfo.cores);
+            cpu.setThreads(nodeInfo.threads);
+            for (Node node : cpuCellNodes) {
+                HostInfo.Topology topology = new HostInfo.Topology();
+                cpuTopology.add(topology);
+                topology.setId(NumberUtil.parseInt(((Element) node).attributeValue("id")));
+                Node cpuNode = node.selectSingleNode("cpus");
+                topology.setNumber(NumberUtil.parseInt(((Element) cpuNode).attributeValue("num")));
+                List<HostInfo.Topology.Cell> cells = new ArrayList<>();
+                topology.setCells(cells);
+                List<Node> cellNodes = cpuNode.selectNodes("cpu");
+                for (Node cellNode : cellNodes) {
+                    Element element = (Element) cellNode;
+                    int id = NumberUtil.parseInt(element.attributeValue("id"));
+                    int socketId = NumberUtil.parseInt(element.attributeValue("socket_id"));
+                    int coreId = NumberUtil.parseInt(element.attributeValue("core_id"));
+                    HostInfo.Topology.Cell cell = HostInfo.Topology.Cell.builder().id(id).socketId(socketId).coreId(coreId).build();
+                    cells.add(cell);
+                }
             }
             List<Node> guestNodes = doc.selectNodes("/capabilities/guest");
             for (Node node : guestNodes) {
                 String osType = node.selectSingleNode("os_type").getText();
                 String arch = ((Element) node.selectSingleNode("arch")).attributeValue("name");
-                if (StringUtils.equalsIgnoreCase(osType, "hvm") && StringUtils.equalsIgnoreCase(arch, hostInfo.getArch())) {
+                if (StringUtils.equalsIgnoreCase(osType, "hvm") && StringUtils.equalsIgnoreCase(arch, cpu.getArch())) {
                     Node emulatorNode = node.selectSingleNode("arch/emulator");
                     if (emulatorNode != null) {
                         hostInfo.setEmulator(emulatorNode.getText());
                     }
-                    List<Node> guestDomainNodes = node.selectNodes("arch/domain");
+                    List<Node> guestDomainNodes = node.selectNodes("arch/domain[@type='kvm']");
                     for (Node guestDomainNode : guestDomainNodes) {
                         emulatorNode = guestDomainNode.selectSingleNode("emulator");
                         if (emulatorNode != null) {

@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,16 +90,16 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.DOWNLOAD:
             case Constant.TemplateStatus.ERROR:
                 this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
-                String uid = UUID.randomUUID().toString();
+                String volName = NameUtil.generateTemplateVolumeName();
                 String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
                 if (Objects.equals(template.getTemplateType(), Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
                     volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
                 TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                         .storageId(storage.getStorageId())
-                        .name(uid)
+                        .name(volName)
                         .templateId(template.getTemplateId())
-                        .path(storage.getMountPath() + "/" + uid)
+                        .path(storage.getMountPath() + "/" + volName)
                         .type(volumeType)
                         .allocation(0L)
                         .capacity(0L)
@@ -107,7 +108,7 @@ public class TemplateService extends AbstractService {
                 this.templateVolumeMapper.insert(templateVolume);
                 template.setStatus(Constant.TemplateStatus.DOWNLOAD);
                 this.templateMapper.updateById(template);
-                BaseOperateParam operateParam = DownloadTemplateOperate.builder().id(uid).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
+                BaseOperateParam operateParam = DownloadTemplateOperate.builder().id(UUID.randomUUID().toString()).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(this.initTemplateModel(template));
@@ -146,12 +147,12 @@ public class TemplateService extends AbstractService {
                 .script("")
                 .status(Constant.TemplateStatus.CREATING).build();
         this.templateMapper.insert(template);
-        String uid = UUID.randomUUID().toString();
+        String volumeName = NameUtil.generateTemplateVolumeName();
         TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                 .storageId(storage.getStorageId())
-                .name(uid)
+                .name(volumeName)
                 .templateId(template.getTemplateId())
-                .path(storage.getMountPath() + "/" + uid)
+                .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
                 .capacity(0L)
                 .allocation(0L)
@@ -160,7 +161,7 @@ public class TemplateService extends AbstractService {
         this.templateVolumeMapper.insert(templateVolume);
 
         BaseOperateParam operateParam = CreateVolumeTemplateOperate.builder()
-                .id(uid)
+                .id(UUID.randomUUID().toString())
                 .sourceVolumeId(volumeId)
                 .targetTemplateVolumeId(templateVolume.getTemplateVolumeId())
                 .title("创建磁盘模版[" + template.getName() + "]")

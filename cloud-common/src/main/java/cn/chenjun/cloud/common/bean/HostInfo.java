@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 主机信息
@@ -38,17 +39,9 @@ public class HostInfo implements Serializable {
      */
     private long memory;
     /**
-     * cpu
+     * cpu信息
      */
-    private int cpu;
-    /**
-     * 系统架构
-     */
-    private String arch;
-    /**
-     * 供应商 intel
-     */
-    private String vendor;
+    private Cpu cpu;
     /**
      * 系统名称
      */
@@ -62,19 +55,67 @@ public class HostInfo implements Serializable {
      */
     private String emulator;
     /**
-     * sockets
-     */
-    private Integer sockets;
-    /**
-     * cores
-     */
-    private Integer cores;
-    /**
-     * cores
-     */
-    private Integer threads;
-    /**
      * 系统版本
      */
     private String osVersion;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Topology {
+        private int id;
+        private int number;
+        private long memory;
+        private List<Cell> cells;
+
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class Cell {
+            private int id;
+            private int socketId;
+            private int coreId;
+        }
+    }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Cpu{
+        private int number;
+        /**
+         * 系统架构
+         */
+        private String arch;
+        /**
+         * 供应商
+         */
+        private String vendor;
+        /**
+         * 供应商 cpu型号
+         */
+        private String model;
+        /**
+         * 主频
+         */
+        private long frequency;
+        /**
+         * sockets
+         */
+        private Integer sockets;
+        /**
+         * cores
+         */
+        private Integer cores;
+        /**
+         * cores
+         */
+        private Integer threads;
+        /**
+         * cpu拓扑结构
+         */
+        private List<Topology> topology;
+    }
 }

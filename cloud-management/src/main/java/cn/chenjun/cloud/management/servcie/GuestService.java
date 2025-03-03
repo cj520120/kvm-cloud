@@ -12,7 +12,7 @@ import cn.chenjun.cloud.management.model.AttachGuestVolumeModel;
 import cn.chenjun.cloud.management.model.GuestModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.GuestNameUtil;
+import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.util.NumberUtil;
@@ -149,10 +149,9 @@ public class GuestService extends AbstractService {
         this.checkSystemComponentComplete(networkId);
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
-        String uid = UUID.randomUUID().toString().replace("-", "");
         GuestEntity guest = GuestEntity.builder()
                 .groupId(groupId)
-                .name(GuestNameUtil.getName())
+                .name(NameUtil.generateGuestName())
                 .description(description)
                 .systemCategory(systemCategory)
                 .bootstrapType(bootstrapType)
@@ -183,7 +182,7 @@ public class GuestService extends AbstractService {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            createGuest(hostId, diskTemplateId,   volumeType, metaData, userData, size, uid, guest, storage);
+            createGuest(hostId, diskTemplateId, volumeType, metaData, userData, size, guest, storage);
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
@@ -200,7 +199,7 @@ public class GuestService extends AbstractService {
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .hostId(hostId)
-                    .id(uid)
+                    .id(UUID.randomUUID().toString())
                     .title("启动客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);
@@ -209,8 +208,8 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    private void createGuest(int hostId, int diskTemplateId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, String uid, GuestEntity guest, StorageEntity storage) {
-        GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, uid, guest, storage);
+    private void createGuest(int hostId, int diskTemplateId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, GuestEntity guest, StorageEntity storage) {
+        GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, guest, storage);
         this.initGuestMetaData(guest.getGuestId(), metaData, userData);
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
@@ -218,7 +217,7 @@ public class GuestService extends AbstractService {
                 .volumeId(guestDisk.getVolumeId())
                 .start(true)
                 .hostId(hostId)
-                .id(uid)
+                .id(UUID.randomUUID().toString())
                 .title("创建客户机[" + guest.getDescription() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
@@ -227,13 +226,14 @@ public class GuestService extends AbstractService {
         this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
     }
 
-    private GuestDiskEntity createGuestVolume(int diskTemplateId, String volumeType, long size, String uid, GuestEntity guest, StorageEntity storage) {
+    private GuestDiskEntity createGuestVolume(int diskTemplateId, String volumeType, long size, GuestEntity guest, StorageEntity storage) {
+        String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
                 .capacity(size)
                 .storageId(storage.getStorageId())
-                .name(uid)
-                .path(storage.getMountPath() + "/" + uid)
+                .name(volumeName)
+                .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
                 .templateId(diskTemplateId)
                 .allocation(0L)
@@ -264,7 +264,6 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态的主机进行重装操作");
         }
         this.checkSystemComponentComplete(guest.getNetworkId());
-        String uid = UUID.randomUUID().toString().replace("-", "");
         guest.setCdRoom(isoTemplateId);
         guest.setSystemCategory(systemCategory);
         guest.setBootstrapType(bootstrapType);
@@ -276,14 +275,14 @@ public class GuestService extends AbstractService {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, uid, guest, storage);
+            GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, guest, storage);
             guest.setStatus(Constant.GuestStatus.CREATING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .templateId(diskTemplateId)
                     .volumeId(guestDisk.getVolumeId())
-                    .id(uid)
+                    .id(UUID.randomUUID().toString())
                     .start(true)
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
@@ -304,7 +303,7 @@ public class GuestService extends AbstractService {
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .hostId(0)
-                    .id(uid)
+                    .id(UUID.randomUUID().toString())
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
             this.operateTask.addTask(operateParam);

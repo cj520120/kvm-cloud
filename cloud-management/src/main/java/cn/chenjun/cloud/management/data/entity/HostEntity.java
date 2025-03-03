@@ -34,34 +34,30 @@ public class HostEntity {
     public static final String HOST_ALLOCATION_CPU = "host_allocation_cpu";
     public static final String HOST_TOTAL_MEMORY = "host_total_memory";
     public static final String HOST_TOTAL_CPU = "host_total_cpu";
-    public static final String HOST_ARCH = "host_arch";
-    public static final String HOST_VENDOR = "host_vendor";
+    public static final String HOST_CPU_ARCH = "host_cpu_arch";
+    public static final String HOST_CPU_VENDOR = "host_cpu_vendor";
     public static final String HOST_HYPERVISOR = "host_hypervisor";
     public static final String HOST_EMULATOR = "host_emulator";
     public static final String HOST_CPU_CORES = "host_cpu_cores";
     public static final String HOST_CPU_THREADS = "host_cpu_threads";
     public static final String HOST_CPU_SOCKETS = "host_cpu_sockets";
+    public static final String HOST_CPU_MODEL = "host_cpu_model";
+    public static final String HOST_CPU_FREQUENCY = "host_cpu_frequency";
     public static final String HOST_STATUS = "host_status";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(HOST_ID)
+    @TableId(type = IdType.AUTO,value = HOST_ID)
     private Integer hostId;
     @TableField(HOST_DISPLAY_NAME)
     private String displayName;
-
     @TableField(CLIENT_ID)
     private String clientId;
-
     @TableField(CLIENT_SECRET)
     private String clientSecret;
-
     @TableField(HOST_IP)
     private String hostIp;
     @TableField(HOST_NAME)
     private String hostName;
-    @TableField(HOST_VENDOR)
-    private String vendor;
     @TableField(HOST_OS_NAME)
     private String osName;
     @TableField(HOST_OS_VERSION)
@@ -78,12 +74,18 @@ public class HostEntity {
     private Long totalMemory;
     @TableField(HOST_TOTAL_CPU)
     private Integer totalCpu;
-    @TableField(HOST_ARCH)
+    @TableField(HOST_CPU_ARCH)
     private String arch;
+    @TableField(HOST_CPU_VENDOR)
+    private String vendor;
     @TableField(HOST_HYPERVISOR)
     private String hypervisor;
     @TableField(HOST_EMULATOR)
     private String emulator;
+    @TableField(HOST_CPU_MODEL)
+    private String model;
+    @TableField(HOST_CPU_FREQUENCY)
+    private Long frequency;
     @TableField(HOST_CPU_CORES)
     private Integer cores;
     @TableField(HOST_CPU_THREADS)

@@ -72,6 +72,8 @@ public class HostService extends AbstractService {
                 .osName("")
                 .osVersion("")
                 .vendor("")
+                .model("")
+                .frequency(0L)
                 .clientId(clientId)
                 .clientSecret(clientSecret)
                 .totalMemory(0L)

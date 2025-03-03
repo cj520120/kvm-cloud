@@ -27,8 +27,7 @@ public class UserInfoEntity {
     public static final String LOGIN_PASSWORD_SALT = "login_password_salt";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(USER_ID)
+    @TableId(type = IdType.AUTO,value = USER_ID)
     private Integer userId;
 
     /**

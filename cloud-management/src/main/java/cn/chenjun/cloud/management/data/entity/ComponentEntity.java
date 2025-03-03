@@ -27,8 +27,7 @@ public class ComponentEntity {
     public static final String COMPONENT_SLAVE_NUMBER = "component_slave_number";
     public static final String SLAVE_GUEST_IDS = "slave_guest_ids";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(COMPONENT_ID)
+    @TableId(type = IdType.AUTO,value = COMPONENT_ID)
     private Integer componentId;
     @TableField(COMPONENT_TYPE)
     private Integer componentType;

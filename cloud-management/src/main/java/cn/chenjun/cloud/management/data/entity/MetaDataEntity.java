@@ -23,12 +23,10 @@ public class MetaDataEntity {
     public static final String META_KEY = "meta_key";
     public static final String META_VALUE = "meta_value";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(ID)
+    @TableId(type = IdType.AUTO,value = ID)
     private Integer id;
     @TableField(GUEST_ID)
     private Integer guestId;
-
     @TableField(META_KEY)
     private String metaKey;
     @TableField(META_VALUE)

@@ -24,8 +24,7 @@ public class GroupInfoEntity {
     public static final String GROUP_NAME = "group_name";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(GROUP_ID)
+    @TableId(type = IdType.AUTO,value = GROUP_ID)
     private Integer groupId;
 
     @TableField(GROUP_NAME)

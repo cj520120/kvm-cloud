@@ -42,8 +42,7 @@ public class GuestEntity {
     public static final String LAST_START_TIME = "last_start_time";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(GUEST_ID)
+    @TableId(type = IdType.AUTO,value = GUEST_ID)
     private Integer guestId;
     @TableField(GROUP_ID)
     private Integer groupId;

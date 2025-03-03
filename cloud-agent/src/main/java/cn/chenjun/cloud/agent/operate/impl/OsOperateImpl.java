@@ -148,7 +148,7 @@ public class OsOperateImpl implements OsOperate {
     @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN,async = true)
     @Override
     public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
-        this.stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(5));
+        this.stopDomain(connect, request.getName(), request.getExpire());
         return null;
 
     }

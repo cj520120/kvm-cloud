@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.util;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.*;
 import com.google.gson.reflect.TypeToken;
@@ -27,7 +26,6 @@ public class ParamBuilder {
         if (guestVncEntity != null) {
             map.put("password", guestVncEntity.getPassword());
         }
-        map.put("type", "vnc");
         return map;
     }
 
@@ -36,15 +34,7 @@ public class ParamBuilder {
         map.put("name", guest.getName());
         map.put("description", guest.getDescription());
         map.put("memory", guest.getMemory());
-        switch (guest.getBootstrapType()) {
-            case BootstrapType.UEFI:
-                map.put("bootstrapType", "uefi");
-                break;
-            default:
-                map.put("bootstrapType", "bios");
-                break;
-
-        }
+        map.put("bootstrapType", guest.getBootstrapType());
         return map;
     }
 

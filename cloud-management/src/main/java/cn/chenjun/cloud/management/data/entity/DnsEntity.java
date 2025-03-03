@@ -26,8 +26,7 @@ public class DnsEntity {
     public static final String DNS_IP = "dns_ip";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(DNS_ID)
+    @TableId(type = IdType.AUTO,value = DNS_ID)
     private Integer dnsId;
     @TableField(NETWORK_ID)
     private Integer networkId;

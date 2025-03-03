@@ -37,7 +37,7 @@ CREATE TABLE `tbl_component_info` (
   `slave_guest_ids` varchar(128) NOT NULL DEFAULT '[]',
   PRIMARY KEY (`component_id`),
   KEY `IX_NETWORK_COMPONENT` (`component_type`,`network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=234 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=234 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,7 +55,7 @@ CREATE TABLE `tbl_dns_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`dns_id`),
   UNIQUE KEY `IX_NETWORK_DOMAIN` (`network_id`,`dns_domain`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +70,7 @@ CREATE TABLE `tbl_group_info` (
   `group_name` varchar(64) NOT NULL,
   `create_time` timestamp NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=658 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=658 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,7 +89,7 @@ CREATE TABLE `tbl_guest_disk` (
   PRIMARY KEY (`guest_disk_id`),
   UNIQUE KEY `IX_GUEST_VOLUME` (`guest_id`,`device_id`),
   UNIQUE KEY `IX_VOLUME_ID` (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7052 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7052 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -122,7 +122,7 @@ CREATE TABLE `tbl_guest_info` (
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6975 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6975 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,7 +143,7 @@ CREATE TABLE `tbl_guest_network` (
   `allocate_type` int NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL,
   PRIMARY KEY (`guest_network_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=134248 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=134248 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -159,7 +159,7 @@ CREATE TABLE `tbl_guest_password` (
   `iv_key` varchar(20) NOT NULL,
   `guest_password` varchar(1024) NOT NULL,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -175,7 +175,7 @@ CREATE TABLE `tbl_guest_ssh_info` (
   `ssh_id` int NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `IX_GUEST_SSH` (`guest_id`,`ssh_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,7 +192,7 @@ CREATE TABLE `tbl_guest_vnc` (
   `vnc_token` varchar(45) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,31 +203,33 @@ DROP TABLE IF EXISTS `tbl_host_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_host_info` (
-  `host_id` int NOT NULL AUTO_INCREMENT,
+  `host_id` int(11) NOT NULL AUTO_INCREMENT,
   `host_display_name` varchar(45) NOT NULL,
   `client_id` varchar(45) NOT NULL,
   `client_secret` varchar(45) NOT NULL,
-  `host_name` varchar(45) NOT NULL DEFAULT '',
+  `host_name` varchar(64) NOT NULL DEFAULT '',
   `host_os_name` varchar(64) NOT NULL,
   `host_os_version` varchar(64) NOT NULL,
-  `host_vendor` varchar(45) NOT NULL,
   `host_ip` varchar(20) NOT NULL,
   `host_nic_name` varchar(20) NOT NULL,
   `host_uri` varchar(128) NOT NULL,
-  `host_allocation_memory` bigint NOT NULL,
-  `host_allocation_cpu` int NOT NULL,
-  `host_total_memory` bigint NOT NULL,
-  `host_total_cpu` int NOT NULL,
-  `host_arch` varchar(20) NOT NULL,
+  `host_allocation_memory` bigint(20) NOT NULL,
+  `host_allocation_cpu` int(11) NOT NULL,
+  `host_total_memory` bigint(20) NOT NULL,
+  `host_total_cpu` int(11) NOT NULL,
+  `host_cpu_model` varchar(128) NOT NULL,
+  `host_cpu_frequency` bigint(20) NOT NULL,
   `host_hypervisor` varchar(20) NOT NULL,
   `host_emulator` varchar(128) NOT NULL,
-  `host_cpu_cores` int NOT NULL DEFAULT '0',
-  `host_cpu_sockets` int NOT NULL DEFAULT '0',
-  `host_cpu_threads` int NOT NULL DEFAULT '0',
-  `host_status` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `host_cpu_vendor` varchar(45) NOT NULL,
+  `host_cpu_arch` varchar(20) NOT NULL,
+  `host_cpu_cores` int(11) NOT NULL DEFAULT '0',
+  `host_cpu_sockets` int(11) NOT NULL DEFAULT '0',
+  `host_cpu_threads` int(11) NOT NULL DEFAULT '0',
+  `host_status` int(11) NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`host_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -244,7 +246,7 @@ CREATE TABLE `tbl_meta_data` (
   `meta_value` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `IX_GUEST_META` (`guest_id`,`meta_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=478 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=478 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -264,7 +266,7 @@ CREATE TABLE `tbl_nat_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`nat_id`),
   UNIQUE KEY `IX_NAT` (`component_id`,`nat_local_port`,`nat_protocol`)
-) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -296,7 +298,7 @@ CREATE TABLE `tbl_network_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`network_id`),
   UNIQUE KEY `IX_NETWORK_POOL_ID` (`network_pool_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -317,7 +319,7 @@ CREATE TABLE `tbl_scheme_info` (
   `scheme_cpu_threads` int NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`scheme_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 --
 -- Table structure for table `tbl_ssh_authorized_keys`
@@ -332,7 +334,7 @@ CREATE TABLE `tbl_ssh_authorized_keys` (
   `ssh_public_key` text NOT NULL,
   `ssh_private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -374,7 +376,7 @@ CREATE TABLE `tbl_system_config` (
   `config_value` text NOT NULL,
   PRIMARY KEY (`config_id`),
   KEY `IX_ALLOCATE_CONFIG` (`config_allocate_type`,`config_allocate_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -393,7 +395,7 @@ CREATE TABLE `tbl_task_info` (
   `create_time` timestamp NOT NULL,
   `expire_time` timestamp NOT NULL,
   PRIMARY KEY (`task_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -413,7 +415,7 @@ CREATE TABLE `tbl_template_info` (
   `template_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -435,7 +437,7 @@ CREATE TABLE `tbl_template_volume` (
   `template_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`template_volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -454,7 +456,7 @@ CREATE TABLE `tbl_user_info` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `IX_LOGIN_NAME` (`login_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -477,7 +479,7 @@ CREATE TABLE `tbl_volume_info` (
   `volume_status` int NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7127 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7127 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

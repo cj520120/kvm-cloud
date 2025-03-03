@@ -28,8 +28,7 @@ public class NatEntity {
     public static final String REMOTE_PORT = "name_remote_port";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(NAT_ID)
+    @TableId(type = IdType.AUTO,value = NAT_ID)
     private Integer natId;
     @TableField(COMPONENT_ID)
     private Integer componentId;

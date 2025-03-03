@@ -18,23 +18,23 @@
 					<el-table-column label="值" prop="value" min-width="200" show-overflow-tooltip />
 					<el-table-column label="操作" width="300">
 						<template #default="scope">
-							<el-button @click="show_config_info_dialog(scope.row)" type="" size="mini">查看</el-button>
-							<el-button @click="show_edit_dialog(scope.row)" type="" size="mini">编辑</el-button>
-							<el-button @click="delete_config(scope.row)" type="" size="mini" v-if="scope.row.id > 0 && !scope.row.defaultParam">删除</el-button>
-							<el-button @click="delete_config(scope.row)" type="" size="mini" v-if="scope.row.id > 0 && scope.row.defaultParam">恢复默认</el-button>
+							<el-button @click="show_config_info_dialog(scope.row)" size="mini">查看</el-button>
+							<el-button @click="show_edit_dialog(scope.row)" type="primary" size="mini">编辑</el-button>
+							<el-button @click="delete_config(scope.row)" size="mini" type="danger" v-if="scope.row.id > 0 && !scope.row.defaultParam">删除</el-button>
+							<el-button @click="delete_config(scope.row)" size="mini" type="danger" v-if="scope.row.id > 0 && scope.row.defaultParam">恢复默认</el-button>
 						</template>
 					</el-table-column>
 				</el-table>
 			</el-row>
 		</el-card>
 
-		<el-dialog title="查看配置项" :visible.sync="info_dialog_visable" width="30%">
+		<el-dialog title="查看配置项" :visible.sync="info_dialog_visable" width="50%">
 			<el-form ref="create_dialog_form_ref" :model="show_config" label-width="50px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="key">
 					<strong>{{ show_config.key }}</strong>
 				</el-form-item>
 				<el-form-item label="值" prop="value">
-					<el-input type="textarea" :rows="5" readonly v-model="show_config.value" v-if="show_config.valueType === 1" style="font-family: monospace; white-space: pre; overflow-x: auto"></el-input>
+					<el-input type="textarea" :rows="20" readonly v-model="show_config.value" v-if="show_config.valueType === 1" style="font-family: monospace; white-space: pre; overflow-x: auto"></el-input>
 					<strong v-if="show_config.valueType !== 1 && show_config.valueType !== 5">{{ show_config.value }}</strong>
 				</el-form-item>
 			</el-form>
@@ -42,13 +42,13 @@
 				<el-button @click="info_dialog_visable = false">取 消</el-button>
 			</span>
 		</el-dialog>
-		<el-dialog title="创建配置项" :visible.sync="create_dialog_visable" width="30%">
+		<el-dialog title="创建配置项" :visible.sync="create_dialog_visable" width="50%">
 			<el-form ref="create_dialog_form_ref" :model="create_config" label-width="50px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="key">
 					<el-input v-model="create_config.key"></el-input>
 				</el-form-item>
 				<el-form-item label="值" prop="value">
-					<el-input v-model="create_config.value" type="textarea" :rows="5"></el-input>
+					<el-input v-model="create_config.value" type="textarea" :rows="20"></el-input>
 				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
@@ -56,14 +56,14 @@
 				<el-button type="primary" @click="create_config_click" :disabled="create_config.key === ''">确 定</el-button>
 			</span>
 		</el-dialog>
-		<el-dialog title="编辑配置项" :visible.sync="modify_dialog_visable" width="30%">
+		<el-dialog title="编辑配置项" :visible.sync="modify_dialog_visable" width="50%">
 			<el-form :model="modify_config" label-width="50px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="key">
 					<strong>{{ modify_config.key }}</strong>
 				</el-form-item>
 				<el-form-item label="值" prop="value">
 					<el-input v-model="modify_config.value" v-if="modify_config.valueType === 0"></el-input>
-					<el-input v-model="modify_config.value" type="textarea" :rows="5" v-if="modify_config.valueType === 1"></el-input>
+					<el-input v-model="modify_config.value" type="textarea" :rows="20" v-if="modify_config.valueType === 1"></el-input>
 					<el-input-number v-model="modify_config.value" v-if="modify_config.valueType === 2"></el-input-number>
 					<el-input-number v-model="modify_config.value" :precision="2" v-if="modify_config.valueType === 3"></el-input-number>
 					<el-select v-model="modify_config.value" placeholder="请选择" v-if="modify_config.valueType === 4">

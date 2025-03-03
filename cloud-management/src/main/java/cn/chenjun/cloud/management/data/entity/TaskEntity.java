@@ -28,8 +28,7 @@ public class TaskEntity {
     public static final String CREATE_TIME = "create_time";
     public static final String EXPIRE_TIME = "expire_time";
 
-    @TableId(type = IdType.INPUT)
-    @TableField(TASK_ID)
+    @TableId(type = IdType.INPUT,value =TASK_ID)
     private String taskId;
     @TableField(TASK_VERSION)
     private Integer version;

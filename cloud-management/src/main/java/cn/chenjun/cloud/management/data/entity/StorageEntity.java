@@ -33,8 +33,7 @@ public class StorageEntity {
     public static final String STORAGE_STATUS = "storage_status";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(STORAGE_ID)
+    @TableId(type = IdType.AUTO,value = STORAGE_ID)
     private Integer storageId;
     @TableField(STORAGE_DESCRIPTION)
     private String description;

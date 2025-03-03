@@ -22,8 +22,7 @@ public class GuestSshEntity {
     public static final String GUEST_ID = "guest_id";
     public static final String SSH_ID = "ssh_id";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(ID)
+    @TableId(type = IdType.AUTO,value = ID)
     private Integer id;
     @TableField(GUEST_ID)
     private Integer guestId;

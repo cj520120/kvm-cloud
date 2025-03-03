@@ -8,11 +8,6 @@ import java.util.Map;
 
 public class DomainUtil {
 
-    public static final int MAX_DEVICE_COUNT = 5;
-    public static final int MIN_DISK_DEVICE_ID = MAX_DEVICE_COUNT;
-    public static final int MIN_NIC_DEVICE_ID = MIN_DISK_DEVICE_ID + MAX_DEVICE_COUNT;
-
-
     public static String buildDiskXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId) {
         Map<String, Object> map = new HashMap<>();
         map.put("storage", ParamBuilder.buildStorageParam(storage));

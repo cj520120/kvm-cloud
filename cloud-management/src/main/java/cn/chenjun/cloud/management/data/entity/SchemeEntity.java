@@ -30,8 +30,7 @@ public class SchemeEntity {
     public static final String SCHEME_CPU_THREADS = "scheme_cpu_threads";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(SCHEME_ID)
+    @TableId(type = IdType.AUTO,value = SCHEME_ID)
     private Integer schemeId;
     @TableField(SCHEME_NAME)
     private String name;

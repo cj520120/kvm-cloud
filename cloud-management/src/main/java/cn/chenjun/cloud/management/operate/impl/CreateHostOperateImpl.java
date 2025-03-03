@@ -99,12 +99,14 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         if (host != null) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 HostInfo hostInfo = resultUtil.getData();
-                host.setThreads(hostInfo.getThreads());
-                host.setCores(hostInfo.getCores());
-                host.setSockets(hostInfo.getSockets());
-                host.setArch(hostInfo.getArch());
+                host.setThreads(hostInfo.getCpu().getThreads());
+                host.setCores(hostInfo.getCpu().getCores());
+                host.setSockets(hostInfo.getCpu().getSockets());
+                host.setArch(hostInfo.getCpu().getArch());
                 host.setHypervisor(hostInfo.getHypervisor());
-                host.setTotalCpu(hostInfo.getCpu());
+                host.setTotalCpu(hostInfo.getCpu().getNumber());
+                host.setFrequency(hostInfo.getCpu().getFrequency());
+                host.setModel(hostInfo.getCpu().getModel());
                 host.setTotalMemory(hostInfo.getMemory());
                 host.setEmulator(hostInfo.getEmulator());
                 host.setHostName(hostInfo.getHostName());

@@ -12,6 +12,7 @@ import cn.chenjun.cloud.management.model.MigrateModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +109,7 @@ public class VolumeService extends AbstractService {
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
-        String volumeName = UUID.randomUUID().toString();
+        String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .templateId(0)
@@ -122,7 +123,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(volume);
-        BaseOperateParam operateParam = CreateVolumeOperate.builder().id(volumeName).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
+        BaseOperateParam operateParam = CreateVolumeOperate.builder().id(UUID.randomUUID().toString()).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
         operateTask.addTask(operateParam);
         VolumeModel model = this.initVolume(volume);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
@@ -137,7 +138,7 @@ public class VolumeService extends AbstractService {
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
-        String volumeName = UUID.randomUUID().toString();
+        String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
         if (guest != null) {
@@ -164,7 +165,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(cloneVolume);
-        BaseOperateParam operateParam = CloneVolumeOperate.builder().id(volumeName)
+        BaseOperateParam operateParam = CloneVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(cloneVolume.getVolumeId())
                 .title("克隆磁盘[" + volume.getName() + "]")
@@ -204,7 +205,7 @@ public class VolumeService extends AbstractService {
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
-        String volumeName = UUID.randomUUID().toString();
+        String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
         if (guest != null) {
@@ -231,7 +232,7 @@ public class VolumeService extends AbstractService {
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(migrateVolume);
-        BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(volumeName)
+        BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .title("迁移磁盘[" + volume.getName() + "]")
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(migrateVolume.getVolumeId())

@@ -18,13 +18,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @TableName("tbl_ssh_authorized_keys")
 public class SshAuthorizedEntity {
-    public static final String SSH_AUTHORIZED_ID = "id";
+    public static final String ID = "id";
     public static final String SSH_NAME = "ssh_name";
     public static final String SSH_PUBLIC_KEY = "ssh_public_key";
     public static final String SSH_PRIVATE_KEY = "ssh_private_key";
 
-    @TableId(type = IdType.AUTO)
-    @TableField(SSH_AUTHORIZED_ID)
+    @TableId(type = IdType.AUTO,value = ID)
     private Integer id;
     @TableField(SSH_NAME)
     private String sshName;

@@ -17,5 +17,9 @@ public class GuestShutdownRequest {
      * 虚拟机名称
      */
     private String name;
+    /**
+     * 等待超时时间
+     */
+    private long expire;
 
 }

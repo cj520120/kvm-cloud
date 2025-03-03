@@ -25,13 +25,15 @@ public class HostModel {
     private int allocationCpu;
     private long totalMemory;
     private int totalCpu;
-    private String arch;
-    private String vendor;
     private String hypervisor;
     private String emulator;
     private String osName;
     private String osVersion;
     private String machine;
+    private String model;
+    private String arch;
+    private String vendor;
+    private long frequency;
     private int cores;
     private int threads;
     private int sockets;
