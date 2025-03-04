@@ -57,9 +57,9 @@ public class StorageService extends AbstractService {
             }
         }
 
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String defaultVolumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(destStorage.getType())) {
-            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+            defaultVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if ((destStorage.getSupportCategory() & Constant.StorageSupportCategory.VOLUME) == Constant.StorageSupportCategory.VOLUME) {
             List<VolumeEntity> sourceVolumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, sourceStorageId));
@@ -81,7 +81,7 @@ public class StorageService extends AbstractService {
                         .templateId(volume.getTemplateId())
                         .name(volumeName)
                         .path(destStorage.getMountPath() + "/" + volumeName)
-                        .type(volumeType)
+                        .type(defaultVolumeType)
                         .capacity(volume.getCapacity())
                         .allocation(0L)
                         .status(Constant.VolumeStatus.CREATING)
@@ -110,8 +110,9 @@ public class StorageService extends AbstractService {
                 if (template.getStatus() != Constant.TemplateStatus.READY) {
                     continue;
                 }
+                String templateVolumeType=defaultVolumeType;
                 if(template.getTemplateType().equals(Constant.TemplateType.ISO)){
-                    volumeType= cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+                    templateVolumeType= cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
                 template.setStatus(Constant.TemplateStatus.MIGRATE);
                 this.templateMapper.updateById(template);
@@ -121,7 +122,7 @@ public class StorageService extends AbstractService {
                         .name(volumeName)
                         .templateId(sourceVolume.getTemplateId())
                         .path(destStorage.getMountPath() + "/" + volumeName)
-                        .type(volumeType)
+                        .type(templateVolumeType)
                         .allocation(0L)
                         .capacity(0L)
                         .status(Constant.TemplateStatus.CREATING)
