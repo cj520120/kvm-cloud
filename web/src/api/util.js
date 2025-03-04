@@ -200,6 +200,8 @@ export default {
           return "模版错误";
         case 4:
           return "正在销毁";
+        case 5:
+          return "正在迁移";
         default:
           return `未知状态[${template.status}]`;
       }

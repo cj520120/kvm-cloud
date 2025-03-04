@@ -26,6 +26,9 @@ public abstract class AbstractRunner {
 
     public void call() {
         try {
+            if(!this.isStart()){
+                return;
+            }
             lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> {
                 if (this.getPeriodSeconds() > 0) {
                     String key = RedisKeyUtil.JOB_RUN_TIME + this.getClass().getName();
@@ -33,10 +36,10 @@ public abstract class AbstractRunner {
                     if (rBucket.isExists()) {
                         return;
                     }
-                    rBucket.set(System.currentTimeMillis(), Math.max(1,this.getPeriodSeconds()), TimeUnit.SECONDS);
+                    rBucket.set(System.currentTimeMillis(), Math.max(1, this.getPeriodSeconds()), TimeUnit.SECONDS);
                 }
                 try {
-                    log.info("开始执行周期任务: {}，当前任务周期 {}s", this.getName(),this.getPeriodSeconds());
+                    log.info("开始执行周期任务: {}，当前任务周期 {}s", this.getName(), this.getPeriodSeconds());
                     this.dispatch();
                 } catch (Exception err) {
                     log.info("执行周期任务失败: {}", this.getName(), err);
@@ -68,4 +71,8 @@ public abstract class AbstractRunner {
      * @return
      */
     protected abstract String getName();
+
+    protected boolean isStart(){
+        return true;
+    }
 }

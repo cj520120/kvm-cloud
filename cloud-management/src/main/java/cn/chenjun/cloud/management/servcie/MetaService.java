@@ -54,7 +54,7 @@ public class MetaService extends AbstractService {
                 break;
             }
             Optional<MetaDataService> metaDataServiceOptional = metaDataPluginRegistry.getPluginFor(guest);
-            if(metaDataServiceOptional.isPresent()){
+            if (metaDataServiceOptional.isPresent()) {
                 MetaData metaData = metaDataServiceOptional.get().buildCloudInitMetaData(guest);
                 return metaData;
             }

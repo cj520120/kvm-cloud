@@ -31,8 +31,14 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
 
     @Override
     public void operate(CreateStorageOperate param) {
+        StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())
-                .stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)).collect(Collectors.toList());
+                .stream().filter(t -> {
+                    if (!Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)) {
+                        return false;
+                    }
+                    return !storage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL) || Objects.equals(storage.getHostId(), t.getHostId());
+                }).collect(Collectors.toList());
         List<Integer> hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         InitHostStorageOperate operate = InitHostStorageOperate.builder().id(UUID.randomUUID().toString())
                 .title(param.getTitle())

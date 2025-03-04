@@ -32,13 +32,6 @@ public class TemplateService extends AbstractService {
     @Autowired
     private AllocateService allocateService;
 
-    private GuestEntity getVolumeGuest(int volumeId) {
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
-        if (guestDisk == null) {
-            return null;
-        }
-        return guestMapper.selectById(guestDisk.getGuestId());
-    }
 
     public ResultUtil<List<TemplateModel>> listTemplate() {
         List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<>());
@@ -83,7 +76,7 @@ public class TemplateService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> downloadTemplate(int templateId) {
-        StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE,0);
+        StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE, 0);
         TemplateEntity template = this.templateMapper.selectById(templateId);
         switch (template.getStatus()) {
             case Constant.TemplateStatus.READY:
@@ -137,7 +130,7 @@ public class TemplateService extends AbstractService {
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);
         this.volumeMapper.updateById(volume);
 
-        StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE,0);
+        StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE, 0);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;

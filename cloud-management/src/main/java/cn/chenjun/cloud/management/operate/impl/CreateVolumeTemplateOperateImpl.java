@@ -35,7 +35,7 @@ public class CreateVolumeTemplateOperateImpl extends AbstractOperate<CreateVolum
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceVolume(initVolume(storage, volume))

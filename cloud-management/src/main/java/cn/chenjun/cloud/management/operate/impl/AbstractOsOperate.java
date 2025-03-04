@@ -57,6 +57,9 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                 case Constant.StorageType.NFS:
                     configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_NFS_TPL;
                     break;
+                case Constant.StorageType.LOCAL:
+                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_LOCAL_TPL;
+                    break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
             }
@@ -77,6 +80,9 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                 break;
             case Constant.StorageType.NFS:
                 configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_NFS_TPL;
+                break;
+            case Constant.StorageType.LOCAL:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_LOCAL_TPL;
                 break;
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");

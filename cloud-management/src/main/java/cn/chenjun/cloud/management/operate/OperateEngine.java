@@ -30,6 +30,7 @@ public class OperateEngine {
     private TaskService taskService;
     @Autowired
     private LockRunner lockRunner;
+
     @Transactional(rollbackFor = Exception.class)
     public void onFinish(BaseOperateParam operateParam, String result) {
         log.info("onFinish type={} param={} result={}", operateParam.getClass().getName(), operateParam, result);

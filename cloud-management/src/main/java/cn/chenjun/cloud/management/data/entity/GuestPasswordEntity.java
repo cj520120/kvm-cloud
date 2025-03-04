@@ -23,7 +23,7 @@ public class GuestPasswordEntity {
     public static final String IV_KEY = "iv_key";
     public static final String GUEST_PASSWORD = "guest_password";
 
-    @TableId(type = IdType.INPUT,value = GUEST_ID)
+    @TableId(type = IdType.INPUT, value = GUEST_ID)
     private Integer guestId;
     @TableField(ENCODE_KEY)
     private String encodeKey;

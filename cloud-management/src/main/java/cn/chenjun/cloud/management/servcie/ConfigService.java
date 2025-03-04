@@ -77,10 +77,14 @@ public class ConfigService {
         initDefaultConfig(Constant.ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
+        initDefaultConfig(Constant.ConfigKey.STORAGE_LOCAL_ENABLE, Constant.Enable.NO, "是否启用本地存储(实验阶段,不支持系统组件创建和启动，系统必须至少包含一个用于磁盘存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(Constant.ConfigKey.STORAGE_LOCAL_PATH, "/data", "本地存储路径，需要在主机节点提前创建", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+
         initDefaultConfig(Constant.ConfigKey.STORAGE_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.STORAGE_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/glusterfs/storage.xml"), "glusterfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/secret.xml"), "ceph rbd 存储池密钥模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.STORAGE_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/storage.xml"), "ceph rbd 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(Constant.ConfigKey.STORAGE_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(Constant.ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.NETWORK_OVS_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
@@ -101,10 +105,12 @@ public class ConfigService {
         initDefaultConfig(Constant.ConfigKey.VM_DISK_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.VM_DISK_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.VM_DISK_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(Constant.ConfigKey.VM_DISK_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(Constant.ConfigKey.VM_CD_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.VM_CD_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(Constant.ConfigKey.VM_CD_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/ceph/cd.xml"), "vm ceph rbd 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(Constant.ConfigKey.VM_CD_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cd.xml"), "vm local存储池光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(Constant.ConfigKey.VM_INTERFACE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/interface/interface.xml"), "vm 基础网络网卡配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
@@ -144,7 +150,7 @@ public class ConfigService {
         DefaultConfigInfo<T> defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(key);
         T value = null;
         if (defaultConfig != null) {
-            value = (T) defaultConfig.getValue();
+            value = defaultConfig.getValue();
         }
         String queryStr = null;
         for (ConfigQuery query : queryList) {

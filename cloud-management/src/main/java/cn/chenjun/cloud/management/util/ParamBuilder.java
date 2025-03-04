@@ -91,7 +91,7 @@ public class ParamBuilder {
     public static Map<String, Object> buildDiskParam(GuestEntity guest, VolumeEntity volume, int deviceId) {
 
         String bus = deviceId == 0 ? guest.getBusType() : Constant.DiskBus.VIRTIO;
-        String targetName = "vd" + (char) ('a' + deviceId );
+        String targetName = "vd" + (char) ('a' + deviceId);
         Map<String, Object> map = new HashMap<>();
         map.put("deviceId", deviceId);
         map.put("target", targetName);

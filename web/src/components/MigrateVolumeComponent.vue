@@ -6,8 +6,7 @@
 		<el-row>
 			<el-form :model="migrate_volume" label-width="100px" class="demo-ruleForm">
 				<el-form-item label="存储池" prop="type">
-					<el-select v-model="migrate_volume.storageId" style="width: 100%">
-						<el-option label="随机" :value="0"></el-option>
+					<el-select v-model="migrate_volume.storageId" style="width: 100%" placeholder="请选择目标存储池">
 						<el-option v-for="item in this.storages" :key="item.storageId" :label="item.description" :value="item.storageId" />
 					</el-select>
 				</el-form-item>
@@ -40,10 +39,10 @@ export default {
 		},
 		async init(volume) {
 			this.migrate_volume.sourceVolumeId = volume.volumeId
-			this.migrate_volume.storageId = volume.storageId
+			this.migrate_volume.storageId = ''
 			await getStorageList().then((res) => {
 				if (res.code == 0) {
-					this.storages = res.data.filter((v) => v.status === 1 && (v.supportCategory & 2) === 2)
+					this.storages = res.data.filter((v) => v.status === 1 && (v.supportCategory & 2) === 2 && v.getStorageId != volume.storageId)
 				}
 			})
 		},

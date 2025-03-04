@@ -59,7 +59,7 @@ public class NioSelector {
                                         client.getCallback().onData(socketReceiveBuffer);
                                     }
                                 }
-                            }catch (Exception err){
+                            } catch (Exception err) {
                                 closeChannel(channel);
                             }
                         }
@@ -74,6 +74,7 @@ public class NioSelector {
             log.error("处理nio检测出错", err);
         }
     }
+
     private void closeChannel(SocketChannel channel) throws IOException {
         NioClient nioClient = channelMap.remove(channel);
         if (nioClient != null) {

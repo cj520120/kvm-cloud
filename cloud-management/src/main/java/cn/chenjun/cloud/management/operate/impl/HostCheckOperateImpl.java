@@ -48,7 +48,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
         RBucket<Long> rBucket = this.redissonClient.getBucket(hostKeepKey);
         boolean isNotify = false;
         if (hostInfo != null) {
-            isNotify = !Objects.equals(updateHost.getStatus() ,cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
+            isNotify = !Objects.equals(updateHost.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
             updateHost.setHostName(hostInfo.getHostName());
             updateHost.setOsName(hostInfo.getName());
             updateHost.setOsVersion(hostInfo.getOsVersion());
@@ -71,7 +71,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             int expire = this.configService.getConfig(queryList, cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
             rBucket.set(System.currentTimeMillis(), Math.max(1, expire * 2), TimeUnit.SECONDS);
         } else if (!rBucket.isExists()) {
-            isNotify = !Objects.equals(updateHost.getStatus() ,cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);
+            isNotify = !Objects.equals(updateHost.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);
             updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);
             hostMapper.updateById(updateHost);
         }

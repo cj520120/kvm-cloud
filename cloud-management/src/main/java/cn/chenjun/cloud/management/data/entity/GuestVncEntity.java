@@ -26,7 +26,7 @@ public class GuestVncEntity {
     public static final String VNC_TOKEN = "vnc_token";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.INPUT,value = GUEST_ID)
+    @TableId(type = IdType.INPUT, value = GUEST_ID)
     private Integer guestId;
     @TableField(VNC_PORT)
     private Integer port;

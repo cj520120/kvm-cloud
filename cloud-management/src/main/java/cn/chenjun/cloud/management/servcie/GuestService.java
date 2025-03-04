@@ -67,7 +67,7 @@ public class GuestService extends AbstractService {
                     .build();
             this.guestPasswordMapper.insert(entity);
         }
-        String sshId = userData.getOrDefault("sshId","");
+        String sshId = userData.getOrDefault("sshId", "");
         if (!StringUtils.isEmpty(sshId)) {
             this.guestSshMapper.delete(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID, guestId));
             this.guestSshMapper.insert(GuestSshEntity.builder().sshId(NumberUtil.parseInt(sshId)).guestId(guestId).build());
@@ -126,7 +126,7 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String busType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
-                                              int isoTemplateId, int diskTemplateId,  int volumeId,
+                                              int isoTemplateId, int diskTemplateId, int volumeId,
                                               int storageId, Map<String, String> metaData, Map<String, String> userData, long size) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
@@ -137,7 +137,7 @@ public class GuestService extends AbstractService {
         if (StringUtils.isEmpty(networkDeviceType)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择网卡驱动");
         }
-        if (isoTemplateId <= 0 && diskTemplateId <= 0  && volumeId <= 0) {
+        if (isoTemplateId <= 0 && diskTemplateId <= 0 && volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
         }
         if (schemeId <= 0) {
@@ -145,6 +145,13 @@ public class GuestService extends AbstractService {
         }
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
+        }
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
+            if (hostId > 0 && !Objects.equals(hostId, storage.getHostId())) {
+                throw new CodeException(ErrorCode.PARAM_ERROR, "使用本地存储时，只能在存储所在机器启动");
+            }
+            hostId = storage.getHostId();
         }
         this.checkSystemComponentComplete(networkId);
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
@@ -176,7 +183,6 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -232,6 +238,7 @@ public class GuestService extends AbstractService {
                 .description("ROOT-" + guest.getGuestId())
                 .capacity(size)
                 .storageId(storage.getStorageId())
+                .hostId(storage.getHostId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
                 .type(volumeType)
@@ -253,10 +260,10 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, int bootstrapType, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId,  int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, int systemCategory, int bootstrapType, Map<String, String> metaData, Map<String, String> userData, int isoTemplateId, int diskTemplateId, int volumeId,
                                             int storageId, long size) {
 
-        if (isoTemplateId <= 0 && diskTemplateId <= 0   && volumeId <= 0) {
+        if (isoTemplateId <= 0 && diskTemplateId <= 0 && volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
@@ -269,7 +276,7 @@ public class GuestService extends AbstractService {
         guest.setBootstrapType(bootstrapType);
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -283,6 +290,7 @@ public class GuestService extends AbstractService {
                     .templateId(diskTemplateId)
                     .volumeId(guestDisk.getVolumeId())
                     .id(UUID.randomUUID().toString())
+                    .hostId(0)
                     .start(true)
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
@@ -292,17 +300,18 @@ public class GuestService extends AbstractService {
             if (guestDisk != null) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
             }
+            VolumeEntity volume = this.volumeMapper.selectById(guestDisk.getVolumeId());
             guestDisk = GuestDiskEntity.builder()
                     .volumeId(volumeId)
                     .guestId(guest.getGuestId())
-                    .deviceId(0)
+                    .deviceId(volume.getHostId())
                     .build();
             this.guestDiskMapper.insert(guestDisk);
             guest.setStatus(Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
-                    .hostId(0)
+                    .hostId(volume.getHostId())
                     .id(UUID.randomUUID().toString())
                     .title("重装客户机[" + guest.getDescription() + "]")
                     .build();
@@ -340,16 +349,22 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (!Objects.equals(guest.getType(), Constant.GuestType.USER)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "非用户主机由系统管理.");
         }
-
         this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
+                int supportHostId = getDiskSupportHostId(guestId);
+                if (hostId == 0) {
+                    hostId = supportHostId;
+                } else if (hostId != supportHostId) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "具有本地存储池虚拟机不允许从其他主机启动");
+                }
                 guest.setHostId(hostId);
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 this.guestMapper.updateById(guest);
@@ -481,10 +496,17 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要挂载的磁盘");
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
+        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+        if (volume.getHostId() > 0) {
+            int supportHostId = getDiskSupportHostId(guestId);
+            if (supportHostId > 0 && supportHostId != volume.getHostId()) {
+                throw new CodeException(ErrorCode.PARAM_ERROR, "当前主机无法挂载其他主机的本地磁盘");
+            }
+        }
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STOP:
+            case Constant.GuestStatus.STARTING:
             case Constant.GuestStatus.RUNNING:
-                VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+            case Constant.GuestStatus.STOP:
                 if (volume.getStatus() != Constant.VolumeStatus.READY) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
                 }

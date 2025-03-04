@@ -14,7 +14,6 @@ import java.util.List;
 public class NatComponentService extends AbstractComponentService<NatComponentQmaInitialize> {
 
 
-
     public NatComponentService(@Autowired List<NatComponentQmaInitialize> componentQmaInitializeList) {
         super(componentQmaInitializeList);
     }

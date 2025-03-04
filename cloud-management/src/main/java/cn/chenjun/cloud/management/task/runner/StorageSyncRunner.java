@@ -1,13 +1,18 @@
 package cn.chenjun.cloud.management.task.runner;
 
+import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.data.mapper.StorageMapper;
+import cn.chenjun.cloud.management.model.StorageModel;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.util.Constant;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,6 +25,8 @@ public class StorageSyncRunner extends AbstractRunner {
 
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private StorageMapper storageMapper;
 
     @Override
     public int getPeriodSeconds() {
@@ -29,8 +36,11 @@ public class StorageSyncRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() {
-        BaseOperateParam operateParam = StorageCheckOperate.builder().id(UUID.randomUUID().toString()).title("检测存储池使用情况").build();
-        this.taskService.addTask(operateParam);
+        List<StorageEntity> storageList=this.storageMapper.selectList(new QueryWrapper<>());
+        for (StorageEntity storage : storageList) {
+            BaseOperateParam operateParam = StorageCheckOperate.builder().id(UUID.randomUUID().toString()).storageId(storage.getStorageId()).title("检测存储池使用情况").build();
+            this.taskService.addTask(operateParam);
+        }
     }
 
     @Override

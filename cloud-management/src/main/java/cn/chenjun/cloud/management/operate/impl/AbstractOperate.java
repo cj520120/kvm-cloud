@@ -214,6 +214,9 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
             case Constant.StorageType.NFS:
                 configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_NFS_TPL;
                 break;
+            case Constant.StorageType.LOCAL:
+                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_LOCAL_TPL;
+                break;
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
         }

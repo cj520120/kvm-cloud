@@ -7,7 +7,10 @@ import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
+import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeOperate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -38,7 +41,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
             if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
             if (param.getTemplateId() > 0) {
                 List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
                 Collections.shuffle(templateVolumeList);
@@ -51,7 +54,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 
-            }   else {
+            } else {
                 VolumeCreateRequest request = VolumeCreateRequest.builder()
                         .volume(initVolume(storage, volume))
                         .build();

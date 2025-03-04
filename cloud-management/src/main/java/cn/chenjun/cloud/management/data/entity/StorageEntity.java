@@ -24,6 +24,7 @@ public class StorageEntity {
     public static final String STORAGE_DESCRIPTION = "storage_description";
     public static final String STORAGE_NAME = "storage_name";
     public static final String STORAGE_TYPE = "storage_type";
+    public static final String STORAGE_HOST_ID = "storage_host_id";
     public static final String STORAGE_PARM = "storage_parm";
     public static final String STORAGE_SUPPORT_CATEGORY = "storage_support_category";
     public static final String STORAGE_MOUNT_PATH = "storage_mount_path";
@@ -33,7 +34,7 @@ public class StorageEntity {
     public static final String STORAGE_STATUS = "storage_status";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO,value = STORAGE_ID)
+    @TableId(type = IdType.AUTO, value = STORAGE_ID)
     private Integer storageId;
     @TableField(STORAGE_DESCRIPTION)
     private String description;
@@ -41,6 +42,8 @@ public class StorageEntity {
     private String name;
     @TableField(STORAGE_TYPE)
     private String type;
+    @TableField(STORAGE_HOST_ID)
+    private Integer hostId;
     @TableField(STORAGE_PARM)
     private String param;
     @TableField(STORAGE_MOUNT_PATH)

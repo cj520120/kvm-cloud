@@ -41,12 +41,13 @@ public class TemplateUtil {
     public static Map<String, String> parseRandomFirstUri(String uriListStr, String defaultPort) {
         return parseUrlList(uriListStr, defaultPort).get(0);
     }
+
     public static String toHex(Integer decimal, Integer minLength) {
         String hexString = Integer.toHexString(decimal);
         while (hexString.length() < minLength) {
             hexString = "0" + hexString;
         }
 
-        return "0x"+hexString;
+        return "0x" + hexString;
     }
 }

@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -30,13 +30,12 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
 
     @Override
     public void operate(StorageCheckOperate param) {
-
-        List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.READY)).collect(Collectors.toList());
-        if (storageList.isEmpty()) {
+        StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
+        if (storage == null) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
-            List<StorageInfoRequest> requests = storageList.stream().map(t -> StorageInfoRequest.builder().name(t.getName()).build()).collect(Collectors.toList());
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            List<StorageInfoRequest> requests = Collections.singletonList(StorageInfoRequest.builder().name(storage.getName()).build());
+            HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_STORAGE_INFO, requests);
         }
     }

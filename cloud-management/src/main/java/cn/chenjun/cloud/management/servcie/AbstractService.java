@@ -71,6 +71,27 @@ public abstract class AbstractService {
         return !componentGuestList.isEmpty();
     }
 
+    protected GuestEntity getVolumeGuest(int volumeId) {
+        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
+        if (guestDisk == null) {
+            return null;
+        }
+        return guestMapper.selectById(guestDisk.getGuestId());
+    }
+    protected int getDiskSupportHostId(int guestId){
+        int hostId;
+        GuestEntity guest=this.guestMapper.selectById(guestId);
+        if(guest.getStatus().equals(Constant.GuestStatus.RUNNING)||guest.getStatus().equals(Constant.GuestStatus.STARTING)||guest.getStatus().equals(Constant.GuestStatus.STOPPING)){
+            hostId=guest.getHostId();
+        }else{
+            List<GuestDiskEntity> guestDiskList=this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID,guestId));
+            List<Integer> volumeIds=guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
+            List<VolumeEntity> guestVolumeList=this.volumeMapper.selectBatchIds(volumeIds);
+            hostId=guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id->id>0).findFirst().orElse(0);
+        }
+        return hostId;
+    }
+
     public GuestModel initGuestInfo(GuestEntity entity) {
         GuestModel model;
         switch (entity.getType()) {
@@ -115,6 +136,7 @@ public abstract class AbstractService {
     protected SshAuthorizedModel initSshAuthorized(SshAuthorizedEntity entity) {
         return SshAuthorizedModel.builder().id(entity.getId()).name(entity.getSshName()).build();
     }
+
     protected GuestNetworkModel initGuestNetwork(GuestNetworkEntity entity) {
         return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())
                 .networkId(entity.getNetworkId())

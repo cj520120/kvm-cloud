@@ -29,7 +29,7 @@ public class TemplateEntity {
     public static final String TEMPLATE_INIT_SCRIPT = "template_cloud_init_script";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO,value = TEMPLATE_ID)
+    @TableId(type = IdType.AUTO, value = TEMPLATE_ID)
     private Integer templateId;
     @TableField(TEMPLATE_NAME)
     private String name;

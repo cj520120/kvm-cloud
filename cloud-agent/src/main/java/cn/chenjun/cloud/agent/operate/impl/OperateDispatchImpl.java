@@ -62,12 +62,12 @@ public class OperateDispatchImpl implements OperateDispatch, BeanPostProcessor {
         ResultUtil<Object> executeResult = null;
         Connect connect = null;
         try {
-            long startTime=System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             connect = connectPool.borrowObject();
             Object param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());
             Consumer consumer = dispatch.getConsumer();
             Object result = consumer.dispatch(connect, param);
-            log.info("dispatch async={} cost={}ms command={} param={} result={}",dispatch.isAsync(),System.currentTimeMillis()-startTime, task.getCommand(), task.getData(), result);
+            log.info("dispatch async={} cost={}ms command={} param={} result={}", dispatch.isAsync(), System.currentTimeMillis() - startTime, task.getCommand(), task.getData(), result);
             executeResult = ResultUtil.success(result);
         } catch (CodeException err) {
             executeResult = ResultUtil.error(err.getCode(), err.getMessage());
@@ -85,6 +85,7 @@ public class OperateDispatchImpl implements OperateDispatch, BeanPostProcessor {
         }
         return executeResult;
     }
+
     private void submitTaskCallback(TaskRequest task, ResultUtil<Object> resultUtil) {
         String result = GsonBuilderUtil.create().toJson(resultUtil);
         try {

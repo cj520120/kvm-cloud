@@ -120,7 +120,7 @@ export default {
 			this.show_type = 2
 		},
 		show_storage_info_click(storage) {
-			this.$refs.StorageInfoComponentRef.init_storage(storage)
+			this.$refs.StorageInfoComponentRef.init_storage(storage, this.storages)
 			this.show_type = 1
 		},
 		pasue_storage(storage) {

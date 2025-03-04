@@ -31,27 +31,24 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
 
     @Override
     public void operate(MigrateVolumeOperate param) {
-        VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
-            StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
-            }
+        VolumeEntity sourceVolume = volumeMapper.selectById(param.getSourceVolumeId());
+        if (sourceVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
+            StorageEntity sourceStorage = storageMapper.selectById(sourceVolume.getStorageId());
             VolumeEntity targetVolume = volumeMapper.selectById(param.getTargetVolumeId());
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
+                throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + sourceVolume.getName() + "]状态不正常:" + sourceVolume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0,  Math.max(sourceVolume.getHostId(),targetVolume.getHostId()), 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
-                    .sourceVolume(initVolume(storage, volume))
+                    .sourceVolume(initVolume(sourceStorage, sourceVolume))
                     .targetVolume(initVolume(targetStorage, targetVolume))
 
                     .build();
 
             this.asyncInvoker(host, param, Constant.Command.VOLUME_MIGRATE, request);
         } else {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
+            throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + sourceVolume.getName() + "]状态不正常:" + sourceVolume.getStatus());
         }
 
     }

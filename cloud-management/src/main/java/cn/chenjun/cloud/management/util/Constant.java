@@ -83,6 +83,7 @@ public class Constant {
         public static final int READY = 2;
         public static final int ERROR = 3;
         public static final int DESTROY = 4;
+        public static final Integer MIGRATE = 5;
     }
 
     public static class NetworkType {
@@ -145,17 +146,8 @@ public class Constant {
         public static int MIGRATE_GUEST = 34;
         public static int HOST_CHECK = 35;
         public static int STORAGE_CHECK = 36;
-    }
-
-    public class UserState {
-        /**
-         * 启用
-         */
-        public static final short ABLE = 0;
-        /**
-         * 禁用
-         */
-        public static final short DISABLE = 1;
+        public static int MIGRATE_TEMPLATE_VOLUME = 37;
+        public static int DESTROY_TEMPLATE_VOLUME = 38;
     }
 
     public static class UserType {
@@ -196,8 +188,8 @@ public class Constant {
         public static final String DEFAULT_CLUSTER_OVER_MEMORY = "default.cluster.over.memory";
         public static final String DEFAULT_CLUSTER_MANAGER_URI = "default.cluster.manager.uri";
 
-         public static final String DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE = "default.cluster.destroy.delay.timeout.minutes";
-         public static final String DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE = "default.vm.stop.max.wait.timeout.minutes";
+        public static final String DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE = "default.cluster.destroy.delay.timeout.minutes";
+        public static final String DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE = "default.vm.stop.max.wait.timeout.minutes";
 
         public static final String DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND = "default.cluster.component.clear.timeout.second";
         public static final String DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default_cluster_component.check.timeout.second";
@@ -225,7 +217,10 @@ public class Constant {
         public static final String VM_MACHINE_NAME = "vm.machine.name";
 
 
+        public static final String STORAGE_LOCAL_ENABLE = "storage.local.enable";
+        public static final String STORAGE_LOCAL_PATH = "storage.local.path";
         public static final String STORAGE_NFS_TPL = "storage.nfs.tpl";
+        public static final String STORAGE_LOCAL_TPL = "storage.local.tpl";
         public static final String STORAGE_GLUSTERFS_TPL = "storage.glusterfs.tpl";
         public static final String STORAGE_CEPH_RBD_SECRET_TPL = "storage.ceph.rbd.secret.tpl";
         public static final String STORAGE_CEPH_RBD_TPL = "storage.ceph.rbd.tpl";
@@ -249,10 +244,12 @@ public class Constant {
         public static final String VM_DISK_NFS_TPL = "vm.disk.nfs.tpl";
         public static final String VM_DISK_GLUSTERFS_TPL = "vm.disk.glusterfs.tpl";
         public static final String VM_DISK_CEPH_RBD_TPL = "vm.disk.ceph.rbd.tpl";
+        public static final String VM_DISK_LOCAL_TPL = "vm.disk.ceph.local.tpl";
 
         public static final String VM_CD_NFS_TPL = "vm.cd.nfs.tpl";
         public static final String VM_CD_GLUSTERFS_TPL = "vm.cd.glusterfs.tpl";
         public static final String VM_CD_CEPH_RBD_TPL = "vm.cd.ceph.rbd.secret.tpl";
+        public static final String VM_CD_LOCAL_TPL = "vm.cd.local.tpl";
 
         public static final String VM_INTERFACE_TPL = "vm.interface.tpl";
 
@@ -289,5 +286,16 @@ public class Constant {
     public static class Enable {
         public static final String YES = "yes";
         public static final String NO = "no";
+    }
+
+    public class UserState {
+        /**
+         * 启用
+         */
+        public static final short ABLE = 0;
+        /**
+         * 禁用
+         */
+        public static final short DISABLE = 1;
     }
 }

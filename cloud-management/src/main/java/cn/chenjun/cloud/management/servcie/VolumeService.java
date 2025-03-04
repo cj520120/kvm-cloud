@@ -35,14 +35,6 @@ public class VolumeService extends AbstractService {
     @Autowired
     private RestTemplate restTemplate;
 
-    private GuestEntity getVolumeGuest(int volumeId) {
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
-        if (guestDisk == null) {
-            return null;
-        }
-        return guestMapper.selectById(guestDisk.getGuestId());
-    }
-
 
     private VolumeEntity findAndUpdateVolumeStatus(int volumeId, int status) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
@@ -83,10 +75,19 @@ public class VolumeService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
+    public ResultUtil<List<VolumeModel>> listNoAttachVolumes(int guestId) {
         List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn(VolumeEntity.VOLUME_ID, volumeIds));
-        List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
+        int hostId = this.getDiskSupportHostId(guestId);
+        List<VolumeModel> models =new ArrayList<>();
+        for (VolumeEntity volume : volumeList) {
+            if(!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)){
+                continue;
+            }
+            if(hostId==0||volume.getHostId()==0||volume.getHostId()==hostId){
+                models.add(this.initVolume(volume));
+            }
+        }
         return ResultUtil.success(models);
     }
 
@@ -104,7 +105,7 @@ public class VolumeService extends AbstractService {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -113,6 +114,7 @@ public class VolumeService extends AbstractService {
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .templateId(0)
+                .hostId(storage.getHostId())
                 .description(description)
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)
@@ -133,13 +135,16 @@ public class VolumeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId) {
 
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
         String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
+        if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "跨宿主机本地磁盘无法完成克隆，如需进行操作，请先迁移到共享存储，然后再进行克隆");
+        }
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
         if (guest != null) {
             switch (guest.getStatus()) {
@@ -154,6 +159,7 @@ public class VolumeService extends AbstractService {
         this.volumeMapper.updateById(volume);
         VolumeEntity cloneVolume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
+                .hostId(storage.getHostId())
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
                 .description(description)
@@ -200,13 +206,16 @@ public class VolumeService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
+        if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "跨宿主机本地磁盘无法完成迁移，如需进行操作，请先迁移到共享存储，然后再进行迁移");
+        }
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
         if (guest != null) {
             switch (guest.getStatus()) {
@@ -222,6 +231,7 @@ public class VolumeService extends AbstractService {
         VolumeEntity migrateVolume = VolumeEntity.builder()
                 .description(volume.getDescription())
                 .storageId(storage.getStorageId())
+                .hostId(storage.getHostId())
                 .templateId(volume.getTemplateId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)

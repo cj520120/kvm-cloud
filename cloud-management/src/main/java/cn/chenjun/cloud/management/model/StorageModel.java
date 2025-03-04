@@ -19,6 +19,7 @@ public class StorageModel {
     private String type;
     private String param;
     private String mountPath;
+    private int hostId;
     private int supportCategory;
     private long capacity;
     private long available;

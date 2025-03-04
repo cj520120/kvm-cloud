@@ -25,7 +25,7 @@ public class GsonNumberAdapter extends TypeAdapter<Object> {
     public GsonNumberAdapter() {
 
         GsonBuilder gb = new GsonBuilder();
-        gb.registerTypeAdapter(java.util.Date.class, new DateSerializer()).setDateFormat(DateFormat.LONG,DateFormat.DEFAULT);
+        gb.registerTypeAdapter(java.util.Date.class, new DateSerializer()).setDateFormat(DateFormat.LONG, DateFormat.DEFAULT);
         this.gson = gb.create();
     }
 

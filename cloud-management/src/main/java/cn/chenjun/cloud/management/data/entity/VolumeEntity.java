@@ -23,6 +23,7 @@ public class VolumeEntity {
     public static final String VOLUME_ID = "volume_id";
     public static final String TEMPLATE_ID = "template_id";
     public static final String STORAGE_ID = "storage_id";
+    public static final String HOST_ID = "host_id";
     public static final String VOLUME_NAME = "volume_name";
     public static final String VOLUME_DESCRIPTION = "volume_description";
     public static final String VOLUME_PATH = "volume_path";
@@ -32,12 +33,14 @@ public class VolumeEntity {
     public static final String VOLUME_STATUS = "volume_status";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO,value = VOLUME_ID)
+    @TableId(type = IdType.AUTO, value = VOLUME_ID)
     private Integer volumeId;
     @TableField(TEMPLATE_ID)
     private Integer templateId;
     @TableField(STORAGE_ID)
     private Integer storageId;
+    @TableField(HOST_ID)
+    private Integer hostId;
     @TableField(VOLUME_NAME)
     private String name;
     @TableField(VOLUME_DESCRIPTION)

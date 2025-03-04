@@ -69,7 +69,6 @@ public interface VolumeOperate {
     VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception;
 
 
-
     /**
      * 下载磁盘
      *

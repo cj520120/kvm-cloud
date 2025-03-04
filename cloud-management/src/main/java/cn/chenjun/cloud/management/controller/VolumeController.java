@@ -27,8 +27,8 @@ public class VolumeController extends BaseController {
     }
 
     @GetMapping("/api/volume/not/attach/all")
-    public ResultUtil<List<VolumeModel>> listNoAttachVolumes() {
-        return this.lockRun(() -> this.volumeService.listNoAttachVolumes());
+    public ResultUtil<List<VolumeModel>> listNoAttachVolumes(@RequestParam("guestId") int guestId) {
+        return this.lockRun(() -> this.volumeService.listNoAttachVolumes(guestId));
     }
 
     @GetMapping("/api/volume/info")
@@ -40,7 +40,7 @@ public class VolumeController extends BaseController {
     public ResultUtil<VolumeModel> createVolume(@RequestParam("description") String description,
                                                 @RequestParam("storageId") int storageId,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        return this.lockRun(() -> this.volumeService.createVolume(description, storageId,  0, volumeSize * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.volumeService.createVolume(description, storageId, 0, volumeSize * 1024 * 1024 * 1024));
     }
 
     @PutMapping("/api/volume/clone")

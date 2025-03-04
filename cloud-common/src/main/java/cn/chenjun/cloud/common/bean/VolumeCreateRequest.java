@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VolumeCreateRequest { 
+public class VolumeCreateRequest {
     private Volume volume;
 }

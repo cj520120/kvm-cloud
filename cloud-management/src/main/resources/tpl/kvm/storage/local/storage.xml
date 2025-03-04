@@ -1,0 +1,12 @@
+
+<pool type='dir'>
+    <name>{{storage.name}}</name>
+    <target>
+        <path>{{storage.param.path}}</path>
+        <permissions>
+            <mode>0777</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </target>
+</pool>

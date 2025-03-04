@@ -83,20 +83,20 @@ public final class ErrorCode {
      * SSh
      */
     public static final int BASE_SSH_AUTHORIZED_ERROR = BASE_ERROR * 12;
-    public static final int SSH_AUTHORIZED_NOT_FOUND = BASE_SSH_AUTHORIZED_ERROR+1;
-    public static final int SSH_AUTHORIZED_CREATE_ERROR = BASE_SSH_AUTHORIZED_ERROR+2;
+    public static final int SSH_AUTHORIZED_NOT_FOUND = BASE_SSH_AUTHORIZED_ERROR + 1;
+    public static final int SSH_AUTHORIZED_CREATE_ERROR = BASE_SSH_AUTHORIZED_ERROR + 2;
 
     /**
      * Agent
      */
     public static final int BASE_AGENT_ERROR = BASE_ERROR * 13;
     public static final int AGENT_TASK_ASYNC_WAIT = BASE_AGENT_ERROR + 1;
-    public static final int BASE_CONFIG_ERROR = BASE_ERROR*14;
+    public static final int BASE_CONFIG_ERROR = BASE_ERROR * 14;
     /**
      * Config
      */
-    public static final int CONFIG_EXISTS_ERROR = BASE_CONFIG_ERROR+1;
-    public static final int CONFIG_NOT_EXISTS_ERROR = BASE_CONFIG_ERROR+1;
+    public static final int CONFIG_EXISTS_ERROR = BASE_CONFIG_ERROR + 1;
+    public static final int CONFIG_NOT_EXISTS_ERROR = BASE_CONFIG_ERROR + 1;
 
     private ErrorCode() {
 

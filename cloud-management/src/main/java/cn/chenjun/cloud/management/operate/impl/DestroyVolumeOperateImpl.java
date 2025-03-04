@@ -34,7 +34,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
             if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
             VolumeDestroyRequest request = VolumeDestroyRequest.builder()
                     .volume(initVolume(storage, volume))
                     .build();

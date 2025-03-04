@@ -11,6 +11,7 @@ public interface VendorDataService extends Plugin<GuestEntity> {
 
     /**
      * 获取用户数据
+     *
      * @param guest
      * @return
      */

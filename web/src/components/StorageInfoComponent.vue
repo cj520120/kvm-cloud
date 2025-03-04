@@ -5,8 +5,9 @@
 		</el-row>
 		<el-row style="text-align: left; margin: 20px 0">
 			<el-button @click="register_storage(show_storage)" type="success" size="mini">重新注册</el-button>
-			<el-button @click="show_modify_storage_support_category_dialog(show_storage)" type="success" size="mini">修改支持范围</el-button>
+			<el-button @click="show_modify_storage_support_category_dialog(show_storage)" type="success" size="mini" v-if="show_storage.type !== 'local'">修改支持范围</el-button>
 			<el-button @click="pasue_storage(show_storage)" type="warning" size="mini" v-if="show_storage.status !== 3">开始维护</el-button>
+			<el-button @click="migrate_dialog_visable = true" type="danger" size="mini">迁移存储池</el-button>
 			<el-button @click="destroy_storage(show_storage)" type="danger" size="mini">销毁存储池</el-button>
 		</el-row>
 		<el-row>
@@ -15,6 +16,7 @@
 				<el-descriptions-item label="存储池名">{{ show_storage.description }}</el-descriptions-item>
 				<el-descriptions-item label="存储池类型">{{ show_storage.type }}</el-descriptions-item>
 				<el-descriptions-item label="允许范围"><div v-html="get_support_category_html(show_storage.supportCategory)" /></el-descriptions-item>
+				<el-descriptions-item label="本地路径" v-if="show_storage.type === 'local'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
 				<el-descriptions-item label="挂载路径" v-if="show_storage.type === 'nfs'">{{ show_storage.mountPath }}</el-descriptions-item>
 				<el-descriptions-item label="NFS路径" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).path }}</el-descriptions-item>
 				<el-descriptions-item label="NFS地址" v-if="show_storage.type === 'nfs'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
@@ -49,20 +51,38 @@
 				<el-button type="primary" @click="modify_storage_support_category_click">确 定</el-button>
 			</span>
 		</el-dialog>
+		<el-dialog title="迁移存储池" :visible.sync="migrate_dialog_visable" width="30%">
+			<el-form ref="migrate_dialog_form_ref" label-width="100px" class="demo-ruleForm">
+				<el-form-item label="目标存储池" prop="value">
+					<el-select v-model="migrate_storage_id" style="width: 100%" placeholder="请选择目标存储池">
+						<el-option v-for="item in this.storage_list.filter((v) => v.status === 1 && v.storageId !== show_storage_id)" :key="item.storageId" :label="item.description" :value="item.storageId" />
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<span slot="footer" class="dialog-footer">
+				<span slot="footer" class="dialog-footer">
+					<el-button @click="migrate_dialog_visable = false">取 消</el-button>
+					<el-button type="primary" @click="migrate_storage_click" :disabled="migrate_storage_id === ''">确 定</el-button>
+				</span>
+			</span>
+		</el-dialog>
 	</el-card>
 </template>
 <script>
 import Notify from '@/api/notify'
 import util from '@/api/util'
-import { destroyStorage, getStorageInfo, pauseStorage, registerStorage, updateStorageSupportCategory } from '@/api/api'
+import { destroyStorage, getStorageInfo, getStorageList, migrateStorage, pauseStorage, registerStorage, updateStorageSupportCategory } from '@/api/api'
 export default {
 	name: 'StorageInfoComponent',
 	data() {
 		return {
 			show_storage_id: 0,
 			update_dialog_visable: false,
+			migrate_dialog_visable: false,
+			migrate_storage_id: '',
 			storage_loading: false,
 			show_storage: {},
+			storage_list: [],
 			storage_support_category_select: []
 		}
 	},
@@ -108,15 +128,24 @@ export default {
 						this.storage_loading = false
 					})
 			}
+			await getStorageList().then((res) => {
+				if (res.code == 0) {
+					this.storage_list = res.data
+				}
+			})
 		},
-		async init_storage(storage) {
+		async init_storage(storage, storage_list) {
 			this.show_storage = storage
 			this.show_storage_id = storage.storageId
-
+			this.storage_list = storage_list
+			this.migrate_storage_id = ''
 			this.storage_loading = false
 		},
 		async init(storageId) {
 			this.show_storage_id = storageId
+			this.migrate_storage_id
+			this.storage_list = []
+			this.migrate_storage_id = ''
 			this.reload_page()
 		},
 		notify_storage_update(volume) {
@@ -189,6 +218,27 @@ export default {
 					})
 				})
 				.catch(() => {})
+		},
+		migrate_storage_click() {
+			if (this.migrate_storage_id == 0) {
+				return
+			}
+			this.$confirm('迁移存储池将根据目标存储池支持类型自动选择已经关机的磁盘以及模版磁盘进行迁移, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				migrateStorage({ sourceStorageId: this.show_storage_id, destStorageId: this.migrate_storage_id }).then((res) => {
+					if (res.code === 0) {
+						this.migrate_dialog_visable = false
+					} else {
+						this.$notify.error({
+							title: '错误',
+							message: `迁移存储池失败:${res.message}`
+						})
+					}
+				})
+			})
 		},
 		show_modify_storage_support_category_dialog(storage) {
 			this.storage_support_category_select = []

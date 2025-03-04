@@ -40,7 +40,7 @@ public class NetworkEntity {
     public static final String NETWORK_BASIC_NETWORK_ID = "network_basic_network_id";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO,value = NETWORK_ID)
+    @TableId(type = IdType.AUTO, value = NETWORK_ID)
     private Integer networkId;
     @TableField(NETWORK_POOL_ID)
     private String poolId;

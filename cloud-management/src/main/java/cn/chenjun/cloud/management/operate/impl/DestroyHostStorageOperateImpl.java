@@ -32,7 +32,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
 
     @Override
     public void operate(DestroyHostStorageOperate param) {
-        if(ObjectUtils.isEmpty(param.getNextHostIds())){
+        if (ObjectUtils.isEmpty(param.getNextHostIds())) {
             //主机为空，直接成功
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
             return;

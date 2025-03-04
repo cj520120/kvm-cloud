@@ -21,22 +21,23 @@ import java.util.stream.Collectors;
 @Service
 public class AllocateService extends AbstractService {
 
-    public StorageEntity allocateStorage(int category,int storageId) {
+    public StorageEntity allocateStorage(int category, int storageId) {
         StorageEntity storage;
         if (storageId > 0) {
             storage = storageMapper.selectById(storageId);
             if (storage == null) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
             }
-            boolean isSupport= (storage.getSupportCategory().intValue() & category) ==category;
-            if(!isSupport){
-                throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT,"选择的存储磁盘分类不支持选定类型");
+            boolean isSupport = (storage.getSupportCategory().intValue() & category) == category;
+            if (!isSupport) {
+                throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "选择的存储磁盘分类不支持选定类型");
             }
         } else {
             List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
             storageList = storageList.stream().filter(t -> {
-                boolean isSupport= (t.getSupportCategory().intValue() & category) ==category;
-                return isSupport&&Objects.equals(t.getStatus(), Constant.StorageStatus.READY);
+                boolean isSupport =!Objects.equals(t.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL);//本地磁盘不参与自动分配
+                isSupport =isSupport &&(t.getSupportCategory().intValue() & category) == category;
+                return isSupport && Objects.equals(t.getStatus(), Constant.StorageStatus.READY);
             }).collect(Collectors.toList());
             storage = storageList.stream().min((o1, o2) -> Long.compare(o2.getAvailable(), o1.getAvailable())).orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
         }

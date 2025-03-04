@@ -63,7 +63,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return path;
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_INFO,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_INFO, async = true)
     @Override
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage(), false);
@@ -87,7 +87,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return volume;
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_VOLUME_INFO,async = true)
+    @DispatchBind(command = Constant.Command.BATCH_VOLUME_INFO, async = true)
     @Override
     public List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
         Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
@@ -128,7 +128,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return modelList;
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_CREATE,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_CREATE, async = true)
     @Override
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
         String path = getVolumePath(request.getVolume());
@@ -142,7 +142,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_DESTROY,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_DESTROY, async = true)
     @Override
     public Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getVolume().getStorage().getName(), false);
@@ -156,7 +156,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_RESIZE,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_RESIZE, async = true)
     @Override
     public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
         VolumeInfo sourceVolume = getInfo(connect, VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage().getName()).sourceName(request.getVolume().getName()).build());
@@ -175,7 +175,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD, async = true)
     @Override
     public VolumeInfo download(Connect connect, VolumeDownloadRequest request) {
         StorageUtil.checkStorageSuccess(connect, request.getVolume().getStorage().getName());
@@ -235,7 +235,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_MIGRATE,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_MIGRATE, async = true)
     @Override
     public VolumeInfo migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
@@ -252,7 +252,7 @@ public class VolumeOperateImpl implements VolumeOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_CLONE,async = true)
+    @DispatchBind(command = Constant.Command.VOLUME_CLONE, async = true)
     @Override
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
         StorageUtil.checkStorageSuccess(connect, request.getSourceVolume().getStorage().getName());

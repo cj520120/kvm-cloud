@@ -14,8 +14,6 @@ import java.util.List;
 public class RouteComponentService extends AbstractComponentService<RouteComponentQmaInitialize> {
 
 
-
-
     public RouteComponentService(@Autowired List<RouteComponentQmaInitialize> componentQmaInitializeList) {
         super(componentQmaInitializeList);
     }

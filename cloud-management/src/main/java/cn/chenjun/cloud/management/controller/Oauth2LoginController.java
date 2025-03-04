@@ -38,6 +38,7 @@ public class Oauth2LoginController {
     private UserService userService;
     @Autowired
     private ConfigService configService;
+
     @GetMapping("/login")
     public RedirectView goLoginPage() {
         String redirectUri = cn.hutool.core.codec.PercentCodec.of(StandardCharsets.UTF_8.name()).encode(this.configService.getConfig(Constant.ConfigKey.OAUTH2_REDIRECT_URI), StandardCharsets.UTF_8);
@@ -56,7 +57,7 @@ public class Oauth2LoginController {
         params.add(Oauth2.Param.GRANT_TYPE, Oauth2.GrantType.AUTHORIZATION_CODE);
         params.add(Oauth2.Param.CODE, code);
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
-        String tokenUri=this.configService.getConfig(Constant.ConfigKey.OAUTH2_REQUEST_TOKEN_URI);
+        String tokenUri = this.configService.getConfig(Constant.ConfigKey.OAUTH2_REQUEST_TOKEN_URI);
         ResponseEntity<String> response = restTemplate.exchange(tokenUri, HttpMethod.POST, request, String.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message(response.getBody()).build();
@@ -67,15 +68,16 @@ public class Oauth2LoginController {
         if (token != null) {
             headers.set(HttpHeaders.AUTHORIZATION, String.format("%s %s", token.get("token_type"), token.get("access_token")));
         }
-        String userUri=this.configService.getConfig(Constant.ConfigKey.OAUTH2_REQUEST_USER_URI);
+        String userUri = this.configService.getConfig(Constant.ConfigKey.OAUTH2_REQUEST_USER_URI);
         response = restTemplate.exchange(userUri, HttpMethod.GET, new HttpEntity<>(null, headers), String.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message(response.getBody()).build();
         }
         Object id = GsonBuilderUtil.create().<Map<String, Object>>fromJson(response.getBody(), new TypeToken<Map<String, Object>>() {
         }.getType());
-        String idPathStr=this.configService.getConfig(Constant.ConfigKey.OAUTH2_USER_ID_PATH);
-        List<String> idPaths = GsonBuilderUtil.create().fromJson(idPathStr,new TypeToken<List<String>>(){}.getType());
+        String idPathStr = this.configService.getConfig(Constant.ConfigKey.OAUTH2_USER_ID_PATH);
+        List<String> idPaths = GsonBuilderUtil.create().fromJson(idPathStr, new TypeToken<List<String>>() {
+        }.getType());
         for (String name : idPaths) {
             if (id != null) {
                 id = ((Map<String, Object>) id).get(name);

@@ -79,11 +79,12 @@ public class HostInfo implements Serializable {
             private int coreId;
         }
     }
+
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Cpu{
+    public static class Cpu {
         private int number;
         /**
          * 系统架构

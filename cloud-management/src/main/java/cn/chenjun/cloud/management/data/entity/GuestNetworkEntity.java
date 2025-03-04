@@ -30,7 +30,7 @@ public class GuestNetworkEntity {
     public static final String NETWORK_IP = "network_ip";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO,value = GUEST_NETWORK_ID)
+    @TableId(type = IdType.AUTO, value = GUEST_NETWORK_ID)
     private Integer guestNetworkId;
     @TableField(ALLOCATE_ID)
     private Integer allocateId;

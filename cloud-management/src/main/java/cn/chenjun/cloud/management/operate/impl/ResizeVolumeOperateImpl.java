@@ -33,7 +33,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, 0, 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
             VolumeResizeRequest request = VolumeResizeRequest.builder()
                     .volume(initVolume(storage, volume))
                     .size(param.getSize())

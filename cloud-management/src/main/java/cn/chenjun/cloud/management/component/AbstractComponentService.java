@@ -35,17 +35,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractComponentService<T extends ComponentQmaInitialize> extends AbstractService implements ComponentProcess {
 
+    private final List<T> componentQmaInitializeList;
     @Autowired
     protected AllocateService allocateService;
     @Autowired
     protected ComponentMapper componentMapper;
     @Autowired
     protected GuestService guestService;
-
     @Autowired
     protected ConfigService configService;
-
-    private final List<T> componentQmaInitializeList;
 
     protected AbstractComponentService(List<T> componentQmaInitializeList) {
         componentQmaInitializeList.sort(Comparator.comparingInt(Ordered::getOrder));
@@ -67,12 +65,12 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         }
         GuestEntity masterGuest = checkAndStartMasterComponent(network, component, hostIds);
         if (masterGuest == null) {
-            return ;
+            return;
         }
 
         if (masterGuest.getStatus() == Constant.GuestStatus.RUNNING) {
             if (!checkComponentSlaveNumber(component)) {
-                return ;
+                return;
             }
             checkAndStartSlaveComponent(component, network, hostIds);
         }
@@ -126,9 +124,9 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         }.getType());
         boolean isUpdateSlave = false;
         int templateId = 0;
-        for (int i = 0; i < slaveList.size() &&   templateId >= 0; i++) {
-            if(hostIds.isEmpty() ){
-                log.warn("没有可用的主机创建Slava，网络:{},组件类型:{}",network.getName(),this.getComponentName());
+        for (int i = 0; i < slaveList.size() && templateId >= 0; i++) {
+            if (hostIds.isEmpty()) {
+                log.warn("没有可用的主机创建Slava，网络:{},组件类型:{}", network.getName(), this.getComponentName());
                 break;
             }
             int slaveGuestId = slaveList.get(i);
@@ -183,7 +181,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         int templateId;
         List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_TYPE, Constant.TemplateType.SYSTEM).eq(TemplateEntity.TEMPLATE_STATUS, Constant.TemplateStatus.READY));
         if (templateList.isEmpty()) {
-            log.warn("系统模版未就绪，等待就绪后创建系统组件.{}",this.getComponentName());
+            log.warn("系统模版未就绪，等待就绪后创建系统组件.{}", this.getComponentName());
             templateId = -1;
         } else {
             Collections.shuffle(templateList);
@@ -214,7 +212,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 break;
         }
         //从可用主机中删除组件主机
-        hostIds.remove((Object)lastHostId);
+        hostIds.remove(lastHostId);
     }
 
     private void destroySlaveGuest(GuestEntity guest) {
@@ -233,9 +231,11 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
 
     private GuestEntity createSystemComponentGuest(int componentId, String name, NetworkEntity network, int diskTemplateId) {
-        int systemCpu=configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU);
-        int systemCpuShare=configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
-        long systemMemory=(int)configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY)*1024;
+        int systemCpu = configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU);
+        int systemCpuShare = configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
+        long systemMemory = (int) configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024;
+
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, 0);
         GuestEntity guest = GuestEntity.builder()
                 .name(NameUtil.generateGuestName())
                 .groupId(0)
@@ -257,7 +257,6 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME,0);
         String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -266,6 +265,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
                 .capacity(0L)
+                .hostId(storage.getHostId())
                 .storageId(storage.getStorageId())
                 .name(volumeName)
                 .path(storage.getMountPath() + "/" + volumeName)

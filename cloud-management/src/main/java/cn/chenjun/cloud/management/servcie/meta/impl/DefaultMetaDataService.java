@@ -25,7 +25,6 @@ public class DefaultMetaDataService implements MetaDataService {
     private MetaMapper metaMapper;
 
 
-
     @Override
     public MetaData buildCloudInitMetaData(GuestEntity guest) {
         List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));

@@ -27,6 +27,7 @@ public class TaskService {
     private TaskMapper taskMapper;
     @Autowired
     private ApplicationContext applicationContext;
+
     @Transactional
     public void addTask(BaseOperateParam operateParam) {
         this.addTask(operateParam, 0);
@@ -67,7 +68,7 @@ public class TaskService {
     public void updateTaskExpire(TaskEntity entity) {
         int expireSecond = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
         Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
-        int version=entity.getVersion()+1;
+        int version = entity.getVersion() + 1;
         entity.setVersion(version);
         entity.setExpireTime(expireTime);
         this.taskMapper.updateById(entity);

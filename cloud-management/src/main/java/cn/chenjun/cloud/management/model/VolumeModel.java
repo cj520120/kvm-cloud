@@ -20,6 +20,7 @@ public class VolumeModel {
     private String description;
     private int templateId;
     private int storageId;
+    private int hostId;
     private String name;
     private String path;
     private String backingPath;

@@ -23,7 +23,7 @@ public class SshAuthorizedEntity {
     public static final String SSH_PUBLIC_KEY = "ssh_public_key";
     public static final String SSH_PRIVATE_KEY = "ssh_private_key";
 
-    @TableId(type = IdType.AUTO,value = ID)
+    @TableId(type = IdType.AUTO, value = ID)
     private Integer id;
     @TableField(SSH_NAME)
     private String sshName;

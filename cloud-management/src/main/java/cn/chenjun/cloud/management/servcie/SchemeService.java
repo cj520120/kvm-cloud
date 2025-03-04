@@ -22,22 +22,6 @@ import java.util.stream.Collectors;
 public class SchemeService extends AbstractService {
 
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SchemeModel> getSchemeInfo(int schemeId) {
-        SchemeEntity entity = this.schemeMapper.selectById(schemeId);
-        if (entity == null) {
-            return ResultUtil.error(ErrorCode.SCHEME_NOT_FOUND, "计算方案不存在");
-        }
-        return ResultUtil.success(this.initScheme(entity));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<List<SchemeModel>> listScheme() {
-        List<SchemeEntity> list = this.schemeMapper.selectList(new QueryWrapper<>());
-        List<SchemeModel> models = list.stream().map(this::initScheme).collect(Collectors.toList());
-        return ResultUtil.success(models);
-    }
-
     private static void verifySchemeParam(String name, int cpu, long memory, int share, int sockets, int cores, int threads) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入架构名称");
@@ -64,6 +48,22 @@ public class SchemeService extends AbstractService {
         if (coreCpu != 0 && cpu != coreCpu) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "Cpu架构设置不正确,sockets、core、threads 参数相乘需要等于Cpu数量");
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<SchemeModel> getSchemeInfo(int schemeId) {
+        SchemeEntity entity = this.schemeMapper.selectById(schemeId);
+        if (entity == null) {
+            return ResultUtil.error(ErrorCode.SCHEME_NOT_FOUND, "计算方案不存在");
+        }
+        return ResultUtil.success(this.initScheme(entity));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<List<SchemeModel>> listScheme() {
+        List<SchemeEntity> list = this.schemeMapper.selectList(new QueryWrapper<>());
+        List<SchemeModel> models = list.stream().map(this::initScheme).collect(Collectors.toList());
+        return ResultUtil.success(models);
     }
 
     @Transactional(rollbackFor = Exception.class)

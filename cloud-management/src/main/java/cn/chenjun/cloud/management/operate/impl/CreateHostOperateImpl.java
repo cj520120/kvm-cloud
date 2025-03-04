@@ -44,7 +44,12 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.StorageStatus.READY, t.getStatus())).collect(Collectors.toList());
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY, t.getStatus())).collect(Collectors.toList());
         Map<String, Object> systemConfig = this.loadSystemConfig(param.getHostId(), 0);
-        List<StorageCreateRequest> createStorageRequest = storageList.stream().map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
+        List<StorageCreateRequest> createStorageRequest = storageList.stream().filter(storage -> {
+            if (storage.getType().equalsIgnoreCase(Constant.StorageType.LOCAL) && !Objects.equals(storage.getStorageId(), host.getHostId())) {
+                return false;
+            }
+            return Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.READY);
+        }).map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
         Map<Integer, NetworkEntity> basicBridgeNetworkMap = networkList.stream().collect(Collectors.toMap(NetworkEntity::getNetworkId, Function.identity()));
         List<BasicBridgeNetwork> basicBridgeNetworks = new ArrayList<>();
         List<VlanNetwork> vlanNetworkList = new ArrayList<>();

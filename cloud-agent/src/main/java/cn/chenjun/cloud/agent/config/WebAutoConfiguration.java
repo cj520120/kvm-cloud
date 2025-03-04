@@ -22,7 +22,7 @@ public class WebAutoConfiguration {
     public GsonHttpMessageConverter gsonHttpMessageConverter() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(java.util.Date.class, new DateSerializer());
-        gsonBuilder.setDateFormat(DateFormat.LONG,DateFormat.DEFAULT);
+        gsonBuilder.setDateFormat(DateFormat.LONG, DateFormat.DEFAULT);
         GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
         converter.setGson(gsonBuilder.create());
         converter.setDefaultCharset(StandardCharsets.UTF_8);

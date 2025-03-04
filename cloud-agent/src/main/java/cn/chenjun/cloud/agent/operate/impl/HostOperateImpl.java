@@ -40,8 +40,8 @@ public class HostOperateImpl implements HostOperate {
         List<HostInfo.Topology> cpuTopology = new ArrayList<>();
         HostInfo.Cpu cpu = HostInfo.Cpu.builder().number(nodeInfo.cpus).topology(cpuTopology).build();
         HostInfo hostInfo = HostInfo.builder().hostName(connect.getHostName())
-                .name(SystemPropsUtil.get("os.name",""))
-                .osVersion(SystemPropsUtil.get("os.version",""))
+                .name(SystemPropsUtil.get("os.name", ""))
+                .osVersion(SystemPropsUtil.get("os.version", ""))
                 .version(connect.getVersion())
                 .uri(connect.getURI())
                 .memory(nodeInfo.memory)
@@ -124,7 +124,7 @@ public class HostOperateImpl implements HostOperate {
         return getHostInfo(connect);
     }
 
-    @DispatchBind(command = Constant.Command.HOST_INIT,async = true)
+    @DispatchBind(command = Constant.Command.HOST_INIT, async = true)
     @Override
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
 

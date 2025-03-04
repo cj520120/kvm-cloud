@@ -20,6 +20,7 @@ public @interface DispatchBind {
 
     /**
      * 是否异步执行
+     *
      * @return
      */
     boolean async() default false;

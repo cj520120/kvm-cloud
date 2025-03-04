@@ -27,11 +27,11 @@ import java.util.stream.Collectors;
 @Component
 public class NetworkInitialize implements GlobalComponentQmaInitialize {
     @Autowired
+    protected ConfigService configService;
+    @Autowired
     private GuestNetworkMapper guestNetworkMapper;
     @Autowired
     private NetworkMapper networkMapper;
-    @Autowired
-    protected ConfigService configService;
 
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {

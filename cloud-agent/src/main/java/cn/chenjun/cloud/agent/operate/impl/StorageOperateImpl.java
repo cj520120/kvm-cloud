@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +47,7 @@ public class StorageOperateImpl implements StorageOperate {
                 .build();
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO,async = true)
+    @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO, async = true)
     @Override
     public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
         List<StorageInfo> list = new ArrayList<>();
@@ -70,14 +69,14 @@ public class StorageOperateImpl implements StorageOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.STORAGE_CREATE,async = true)
+    @DispatchBind(command = Constant.Command.STORAGE_CREATE, async = true)
     @Override
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
-        if (!ObjectUtils.isEmpty(request.getSecretXml())){
+        if (!ObjectUtils.isEmpty(request.getSecretXml())) {
             Secret secret;
-            try{
+            try {
                 secret = connect.secretLookupByUUIDString(request.getName());
-            }catch (Exception err){
+            } catch (Exception err) {
                 log.info("创建 secret:{} xml={}", request.getName(), request.getSecretXml());
                 secret = connect.secretDefineXML(request.getSecretXml());
             }
@@ -103,7 +102,7 @@ public class StorageOperateImpl implements StorageOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.STORAGE_DESTROY,async = true)
+    @DispatchBind(command = Constant.Command.STORAGE_DESTROY, async = true)
     @Override
     public Void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
         synchronized (request.getName().intern()) {

@@ -6,7 +6,9 @@ import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
-import cn.chenjun.cloud.management.data.mapper.*;
+import cn.chenjun.cloud.management.data.mapper.GuestDiskMapper;
+import cn.chenjun.cloud.management.data.mapper.TemplateMapper;
+import cn.chenjun.cloud.management.data.mapper.VolumeMapper;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
@@ -15,8 +17,6 @@ import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.MetaDataType;
 import cn.chenjun.cloud.management.util.TemplateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
-import jodd.bean.BeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -63,17 +63,17 @@ public class TemplateVendorDataService implements VendorDataService {
             }
             sb.append(script);
         } while (false);
-        String script=sb.toString();
-        if(!ObjectUtils.isEmpty(script)) {
+        String script = sb.toString();
+        if (!ObjectUtils.isEmpty(script)) {
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(),
                     ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(guest.getHostId()).build(),
                     ConfigQuery.builder().type(Constant.ConfigAllocateType.GUEST).id(guest.getGuestId()).build()
             );
-            Map<String,Object> sysconfig= this.configService.loadSystemConfig(queryList);
-            Map<String,Object> map=new HashMap<>();
-            map.put("__SYS__",sysconfig);
-            map.put("vm", GsonBuilderUtil.create().fromJson(GsonBuilderUtil.create().toJson(guest),Map.class ));
-            script= TemplateUtil.create().render(script,map);
+            Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
+            Map<String, Object> map = new HashMap<>();
+            map.put("__SYS__", sysconfig);
+            map.put("vm", GsonBuilderUtil.create().fromJson(GsonBuilderUtil.create().toJson(guest), Map.class));
+            script = TemplateUtil.create().render(script, map);
         }
         return MetaData.builder().type(MetaDataType.CLOUD).body(script).build();
     }

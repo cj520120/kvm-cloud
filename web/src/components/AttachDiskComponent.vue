@@ -29,7 +29,7 @@ export default {
 	},
 	methods: {
 		async load_all_attach_volumes() {
-			await getNotAttachVolumeList().then((res) => {
+			await getNotAttachVolumeList({ guestId: this.attach_volume_guest.guestId }).then((res) => {
 				if (res.code === 0) {
 					this.attach_volumes = res.data
 				}
@@ -39,6 +39,7 @@ export default {
 			this.attach_volume_guest.guestId = guest.guestId
 			this.attach_volume_guest.volumeId = ''
 			this.attach_volume_dialog_visiable = true
+			this.attach_volumes = []
 			await this.load_all_attach_volumes()
 		},
 		attach_volume_click() {

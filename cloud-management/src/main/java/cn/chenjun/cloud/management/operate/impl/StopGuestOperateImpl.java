@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -44,9 +43,9 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
                 this.onFinish(param, ResultUtil.success());
             }
             if (!param.isForce()) {
-                Map<String,Object> systemConfig=this.loadSystemConfig(guest.getHostId(), guest.getGuestId());
-                int maxWaitMinutes= (int) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE);
-                long expire= TimeUnit.MINUTES.toMinutes(Math.max(maxWaitMinutes,1));
+                Map<String, Object> systemConfig = this.loadSystemConfig(guest.getHostId(), guest.getGuestId());
+                int maxWaitMinutes = (int) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE);
+                long expire = TimeUnit.MINUTES.toMinutes(Math.max(maxWaitMinutes, 1));
                 GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).expire(expire).build();
                 this.asyncInvoker(host, param, Constant.Command.GUEST_SHUTDOWN, request);
             } else {

@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class RouteFirewalldInitialize  implements RouteComponentQmaInitialize{
+public class RouteFirewalldInitialize implements RouteComponentQmaInitialize {
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
-        List<GuestQmaRequest.QmaBody> commands=new ArrayList<>();
+        List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/open_firewalld.sh"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("firewall-cmd").args(new String[]{"--add-port=80/tcp"}).checkSuccess(false).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("firewall-cmd").args(new String[]{"--add-port=53/tcp"}).checkSuccess(false).build())).build());

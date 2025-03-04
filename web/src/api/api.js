@@ -193,6 +193,13 @@ export const registerStorage = (data = {}) => {
   });
 };
 
+export const migrateStorage = (data = {}) => {
+  return axios.request({
+    url: "api/storage/migrate",
+    data,
+    method: "POST",
+  });
+};
 export const destroyStorage = (data = {}) => {
   return axios.request({
     url: "api/storage/destroy",

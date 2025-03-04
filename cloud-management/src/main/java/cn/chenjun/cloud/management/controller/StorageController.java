@@ -33,18 +33,23 @@ public class StorageController extends BaseController {
                                                   @RequestParam("supportCategory") int supportCategory,
                                                   @RequestParam("type") String type,
                                                   @RequestParam("param") String param) {
-        return this.lockRun(() -> storageService.createStorage(supportCategory,description, type, param));
+        return this.lockRun(() -> storageService.createStorage(supportCategory, description, type, param));
     }
 
 
     @PostMapping("/api/storage/support/category/update")
-    public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestParam("storageId") int storageId,  @RequestParam("supportCategory") int supportCategory) {
-        return this.lockRun(() -> storageService.updateStorageSupportCategory(storageId,supportCategory));
+    public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestParam("storageId") int storageId, @RequestParam("supportCategory") int supportCategory) {
+        return this.lockRun(() -> storageService.updateStorageSupportCategory(storageId, supportCategory));
     }
 
     @PostMapping("/api/storage/register")
     public ResultUtil<StorageModel> registerStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.registerStorage(storageId));
+    }
+
+    @PostMapping("/api/storage/migrate")
+    public ResultUtil<Void> migrateStorage(@RequestParam("sourceStorageId") int sourceStorageId, @RequestParam("destStorageId") int destStorageId) {
+        return this.lockRun(() -> storageService.migrateStorage(sourceStorageId, destStorageId));
     }
 
     @PostMapping("/api/storage/maintenance")

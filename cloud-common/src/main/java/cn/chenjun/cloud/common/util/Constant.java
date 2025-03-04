@@ -14,26 +14,29 @@ public class Constant {
          * 基础网络
          */
         BASIC(0, "bridge"),
-        OPEN_SWITCH(1,"OpenSwitch");
+        OPEN_SWITCH(1, "OpenSwitch");
         private final String bridgeName;
         private final int bridgeType;
 
-        NetworkBridgeType(int bridgeType,String bridgeName) {
+        NetworkBridgeType(int bridgeType, String bridgeName) {
             this.bridgeType = bridgeType;
             this.bridgeName = bridgeName;
         }
 
-        public int bridgeType(){
+        public static NetworkBridgeType fromBridgeValue(String value) {
+            return Arrays.stream(NetworkBridgeType.values()).filter(br -> StringUtils.endsWithIgnoreCase(br.bridgeName, value)).findFirst().orElse(null);
+        }
+
+        public static NetworkBridgeType fromBridgeType(int type) {
+            return Arrays.stream(NetworkBridgeType.values()).filter(br -> br.bridgeType == type).findFirst().orElse(null);
+        }
+
+        public int bridgeType() {
             return this.bridgeType;
         }
-        public String bridgeName(){
+
+        public String bridgeName() {
             return this.bridgeName;
-        }
-        public static NetworkBridgeType fromBridgeValue(String value){
-            return Arrays.stream(NetworkBridgeType.values()).filter(br-> StringUtils.endsWithIgnoreCase(br.bridgeName,value)).findFirst().orElse(null);
-        }
-        public static NetworkBridgeType fromBridgeType(int type){
-            return Arrays.stream(NetworkBridgeType.values()).filter(br-> br.bridgeType ==type).findFirst().orElse(null);
         }
     }
 
@@ -70,7 +73,7 @@ public class Constant {
         public static final String VOLUME_MIGRATE = "MigrateVolume";
 //        public static final String VOLUME_SNAPSHOT = "SnapshotVolume";
 
-//        public static final String VOLUME_TEMPLATE = "TemplateVolume";
+        //        public static final String VOLUME_TEMPLATE = "TemplateVolume";
         public static final String VOLUME_DOWNLOAD = "DownloadVolume";
 
         public static final String GUEST_DESTROY = "DeleteGuest";
@@ -147,7 +150,7 @@ public class Constant {
         public static final int UPDATE_COMPONENT_NAT = 12;
         public static final int UPDATE_SSH_KEY = 13;
 
- 
+
         public static final int COMPONENT_UPDATE_DNS = 101;
         public static final int COMPONENT_UPDATE_NAT = 102;
 

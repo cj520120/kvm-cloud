@@ -1,12 +1,13 @@
 package cn.chenjun.cloud.management.util;
 
 public enum MetaDataType {
-    CLOUD("#cloud-config\n","text/cloud-config");
+    CLOUD("#cloud-config\n", "text/cloud-config");
     private final String firstLine;
     private final String contextType;
-    private MetaDataType(String firstLine,String contextType){
-        this.firstLine=firstLine;
-        this.contextType=contextType;
+
+    MetaDataType(String firstLine, String contextType) {
+        this.firstLine = firstLine;
+        this.contextType = contextType;
     }
 
     public String getContextType() {

@@ -57,10 +57,10 @@ public class NetworkController extends BaseController {
                                                   @RequestParam("dns") String dns,
                                                   @RequestParam("domain") String domain,
                                                   @RequestParam("type") int type,
-                                                  @RequestParam("bridgeType") int   bridgeType,
+                                                  @RequestParam("bridgeType") int bridgeType,
                                                   @RequestParam("vlanId") int vlanId,
                                                   @RequestParam("basicNetworkId") int basicNetworkId) {
-        return this.lockRun(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId,bridgeType));
+        return this.lockRun(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
     }
 
     @PostMapping("/api/network/register")

@@ -14,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,9 +29,15 @@ public class DestroyStorageOperateImpl extends AbstractOperate<DestroyStorageOpe
 
     @Override
     public void operate(DestroyStorageOperate param) {
-        List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())
-                .stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)).collect(Collectors.toList());
-        List<Integer> hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
+        StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
+        List<Integer> hostIds;
+        if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
+            hostIds = Collections.singletonList(storage.getHostId());
+        } else {
+            List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())
+                    .stream().filter(t -> Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)).collect(Collectors.toList());
+            hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
+        }
         DestroyHostStorageOperate operate = DestroyHostStorageOperate.builder().id(UUID.randomUUID().toString())
                 .title(param.getTitle())
                 .storageId(param.getStorageId())

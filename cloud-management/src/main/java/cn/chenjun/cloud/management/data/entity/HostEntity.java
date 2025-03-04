@@ -46,7 +46,7 @@ public class HostEntity {
     public static final String HOST_STATUS = "host_status";
     public static final String CREATE_TIME = "create_time";
 
-    @TableId(type = IdType.AUTO,value = HOST_ID)
+    @TableId(type = IdType.AUTO, value = HOST_ID)
     private Integer hostId;
     @TableField(HOST_DISPLAY_NAME)
     private String displayName;
