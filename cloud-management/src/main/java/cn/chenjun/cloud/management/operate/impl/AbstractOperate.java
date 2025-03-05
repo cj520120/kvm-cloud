@@ -276,12 +276,12 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
 
     protected Map<String, Object> loadSystemConfig(int hostId, int guestId) {
         List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
         if (hostId > 0) {
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(hostId).build());
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(hostId).build());
         }
         if (guestId > 0) {
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.GUEST).id(guestId).build());
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.GUEST).id(guestId).build());
         }
         return this.configService.loadSystemConfig(queryList);
     }

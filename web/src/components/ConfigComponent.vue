@@ -144,7 +144,7 @@ export default {
 			this.modify_dialog_visable = true
 		},
 		update_config_info(config) {
-			let findIndex = this.config_list.findIndex((item) => item.key === config.key && item.allocateType === config.allocateType && item.allocateType === config.allocateId)
+			let findIndex = this.config_list.findIndex((item) => item.key === config.key && item.allocateType === config.allocateType && item.allocateId === config.allocateId)
 			if (findIndex >= 0) {
 				this.$set(this.config_list, findIndex, config)
 			} else {

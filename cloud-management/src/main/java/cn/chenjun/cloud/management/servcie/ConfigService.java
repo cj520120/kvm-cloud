@@ -10,9 +10,11 @@ import cn.chenjun.cloud.management.model.ConfigModel;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.servcie.bean.DefaultConfigInfo;
 import cn.chenjun.cloud.management.servcie.convert.ConfigConvert;
+import cn.chenjun.cloud.management.servcie.convert.bean.VCpuTune;
 import cn.chenjun.cloud.management.servcie.convert.impl.FloatConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.IntegerConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.StringConvert;
+import cn.chenjun.cloud.management.servcie.convert.impl.VCpuTuneConvert;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -33,7 +35,7 @@ public class ConfigService {
 
     public ConfigService(@Autowired ApplicationConfig applicationConfig) {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_MANAGER_URI,false, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, true,Constant.Enable.YES, "是否启动网络组件", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, true,Constant.Enable.YES, "是否启动网络组件(特殊情况下使用)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, false,cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, false,"8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU, false,1, "系统组件Cpu", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
@@ -64,6 +66,18 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, false,600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND,false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, false,120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false,"no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, false,new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
+
+        initDefaultConfig(ConfigKey.VM_BIND_HOST, true,0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, false,"no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, false,"strict", "numa内存分配模式", Constant.ConfigValueType.STRING, Arrays.asList("strict","preferred","interleave"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, false,"0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+
+        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, false,"yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_MODEL, false,"virtio", "内存气球驱动方式", Constant.ConfigValueType.STRING, Arrays.asList("none","virtio"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_PERIOD, false,10, "内存气球回收周期(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
         initDefaultConfig(ConfigKey.VM_MEMORY_HUGE_PAGES_ENABLE, false,Constant.Enable.NO, "是否启用大页内存", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
@@ -145,7 +159,7 @@ public class ConfigService {
     }
 
     public <T> T getConfig(String key) {
-        return this.getConfig(Collections.singletonList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).id(0).build()), key);
+        return this.getConfig(Collections.singletonList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build()), key);
     }
 
     public <T> T getConfig(List<ConfigQuery> queryList, String key) {
@@ -178,7 +192,7 @@ public class ConfigService {
 
         Map<String, Object> map = new HashMap<>();
         for (ConfigQuery query : queryList) {
-            if (query.getType() == Constant.ConfigAllocateType.DEFAULT) {
+            if (query.getType() == Constant.ConfigType.DEFAULT) {
                 DEFAULT_CONFIG_LIST_CACHE.stream().forEach(config -> map.put(config.getKey(), config.getValue()));
             }
             List<ConfigEntity> list = this.mapper.selectList(new QueryWrapper<ConfigEntity>().eq(ConfigEntity.CONFIG_ALLOCATE_TYPE, query.getType()).eq(ConfigEntity.CONFIG_ALLOCATE_ID, query.getId()));
@@ -198,7 +212,7 @@ public class ConfigService {
     public ResultUtil<List<ConfigModel>> listConfig(int allocateType, int allocateId) {
         List<ConfigModel> list = new ArrayList<>();
         Map<String, ConfigModel> map = new HashMap<>();
-        if (allocateType == Constant.ConfigAllocateType.DEFAULT) {
+        if (allocateType == Constant.ConfigType.DEFAULT) {
             DEFAULT_CONFIG_LIST_CACHE.stream().forEach(config -> {
                 ConfigModel model = new ConfigModel();
                 BeanUtils.copyProperties(config, model);
@@ -210,14 +224,21 @@ public class ConfigService {
         List<ConfigEntity> searchList = this.mapper.selectList(new QueryWrapper<ConfigEntity>().eq(ConfigEntity.CONFIG_ALLOCATE_TYPE, allocateType).eq(ConfigEntity.CONFIG_ALLOCATE_ID, allocateId));
         searchList.stream().forEach(config -> {
             ConfigModel model = map.get(config.getConfigKey());
-            if (model != null) {
-                model.setId(config.getId());
-                model.setValue(config.getConfigValue());
-            } else {
-                model = ConfigModel.builder().id(config.getId()).defaultParam(false).key(config.getConfigKey()).allocateType(allocateType).allocateId(allocateId).value(config.getConfigValue()).valueType(Constant.ConfigValueType.MULTI_STRING).description("").valueOptions(null).build();
-                list.add(model);
-                map.put(model.getKey(), model);
+            if(model==null){
+                model=new ConfigModel();
+                DefaultConfigInfo defaultConfigInfo=DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
+                if(defaultConfigInfo!=null) {
+                    BeanUtils.copyProperties(defaultConfigInfo, model);
+                    model.setIntern(false);
+                    model.setDefaultParam(false);
+                    list.add(model);
+                    map.put(model.getKey(), model);
+                }else {
+                    model = ConfigModel.builder().id(config.getId()).defaultParam(false).key(config.getConfigKey()).allocateType(allocateType).allocateId(allocateId).value(config.getConfigValue()).valueType(Constant.ConfigValueType.MULTI_STRING).description("").valueOptions(null).build();
+                }
             }
+            model.setId(config.getId());
+            model.setValue(config.getConfigValue());
         });
         return ResultUtil.success(list);
     }

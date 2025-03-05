@@ -65,9 +65,9 @@ public class TemplateVendorDataService implements VendorDataService {
         } while (false);
         String script = sb.toString();
         if (!ObjectUtils.isEmpty(script)) {
-            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(),
-                    ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(guest.getHostId()).build(),
-                    ConfigQuery.builder().type(Constant.ConfigAllocateType.GUEST).id(guest.getGuestId()).build()
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(),
+                    ConfigQuery.builder().type(Constant.ConfigType.HOST).id(guest.getHostId()).build(),
+                    ConfigQuery.builder().type(Constant.ConfigType.GUEST).id(guest.getGuestId()).build()
             );
             Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
             Map<String, Object> map = new HashMap<>();

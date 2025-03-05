@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
@@ -129,8 +130,11 @@ public class HostService extends AbstractService {
         if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq(GuestEntity.HOST_ID, hostId)) > 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
+        if (this.storageMapper.selectCount(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, host)) > 0) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
+        }
         this.hostMapper.deleteById(hostId);
-        this.configService.deleteAllocateConfig(Constant.ConfigAllocateType.HOST, hostId);
+        this.configService.deleteAllocateConfig(Constant.ConfigType.HOST, hostId);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success();
     }

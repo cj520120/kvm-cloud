@@ -181,7 +181,7 @@ public class Constant {
         public static final int SELECT = 4;
     }
 
-    public static class ConfigAllocateType {
+    public static class ConfigType {
         public static final int DEFAULT = 0;
         public static final int HOST = 1;
         public static final int GUEST = 2;

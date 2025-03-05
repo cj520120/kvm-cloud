@@ -67,8 +67,8 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
             hostMapper.updateById(updateHost);
             List<ConfigQuery> queryList = new ArrayList<>(2);
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(1).build());
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(1).build());
             int expire = this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
             rBucket.set(System.currentTimeMillis(), Math.max(1, expire * 2), TimeUnit.SECONDS);
         } else if (!rBucket.isExists()) {

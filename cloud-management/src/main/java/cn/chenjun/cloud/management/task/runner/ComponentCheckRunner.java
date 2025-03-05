@@ -51,8 +51,8 @@ public class ComponentCheckRunner extends AbstractRunner {
         List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>());
         for (NetworkEntity network : networkList) {
             List<ConfigQuery> queryList=new ArrayList<>();
-            queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).id(0).build());
-            queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.NETWORK).id(network.getNetworkId()).build());
+            queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
+            queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
             if(Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)){
                 continue;
             }

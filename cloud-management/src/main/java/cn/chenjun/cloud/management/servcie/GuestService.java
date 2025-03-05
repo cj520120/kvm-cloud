@@ -78,8 +78,8 @@ public class GuestService extends AbstractService {
 
     private void checkSystemComponentComplete(int networkId) {
         List<ConfigQuery> queryList=new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.NETWORK).id(networkId).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(networkId).build());
         if(Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)){
             return;
         }
@@ -367,11 +367,11 @@ public class GuestService extends AbstractService {
         this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
-                int supportHostId = getDiskSupportHostId(guestId);
+                int allowHostId = getAllowHostId(guest);
                 if (hostId == 0) {
-                    hostId = supportHostId;
-                } else if (hostId != supportHostId) {
-                    throw new CodeException(ErrorCode.PARAM_ERROR, "具有本地存储池虚拟机不允许从其他主机启动");
+                    hostId = allowHostId;
+                } else if (hostId != allowHostId) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "该宿主机已经绑定了启动主机ID："+allowHostId);
                 }
                 guest.setHostId(hostId);
                 guest.setStatus(Constant.GuestStatus.STARTING);
@@ -506,8 +506,8 @@ public class GuestService extends AbstractService {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume.getHostId() > 0) {
-            int supportHostId = getDiskSupportHostId(guestId);
-            if (supportHostId > 0 && supportHostId != volume.getHostId()) {
+            int allowHostId = getAllowHostId(guest);
+            if (allowHostId > 0 && allowHostId != volume.getHostId()) {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "当前主机无法挂载其他主机的本地磁盘");
             }
         }
@@ -524,15 +524,9 @@ public class GuestService extends AbstractService {
                 }
                 List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
                 List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
-                int deviceId = -1;
-                for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
-                    if (!gustDiskDeviceIds.contains(i)) {
-                        deviceId = i;
-                        break;
-                    }
-                }
-                if (deviceId < 0) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大磁盘数量限制");
+                int deviceId = 0;
+                while (!gustDiskDeviceIds.contains(deviceId)) {
+                    deviceId++;
                 }
                 guestDisk = GuestDiskEntity.builder().guestId(guestId).volumeId(volumeId).deviceId(deviceId).build();
                 this.guestDiskMapper.insert(guestDisk);

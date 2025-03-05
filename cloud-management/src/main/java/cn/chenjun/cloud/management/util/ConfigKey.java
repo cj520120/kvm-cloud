@@ -28,6 +28,15 @@ public class ConfigKey {
     public static final String DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.cluster.storage.volume.sync.timeout.second";
     public static final String DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND = "default.cluster.task.expire.timeout.second";
 
+    public static final String VM_BIND_HOST = "vm.bind.host";
+    public static final String VM_NUMA_MEMORY_ENABLE = "vm.numa.memory.enable";
+    public static final String VM_NUMA_MEMORY_MODEL = "vm.numa.memory.model";
+    public static final String VM_NUMA_MEMORY_NODE = "vm.numa.memory.node";
+    public static final String VM_CPUTUNE_VCPUPIN_ENABLE = "vm.cputune.vcpupin.enable";
+    public static final String VM_CPUTUNE_VCPUPIN_CONFIG = "vm.cputune.vcpupin.config";
+    public static final String VM_MEMORY_MEMBALLOON_ENABLE = "vm.memory.memballoon.enable";
+    public static final String VM_MEMORY_MEMBALLOON_PERIOD = "vm.memory.memballoon.period";
+    public static final String VM_MEMORY_MEMBALLOON_MODEL = "vm.memory.memballoon.model";
     public static final String VM_MEMORY_HUGE_PAGES_ENABLE = "vm.memory.huge.pages.enable";
     public static final String VM_MEMORY_HUGE_PAGES_SIZE = "vm.memory.huge.pages.size";
     public static final String VM_CPU_CACHE_ENABLE = "vm.cpu.cache.enable";

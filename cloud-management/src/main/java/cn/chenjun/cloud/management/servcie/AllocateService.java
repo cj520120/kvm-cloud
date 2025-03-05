@@ -60,7 +60,7 @@ public class AllocateService extends AbstractService {
     public List<HostEntity> listAllocateHost(int cpu, long memory) {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
-            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         }
@@ -72,7 +72,7 @@ public class AllocateService extends AbstractService {
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             if (!hostVerify(host, cpu, memory)) {
@@ -83,7 +83,7 @@ public class AllocateService extends AbstractService {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : list) {
 
-                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
                 host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
                 host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             }

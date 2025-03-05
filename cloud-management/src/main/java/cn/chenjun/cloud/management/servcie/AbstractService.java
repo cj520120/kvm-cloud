@@ -79,20 +79,27 @@ public abstract class AbstractService {
         }
         return guestMapper.selectById(guestDisk.getGuestId());
     }
-    protected int getDiskSupportHostId(int guestId){
-        int hostId;
+
+    protected int getAllowHostId(int guestId) {
         GuestEntity guest=this.guestMapper.selectById(guestId);
-        if(guest.getStatus().equals(Constant.GuestStatus.RUNNING)||guest.getStatus().equals(Constant.GuestStatus.STARTING)||guest.getStatus().equals(Constant.GuestStatus.STOPPING)){
-            hostId=guest.getHostId();
-        }else{
-            List<GuestDiskEntity> guestDiskList=this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID,guestId));
-            List<Integer> volumeIds=guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
-            List<VolumeEntity> guestVolumeList=this.volumeMapper.selectBatchIds(volumeIds);
-            hostId=guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id->id>0).findFirst().orElse(0);
+        return getAllowHostId(guest);
+    }
+
+
+    protected int getAllowHostId(GuestEntity guest) {
+        int hostId=this.configService.getConfig(Arrays.asList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
+        if(hostId==0) {
+            if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
+                hostId = guest.getHostId();
+            } else {
+                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
+                List<Integer> volumeIds = guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
+                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(volumeIds);
+                hostId = guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id -> id > 0).findFirst().orElse(0);
+            }
         }
         return hostId;
     }
-
     public GuestModel initGuestInfo(GuestEntity entity) {
         GuestModel model;
         switch (entity.getType()) {
@@ -150,7 +157,7 @@ public abstract class AbstractService {
     }
 
     protected HostModel initHost(HostEntity entity) {
-        List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(entity.getHostId()).build());
+        List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(entity.getHostId()).build());
         entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
         entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         return new BeanConverter<>(HostModel.class).convert(entity, null);

@@ -49,8 +49,9 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         }
 
         List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
         Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
 
         switch (network.getType()) {

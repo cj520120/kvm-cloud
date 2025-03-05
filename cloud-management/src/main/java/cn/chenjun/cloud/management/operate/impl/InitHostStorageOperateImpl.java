@@ -43,8 +43,9 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             return;
         }
         List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.STORAGE).id(storage.getStorageId()).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
         Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
         StorageCreateRequest request = buildStorageCreateRequest(storage, sysconfig);
         this.asyncInvoker(host, param, Constant.Command.STORAGE_CREATE, request);

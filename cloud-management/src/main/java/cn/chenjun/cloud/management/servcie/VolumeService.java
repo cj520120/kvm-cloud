@@ -79,13 +79,13 @@ public class VolumeService extends AbstractService {
     public ResultUtil<List<VolumeModel>> listNoAttachVolumes(int guestId) {
         List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn(VolumeEntity.VOLUME_ID, volumeIds));
-        int hostId = this.getDiskSupportHostId(guestId);
+        int allowHostId = this.getAllowHostId(guestId);
         List<VolumeModel> models =new ArrayList<>();
         for (VolumeEntity volume : volumeList) {
             if(!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)){
                 continue;
             }
-            if(hostId==0||volume.getHostId()==0||volume.getHostId()==hostId){
+            if(allowHostId==0||volume.getHostId()==0||volume.getHostId()==allowHostId){
                 models.add(this.initVolume(volume));
             }
         }
