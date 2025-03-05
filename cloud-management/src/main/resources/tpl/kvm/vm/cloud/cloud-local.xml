@@ -1,7 +1,7 @@
 <disk type='file' device='disk'>
     <driver name='qemu' type='raw'/>
     <source file='/var/run/cj-kvm-cloud/local-cloud.img'/>
-    <target dev='hda' bus='virtio'/>
+    <target dev='hdb' bus='virtio'/>
     <readonly/>
     <address type='pci' domain='0x0000' bus='0x00' slot='0x10' function='0x0'/>
 </disk>
