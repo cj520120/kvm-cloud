@@ -4,6 +4,8 @@ import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import org.springframework.plugin.core.Plugin;
 
+import java.util.List;
+
 /**
  * @author chenjun
  */
@@ -14,7 +16,13 @@ public interface MetaDataService extends Plugin<GuestEntity> {
      * @param guest
      * @return
      */
-    MetaData buildCloudInitMetaData(GuestEntity guest);
+    MetaData buildCloudInitMetaData(GuestEntity guest);    /**
+     * 获取meta数据
+     *
+     * @param guest
+     * @return
+     */
+    List<String> listMetaDataKeys(GuestEntity guest);
 
     /**
      * 获取meta数据

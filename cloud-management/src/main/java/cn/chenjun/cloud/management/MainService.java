@@ -23,10 +23,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan("cn.chenjun.cloud.management.data")
 public class MainService {
     public static void main(String[] args) {
-//        String tpl = "{{__SYS__['a.d']}}";
-//        Map<String, Map> map = new HashMap<>();
-//        map.put("__SYS__", MapUtil.of("a.d", 123));
-//        System.out.println(TemplateUtil.create().render(tpl, map));
         SpringApplication.run(MainService.class, args);
     }
 }

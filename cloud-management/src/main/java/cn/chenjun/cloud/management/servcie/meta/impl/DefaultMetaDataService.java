@@ -39,6 +39,12 @@ public class DefaultMetaDataService implements MetaDataService {
     }
 
     @Override
+    public List<String> listMetaDataKeys(GuestEntity guest) {
+        List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));
+        return list.stream().map(MetaDataEntity::getMetaKey).collect(Collectors.toList());
+    }
+
+    @Override
     public boolean supports(@NonNull GuestEntity guest) {
         return guest.getSystemCategory() != SystemCategory.WINDOWS;
     }

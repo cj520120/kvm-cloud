@@ -61,7 +61,33 @@ public class MetaService extends AbstractService {
         } while (false);
         return null;
     }
-
+    public String listMetaDataKeys( int networkId, String ip, String nonce, String sign) {
+        StringBuilder data = new StringBuilder();
+        do {
+            GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_IP, ip).eq(GuestNetworkEntity.NETWORK_ID, networkId));
+            if (guestNetwork == null) {
+                break;
+            }
+            NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
+            if (network == null) {
+                break;
+            }
+            if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce + ":" + ip).equals(sign)) {
+                break;
+            }
+            GuestEntity guest = guestMapper.selectById(guestNetwork.getAllocateId());
+            if (guest == null) {
+                break;
+            }
+            Optional<MetaDataService> optional = metaDataPluginRegistry.getPluginFor(guest);
+            if (!optional.isPresent()) {
+                break;
+            }
+            List<String> metaKeys=optional.get().listMetaDataKeys(guest);
+            data.append(String.join("\n",metaKeys));
+        } while (false);
+        return data.toString();
+    }
     public String findMetaDataByKey(String key, int networkId, String ip, String nonce, String sign) {
         StringBuilder data = new StringBuilder();
         do {
@@ -91,7 +117,6 @@ public class MetaService extends AbstractService {
         } while (false);
         return data.toString();
     }
-
     public List<MetaData> findGuestVendorData(int networkId, String ip, String nonce, String sign) {
         List<MetaData> metaDataList = new ArrayList<>();
         do {
