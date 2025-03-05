@@ -7,6 +7,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.ConfigService;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,20 +46,20 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                 throw new CodeException(ErrorCode.SERVER_ERROR, "光盘镜像未就绪");
             }
         }
-        String configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_NFS_TPL;
+        String configKey = ConfigKey.VM_CD_NFS_TPL;
         if (storage != null) {
             switch (storage.getType()) {
                 case Constant.StorageType.CEPH_RBD:
-                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_CEPH_RBD_TPL;
+                    configKey = ConfigKey.VM_CD_CEPH_RBD_TPL;
                     break;
                 case Constant.StorageType.GLUSTERFS:
-                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_GLUSTERFS_TPL;
+                    configKey = ConfigKey.VM_CD_GLUSTERFS_TPL;
                     break;
                 case Constant.StorageType.NFS:
-                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_NFS_TPL;
+                    configKey = ConfigKey.VM_CD_NFS_TPL;
                     break;
                 case Constant.StorageType.LOCAL:
-                    configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_CD_LOCAL_TPL;
+                    configKey = ConfigKey.VM_CD_LOCAL_TPL;
                     break;
                 default:
                     throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
@@ -73,16 +74,16 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
         String configKey;
         switch (storage.getType()) {
             case Constant.StorageType.CEPH_RBD:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_CEPH_RBD_TPL;
+                configKey = ConfigKey.VM_DISK_CEPH_RBD_TPL;
                 break;
             case Constant.StorageType.GLUSTERFS:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_GLUSTERFS_TPL;
+                configKey = ConfigKey.VM_DISK_GLUSTERFS_TPL;
                 break;
             case Constant.StorageType.NFS:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_NFS_TPL;
+                configKey = ConfigKey.VM_DISK_NFS_TPL;
                 break;
             case Constant.StorageType.LOCAL:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DISK_LOCAL_TPL;
+                configKey = ConfigKey.VM_DISK_LOCAL_TPL;
                 break;
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
@@ -92,7 +93,7 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
     }
 
     public String buildInterfaceXml(NetworkEntity network, GuestNetworkEntity guestNetwork, Map<String, Object> systemConfig) {
-        String tpl = (String) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_INTERFACE_TPL);
+        String tpl = (String) systemConfig.get(ConfigKey.VM_INTERFACE_TPL);
         return DomainUtil.buildNetworkInterfaceXml(tpl, systemConfig, network, guestNetwork);
     }
 }

@@ -5,7 +5,7 @@ import cn.chenjun.cloud.management.data.entity.TaskEntity;
 import cn.chenjun.cloud.management.data.mapper.TaskMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
-import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class TaskService {
 
     @Transactional
     public void keepTask(String taskId) {
-        int expire = configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
+        int expire = configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
         taskMapper.keep(taskId, new Date(System.currentTimeMillis() + +TimeUnit.SECONDS.toMillis(expire)));
     }
 
@@ -66,7 +66,7 @@ public class TaskService {
 
     @Transactional
     public void updateTaskExpire(TaskEntity entity) {
-        int expireSecond = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
+        int expireSecond = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND);
         Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
         int version = entity.getVersion() + 1;
         entity.setVersion(version);

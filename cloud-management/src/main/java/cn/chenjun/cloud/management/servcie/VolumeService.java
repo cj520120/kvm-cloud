@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.operate.bean.*;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -106,7 +107,7 @@ public class VolumeService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -207,7 +208,7 @@ public class VolumeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -287,7 +288,7 @@ public class VolumeService extends AbstractService {
                 volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate, volume.getStatus() == Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
+                operateTask.addTask(operate, volume.getStatus() == Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
                 VolumeModel source = this.initVolume(volume);
                 this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);

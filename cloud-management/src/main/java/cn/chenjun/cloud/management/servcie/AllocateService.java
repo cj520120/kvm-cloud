@@ -7,6 +7,7 @@ import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
@@ -60,8 +61,8 @@ public class AllocateService extends AbstractService {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
-            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
-            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
+            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         }
         list = list.stream().filter(t -> hostVerify(t, cpu, memory))
                 .collect(Collectors.toList());
@@ -72,8 +73,8 @@ public class AllocateService extends AbstractService {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
-            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
-            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
+            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             if (!hostVerify(host, cpu, memory)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
             }
@@ -83,8 +84,8 @@ public class AllocateService extends AbstractService {
             for (HostEntity host : list) {
 
                 List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(host.getHostId()).build());
-                host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
-                host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
+                host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+                host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
             }
             list = list.stream().filter(t -> hostVerify(t, cpu, memory))
                     .collect(Collectors.toList());

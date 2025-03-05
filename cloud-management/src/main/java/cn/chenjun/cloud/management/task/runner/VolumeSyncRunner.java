@@ -5,6 +5,7 @@ import cn.chenjun.cloud.management.data.mapper.StorageMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.VolumeCheckOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class VolumeSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND);
+        return configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND);
     }
 
     @Override

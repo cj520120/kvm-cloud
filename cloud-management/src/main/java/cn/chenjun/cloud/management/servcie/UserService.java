@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.model.LoginSignatureModel;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.model.TokenModel;
 import cn.chenjun.cloud.management.model.UserInfoModel;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -77,10 +78,10 @@ public class UserService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "token不能为空");
         }
         try {
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256((String) this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_PASSWORD))).withIssuer((String) this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_ISSUER)).build();
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256((String) this.configService.getConfig(ConfigKey.LOGIN_JWD_PASSWORD))).withIssuer((String) this.configService.getConfig(ConfigKey.LOGIN_JWD_ISSUER)).build();
             DecodedJWT jwt = jwtVerifier.verify(token);
             LoginUserModel loginUser = GsonBuilderUtil.create().fromJson(jwt.getClaim("User").asString(), LoginUserModel.class);
-            boolean isEnableOauth2 = Objects.equals(this.configService.getConfig(Constant.ConfigKey.OAUTH2_ENABLE), Constant.Enable.YES);
+            boolean isEnableOauth2 = Objects.equals(this.configService.getConfig(ConfigKey.OAUTH2_ENABLE), Constant.Enable.YES);
             if (isEnableOauth2 && !Constant.UserType.OAUTH2.equals(loginUser.getType())) {
                 throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "Token过期");
             } else if (!isEnableOauth2 && !Constant.UserType.LOCAL.equals(loginUser.getType())) {
@@ -187,15 +188,15 @@ public class UserService extends AbstractService {
     }
 
     private TokenModel getToken(String userType, Object userId) {
-        int expireMinutes = this.configService.getConfig(Constant.ConfigKey.LOGIN_JWT_EXPIRE_MINUTES);
+        int expireMinutes = this.configService.getConfig(ConfigKey.LOGIN_JWT_EXPIRE_MINUTES);
         Date expire = new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(expireMinutes));
         LoginUserModel user = LoginUserModel.builder().id(userId).type(userType).build();
         String token = JWT.create()
-                .withIssuer(this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_ISSUER))
+                .withIssuer(this.configService.getConfig(ConfigKey.LOGIN_JWD_ISSUER))
                 .withIssuedAt(new Date())
                 .withClaim("User", GsonBuilderUtil.create().toJson(user))
                 .withExpiresAt(expire)
-                .sign(Algorithm.HMAC256((String) this.configService.getConfig(Constant.ConfigKey.LOGIN_JWD_PASSWORD)));
+                .sign(Algorithm.HMAC256((String) this.configService.getConfig(ConfigKey.LOGIN_JWD_PASSWORD)));
 
 
         return TokenModel.builder().expire(expire).token(token).build();

@@ -11,6 +11,8 @@ import cn.chenjun.cloud.management.model.AttachGuestNetworkModel;
 import cn.chenjun.cloud.management.model.AttachGuestVolumeModel;
 import cn.chenjun.cloud.management.model.GuestModel;
 import cn.chenjun.cloud.management.operate.bean.*;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
@@ -75,6 +77,12 @@ public class GuestService extends AbstractService {
     }
 
     private void checkSystemComponentComplete(int networkId) {
+        List<ConfigQuery> queryList=new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.NETWORK).id(networkId).build());
+        if(Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)){
+            return;
+        }
         if (!this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
         }
@@ -183,7 +191,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -277,7 +285,7 @@ public class GuestService extends AbstractService {
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -670,7 +678,7 @@ public class GuestService extends AbstractService {
                 this.guestMapper.updateById(guest);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE) : 0);
+                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE) : 0);
                 break;
             }
             default:

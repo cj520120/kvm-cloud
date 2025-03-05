@@ -15,6 +15,7 @@ import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import com.google.gson.reflect.TypeToken;
 import org.redisson.api.RedissonClient;
@@ -201,21 +202,21 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         String secretValue = null;
         switch (storage.getType()) {
             case Constant.StorageType.CEPH_RBD:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_CEPH_RBD_TPL;
-                secretKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL;
+                configKey = ConfigKey.STORAGE_CEPH_RBD_TPL;
+                secretKey = ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL;
 
                 Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storage.getParam(), new TypeToken<Map<String, Object>>() {
                 }.getType());
                 secretValue = storageParam.getOrDefault("secret", "").toString();
                 break;
             case Constant.StorageType.GLUSTERFS:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_GLUSTERFS_TPL;
+                configKey = ConfigKey.STORAGE_GLUSTERFS_TPL;
                 break;
             case Constant.StorageType.NFS:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_NFS_TPL;
+                configKey = ConfigKey.STORAGE_NFS_TPL;
                 break;
             case Constant.StorageType.LOCAL:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.STORAGE_LOCAL_TPL;
+                configKey = ConfigKey.STORAGE_LOCAL_TPL;
                 break;
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
@@ -241,10 +242,10 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         String configKey;
         switch (type) {
             case BASIC:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL;
+                configKey = ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL;
                 break;
             case OPEN_SWITCH:
-                configKey = cn.chenjun.cloud.management.util.Constant.ConfigKey.NETWORK_OVS_BRIDGE_TPL;
+                configKey = ConfigKey.NETWORK_OVS_BRIDGE_TPL;
                 break;
             default:
                 throw new CodeException(ErrorCode.BASE_NETWORK_ERROR, "不支持的桥接方式");

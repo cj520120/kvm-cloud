@@ -24,6 +24,8 @@ public class VolumeEntity {
     public static final String TEMPLATE_ID = "template_id";
     public static final String STORAGE_ID = "storage_id";
     public static final String HOST_ID = "host_id";
+//    public static final String GUEST_ID = "guest_id";
+//    public static final String DEVICE_ID = "device_id";
     public static final String VOLUME_NAME = "volume_name";
     public static final String VOLUME_DESCRIPTION = "volume_description";
     public static final String VOLUME_PATH = "volume_path";
@@ -41,6 +43,10 @@ public class VolumeEntity {
     private Integer storageId;
     @TableField(HOST_ID)
     private Integer hostId;
+//    @TableField(GUEST_ID)
+//    private Integer guestId;
+//    @TableField(DEVICE_ID)
+//    private Integer deviceId;
     @TableField(VOLUME_NAME)
     private String name;
     @TableField(VOLUME_DESCRIPTION)

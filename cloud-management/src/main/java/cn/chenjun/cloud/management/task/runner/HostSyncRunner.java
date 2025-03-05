@@ -5,6 +5,7 @@ import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.HostCheckOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class HostSyncRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
+        return configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
     }
 
     @Override

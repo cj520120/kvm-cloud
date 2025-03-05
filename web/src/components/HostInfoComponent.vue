@@ -42,8 +42,13 @@
 				</el-descriptions-item>
 			</el-descriptions>
 		</el-row>
-		<el-row style="text-align: left; margin: 20px 0">
-			<ConfigComponent ref="ConfigComponentRef" />
+
+		<el-row>
+			<el-tabs>
+				<el-tab-pane label="系统配置">
+					<ConfigComponent ref="ConfigComponentRef" />
+				</el-tab-pane>
+			</el-tabs>
 		</el-row>
 	</el-card>
 </template>

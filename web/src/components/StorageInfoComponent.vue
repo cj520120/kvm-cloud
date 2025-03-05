@@ -37,6 +37,13 @@
 			</el-descriptions>
 		</el-row>
 
+		<el-row>
+			<el-tabs>
+				<el-tab-pane label="系统配置">
+					<ConfigComponent ref="ConfigComponentRef" />
+				</el-tab-pane>
+			</el-tabs>
+		</el-row>
 		<el-dialog title="修改存储支持范围" :visible.sync="update_dialog_visable" width="30%">
 			<el-form label-width="100px" class="demo-ruleForm">
 				<el-form-item label="可选范围" prop="value">
@@ -71,6 +78,8 @@
 <script>
 import Notify from '@/api/notify'
 import util from '@/api/util'
+
+import ConfigComponent from '@/components/ConfigComponent.vue'
 import { destroyStorage, getStorageInfo, getStorageList, migrateStorage, pauseStorage, registerStorage, updateStorageSupportCategory } from '@/api/api'
 export default {
 	name: 'StorageInfoComponent',
@@ -86,6 +95,7 @@ export default {
 			storage_support_category_select: []
 		}
 	},
+	components: { ConfigComponent },
 	mixins: [Notify, util],
 	created() {
 		this.show_storage_id = 0
@@ -140,12 +150,15 @@ export default {
 			this.storage_list = storage_list
 			this.migrate_storage_id = ''
 			this.storage_loading = false
+			this.$refs.ConfigComponentRef.init(1, this.show_storage.storageId)
 		},
 		async init(storageId) {
 			this.show_storage_id = storageId
 			this.migrate_storage_id
 			this.storage_list = []
 			this.migrate_storage_id = ''
+
+			this.$refs.ConfigComponentRef.init(1, storageId)
 			this.reload_page()
 		},
 		notify_storage_update(volume) {

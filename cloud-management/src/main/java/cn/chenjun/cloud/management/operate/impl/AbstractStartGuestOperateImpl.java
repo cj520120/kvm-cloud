@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.VncService;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -58,7 +59,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         this.guestMapper.updateById(guest);
         this.allocateService.initHostAllocate();
         SchemeEntity scheme = this.schemeMapper.selectById(guest.getSchemeId());
-        String tpl = (String) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_DOMAIN_TPL);
+        String tpl = (String) systemConfig.get(ConfigKey.VM_DOMAIN_TPL);
         String xml = DomainUtil.buildDomainXml(tpl, systemConfig, guest, host, scheme, vnc, deviceXmlList);
         GuestStartRequest request = GuestStartRequest.builder()
                 .name(guest.getName())
@@ -119,7 +120,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<String> networkInterfaces = new ArrayList<>();
-        String tpl = (String) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.VM_INTERFACE_TPL);
+        String tpl = (String) systemConfig.get(ConfigKey.VM_INTERFACE_TPL);
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
             if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {

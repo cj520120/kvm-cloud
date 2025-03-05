@@ -13,6 +13,7 @@ import cn.chenjun.cloud.management.servcie.convert.ConfigConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.FloatConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.IntegerConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.StringConvert;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -31,20 +32,21 @@ public class ConfigService {
     private ConfigMapper mapper;
 
     public ConfigService(@Autowired ApplicationConfig applicationConfig) {
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_MANAGER_URI, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, "8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU, 1, "系统组件Cpu", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY, 1024, "系统组件Cpu内存(MB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE, 0, "系统组件Cpu Share", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES, 60, "系统组件单个qma执行命令超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES, 10, "系统组件qma启动超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_PIP_INSTALL_SOURCE, "", "系统组件pip加速源", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE, "", "系统组件yum加速源", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU, 1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY, 1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_MANAGER_URI,false, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, true,Constant.Enable.YES, "是否启动网络组件", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, false,cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, false,"8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU, false,1, "系统组件Cpu", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY, false,1024, "系统组件Cpu内存(MB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE, false,0, "系统组件Cpu Share", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES, false,60, "系统组件单个qma执行命令超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES,false, 10, "系统组件qma启动超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_PIP_INSTALL_SOURCE, false,"", "系统组件pip加速源", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE,false, "", "系统组件yum加速源", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_CPU, false,1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY, false,1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW,
@@ -52,89 +54,89 @@ public class ConfigService {
                 cn.chenjun.cloud.common.util.Constant.VolumeType.VPC,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.VMDK
         ), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE, 10, "虚拟机关机最大等待时间，超过时间则直接进行销毁操作(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE, 10, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND, 60, "清理未关联系统组件间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND, 10, "系统组件状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND, 30, "宿主机运行虚拟机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND, 30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND, 60, "宿主机存储池检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, 600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, 120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE, false,10, "虚拟机关机最大等待时间，超过时间则直接进行销毁操作(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE, false,10, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND,false, 60, "清理未关联系统组件间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND,false, 10, "系统组件状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND, false,30, "宿主机运行虚拟机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND, false,30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND, false,60, "宿主机存储池检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, false,600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND,false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, false,120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
-        initDefaultConfig(Constant.ConfigKey.VM_MEMORY_HUGE_PAGES_ENABLE, Constant.Enable.NO, "是否启用大页内存", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_MEMORY_HUGE_PAGES_SIZE, 0, "大页内存设置值(GiB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CPU_CACHE_ENABLE, Constant.Enable.NO, "启用Cpu L3缓存(需要硬件支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CPU_VIRTUALIZATION_ENABLE, Constant.Enable.NO, "允许虚拟机内再运行虚拟化（需Intel/AMD支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CPU_VIRTUALIZATION_NAME, "vmx", "嵌套虚拟化名称(intel:vmx,amd:svm)", Constant.ConfigValueType.SELECT, Arrays.asList("vmx", "svm"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_HUGE_PAGES_ENABLE, false,Constant.Enable.NO, "是否启用大页内存", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_HUGE_PAGES_SIZE, false,0, "大页内存设置值(GiB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_CACHE_ENABLE,false, Constant.Enable.NO, "启用Cpu L3缓存(需要硬件支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_VIRTUALIZATION_ENABLE,false, Constant.Enable.NO, "允许虚拟机内再运行虚拟化（需Intel/AMD支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_VIRTUALIZATION_NAME, false,"vmx", "嵌套虚拟化名称(intel:vmx,amd:svm)", Constant.ConfigValueType.SELECT, Arrays.asList("vmx", "svm"), StringConvert.Default);
 
-        initDefaultConfig(Constant.ConfigKey.VM_CLOCK_TYPE, "utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime", "timezone", "variable"), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CD_BUS, "ide", "默认光驱驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("ide", "sata", "scsi"), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_DEFAULT_UEFI_LOADER_TYPE, "pflash", "Uefi Loader Type", Constant.ConfigValueType.SELECT, Arrays.asList("pflash", "rom"), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH, "/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd", "Uefi Loader Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CLOCK_TYPE, false,"utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime", "timezone", "variable"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_BUS,false, "ide", "默认光驱驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("ide", "sata", "scsi"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_TYPE, false,"pflash", "Uefi Loader Type", Constant.ConfigValueType.SELECT, Arrays.asList("pflash", "rom"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH,false, "/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd", "Uefi Loader Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MACHINE_ARCH, false,"x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MACHINE_NAME, false,"", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
-        initDefaultConfig(Constant.ConfigKey.STORAGE_LOCAL_ENABLE, Constant.Enable.NO, "是否启用本地存储(实验阶段,不支持系统组件创建和启动，系统必须至少包含一个用于磁盘存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.STORAGE_LOCAL_PATH, "/data", "本地存储路径，需要在主机节点提前创建", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_ENABLE,true, Constant.Enable.NO, "是否启用本地存储(实验阶段,不支持系统组件创建和启动，系统必须至少包含一个用于磁盘存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_PATH,true, "/data", "本地存储路径，需要在主机节点提前创建", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
-        initDefaultConfig(Constant.ConfigKey.STORAGE_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.STORAGE_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/glusterfs/storage.xml"), "glusterfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/secret.xml"), "ceph rbd 存储池密钥模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.STORAGE_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/storage.xml"), "ceph rbd 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.STORAGE_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_NFS_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_GLUSTERFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/storage/glusterfs/storage.xml"), "glusterfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/secret.xml"), "ceph rbd 存储池密钥模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/storage.xml"), "ceph rbd 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_TPL, true,ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-        initDefaultConfig(Constant.ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.NETWORK_OVS_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVS_BRIDGE_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-        initDefaultConfig(Constant.ConfigKey.VM_PCI_DISK_BUS, 0, "磁盘P默认CI总线层级(bus)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_PCI_DISK_SLOT, 20, "磁盘PCI默认插槽(slot)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_PCI_DISK_FUNCTION, 0, "磁盘PCI默认功能标识(function)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-
-
-        initDefaultConfig(Constant.ConfigKey.VM_PCI_NETWORK_BUS, 0, "网卡P默认CI总线层级(bus)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_PCI_NETWORK_SLOT, 10, "网卡PCI默认插槽(slot)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_PCI_NETWORK_FUNCTION, 0, "网卡PCI默认功能标识(function)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_DEFAULT_DEVICE_TPL, "", "其他设备Xml配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_PCI_DISK_BUS, false,0, "磁盘P默认CI总线层级(bus)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_PCI_DISK_SLOT, false,20, "磁盘PCI默认插槽(slot)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_PCI_DISK_FUNCTION, false,0, "磁盘PCI默认功能标识(function)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
-        initDefaultConfig(Constant.ConfigKey.VM_DOMAIN_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/vm.xml"), "VM模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-
-        initDefaultConfig(Constant.ConfigKey.VM_DISK_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_DISK_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_DISK_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_DISK_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-
-        initDefaultConfig(Constant.ConfigKey.VM_CD_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CD_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CD_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/ceph/cd.xml"), "vm ceph rbd 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.VM_CD_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cd.xml"), "vm local存储池光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-
-        initDefaultConfig(Constant.ConfigKey.VM_INTERFACE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/interface/interface.xml"), "vm 基础网络网卡配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_PCI_NETWORK_BUS, false,0, "网卡P默认CI总线层级(bus)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_PCI_NETWORK_SLOT, false,10, "网卡PCI默认插槽(slot)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_PCI_NETWORK_FUNCTION,false, 0, "网卡PCI默认功能标识(function)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DEFAULT_DEVICE_TPL,false, "", "其他设备Xml配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
 
-        initDefaultConfig(Constant.ConfigKey.LOGIN_JWD_PASSWORD, "#$1fa)&*WS09", "登录使用的JWT 密码", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.LOGIN_JWD_ISSUER, "CJ Cloud Management", "登录使用的JWT ISSUser", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.LOGIN_JWT_EXPIRE_MINUTES, (int) TimeUnit.DAYS.toMinutes(1), "登录token有效期(小时)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DOMAIN_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/vm.xml"), "VM模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+
+        initDefaultConfig(ConfigKey.VM_DISK_NFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_GLUSTERFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_CEPH_RBD_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, true,ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+
+        initDefaultConfig(ConfigKey.VM_CD_NFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_GLUSTERFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_CEPH_RBD_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/ceph/cd.xml"), "vm ceph rbd 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_LOCAL_TPL,true, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cd.xml"), "vm local存储池光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+
+        initDefaultConfig(ConfigKey.VM_INTERFACE_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/interface/interface.xml"), "vm 基础网络网卡配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
 
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_ENABLE, Constant.Enable.NO, "是否启用Oauth2", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_TITLE, "Oauth2 Login", "Oauth2 Title", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_CLIENT_ID, "", "Oauth2 Client Id", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_CLIENT_SECRET, "Oauth2 Login", "Oauth2 Client Secret", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_REQUEST_AUTH_URI, "", "Oauth2 Auth Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_REQUEST_TOKEN_URI, "", "Oauth2 Request Token Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_REQUEST_USER_URI, "", "Oauth2 Request User Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_REDIRECT_URI, "", "Oauth2 Redirect Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_USER_ID_PATH, "[\"userId\"]", "Oauth2 User Response ID Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(Constant.ConfigKey.OAUTH2_USER_AUTHORITIES_PATH, "[\"authorities\"]", "Oauth2 User Response Authorities Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.LOGIN_JWD_PASSWORD,false, "#$1fa)&*WS09", "登录使用的JWT 密码", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.LOGIN_JWD_ISSUER,false, "CJ Cloud Management", "登录使用的JWT ISSUser", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.LOGIN_JWT_EXPIRE_MINUTES,false, (int) TimeUnit.DAYS.toMinutes(1), "登录token有效期(小时)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+
+
+        initDefaultConfig(ConfigKey.OAUTH2_ENABLE, false,Constant.Enable.NO, "是否启用Oauth2", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_TITLE, false,"Oauth2 Login", "Oauth2 Title", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_CLIENT_ID, false,"", "Oauth2 Client Id", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_CLIENT_SECRET, false,"", "Oauth2 Client Secret", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_REQUEST_AUTH_URI,false, "", "Oauth2 Auth Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_REQUEST_TOKEN_URI,false, "", "Oauth2 Request Token Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_REQUEST_USER_URI, false,"", "Oauth2 Request User Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_REDIRECT_URI, false,"", "Oauth2 Redirect Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_USER_ID_PATH, false,"[\"userId\"]", "Oauth2 User Response ID Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_USER_AUTHORITIES_PATH, false,"[\"authorities\"]", "Oauth2 User Response Authorities Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
     }
 
-    private static <T> void initDefaultConfig(String key, T value, String description, int valueType, Object valueOptions, ConfigConvert<T> convert) {
-        DefaultConfigInfo<T> defaultConfig = DefaultConfigInfo.<T>builder().key(key).value(value).description(description).valueType(valueType).valueOptions(valueOptions).convert(convert).build();
+    private static <T> void initDefaultConfig(String key, boolean intern,T value, String description, int valueType, Object valueOptions, ConfigConvert<T> convert) {
+        DefaultConfigInfo<T> defaultConfig = DefaultConfigInfo.<T>builder().key(key).intern(intern).value(value).description(description).valueType(valueType).valueOptions(valueOptions).convert(convert).build();
         DEFAULT_CONFIG_LIST_CACHE.add(defaultConfig);
         if (DEFAULT_CONFIG_MAP_CACHE.containsKey(key)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "系统配置Key已存在:" + key);
@@ -288,6 +290,7 @@ public class ConfigService {
             model.setDescription("");
             model.setValueOptions(null);
             model.setDefaultParam(false);
+            model.setIntern(false);
             model.setValueType(Constant.ConfigValueType.MULTI_STRING);
         }
         model.setId(entity.getId());

@@ -13,6 +13,7 @@ import cn.chenjun.cloud.management.servcie.AbstractService;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.GuestService;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -57,7 +58,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     @Transactional(rollbackFor = Exception.class)
     public void checkAndStart(NetworkEntity network, ComponentEntity component) {
 
-        List<HostEntity> hostList = allocateService.listAllocateHost(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU), (int) configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024);
+        List<HostEntity> hostList = allocateService.listAllocateHost(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU), (int) configService.getConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024);
         List<Integer> hostIds = hostList.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         if (hostIds.isEmpty()) {
             log.warn("没有可用的主机，无法检查网络组件:{}", this.getComponentName());
@@ -231,9 +232,9 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
 
     private GuestEntity createSystemComponentGuest(int componentId, String name, NetworkEntity network, int diskTemplateId) {
-        int systemCpu = configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU);
-        int systemCpuShare = configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
-        long systemMemory = (int) configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024;
+        int systemCpu = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU);
+        int systemCpuShare = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
+        long systemMemory = (int) configService.getConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024;
 
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, 0);
         GuestEntity guest = GuestEntity.builder()
@@ -257,7 +258,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -285,7 +286,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         GuestNetworkEntity guestNetwork;
         guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
         guestNetwork.setDeviceId(0);
-        guestNetwork.setDriveType(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
+        guestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
@@ -298,7 +299,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
             GuestNetworkEntity basicGuestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
             basicGuestNetwork.setDeviceId(0);
-            basicGuestNetwork.setDriveType(configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
+            basicGuestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
             basicGuestNetwork.setAllocateId(guest.getGuestId());
             basicGuestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
             this.guestNetworkMapper.updateById(basicGuestNetwork);
@@ -337,8 +338,8 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
     @Override
     public GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
-        int qmaExecuteExpire = this.configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES);
-        int qmaCheckExpire = this.configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES);
+        int qmaExecuteExpire = this.configService.getConfig(ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES);
+        int qmaCheckExpire = this.configService.getConfig(ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES);
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         GuestQmaRequest request = GuestQmaRequest.builder().build();
         request.setName("");

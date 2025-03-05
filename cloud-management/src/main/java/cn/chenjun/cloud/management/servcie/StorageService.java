@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.StorageModel;
 import cn.chenjun.cloud.management.operate.bean.*;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -57,7 +58,7 @@ public class StorageService extends AbstractService {
             }
         }
 
-        String defaultVolumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(destStorage.getType())) {
             defaultVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }

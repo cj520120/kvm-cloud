@@ -9,6 +9,8 @@ import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.servcie.NotifyService;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,13 +43,19 @@ public class ComponentCheckRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
+        return configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
     }
 
     @Override
     protected void dispatch() throws Exception {
         List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>());
         for (NetworkEntity network : networkList) {
+            List<ConfigQuery> queryList=new ArrayList<>();
+            queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).id(0).build());
+            queryList.add(ConfigQuery.builder().type(Constant.ConfigAllocateType.NETWORK).id(network.getNetworkId()).build());
+            if(Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)){
+                continue;
+            }
             if (network.getStatus() == Constant.NetworkStatus.READY || network.getStatus() == Constant.NetworkStatus.INSTALL) {
                 List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
                 for (ComponentEntity component : components) {

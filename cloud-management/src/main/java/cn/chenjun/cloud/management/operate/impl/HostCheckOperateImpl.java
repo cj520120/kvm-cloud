@@ -7,6 +7,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.HostCheckOperate;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
@@ -68,7 +69,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             List<ConfigQuery> queryList = new ArrayList<>(2);
             queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.DEFAULT).id(0).build());
             queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigAllocateType.HOST).id(1).build());
-            int expire = this.configService.getConfig(queryList, cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
+            int expire = this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND);
             rBucket.set(System.currentTimeMillis(), Math.max(1, expire * 2), TimeUnit.SECONDS);
         } else if (!rBucket.isExists()) {
             isNotify = !Objects.equals(updateHost.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);

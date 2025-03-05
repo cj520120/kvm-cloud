@@ -5,6 +5,7 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -150,8 +151,8 @@ public abstract class AbstractService {
 
     protected HostModel initHost(HostEntity entity) {
         List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigAllocateType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigAllocateType.HOST).id(entity.getHostId()).build());
-        entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
-        entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, Constant.ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
+        entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
+        entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
         return new BeanConverter<>(HostModel.class).convert(entity, null);
     }
 

@@ -5,7 +5,7 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.servcie.ConfigService;
-import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,7 +25,7 @@ public class YumSourceCommand implements GlobalComponentQmaInitialize {
     @Override
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
-        String source = configService.getConfig(Constant.ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE);
+        String source = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE);
         source = source.replace("\r", "").trim();
         if (!StringUtils.isEmpty(source)) {
             //写入yum源

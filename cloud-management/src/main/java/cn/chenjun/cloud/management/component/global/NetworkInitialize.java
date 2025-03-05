@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.servcie.ConfigService;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.TemplateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
@@ -67,7 +68,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         Map<String, Object> map = new HashMap<>(1);
         map.put("__SYS__", sysconfig);
         map.put("commands", routeCommands);
-        map.put("check-address", sysconfig.get(Constant.ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
+        map.put("check-address", sysconfig.get(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
         networkCheckScript = TemplateUtil.create().render(networkCheckScript, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/network_check.sh").fileBody(networkCheckScript).build())).build());
 

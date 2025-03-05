@@ -18,5 +18,6 @@ public class ConfigModel {
     private String description;
     private int valueType;
     private Object valueOptions;
+    private boolean intern;
     private boolean defaultParam;
 }

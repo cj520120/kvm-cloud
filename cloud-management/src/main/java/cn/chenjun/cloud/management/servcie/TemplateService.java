@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -84,7 +85,7 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.ERROR:
                 this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
                 String volName = NameUtil.generateTemplateVolumeName();
-                String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+                String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
                 if (Objects.equals(template.getTemplateType(), Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
                     volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
@@ -131,7 +132,7 @@ public class TemplateService extends AbstractService {
         this.volumeMapper.updateById(volume);
 
         StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE, 0);
-        String volumeType = this.configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -179,7 +180,7 @@ public class TemplateService extends AbstractService {
                 template.setStatus(Constant.TemplateStatus.DESTROY);
                 this.templateMapper.updateById(template);
                 BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
-                operateTask.addTask(operate, configService.getConfig(Constant.ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
+                operateTask.addTask(operate, configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE));
                 TemplateModel source = this.initTemplateModel(template);
                 this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(source);

@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -67,7 +68,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
-        requestMap.add("managerUri", (String) systemConfig.get(cn.chenjun.cloud.management.util.Constant.ConfigKey.DEFAULT_CLUSTER_MANAGER_URI));
+        requestMap.add("managerUri", (String) systemConfig.get(ConfigKey.DEFAULT_CLUSTER_MANAGER_URI));
         requestMap.add("clientId", host.getClientId());
         requestMap.add("clientSecret", host.getClientSecret());
         RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity

@@ -18,5 +18,6 @@ public class DefaultConfigInfo<T> {
     private int allocateId;
     private int valueType;
     private Object valueOptions;
+    private boolean intern;
     private ConfigConvert<T> convert;
 }
