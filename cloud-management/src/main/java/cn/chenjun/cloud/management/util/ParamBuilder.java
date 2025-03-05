@@ -96,7 +96,6 @@ public class ParamBuilder {
         map.put("deviceId", deviceId);
         map.put("target", targetName);
         map.put("type", volume.getType());
-//        map.put("slot", String.format("0x%02x", deviceId+ DomainUtil.MIN_DISK_DEVICE_ID));
         map.put("bus", bus);
         map.put("name", volume.getName());
         return map;

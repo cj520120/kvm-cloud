@@ -27,7 +27,8 @@ public class ConfigKey {
     public static final String DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND = "default.cluster.storage.check.timeout.second";
     public static final String DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.cluster.storage.volume.sync.timeout.second";
     public static final String DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND = "default.cluster.task.expire.timeout.second";
-
+    public static final String VM_CLOUND_UPDATE_ENABLE = "vm.cloud.update.enable";
+    public static final String VM_CLOUND_UPDATE_DISK_TPL = "vm.cloud.update.tpl";
     public static final String VM_BIND_HOST = "vm.bind.host";
     public static final String VM_NUMA_MEMORY_ENABLE = "vm.numa.memory.enable";
     public static final String VM_NUMA_MEMORY_MODEL = "vm.numa.memory.model";

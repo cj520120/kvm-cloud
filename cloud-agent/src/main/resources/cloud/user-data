@@ -1,0 +1,16 @@
+#cloud-config
+package_reboot_if_required: true
+ssh_pwauth: true
+write_files:
+- encoding: b64
+  content:  ZGF0YXNvdXJjZToKICBOb0Nsb3VkOgogICAgc2VlZGZyb206IGh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQKZGF0YXNvdXJjZV9saXN0OiBbIE5vQ2xvdWQgXQo=
+  owner: root:root
+  path: /etc/cloud/cloud.cfg.d/99_kvmcloud.cfg
+  permissions: '0644'
+power_state:
+  delay: now
+  mode: reboot
+  timeout: 30
+  message: Rebooting machine
+  condition: true
+

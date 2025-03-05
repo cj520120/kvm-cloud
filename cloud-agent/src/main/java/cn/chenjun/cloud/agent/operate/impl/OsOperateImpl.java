@@ -254,6 +254,11 @@ public class OsOperateImpl implements OsOperate {
                 return this.initVmResponse(domain);
             }
             domain.destroy();
+            try{
+                domain.undefine();
+            }catch (Exception err){
+
+            }
         }
         log.info("create vm={}", request.getXml());
         domain = connect.domainCreateXML(request.getXml(), 0);
@@ -311,12 +316,22 @@ public class OsOperateImpl implements OsOperate {
                 }
                 if (System.currentTimeMillis() - stopTime > timeout) {
                     domain.destroy();
+                    try {
+                        domain.undefine();
+                    }catch (Exception err){
+
+                    }
                 } else {
                     if (Objects.requireNonNull(domain.getInfo().state) == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
                         domain.shutdown();
                         ThreadUtil.sleep(5, TimeUnit.SECONDS);
                     } else {
                         domain.destroy();
+                        try {
+                            domain.undefine();
+                        }catch (Exception err){
+
+                        }
                     }
                 }
             } catch (LibvirtException err) {

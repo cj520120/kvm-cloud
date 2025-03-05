@@ -6,6 +6,8 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.crypto.digest.MD5;
 import cn.hutool.http.HttpUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
@@ -16,6 +18,7 @@ import org.springframework.util.StringUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author chenjun
@@ -55,6 +58,23 @@ public class ClientService implements CommandLineRunner {
     }
 
     private void init() throws Exception {
+        File runPath=new File("/var/run/cj-kvm-cloud");
+        if(!runPath.exists()){
+            runPath.mkdirs();
+        }
+        boolean isWrite;
+        byte[] buffer=ResourceUtil.readBytes("cloud/local-cloud.img");
+        File cloudFile=new File("/var/run/cj-kvm-cloud/local-cloud.img");
+        if(!cloudFile.exists()){
+            isWrite=true;
+        }else{
+            byte[] oldBuffer=FileUtil.readBytes(cloudFile);
+            isWrite= !Objects.equals(MD5.create().digest(buffer),MD5.create().digest(oldBuffer));
+        }
+        if(isWrite){
+            FileUtil.writeBytes(buffer,cloudFile);
+        }
+
         File configFile = new File("./config.json");
         if (configFile.exists()) {
             Map<String, String> config = GsonBuilderUtil.create().fromJson(FileUtil.readUtf8String(configFile), new TypeToken<Map<String, Object>>() {
