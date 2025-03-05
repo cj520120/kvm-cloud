@@ -370,7 +370,7 @@ public class GuestService extends AbstractService {
                 int allowHostId = getAllowHostId(guest);
                 if (hostId == 0) {
                     hostId = allowHostId;
-                } else if (hostId != allowHostId) {
+                } else if (hostId != allowHostId && allowHostId >0) {
                     throw new CodeException(ErrorCode.PARAM_ERROR, "该宿主机已经绑定了启动主机ID："+allowHostId);
                 }
                 guest.setHostId(hostId);
