@@ -1,5 +1,5 @@
 <pool type="netfs">
-    <name>{{name}}</name>
+    <name>{{storage.name}}</name>
     <source>
         {% set __host=cloud:parseRandomFirstUri(storage.param.uri,"24007") %}
         <host name='{{__host.address}}' port='{{__host.port}}'/>

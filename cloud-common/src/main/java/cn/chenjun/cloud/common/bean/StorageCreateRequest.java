@@ -17,6 +17,8 @@ public class StorageCreateRequest {
      * 存储池名称
      */
     private String name;
+    private String type;
+    private String path;
     private String secretXml;
     private String storageXml;
     private String secretValue;

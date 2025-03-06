@@ -10,6 +10,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.Secret;
@@ -18,6 +19,7 @@ import org.libvirt.StoragePoolInfo;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +73,17 @@ public class StorageOperate {
     @DispatchBind(command = Constant.Command.STORAGE_CREATE, async = true)
 
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
+
+        switch (request.getType()){
+            case Constant.StorageType.NFS:
+            case Constant.StorageType.GLUSTERFS:
+            case Constant.StorageType.LOCAL:
+                File path=new File(request.getPath());
+                if(!path.exists()){
+                    path.mkdirs();
+                }
+                break;
+        }
         if (!ObjectUtils.isEmpty(request.getSecretXml())) {
             Secret secret;
             try {

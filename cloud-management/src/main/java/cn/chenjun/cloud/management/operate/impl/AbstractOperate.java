@@ -230,6 +230,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         }
         StorageCreateRequest request = StorageCreateRequest.builder()
                 .name(storage.getName())
+                .type(storage.getType())
+                .path(storage.getMountPath())
                 .storageXml(storageXml)
                 .secretXml(secretXml)
                 .secretValue(secretValue)
