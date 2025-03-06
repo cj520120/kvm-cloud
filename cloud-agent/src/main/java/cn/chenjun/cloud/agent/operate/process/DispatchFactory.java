@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.agent.operate.impl;
+package cn.chenjun.cloud.agent.operate.process;
 
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.operate.bean.Consumer;

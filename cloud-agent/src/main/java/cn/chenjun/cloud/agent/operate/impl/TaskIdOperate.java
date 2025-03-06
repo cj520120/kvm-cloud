@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.operate.TaskService;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.TaskIdUtil;
 import cn.chenjun.cloud.common.bean.NoneRequest;
@@ -16,8 +15,8 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class TaskServiceImpl implements TaskService {
-    @Override
+public class TaskIdOperate {
+
     @DispatchBind(command = Constant.Command.CHECK_TASK)
     public List<String> checkTask(Connect connect, NoneRequest request) {
         return TaskIdUtil.getTaskList();

@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.StorageUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
@@ -28,11 +27,11 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-public class StorageOperateImpl implements StorageOperate {
+public class StorageOperate {
 
 
     @DispatchBind(command = Constant.Command.STORAGE_INFO)
-    @Override
+
     public StorageInfo getStorageInfo(Connect connect, StorageInfoRequest request) throws Exception {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getName(), false);
         if (storagePool == null) {
@@ -48,7 +47,7 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO, async = true)
-    @Override
+
     public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
         List<StorageInfo> list = new ArrayList<>();
         for (StorageInfoRequest request : batchRequest) {
@@ -70,7 +69,7 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @DispatchBind(command = Constant.Command.STORAGE_CREATE, async = true)
-    @Override
+
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
         if (!ObjectUtils.isEmpty(request.getSecretXml())) {
             Secret secret;
@@ -103,7 +102,7 @@ public class StorageOperateImpl implements StorageOperate {
     }
 
     @DispatchBind(command = Constant.Command.STORAGE_DESTROY, async = true)
-    @Override
+
     public Void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
         synchronized (request.getName().intern()) {
             StoragePool storagePool = StorageUtil.findStorage(connect, request.getName(), true);

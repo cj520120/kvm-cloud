@@ -85,7 +85,7 @@ public class TemplateService extends AbstractService {
             case Constant.TemplateStatus.ERROR:
                 this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
                 String volName = NameUtil.generateTemplateVolumeName();
-                String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+                String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE);
                 if (Objects.equals(template.getTemplateType(), Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
                     volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
@@ -132,7 +132,7 @@ public class TemplateService extends AbstractService {
         this.volumeMapper.updateById(volume);
 
         StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE, 0);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }

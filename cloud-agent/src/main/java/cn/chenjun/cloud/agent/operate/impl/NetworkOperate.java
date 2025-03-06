@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.operate.NetworkOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
@@ -24,7 +23,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class NetworkOperateImpl implements NetworkOperate {
+public class NetworkOperate {
     private static String getNodeAttr(String xml, String path, String attrName) throws SAXException, DocumentException {
         try (StringReader sr = new StringReader(xml)) {
             SAXReader reader = new SAXReader();
@@ -36,7 +35,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_BASIC)
-    @Override
+
     public Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
         createNetworkPool(connect, request.getPoolId(), request.getXml());
         return null;
@@ -59,7 +58,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_VLAN)
-    @Override
+
     public Void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
         log.info("创建Vlan网络:{}", vlan);
         createNetworkPool(connect, vlan.getPoolId(), vlan.getBasic().getXml());
@@ -68,7 +67,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_BASIC)
-    @Override
+
     public Void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
         log.info("销毁基础网络:{}", bridge);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
@@ -87,7 +86,7 @@ public class NetworkOperateImpl implements NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_VLAN)
-    @Override
+
     public Void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
         log.info("销毁Vlan网络:{}", vlan);
         List<String> networkNames = Arrays.asList(connect.listNetworks());

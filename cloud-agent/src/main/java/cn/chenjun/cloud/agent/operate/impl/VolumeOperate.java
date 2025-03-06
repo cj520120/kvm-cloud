@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.operate.VolumeOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.CommandExecutor;
 import cn.chenjun.cloud.agent.util.StorageUtil;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class VolumeOperateImpl implements VolumeOperate {
+public class VolumeOperate {
 
 
     private static String getVolumePath(Volume volume) {
@@ -64,7 +63,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_INFO, async = true)
-    @Override
+
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage(), false);
         if (storagePool == null) {
@@ -88,7 +87,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.BATCH_VOLUME_INFO, async = true)
-    @Override
+
     public List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
         Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
         Map<String, Map<String, VolumeInfo>> result = new HashMap<>(4);
@@ -129,7 +128,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_CREATE, async = true)
-    @Override
+
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
         String path = getVolumePath(request.getVolume());
         String[] commands = new String[]{"qemu-img", "create", "-f", request.getVolume().getType(), path, String.valueOf(request.getVolume().getCapacity())};
@@ -143,7 +142,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_DESTROY, async = true)
-    @Override
+
     public Void destroy(Connect connect, VolumeDestroyRequest request) throws Exception {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getVolume().getStorage().getName(), false);
         if (storagePool == null) {
@@ -157,7 +156,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_RESIZE, async = true)
-    @Override
+
     public VolumeInfo resize(Connect connect, VolumeResizeRequest request) throws Exception {
         VolumeInfo sourceVolume = getInfo(connect, VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage().getName()).sourceName(request.getVolume().getName()).build());
         if (sourceVolume.getCapacity() >= request.getSize()) {
@@ -176,7 +175,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD, async = true)
-    @Override
+
     public VolumeInfo download(Connect connect, VolumeDownloadRequest request) {
         StorageUtil.checkStorageSuccess(connect, request.getVolume().getStorage().getName());
         File tempFile = FileUtil.createTempFile();
@@ -184,12 +183,12 @@ public class VolumeOperateImpl implements VolumeOperate {
             HttpUtil.downloadFile(request.getSourceUri(), tempFile, new StreamProgress() {
                 int lastPercent = 0;
 
-                @Override
+
                 public void start() {
                     log.info("开始下载文件:uri={},file={}", request.getSourceUri(), tempFile.getPath());
                 }
 
-                @Override
+
                 public void progress(long total, long progressSize) {
                     if (total > 0) {
                         int percent = (int) (progressSize * 100 / total);
@@ -200,7 +199,7 @@ public class VolumeOperateImpl implements VolumeOperate {
                     }
                 }
 
-                @Override
+
                 public void finish() {
                     log.info("文件下载完毕:{}", tempFile.getPath());
 
@@ -236,7 +235,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_MIGRATE, async = true)
-    @Override
+
     public VolumeInfo migrate(Connect connect, VolumeMigrateRequest request) throws Exception {
         return clone(connect, VolumeCloneRequest.builder()
                 .sourceVolume(request.getSourceVolume())
@@ -253,7 +252,7 @@ public class VolumeOperateImpl implements VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_CLONE, async = true)
-    @Override
+
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
         StorageUtil.checkStorageSuccess(connect, request.getSourceVolume().getStorage().getName());
         StorageUtil.checkStorageSuccess(connect, request.getTargetVolume().getStorage().getName());

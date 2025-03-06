@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
-import cn.chenjun.cloud.agent.operate.OsOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class OsOperateImpl implements OsOperate {
+public class GuestOperate {
     @Autowired
     private ApplicationConfig applicationConfig;
 
@@ -92,7 +91,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_INFO)
-    @Override
+
     public GuestInfo getGustInfo(Connect connect, GuestInfoRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
@@ -103,7 +102,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.ALL_GUEST_INFO, async = true)
-    @Override
+
     public List<GuestInfo> listAllGuestInfo(Connect connect, NoneRequest request) throws Exception {
         List<GuestInfo> list = new ArrayList<>();
         int[] ids = connect.listDomains();
@@ -120,7 +119,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.BATCH_GUEST_INFO, async = true)
-    @Override
+
     public List<GuestInfo> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception {
         Set<String> names = batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
         Map<String, GuestInfo> map = new HashMap<>(4);
@@ -146,7 +145,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN, async = true)
-    @Override
+
     public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         this.stopDomain(connect, request.getName(), request.getExpire());
         return null;
@@ -154,7 +153,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_REBOOT)
-    @Override
+
     public Void reboot(Connect connect, GuestRebootRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
@@ -173,7 +172,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_CD_ROOM)
-    @Override
+
     public Void detachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -186,7 +185,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_CD_ROOM)
-    @Override
+
     public Void attachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -198,7 +197,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_DISK)
-    @Override
+
     public Void attachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -210,7 +209,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_DISK)
-    @Override
+
     public Void detachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -222,7 +221,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_NIC)
-    @Override
+
     public Void attachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -234,7 +233,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_NIC)
-    @Override
+
     public Void detachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -246,7 +245,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_START, async = true)
-    @Override
+
     public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
@@ -344,7 +343,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_QMA, async = true)
-    @Override
+
     public Void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
@@ -355,7 +354,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DESTROY, async = true)
-    @Override
+
     public Void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
@@ -365,7 +364,7 @@ public class OsOperateImpl implements OsOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_MIGRATE, async = true)
-    @Override
+
     public Void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {

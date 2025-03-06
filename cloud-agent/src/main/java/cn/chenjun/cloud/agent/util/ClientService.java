@@ -58,22 +58,6 @@ public class ClientService implements CommandLineRunner {
     }
 
     private void init() throws Exception {
-        File runPath=new File("/var/run/cj-kvm-cloud");
-        if(!runPath.exists()){
-            runPath.mkdirs();
-        }
-        boolean isWrite;
-        byte[] buffer=ResourceUtil.readBytes("cloud/local-cloud.img");
-        File cloudFile=new File("/var/run/cj-kvm-cloud/local-cloud.img");
-        if(!cloudFile.exists()){
-            isWrite=true;
-        }else{
-            byte[] oldBuffer=FileUtil.readBytes(cloudFile);
-            isWrite= !Objects.equals(MD5.create().digest(buffer),MD5.create().digest(oldBuffer));
-        }
-        if(isWrite){
-            FileUtil.writeBytes(buffer,cloudFile);
-        }
 
         File configFile = new File("./config.json");
         if (configFile.exists()) {

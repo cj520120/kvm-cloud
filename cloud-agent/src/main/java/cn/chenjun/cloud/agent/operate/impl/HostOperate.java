@@ -1,8 +1,5 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.operate.HostOperate;
-import cn.chenjun.cloud.agent.operate.NetworkOperate;
-import cn.chenjun.cloud.agent.operate.StorageOperate;
 import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.util.Constant;
@@ -27,7 +24,7 @@ import java.util.List;
  * @author chenjun
  */
 @Component
-public class HostOperateImpl implements HostOperate {
+public class HostOperate {
     @Autowired
     private NetworkOperate networkOperate;
     @Autowired
@@ -118,14 +115,12 @@ public class HostOperateImpl implements HostOperate {
     }
 
     @DispatchBind(command = Constant.Command.HOST_INFO)
-    @Override
     public HostInfo getHostInfo(Connect connect, NoneRequest request) {
 
         return getHostInfo(connect);
     }
 
     @DispatchBind(command = Constant.Command.HOST_INIT, async = true)
-    @Override
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
 
         List<StorageCreateRequest> storageList = request.getStorageList();

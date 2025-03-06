@@ -48,7 +48,12 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_CPU, false,1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY, false,1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
+                cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
+                cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
+                cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW
+        ), StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认模版磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW,
@@ -66,9 +71,6 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, false,600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND,false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, false,120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-
-        initDefaultConfig(ConfigKey.VM_CLOUND_UPDATE_ENABLE, false,"no", "是否自动篡改cloud配置(通过默认的local-cloud配置进行处理，针对从操作系统官网下载的qcow2系统配置，自定义的不需要,启动成功后请恢复该配置)", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CLOUND_UPDATE_DISK_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/vm/cloud/cloud-local.xml"), "cloud 配置篡改文件配置", Constant.ConfigValueType.MULTI_STRING, "", StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false,"no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, false,new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);

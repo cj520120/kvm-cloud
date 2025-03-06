@@ -86,13 +86,7 @@
     <on_crash>destroy</on_crash>
     <devices>
         <emulator>{{host.emulator}}</emulator>
-
-        {% if __SYS__["vm.cloud.update.enable"] =="yes" %}
-        {{__SYS__['vm.cloud.update.tpl']}}
-        {% endif %}
-
         {{device.xml}}
-
         {{__SYS__['vm.device.default.tpl']}}
         {% if __SYS__["vm.memory.memballoon.enable"] =="yes" %}
         <memballoon model="{{__SYS__['vm.memory.memballoon.model']}}">

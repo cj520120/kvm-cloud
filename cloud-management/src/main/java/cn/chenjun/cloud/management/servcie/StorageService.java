@@ -100,6 +100,7 @@ public class StorageService extends AbstractService {
 
             }
         }
+        defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE);
         if ((destStorage.getSupportCategory() & Constant.StorageSupportCategory.TEMPLATE) == Constant.StorageSupportCategory.TEMPLATE) {
             List<TemplateVolumeEntity> templateVolumeEntityList = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, sourceStorageId));
             for (TemplateVolumeEntity sourceVolume : templateVolumeEntityList) {
@@ -107,7 +108,6 @@ public class StorageService extends AbstractService {
                     continue;
                 }
                 TemplateEntity template = this.templateMapper.selectById(sourceVolume.getTemplateId());
-
                 if (template.getStatus() != Constant.TemplateStatus.READY) {
                     continue;
                 }
