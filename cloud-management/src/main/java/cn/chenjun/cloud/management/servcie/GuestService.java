@@ -525,9 +525,9 @@ public class GuestService extends AbstractService {
                 List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
                 List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
                 int deviceId = 0;
-                while (!gustDiskDeviceIds.contains(deviceId)) {
+                do{
                     deviceId++;
-                }
+                }while(gustDiskDeviceIds.contains(deviceId));
                 guestDisk = GuestDiskEntity.builder().guestId(guestId).volumeId(volumeId).deviceId(deviceId).build();
                 this.guestDiskMapper.insert(guestDisk);
                 volume.setStatus(Constant.VolumeStatus.ATTACH_DISK);

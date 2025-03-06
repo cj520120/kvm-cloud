@@ -40,17 +40,11 @@ public class VolumeOperate {
         String path;
         switch (volume.getStorage().getType()) {
             case Constant.StorageType.NFS:
+            case Constant.StorageType.GLUSTERFS:
                 path = "/mnt/" + volume.getStorage().getName() + "/" + volume.getName();
                 break;
             case Constant.StorageType.LOCAL:
                 path = volume.getStorage().getMountPath() + "/" + volume.getName();
-                break;
-            case Constant.StorageType.GLUSTERFS:
-                String glusterfsUri = (String) volume.getStorage().getParam().get("uri");
-                List<String> uriList = Arrays.stream(glusterfsUri.split(",")).map(String::trim).filter(uri -> !ObjectUtils.isEmpty(uri)).collect(Collectors.toList());
-                Collections.shuffle(uriList);
-                String glusterfsVolume = (String) volume.getStorage().getParam().get("path");
-                path = "gluster+tcp://" + uriList.get(0) + "/" + glusterfsVolume + "/" + volume.getName();
                 break;
             case Constant.StorageType.CEPH_RBD:
                 String pool = volume.getStorage().getParam().get("pool").toString();

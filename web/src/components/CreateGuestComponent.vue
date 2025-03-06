@@ -203,13 +203,6 @@ export default {
 	computed: {
 		select_host() {
 			return this.hosts.filter((v) => {
-				if (this.create_guest.bootstrapType === 0) {
-					return true
-				} else if (this.create_guest.bootstrapType === 1) {
-					if (v.uefiType && v.uefiType != '' && v.uefiPath && v.uefiPath != '') {
-						return true
-					}
-				}
 				if (v.hostId === this.create_guest.hostId) {
 					this.create_guest.hostId = 0
 				}

@@ -1,11 +1,29 @@
-<pool type="gluster">
-    <name>{{storage.name}}</name>
+<pool type="netfs">
+    <name>{{name}}</name>
     <source>
-        {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}
-        {% for __host in __hostList %}
+        {% set __host=cloud:parseRandomFirstUri(storage.param.uri,"24007") %}
         <host name='{{__host.address}}' port='{{__host.port}}'/>
-        {% endfor %}
-        <dir path="/"/>
-        <name>{{storage.param.volume}}</name>
+        <dir path="{{storage.param.volume}}"/>
+        <format type="glusterfs"/>
     </source>
+    <target>
+        <path>{{storage.mount}}</path>
+        <permissions>
+            <mode>0777</mode>
+            <owner>0</owner>
+            <group>0</group>
+        </permissions>
+    </target>
 </pool>
+
+<!--<pool type="gluster">-->
+<!--    <name>{{storage.name}}</name>-->
+<!--    <source>-->
+<!--        {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}-->
+<!--        {% for __host in __hostList %}-->
+<!--        <host name='{{__host.address}}' port='{{__host.port}}'/>-->
+<!--        {% endfor %}-->
+<!--        <dir path="/"/>-->
+<!--        <name>{{storage.param.volume}}</name>-->
+<!--    </source>-->
+<!--</pool>-->

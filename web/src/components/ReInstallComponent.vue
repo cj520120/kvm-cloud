@@ -11,7 +11,6 @@
 							<el-select v-model="reinstall_guest.type" style="width: 100%" placeholder="请选择安装方式">
 								<el-option label="ISO镜像" :value="0" />
 								<el-option label="模版安装" :value="1" />
-								<!-- <el-option label="快照安装" :value="2" /> -->
 								<el-option label="现有磁盘" :value="3" />
 							</el-select>
 						</el-form-item>

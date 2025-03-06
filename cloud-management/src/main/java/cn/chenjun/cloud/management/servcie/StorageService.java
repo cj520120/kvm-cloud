@@ -158,8 +158,11 @@ public class StorageService extends AbstractService {
         }
         String storageName = UUID.randomUUID().toString().toLowerCase().replace("-", "");
         String mountPath = "";
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.NFS.equals(type)) {
-            mountPath = "/mnt/" + storageName;
+        switch (type){
+            case cn.chenjun.cloud.common.util.Constant.StorageType.NFS:
+            case cn.chenjun.cloud.common.util.Constant.StorageType.GLUSTERFS:
+                mountPath = "/mnt/" + storageName;
+                break;
         }
         StorageEntity storage = StorageEntity.builder()
                 .description(description)
