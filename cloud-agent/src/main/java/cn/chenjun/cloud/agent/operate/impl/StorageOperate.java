@@ -78,10 +78,7 @@ public class StorageOperate {
             case Constant.StorageType.NFS:
             case Constant.StorageType.GLUSTERFS:
             case Constant.StorageType.LOCAL:
-                File path=new File(request.getPath());
-                if(!path.exists()){
-                    path.mkdirs();
-                }
+                FileUtil.mkdir(request.getPath());
                 break;
         }
         if (!ObjectUtils.isEmpty(request.getSecretXml())) {

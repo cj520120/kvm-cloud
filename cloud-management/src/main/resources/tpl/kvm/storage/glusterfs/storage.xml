@@ -15,15 +15,3 @@
         </permissions>
     </target>
 </pool>
-
-<!--<pool type="gluster">-->
-<!--    <name>{{storage.name}}</name>-->
-<!--    <source>-->
-<!--        {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}-->
-<!--        {% for __host in __hostList %}-->
-<!--        <host name='{{__host.address}}' port='{{__host.port}}'/>-->
-<!--        {% endfor %}-->
-<!--        <dir path="/"/>-->
-<!--        <name>{{storage.param.volume}}</name>-->
-<!--    </source>-->
-<!--</pool>-->

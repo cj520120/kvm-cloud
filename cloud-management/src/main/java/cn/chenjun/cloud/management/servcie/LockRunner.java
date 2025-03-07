@@ -15,18 +15,15 @@ public class LockRunner {
     private RedissonClient redissonClient;
 
     public void lockRun(String key, Runnable runnable) {
-        RLock lock = null;
+        RLock lock = redissonClient.getLock(key);
         try {
-            lock = redissonClient.getLock(key);
-            lock.lock(30, TimeUnit.SECONDS);
+            lock.lock(10, TimeUnit.SECONDS);
             runnable.run();
         } catch (Exception err) {
             log.error("执行失败.lock-key:{}", key, err);
         } finally {
             try {
-                if (lock != null && lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                }
+                lock.unlock();
             } catch (Exception err) {
 
             }
@@ -37,16 +34,14 @@ public class LockRunner {
         RLock lock = null;
         try {
             lock = redissonClient.getLock(key);
-            lock.lock(30, TimeUnit.SECONDS);
+            lock.lock(10, TimeUnit.SECONDS);
             return runnable.run();
         } catch (Exception err) {
             log.error("执行失败.lock-key:{}", key, err);
             throw err;
         } finally {
             try {
-                if (lock != null && lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                }
+                lock.unlock();
             } catch (Exception err) {
 
             }
