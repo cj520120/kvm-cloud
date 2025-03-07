@@ -50,7 +50,7 @@
 						<el-form-item label="运行主机">
 							<el-select v-model="create_guest.hostId" style="width: 100%">
 								<el-option label="随机" :value="0"></el-option>
-								<el-option v-for="item in select_host" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
+								<el-option v-for="item in hosts" :key="item.hostId" :label="item.displayName" :value="item.hostId" />
 							</el-select>
 						</el-form-item>
 					</el-col>
@@ -200,16 +200,7 @@ export default {
 			sshs: [{ id: 0, name: '无' }]
 		}
 	},
-	computed: {
-		select_host() {
-			return this.hosts.filter((v) => {
-				if (v.hostId === this.create_guest.hostId) {
-					this.create_guest.hostId = 0
-				}
-				return false
-			})
-		}
-	},
+	computed: {},
 	methods: {
 		on_back_click() {
 			this.$emit('back')

@@ -325,7 +325,11 @@ public class GuestOperate {
                         domain.shutdown();
                         ThreadUtil.sleep(5, TimeUnit.SECONDS);
                     } else {
-                        domain.destroy();
+                        try {
+                            domain.destroy();
+                        } catch (Exception err) {
+
+                        }
                         try {
                             domain.undefine();
                         }catch (Exception err){
@@ -358,7 +362,15 @@ public class GuestOperate {
     public Void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
-            domain.destroy();
+            try {
+                domain.destroy();
+            } catch (Exception er) {
+
+            }
+            try {
+                domain.undefine(Domain.UndefineFlags.MANAGED_SAVE | Domain.UndefineFlags.SNAPSHOTS_METADATA);
+            } catch (Exception err) {
+            }
         }
         return null;
     }
