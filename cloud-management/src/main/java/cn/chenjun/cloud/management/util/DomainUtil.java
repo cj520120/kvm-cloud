@@ -1,11 +1,13 @@
 package cn.chenjun.cloud.management.util;
 
 import cn.chenjun.cloud.management.data.entity.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class DomainUtil {
 
     public static String buildDiskXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId,String deviceType) {
@@ -63,5 +65,4 @@ public class DomainUtil {
         map.put("device", MapUtil.of("xml", String.join("\n", deviceXml)));
         return TemplateUtil.create().render(tpl, map);
     }
-
 }

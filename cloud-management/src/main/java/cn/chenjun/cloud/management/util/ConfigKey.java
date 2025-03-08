@@ -34,6 +34,7 @@ public class ConfigKey {
     public static final String DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND = "default.cluster.task.expire.timeout.second";
 
     public static final String VM_BIND_HOST = "vm.bind.host";
+    public static final String VM_CPU_MODEL = "vm.cpu.model";
     public static final String VM_NUMA_MEMORY_ENABLE = "vm.numa.memory.enable";
     public static final String VM_NUMA_MEMORY_MODEL = "vm.numa.memory.model";
     public static final String VM_NUMA_MEMORY_NODE = "vm.numa.memory.node";
@@ -48,9 +49,6 @@ public class ConfigKey {
     public static final String VM_CLOCK_TYPE = "vm.clock.type";
     public static final String VM_CPU_VIRTUALIZATION_ENABLE = "vm.cpu.virtualization.enable";
     public static final String VM_CPU_VIRTUALIZATION_NAME = "vm.cpu.virtualization.name";
-
-
-    public static final String VM_CD_BUS = "vm.cd.bus";
 
     public static final String VM_DEFAULT_UEFI_LOADER_TYPE = "vm.uefi.loader.type";
     public static final String VM_DEFAULT_UEFI_LOADER_PATH = "vm.uefi.loader.path";
@@ -87,6 +85,8 @@ public class ConfigKey {
     public static final String VM_DISK_GLUSTERFS_TPL = "vm.disk.glusterfs.tpl";
     public static final String VM_DISK_CEPH_RBD_TPL = "vm.disk.ceph.rbd.tpl";
     public static final String VM_DISK_LOCAL_TPL = "vm.disk.local.tpl";
+    public static final String VM_DISK_CACHE = "vm.disk.cache";
+    public static final String VM_DISK_AIO = "vm.disk.aio";
 
     public static final String VM_CD_NFS_TPL = "vm.cd.nfs.tpl";
     public static final String VM_CD_GLUSTERFS_TPL = "vm.cd.glusterfs.tpl";

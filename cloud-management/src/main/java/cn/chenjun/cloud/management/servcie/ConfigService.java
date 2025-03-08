@@ -48,8 +48,8 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_CPU, false,1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY, false,1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_ENABLE_VIRTIO_SCSI, false,Constant.Enable.YES, "是否使用virtio-scsi", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_VIRTIO_SCSI_QUEUE_NUMBER, false,4, "virtio-scsi queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_ENABLE_VIRTIO_SCSI, false,Constant.Enable.YES, "是否使用virtio-scsi控制器", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_VIRTIO_SCSI_QUEUE_NUMBER, false,4, "virtio-scsi控制器 queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
@@ -75,6 +75,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND,false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, false,120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
+        initDefaultConfig(ConfigKey.VM_CPU_MODEL, false,"host-passthrough", "cpu模式", Constant.ConfigValueType.STRING, Arrays.asList("host-passthrough" , "host-model" , "custom"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false,"no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, false,new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
@@ -95,7 +96,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_CPU_VIRTUALIZATION_NAME, false,"vmx", "嵌套虚拟化名称(intel:vmx,amd:svm)", Constant.ConfigValueType.SELECT, Arrays.asList("vmx", "svm"), StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CLOCK_TYPE, false,"utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime", "timezone", "variable"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CD_BUS,false, "ide", "默认光驱驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("ide", "sata", "scsi"), StringConvert.Default);
+
         initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_TYPE, false,"pflash", "Uefi Loader Type", Constant.ConfigValueType.SELECT, Arrays.asList("pflash", "rom"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH,false, "/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd", "Uefi Loader Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MACHINE_ARCH, false,"x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
@@ -108,10 +109,13 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.STORAGE_GLUSTERFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/storage/glusterfs/storage.xml"), "glusterfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/secret.xml"), "ceph rbd 存储池密钥模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/storage.xml"), "ceph rbd 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.STORAGE_LOCAL_TPL, true,ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.NETWORK_OVS_BRIDGE_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+
+//        initDefaultConfig(ConfigKey.VM_DISK_CACHE,false,"none", "磁盘读写缓冲(cache)模式", Constant.ConfigValueType.SELECT, Arrays.asList( "writethrough", "wirteback", "none", "unsafe", "directsync"), StringConvert.Default);
+//        initDefaultConfig(ConfigKey.VM_DISK_AIO,false,"native", "磁盘读写AIO模式", Constant.ConfigValueType.SELECT, Arrays.asList( "native", "thread"), StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_PCI_DISK_BUS, false,0, "磁盘P默认CI总线层级(bus)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.VM_PCI_DISK_SLOT, false,20, "磁盘PCI默认插槽(slot)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
@@ -129,7 +133,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_DISK_NFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_GLUSTERFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_CEPH_RBD_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, true,ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CD_NFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CD_GLUSTERFS_TPL,false, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);

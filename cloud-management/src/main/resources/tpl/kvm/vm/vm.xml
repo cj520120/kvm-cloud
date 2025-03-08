@@ -29,7 +29,7 @@
         {% endfor %}
         {% endif %}
     </cputune>
-    <cpu mode="host-passthrough" check="partial">
+    <cpu mode="{{__SYS__['vm.cpu.model']}}" check="partial">
         <model fallback="allow">Nehalem</model>
         {% if cpu.socket > 0 and cpu.core > 0 and cpu.thread > 0 %}
         <topology sockets="{{cpu.socket}}" cores="{{cpu.core}}" threads="{{cpu.thread}}"/>
@@ -61,7 +61,6 @@
             <entry name='product'>CJ KVM Cloud</entry>
             <entry name='version'>4.0</entry>
             <entry name='manufacturer'>chenjun</entry>
-            <entry name='serial'>ds=nocloud;s=http://169.254.169.254/</entry>
         </system>
     </sysinfo>
     <features>
@@ -87,11 +86,11 @@
     <devices>
         <emulator>{{host.emulator}}</emulator>
         {% if __SYS__["default.cluster.virtio-scsi.enable"] =="yes" and vm.bus == "scsi" %}
+        <!--virtio-scsi控制器,其他控制器会默认添加，无需加入-->
         <controller type='scsi' index='0' model='virtio-scsi'>
             <driver queues = "{{__SYS__['default.cluster.virtio-scsi.queue.number']}}"/>
         </controller>
         {% endif %}
-
         {{device.xml}}
         {{__SYS__['vm.device.default.tpl']}}
         {% if __SYS__["vm.memory.memballoon.enable"] =="yes" %}
