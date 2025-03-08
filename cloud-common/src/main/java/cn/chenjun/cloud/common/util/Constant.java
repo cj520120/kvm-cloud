@@ -103,7 +103,7 @@ public class Constant {
         public static final String LOCAL = "local";
     }
 
-    public static class DiskBus {
+    public static class DiskDriveType {
         public static final String VIRTIO = "virtio";
         public static final String IDE = "ide";
         public static final String SCSI = "scsi";

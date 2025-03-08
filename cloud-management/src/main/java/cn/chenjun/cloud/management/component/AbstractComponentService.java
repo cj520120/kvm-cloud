@@ -243,7 +243,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .description(name)
                 .systemCategory(SystemCategory.CENTOS)
                 .bootstrapType(BootstrapType.BIOS)
-                .busType(cn.chenjun.cloud.common.util.Constant.DiskBus.VIRTIO)
+                .busType(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
                 .cpu(systemCpu)
                 .share(systemCpuShare)
                 .memory(systemMemory)

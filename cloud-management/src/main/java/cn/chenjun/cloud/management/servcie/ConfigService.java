@@ -48,7 +48,10 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_CPU, false,1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY, false,1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_ENABLE_VIRTIO_SCSI, false,Constant.Enable.YES, "是否使用virtio-scsi", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_VIRTIO_SCSI_QUEUE_NUMBER, false,4, "virtio-scsi queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+
+        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW

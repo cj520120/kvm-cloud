@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class DomainUtil {
 
-    public static String buildDiskXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId) {
+    public static String buildDiskXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId,String deviceType) {
         Map<String, Object> map = new HashMap<>();
         map.put("storage", ParamBuilder.buildStorageParam(storage));
         map.put("disk", ParamBuilder.buildDiskParam(guest, volume, deviceId));

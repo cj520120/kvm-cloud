@@ -34,6 +34,7 @@ public class ParamBuilder {
         map.put("name", guest.getName());
         map.put("description", guest.getDescription());
         map.put("memory", guest.getMemory());
+        map.put("bus", guest.getBusType());
         map.put("bootstrapType", guest.getBootstrapType());
         return map;
     }
@@ -89,8 +90,7 @@ public class ParamBuilder {
     }
 
     public static Map<String, Object> buildDiskParam(GuestEntity guest, VolumeEntity volume, int deviceId) {
-
-        String bus = deviceId == 0 ? guest.getBusType() : Constant.DiskBus.VIRTIO;
+        String bus = deviceId == 0 ? guest.getBusType() : Constant.DiskDriveType.VIRTIO;
         String targetName = "vd" + (char) ('a' + deviceId);
         Map<String, Object> map = new HashMap<>();
         map.put("deviceId", deviceId);

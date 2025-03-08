@@ -45,7 +45,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                         throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
                     }
                     Map<String, Object> systemConfig = this.loadSystemConfig(host.getHostId(), guest.getGuestId());
-                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), systemConfig);
+                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(),  guest.getBusType(),systemConfig);
                     ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
                     if (param.isAttach()) {
                         this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);

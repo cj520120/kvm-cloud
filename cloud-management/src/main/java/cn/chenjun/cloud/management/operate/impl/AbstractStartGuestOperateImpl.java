@@ -108,7 +108,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 }
                 return storageEntity;
             });
-            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), sysconfig));
+            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guest.getBusType(),sysconfig));
         }
         return disks;
     }

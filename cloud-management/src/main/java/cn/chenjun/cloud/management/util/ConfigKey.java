@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.util;
 
 public class ConfigKey {
     public static final String SYSTEM_COMPONENT_NETWORK_DRIVER = "system.component.network.driver";
+
     public static final String SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS = "system.component.network.check.address";
     public static final String SYSTEM_COMPONENT_CPU = "system.component.cpu.number";
     public static final String SYSTEM_COMPONENT_MEMORY = "system.component.memory";
@@ -12,6 +13,9 @@ public class ConfigKey {
     public static final String SYSTEM_COMPONENT_PIP_INSTALL_SOURCE = "system.component.pip.source";
     public static final String SYSTEM_COMPONENT_YUM_INSTALL_SOURCE = "system.component.yum.repo";
     public static final String DEFAULT_CLUSTER_OVER_CPU = "default.cluster.over.cpu";
+
+    public static final String DEFAULT_CLUSTER_ENABLE_VIRTIO_SCSI = "default.cluster.virtio-scsi.enable";
+    public static final String DEFAULT_CLUSTER_VIRTIO_SCSI_QUEUE_NUMBER = "default.cluster.virtio-scsi.queue.number";
     public static final String DEFAULT_CLUSTER_DISK_TYPE = "default.cluster.disk.type";
     public static final String DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE = "default.cluster.template.disk.type";
     public static final String DEFAULT_CLUSTER_OVER_MEMORY = "default.cluster.over.memory";
@@ -82,7 +86,7 @@ public class ConfigKey {
     public static final String VM_DISK_NFS_TPL = "vm.disk.nfs.tpl";
     public static final String VM_DISK_GLUSTERFS_TPL = "vm.disk.glusterfs.tpl";
     public static final String VM_DISK_CEPH_RBD_TPL = "vm.disk.ceph.rbd.tpl";
-    public static final String VM_DISK_LOCAL_TPL = "vm.disk.ceph.local.tpl";
+    public static final String VM_DISK_LOCAL_TPL = "vm.disk.local.tpl";
 
     public static final String VM_CD_NFS_TPL = "vm.cd.nfs.tpl";
     public static final String VM_CD_GLUSTERFS_TPL = "vm.cd.glusterfs.tpl";

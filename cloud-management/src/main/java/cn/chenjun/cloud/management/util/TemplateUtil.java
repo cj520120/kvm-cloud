@@ -16,6 +16,7 @@ public class TemplateUtil {
         jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseUrlList", TemplateUtil.class, "parseUrlList", String.class, String.class));
         jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseRandomFirstUri", TemplateUtil.class, "parseRandomFirstUri", String.class, String.class));
         jinjava.registerFunction(new ELFunctionDefinition("cloud", "toHex", TemplateUtil.class, "toHex", Integer.class, Integer.class));
+        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseInteger", TemplateUtil.class, "parseInteger", Double.class));
         return jinjava;
     }
 
@@ -49,5 +50,9 @@ public class TemplateUtil {
         }
 
         return "0x" + hexString;
+    }
+
+    public static Integer parseInteger(Double value) {
+        return value.intValue();
     }
 }

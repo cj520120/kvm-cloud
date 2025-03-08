@@ -69,7 +69,7 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
         return DomainUtil.buildCdXml(tpl, configParam, storage, templateVolume);
     }
 
-    protected String buildDiskXml(GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId, Map<String, Object> sysconfig) {
+    protected String buildDiskXml(GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId,String deviceType, Map<String, Object> sysconfig) {
 
         String configKey;
         switch (storage.getType()) {
@@ -89,7 +89,7 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                 throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
         }
         String tpl = (String) sysconfig.get(configKey);
-        return DomainUtil.buildDiskXml(tpl, sysconfig, guest, storage, volume, deviceId);
+        return DomainUtil.buildDiskXml(tpl, sysconfig, guest, storage, volume, deviceId,deviceType);
     }
 
     public String buildInterfaceXml(NetworkEntity network, GuestNetworkEntity guestNetwork, Map<String, Object> systemConfig) {

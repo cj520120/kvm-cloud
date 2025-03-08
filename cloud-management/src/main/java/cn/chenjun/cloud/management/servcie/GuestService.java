@@ -132,14 +132,14 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String busType
+    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceType
             , int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int volumeId,
                                               int storageId, Map<String, String> metaData, Map<String, String> userData, long size) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
-        if (StringUtils.isEmpty(busType)) {
+        if (StringUtils.isEmpty(deviceType)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择总线方式");
         }
         if (StringUtils.isEmpty(networkDeviceType)) {
@@ -170,7 +170,7 @@ public class GuestService extends AbstractService {
                 .description(description)
                 .systemCategory(systemCategory)
                 .bootstrapType(bootstrapType)
-                .busType(busType)
+                .busType(deviceType)
                 .cpu(scheme.getCpu())
                 .share(scheme.getShare())
                 .memory(scheme.getMemory())
@@ -196,7 +196,7 @@ public class GuestService extends AbstractService {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            createGuest(hostId, diskTemplateId, volumeType, metaData, userData, size, guest, storage);
+            createGuest(hostId, diskTemplateId, deviceType,volumeType, metaData, userData, size, guest, storage);
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
@@ -222,8 +222,8 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    private void createGuest(int hostId, int diskTemplateId, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, GuestEntity guest, StorageEntity storage) {
-        GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, guest, storage);
+    private void createGuest(int hostId, int diskTemplateId,String deviceType, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, GuestEntity guest, StorageEntity storage) {
+        GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, deviceType, volumeType, size, guest, storage);
         this.initGuestMetaData(guest.getGuestId(), metaData, userData);
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
@@ -240,7 +240,7 @@ public class GuestService extends AbstractService {
         this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
     }
 
-    private GuestDiskEntity createGuestVolume(int diskTemplateId, String volumeType, long size, GuestEntity guest, StorageEntity storage) {
+    private GuestDiskEntity createGuestVolume(int diskTemplateId, String deviceType,String volumeType, long size, GuestEntity guest, StorageEntity storage) {
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
@@ -290,7 +290,7 @@ public class GuestService extends AbstractService {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, volumeType, size, guest, storage);
+            GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, guest.getBusType(), volumeType, size, guest, storage);
             guest.setStatus(Constant.GuestStatus.CREATING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = CreateGuestOperate.builder()
