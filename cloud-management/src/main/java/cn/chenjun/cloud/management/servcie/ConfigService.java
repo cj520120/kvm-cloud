@@ -114,8 +114,8 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.NETWORK_OVS_BRIDGE_TPL, false,ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-//        initDefaultConfig(ConfigKey.VM_DISK_CACHE,false,"none", "磁盘读写缓冲(cache)模式", Constant.ConfigValueType.SELECT, Arrays.asList( "writethrough", "wirteback", "none", "unsafe", "directsync"), StringConvert.Default);
-//        initDefaultConfig(ConfigKey.VM_DISK_AIO,false,"native", "磁盘读写AIO模式", Constant.ConfigValueType.SELECT, Arrays.asList( "native", "thread"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_CACHE,false,"none", "磁盘读写缓冲(cache)模式", Constant.ConfigValueType.SELECT, Arrays.asList( "writethrough", "writeback", "none", "unsafe", "directsync"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_AIO,false,"native", "磁盘读写AIO模式", Constant.ConfigValueType.SELECT, Arrays.asList( "native", "thread"), StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_PCI_DISK_BUS, false,0, "磁盘P默认CI总线层级(bus)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.VM_PCI_DISK_SLOT, false,20, "磁盘PCI默认插槽(slot)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);

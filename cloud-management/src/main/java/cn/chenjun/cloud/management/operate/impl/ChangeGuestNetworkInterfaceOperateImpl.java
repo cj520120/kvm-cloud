@@ -33,7 +33,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOsOperate<Ch
         if (guest.getHostId() > 0) {
             HostEntity host = hostMapper.selectById(guest.getHostId());
             NetworkEntity network = networkMapper.selectById(guestNetwork.getNetworkId());
-            Map<String, Object> systemConfig = this.loadSystemConfig(host.getHostId(), guest.getGuestId());
+            Map<String, Object> systemConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
             String xml = this.buildInterfaceXml(network, guestNetwork, systemConfig);
             ChangeGuestInterfaceRequest nic = ChangeGuestInterfaceRequest.builder()
                     .name(guest.getName())

@@ -1,6 +1,6 @@
-<disk type="file" device="disk" cache="none" aio="native">
+<disk type="file" device="disk" >
     <target dev="{{disk.target}}" bus="{{disk.bus}}"/>
-    <driver name="qemu" type="{{disk.type}}"/>
+    <driver name="qemu" type="{{disk.type}}" cache="{{__SYS__['vm.disk.cache']}}" aio="{{__SYS__['vm.disk.aio']}}"/>
     <source file="{{storage.mount}}/{{disk.name}}"/>
     {% if disk.bus=='virtio' %}
     <!-- virtio 驱动-->

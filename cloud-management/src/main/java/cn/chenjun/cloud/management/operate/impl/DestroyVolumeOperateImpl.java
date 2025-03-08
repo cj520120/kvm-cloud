@@ -58,7 +58,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
         if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY) {
             volumeMapper.deleteById(param.getVolumeId());
         }
-
+        this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.VOLUME,param.getVolumeId());
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 

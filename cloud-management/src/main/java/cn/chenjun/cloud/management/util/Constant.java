@@ -187,6 +187,8 @@ public class Constant {
         public static final int GUEST = 2;
         public static final int NETWORK = 3;
         public static final int STORAGE = 4;
+
+        public static final int VOLUME = 5;
     }
 
     public static class Enable {

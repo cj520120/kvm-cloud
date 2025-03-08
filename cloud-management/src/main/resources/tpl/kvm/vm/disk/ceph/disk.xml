@@ -1,6 +1,6 @@
-<disk type="network" device="disk" cache="none" aio="native">
+<disk type="network" device="disk">
     <target dev="{{disk.target}}" bus="{{disk.bus}}"/>
-    <driver name="qemu" type="{{disk.type}}" cache="none" aio="native"/>
+    <driver name="qemu" type="{{disk.type}}" cache="{{__SYS__['vm.disk.cache']}}" aio="{{__SYS__['vm.disk.aio']}}"/>
     <source protocol="rbd" name="{{storage.param.pool}}/{{disk.name}}">
         {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}
         {% for host in __hostList %}

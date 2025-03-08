@@ -44,7 +44,7 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
                 this.onFinish(param, ResultUtil.success());
             }
             if (!param.isForce()) {
-                Map<String, Object> systemConfig = this.loadSystemConfig(guest.getHostId(), guest.getGuestId());
+                Map<String, Object> systemConfig = this.loadGuestConfig(guest.getHostId(), guest.getGuestId());
                 int maxWaitMinutes = (int) systemConfig.get(ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE);
                 long expire = TimeUnit.MINUTES.toMinutes(Math.max(maxWaitMinutes, 1));
                 GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).expire(expire).build();

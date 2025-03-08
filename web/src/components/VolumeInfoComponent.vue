@@ -37,6 +37,13 @@
 					</el-descriptions-item>
 				</el-descriptions>
 			</el-row>
+			<el-row>
+				<el-tabs>
+					<el-tab-pane label="系统配置">
+						<ConfigComponent ref="ConfigComponentRef" />
+					</el-tab-pane>
+				</el-tabs>
+			</el-row>
 		</el-card>
 		<CloneVolumeComponent ref="CloneVolumeComponentRef" @back="show_type = 0" @onVolumeUpdate="notify_volume_update" v-show="this.show_type === 1" />
 		<MigrateVolumeComponent ref="MigrateVolumeComponentRef" @back="show_type = 0" @onVolumeUpdate="notify_volume_update" v-show="this.show_type === 2" />
@@ -53,6 +60,7 @@ import CreateVolumeTemplateComponent from '@/components/CreateVolumeTemplateComp
 import CloneVolumeComponent from '@/components/CloneVolumeComponent'
 import MigrateVolumeComponent from '@/components/MigrateVolumeComponent.vue'
 import StorageInfoComponent from '@/components/StorageInfoComponent'
+import ConfigComponent from '@/components/ConfigComponent'
 import util from '@/api/util'
 import Notify from '@/api/notify'
 import { destroyVolume, getStorageInfo, getTemplateInfo, getVolumeInfo } from '@/api/api'
@@ -68,7 +76,7 @@ export default {
 			show_volume_id: 0
 		}
 	},
-	components: { ResizeVolumeComponent, CreateVolumeTemplateComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent },
+	components: { ResizeVolumeComponent, CreateVolumeTemplateComponent, CloneVolumeComponent, MigrateVolumeComponent, StorageInfoComponent, ConfigComponent },
 	beforeCreate() {
 		this.$options.components.GuestInfoComponent = require('./GuestInfoComponent.vue').default
 	},
@@ -93,6 +101,7 @@ export default {
 			this.show_volume_id = volume.volumeId
 			this.show_volume = volume
 			this.show_type = 0
+			this.$refs.ConfigComponentRef.init(5, this.show_volume.volumeId)
 			await this.init_volume_template()
 			await this.init_volume_storage()
 		},
@@ -100,6 +109,7 @@ export default {
 			if (this.show_volume_id > 0) {
 				this.show_type = 0
 				this.volume_loading = true
+				this.$refs.ConfigComponentRef.init(5, this.show_volume_id)
 				await getVolumeInfo({ volumeId: this.show_volume_id })
 					.then((res) => {
 						if (res.code === 0) {

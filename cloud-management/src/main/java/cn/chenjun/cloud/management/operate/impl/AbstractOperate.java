@@ -276,7 +276,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         return vlan;
     }
 
-    protected Map<String, Object> loadSystemConfig(int hostId, int guestId) {
+    protected Map<String, Object> loadGuestConfig(int hostId, int guestId) {
         List<ConfigQuery> queryList = new ArrayList<>();
         queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
         if (hostId > 0) {
@@ -287,5 +287,15 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         }
         return this.configService.loadSystemConfig(queryList);
     }
-
+    protected Map<String, Object> loadVolumeConfig(int storageId, int volumeId) {
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
+        if (storageId > 0) {
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.STORAGE).id(storageId).build());
+        }
+        if (volumeId > 0) {
+            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.VOLUME).id(volumeId).build());
+        }
+        return this.configService.loadSystemConfig(queryList);
+    }
 }

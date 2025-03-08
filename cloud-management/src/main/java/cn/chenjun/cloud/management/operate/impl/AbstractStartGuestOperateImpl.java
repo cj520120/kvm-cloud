@@ -47,7 +47,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
         HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
-        Map<String, Object> systemConfig = this.loadSystemConfig(hostId, guestId);
+        Map<String, Object> systemConfig = this.loadGuestConfig(hostId, guestId);
         List<String> deviceXmlList = new ArrayList<>();
         deviceXmlList.add(this.buildCdXml(guest, systemConfig));
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
@@ -108,7 +108,11 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 }
                 return storageEntity;
             });
-            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guest.getBusType(),sysconfig));
+            Map<String,Object> volumeConfigMap=this.loadVolumeConfig(storage.getStorageId(),volume.getVolumeId());
+            Map<String,Object> configMap=new HashMap<>();
+            configMap.putAll(sysconfig);
+            configMap.putAll(volumeConfigMap);
+            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guest.getBusType(),configMap));
         }
         return disks;
     }

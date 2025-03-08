@@ -28,7 +28,7 @@ public class ChangeGuestCdRoomOperateImpl extends AbstractOsOperate<ChangeGuestC
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         if (guest.getHostId() > 0) {
             HostEntity host = hostMapper.selectById(guest.getHostId());
-            Map<String, Object> systemConfig = this.loadSystemConfig(guest.getHostId(), guest.getGuestId());
+            Map<String, Object> systemConfig = this.loadGuestConfig(guest.getHostId(), guest.getGuestId());
             String xml = this.buildCdXml(guest, systemConfig);
             String command = Constant.Command.GUEST_DETACH_CD_ROOM;
             if (guest.getCdRoom() > 0) {

@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,8 +45,13 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                     if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                         throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
                     }
-                    Map<String, Object> systemConfig = this.loadSystemConfig(host.getHostId(), guest.getGuestId());
-                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(),  guest.getBusType(),systemConfig);
+                    Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
+
+                    Map<String,Object> volumeConfigMap=this.loadVolumeConfig(storage.getStorageId(),volume.getVolumeId());
+                    Map<String,Object> configMap=new HashMap<>();
+                    configMap.putAll(guestConfig);
+                    configMap.putAll(volumeConfigMap);
+                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(),  guest.getBusType(),configMap);
                     ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
                     if (param.isAttach()) {
                         this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
