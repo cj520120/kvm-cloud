@@ -75,17 +75,17 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND,false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, false,120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_CPU_MODEL, false,"host-passthrough", "cpu模式", Constant.ConfigValueType.STRING, Arrays.asList("host-passthrough" , "host-model" , "custom"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false,"no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_MODEL, false,"host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough" , "host-model" , "custom"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false,"no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, false,new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_BIND_HOST, true,0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, false,"no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, false,"strict", "numa内存分配模式", Constant.ConfigValueType.STRING, Arrays.asList("strict","preferred","interleave"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, false,"no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, false,"strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict","preferred","interleave"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, false,"0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, false,"yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.STRING, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_MODEL, false,"virtio", "内存气球驱动方式", Constant.ConfigValueType.STRING, Arrays.asList("none","virtio"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, false,"yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_MODEL, false,"virtio", "内存气球驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("none","virtio"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_PERIOD, false,10, "内存气球回收周期(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
