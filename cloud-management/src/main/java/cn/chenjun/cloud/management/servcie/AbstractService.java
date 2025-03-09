@@ -158,8 +158,8 @@ public abstract class AbstractService {
 
     protected HostModel initHost(HostEntity entity) {
         List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(entity.getHostId()).build());
-        entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_CPU)));
-        entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY)));
+        entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
+        entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
         return new BeanConverter<>(HostModel.class).convert(entity, null);
     }
 

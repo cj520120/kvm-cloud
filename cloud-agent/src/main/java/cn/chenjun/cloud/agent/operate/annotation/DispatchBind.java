@@ -23,5 +23,5 @@ public @interface DispatchBind {
      *
      * @return
      */
-    boolean async() default false;
+    boolean async() default true;
 }

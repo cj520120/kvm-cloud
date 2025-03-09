@@ -34,7 +34,7 @@ public class ClearComponentGuestRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND);
+        return configService.getConfig(ConfigKey.DEFAULT_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND);
     }
 
     @Override

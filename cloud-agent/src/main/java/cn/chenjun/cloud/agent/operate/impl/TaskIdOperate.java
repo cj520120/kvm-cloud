@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class TaskIdOperate {
 
-    @DispatchBind(command = Constant.Command.CHECK_TASK)
+    @DispatchBind(command = Constant.Command.CHECK_TASK,async = false)
     public List<String> checkTask(Connect connect, NoneRequest request) {
         return TaskIdUtil.getTaskList();
     }

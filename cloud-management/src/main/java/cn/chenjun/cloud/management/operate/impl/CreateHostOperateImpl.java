@@ -68,7 +68,7 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
-        requestMap.add("managerUri", (String) systemConfig.get(ConfigKey.DEFAULT_CLUSTER_MANAGER_URI));
+        requestMap.add("managerUri", (String) systemConfig.get(ConfigKey.DEFAULT_MANAGER_URI));
         requestMap.add("clientId", host.getClientId());
         requestMap.add("clientSecret", host.getClientSecret());
         RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity

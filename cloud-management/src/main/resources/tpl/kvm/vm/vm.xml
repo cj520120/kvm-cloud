@@ -85,10 +85,10 @@
     <on_crash>destroy</on_crash>
     <devices>
         <emulator>{{host.emulator}}</emulator>
-        {% if __SYS__["default.cluster.virtio-scsi.enable"] =="yes" and vm.bus == "scsi" %}
+        {% if __SYS__["default.virtio-scsi.enable"] =="yes" and vm.bus == "scsi" %}
         <!--virtio-scsi控制器,其他控制器会默认添加，无需加入-->
         <controller type='scsi' index='0' model='virtio-scsi'>
-            <driver queues = "{{__SYS__['default.cluster.virtio-scsi.queue.number']}}"/>
+            <driver queues = "{{__SYS__['default.virtio-scsi.queue.number']}}"/>
         </controller>
         {% endif %}
         {{device.xml}}

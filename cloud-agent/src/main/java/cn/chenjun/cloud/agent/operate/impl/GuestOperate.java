@@ -101,7 +101,7 @@ public class GuestOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.ALL_GUEST_INFO, async = true)
+    @DispatchBind(command = Constant.Command.ALL_GUEST_INFO)
 
     public List<GuestInfo> listAllGuestInfo(Connect connect, NoneRequest request) throws Exception {
         List<GuestInfo> list = new ArrayList<>();
@@ -118,7 +118,7 @@ public class GuestOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_GUEST_INFO, async = true)
+    @DispatchBind(command = Constant.Command.BATCH_GUEST_INFO)
 
     public List<GuestInfo> batchGustInfo(Connect connect, List<GuestInfoRequest> batchRequest) throws Exception {
         Set<String> names = batchRequest.stream().map(GuestInfoRequest::getName).collect(Collectors.toSet());
@@ -144,7 +144,7 @@ public class GuestOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN, async = true)
+    @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN)
 
     public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         this.stopDomain(connect, request.getName(), request.getExpire());
@@ -244,7 +244,7 @@ public class GuestOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_START, async = true)
+    @DispatchBind(command = Constant.Command.GUEST_START)
 
     public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
@@ -346,7 +346,7 @@ public class GuestOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_QMA, async = true)
+    @DispatchBind(command = Constant.Command.GUEST_QMA)
 
     public Void qma(Connect connect, GuestQmaRequest request) throws Exception {
         Domain domain = connect.domainLookupByName(request.getName());
@@ -357,7 +357,7 @@ public class GuestOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_DESTROY, async = true)
+    @DispatchBind(command = Constant.Command.GUEST_DESTROY)
 
     public Void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());
@@ -375,7 +375,7 @@ public class GuestOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_MIGRATE, async = true)
+    @DispatchBind(command = Constant.Command.GUEST_MIGRATE)
 
     public Void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
         Domain domain = this.findDomainByName(connect, request.getName());

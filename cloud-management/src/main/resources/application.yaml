@@ -1,9 +1,12 @@
 app:
   #启动后请修改系统配置项default.cluster.manager.uri
   manager-uri: http://192.168.2.193:8080/
-  work:
+  task:
     thread:
       size: 8
+  work:
+    thread:
+      size: 4
 server:
   port: 8080
   servlet:

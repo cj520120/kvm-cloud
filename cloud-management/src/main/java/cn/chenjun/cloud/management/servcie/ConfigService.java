@@ -34,29 +34,33 @@ public class ConfigService {
     private ConfigMapper mapper;
 
     public ConfigService(@Autowired ApplicationConfig applicationConfig) {
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_MANAGER_URI,false, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, true,Constant.Enable.YES, "是否启动网络组件(特殊情况下使用)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, false,cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, false,"8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU, false,1, "系统组件Cpu", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY, false,1024, "系统组件Cpu内存(MB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE, false,0, "系统组件Cpu Share", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES, false,60, "系统组件单个qma执行命令超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES,false, 10, "系统组件qma启动超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_PIP_INSTALL_SOURCE, false,"", "系统组件pip加速源", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE,false, "", "系统组件yum加速源", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_CPU, false,1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_OVER_MEMORY, false,1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_MANAGER_URI, false, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, true, Constant.Enable.YES, "是否启动网络组件(特殊情况下使用)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, false, cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, false, "8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU, false, 1, "系统组件Cpu", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY, false, 1024, "系统组件Cpu内存(MB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE, false, 0, "系统组件Cpu Share", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES, false, 60, "系统组件单个qma执行命令超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES, false, 10, "系统组件qma启动超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_PIP_INSTALL_SOURCE, false, "", "系统组件pip加速源", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE, false, "", "系统组件yum加速源", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_OVER_CPU, false, 1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_OVER_MEMORY, false, 1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_ENABLE_VIRTIO_SCSI, false,Constant.Enable.YES, "是否使用virtio-scsi控制器", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_VIRTIO_SCSI_QUEUE_NUMBER, false,4, "virtio-scsi控制器 queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_HOST_CPU_WEIGHT, false, 30.0f, "申请主机时剩余CPU占比权重", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_HOST_MEMORY_WEIGHT, false, 20.0f, "申请主机时剩余内存占比权重(每GB)", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT, false, 1.0f, "申请磁盘时存储池占比权重(每TB)", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
+        initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_ENABLE, false, Constant.Enable.YES, "是否使用virtio-scsi控制器", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_QUEUE_NUMBER, false, 4, "virtio-scsi控制器 queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+
+        initDefaultConfig(ConfigKey.DEFAULT_DISK_TYPE, false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW
         ), StringConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE,false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认模版磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
+        initDefaultConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE, false, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认模版磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW,
@@ -64,25 +68,25 @@ public class ConfigService {
                 cn.chenjun.cloud.common.util.Constant.VolumeType.VPC,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.VMDK
         ), StringConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE, false,10, "虚拟机关机最大等待时间，超过时间则直接进行销毁操作(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE, false,10, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND,false, 60, "清理未关联系统组件间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND,false, 10, "系统组件状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND, false,30, "宿主机运行虚拟机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND, false,30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND, false,60, "宿主机存储池检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, false,600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND,false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND, false,120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE, false, 10, "虚拟机关机最大等待时间，超过时间则直接进行销毁操作(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE, false, 10, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND, false, 60, "清理未关联系统组件间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND, false, 10, "系统组件状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND, false, 30, "宿主机运行虚拟机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND, false, 30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_STORAGE_CHECK_TIMEOUT_SECOND, false, 60, "宿主机存储池检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND, false, 600, "存储池磁盘占用同步间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND, false, 30, "宿主机任务列表同步间隔(秒)，需要小于任务过期时间/2", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND, false, 120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_CPU_MODEL, false,"host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough" , "host-model" , "custom"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false,"no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, false,new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_MODEL, false, "host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough", "host-model", "custom"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, false, "no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, false, new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_BIND_HOST, true,0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, false,"no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, false,"strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict","preferred","interleave"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, false,"0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_BIND_HOST, true, 0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, false, "no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, false, "strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict", "preferred", "interleave"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, false, "0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, false,"yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_MODEL, false,"virtio", "内存气球驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("none","virtio"), StringConvert.Default);
@@ -236,18 +240,18 @@ public class ConfigService {
         List<ConfigEntity> searchList = this.mapper.selectList(new QueryWrapper<ConfigEntity>().eq(ConfigEntity.CONFIG_ALLOCATE_TYPE, allocateType).eq(ConfigEntity.CONFIG_ALLOCATE_ID, allocateId));
         searchList.stream().forEach(config -> {
             ConfigModel model = map.get(config.getConfigKey());
-            if(model==null){
-                model=new ConfigModel();
-                DefaultConfigInfo defaultConfigInfo=DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
-                if(defaultConfigInfo!=null) {
+            if(model==null) {
+                DefaultConfigInfo defaultConfigInfo = DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
+                if (defaultConfigInfo != null) {
+                    model = new ConfigModel();
                     BeanUtils.copyProperties(defaultConfigInfo, model);
                     model.setIntern(false);
                     model.setDefaultParam(false);
-                    list.add(model);
-                    map.put(model.getKey(), model);
-                }else {
+                } else {
                     model = ConfigModel.builder().id(config.getId()).defaultParam(false).key(config.getConfigKey()).allocateType(allocateType).allocateId(allocateId).value(config.getConfigValue()).valueType(Constant.ConfigValueType.MULTI_STRING).description("").valueOptions(null).build();
                 }
+                map.put(model.getKey(), model);
+                list.add(model);
             }
             model.setId(config.getId());
             model.setValue(config.getConfigValue());

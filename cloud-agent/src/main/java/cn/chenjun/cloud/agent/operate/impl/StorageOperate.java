@@ -48,7 +48,7 @@ public class StorageOperate {
                 .build();
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO, async = true)
+    @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO)
 
     public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
         List<StorageInfo> list = new ArrayList<>();
@@ -70,7 +70,7 @@ public class StorageOperate {
         return list;
     }
 
-    @DispatchBind(command = Constant.Command.STORAGE_CREATE, async = true)
+    @DispatchBind(command = Constant.Command.STORAGE_CREATE)
 
     public StorageInfo create(Connect connect, StorageCreateRequest request) throws Exception {
 
@@ -111,7 +111,7 @@ public class StorageOperate {
         }
     }
 
-    @DispatchBind(command = Constant.Command.STORAGE_DESTROY, async = true)
+    @DispatchBind(command = Constant.Command.STORAGE_DESTROY)
 
     public Void destroy(Connect connect, StorageDestroyRequest request) throws Exception {
         synchronized (request.getName().intern()) {

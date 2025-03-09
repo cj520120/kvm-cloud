@@ -12,26 +12,31 @@ public class ConfigKey {
     public static final String SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES = "system.component.qma.check.timeout.minutes";
     public static final String SYSTEM_COMPONENT_PIP_INSTALL_SOURCE = "system.component.pip.source";
     public static final String SYSTEM_COMPONENT_YUM_INSTALL_SOURCE = "system.component.yum.repo";
-    public static final String DEFAULT_CLUSTER_OVER_CPU = "default.cluster.over.cpu";
 
-    public static final String DEFAULT_CLUSTER_ENABLE_VIRTIO_SCSI = "default.cluster.virtio-scsi.enable";
-    public static final String DEFAULT_CLUSTER_VIRTIO_SCSI_QUEUE_NUMBER = "default.cluster.virtio-scsi.queue.number";
-    public static final String DEFAULT_CLUSTER_DISK_TYPE = "default.cluster.disk.type";
-    public static final String DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE = "default.cluster.template.disk.type";
-    public static final String DEFAULT_CLUSTER_OVER_MEMORY = "default.cluster.over.memory";
-    public static final String DEFAULT_CLUSTER_MANAGER_URI = "default.cluster.manager.uri";
 
-    public static final String DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE = "default.cluster.destroy.delay.timeout.minutes";
+    public static final String DEFAULT_VIRTIO_SCSI_ENABLE = "default.virtio-scsi.enable";
+    public static final String DEFAULT_VIRTIO_SCSI_QUEUE_NUMBER = "default.virtio-scsi.queue.number";
+    public static final String DEFAULT_DISK_TYPE = "default.disk.type";
+    public static final String DEFAULT_TEMPLATE_DISK_TYPE = "default.template.disk.type";
+    public static final String DEFAULT_OVER_CPU = "default.over.cpu";
+    public static final String DEFAULT_OVER_MEMORY = "default.over.memory";
+
+    public static final String DEFAULT_ALLOCATE_HOST_CPU_WEIGHT = "default.allocate.cpu.weight";
+    public static final String DEFAULT_ALLOCATE_HOST_MEMORY_WEIGHT = "default.allocate.memory.weight";
+    public static final String DEFAULT_ALLOCATE_STORAGE_WEIGHT = "default.allocate.storage.weight";
+    public static final String DEFAULT_MANAGER_URI = "default.manager.uri";
+
+    public static final String DEFAULT_DESTROY_DELAY_MINUTE = "default.destroy.delay.timeout.minutes";
     public static final String DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE = "default.vm.stop.max.wait.timeout.minutes";
 
-    public static final String DEFAULT_CLUSTER_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND = "default.cluster.component.clear.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default_cluster_component.check.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND = "default.cluster.host.guest.sync.check.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND = "default.cluster.host.task.sync.check.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_HOST_CHECK_TIMEOUT_SECOND = "default.cluster.host.check.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_STORAGE_CHECK_TIMEOUT_SECOND = "default.cluster.storage.check.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.cluster.storage.volume.sync.timeout.second";
-    public static final String DEFAULT_CLUSTER_TASK_EXPIRE_TIMEOUT_SECOND = "default.cluster.task.expire.timeout.second";
+    public static final String DEFAULT_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND = "default.component.clear.timeout.second";
+    public static final String DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default.component.check.timeout.second";
+    public static final String DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND = "default.host.guest.sync.check.timeout.second";
+    public static final String DEFAULT_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND = "default.host.task.sync.check.timeout.second";
+    public static final String DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND = "default.host.check.timeout.second";
+    public static final String DEFAULT_TASK_STORAGE_CHECK_TIMEOUT_SECOND = "default.storage.check.timeout.second";
+    public static final String DEFAULT_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.storage.volume.sync.timeout.second";
+    public static final String DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND = "default.task.expire.timeout.second";
 
     public static final String VM_BIND_HOST = "vm.bind.host";
     public static final String VM_CPU_MODEL = "vm.cpu.model";

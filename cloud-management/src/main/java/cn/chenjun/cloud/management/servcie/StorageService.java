@@ -58,7 +58,7 @@ public class StorageService extends AbstractService {
             }
         }
 
-        String defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(destStorage.getType())) {
             defaultVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -100,7 +100,7 @@ public class StorageService extends AbstractService {
 
             }
         }
-        defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TEMPLATE_DISK_TYPE);
+        defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE);
         if ((destStorage.getSupportCategory() & Constant.StorageSupportCategory.TEMPLATE) == Constant.StorageSupportCategory.TEMPLATE) {
             List<TemplateVolumeEntity> templateVolumeEntityList = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, sourceStorageId));
             for (TemplateVolumeEntity sourceVolume : templateVolumeEntityList) {

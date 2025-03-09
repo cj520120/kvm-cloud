@@ -20,6 +20,7 @@ import cn.chenjun.cloud.management.util.DomainUtil;
 import com.google.gson.reflect.TypeToken;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * @author chenjun
@@ -77,7 +78,8 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     protected RestTemplate restTemplate;
 
     @Autowired
-    protected ScheduledExecutorService executor;
+    @Qualifier("workExecutorService")
+    protected ScheduledThreadPoolExecutor executor;
 
     @Override
     public boolean supports(@NonNull Integer type) {

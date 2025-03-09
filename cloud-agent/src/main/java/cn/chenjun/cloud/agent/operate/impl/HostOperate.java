@@ -120,7 +120,7 @@ public class HostOperate {
         return getHostInfo(connect);
     }
 
-    @DispatchBind(command = Constant.Command.HOST_INIT, async = true)
+    @DispatchBind(command = Constant.Command.HOST_INIT)
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
 
         List<StorageCreateRequest> storageList = request.getStorageList();

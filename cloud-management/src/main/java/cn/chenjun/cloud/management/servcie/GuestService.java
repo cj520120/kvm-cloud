@@ -191,7 +191,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -285,7 +285,7 @@ public class GuestService extends AbstractService {
         this.initGuestMetaData(guestId, metaData, userData);
         this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
@@ -672,7 +672,7 @@ public class GuestService extends AbstractService {
                 this.guestMapper.updateById(guest);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DESTROY_DELAY_MINUTE) : 0);
+                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE) : 0);
                 break;
             }
             default:

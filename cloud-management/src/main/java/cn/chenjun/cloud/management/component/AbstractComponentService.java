@@ -258,7 +258,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_CLUSTER_DISK_TYPE);
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }

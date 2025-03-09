@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
@@ -15,10 +14,15 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  */
 @Configuration
 public class ThreadPoolConfig {
-    @Bean(destroyMethod = "shutdown")
+    @Bean(destroyMethod = "shutdown", name = "taskExecutorService")
     @Primary
-    public ScheduledExecutorService workExecutorService(@Value("${app.work.thread.size:1}") int size) {
+    public ScheduledThreadPoolExecutor taskExecutorService(@Value("${app.task.thread.size:1}") int size) {
         return new ScheduledThreadPoolExecutor(Math.max(size, 1), new BasicThreadFactory.Builder().namingPattern("executor-pool-%d").daemon(true).build());
     }
 
+    @Bean(destroyMethod = "shutdown", name = "workExecutorService")
+    @Primary
+    public ScheduledThreadPoolExecutor workExecutorService(@Value("${app.work.thread.size:1}") int size) {
+        return new ScheduledThreadPoolExecutor(Math.max(size, 1), new BasicThreadFactory.Builder().namingPattern("executor-pool-%d").daemon(true).build());
+    }
 }

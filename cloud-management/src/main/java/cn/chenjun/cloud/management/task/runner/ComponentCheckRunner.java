@@ -43,7 +43,7 @@ public class ComponentCheckRunner extends AbstractRunner {
 
     @Override
     public int getPeriodSeconds() {
-        return configService.getConfig(ConfigKey.DEFAULT_CLUSTER_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
+        return configService.getConfig(ConfigKey.DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
     }
 
     @Override
