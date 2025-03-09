@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Configuration;
 public class LibvirtPoolConfig {
 
     @Bean
-    public GenericObjectPoolConfig<Connect> genericObjectPoolConfig() {
+    public GenericObjectPoolConfig<Connect> genericObjectPoolConfig(ApplicationConfig applicationConfig) {
         GenericObjectPoolConfig<Connect> poolConfig = new GenericObjectPoolConfig<>();
-        poolConfig.setMaxIdle(8);
+        poolConfig.setMaxIdle(Math.max(applicationConfig.getTaskThreadSize(),1));
         poolConfig.setMinIdle(1);
         poolConfig.setBlockWhenExhausted(true);
         poolConfig.setTestOnBorrow(true);

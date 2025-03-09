@@ -1,11 +1,13 @@
 package cn.chenjun.cloud.agent.operate;
 
+import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.operate.bean.Consumer;
 import cn.chenjun.cloud.agent.operate.bean.Dispatch;
+import cn.chenjun.cloud.agent.operate.bean.DispatchProcess;
 import cn.chenjun.cloud.agent.operate.process.DispatchFactory;
 import cn.chenjun.cloud.agent.service.ConnectPool;
 import cn.chenjun.cloud.agent.util.ClientService;
-import cn.chenjun.cloud.agent.util.TaskIdUtil;
+import cn.chenjun.cloud.agent.util.TaskPoolUtil;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.TaskRequest;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -14,29 +16,35 @@ import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.libvirt.Connect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
  */
 @Slf4j
 @Component
-public class OperateDispatch {
+public class OperateDispatch implements CommandLineRunner {
     @Autowired
     private DispatchFactory dispatchFactory;
     @Autowired
     private ConnectPool connectPool;
-    @Autowired
-    private ThreadPoolExecutor executor;
+
+    private ScheduledThreadPoolExecutor executor;
     @Autowired
     private ClientService clientService;
+
+    @Autowired
+    private ApplicationConfig applicationConfig;
 
 
     public ResultUtil<Object> dispatch(String data) {
@@ -45,13 +53,14 @@ public class OperateDispatch {
         if (dispatch == null) {
             return ResultUtil.error(ErrorCode.SERVER_ERROR, "不支持的操作:" + task.getCommand());
         }
-        TaskIdUtil.push(task.getTaskId());
         if (dispatch.isAsync()) {
-            this.executor.submit(() -> {
-                dispatchTaskConsumer(task, dispatch);
-            });
+
+            DispatchProcess dispatchProcess = DispatchProcess.builder().dispatch(dispatch).task(task).build();
+            TaskPoolUtil.push(dispatchProcess);
+            log.info("提交异步任务:{}[{}]", task.getCommand(), task.getTaskId());
             return ResultUtil.builder().code(ErrorCode.AGENT_TASK_ASYNC_WAIT).build();
         } else {
+            log.info("同步执行任务{}[{}]", task.getCommand(), task.getTaskId());
             return dispatchTaskConsumer(task, dispatch);
         }
     }
@@ -73,7 +82,7 @@ public class OperateDispatch {
             log.error("dispatch fail. taskId={} command={} data={}", task.getTaskId(), task.getCommand(), task.getData(), err);
             executeResult = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         } finally {
-            TaskIdUtil.remove(task.getTaskId());
+            TaskPoolUtil.remove(task.getTaskId());
             if (dispatch.isAsync()) {
                 submitTaskCallback(task, executeResult);
             }
@@ -91,7 +100,7 @@ public class OperateDispatch {
             Map<String, Object> map = new HashMap<>(5);
             map.put("taskId", task.getTaskId());
             map.put("data", result);
-            map.put("timestamp", System.currentTimeMillis());
+            map.put("timestamp", String.valueOf(System.currentTimeMillis()));
             String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
             map.put("sign", sign);
             String url = clientService.getManagerUri();
@@ -105,4 +114,19 @@ public class OperateDispatch {
         }
     }
 
+    @Override
+    public void run(String... args) throws Exception {
+        int taskSize = Math.max(this.applicationConfig.getTaskThreadSize(), 1);
+        this.executor = new ScheduledThreadPoolExecutor(taskSize, new BasicThreadFactory.Builder().namingPattern("job-executor-pool-%d").daemon(true).build());
+        for (int i = 0; i < taskSize; i++) {
+            this.executor.scheduleAtFixedRate(this::consumeTask, 10, 1, TimeUnit.SECONDS);
+        }
+    }
+
+    public void consumeTask() {
+        DispatchProcess dispatchProcess = TaskPoolUtil.offer();
+        if (dispatchProcess != null) {
+            this.dispatchTaskConsumer(dispatchProcess.getTask(), dispatchProcess.getDispatch());
+        }
+    }
 }
