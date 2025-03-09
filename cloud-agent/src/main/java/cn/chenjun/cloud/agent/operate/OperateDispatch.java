@@ -69,6 +69,7 @@ public class OperateDispatch implements CommandLineRunner {
         ResultUtil<Object> executeResult = null;
         Connect connect = null;
         try {
+            log.info("开始执行任务:{}-{}",task.getCommand(),task.getTaskId());
             long startTime = System.currentTimeMillis();
             connect = connectPool.borrowObject();
             Object param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());

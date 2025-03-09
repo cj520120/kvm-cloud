@@ -46,7 +46,9 @@ public class TaskPoolUtil {
     }
 
     public static int size() {
-        return TASK_QUEUE.size();
+        synchronized (SYNC_OBJECT) {
+            return TASK_MAP.size();
+        }
     }
 
     public static void remove(String taskId) {
