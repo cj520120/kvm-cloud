@@ -27,7 +27,7 @@ public class VolumeController extends BaseController {
     }
 
     @GetMapping("/api/volume/not/attach/all")
-    public ResultUtil<List<VolumeModel>> listNoAttachVolumes(@RequestParam("guestId") int guestId) {
+    public ResultUtil<List<VolumeModel>> listNoAttachVolumes(@RequestParam(value = "guestId",defaultValue = "0") int guestId) {
         return this.lockRun(() -> this.volumeService.listNoAttachVolumes(guestId));
     }
 

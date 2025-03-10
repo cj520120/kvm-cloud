@@ -243,7 +243,6 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .description(name)
                 .systemCategory(SystemCategory.CENTOS)
                 .bootstrapType(BootstrapType.BIOS)
-                .busType(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
                 .cpu(systemCpu)
                 .share(systemCpuShare)
                 .memory(systemMemory)
@@ -281,6 +280,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .volumeId(volume.getVolumeId())
                 .guestId(guest.getGuestId())
                 .deviceId(0)
+                .deviceBus(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
                 .build();
         this.guestDiskMapper.insert(guestDisk);
         GuestNetworkEntity guestNetwork;

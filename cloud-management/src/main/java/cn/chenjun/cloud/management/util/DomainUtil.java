@@ -13,7 +13,7 @@ public class DomainUtil {
     public static String buildDiskXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, StorageEntity storage, VolumeEntity volume, int deviceId,String deviceType) {
         Map<String, Object> map = new HashMap<>();
         map.put("storage", ParamBuilder.buildStorageParam(storage));
-        map.put("disk", ParamBuilder.buildDiskParam(guest, volume, deviceId));
+        map.put("disk", ParamBuilder.buildDiskParam( volume, deviceId,deviceType));
         map.put("__SYS__", systemConfig);
         return TemplateUtil.create().render(tpl, map);
     }

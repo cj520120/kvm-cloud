@@ -519,6 +519,14 @@ export const detachGuestCdRoom = (data = {}) => {
     method: "POST",
   });
 };
+
+export const modifyAttachGuestDisk = (data = {}) => {
+  return axios.request({
+    url: "/api/guest/disk/device/modify",
+    data,
+    method: "POST",
+  });
+};
 export const attachGuestDisk = (data = {}) => {
   return axios.request({
     url: "api/guest/disk/attach",

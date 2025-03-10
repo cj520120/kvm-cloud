@@ -29,7 +29,6 @@
 						<img :src="get_system_category_image(show_guest_info.current_guest)" style="width: 24px; height: 24px; float: left" />
 						<div style="line-height: 24px; margin-left: 5px; float: left">{{ get_system_category_name(show_guest_info.current_guest) }}</div>
 					</el-descriptions-item>
-					<el-descriptions-item label="总线类型">{{ show_guest_info.current_guest.busType }}</el-descriptions-item>
 					<el-descriptions-item label="固件">{{ get_bootstrap_type_name(show_guest_info.current_guest) }}</el-descriptions-item>
 					<el-descriptions-item label="CPU">{{ show_guest_info.current_guest.cpu }}核</el-descriptions-item>
 					<el-descriptions-item label="内存">{{ get_memory_display_size(show_guest_info.current_guest.memory) }}</el-descriptions-item>
@@ -62,6 +61,11 @@
 						<el-table :v-loading="show_guest_info.volume_loading" :data="show_guest_info.volumes" style="width: 100%">
 							<el-table-column label="ID" prop="volumeId" width="80" />
 							<el-table-column label="描述" prop="description" width="200" />
+							<el-table-column label="驱动方式" width="200">
+								<template #default="scope">
+									{{ scope.row.attach.deviceBus }}
+								</template>
+							</el-table-column>
 							<el-table-column label="容量" prop="capacity" width="150">
 								<template #default="scope">
 									{{ get_volume_display_size(scope.row.capacity) }}
@@ -76,6 +80,7 @@
 							<el-table-column label="操作" width="180">
 								<template #default="scope">
 									<el-button type="text" @click="show_volume_info(scope.row.volumeId)">详情</el-button>
+									<el-button type="text" @click="show_modify_disk_dialog(scope.row)">修改</el-button>
 									<el-button style="margin-left: 10px" type="text" @click="detach_volume_click(scope.row)" :disabled="scope.row.attach.deviceId === 0">卸载磁盘</el-button>
 								</template>
 							</el-table-column>
@@ -98,6 +103,23 @@
 					</el-tab-pane>
 				</el-tabs>
 			</el-row>
+
+			<el-dialog title="修改挂载驱动" :visible.sync="modify_disk_attach_dialog_visable" width="400px">
+				<el-form ref="create_dialog_form_ref" :model="modify_attach_disk" label-width="100px" class="demo-ruleForm">
+					<el-form-item label="驱动方式">
+						<el-select v-model="modify_attach_disk.deviceBus" style="width: 100%" placeholder="驱动方式">
+							<el-option label="virtio" value="virtio" />
+							<el-option label="scsi" value="scsi" />
+							<el-option label="sata" value="sata" />
+							<el-option label="ide" value="ide" :disabled="modify_attach_disk.deviceId !== 0" />
+						</el-select>
+					</el-form-item>
+				</el-form>
+				<span slot="footer" class="dialog-footer">
+					<el-button @click="modify_disk_attach_dialog_visable = false">取 消</el-button>
+					<el-button type="primary" @click="modify_attach_disk_click">确 定</el-button>
+				</span>
+			</el-dialog>
 		</el-card>
 		<ReInstallComponentVue ref="ReInstallComponentVueRef" @back="show_type = 0" @finish="on_finish_reinstall" v-show="show_type === 1" />
 		<HostInfoComponent ref="HostInfoComponentRef" v-show="this.show_type === 2" @back="show_host_return" />
@@ -127,7 +149,7 @@ import VolumeInfoComponent from '@/components/VolumeInfoComponent'
 import MigrateGuestComponent from '@/components/MigrateGuestComponent'
 import ConfigComponent from '@/components/ConfigComponent.vue'
 import Notify from '@/api/notify'
-import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo } from '@/api/api'
+import { destroyGuest, getTemplateInfo, getSchemeInfo, getHostInfo, getGuestVolumes, getGuestNetworks, rebootGuest, detachGuestCdRoom, detachGuestNetwork, detachGuestDisk, getGuestInfo, modifyAttachGuestDisk } from '@/api/api'
 
 export default {
 	name: 'GuestInfoComponent',
@@ -159,9 +181,15 @@ export default {
 	},
 	data() {
 		return {
+			modify_disk_attach_dialog_visable: false,
 			show_type: 0,
 			guest_loading: false,
 			show_guest_id: 0,
+			modify_attach_disk: {
+				guestId: 0,
+				deviceId: 0,
+				deviceBus: 'virtio'
+			},
 			show_guest_info: {
 				guestId: 0,
 				volume_loading: false,
@@ -171,7 +199,6 @@ export default {
 					guestId: 0,
 					name: '',
 					description: '',
-					busType: 'virtio',
 					cpu: 1,
 					memory: 524288,
 					share: 500,
@@ -493,6 +520,28 @@ export default {
 					this.on_back_click()
 				}
 			}
+		},
+		show_modify_disk_dialog(vol) {
+			this.modify_attach_disk.guestId = this.show_guest_id
+			this.modify_attach_disk.deviceId = vol.attach.deviceId
+			this.modify_attach_disk.deviceBus = vol.attach.deviceBus
+			this.modify_disk_attach_dialog_visable = true
+		},
+		modify_attach_disk_click() {
+			modifyAttachGuestDisk(this.modify_attach_disk).then((res) => {
+				if (res.code === 0) {
+					let findIndex = this.show_guest_info.volumes.findIndex((v) => v.volumeId === res.data.volumeId)
+					if (findIndex >= 0) {
+						this.$set(this.show_guest_info.volumes, findIndex, res.data)
+					}
+					this.modify_disk_attach_dialog_visable = false
+				} else {
+					this.$notify.error({
+						title: '错误',
+						message: `修改挂载驱动信息失败:${res.message}`
+					})
+				}
+			})
 		}
 	}
 }

@@ -4,14 +4,6 @@
 			<el-form-item label="名称" prop="description">
 				<el-input v-model="modify_guest.description"></el-input>
 			</el-form-item>
-			<el-form-item label="总线方式">
-				<el-select v-model="modify_guest.busType" style="width: 100%" placeholder="总线方式">
-					<el-option label="virtio" value="virtio" />
-					<el-option label="ide" value="ide" />
-					<el-option label="scsi" value="scsi" />
-					<el-option label="sata" value="sata" />
-				</el-select>
-			</el-form-item>
 			<el-form-item label="操作系统">
 				<el-select v-model="modify_guest.systemCategory" style="width: 100%" placeholder="操作系统">
 					<el-option label="Centos" :value="101" />
@@ -21,6 +13,8 @@
 					<el-option label="RedHat" :value="104" />
 					<el-option label="Debian" :value="105" />
 					<el-option label="OpenEuler" :value="106" />
+					<el-option label="UOS" :value="107" />
+					<el-option label="OracleLinux" :value="108" />
 					<el-option label="Linux" :value="100" />
 					<el-option label="Unix" :value="200" />
 					<el-option label="Android" :value="400" />
@@ -60,7 +54,6 @@ export default {
 			modify_guest: {
 				guestId: 0,
 				groupId: 0,
-				busType: '',
 				description: '',
 				schemeId: '',
 				bootstrapType: 0,
@@ -75,7 +68,6 @@ export default {
 			this.modify_guest.groupId = guest.groupId
 			this.modify_guest.description = guest.description
 			this.modify_guest.schemeId = guest.schemeId
-			this.modify_guest.busType = guest.busType
 			this.modify_guest_dialog_visiable = true
 			this.modify_guest.systemCategory = guest.systemCategory
 			this.modify_guest.bootstrapType = guest.bootstrapType

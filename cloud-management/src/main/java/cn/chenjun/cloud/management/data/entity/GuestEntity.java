@@ -50,8 +50,6 @@ public class GuestEntity {
     private String name;
     @TableField(GUEST_DESCRIPTION)
     private String description;
-    @TableField(GUEST_BUS_TYPE)
-    private String busType;
     @TableField(GUEST_CPU)
     private Integer cpu;
     @TableField(GUEST_CPU_SPEED)

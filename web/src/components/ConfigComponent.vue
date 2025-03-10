@@ -28,7 +28,7 @@
 			</el-row>
 		</el-card>
 
-		<el-dialog title="查看配置项" :visible.sync="info_dialog_visable" width="50%">
+		<el-dialog :close-on-click-modal="false" title="查看配置项" :visible.sync="info_dialog_visable" width="50%">
 			<el-form ref="create_dialog_form_ref" :model="show_config" label-width="50px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="key">
 					<strong>{{ show_config.key }}</strong>
@@ -42,7 +42,7 @@
 				<el-button @click="info_dialog_visable = false">取 消</el-button>
 			</span>
 		</el-dialog>
-		<el-dialog title="创建配置项" :visible.sync="create_dialog_visable" width="50%">
+		<el-dialog :close-on-click-modal="false" title="创建配置项" :visible.sync="create_dialog_visable" width="50%">
 			<el-form ref="create_dialog_form_ref" :model="create_config" label-width="50px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="key">
 					<el-input v-model="create_config.key"></el-input>
@@ -56,7 +56,7 @@
 				<el-button type="primary" @click="create_config_click" :disabled="create_config.key === ''">确 定</el-button>
 			</span>
 		</el-dialog>
-		<el-dialog title="编辑配置项" :visible.sync="modify_dialog_visable" width="50%">
+		<el-dialog :close-on-click-modal="false" title="编辑配置项" :visible.sync="modify_dialog_visable" width="50%">
 			<el-form :model="modify_config" label-width="50px" class="demo-ruleForm">
 				<el-form-item label="名称" prop="key">
 					<strong>{{ modify_config.key }}</strong>

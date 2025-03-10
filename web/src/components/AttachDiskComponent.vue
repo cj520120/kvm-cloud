@@ -6,6 +6,14 @@
 					<el-option v-for="item in this.attach_volumes" :key="item.volumeId" :label="item.description" :value="item.volumeId" />
 				</el-select>
 			</el-form-item>
+
+			<el-form-item label="驱动方式">
+				<el-select v-model="attach_volume_guest.deviceType" style="width: 100%" placeholder="驱动方式">
+					<el-option label="virtio" value="virtio" />
+					<el-option label="scsi" value="scsi" />
+					<el-option label="sata" value="sata" />
+				</el-select>
+			</el-form-item>
 		</el-form>
 		<span slot="footer" class="dialog-footer">
 			<el-button @click="attach_volume_dialog_visiable = false">取 消</el-button>
@@ -23,7 +31,8 @@ export default {
 			attach_volumes: [],
 			attach_volume_guest: {
 				guestId: 0,
-				volumeId: ''
+				volumeId: '',
+				deviceType: 'virtio'
 			}
 		}
 	},

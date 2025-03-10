@@ -18,7 +18,6 @@ public class GuestModel {
     private int guestId;
     private String name;
     private String description;
-    private String busType;
     private int cpu;
     private long memory;
     private int share;

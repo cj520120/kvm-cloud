@@ -112,7 +112,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             Map<String,Object> configMap=new HashMap<>();
             configMap.putAll(sysconfig);
             configMap.putAll(volumeConfigMap);
-            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guest.getBusType(),configMap));
+            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guestDisk.getDeviceBus(),configMap));
         }
         return disks;
     }

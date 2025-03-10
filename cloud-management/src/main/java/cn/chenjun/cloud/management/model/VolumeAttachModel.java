@@ -17,4 +17,5 @@ public class VolumeAttachModel {
     private int guestId;
     private String description;
     private int deviceId;
+    private String deviceBus;
 }

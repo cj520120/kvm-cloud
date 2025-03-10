@@ -12,8 +12,8 @@
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
-						<el-form-item label="总线方式">
-							<el-select v-model="create_guest.busType" style="width: 100%" placeholder="总线方式">
+						<el-form-item label="磁盘总线">
+							<el-select v-model="create_guest.deviceBus" style="width: 100%" placeholder="总线方式">
 								<el-option label="virtio" value="virtio" />
 								<el-option label="ide" value="ide" />
 								<el-option label="scsi" value="scsi" />
@@ -169,7 +169,7 @@ export default {
 				type: 0,
 				groupId: 0,
 				description: '',
-				busType: 'virtio',
+				deviceBus: 'virtio',
 				hostId: 0,
 				schemeId: '',
 				networkId: '',

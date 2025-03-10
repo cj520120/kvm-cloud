@@ -24,6 +24,7 @@ public class GuestDiskEntity {
     public static final String GUEST_ID = "guest_id";
     public static final String VOLUME_ID = "volume_id";
     public static final String DEVICE_ID = "device_id";
+    public static final String DEVICE_BUS = "device_bus";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO, value = GUEST_DISK_ID)
@@ -34,6 +35,8 @@ public class GuestDiskEntity {
     private Integer volumeId;
     @TableField(DEVICE_ID)
     private Integer deviceId;
+    @TableField(DEVICE_BUS)
+    private String deviceBus;
     @TableField(CREATE_TIME)
     private Date createTime;
 

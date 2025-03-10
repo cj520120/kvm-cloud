@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
  * 更改磁盘挂载
  *
@@ -36,7 +37,17 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
             case cn.chenjun.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
             case cn.chenjun.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
                 GuestEntity guest = guestMapper.selectById(param.getGuestId());
-                if (guest.getHostId() > 0) {
+                boolean isSupportHotplugged = false;
+                switch (param.getDeviceBus()) {
+                    case Constant.DiskDriveType.VIRTIO:
+                    case Constant.DiskDriveType.SCSI:
+                        //只有virtio和scsi支持热拔插
+                        isSupportHotplugged = true;
+                        break;
+                    default:
+                        break;
+                }
+                if (isSupportHotplugged && guest.getHostId() > 0) {
                     HostEntity host = hostMapper.selectById(guest.getHostId());
                     StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
                     if (storage == null) {
@@ -51,7 +62,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                     Map<String,Object> configMap=new HashMap<>();
                     configMap.putAll(guestConfig);
                     configMap.putAll(volumeConfigMap);
-                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(),  guest.getBusType(),configMap);
+                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);
                     ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
                     if (param.isAttach()) {
                         this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);

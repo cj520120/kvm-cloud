@@ -15,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class ChangeGuestDiskOperate extends BaseOperateParam {
     private int deviceId;
+    private String deviceBus;
     private int volumeId;
     private int guestId;
     private boolean attach;

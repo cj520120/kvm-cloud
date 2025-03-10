@@ -87,6 +87,9 @@ public abstract class AbstractService {
 
 
     protected int getAllowHostId(GuestEntity guest) {
+        if(guest==null){
+            return 0;
+        }
         int hostId=this.configService.getConfig(Arrays.asList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
         if(hostId==0) {
             if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
@@ -133,7 +136,7 @@ public abstract class AbstractService {
 
     protected VolumeModel initVolume(GuestDiskEntity disk) {
         VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
-        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).guestDiskId(disk.getGuestDiskId()).build());
+        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).deviceBus(disk.getDeviceBus()).guestDiskId(disk.getGuestDiskId()).build());
         return model;
     }
 
@@ -174,7 +177,7 @@ public abstract class AbstractService {
         if (disk != null && disk.getGuestId() != 0) {
             GuestEntity guest = this.guestMapper.selectById(disk.getGuestId());
             if (guest != null) {
-                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).description(guest.getDescription()).guestDiskId(disk.getGuestDiskId()).build());
+                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).deviceBus(disk.getDeviceBus()).description(guest.getDescription()).guestDiskId(disk.getGuestDiskId()).build());
             }
         }
         return model;

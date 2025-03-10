@@ -1,7 +1,9 @@
 package cn.chenjun.cloud.management.util;
 
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import com.google.gson.reflect.TypeToken;
 
@@ -34,7 +36,6 @@ public class ParamBuilder {
         map.put("name", guest.getName());
         map.put("description", guest.getDescription());
         map.put("memory", guest.getMemory());
-        map.put("bus", guest.getBusType());
         map.put("bootstrapType", guest.getBootstrapType());
         return map;
     }
@@ -89,14 +90,27 @@ public class ParamBuilder {
         return map;
     }
 
-    public static Map<String, Object> buildDiskParam(GuestEntity guest, VolumeEntity volume, int deviceId) {
-        String bus = deviceId == 0 ? guest.getBusType() : Constant.DiskDriveType.VIRTIO;
-        String targetName = "vd" + (char) ('a' + deviceId);
+    public static Map<String, Object> buildDiskParam(VolumeEntity volume, int deviceId, String deviceType) {
+        String targetName;
+        switch (deviceType) {
+            case Constant.DiskDriveType.IDE:
+                targetName = "hd" + (char) ('a' + deviceId + 1);
+                break;
+            case Constant.DiskDriveType.SCSI:
+            case Constant.DiskDriveType.SATA:
+                targetName = "sd" + (char) ('a' + deviceId);
+                break;
+            case Constant.DiskDriveType.VIRTIO:
+                targetName = "vd" + (char) ('a' + deviceId);
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的磁盘驱动:" + deviceType);
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("deviceId", deviceId);
         map.put("target", targetName);
         map.put("type", volume.getType());
-        map.put("bus", bus);
+        map.put("bus", deviceType);
         map.put("name", volume.getName());
         return map;
     }

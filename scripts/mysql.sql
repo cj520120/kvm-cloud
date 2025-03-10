@@ -81,15 +81,16 @@ DROP TABLE IF EXISTS `tbl_guest_disk`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_guest_disk` (
-  `guest_disk_id` int NOT NULL AUTO_INCREMENT,
-  `guest_id` int NOT NULL,
-  `volume_id` int NOT NULL,
-  `device_id` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `guest_disk_id` int(11) NOT NULL AUTO_INCREMENT,
+  `guest_id` int(11) NOT NULL,
+  `volume_id` int(11) NOT NULL,
+  `device_id` int(11) NOT NULL,
+  `device_bus` varchar(10) NOT NULL DEFAULT 'virtio',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_disk_id`),
   UNIQUE KEY `IX_GUEST_VOLUME` (`guest_id`,`device_id`),
   UNIQUE KEY `IX_VOLUME_ID` (`volume_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7052 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=691 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,29 +101,28 @@ DROP TABLE IF EXISTS `tbl_guest_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_guest_info` (
-  `guest_id` int NOT NULL AUTO_INCREMENT,
-  `system_category` int NOT NULL DEFAULT '100',
+  `guest_id` int(11) NOT NULL AUTO_INCREMENT,
+  `system_category` int(11) NOT NULL DEFAULT '100',
   `guest_name` varchar(45) NOT NULL,
   `guest_description` varchar(45) NOT NULL,
-  `guest_bus_type` varchar(10) NOT NULL,
-  `guest_cpu` int NOT NULL,
-  `guest_cpu_share` int NOT NULL DEFAULT '0',
-  `guest_memory` bigint NOT NULL,
-  `guest_cd_room` int NOT NULL,
-  `host_id` int NOT NULL,
-  `last_host_id` int NOT NULL,
-  `scheme_id` int NOT NULL DEFAULT '0',
+  `guest_cpu` int(11) NOT NULL,
+  `guest_cpu_share` int(11) NOT NULL DEFAULT '0',
+  `guest_memory` bigint(20) NOT NULL,
+  `guest_cd_room` int(11) NOT NULL,
+  `host_id` int(11) NOT NULL,
+  `last_host_id` int(11) NOT NULL,
+  `scheme_id` int(11) NOT NULL DEFAULT '0',
   `guest_ip` varchar(48) NOT NULL DEFAULT '',
   `network_id` varchar(45) NOT NULL DEFAULT '0',
-  `guest_type` int NOT NULL,
-  `guest_bootstrap_type` int NOT NULL DEFAULT '0',
-  `group_id` int NOT NULL DEFAULT '0',
-  `other_id` int NOT NULL,
-  `guest_status` int NOT NULL,
+  `guest_type` int(11) NOT NULL,
+  `guest_bootstrap_type` int(11) NOT NULL DEFAULT '0',
+  `group_id` int(11) NOT NULL DEFAULT '0',
+  `other_id` int(11) NOT NULL,
+  `guest_status` int(11) NOT NULL,
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6975 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

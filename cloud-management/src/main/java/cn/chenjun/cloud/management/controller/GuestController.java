@@ -69,7 +69,7 @@ public class GuestController extends BaseController {
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
                                               @RequestParam(value = "systemCategory") int systemCategory,
                                               @RequestParam("bootstrapType") int bootstrapType,
-                                              @RequestParam("busType") String busType,
+                                              @RequestParam("deviceBus") String deviceBus,
                                               @RequestParam(value = "metaData", defaultValue = "{}") String metaData,
                                               @RequestParam(value = "userData", defaultValue = "{}") String userData,
                                               @RequestParam("groupId") int groupId,
@@ -86,13 +86,14 @@ public class GuestController extends BaseController {
         }.getType());
         Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
-        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, busType, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, metaMap, userMap, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, metaMap, userMap, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/reinstall")
     public ResultUtil<GuestModel> reInstall(@RequestParam("guestId") int guestId,
                                             @RequestParam("systemCategory") int systemCategory,
                                             @RequestParam("bootstrapType") int bootstrapType,
+                                            @RequestParam("deviceBus") String deviceBus,
                                             @RequestParam("isoTemplateId") int isoTemplateId,
                                             @RequestParam("diskTemplateId") int diskTemplateId,
                                             @RequestParam("volumeId") int volumeId,
@@ -106,7 +107,7 @@ public class GuestController extends BaseController {
         Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
 
-        return this.lockRun(() -> this.guestService.reInstall(guestId, systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.reInstall(guestId, deviceBus,systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/start/batch")
@@ -156,10 +157,17 @@ public class GuestController extends BaseController {
         return this.lockRun(() -> this.guestService.detachCdRoom(guestId));
     }
 
+    @PostMapping("/api/guest/disk/device/modify")
+    public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(@RequestParam("guestId") int guestId,
+                                                         @RequestParam("deviceId") int deviceId,
+                                                         @RequestParam("deviceBus") String deviceBus) {
+        return this.lockRun(() -> this.guestService.modifyGuestDiskDeviceType(guestId, deviceId,deviceBus));
+    }
     @PostMapping("/api/guest/disk/attach")
     public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
-                                                         @RequestParam("volumeId") int volumeId) {
-        return this.lockRun(() -> this.guestService.attachDisk(guestId, volumeId));
+                                                         @RequestParam("volumeId") int volumeId,
+                                                         @RequestParam("deviceType") String deviceType) {
+        return this.lockRun(() -> this.guestService.attachDisk(guestId, volumeId,deviceType));
     }
 
     @PostMapping("/api/guest/disk/detach")
@@ -188,11 +196,10 @@ public class GuestController extends BaseController {
     public ResultUtil<GuestModel> updateGuest(@RequestParam("guestId") int guestId,
                                               @RequestParam("systemCategory") int systemCategory,
                                               @RequestParam("bootstrapType") int bootstrapType,
-                                              @RequestParam("busType") String busType,
                                               @RequestParam("description") String description,
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("groupId") int groupId) {
-        return this.lockRun(() -> this.guestService.modifyGuest(guestId, systemCategory, bootstrapType, groupId, busType, description, schemeId));
+        return this.lockRun(() -> this.guestService.modifyGuest(guestId, systemCategory, bootstrapType, groupId, description, schemeId));
     }
 
     @DeleteMapping("/api/guest/destroy")

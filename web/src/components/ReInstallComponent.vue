@@ -52,6 +52,8 @@
 								<el-option label="RedHat" :value="104" />
 								<el-option label="Debian" :value="105" />
 								<el-option label="OpenEuler" :value="106" />
+								<el-option label="UOS" :value="107" />
+								<el-option label="OracleLinux" :value="108" />
 								<el-option label="Linux" :value="100" />
 								<el-option label="Unix" :value="200" />
 								<el-option label="Android" :value="400" />
@@ -89,6 +91,16 @@
 				</el-row>
 				<el-row>
 					<el-col :span="8">
+						<el-form-item label="磁盘总线">
+							<el-select v-model="reinstall_guest.deviceBus" style="width: 100%" placeholder="总线方式">
+								<el-option label="virtio" value="virtio" />
+								<el-option label="ide" value="ide" />
+								<el-option label="scsi" value="scsi" />
+								<el-option label="sata" value="sata" />
+							</el-select>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">
 						<el-form-item label="磁盘大小">
 							<el-input v-model="reinstall_guest.size" :disabled="reinstall_guest.type === 3">
 								<template slot="append">GB</template>
@@ -116,6 +128,7 @@ export default {
 				diskTemplateId: '',
 				volumeId: '',
 				storageId: 0,
+				deviceBus: 'virtio',
 				size: 100,
 				bootstrapType: 0,
 				systemCategory: 100
@@ -139,7 +152,7 @@ export default {
 			this.$emit('back')
 		},
 		async load_all_attach_volumes() {
-			await getNotAttachVolumeList().then((res) => {
+			await getNotAttachVolumeList({ guestId: this.reinstall_guest.guestId }).then((res) => {
 				if (res.code === 0) {
 					this.attach_volumes = res.data
 				}

@@ -53,31 +53,35 @@ public class ComponentCheckRunner extends AbstractRunner {
             List<ConfigQuery> queryList=new ArrayList<>();
             queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
             queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
-            if(Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)){
-                continue;
-            }
+            boolean isCheckComponentEnable=Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.YES);
             if (network.getStatus() == Constant.NetworkStatus.READY || network.getStatus() == Constant.NetworkStatus.INSTALL) {
-                List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
-                for (ComponentEntity component : components) {
-                    processPluginRegistry.getPluginFor(component.getComponentType()).ifPresent(componentProcess -> componentProcess.checkAndStart(network, component));
-                }
-                //检测Route组件
-                ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, network.getNetworkId()).last("limit 0 ,1"));
-                if (component == null) {
-                    return;
-                }
-                List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-                }.getType());
-                componentGuestIds.add(component.getMasterGuestId());
-                List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
-                if (network.getStatus() == Constant.NetworkStatus.INSTALL && !componentGuestList.isEmpty()) {
-                    //检测route组件是否已经初始化
+                if(isCheckComponentEnable) {
+                    List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
+                    for (ComponentEntity component : components) {
+                        processPluginRegistry.getPluginFor(component.getComponentType()).ifPresent(componentProcess -> componentProcess.checkAndStart(network, component));
+                    }
+                    //检测Route组件
+                    ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, network.getNetworkId()).last("limit 0 ,1"));
+                    if (component == null) {
+                        return;
+                    }
+                    List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
+                    }.getType());
+                    componentGuestIds.add(component.getMasterGuestId());
+                    List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
+                    if (network.getStatus() == Constant.NetworkStatus.INSTALL && !componentGuestList.isEmpty()) {
+                        //检测route组件是否已经初始化
+                        network.setStatus(Constant.NetworkStatus.READY);
+                        networkMapper.updateById(network);
+                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+                    } else if (network.getStatus() == Constant.NetworkStatus.READY && componentGuestList.isEmpty()) {
+                        //检测route组件
+                        network.setStatus(Constant.NetworkStatus.INSTALL);
+                        networkMapper.updateById(network);
+                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+                    }
+                }else if(network.getStatus() == Constant.NetworkStatus.INSTALL){
                     network.setStatus(Constant.NetworkStatus.READY);
-                    networkMapper.updateById(network);
-                    this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-                } else if (network.getStatus() == Constant.NetworkStatus.READY && componentGuestList.isEmpty()) {
-                    //检测route组件
-                    network.setStatus(Constant.NetworkStatus.INSTALL);
                     networkMapper.updateById(network);
                     this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
                 }
