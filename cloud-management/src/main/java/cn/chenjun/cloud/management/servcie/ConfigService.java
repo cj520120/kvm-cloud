@@ -35,6 +35,7 @@ public class ConfigService {
 
     public ConfigService(@Autowired ApplicationConfig applicationConfig) {
         initDefaultConfig(ConfigKey.DEFAULT_MANAGER_URI, false, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_BASE_URI, false, "/", "Websocket通信基础地址(用于VNC和页面实时更新)", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, true, Constant.Enable.YES, "是否启动网络组件(特殊情况下使用)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, false, cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, false, "8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);

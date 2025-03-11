@@ -1,6 +1,6 @@
 <template>
 	<div id="main" class="login-container">
-		<el-form ref="ruleForm2" class="demo-ruleForm login-page" label-position="left" label-width="0px" status-icon v-if="show_type === 'Login' && !this.oauth.enalbe">
+		<el-form ref="ruleForm2" class="demo-ruleForm login-page" label-position="left" label-width="0px" status-icon v-if="show_type === 'Login' && !this.oauth2.enable">
 			<h3 class="title">KVM Cloud Login</h3>
 			<el-form-item prop="username">
 				<el-input v-model="loginData.loginName" auto-complete="off" autofocus="true" placeholder="用户名" prefix-icon="el-icon-s-custom" type="text"></el-input>
@@ -14,11 +14,11 @@
 		</el-form>
 
 		<el-form class="login-page" label-position="left" label-width="0px" status-icon v-if="show_type === 'Loading'">
-			<div class="title">{{ this.oauth.title }}</div>
+			<div class="title">{{ this.oauth2.title }}</div>
 			<div style="height: 80px; font-size: 30px; margin-bottom: 10px" v-loading="true" element-loading-spinner="el-icon-loading" element-loading-text="正在登录,请稍后..."></div>
 		</el-form>
 		<el-form class="login-page" label-position="left" label-width="0px" status-icon v-if="show_type === 'Error'">
-			<div class="title">{{ this.oauth.title }}</div>
+			<div class="title">{{ this.oauth2.title }}</div>
 			<div>
 				<strong style="color: red">{{ this.errorMessage }}</strong>
 			</div>
@@ -38,7 +38,7 @@ export default {
 				loginName: '',
 				password: ''
 			},
-			oauth: {
+			oauth2: {
 				enable: false,
 				title: ' Oauth2 登录'
 			},
@@ -51,11 +51,11 @@ export default {
 		this.check_full_screen(true)
 		getSystemConfig().then((res) => {
 			if (res.code === 0) {
-				if (res.data.oauth) {
-					this.oauth.title = res.data.oauth.title
-					this.oauth.enable = res.data.oauth.enable
+				if (res.data.oauth2) {
+					this.oauth2.title = res.data.oauth2.title
+					this.oauth2.enable = res.data.oauth2.enable
 				}
-				if (this.oauth.enable) {
+				if (this.oauth2.enable) {
 					let code = this.$route.query.code
 					if (code && code !== '') {
 						oauth2Login({ code: code }).then((res) => {

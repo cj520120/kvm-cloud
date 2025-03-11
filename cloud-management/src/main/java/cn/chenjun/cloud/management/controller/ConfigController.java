@@ -3,15 +3,14 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.ConfigModel;
+import cn.chenjun.cloud.management.model.SystemConfigModel;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author chenjun
@@ -22,13 +21,13 @@ public class ConfigController extends BaseController {
     private ConfigService configService;
 
     @GetMapping("/api/config")
-    public ResultUtil<Map<String, Object>> getSystemConfig() {
-        Map<String, Object> oauth = new HashMap<>(3);
-        oauth.put("enable", Constant.Enable.YES.equals(this.configService.getConfig(ConfigKey.OAUTH2_ENABLE)));
-        oauth.put("title", this.configService.getConfig(ConfigKey.OAUTH2_TITLE));
-        Map<String, Object> map = new HashMap<>(1);
-        map.put("oauth", oauth);
-        return ResultUtil.<Map<String, Object>>builder().data(map).build();
+    public ResultUtil<SystemConfigModel> getSystemConfig() {
+        SystemConfigModel.Oauth2 oauth2 = SystemConfigModel.Oauth2.builder()
+                .enable(Constant.Enable.YES.equals(this.configService.getConfig(ConfigKey.OAUTH2_ENABLE)))
+                .title(this.configService.getConfig(ConfigKey.OAUTH2_TITLE))
+                .build();
+        SystemConfigModel model = SystemConfigModel.builder().oauth2(oauth2).baseUri(this.configService.getConfig(ConfigKey.DEFAULT_BASE_URI)).build();
+        return ResultUtil.success(model);
     }
 
     @LoginRequire

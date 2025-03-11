@@ -101,6 +101,9 @@ export default {
 			this.show_volume_id = volume.volumeId
 			this.show_volume = volume
 			this.show_type = 0
+			this.volume_loading = false
+			this.storage = {}
+			this.template = {}
 			this.$refs.ConfigComponentRef.init(5, this.show_volume.volumeId)
 			await this.init_volume_template()
 			await this.init_volume_storage()
@@ -135,6 +138,7 @@ export default {
 		},
 		async init(volumeId) {
 			this.show_volume_id = volumeId
+			this.volume_loading = true
 			this.reload_page()
 		},
 		notify_volume_update(volume) {

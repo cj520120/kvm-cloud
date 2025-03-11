@@ -308,6 +308,8 @@ export default {
 			this.guest_loading = false
 			this.show_guest_info.guestId = guest.guestId
 			this.show_guest_info.current_guest = guest
+			this.show_guest_info.volumes = []
+			this.show_guest_info.networks = []
 			await this.load_current_guest_template(guest)
 			await this.load_current_guest_host(guest)
 			await this.load_current_guest_scheme(guest)
@@ -316,6 +318,9 @@ export default {
 			await this.$refs.ConfigComponentRef.init(2, guest.guestId)
 		},
 		async initGuestId(guestId) {
+			this.show_guest_info.guest_loading = true
+			this.show_guest_info.volume_loading = true
+			this.show_guest_info.network_loading = true
 			this.show_guest_id = guestId
 			this.reload_page()
 		},

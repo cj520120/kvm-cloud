@@ -57,7 +57,7 @@
 
 <script>
 import RFB from '@novnc/novnc/core/rfb'
-import { getGuestVncPassword } from '@/api/api'
+import { getGuestVncPassword, getSystemConfig } from '@/api/api'
 import keysymMixin from '@/api/keysym'
 import KeyboardLetters from '@/components/KeyboardLetters'
 import KeyboardNumbers from '@/components/KeyboardNumbers'
@@ -88,7 +88,8 @@ export default {
 			rfb: null,
 			connectionStatus: '连接中...',
 			guestId: this.$route.query.id,
-			guestDesc: this.$route.query.description
+			guestDesc: this.$route.query.description,
+			ws_base_uri: ''
 		}
 	},
 	computed: {
@@ -96,13 +97,21 @@ export default {
 			return this.isCollapse ? '64px' : '240px'
 		},
 		websocketUrl() {
-			const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-			return process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}/api/vnc/${this.guestId}` : `${protocol}://192.168.2.193:8080/api/vnc/${this.guestId}`
+			let baseUri
+			if (this.ws_base_uri.startsWith('ws://') || this.ws_base_uri.startsWith('wss://')) {
+				baseUri = this.ws_base_uri
+			} else {
+				const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+				baseUri = process.env.NODE_ENV === 'production' ? `${protocol}://${window.location.host}${this.ws_base_uri}` : `${protocol}://192.168.2.193:8080/`
+			}
+			return `${baseUri}api/vnc/${this.guestId}`
 		}
 	},
 	mounted() {
 		this.check_full_screen(true)
-		this.initVncConnection()
+	},
+	created() {
+		this.connnect_vnc_server()
 	},
 	beforeDestroy() {
 		this.check_full_screen(false)
@@ -111,6 +120,17 @@ export default {
 	methods: {
 		toggleCollapse() {
 			this.isCollapse = !this.isCollapse
+		},
+		connnect_vnc_server() {
+			getSystemConfig().then((res) => {
+				if (res.data.baseUri) {
+					this.ws_base_uri = res.data.baseUri
+					this.initVncConnection()
+				} else {
+					this.ws_base_uri = '/'
+					this.initVncConnection()
+				}
+			})
 		},
 		async initVncConnection() {
 			try {
@@ -130,7 +150,6 @@ export default {
 				this.connectionStatus = `连接失败: ${error.message}`
 			}
 		},
-
 		handleConnect() {
 			this.connectionStatus = `已连接至 ${this.guestDesc}`
 		},

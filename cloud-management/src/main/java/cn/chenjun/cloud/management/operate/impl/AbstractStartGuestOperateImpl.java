@@ -93,6 +93,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
         List<String> disks = new ArrayList<>();
         Map<Integer, StorageEntity> storageMap = Maps.newHashMap();
+        guestDiskEntityList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
         for (GuestDiskEntity guestDisk : guestDiskEntityList) {
             VolumeEntity volume = volumeMapper.selectById(guestDisk.getVolumeId());
             if (volume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY) {

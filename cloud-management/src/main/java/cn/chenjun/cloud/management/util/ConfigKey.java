@@ -25,6 +25,7 @@ public class ConfigKey {
     public static final String DEFAULT_ALLOCATE_HOST_MEMORY_WEIGHT = "default.allocate.memory.weight";
     public static final String DEFAULT_ALLOCATE_STORAGE_WEIGHT = "default.allocate.storage.weight";
     public static final String DEFAULT_MANAGER_URI = "default.manager.uri";
+    public static final String DEFAULT_BASE_URI = "default.base.uri";
 
     public static final String DEFAULT_DESTROY_DELAY_MINUTE = "default.destroy.delay.timeout.minutes";
     public static final String DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE = "default.vm.stop.max.wait.timeout.minutes";

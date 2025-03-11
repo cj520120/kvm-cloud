@@ -31,10 +31,10 @@ spring:
       max-open-prepared-statements: 32
       max-pool-prepared-statement-per-connection-size: 32
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-    password: 123456
+    password: KvmCloud@123456
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.1.90:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
-    username: root
+    url: jdbc:mysql://192.168.1.119:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
+    username: kvm-cloud
   redis:
     redisson:
       config: |
@@ -44,7 +44,7 @@ spring:
          timeout: 3000
          retryAttempts: 3
          retryInterval: 1500
-         address: "redis://192.168.1.90:6379"
+         address: "redis://192.168.1.119:6379"
          password: 
          database: 0
          subscriptionsPerConnection: 5

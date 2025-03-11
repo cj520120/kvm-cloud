@@ -150,14 +150,14 @@ export default {
 			this.storage_list = storage_list
 			this.migrate_storage_id = ''
 			this.storage_loading = false
-			this.$refs.ConfigComponentRef.init(4, this.show_storage.storageId)
+			this.this.$refs.ConfigComponentRef.init(4, this.show_storage.storageId)
 		},
 		async init(storageId) {
 			this.show_storage_id = storageId
 			this.migrate_storage_id
 			this.storage_list = []
 			this.migrate_storage_id = ''
-
+			this.storage_loading = true
 			this.$refs.ConfigComponentRef.init(4, storageId)
 			this.reload_page()
 		},

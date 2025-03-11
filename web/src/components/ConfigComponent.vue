@@ -108,7 +108,6 @@ export default {
 					hasKeyword = v.description.toLowerCase().indexOf(searchKeyword) >= 0 || v.key.indexOf(searchKeyword) >= 0
 				}
 				if (hasKeyword && v.intern) {
-					console.log(v)
 					hasKeyword = v.id > 0
 				}
 				return hasKeyword
