@@ -9,8 +9,8 @@
 
 			<el-form-item label="驱动方式">
 				<el-select v-model="attach_volume_guest.deviceType" style="width: 100%" placeholder="驱动方式">
-					<el-option label="virtio" value="virtio" />
 					<el-option label="scsi" value="scsi" />
+					<el-option label="virtio" value="virtio" />
 					<el-option label="sata" value="sata" />
 				</el-select>
 			</el-form-item>
@@ -32,7 +32,7 @@ export default {
 			attach_volume_guest: {
 				guestId: 0,
 				volumeId: '',
-				deviceType: 'virtio'
+				deviceType: 'scsi'
 			}
 		}
 	},

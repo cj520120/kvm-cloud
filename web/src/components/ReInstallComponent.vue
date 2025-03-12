@@ -93,9 +93,9 @@
 					<el-col :span="8">
 						<el-form-item label="磁盘总线">
 							<el-select v-model="reinstall_guest.deviceBus" style="width: 100%" placeholder="总线方式">
+								<el-option label="scsi" value="scsi" />
 								<el-option label="virtio" value="virtio" />
 								<el-option label="ide" value="ide" />
-								<el-option label="scsi" value="scsi" />
 								<el-option label="sata" value="sata" />
 							</el-select>
 						</el-form-item>
@@ -128,7 +128,7 @@ export default {
 				diskTemplateId: '',
 				volumeId: '',
 				storageId: 0,
-				deviceBus: 'virtio',
+				deviceBus: 'scsi',
 				size: 100,
 				bootstrapType: 0,
 				systemCategory: 100
