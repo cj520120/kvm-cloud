@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.operate.bean.CreateStorageOperate;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.servcie.TaskService;
+import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.MapUtil;
@@ -19,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,38 +40,39 @@ public class InitLocalStorageRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() throws Exception {
-        String path = this.configService.getConfig(ConfigKey.STORAGE_LOCAL_PATH);
-        String enable = this.configService.getConfig(ConfigKey.STORAGE_LOCAL_ENABLE);
-        if (Objects.equals(Constant.Enable.YES, enable)) {
-            Map<String, String> storageParm = MapUtil.of("path", path);
-            String paramStr = GsonBuilderUtil.create().toJson(storageParm);
             List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
             Map<Integer, HostEntity> hostMap = hostList.stream().collect(Collectors.toMap(HostEntity::getHostId, Function.identity()));
 
             if (!hostMap.isEmpty()) {
                 for (HostEntity host : hostMap.values()) {
-                    List<StorageEntity> storageList=this.storageMapper.selectList(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID,host.getHostId()).eq(StorageEntity.STORAGE_TYPE, cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL));
-                    if (storageList.stream().filter(v-> Objects.equals(v.getMountPath(),path)).count()==0) {
-                        String storageName = UUID.randomUUID().toString().replace("-", "").toUpperCase();
-                        String mountPath = path;
-                        StorageEntity storage = StorageEntity.builder()
-                                .description("Local Storage(" + host.getDisplayName() + ")")
-                                .name(storageName)
-                                .type(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)
-                                .hostId(host.getHostId())
-                                .param(paramStr)
-                                .mountPath(mountPath)
-                                .supportCategory(Constant.StorageSupportCategory.VOLUME)
-                                .allocation(0L)
-                                .capacity(0L)
-                                .available(0L)
-                                .status(Constant.StorageStatus.INIT)
-                                .build();
-                        this.storageMapper.insert(storage);
-                        BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
-                        this.operateTask.addTask(operateParam);
-                        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
-                    }
+                    List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
+                    String enable = this.configService.getConfig(queryList, ConfigKey.STORAGE_LOCAL_ENABLE);
+                    if (Objects.equals(Constant.Enable.YES, enable)) {
+                        String path = this.configService.getConfig(queryList, ConfigKey.STORAGE_LOCAL_PATH);
+                        Map<String, String> storageParm = MapUtil.of("path", path);
+                        String paramStr = GsonBuilderUtil.create().toJson(storageParm);
+                        List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, host.getHostId()).eq(StorageEntity.STORAGE_TYPE, cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL));
+                        if (storageList.stream().filter(v -> Objects.equals(v.getMountPath(), path)).count() == 0) {
+                            String storageName = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+                            String mountPath = path;
+                            StorageEntity storage = StorageEntity.builder()
+                                    .description("Local Storage(" + host.getDisplayName() + ")")
+                                    .name(storageName)
+                                    .type(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)
+                                    .hostId(host.getHostId())
+                                    .param(paramStr)
+                                    .mountPath(mountPath)
+                                    .supportCategory(Constant.StorageSupportCategory.VOLUME)
+                                    .allocation(0L)
+                                    .capacity(0L)
+                                    .available(0L)
+                                    .status(Constant.StorageStatus.INIT)
+                                    .build();
+                            this.storageMapper.insert(storage);
+                            BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
+                            this.operateTask.addTask(operateParam);
+                            this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                        }
 
                 }
             }
