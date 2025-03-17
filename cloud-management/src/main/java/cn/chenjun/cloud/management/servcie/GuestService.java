@@ -377,7 +377,7 @@ public class GuestService extends AbstractService {
                 } else if (hostId != allowHostId && allowHostId >0) {
                     throw new CodeException(ErrorCode.PARAM_ERROR, "该宿主机已经绑定了启动主机ID："+allowHostId);
                 }
-                guest.setHostId(hostId);
+                guest.setHostId(0);
                 guest.setStatus(Constant.GuestStatus.STARTING);
                 this.guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
