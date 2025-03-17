@@ -349,6 +349,7 @@ CREATE TABLE `tbl_storage_info` (
   `storage_description` varchar(45) NOT NULL,
   `storage_name` varchar(64) NOT NULL,
   `storage_support_category` int(11) NOT NULL DEFAULT '0',
+  `storage_host_id` int(11) NOT NULL,
   `storage_type` varchar(20) NOT NULL,
   `storage_parm` text NOT NULL,
   `storage_mount_path` varchar(1024) NOT NULL,
@@ -358,7 +359,7 @@ CREATE TABLE `tbl_storage_info` (
   `storage_status` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`storage_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

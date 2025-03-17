@@ -32,6 +32,11 @@ public class VncService {
                     .token(RandomStringUtils.randomAlphanumeric(16))
                     .build();
             this.guestVncMapper.insert(guestVncEntity);
+        }else{
+            if(guestVncEntity.getPassword().length()>8){
+                guestVncEntity.setPassword(RandomStringUtils.randomAlphanumeric(8));
+                this.guestVncMapper.updateById(guestVncEntity);
+            }
         }
         return guestVncEntity;
     }
