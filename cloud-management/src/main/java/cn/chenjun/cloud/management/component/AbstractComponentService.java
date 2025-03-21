@@ -192,28 +192,43 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     }
 
     private void startComponentGuest(GuestEntity guest, List<Integer> hostIds) {
-        Integer lastHostId = guest.getLastHostId();
-        //优先使用上次启动的主机
-        if (!hostIds.contains(lastHostId)) {
-            lastHostId = hostIds.get(0);
+        if (guest.getStatus().equals(Constant.GuestStatus.ERROR)) {
+            log.info("当前组件{}:{}状态错误，准备删除重建", this.getComponentName(), guest.getName());
+            this.guestService.destroyGuest(guest.getGuestId());
+            return;
         }
-        switch (guest.getStatus()) {
-            case Constant.GuestStatus.STOP:
-                guest.setStatus(Constant.GuestStatus.STARTING);
-                guest.setLastHostId(lastHostId);
+        if (!guest.getStatus().equals(Constant.GuestStatus.STOP)) {
+            log.info("当前组件{}:{}状态不是停止状态，无需操作", this.getComponentName(), guest.getName());
+            return;
+        }
+
+        Integer hostId = 0;
+        Integer allowHostId = this.guestService.getAllowHostId(guest);
+        if (allowHostId > 0) {
+            hostId = allowHostId;
+            if (!hostIds.contains(hostId)) {
+                log.info("当前组件{}:{}绑定了主机:{},但该主机未活跃", this.getComponentName(), guest.getName(), hostId);
+
+                return;
+            } else {
+                log.info("当前组件{}:{}绑定了主机:{},准备启动...", this.getComponentName(), guest.getName(), hostId);
+            }
+        } else {
+            hostId = guest.getLastHostId();
+            if (!hostIds.contains(hostId)) {
+                hostId = hostIds.get(0);
+            }
+        }
+        guest.setStatus(Constant.GuestStatus.STARTING);
+        guest.setLastHostId(hostId);
                 guestMapper.updateById(guest);
-                BaseOperateParam operateParam = StartComponentGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(lastHostId).componentType(this.getComponentType()).build();
+        BaseOperateParam operateParam = StartComponentGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(hostId).componentType(this.getComponentType()).build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                break;
-            case Constant.GuestStatus.ERROR:
-                this.guestService.destroyGuest(guest.getGuestId());
-                break;
-            default:
-                break;
-        }
+
         //从可用主机中删除组件主机
-        hostIds.remove(lastHostId);
+        Object removeHostId = hostId;
+        hostIds.removeIf(id -> Objects.equals(id, removeHostId));
     }
 
     private void destroySlaveGuest(GuestEntity guest) {

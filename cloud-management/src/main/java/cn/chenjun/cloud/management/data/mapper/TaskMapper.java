@@ -20,7 +20,7 @@ public interface TaskMapper extends BaseMapper<TaskEntity> {
      * @param taskId
      * @param expireTime
      */
-    @Update("update tbl_task_info set expire_time=#{expireTime} where task_id=#{taskId}")
+    @Update("update tbl_task_info set task_version=task_version+1,expire_time=#{expireTime} where task_id=#{taskId}")
     void keep(@Param("taskId") String taskId, @Param("expireTime") Date expireTime);
 
     /**

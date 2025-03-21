@@ -52,7 +52,7 @@ public class TaskService {
     @Transactional
     public void keepTask(String taskId) {
         int expire = configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
-        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + +TimeUnit.SECONDS.toMillis(expire)));
+        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expire)));
     }
 
 
@@ -65,13 +65,10 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateTaskExpire(TaskEntity entity) {
+    public boolean startTask(TaskEntity entity) {
         int expireSecond = this.configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
         Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
-        int version = entity.getVersion() + 1;
-        entity.setVersion(version);
-        entity.setExpireTime(expireTime);
-        this.taskMapper.updateById(entity);
+       return this.taskMapper.updateVersion(entity.getTaskId(),entity.getVersion(),expireTime)>0;
     }
 
     @Transactional

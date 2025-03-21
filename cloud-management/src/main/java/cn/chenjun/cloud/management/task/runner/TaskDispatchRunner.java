@@ -38,10 +38,13 @@ public class TaskDispatchRunner extends AbstractRunner {
         List<TaskEntity> taskList = this.taskService.listCanRunTask(100);
         for (TaskEntity entity : taskList) {
             try {
-                this.taskService.updateTaskExpire(entity);
-                Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
-                BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
-                this.operateEngine.process(operateParam);
+                if (this.taskService.startTask(entity)) {
+                    Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
+                    BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
+                    this.operateEngine.process(operateParam);
+                }else {
+                    log.info("任务:{}-{}已经更新,已忽略",entity.getTaskId(),entity.getTitle());
+                }
 
             } catch (Exception err) {
                 ResultUtil<?> resultUtil;

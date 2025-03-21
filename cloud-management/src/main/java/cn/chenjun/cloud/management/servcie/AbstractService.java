@@ -86,7 +86,7 @@ public abstract class AbstractService {
     }
 
 
-    protected int getAllowHostId(GuestEntity guest) {
+    public int getAllowHostId(GuestEntity guest) {
         if(guest==null){
             return 0;
         }
