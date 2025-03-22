@@ -15,6 +15,7 @@ public class LibvirtPoolConfig {
     public GenericObjectPoolConfig<Connect> genericObjectPoolConfig(ApplicationConfig applicationConfig) {
         GenericObjectPoolConfig<Connect> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setMaxIdle(Math.max(applicationConfig.getTaskThreadSize(),1));
+        poolConfig.setMaxTotal(Math.max(applicationConfig.getTaskThreadSize(),1)+1);
         poolConfig.setMinIdle(1);
         poolConfig.setBlockWhenExhausted(true);
         poolConfig.setTestOnBorrow(true);
