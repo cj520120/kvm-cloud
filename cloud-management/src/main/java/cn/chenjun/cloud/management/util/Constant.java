@@ -9,6 +9,7 @@ public class Constant {
     public static class NetworkAllocateType {
         public static final int GUEST = 0;
         public static final int COMPONENT_VIP = 1;
+        public static final int CUSTOM = 2;
     }
 
     public static class HostStatus {
@@ -148,6 +149,7 @@ public class Constant {
         public static int STORAGE_CHECK = 36;
         public static int MIGRATE_TEMPLATE_VOLUME = 37;
         public static int DESTROY_TEMPLATE_VOLUME = 38;
+        public static int STORAGE_VOLUME_CLEAR = 39;
     }
 
     public static class UserType {

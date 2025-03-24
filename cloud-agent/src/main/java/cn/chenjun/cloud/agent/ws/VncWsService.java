@@ -1,11 +1,11 @@
 package cn.chenjun.cloud.agent.ws;
 
 import cn.chenjun.cloud.agent.config.WebSocketConfig;
-import cn.chenjun.cloud.agent.service.ConnectPool;
 import cn.chenjun.cloud.agent.sock.NioCallback;
 import cn.chenjun.cloud.agent.sock.NioClient;
 import cn.chenjun.cloud.agent.sock.NioSelector;
 import cn.chenjun.cloud.agent.util.ClientService;
+import cn.chenjun.cloud.agent.util.ConnectFactory;
 import cn.chenjun.cloud.agent.util.SpringContextUtils;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -39,7 +39,6 @@ public class VncWsService implements NioCallback {
     private Session session;
     private NioClient vncClient;
     private ClientService clientService;
-    private ConnectPool connectPool;
     private NioSelector nioSelector;
 
     @SneakyThrows
@@ -47,7 +46,6 @@ public class VncWsService implements NioCallback {
     public void onVncConnect(Session session) {
         this.session = session;
         this.clientService = SpringContextUtils.getBean(ClientService.class);
-        this.connectPool = SpringContextUtils.getBean(ConnectPool.class);
         this.nioSelector = SpringContextUtils.getBean(NioSelector.class);
         String data = this.getHeader("x-data");
         Map<String, Object> map = GsonBuilderUtil.create().fromJson(data, new TypeToken<Map<String, Object>>() {
@@ -75,7 +73,7 @@ public class VncWsService implements NioCallback {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "签名错误:签名验证失败.");
             }
             log.info("开始查询虚拟机信息:{}", name);
-            connect = connectPool.borrowObject();
+            connect = ConnectFactory.create();
             int port = 0;
             try {
                 String xml = connect.domainLookupByName(name).getXMLDesc(0);
@@ -96,7 +94,7 @@ public class VncWsService implements NioCallback {
             }
         } finally {
             if (connect != null) {
-                connectPool.returnObject(connect);
+                connect.close();
             }
         }
     }

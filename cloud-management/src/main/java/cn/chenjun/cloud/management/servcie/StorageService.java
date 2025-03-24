@@ -240,6 +240,16 @@ public class StorageService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<Void> clearUnLinkVolume(int storageId) {
+        StorageEntity storage = this.storageMapper.selectById(storageId);
+        if (storage == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
+        }
+        BaseOperateParam operateParam = StorageVolumeCleanOperate.builder().id(UUID.randomUUID().toString()).title("清理存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
+        this.operateTask.addTask(operateParam);
+        return ResultUtil.success();
+    }
+    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> destroyStorage(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {

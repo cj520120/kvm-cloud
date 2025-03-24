@@ -207,6 +207,13 @@ export const destroyStorage = (data = {}) => {
     method: "DELETE",
   });
 };
+export const clearStorage = (data = {}) => {
+  return axios.request({
+    url: "api/storage/clear",
+    data,
+    method: "DELETE",
+  });
+};
 export const updateStorageSupportCategory = (data = {}) => {
   return axios.request({
     url: "api/storage/support/category/update",

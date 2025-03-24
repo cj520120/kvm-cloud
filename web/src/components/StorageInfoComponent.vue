@@ -8,6 +8,7 @@
 			<el-button @click="show_modify_storage_support_category_dialog(show_storage)" type="success" size="mini" v-if="show_storage.type !== 'local'">修改支持范围</el-button>
 			<el-button @click="pasue_storage(show_storage)" type="warning" size="mini" v-if="show_storage.status !== 3">开始维护</el-button>
 			<el-button @click="migrate_dialog_visable = true" type="danger" size="mini">迁移存储池</el-button>
+			<el-button @click="clear_storage(show_storage)" type="danger" size="mini">清理未知磁盘</el-button>
 			<el-button @click="destroy_storage(show_storage)" type="danger" size="mini">销毁存储池</el-button>
 		</el-row>
 		<el-row>
@@ -80,7 +81,7 @@ import Notify from '@/api/notify'
 import util from '@/api/util'
 
 import ConfigComponent from '@/components/ConfigComponent.vue'
-import { destroyStorage, getStorageInfo, getStorageList, migrateStorage, pauseStorage, registerStorage, updateStorageSupportCategory } from '@/api/api'
+import { clearStorage, destroyStorage, getStorageInfo, getStorageList, migrateStorage, pauseStorage, registerStorage, updateStorageSupportCategory } from '@/api/api'
 export default {
 	name: 'StorageInfoComponent',
 	data() {
@@ -205,6 +206,24 @@ export default {
 							this.$notify.error({
 								title: '错误',
 								message: `注册存储池失败:${res.message}`
+							})
+						}
+					})
+				})
+				.catch(() => {})
+		},
+		clear_storage(storage) {
+			this.$confirm('清理存储池会删除系统未使用的所有文件，请谨慎操作, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			})
+				.then(() => {
+					clearStorage({ storageId: storage.storageId }).then((res) => {
+						if (res.code !== 0) {
+							this.$notify.error({
+								title: '错误',
+								message: `清理存储池失败:${res.message}`
 							})
 						}
 					})

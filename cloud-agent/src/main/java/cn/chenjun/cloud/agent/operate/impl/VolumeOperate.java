@@ -80,8 +80,30 @@ public class VolumeOperate {
         return volume;
     }
 
-    @DispatchBind(command = Constant.Command.BATCH_VOLUME_INFO)
+    @DispatchBind(command = Constant.Command.LIST_STORAGE_VOLUME)
+    public List<String> listStorageVolume(Connect connect, ListStorageVolumeRequest request) throws Exception {
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getName(), false);
+        if (storagePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_READY, "当前存储池未就绪:[" + request.getName() + "]");
+        }
+        return Arrays.asList(storagePool.listVolumes());
+    }
 
+    @DispatchBind(command = Constant.Command.DESTROY_UNLINK_VOLUME)
+    public Void destroyUnlinkVolume(Connect connect, DestroyUnLinkVolumeRequest request) throws Exception {
+        StoragePool storagePool = StorageUtil.findStorage(connect, request.getStorage(), false);
+        if (storagePool == null) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_READY, "当前存储池未就绪:[" + request.getStorage() + "]");
+        }
+        for (String volume : request.getVolumes()) {
+            StorageVol storageVol = this.findVol(storagePool, volume);
+            if (storageVol != null) {
+                storageVol.delete(0);
+            }
+        }
+        return null;
+    }
+    @DispatchBind(command = Constant.Command.BATCH_VOLUME_INFO)
     public List<VolumeInfo> batchInfo(Connect connect, List<VolumeInfoRequest> batchRequest) throws Exception {
         Map<String, List<VolumeInfoRequest>> list = batchRequest.stream().collect(Collectors.groupingBy(VolumeInfoRequest::getSourceStorage));
         Map<String, Map<String, VolumeInfo>> result = new HashMap<>(4);

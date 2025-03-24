@@ -5,8 +5,8 @@ import cn.chenjun.cloud.agent.operate.bean.Consumer;
 import cn.chenjun.cloud.agent.operate.bean.Dispatch;
 import cn.chenjun.cloud.agent.operate.bean.DispatchProcess;
 import cn.chenjun.cloud.agent.operate.process.DispatchFactory;
-import cn.chenjun.cloud.agent.service.ConnectPool;
 import cn.chenjun.cloud.agent.util.ClientService;
+import cn.chenjun.cloud.agent.util.ConnectFactory;
 import cn.chenjun.cloud.agent.util.TaskPoolUtil;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.TaskRequest;
@@ -36,8 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class OperateDispatch implements CommandLineRunner {
     @Autowired
     private DispatchFactory dispatchFactory;
-    @Autowired
-    private ConnectPool connectPool;
+
 
     private ScheduledThreadPoolExecutor executor;
     @Autowired
@@ -69,9 +68,10 @@ public class OperateDispatch implements CommandLineRunner {
         ResultUtil<Object> executeResult = null;
         Connect connect = null;
         try {
+            connect = ConnectFactory.create();
             log.info("开始执行任务:{}-{}",task.getCommand(),task.getTaskId());
             long startTime = System.currentTimeMillis();
-            connect = connectPool.borrowObject();
+
             Object param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());
             Consumer consumer = dispatch.getConsumer();
             Object result = consumer.dispatch(connect, param);
@@ -88,7 +88,11 @@ public class OperateDispatch implements CommandLineRunner {
                 submitTaskCallback(task, executeResult);
             }
             if (connect != null) {
-                connectPool.returnObject(connect);
+                try {
+                    connect.close();
+                } catch (Exception e) {
+                    log.error("关闭连接失败.", e);
+                }
             }
         }
         return executeResult;

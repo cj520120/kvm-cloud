@@ -67,13 +67,12 @@ public class Constant {
         public static final String BATCH_VOLUME_INFO = "BatchVolumeInfo";
         public static final String VOLUME_CREATE = "CreateVolume";
         public static final String VOLUME_DESTROY = "DestroyVolume";
+        public static final String DESTROY_UNLINK_VOLUME = "DestroyUnLinkVolume";
         public static final String VOLUME_CLONE = "CloneVolume";
         public static final String VOLUME_RESIZE = "ResizeVolume";
+        public static final String LIST_STORAGE_VOLUME = "ListStorageVolume";
 
         public static final String VOLUME_MIGRATE = "MigrateVolume";
-//        public static final String VOLUME_SNAPSHOT = "SnapshotVolume";
-
-        //        public static final String VOLUME_TEMPLATE = "TemplateVolume";
         public static final String VOLUME_DOWNLOAD = "DownloadVolume";
 
         public static final String GUEST_DESTROY = "DeleteGuest";
