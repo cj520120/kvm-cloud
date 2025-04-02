@@ -26,6 +26,6 @@ public class StorageVolumeCleanOperate extends BaseOperateParam {
 
     @Override
     public String getTaskId() {
-        return "STORAGE_VOLUME_CLEAR:"+this.storageId;
+        return "STORAGE_VOLUME_CLEAR:" + this.storageId;
     }
 }

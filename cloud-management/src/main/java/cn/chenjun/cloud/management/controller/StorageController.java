@@ -62,6 +62,7 @@ public class StorageController extends BaseController {
         return this.lockRun(() -> storageService.destroyStorage(storageId));
 
     }
+
     @DeleteMapping("/api/storage/clear")
     public ResultUtil<Void> clearUnLinkVolume(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.clearUnLinkVolume(storageId));

@@ -35,7 +35,7 @@ public class StorageSyncRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() {
-        List<StorageEntity> storageList=this.storageMapper.selectList(new QueryWrapper<>());
+        List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>());
         for (StorageEntity storage : storageList) {
             BaseOperateParam operateParam = StorageCheckOperate.builder().id(UUID.randomUUID().toString()).storageId(storage.getStorageId()).title("检测存储池使用情况").build();
             this.taskService.addTask(operateParam);

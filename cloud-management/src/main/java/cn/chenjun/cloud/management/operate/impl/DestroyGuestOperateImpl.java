@@ -87,7 +87,7 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
                     this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 }
             }
-            this.configService.deleteAllocateConfig(Constant.ConfigType.GUEST,param.getGuestId());
+            this.configService.deleteAllocateConfig(Constant.ConfigType.GUEST, param.getGuestId());
             this.guestVncMapper.deleteById(guest.getGuestId());
             this.guestMapper.deleteById(guest.getGuestId());
             this.guestPasswordMapper.deleteById(guest.getGuestId());

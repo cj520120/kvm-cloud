@@ -289,6 +289,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         }
         return this.configService.loadSystemConfig(queryList);
     }
+
     protected Map<String, Object> loadVolumeConfig(int storageId, int volumeId) {
         List<ConfigQuery> queryList = new ArrayList<>();
         queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());

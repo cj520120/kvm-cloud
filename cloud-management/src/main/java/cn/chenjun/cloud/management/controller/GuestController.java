@@ -107,7 +107,7 @@ public class GuestController extends BaseController {
         Map<String, String> userMap = GsonBuilderUtil.create().fromJson(userData, new TypeToken<Map<String, String>>() {
         }.getType());
 
-        return this.lockRun(() -> this.guestService.reInstall(guestId, deviceBus,systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.reInstall(guestId, deviceBus, systemCategory, bootstrapType, metaMap, userMap, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024));
     }
 
     @PostMapping("/api/guest/start/batch")
@@ -159,15 +159,16 @@ public class GuestController extends BaseController {
 
     @PostMapping("/api/guest/disk/device/modify")
     public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(@RequestParam("guestId") int guestId,
-                                                         @RequestParam("deviceId") int deviceId,
-                                                         @RequestParam("deviceBus") String deviceBus) {
-        return this.lockRun(() -> this.guestService.modifyGuestDiskDeviceType(guestId, deviceId,deviceBus));
+                                                             @RequestParam("deviceId") int deviceId,
+                                                             @RequestParam("deviceBus") String deviceBus) {
+        return this.lockRun(() -> this.guestService.modifyGuestDiskDeviceType(guestId, deviceId, deviceBus));
     }
+
     @PostMapping("/api/guest/disk/attach")
     public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
                                                          @RequestParam("volumeId") int volumeId,
                                                          @RequestParam("deviceType") String deviceType) {
-        return this.lockRun(() -> this.guestService.attachDisk(guestId, volumeId,deviceType));
+        return this.lockRun(() -> this.guestService.attachDisk(guestId, volumeId, deviceType));
     }
 
     @PostMapping("/api/guest/disk/detach")

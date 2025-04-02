@@ -58,8 +58,8 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                     }
                     Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
 
-                    Map<String,Object> volumeConfigMap=this.loadVolumeConfig(storage.getStorageId(),volume.getVolumeId());
-                    Map<String,Object> configMap=new HashMap<>();
+                    Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
+                    Map<String, Object> configMap = new HashMap<>();
                     configMap.putAll(guestConfig);
                     configMap.putAll(volumeConfigMap);
                     String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);

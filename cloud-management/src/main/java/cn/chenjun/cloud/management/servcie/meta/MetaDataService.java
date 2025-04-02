@@ -16,7 +16,9 @@ public interface MetaDataService extends Plugin<GuestEntity> {
      * @param guest
      * @return
      */
-    MetaData buildCloudInitMetaData(GuestEntity guest);    /**
+    MetaData buildCloudInitMetaData(GuestEntity guest);
+
+    /**
      * 获取meta数据
      *
      * @param guest

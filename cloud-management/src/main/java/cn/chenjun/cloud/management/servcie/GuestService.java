@@ -1,7 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
@@ -79,10 +78,10 @@ public class GuestService extends AbstractService {
     }
 
     private void checkSystemComponentComplete(int networkId) {
-        List<ConfigQuery> queryList=new ArrayList<>();
+        List<ConfigQuery> queryList = new ArrayList<>();
         queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
         queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(networkId).build());
-        if(Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)){
+        if (Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)) {
             return;
         }
         if (!this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
@@ -197,7 +196,7 @@ public class GuestService extends AbstractService {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            createGuest(hostId, diskTemplateId, deviceBus,volumeType, metaData, userData, size, guest, storage);
+            createGuest(hostId, diskTemplateId, deviceBus, volumeType, metaData, userData, size, guest, storage);
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
@@ -224,7 +223,7 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    private void createGuest(int hostId, int diskTemplateId,String deviceType, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, GuestEntity guest, StorageEntity storage) {
+    private void createGuest(int hostId, int diskTemplateId, String deviceType, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, GuestEntity guest, StorageEntity storage) {
         GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, deviceType, volumeType, size, guest, storage);
         this.initGuestMetaData(guest.getGuestId(), metaData, userData);
         BaseOperateParam operateParam = CreateGuestOperate.builder()
@@ -242,7 +241,7 @@ public class GuestService extends AbstractService {
         this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
     }
 
-    private GuestDiskEntity createGuestVolume(int diskTemplateId, String deviceType,String volumeType, long size, GuestEntity guest, StorageEntity storage) {
+    private GuestDiskEntity createGuestVolume(int diskTemplateId, String deviceType, String volumeType, long size, GuestEntity guest, StorageEntity storage) {
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
@@ -374,8 +373,8 @@ public class GuestService extends AbstractService {
                 int allowHostId = getAllowHostId(guest);
                 if (hostId == 0) {
                     hostId = allowHostId;
-                } else if (hostId != allowHostId && allowHostId >0) {
-                    throw new CodeException(ErrorCode.PARAM_ERROR, "该宿主机已经绑定了启动主机ID："+allowHostId);
+                } else if (hostId != allowHostId && allowHostId > 0) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "该宿主机已经绑定了启动主机ID：" + allowHostId);
                 }
                 guest.setHostId(0);
                 guest.setStatus(Constant.GuestStatus.STARTING);
@@ -482,10 +481,11 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
         }
     }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(int guestId, int deviceId, String deviceType) {
-        GuestDiskEntity guestDisk=this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID,guestId).eq(GuestDiskEntity.DEVICE_ID,deviceId));
-        if(guestDisk==null){
+        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, deviceId));
+        if (guestDisk == null) {
             throw new CodeException(ErrorCode.GUEST_VOLUME_ATTACH_ERROR, "选择的磁盘没有挂载");
         }
         guestDisk.setDeviceBus(deviceType);
@@ -539,9 +539,9 @@ public class GuestService extends AbstractService {
                 List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
                 List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
                 int deviceId = 0;
-                do{
+                do {
                     deviceId++;
-                }while(gustDiskDeviceIds.contains(deviceId));
+                } while (gustDiskDeviceIds.contains(deviceId));
                 guestDisk = GuestDiskEntity.builder().guestId(guestId).volumeId(volumeId).deviceId(deviceId).deviceBus(deviceType).build();
                 this.guestDiskMapper.insert(guestDisk);
                 volume.setStatus(Constant.VolumeStatus.ATTACH_DISK);

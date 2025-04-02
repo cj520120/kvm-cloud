@@ -52,8 +52,8 @@ public class StorageService extends AbstractService {
         if (destStorage == null || (destStorage.getStatus() != Constant.StorageStatus.READY)) {
             return ResultUtil.error(ErrorCode.STORAGE_NOT_FOUND, "目标存储池未就绪");
         }
-        if(sourceStorage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)&&destStorage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)){
-            if(!Objects.equals(sourceStorage.getHostId(),destStorage.getHostId())){
+        if (sourceStorage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL) && destStorage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
+            if (!Objects.equals(sourceStorage.getHostId(), destStorage.getHostId())) {
                 return ResultUtil.error(ErrorCode.STORAGE_NOT_SUPPORT, "不能跨主机迁移本地存储池");
             }
         }
@@ -111,9 +111,9 @@ public class StorageService extends AbstractService {
                 if (template.getStatus() != Constant.TemplateStatus.READY) {
                     continue;
                 }
-                String templateVolumeType=defaultVolumeType;
-                if(template.getTemplateType().equals(Constant.TemplateType.ISO)){
-                    templateVolumeType= cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+                String templateVolumeType = defaultVolumeType;
+                if (template.getTemplateType().equals(Constant.TemplateType.ISO)) {
+                    templateVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
                 template.setStatus(Constant.TemplateStatus.MIGRATE);
                 this.templateMapper.updateById(template);
@@ -142,6 +142,7 @@ public class StorageService extends AbstractService {
         }
         return ResultUtil.success();
     }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> createStorage(int supportCategory, String description, String type, String param) {
         if (StringUtils.isEmpty(description)) {
@@ -150,15 +151,15 @@ public class StorageService extends AbstractService {
         if (StringUtils.isEmpty(type)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择存储池类型");
         }
-        if(Objects.equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL,type)){
-            throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT,"本地存储池不支持主动创建");
+        if (Objects.equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL, type)) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "本地存储池不支持主动创建");
         }
         if (StringUtils.isEmpty(param)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "存储池参数不正确");
         }
         String storageName = UUID.randomUUID().toString().toLowerCase().replace("-", "");
         String mountPath = "";
-        switch (type){
+        switch (type) {
             case cn.chenjun.cloud.common.util.Constant.StorageType.NFS:
             case cn.chenjun.cloud.common.util.Constant.StorageType.GLUSTERFS:
                 mountPath = "/mnt/" + storageName;
@@ -249,6 +250,7 @@ public class StorageService extends AbstractService {
         this.operateTask.addTask(operateParam);
         return ResultUtil.success();
     }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<StorageModel> destroyStorage(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);

@@ -38,7 +38,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + sourceVolume.getName() + "]状态不正常:" + sourceVolume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0,  Math.max(sourceVolume.getHostId(),targetVolume.getHostId()), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(0, Math.max(sourceVolume.getHostId(), targetVolume.getHostId()), 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceVolume(initVolume(sourceStorage, sourceVolume))

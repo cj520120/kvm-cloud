@@ -109,11 +109,11 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 }
                 return storageEntity;
             });
-            Map<String,Object> volumeConfigMap=this.loadVolumeConfig(storage.getStorageId(),volume.getVolumeId());
-            Map<String,Object> configMap=new HashMap<>();
+            Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
+            Map<String, Object> configMap = new HashMap<>();
             configMap.putAll(sysconfig);
             configMap.putAll(volumeConfigMap);
-            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guestDisk.getDeviceBus(),configMap));
+            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guestDisk.getDeviceBus(), configMap));
         }
         return disks;
     }

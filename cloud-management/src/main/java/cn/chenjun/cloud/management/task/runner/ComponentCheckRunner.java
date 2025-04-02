@@ -50,12 +50,12 @@ public class ComponentCheckRunner extends AbstractRunner {
     protected void dispatch() throws Exception {
         List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>());
         for (NetworkEntity network : networkList) {
-            List<ConfigQuery> queryList=new ArrayList<>();
+            List<ConfigQuery> queryList = new ArrayList<>();
             queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
             queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
-            boolean isCheckComponentEnable=Objects.equals(this.configService.getConfig(queryList,ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.YES);
+            boolean isCheckComponentEnable = Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.YES);
             if (network.getStatus() == Constant.NetworkStatus.READY || network.getStatus() == Constant.NetworkStatus.INSTALL) {
-                if(isCheckComponentEnable) {
+                if (isCheckComponentEnable) {
                     List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
                     for (ComponentEntity component : components) {
                         processPluginRegistry.getPluginFor(component.getComponentType()).ifPresent(componentProcess -> componentProcess.checkAndStart(network, component));
@@ -80,7 +80,7 @@ public class ComponentCheckRunner extends AbstractRunner {
                         networkMapper.updateById(network);
                         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
                     }
-                }else if(network.getStatus() == Constant.NetworkStatus.INSTALL){
+                } else if (network.getStatus() == Constant.NetworkStatus.INSTALL) {
                     network.setStatus(Constant.NetworkStatus.READY);
                     networkMapper.updateById(network);
                     this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -81,17 +82,17 @@ public abstract class AbstractService {
     }
 
     protected int getAllowHostId(int guestId) {
-        GuestEntity guest=this.guestMapper.selectById(guestId);
+        GuestEntity guest = this.guestMapper.selectById(guestId);
         return getAllowHostId(guest);
     }
 
 
     public int getAllowHostId(GuestEntity guest) {
-        if(guest==null){
+        if (guest == null) {
             return 0;
         }
-        int hostId=this.configService.getConfig(Arrays.asList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
-        if(hostId==0) {
+        int hostId = this.configService.getConfig(Collections.singletonList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
+        if (hostId == 0) {
             if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
                 hostId = guest.getHostId();
             } else {
@@ -103,6 +104,7 @@ public abstract class AbstractService {
         }
         return hostId;
     }
+
     public GuestModel initGuestInfo(GuestEntity entity) {
         GuestModel model;
         switch (entity.getType()) {

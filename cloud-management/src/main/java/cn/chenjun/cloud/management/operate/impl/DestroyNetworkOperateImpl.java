@@ -54,7 +54,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
             if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
                 networkMapper.deleteById(param.getNetworkId());
-                this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.NETWORK,param.getNetworkId());
+                this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.NETWORK, param.getNetworkId());
             }
         }
 

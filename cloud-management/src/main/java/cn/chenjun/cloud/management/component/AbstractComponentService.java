@@ -74,7 +74,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 return;
             }
             //剔除master所在的主机
-            hostIds.removeIf(hostId->Objects.equals(hostId,masterGuest.getHostId()));
+            hostIds.removeIf(hostId -> Objects.equals(hostId, masterGuest.getHostId()));
             checkAndStartSlaveComponent(component, network, hostIds);
         }
     }
@@ -155,7 +155,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             }
             if (slaveGuest != null) {
                 this.startComponentGuest(slaveGuest, hostIds);
-                hostIds.removeIf(hostId->Objects.equals(hostId,slaveGuest.getHostId()));
+                hostIds.removeIf(hostId -> Objects.equals(hostId, slaveGuest.getHostId()));
             }
         }
         if (isUpdateSlave) {
@@ -224,10 +224,10 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         }
         guest.setStatus(Constant.GuestStatus.STARTING);
         guest.setLastHostId(hostId);
-                guestMapper.updateById(guest);
+        guestMapper.updateById(guest);
         BaseOperateParam operateParam = StartComponentGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(hostId).componentType(this.getComponentType()).build();
-                this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     private void destroySlaveGuest(GuestEntity guest) {

@@ -26,7 +26,7 @@ public abstract class AbstractRunner {
 
     public void call() {
         try {
-            if(!this.isStart()){
+            if (!this.isStart()) {
                 return;
             }
             lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> {
@@ -72,7 +72,7 @@ public abstract class AbstractRunner {
      */
     protected abstract String getName();
 
-    protected boolean isStart(){
+    protected boolean isStart() {
         return true;
     }
 }

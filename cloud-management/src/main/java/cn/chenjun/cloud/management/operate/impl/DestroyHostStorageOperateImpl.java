@@ -77,7 +77,7 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
                 if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
                     storageMapper.deleteById(param.getStorageId());
-                    this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.STORAGE,param.getStorageId());
+                    this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.STORAGE, param.getStorageId());
                     templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, param.getStorageId()));
                 }
             }

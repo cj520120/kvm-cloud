@@ -42,8 +42,8 @@ public class TaskDispatchRunner extends AbstractRunner {
                     Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
                     BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
                     this.operateEngine.process(operateParam);
-                }else {
-                    log.info("任务:{}-{}已经更新,已忽略",entity.getTaskId(),entity.getTitle());
+                } else {
+                    log.info("任务:{}-{}已经更新,已忽略", entity.getTaskId(), entity.getTitle());
                 }
 
             } catch (Exception err) {

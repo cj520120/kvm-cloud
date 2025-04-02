@@ -68,7 +68,7 @@ public class TaskService {
     public boolean startTask(TaskEntity entity) {
         int expireSecond = this.configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
         Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
-       return this.taskMapper.updateVersion(entity.getTaskId(),entity.getVersion(),expireTime)>0;
+        return this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0;
     }
 
     @Transactional
