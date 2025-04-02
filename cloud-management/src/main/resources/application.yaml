@@ -33,7 +33,7 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
     password: KvmCloud@123456
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.1.119:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
+    url: jdbc:mysql://192.168.1.100:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
     username: kvm-cloud
   redis:
     redisson:
@@ -44,7 +44,7 @@ spring:
          timeout: 3000
          retryAttempts: 3
          retryInterval: 1500
-         address: "redis://192.168.1.119:6379"
+         address: "redis://192.168.1.100:6379"
          password: 
          database: 0
          subscriptionsPerConnection: 5

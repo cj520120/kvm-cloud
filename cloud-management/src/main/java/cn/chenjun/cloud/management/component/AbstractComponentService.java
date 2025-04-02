@@ -73,6 +73,8 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             if (!checkComponentSlaveNumber(component)) {
                 return;
             }
+            //剔除master所在的主机
+            hostIds.removeIf(hostId->Objects.equals(hostId,masterGuest.getHostId()));
             checkAndStartSlaveComponent(component, network, hostIds);
         }
     }
@@ -153,6 +155,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             }
             if (slaveGuest != null) {
                 this.startComponentGuest(slaveGuest, hostIds);
+                hostIds.removeIf(hostId->Objects.equals(hostId,slaveGuest.getHostId()));
             }
         }
         if (isUpdateSlave) {
@@ -225,10 +228,6 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         BaseOperateParam operateParam = StartComponentGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(hostId).componentType(this.getComponentType()).build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-
-        //从可用主机中删除组件主机
-        Object removeHostId = hostId;
-        hostIds.removeIf(id -> Objects.equals(id, removeHostId));
     }
 
     private void destroySlaveGuest(GuestEntity guest) {
