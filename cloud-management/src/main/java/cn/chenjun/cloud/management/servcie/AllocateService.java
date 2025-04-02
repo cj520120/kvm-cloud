@@ -64,6 +64,7 @@ public class AllocateService extends AbstractService {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("network_id", networkId);
         wrapper.eq("allocate_id", 0);
+        wrapper.eq("allocate_type", Constant.NetworkAllocateType.GUEST);
         wrapper.last("limit 0,1");
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
         if (guestNetwork == null) {

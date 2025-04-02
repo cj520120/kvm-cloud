@@ -163,15 +163,16 @@ public class NetworkService extends AbstractService {
                     .componentType(Constant.ComponentType.ROUTE).networkId(network.getNetworkId())
                     .componentVip(componentVip.getIp()).basicComponentVip(basicComponentVip.getIp()).build();
             componentMapper.insert(component);
-
+            if (type == Constant.NetworkType.VLAN) {
+                basicComponentVip.setAllocateId(component.getComponentId());
+                basicComponentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
+                this.guestNetworkMapper.updateById(basicComponentVip);
+            }
             componentVip.setAllocateId(component.getComponentId());
             componentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
             this.guestNetworkMapper.updateById(componentVip);
             if (type == Constant.NetworkType.VLAN && ObjectUtils.isEmpty(gateway)) {
                 //如果没有硬件网关地址，则将VIP设置为模拟网关
-                basicComponentVip.setAllocateId(component.getComponentId());
-                basicComponentVip.setAllocateType(Constant.NetworkAllocateType.COMPONENT_VIP);
-                this.guestNetworkMapper.updateById(componentVip);
                 network.setGateway(componentVip.getIp());
                 this.networkMapper.updateById(network);
             }
