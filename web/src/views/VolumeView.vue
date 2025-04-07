@@ -25,7 +25,8 @@
 						<el-table ref="volumeTable" :v-loading="true" :data="show_table_volumes" style="width: 100%" @selection-change="handleSelectionChange" border>
 							<el-table-column type="selection" width="55"></el-table-column>
 							<el-table-column label="ID" prop="volumeId" width="80" />
-							<el-table-column label="名称" prop="description" min-width="100" show-overflow-tooltip />
+							<el-table-column label="名称" prop="name" min-width="150" show-overflow-tooltip />
+							<el-table-column label="说明" prop="description" min-width="50" show-overflow-tooltip />
 							<el-table-column label="磁盘类型" prop="type" width="100">
 								<template #default="scope">
 									<el-tag>{{ scope.row.type }}</el-tag>

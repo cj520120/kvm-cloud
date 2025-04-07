@@ -33,8 +33,6 @@ public class VolumeService extends AbstractService {
 
     @Autowired
     private AllocateService allocateService;
-    @Autowired
-    private RestTemplate restTemplate;
 
 
     private VolumeEntity findAndUpdateVolumeStatus(int volumeId, int status) {
@@ -186,8 +184,7 @@ public class VolumeService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) {
-
+    public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) { 
         if (size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入新增的磁盘大小");
         }

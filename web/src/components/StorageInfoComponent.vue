@@ -28,6 +28,7 @@
 				<el-descriptions-item label="Ceph地址" v-if="show_storage.type === 'ceph-rbd'">{{ JSON.parse(show_storage.param).uri }}</el-descriptions-item>
 				<el-descriptions-item label="Ceph存储池名称" v-if="show_storage.type === 'ceph-rbd'">{{ JSON.parse(show_storage.param).pool }}</el-descriptions-item>
 				<el-descriptions-item label="Ceph用户" v-if="show_storage.type === 'ceph-rbd'">{{ JSON.parse(show_storage.param).username }}</el-descriptions-item>
+				<el-descriptions-item label="主机ID" v-if="show_storage.type === 'local'">{{ show_storage.hostId }}</el-descriptions-item>
 
 				<el-descriptions-item label="容量">{{ get_volume_display_size(show_storage.capacity) }}</el-descriptions-item>
 				<el-descriptions-item label="可用">{{ get_volume_display_size(show_storage.available) }}</el-descriptions-item>

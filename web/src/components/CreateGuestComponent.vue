@@ -271,18 +271,8 @@ export default {
 			this.load_all_networks()
 			this.load_all_groups()
 			this.load_all_ssh()
-			if (this.$refs['createForm']) {
-				this.$refs['createForm'].resetFields()
-			}
-			this.create_guest.isoTemplateId = ''
-			this.create_guest.diskTemplateId = ''
 			this.create_guest.volumeId = ''
-			this.create_guest.type = 0
-			this.create_guest.groupId = 0
-			this.create_guest.systemCategory = 101
-			this.create_guest.bootstrapType = 0
-			this.user_config.password = ''
-			this.user_config.sshId = 0
+			this.create_guest.description = ''
 			this.meta_config.hostName = ''
 		},
 		create_guest_click() {
@@ -295,13 +285,7 @@ export default {
 				case 1:
 					this.create_guest.isoTemplateId = 0
 					this.create_guest.volumeId = 0
-					break
-				case 2:
-					this.create_guest.isoTemplateId = 0
-					this.create_guest.diskTemplateId = 0
-					this.create_guest.volumeId = 0
-					this.create_guest.size = 0
-					break
+					break 
 				case 3:
 					this.create_guest.isoTemplateId = 0
 					this.create_guest.diskTemplateId = 0

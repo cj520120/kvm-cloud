@@ -15,12 +15,6 @@ import org.springframework.stereotype.Component;
 public class VncService {
     @Autowired
     protected GuestVncMapper guestVncMapper;
-    @Autowired
-    private GuestMapper guestMapper;
-    @Autowired
-    private HostMapper hostMapper;
-    @Autowired
-    private NotifyService notifyService;
 
     public GuestVncEntity getGuestVnc(int guestId) {
         GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guestId);

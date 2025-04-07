@@ -187,15 +187,9 @@ export default {
 			this.load_all_storage()
 			this.load_all_ssh()
 			this.reinstall_guest.guestId = guest.guestId
-			this.reinstall_guest.isoTemplateId = ''
-			this.reinstall_guest.diskTemplateId = ''
 			this.reinstall_guest.volumeId = ''
-			this.reinstall_guest.type = 0
 			this.reinstall_guest.systemCategory = guest.systemCategory
 			this.reinstall_guest.bootstrapType = guest.bootstrapType
-			this.user_config.password = ''
-			this.user_config.sshId = 0
-			this.meta_config.hostName = ''
 		},
 		reinstall_guest_click() {
 			switch (this.reinstall_guest.type) {

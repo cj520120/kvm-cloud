@@ -23,7 +23,6 @@ public class VolumeModel {
     private int hostId;
     private String name;
     private String path;
-    private String backingPath;
     private long capacity;
     private long allocation;
     private String type;
