@@ -1,10 +1,10 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
 import cn.chenjun.cloud.management.data.mapper.MetaMapper;
 import cn.chenjun.cloud.management.model.AttachGuestNetworkModel;
@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -33,13 +34,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class GuestService extends AbstractService {
-
-
-    @Autowired
-    protected ComponentMapper componentMapper;
     @Autowired
     private AllocateService allocateService;
-
     @Autowired
     private GuestPasswordMapper guestPasswordMapper;
     @Autowired
@@ -71,7 +67,7 @@ public class GuestService extends AbstractService {
             this.guestPasswordMapper.insert(entity);
         }
         String sshId = userData.getOrDefault("sshId", "");
-        if (!StringUtils.isEmpty(sshId)) {
+        if (!ObjectUtils.isEmpty(sshId)) {
             this.guestSshMapper.delete(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID, guestId));
             this.guestSshMapper.insert(GuestSshEntity.builder().sshId(NumberUtil.parseInt(sshId)).guestId(guestId).build());
         }
@@ -84,13 +80,12 @@ public class GuestService extends AbstractService {
         if (Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)) {
             return;
         }
-        if (!this.checkComponentComplete(networkId, Constant.ComponentType.ROUTE)) {
+        if (!this.checkRouteComponentComplete(networkId)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
         }
     }
 
 
-    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<>());
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
@@ -98,7 +93,33 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<Page<GuestModel>> search(Integer guestType, Integer groupId, Integer networkId, Integer hostId, Integer schemeId, Integer status, String keyword, int no, int size) {
+        QueryWrapper queryWrapper = new QueryWrapper<GuestEntity>();
+        queryWrapper.eq(groupId != null, GuestEntity.GROUP_ID, groupId);
+        queryWrapper.eq(hostId != null, GuestEntity.HOST_ID, hostId);
+        queryWrapper.eq(networkId != null, GuestEntity.NETWORK_ID, networkId);
+        queryWrapper.eq(schemeId != null, GuestEntity.SCHEME_ID, schemeId);
+        queryWrapper.eq(guestType != null, GuestEntity.GUEST_TYPE, guestType);
+        queryWrapper.eq(status != null, GuestEntity.GUEST_STATUS, status);
+        if (!ObjectUtils.isEmpty(keyword)) {
+            queryWrapper.and(o -> {
+                String condition = "%" + keyword + "%";
+                QueryWrapper<GuestEntity> wrapper = (QueryWrapper) o;
+                wrapper.like(GuestEntity.GUEST_IP, condition)
+                        .or().like(GuestEntity.GUEST_NAME, condition)
+                        .or().like(GuestEntity.GUEST_DESCRIPTION, condition);
+            });
+        }
+        int nCount = Math.toIntExact(this.guestMapper.selectCount(queryWrapper));
+        int nOffset = (no - 1) * size;
+        queryWrapper.last("limit " + nOffset + ", " + size);
+        List<GuestEntity> guestList = this.guestMapper.selectList(queryWrapper);
+        List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
+        Page<GuestModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
+
     public ResultUtil<List<GuestModel>> listUserGuests() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.GUEST_TYPE, Constant.GuestType.USER));
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).sorted((o1, o2) -> {
@@ -116,14 +137,12 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(models);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<GuestModel>> listSystemGuests(int networkId) {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.NETWORK_ID, networkId).eq(GuestEntity.GUEST_TYPE, Constant.GuestType.COMPONENT));
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> getGuestInfo(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest == null) {
@@ -370,7 +389,7 @@ public class GuestService extends AbstractService {
         this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STOP:
-                int allowHostId = getAllowHostId(guest);
+                int allowHostId = getGuestMustStartHostId(guest);
                 if (hostId == 0) {
                     hostId = allowHostId;
                 } else if (hostId != allowHostId && allowHostId > 0) {
@@ -520,7 +539,7 @@ public class GuestService extends AbstractService {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume.getHostId() > 0) {
-            int allowHostId = getAllowHostId(guest);
+            int allowHostId = getGuestMustStartHostId(guest);
             if (allowHostId > 0 && allowHostId != volume.getHostId()) {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "当前主机无法挂载其他主机的本地磁盘");
             }

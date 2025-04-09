@@ -22,10 +22,12 @@ public class LockRunner {
         } catch (Exception err) {
             log.error("执行失败.lock-key:{}", key, err);
         } finally {
-            try {
-                lock.unlock();
-            } catch (Exception err) {
+            if (lock != null) {
+                try {
+                    lock.unlock();
+                } catch (Exception ignored) {
 
+                }
             }
         }
     }
@@ -40,10 +42,12 @@ public class LockRunner {
             log.error("执行失败.lock-key:{}", key, err);
             throw err;
         } finally {
-            try {
-                lock.unlock();
-            } catch (Exception err) {
+            if (lock != null) {
+                try {
+                    lock.unlock();
+                } catch (Exception ignored) {
 
+                }
             }
         }
     }
@@ -54,7 +58,7 @@ public class LockRunner {
         /**
          * 执行
          *
-         * @return
+         * @return 结果
          */
         T run();
     }

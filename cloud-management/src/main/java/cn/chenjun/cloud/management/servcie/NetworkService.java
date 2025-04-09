@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -8,7 +9,7 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.DnsMapper;
 import cn.chenjun.cloud.management.data.mapper.NatMapper;
-import cn.chenjun.cloud.management.model.ComponentModel;
+import cn.chenjun.cloud.management.model.ComponentDetailModel;
 import cn.chenjun.cloud.management.model.GuestNetworkModel;
 import cn.chenjun.cloud.management.model.NatModel;
 import cn.chenjun.cloud.management.model.NetworkModel;
@@ -17,6 +18,7 @@ import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
+import cn.chenjun.cloud.management.util.IpValidator;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -59,6 +61,21 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
+    public ResultUtil<Page<NetworkModel>> search(String keyword, int no, int size) {
+        QueryWrapper<NetworkEntity> wrapper = new QueryWrapper<>();
+        if (!ObjectUtils.isEmpty(keyword)) {
+            String condition = "%" + keyword + "%";
+            wrapper.like(NetworkEntity.NETWORK_NAME, condition);
+        }
+        int nCount = Math.toIntExact(this.networkMapper.selectCount(wrapper));
+        int nOffset = (no - 1) * size;
+        wrapper.last("limit " + nOffset + ", " + size);
+        List<NetworkEntity> list = this.networkMapper.selectList(wrapper);
+        List<NetworkModel> models = list.stream().map(this::initGuestNetwork).collect(Collectors.toList());
+        Page<NetworkModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     public ResultUtil<List<NetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());
         List<NetworkModel> models = networkList.stream().map(this::initGuestNetwork).collect(Collectors.toList());
@@ -71,17 +88,17 @@ public class NetworkService extends AbstractService {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");
         }
-        if (StringUtils.isEmpty(startIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入开始IP");
+        if (!IpValidator.isValidIp(startIp)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的开始IP");
         }
-        if (StringUtils.isEmpty(endIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入结束IP");
+        if (!IpValidator.isValidIp(endIp)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的结束IP");
         }
         if (Constant.NetworkType.BASIC == type && StringUtils.isEmpty(gateway)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网关地址");
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的网关地址");
         }
-        if (StringUtils.isEmpty(mask)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入子网掩码");
+        if (!IpValidator.isValidIp(mask)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的子网掩码");
         }
         if (Constant.NetworkType.BASIC == type && StringUtils.isEmpty(bridge)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入桥接网卡名称");
@@ -89,11 +106,11 @@ public class NetworkService extends AbstractService {
         if (StringUtils.isEmpty(dns)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入DNS信息");
         }
-        if (StringUtils.isEmpty(subnet)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入子网信息");
+        if (!IpValidator.isValidIp(subnet)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的子网信息");
         }
-        if (StringUtils.isEmpty(broadcast)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入广播地址");
+        if (!IpValidator.isValidIp(broadcast)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的广播地址");
         }
         if (StringUtils.isEmpty(domain)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入搜索域");
@@ -243,14 +260,14 @@ public class NetworkService extends AbstractService {
         return ResultUtil.success(this.initGuestNetwork(network));
     }
 
-    public ResultUtil<List<ComponentModel>> listNetworkComponent(int networkId) {
+    public ResultUtil<List<ComponentDetailModel>> listNetworkComponent(int networkId) {
         List<ComponentEntity> entityList = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, networkId));
-        List<ComponentModel> list = entityList.stream().map(this::initComponent).collect(Collectors.toList());
+        List<ComponentDetailModel> list = entityList.stream().map(this::initComponent).collect(Collectors.toList());
         return ResultUtil.success(list);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<ComponentModel> updateComponentSlaveNumber(int componentId, int slaveNumber) {
+    public ResultUtil<ComponentDetailModel> updateComponentSlaveNumber(int componentId, int slaveNumber) {
         ComponentEntity entity = this.componentMapper.selectById(componentId);
         if (entity == null) {
             return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件未找到");
@@ -265,7 +282,7 @@ public class NetworkService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<ComponentModel> createComponent(int networkId, int type) {
+    public ResultUtil<ComponentDetailModel> createComponent(int networkId, int type) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
         if (network == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");

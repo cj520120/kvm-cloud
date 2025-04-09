@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.StorageModel;
@@ -23,6 +24,14 @@ public class StorageController extends BaseController {
         return this.lockRun(() -> storageService.listStorage());
     }
 
+    @GetMapping("/api/storage/search")
+    public ResultUtil<Page<StorageModel>> search(@RequestParam("storageType") Integer storageType,
+                                                 @RequestParam("storageStatus") Integer storageStatus,
+                                                 @RequestParam("keyword") String keyword,
+                                                 @RequestParam("no") int no,
+                                                 @RequestParam("size") int size) {
+        return this.lockRun(() -> storageService.search(storageType, storageStatus, keyword, no, size));
+    }
     @GetMapping("/api/storage/info")
     public ResultUtil<StorageModel> getStorageInfo(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.getStorageInfo(storageId));

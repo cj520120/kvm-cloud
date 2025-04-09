@@ -1,8 +1,9 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
-import cn.chenjun.cloud.management.model.ComponentModel;
+import cn.chenjun.cloud.management.model.ComponentDetailModel;
 import cn.chenjun.cloud.management.model.NatModel;
 import cn.chenjun.cloud.management.model.NetworkModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
@@ -25,23 +26,29 @@ public class NetworkController extends BaseController {
         return this.lockRun(() -> networkService.getNetworkInfo(networkId));
     }
 
+    @GetMapping("/api/network/search")
+    public ResultUtil<Page<NetworkModel>> search(@RequestParam("keyword") String keyword,
+                                                 @RequestParam("no") int no,
+                                                 @RequestParam("size") int size) {
+        return this.lockRun(() -> networkService.search(keyword, no, size));
+    }
     @GetMapping("/api/network/all")
     public ResultUtil<List<NetworkModel>> listNetwork() {
         return this.lockRun(() -> networkService.listNetwork());
     }
 
     @GetMapping("/api/network/component")
-    public ResultUtil<List<ComponentModel>> listNetworkComponent(@RequestParam("networkId") int networkId) {
+    public ResultUtil<List<ComponentDetailModel>> listNetworkComponent(@RequestParam("networkId") int networkId) {
         return this.lockRun(() -> networkService.listNetworkComponent(networkId));
     }
 
     @PostMapping("/api/network/component/slave/update")
-    public ResultUtil<ComponentModel> updateComponentSlaveNumber(@RequestParam("componentId") int componentId, @RequestParam("number") int number) {
+    public ResultUtil<ComponentDetailModel> updateComponentSlaveNumber(@RequestParam("componentId") int componentId, @RequestParam("number") int number) {
         return this.lockRun(() -> networkService.updateComponentSlaveNumber(componentId, number));
     }
 
     @PutMapping("/api/network/component/create")
-    public ResultUtil<ComponentModel> createComponent(@RequestParam("networkId") int networkId, @RequestParam("componentType") int componentType) {
+    public ResultUtil<ComponentDetailModel> createComponent(@RequestParam("networkId") int networkId, @RequestParam("componentType") int componentType) {
         return this.lockRun(() -> networkService.createComponent(networkId, componentType));
     }
 

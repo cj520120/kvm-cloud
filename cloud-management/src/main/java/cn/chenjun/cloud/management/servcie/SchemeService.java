@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
@@ -10,6 +11,7 @@ import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -59,13 +61,27 @@ public class SchemeService extends AbstractService {
         return ResultUtil.success(this.initScheme(entity));
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<List<SchemeModel>> listScheme() {
         List<SchemeEntity> list = this.schemeMapper.selectList(new QueryWrapper<>());
         List<SchemeModel> models = list.stream().map(this::initScheme).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
+    public ResultUtil<Page<SchemeModel>> search(String keyword, int no, int size) {
+        QueryWrapper<SchemeEntity> wrapper = new QueryWrapper<>();
+        if (!ObjectUtils.isEmpty(keyword)) {
+            String condition = "%" + keyword + "%";
+            wrapper.like(SchemeEntity.SCHEME_NAME, condition);
+        }
+        int nCount = Math.toIntExact(this.schemeMapper.selectCount(wrapper));
+        int nOffset = (no - 1) * size;
+        wrapper.last("limit " + nOffset + ", " + size);
+        List<SchemeEntity> list = this.schemeMapper.selectList(wrapper);
+        List<SchemeModel> models = list.stream().map(this::initScheme).collect(Collectors.toList());
+        Page<SchemeModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SchemeModel> createScheme(String name, int cpu, long memory, int share, int sockets, int cores, int threads) {
         verifySchemeParam(name, cpu, memory, share, sockets, cores, threads);

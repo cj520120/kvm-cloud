@@ -6,7 +6,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
-import cn.chenjun.cloud.management.model.ComponentModel;
+import cn.chenjun.cloud.management.model.ComponentDetailModel;
 import cn.chenjun.cloud.management.websocket.WsSessionManager;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.common.reflect.TypeToken;
@@ -28,9 +28,9 @@ public class UpdateComponentProcess extends AbstractClusterMessageProcess {
     @Override
     public void process(NotifyData<?> msg) {
         ComponentEntity entity = this.mapper.selectById(msg.getId());
-        ResultUtil<ComponentModel> resultUtil;
+        ResultUtil<ComponentDetailModel> resultUtil;
         if (entity != null) {
-            ComponentModel model = ComponentModel.builder().componentId(entity.getComponentId())
+            ComponentDetailModel model = ComponentDetailModel.builder().componentId(entity.getComponentId())
                     .networkId(entity.getNetworkId())
                     .componentSlaveNumber(entity.getComponentSlaveNumber())
                     .componentType(entity.getComponentType())
@@ -44,7 +44,7 @@ public class UpdateComponentProcess extends AbstractClusterMessageProcess {
             resultUtil = ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件未找到");
         }
 
-        NotifyData<ResultUtil<ComponentModel>> sendMsg = NotifyData.<ResultUtil<ComponentModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_COMPONENT).data(resultUtil).version(System.currentTimeMillis()).build();
+        NotifyData<ResultUtil<ComponentDetailModel>> sendMsg = NotifyData.<ResultUtil<ComponentDetailModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_COMPONENT).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);
     }
 

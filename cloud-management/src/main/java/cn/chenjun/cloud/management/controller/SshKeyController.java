@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.CreateSshAuthorizedModel;
@@ -20,6 +21,7 @@ import java.util.List;
 /**
  * @author chenjun
  */
+
 @RestController
 public class SshKeyController extends BaseController {
     @Autowired
@@ -31,6 +33,13 @@ public class SshKeyController extends BaseController {
         return this.lockRun(() -> this.sshAuthorizedService.listAllSshKeys());
     }
 
+    @LoginRequire
+    @GetMapping("/api/ssh/search")
+    public ResultUtil<Page<SshAuthorizedModel>> search(@RequestParam("keyword") String keyword,
+                                                       @RequestParam("no") int no,
+                                                       @RequestParam("size") int size) {
+        return this.lockRun(() -> this.sshAuthorizedService.search(keyword, no, size));
+    }
     @LoginRequire
     @GetMapping("/api/ssh/info")
     public ResultUtil<SshAuthorizedModel> getSshKey(@RequestParam("id") int id) {

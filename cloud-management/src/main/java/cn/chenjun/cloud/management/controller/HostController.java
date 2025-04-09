@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.HostModel;
@@ -23,6 +24,12 @@ public class HostController extends BaseController {
         return this.lockRun(() -> hostService.listAllHost());
     }
 
+    @GetMapping("/api/host/search")
+    public ResultUtil<Page<HostModel>> search(@RequestParam("keyword") String keyword,
+                                              @RequestParam("no") int no,
+                                              @RequestParam("size") int size) {
+        return this.lockRun(() -> hostService.search(keyword, no, size));
+    }
     @GetMapping("/api/host/info")
     public ResultUtil<HostModel> getHostInfo(@RequestParam("hostId") int hostId) {
         return this.lockRun(() -> hostService.getHostInfo(hostId));

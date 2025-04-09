@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ComponentModel {
+public class ComponentDetailModel {
     private Integer componentId;
     private Integer componentType;
     private String componentVip;

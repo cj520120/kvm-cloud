@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -22,6 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
@@ -64,13 +66,13 @@ public class UserService extends AbstractService {
     }
 
     public ResultUtil<UserInfoModel> findUserById(int userId) {
-        return ResultUtil.success(this.initLoginInfoBO(loginInfoMapper.selectById(userId)));
+        return ResultUtil.success(this.initUserModel(loginInfoMapper.selectById(userId)));
     }
 
 
     public ResultUtil<UserInfoModel> findUserByLoginName(String loginName) {
         UserInfoEntity user = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
-        return ResultUtil.success(this.initLoginInfoBO(user));
+        return ResultUtil.success(this.initUserModel(user));
     }
 
     public ResultUtil<LoginUserModel> getUserIdByToken(String token) {
@@ -130,7 +132,7 @@ public class UserService extends AbstractService {
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
         entity = UserInfoEntity.builder().loginState(Constant.UserState.ABLE).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
         loginInfoMapper.insert(entity);
-        return ResultUtil.success(this.initUserInfoBO(entity));
+        return ResultUtil.success(this.initUserModel(entity));
     }
 
     public ResultUtil<UserInfoModel> updateUserState(int userId, short state) {
@@ -141,17 +143,32 @@ public class UserService extends AbstractService {
         }
         loginInfoEntity.setLoginState(state);
         this.loginInfoMapper.updateById(loginInfoEntity);
-        return ResultUtil.success(this.initUserInfoBO(loginInfoEntity));
+        return ResultUtil.success(this.initUserModel(loginInfoEntity));
     }
 
 
     public ResultUtil<List<UserInfoModel>> listUsers() {
 
         List<UserInfoEntity> list = this.loginInfoMapper.selectList(new QueryWrapper<>());
-        return ResultUtil.success(list.stream().map(this::initUserInfoBO).collect(Collectors.toList()));
+        return ResultUtil.success(list.stream().map(this::initUserModel).collect(Collectors.toList()));
     }
 
+    public ResultUtil<Page<UserInfoModel>> search(String keyword, int no, int size) {
+        QueryWrapper<UserInfoEntity> queryWrapper = new QueryWrapper<>();
+        if (!ObjectUtils.isEmpty(keyword)) {
+            String condition = "%" + keyword + "%";
+            queryWrapper.like(UserInfoEntity.LOGIN_NAME, keyword);
 
+        }
+        int nCount = Math.toIntExact(this.loginInfoMapper.selectCount(queryWrapper));
+        int nOffset = (no - 1) * size;
+        queryWrapper.last("limit " + nOffset + ", " + size);
+        List<UserInfoEntity> list = this.loginInfoMapper.selectList(queryWrapper);
+        List<UserInfoModel> models = list.stream().map(this::initUserModel).collect(Collectors.toList());
+        Page<UserInfoModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     public ResultUtil<UserInfoModel> resetPassword(int userId, String password) {
         UserInfoEntity loginInfoEntity = this.loginInfoMapper.selectById(userId);
         if (loginInfoEntity == null) {
@@ -162,7 +179,7 @@ public class UserService extends AbstractService {
         loginInfoEntity.setLoginPassword(pwd);
         loginInfoEntity.setLoginPasswordSalt(salt);
         this.loginInfoMapper.updateById(loginInfoEntity);
-        return ResultUtil.success(this.initUserInfoBO(loginInfoEntity));
+        return ResultUtil.success(this.initUserModel(loginInfoEntity));
     }
 
 
@@ -202,7 +219,7 @@ public class UserService extends AbstractService {
         return TokenModel.builder().expire(expire).token(token).build();
     }
 
-    private UserInfoModel initUserInfoBO(UserInfoEntity loginInfoEntity) {
+    private UserInfoModel initUserModel(UserInfoEntity loginInfoEntity) {
         if (loginInfoEntity == null) {
             return null;
         }
@@ -215,14 +232,5 @@ public class UserService extends AbstractService {
         return userModel;
     }
 
-    private UserInfoModel initLoginInfoBO(UserInfoEntity loginInfoEntity) {
-        if (loginInfoEntity == null) {
-            return null;
-        }
-        UserInfoModel loginInfoBean = new UserInfoModel();
-        loginInfoBean.setUserId(loginInfoEntity.getUserId());
-        loginInfoBean.setLoginName(loginInfoEntity.getLoginName());
-        loginInfoBean.setPasswordSalt(loginInfoEntity.getLoginPasswordSalt());
-        return loginInfoBean;
-    }
+
 }

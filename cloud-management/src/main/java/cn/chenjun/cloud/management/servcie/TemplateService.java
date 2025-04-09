@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -17,6 +18,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -40,6 +42,26 @@ public class TemplateService extends AbstractService {
         return ResultUtil.success(models);
     }
 
+    public ResultUtil<Page<TemplateModel>> search(Integer templateType, Integer templateStatus, String keyword, int no, int size) {
+        QueryWrapper<TemplateEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(templateType != null, TemplateEntity.TEMPLATE_TYPE, templateType);
+        queryWrapper.eq(templateStatus != null, TemplateEntity.TEMPLATE_STATUS, templateStatus);
+        if (!ObjectUtils.isEmpty(keyword)) {
+            queryWrapper.and(o -> {
+                String condition = "%" + keyword + "%";
+                QueryWrapper<TemplateEntity> wrapper = o;
+                wrapper.like(TemplateEntity.TEMPLATE_NAME, condition);
+            });
+        }
+        int nCount = Math.toIntExact(this.templateMapper.selectCount(queryWrapper));
+        int nOffset = (no - 1) * size;
+        queryWrapper.last("limit " + nOffset + ", " + size);
+        List<TemplateEntity> list = this.templateMapper.selectList(queryWrapper);
+        List<TemplateModel> models = list.stream().map(this::initTemplateModel).collect(Collectors.toList());
+        Page<TemplateModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
         TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_ID, templateId));
         if (template == null) {

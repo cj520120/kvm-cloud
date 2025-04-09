@@ -86,6 +86,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
         return this.getType() == type;
     }
 
+    @SuppressWarnings({"unchecked"})
     protected void asyncInvoker(HostEntity host, T param, String command, Object data) {
         this.executor.submit(() -> {
             try {
@@ -162,8 +163,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     /**
      * 执行结果回调
      *
-     * @param param
-     * @param resultUtil
      */
     public abstract void onFinish(T param, V resultUtil);
 
@@ -230,7 +229,7 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
             String secretTpl = (String) sysconfig.get(secretKey);
             secretXml = DomainUtil.buildStorageXml(secretTpl, sysconfig, storage);
         }
-        StorageCreateRequest request = StorageCreateRequest.builder()
+        return StorageCreateRequest.builder()
                 .name(storage.getName())
                 .type(storage.getType())
                 .path(storage.getMountPath())
@@ -238,7 +237,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
                 .secretXml(secretXml)
                 .secretValue(secretValue)
                 .build();
-        return request;
     }
 
     private String buildNetworkXml(NetworkEntity network, Map<String, Object> sysconfig) {
@@ -255,27 +253,24 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
                 throw new CodeException(ErrorCode.BASE_NETWORK_ERROR, "不支持的桥接方式");
         }
         String tpl = (String) sysconfig.get(configKey);
-        String xml = DomainUtil.buildNetworkXml(tpl, sysconfig, network);
-        return xml;
+        return DomainUtil.buildNetworkXml(tpl, sysconfig, network);
     }
 
     protected BasicBridgeNetwork buildBasicNetworkRequest(NetworkEntity network, Map<String, Object> sysconfig) {
-        BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
+        return BasicBridgeNetwork.builder()
                 .poolId(network.getPoolId())
                 .xml(buildNetworkXml(network, sysconfig))
                 .build();
-        return basicBridgeNetwork;
     }
 
     protected VlanNetwork buildVlanCreateRequest(NetworkEntity basicNetworkEntity, NetworkEntity network, Map<String, Object> sysconfig) {
 
         BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(basicNetworkEntity, sysconfig);
-        VlanNetwork vlan = VlanNetwork.builder()
+        return VlanNetwork.builder()
                 .poolId(network.getPoolId())
                 .xml(buildNetworkXml(network, sysconfig))
                 .basic(basicBridgeNetwork)
                 .build();
-        return vlan;
     }
 
     protected Map<String, Object> loadGuestConfig(int hostId, int guestId) {

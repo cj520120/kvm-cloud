@@ -206,7 +206,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         }
 
         Integer hostId = 0;
-        Integer allowHostId = this.guestService.getAllowHostId(guest);
+        Integer allowHostId = this.guestService.getGuestMustStartHostId(guest);
         if (allowHostId > 0) {
             hostId = allowHostId;
             if (!hostIds.contains(hostId)) {

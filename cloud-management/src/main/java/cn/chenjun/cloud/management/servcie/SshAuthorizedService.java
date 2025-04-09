@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
@@ -16,6 +17,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,13 +35,28 @@ public class SshAuthorizedService extends AbstractService {
     @Autowired
     private RedissonClient redissonClient;
 
-    @Transactional(rollbackFor = Exception.class)
+
     public ResultUtil<List<SshAuthorizedModel>> listAllSshKeys() {
         List<SshAuthorizedEntity> list = this.sshAuthorizedMapper.selectList(new QueryWrapper<>());
         List<SshAuthorizedModel> models = list.stream().map(this::initSshAuthorized).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
+    public ResultUtil<Page<SshAuthorizedModel>> search(String keyword, int no, int size) {
+        QueryWrapper<SshAuthorizedEntity> wrapper = new QueryWrapper<>();
+        if (!ObjectUtils.isEmpty(keyword)) {
+            String condition = "%" + keyword + "%";
+            wrapper.like(SshAuthorizedEntity.SSH_NAME, condition);
+        }
+        int nCount = Math.toIntExact(this.sshAuthorizedMapper.selectCount(wrapper));
+        int nOffset = (no - 1) * size;
+        wrapper.last("limit " + nOffset + ", " + size);
+        List<SshAuthorizedEntity> list = this.sshAuthorizedMapper.selectList(wrapper);
+        List<SshAuthorizedModel> models = list.stream().map(this::initSshAuthorized).collect(Collectors.toList());
+        Page<SshAuthorizedModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SshAuthorizedModel> getSshKey(int id) {
         SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
@@ -51,7 +68,7 @@ public class SshAuthorizedService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SshAuthorizedModel> importSshKey(String name, String publicKey, String privateKey) {
-        SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPublicKey(publicKey).build();
+        SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPublicKey(publicKey).sshPrivateKey(privateKey).build();
         this.sshAuthorizedMapper.insert(entity);
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH_KEY).build());
 

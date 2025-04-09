@@ -32,7 +32,7 @@ public class AllocateService extends AbstractService {
             if (storage == null) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
             }
-            boolean isSupport = (storage.getSupportCategory().intValue() & category) == category;
+            boolean isSupport = (storage.getSupportCategory() & category) == category;
             if (!isSupport) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "选择的存储磁盘分类不支持选定类型");
             }
@@ -40,10 +40,10 @@ public class AllocateService extends AbstractService {
             List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
             storageList = storageList.stream().filter(t -> {
                 boolean isSupport = !Objects.equals(t.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL);//本地磁盘不参与自动分配
-                isSupport = isSupport && (t.getSupportCategory().intValue() & category) == category;
+                isSupport = isSupport && (t.getSupportCategory() & category) == category;
                 return isSupport && Objects.equals(t.getStatus(), Constant.StorageStatus.READY);
             }).collect(Collectors.toList());
-            Map<Integer, Float> scoreMap = new HashMap<>();
+            Map<Integer, Float> scoreMap = new HashMap<>(storageList.size());
             for (StorageEntity entity : storageList) {
                 List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build(), ConfigQuery.builder().type(Constant.ConfigType.STORAGE).id(entity.getStorageId()).build());
                 float storageWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT);
@@ -64,7 +64,7 @@ public class AllocateService extends AbstractService {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         wrapper.eq("network_id", networkId);
         wrapper.eq("allocate_id", 0);
-        wrapper.eq("allocate_type", Constant.NetworkAllocateType.GUEST);
+        wrapper.eq("allocate_type", Constant.NetworkAllocateType.DEFAULT);
         wrapper.last("limit 0,1");
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
         if (guestNetwork == null) {
@@ -113,7 +113,7 @@ public class AllocateService extends AbstractService {
             }
             if (host == null) {
                 if (cpu > 0 && memory > 0) {
-                    Map<Integer, Float> scoreMap = new HashMap<>();
+                    Map<Integer, Float> scoreMap = new HashMap<>(list.size());
                     for (HostEntity entity : list) {
                         List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build(), ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(entity.getHostId()).build());
                         float cpuWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_HOST_CPU_WEIGHT);

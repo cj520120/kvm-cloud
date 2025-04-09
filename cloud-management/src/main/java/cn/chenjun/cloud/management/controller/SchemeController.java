@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.SchemeModel;
@@ -28,6 +29,12 @@ public class SchemeController extends BaseController {
         return this.lockRun(() -> this.schemeService.listScheme());
     }
 
+    @GetMapping("/api/scheme/search")
+    public ResultUtil<Page<SchemeModel>> search(@RequestParam("keyword") String keyword,
+                                                @RequestParam("no") int no,
+                                                @RequestParam("size") int size) {
+        return this.lockRun(() -> this.schemeService.search(keyword, no, size));
+    }
     @PutMapping("/api/scheme/create")
     public ResultUtil<SchemeModel> createScheme(@RequestParam("name") String name,
                                                 @RequestParam("cpu") int cpu,

@@ -33,7 +33,8 @@ public class TaskDispatchRunner extends AbstractRunner {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
+    @SuppressWarnings({"unchecked"})
     protected void dispatch() throws Exception {
         List<TaskEntity> taskList = this.taskService.listCanRunTask(100);
         for (TaskEntity entity : taskList) {

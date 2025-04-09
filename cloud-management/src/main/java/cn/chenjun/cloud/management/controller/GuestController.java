@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
@@ -33,6 +34,19 @@ public class GuestController extends BaseController {
     @GetMapping("/api/guest/all")
     public ResultUtil<List<GuestModel>> listGuests() {
         return this.lockRun(() -> this.guestService.listGuests());
+    }
+
+    @GetMapping("/api/guest/search")
+    public ResultUtil<Page<GuestModel>> search(@RequestParam("guestType") Integer guestType,
+                                               @RequestParam("groupId") Integer groupId,
+                                               @RequestParam("networkId") Integer networkId,
+                                               @RequestParam("hostId") Integer hostId,
+                                               @RequestParam("schemeId") Integer schemeId,
+                                               @RequestParam("status") Integer status,
+                                               @RequestParam("keyword") String keyword,
+                                               @RequestParam("no") int no,
+                                               @RequestParam("size") int size) {
+        return this.lockRun(() -> this.guestService.search(guestType, groupId, networkId, hostId, schemeId, status, keyword, no, size));
     }
 
     @GetMapping("/api/guest/system")

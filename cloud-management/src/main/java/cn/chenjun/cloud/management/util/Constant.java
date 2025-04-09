@@ -7,6 +7,7 @@ public class Constant {
     public static int MAX_DEVICE_ID = 200;
 
     public static class NetworkAllocateType {
+        public static final int DEFAULT = 0;
         public static final int GUEST = 0;
         public static final int COMPONENT_VIP = 1;
         public static final int CUSTOM = 2;

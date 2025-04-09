@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.DnsModel;
@@ -24,6 +25,15 @@ public class DnsController extends BaseController {
 
         return this.lockRun(() -> this.dnsService.listDnsByNetworkId(networkId));
 
+    }
+
+    @LoginRequire
+    @GetMapping("/api/dns/list")
+    public ResultUtil<Page<DnsModel>> search(@RequestParam("networkId") int networkId,
+                                             @RequestParam("keyword") String keyword,
+                                             @RequestParam("no") int no,
+                                             @RequestParam("size") int size) {
+        return this.lockRun(() -> this.dnsService.search(networkId, keyword, no, size));
     }
 
     @LoginRequire

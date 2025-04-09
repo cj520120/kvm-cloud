@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
@@ -26,6 +27,16 @@ public class VolumeController extends BaseController {
         return this.lockRun(() -> this.volumeService.listVolumes());
     }
 
+    @GetMapping("/api/volume/search")
+    public ResultUtil<Page<VolumeModel>> search(@RequestParam("storageId") Integer storageId,
+                                                @RequestParam("status") Integer status,
+                                                @RequestParam("templateId") Integer templateId,
+                                                @RequestParam("volumeType") String volumeType,
+                                                @RequestParam("keyword") String keyword,
+                                                @RequestParam("no") int no,
+                                                @RequestParam("size") int size) {
+        return this.lockRun(() -> this.volumeService.search(storageId, status, templateId, volumeType, keyword, no, size));
+    }
     @GetMapping("/api/volume/not/attach/all")
     public ResultUtil<List<VolumeModel>> listNoAttachVolumes(@RequestParam(value = "guestId", defaultValue = "0") int guestId) {
         return this.lockRun(() -> this.volumeService.listNoAttachVolumes(guestId));

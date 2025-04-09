@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -19,8 +20,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,12 +63,34 @@ public class VolumeService extends AbstractService {
                 return 1;
             }
             return Integer.compare(o1.getStatus(), o2.getStatus());
-        }).collect(Collectors.toList());
-        models.sort(Comparator.comparingInt(o -> o.getAttach().getDeviceId()));
+        }).sorted(Comparator.comparingInt(o -> o.getAttach().getDeviceId())).collect(Collectors.toList());
         return ResultUtil.success(models);
-
     }
 
+    public ResultUtil<Page<VolumeModel>> search(Integer storageId, Integer status, Integer templateId, String volumeType, String keyword, int no, int size) {
+        QueryWrapper<VolumeEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(storageId != null, VolumeEntity.STORAGE_ID, storageId);
+        queryWrapper.eq(templateId != null, VolumeEntity.TEMPLATE_ID, templateId);
+        queryWrapper.eq(status != null, VolumeEntity.VOLUME_STATUS, status);
+        queryWrapper.eq(!ObjectUtils.isEmpty(volumeType), VolumeEntity.VOLUME_TYPE, volumeType);
+        if (!ObjectUtils.isEmpty(keyword)) {
+            queryWrapper.and(o -> {
+                String condition = "%" + keyword + "%";
+                QueryWrapper<VolumeEntity> wrapper = o;
+                wrapper.like(VolumeEntity.VOLUME_NAME, condition)
+                        .or().like(VolumeEntity.VOLUME_DESCRIPTION, condition);
+            });
+        }
+        int nCount = Math.toIntExact(this.volumeMapper.selectCount(queryWrapper));
+        int nOffset = (no - 1) * size;
+        queryWrapper.last("limit " + nOffset + ", " + size);
+        List<VolumeEntity> guestList = this.volumeMapper.selectList(queryWrapper);
+        List<VolumeModel> models = guestList.stream().map(this::initVolume).collect(Collectors.toList());
+        Page<VolumeModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+
+    }
     public ResultUtil<List<VolumeModel>> listVolumes() {
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
         List<VolumeModel> models = volumeList.stream().map(this::initVolume).collect(Collectors.toList());
@@ -77,7 +100,7 @@ public class VolumeService extends AbstractService {
     public ResultUtil<List<VolumeModel>> listNoAttachVolumes(int guestId) {
         List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
         List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn(VolumeEntity.VOLUME_ID, volumeIds));
-        int allowHostId = this.getAllowHostId(guestId);
+        int allowHostId = this.getGuestMustStartHostId(guestId);
         List<VolumeModel> models = new ArrayList<>();
         for (VolumeEntity volume : volumeList) {
             if (!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)) {

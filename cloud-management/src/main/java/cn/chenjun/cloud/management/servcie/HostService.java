@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.AppUtils;
@@ -15,6 +16,7 @@ import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -34,6 +36,24 @@ public class HostService extends AbstractService {
         return ResultUtil.success(models);
     }
 
+    public ResultUtil<Page<HostModel>> search(String keyword, int no, int size) {
+        QueryWrapper<HostEntity> wrapper = new QueryWrapper<>();
+        if (!ObjectUtils.isEmpty(keyword)) {
+            String condition = "%" + keyword + "%";
+            wrapper.like(HostEntity.HOST_DISPLAY_NAME, condition)
+                    .or().like(HostEntity.HOST_IP, condition)
+                    .or().like(HostEntity.HOST_OS_NAME, condition);
+
+        }
+        int nCount = Math.toIntExact(this.hostMapper.selectCount(wrapper));
+        int nOffset = (no - 1) * size;
+        wrapper.last("limit " + nOffset + ", " + size);
+        List<HostEntity> list = this.hostMapper.selectList(wrapper);
+        List<HostModel> models = list.stream().map(this::initHost).collect(Collectors.toList());
+        Page<HostModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> getHostInfo(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);

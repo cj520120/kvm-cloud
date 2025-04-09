@@ -1,9 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.management.data.entity.GuestVncEntity;
-import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestVncMapper;
-import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +13,8 @@ import org.springframework.stereotype.Component;
 public class VncService {
     @Autowired
     protected GuestVncMapper guestVncMapper;
+    private static final int VNC_PASSWORD_SIZE = 8;
+    private static final int VNC_TOKEN_SIZE = 16;
 
     public GuestVncEntity getGuestVnc(int guestId) {
         GuestVncEntity guestVncEntity = this.guestVncMapper.selectById(guestId);
@@ -22,13 +22,13 @@ public class VncService {
             guestVncEntity = GuestVncEntity.builder()
                     .guestId(guestId)
                     .port(0)
-                    .password(RandomStringUtils.randomAlphanumeric(8))
-                    .token(RandomStringUtils.randomAlphanumeric(16))
+                    .password(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE))
+                    .token(RandomStringUtils.randomAlphanumeric(VNC_TOKEN_SIZE))
                     .build();
             this.guestVncMapper.insert(guestVncEntity);
         } else {
-            if (guestVncEntity.getPassword().length() > 8) {
-                guestVncEntity.setPassword(RandomStringUtils.randomAlphanumeric(8));
+            if (guestVncEntity.getPassword().length() > VNC_PASSWORD_SIZE) {
+                guestVncEntity.setPassword(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
                 this.guestVncMapper.updateById(guestVncEntity);
             }
         }

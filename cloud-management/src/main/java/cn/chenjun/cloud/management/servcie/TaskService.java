@@ -17,6 +17,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenjun
+ */
 @Slf4j
 @Service
 public class TaskService {
@@ -28,12 +31,12 @@ public class TaskService {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void addTask(BaseOperateParam operateParam) {
         this.addTask(operateParam, 0);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void addTask(BaseOperateParam operateParam, int delayMinute) {
         TaskEntity task = this.findTask(operateParam.getTaskId());
         if (task == null) {
@@ -49,34 +52,33 @@ public class TaskService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void keepTask(String taskId) {
         int expire = configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
         taskMapper.keep(taskId, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expire)));
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<TaskEntity> listCanRunTask(int count) {
         QueryWrapper<TaskEntity> wrapper = new QueryWrapper<TaskEntity>().lt(TaskEntity.EXPIRE_TIME, new Date(System.currentTimeMillis()));
         wrapper.last("limit 0," + count);
-        List<TaskEntity> taskList = this.taskMapper.selectList(wrapper);
-        return taskList;
+        return this.taskMapper.selectList(wrapper);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean startTask(TaskEntity entity) {
         int expireSecond = this.configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
         Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
         return this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTask(String taskId) {
         this.taskMapper.deleteById(taskId);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public TaskEntity findTask(String taskId) {
         return this.taskMapper.selectOne(new QueryWrapper<TaskEntity>().eq(TaskEntity.TASK_ID, taskId));
     }
@@ -88,6 +90,5 @@ public class TaskService {
             return;
         }
         this.applicationContext.publishEvent(OperateFinishBean.builder().taskId(taskId).operateType(task.getType()).param(task.getParam()).result(result).build());
-
     }
 }

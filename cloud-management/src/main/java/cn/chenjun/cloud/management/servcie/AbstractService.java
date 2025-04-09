@@ -61,8 +61,8 @@ public abstract class AbstractService {
     @Autowired
     protected ConfigService configService;
 
-    protected boolean checkComponentComplete(int networkId, int componentType) {
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, componentType).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
+    protected boolean checkRouteComponentComplete(int networkId) {
+        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
         if (component == null) {
             return true;
         }
@@ -81,13 +81,13 @@ public abstract class AbstractService {
         return guestMapper.selectById(guestDisk.getGuestId());
     }
 
-    protected int getAllowHostId(int guestId) {
+    protected int getGuestMustStartHostId(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        return getAllowHostId(guest);
+        return getGuestMustStartHostId(guest);
     }
 
 
-    public int getAllowHostId(GuestEntity guest) {
+    public int getGuestMustStartHostId(GuestEntity guest) {
         if (guest == null) {
             return 0;
         }
@@ -170,7 +170,6 @@ public abstract class AbstractService {
 
     protected TemplateModel initTemplateModel(TemplateEntity entity) {
         return new BeanConverter<>(TemplateModel.class).convert(entity, null);
-
     }
 
     protected VolumeModel initVolume(VolumeEntity volume) {
@@ -186,9 +185,9 @@ public abstract class AbstractService {
     }
 
 
-    protected ComponentModel initComponent(ComponentEntity entity) {
+    protected ComponentDetailModel initComponent(ComponentEntity entity) {
 
-        return ComponentModel.builder().componentId(entity.getComponentId())
+        return ComponentDetailModel.builder().componentId(entity.getComponentId())
                 .networkId(entity.getNetworkId())
                 .componentSlaveNumber(entity.getComponentSlaveNumber())
                 .componentType(entity.getComponentType())
@@ -203,4 +202,21 @@ public abstract class AbstractService {
         return NatModel.builder().natId(entity.getNatId()).componentId(entity.getComponentId()).localPort(entity.getLocalPort()).protocol(entity.getProtocol()).remoteIp(entity.getRemoteIp()).remotePort(entity.getRemotePort()).build();
     }
 
+    protected DnsModel initDns(DnsEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return DnsModel.builder().id(entity.getDnsId())
+                .networkId(entity.getNetworkId())
+                .domain(entity.getDnsDomain())
+                .ip(entity.getDnsIp())
+                .build();
+    }
+
+    protected GroupModel initGroup(GroupInfoEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return GroupModel.builder().groupId(entity.getGroupId()).groupName(entity.getGroupName()).createTime(entity.getCreateTime()).build();
+    }
 }

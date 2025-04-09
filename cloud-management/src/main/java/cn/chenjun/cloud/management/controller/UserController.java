@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
@@ -95,5 +96,13 @@ public class UserController extends BaseController {
     @GetMapping("/api/user/list")
     public ResultUtil<List<UserInfoModel>> listUsers() {
         return this.lockRun(() -> userUiService.listUsers());
+    }
+
+    @GetMapping("/api/user/search")
+    public ResultUtil<Page<UserInfoModel>> search(@RequestParam("keyword") String keyword,
+                                                  @RequestParam("no") int no,
+                                                  @RequestParam("size") int size) {
+
+        return this.lockRun(() -> userUiService.search(keyword, no, size));
     }
 }

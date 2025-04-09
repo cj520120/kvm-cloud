@@ -24,6 +24,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @author chenjun
+ */
 @Service
 public class InitLocalStorageRunner extends AbstractRunner {
     @Autowired
@@ -52,16 +55,15 @@ public class InitLocalStorageRunner extends AbstractRunner {
                     Map<String, String> storageParm = MapUtil.of("path", path);
                     String paramStr = GsonBuilderUtil.create().toJson(storageParm);
                     List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, host.getHostId()).eq(StorageEntity.STORAGE_TYPE, cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL));
-                    if (storageList.stream().filter(v -> Objects.equals(v.getMountPath(), path)).count() == 0) {
+                    if (storageList.stream().noneMatch(v -> Objects.equals(v.getMountPath(), path))) {
                         String storageName = UUID.randomUUID().toString().replace("-", "").toUpperCase();
-                        String mountPath = path;
                         StorageEntity storage = StorageEntity.builder()
                                 .description("Local Storage(" + host.getDisplayName() + ")")
                                 .name(storageName)
                                 .type(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)
                                 .hostId(host.getHostId())
                                 .param(paramStr)
-                                .mountPath(mountPath)
+                                .mountPath(path)
                                 .supportCategory(Constant.StorageSupportCategory.VOLUME)
                                 .allocation(0L)
                                 .capacity(0L)

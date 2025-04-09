@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.GroupModel;
@@ -23,6 +24,12 @@ public class GroupController extends BaseController {
         return this.lockRun(() -> this.groupService.listGroups());
     }
 
+    @GetMapping("/api/group/search")
+    public ResultUtil<Page<GroupModel>> search(@RequestParam("keyword") String keyword,
+                                               @RequestParam("no") int no,
+                                               @RequestParam("size") int size) {
+        return this.lockRun(() -> this.groupService.search(keyword, no, size));
+    }
     @GetMapping("/api/group/info")
     public ResultUtil<GroupModel> getGroupInfo(@RequestParam("groupId") int groupId) {
         return this.lockRun(() -> this.groupService.getGroup(groupId));
@@ -32,7 +39,6 @@ public class GroupController extends BaseController {
     public ResultUtil<GroupModel> createGroup(@RequestParam("groupName") String groupName) {
         return this.lockRun(() -> this.groupService.createGroup(groupName));
     }
-
     @PostMapping("/api/group/update")
     public ResultUtil<GroupModel> updateGroup(@RequestParam("groupId") int groupId, @RequestParam("groupName") String groupName) {
         return this.lockRun(() -> this.groupService.updateGroup(groupId, groupName));

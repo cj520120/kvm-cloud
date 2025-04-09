@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -13,6 +14,7 @@ import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
@@ -34,6 +36,26 @@ public class StorageService extends AbstractService {
         return ResultUtil.success(models);
     }
 
+    public ResultUtil<Page<StorageModel>> search(Integer storageType, Integer storageStatus, String keyword, int no, int size) {
+        QueryWrapper<StorageEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(storageType != null, StorageEntity.STORAGE_TYPE, storageType);
+        queryWrapper.eq(storageStatus != null, StorageEntity.STORAGE_STATUS, storageStatus);
+        if (!ObjectUtils.isEmpty(keyword)) {
+            queryWrapper.and(o -> {
+                String condition = "%" + keyword + "%";
+                QueryWrapper<StorageEntity> wrapper = o;
+                wrapper.like(StorageEntity.STORAGE_NAME, condition);
+            });
+        }
+        int nCount = Math.toIntExact(this.storageMapper.selectCount(queryWrapper));
+        int nOffset = (no - 1) * size;
+        queryWrapper.last("limit " + nOffset + ", " + size);
+        List<StorageEntity> list = this.storageMapper.selectList(queryWrapper);
+        List<StorageModel> models = list.stream().map(this::initStorageModel).collect(Collectors.toList());
+        Page<StorageModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
+    }
     public ResultUtil<StorageModel> getStorageInfo(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {
@@ -158,11 +180,14 @@ public class StorageService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "存储池参数不正确");
         }
         String storageName = UUID.randomUUID().toString().toLowerCase().replace("-", "");
-        String mountPath = "";
+        String mountPath;
         switch (type) {
             case cn.chenjun.cloud.common.util.Constant.StorageType.NFS:
             case cn.chenjun.cloud.common.util.Constant.StorageType.GLUSTERFS:
                 mountPath = "/mnt/" + storageName;
+                break;
+            default:
+                mountPath = "";
                 break;
         }
         StorageEntity storage = StorageEntity.builder()
