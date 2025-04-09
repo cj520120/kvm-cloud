@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.controller;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.TemplateModel;
@@ -22,7 +23,14 @@ public class TemplateController extends BaseController {
     public ResultUtil<List<TemplateModel>> listTemplate() {
         return this.lockRun(() -> templateService.listTemplate());
     }
-
+    @GetMapping("/api/template/search")
+    public ResultUtil<Page<TemplateModel>> search(@RequestParam("templateType") Integer templateType,
+                                                  @RequestParam("templateStatus") Integer templateStatus,
+                                                  @RequestParam("keyword") String keyword,
+                                                  @RequestParam("no") int no,
+                                                  @RequestParam("size") int size) {
+        return this.lockRun(() -> templateService.search(templateType, templateStatus, keyword, no, size));
+    }
     @GetMapping("/api/template/info")
     public ResultUtil<TemplateModel> getTemplateInfo(@RequestParam("templateId") int templateId) {
         return this.lockRun(() -> templateService.getTemplateInfo(templateId));
