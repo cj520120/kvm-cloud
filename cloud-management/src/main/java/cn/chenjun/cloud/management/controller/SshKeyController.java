@@ -35,7 +35,7 @@ public class SshKeyController extends BaseController {
 
     @LoginRequire
     @GetMapping("/api/ssh/search")
-    public ResultUtil<Page<SshAuthorizedModel>> search(@RequestParam("keyword") String keyword,
+    public ResultUtil<Page<SshAuthorizedModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
                                                        @RequestParam("no") int no,
                                                        @RequestParam("size") int size) {
         return this.lockRun(() -> this.sshAuthorizedService.search(keyword, no, size));

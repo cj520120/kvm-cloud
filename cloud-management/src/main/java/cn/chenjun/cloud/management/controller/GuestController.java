@@ -37,13 +37,13 @@ public class GuestController extends BaseController {
     }
 
     @GetMapping("/api/guest/search")
-    public ResultUtil<Page<GuestModel>> search(@RequestParam("guestType") Integer guestType,
-                                               @RequestParam("groupId") Integer groupId,
-                                               @RequestParam("networkId") Integer networkId,
-                                               @RequestParam("hostId") Integer hostId,
-                                               @RequestParam("schemeId") Integer schemeId,
-                                               @RequestParam("status") Integer status,
-                                               @RequestParam("keyword") String keyword,
+    public ResultUtil<Page<GuestModel>> search(@RequestParam(value = "guestType",required = false) Integer guestType,
+                                               @RequestParam(value = "groupId",required = false) Integer groupId,
+                                               @RequestParam(value = "networkId",required = false) Integer networkId,
+                                               @RequestParam(value = "hostId",required = false) Integer hostId,
+                                               @RequestParam(value = "schemeId",required = false) Integer schemeId,
+                                               @RequestParam(value = "status",required = false) Integer status,
+                                               @RequestParam(value = "keyword",required = false) String keyword,
                                                @RequestParam("no") int no,
                                                @RequestParam("size") int size) {
         return this.lockRun(() -> this.guestService.search(guestType, groupId, networkId, hostId, schemeId, status, keyword, no, size));

@@ -28,11 +28,11 @@ public class VolumeController extends BaseController {
     }
 
     @GetMapping("/api/volume/search")
-    public ResultUtil<Page<VolumeModel>> search(@RequestParam("storageId") Integer storageId,
-                                                @RequestParam("status") Integer status,
-                                                @RequestParam("templateId") Integer templateId,
-                                                @RequestParam("volumeType") String volumeType,
-                                                @RequestParam("keyword") String keyword,
+    public ResultUtil<Page<VolumeModel>> search(@RequestParam(value = "storageId",required = false) Integer storageId,
+                                                @RequestParam(value = "status",required = false) Integer status,
+                                                @RequestParam(value = "templateId",required = false) Integer templateId,
+                                                @RequestParam(value = "volumeType",required = false) String volumeType,
+                                                @RequestParam(value = "keyword",required = false) String keyword,
                                                 @RequestParam("no") int no,
                                                 @RequestParam("size") int size) {
         return this.lockRun(() -> this.volumeService.search(storageId, status, templateId, volumeType, keyword, no, size));

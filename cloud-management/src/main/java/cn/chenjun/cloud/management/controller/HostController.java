@@ -25,7 +25,7 @@ public class HostController extends BaseController {
     }
 
     @GetMapping("/api/host/search")
-    public ResultUtil<Page<HostModel>> search(@RequestParam("keyword") String keyword,
+    public ResultUtil<Page<HostModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
                                               @RequestParam("no") int no,
                                               @RequestParam("size") int size) {
         return this.lockRun(() -> hostService.search(keyword, no, size));

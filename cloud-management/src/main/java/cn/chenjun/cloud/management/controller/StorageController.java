@@ -25,9 +25,9 @@ public class StorageController extends BaseController {
     }
 
     @GetMapping("/api/storage/search")
-    public ResultUtil<Page<StorageModel>> search(@RequestParam("storageType") Integer storageType,
-                                                 @RequestParam("storageStatus") Integer storageStatus,
-                                                 @RequestParam("keyword") String keyword,
+    public ResultUtil<Page<StorageModel>> search(@RequestParam(value = "storageType",required = false) Integer storageType,
+                                                 @RequestParam(value = "storageStatus",required = false) Integer storageStatus,
+                                                 @RequestParam(value = "keyword",required = false) String keyword,
                                                  @RequestParam("no") int no,
                                                  @RequestParam("size") int size) {
         return this.lockRun(() -> storageService.search(storageType, storageStatus, keyword, no, size));

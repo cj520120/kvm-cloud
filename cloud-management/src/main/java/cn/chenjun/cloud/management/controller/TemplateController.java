@@ -24,8 +24,8 @@ public class TemplateController extends BaseController {
         return this.lockRun(() -> templateService.listTemplate());
     }
     @GetMapping("/api/template/search")
-    public ResultUtil<Page<TemplateModel>> search(@RequestParam("templateType") Integer templateType,
-                                                  @RequestParam("templateStatus") Integer templateStatus,
+    public ResultUtil<Page<TemplateModel>> search(@RequestParam(value = "templateType",required = false) Integer templateType,
+                                                  @RequestParam(value = "templateStatus",required = false) Integer templateStatus,
                                                   @RequestParam("keyword") String keyword,
                                                   @RequestParam("no") int no,
                                                   @RequestParam("size") int size) {

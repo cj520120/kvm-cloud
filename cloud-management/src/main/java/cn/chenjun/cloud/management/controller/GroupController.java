@@ -25,7 +25,7 @@ public class GroupController extends BaseController {
     }
 
     @GetMapping("/api/group/search")
-    public ResultUtil<Page<GroupModel>> search(@RequestParam("keyword") String keyword,
+    public ResultUtil<Page<GroupModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
                                                @RequestParam("no") int no,
                                                @RequestParam("size") int size) {
         return this.lockRun(() -> this.groupService.search(keyword, no, size));

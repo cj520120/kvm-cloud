@@ -27,7 +27,7 @@ public class NetworkController extends BaseController {
     }
 
     @GetMapping("/api/network/search")
-    public ResultUtil<Page<NetworkModel>> search(@RequestParam("keyword") String keyword,
+    public ResultUtil<Page<NetworkModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
                                                  @RequestParam("no") int no,
                                                  @RequestParam("size") int size) {
         return this.lockRun(() -> networkService.search(keyword, no, size));
