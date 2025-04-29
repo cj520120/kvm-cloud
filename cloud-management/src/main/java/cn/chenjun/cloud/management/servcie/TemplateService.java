@@ -65,7 +65,7 @@ public class TemplateService extends AbstractService {
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
         TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_ID, templateId));
         if (template == null) {
-            return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+            return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "Template not found.");
         }
         return ResultUtil.success(this.initTemplateModel(template));
     }
@@ -73,10 +73,10 @@ public class TemplateService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String initScript) {
         if (StringUtils.isEmpty(name)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版名称");
+            throw new CodeException(ErrorCode.PARAM_ERROR, "Please input template name.");
         }
         if (StringUtils.isEmpty(uri)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入模版地址");
+            throw new CodeException(ErrorCode.PARAM_ERROR, "Please input template uri.");
         }
         TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
         this.templateMapper.insert(template);
@@ -89,7 +89,7 @@ public class TemplateService extends AbstractService {
 
         TemplateEntity template = templateMapper.selectById(id);
         if (template == null) {
-            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "Template not found.");
         }
         template.setScript(initScript);
         templateMapper.updateById(template);
@@ -197,8 +197,7 @@ public class TemplateService extends AbstractService {
         }
         switch (template.getStatus()) {
             case Constant.TemplateStatus.ERROR:
-            case Constant.TemplateStatus.READY:
-            case Constant.TemplateStatus.DESTROY:
+            case Constant.TemplateStatus.READY: {
                 template.setStatus(Constant.TemplateStatus.DESTROY);
                 this.templateMapper.updateById(template);
                 BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
@@ -206,6 +205,16 @@ public class TemplateService extends AbstractService {
                 TemplateModel source = this.initTemplateModel(template);
                 this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return ResultUtil.success(source);
+            }
+            case Constant.TemplateStatus.DESTROY: {
+                BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
+                operateTask.addTask(operate, 0);
+                TemplateModel source = this.initTemplateModel(template);
+                this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+                return ResultUtil.success(source);
+            }
+
+
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");
         }

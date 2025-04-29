@@ -69,6 +69,9 @@ public final class ErrorCode {
     public static final int USER_LOGIN_NAME_OR_PASSWORD_ERROR = BASE_USER_ERROR + 1;
     public static final int USER_FORBID_ERROR = BASE_USER_ERROR + 2;
     public static final int PERMISSION_ERROR = BASE_USER_ERROR + 3;
+    public static final int USER_NOT_FOUND = BASE_USER_ERROR + 4;
+    public static final int OLD_PASSWORD_ERROR = BASE_USER_ERROR + 5;
+    public static final int PASSWORD_NOT_EMPTY = BASE_USER_ERROR + 6;
     /**
      * Group
      */
@@ -91,12 +94,13 @@ public final class ErrorCode {
      */
     public static final int BASE_AGENT_ERROR = BASE_ERROR * 13;
     public static final int AGENT_TASK_ASYNC_WAIT = BASE_AGENT_ERROR + 1;
-    public static final int BASE_CONFIG_ERROR = BASE_ERROR * 14;
     /**
      * Config
      */
+    public static final int BASE_CONFIG_ERROR = BASE_ERROR * 14;
     public static final int CONFIG_EXISTS_ERROR = BASE_CONFIG_ERROR + 1;
     public static final int CONFIG_NOT_EXISTS_ERROR = BASE_CONFIG_ERROR + 1;
+
 
     private ErrorCode() {
 

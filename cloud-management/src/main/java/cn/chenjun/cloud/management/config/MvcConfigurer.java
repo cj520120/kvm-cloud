@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.config;
 
 import cn.chenjun.cloud.management.filter.AuthenticationInterceptor;
+import cn.chenjun.cloud.management.filter.PermissionInterceptor;
 import cn.chenjun.cloud.management.filter.SignInterceptor;
 import cn.chenjun.cloud.management.filter.UserInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,14 @@ public class MvcConfigurer implements WebMvcConfigurer {
     private UserInterceptor userInterceptor;
     @Autowired
     private SignInterceptor signInterceptor;
+    @Autowired
+    private PermissionInterceptor permissionInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userInterceptor).addPathPatterns("/api/**");
         registry.addInterceptor(authenticationInterceptor).addPathPatterns("/api/**");
+        registry.addInterceptor(permissionInterceptor).addPathPatterns("/api/**");
         registry.addInterceptor(signInterceptor).addPathPatterns("/api/agent/**");
     }
 

@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginUserModel {
-    private Object id;
-    private String type;
+    private int userId;
 
 }

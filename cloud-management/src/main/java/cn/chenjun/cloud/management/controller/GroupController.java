@@ -3,8 +3,10 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.GroupModel;
 import cn.chenjun.cloud.management.servcie.GroupService;
+import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,15 +37,19 @@ public class GroupController extends BaseController {
         return this.lockRun(() -> this.groupService.getGroup(groupId));
     }
 
+    
     @PutMapping("/api/group/create")
     public ResultUtil<GroupModel> createGroup(@RequestParam("groupName") String groupName) {
         return this.lockRun(() -> this.groupService.createGroup(groupName));
     }
+
+    
     @PostMapping("/api/group/update")
     public ResultUtil<GroupModel> updateGroup(@RequestParam("groupId") int groupId, @RequestParam("groupName") String groupName) {
         return this.lockRun(() -> this.groupService.updateGroup(groupId, groupName));
     }
 
+    
     @DeleteMapping("/api/group/destroy")
     public ResultUtil<Void> deleteGroup(@RequestParam("groupId") int groupId) {
         return this.lockRun(() -> this.groupService.deleteGroup(groupId));

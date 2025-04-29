@@ -44,11 +44,8 @@ public class Constant {
     public static class VolumeStatus {
         public static final int CREATING = 0;
         public static final int READY = 1;
-        public static final int ATTACH_DISK = 2;
-        public static final int DETACH_DISK = 3;
         public static final int CLONE = 4;
         public static final int CREATE_TEMPLATE = 5;
-        public static final int CREATE_SNAPSHOT = 6;
         public static final int MIGRATE = 7;
         public static final int RESIZE = 8;
         public static final int DESTROY = 9;
@@ -153,11 +150,16 @@ public class Constant {
         public static int STORAGE_VOLUME_CLEAR = 39;
     }
 
-    public static class UserType {
-        public static final String LOCAL = "Local";
-        public static final String OAUTH2 = "Oauth2";
+    public static class LoginType {
+        public static final short LOCAL = 0;
+        public static final short OAUTH2 = 1;
     }
 
+    public static class UserType {
+        public static final short SUPPER_ADMIN = 0;
+        public static final short ADMIN = 100;
+        public static final short USER = 200;
+    }
     public static class HttpHeaderNames {
         /**
          * 登陆HTTP TOKEN 头

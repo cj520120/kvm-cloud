@@ -22,4 +22,9 @@ public class MigrateGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.MIGRATE_GUEST;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Migrate:" + guestId + ":" + sourceHostId + ":" + toHostId;
+    }
 }

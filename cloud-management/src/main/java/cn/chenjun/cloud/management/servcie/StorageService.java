@@ -5,8 +5,10 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.model.SimpleStorageModel;
 import cn.chenjun.cloud.management.model.StorageModel;
 import cn.chenjun.cloud.management.operate.bean.*;
+import cn.chenjun.cloud.management.util.BeanConverter;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
@@ -21,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -30,13 +31,13 @@ import java.util.stream.Collectors;
 public class StorageService extends AbstractService {
 
 
-    public ResultUtil<List<StorageModel>> listStorage() {
+    public ResultUtil<List<SimpleStorageModel>> listStorage() {
         List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>());
-        List<StorageModel> models = storageList.stream().map(this::initStorageModel).collect(Collectors.toList());
+        List<SimpleStorageModel> models = BeanConverter.convert(storageList, SimpleStorageModel.class);
         return ResultUtil.success(models);
     }
 
-    public ResultUtil<Page<StorageModel>> search(Integer storageType, Integer storageStatus, String keyword, int no, int size) {
+    public ResultUtil<Page<SimpleStorageModel>> search(Integer storageType, Integer storageStatus, String keyword, int no, int size) {
         QueryWrapper<StorageEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(storageType != null, StorageEntity.STORAGE_TYPE, storageType);
         queryWrapper.eq(storageStatus != null, StorageEntity.STORAGE_STATUS, storageStatus);
@@ -50,9 +51,9 @@ public class StorageService extends AbstractService {
         int nCount = Math.toIntExact(this.storageMapper.selectCount(queryWrapper));
         int nOffset = (no - 1) * size;
         queryWrapper.last("limit " + nOffset + ", " + size);
-        List<StorageEntity> list = this.storageMapper.selectList(queryWrapper);
-        List<StorageModel> models = list.stream().map(this::initStorageModel).collect(Collectors.toList());
-        Page<StorageModel> page = Page.create(nCount, nOffset, size);
+        List<StorageEntity> storageList = this.storageMapper.selectList(queryWrapper);
+        List<SimpleStorageModel> models = BeanConverter.convert(storageList, SimpleStorageModel.class);
+        Page<SimpleStorageModel> page = Page.create(nCount, nOffset, size);
         page.setList(models);
         return ResultUtil.success(page);
     }
@@ -65,7 +66,7 @@ public class StorageService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> migrateStorage(int sourceStorageId, int destStorageId) {
+    public ResultUtil<StorageModel> migrateStorage(int sourceStorageId, int destStorageId) {
         StorageEntity sourceStorage = this.storageMapper.selectById(sourceStorageId);
         StorageEntity destStorage = this.storageMapper.selectById(destStorageId);
         if (sourceStorage == null || (sourceStorage.getStatus() != Constant.StorageStatus.READY && sourceStorage.getStatus() != Constant.StorageStatus.MAINTENANCE)) {
@@ -162,7 +163,7 @@ public class StorageService extends AbstractService {
                 this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
             }
         }
-        return ResultUtil.success();
+        return this.getStorageInfo(sourceStorageId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -266,14 +267,14 @@ public class StorageService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> clearUnLinkVolume(int storageId) {
+    public ResultUtil<StorageModel> clearUnLinkVolume(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
         BaseOperateParam operateParam = StorageVolumeCleanOperate.builder().id(UUID.randomUUID().toString()).title("清理存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
         this.operateTask.addTask(operateParam);
-        return ResultUtil.success();
+        return this.getStorageInfo(storageId);
     }
 
     @Transactional(rollbackFor = Exception.class)

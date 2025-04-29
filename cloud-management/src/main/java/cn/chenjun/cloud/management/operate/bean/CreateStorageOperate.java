@@ -20,4 +20,9 @@ public class CreateStorageOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CREATE_STORAGE;
     }
+
+    @Override
+    public String getId() {
+        return "Storage-Create:" + storageId;
+    }
 }

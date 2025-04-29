@@ -2,16 +2,12 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
 import cn.chenjun.cloud.management.annotation.NoLoginRequire;
-import cn.chenjun.cloud.management.model.LoginSignatureModel;
-import cn.chenjun.cloud.management.model.LoginUserModel;
-import cn.chenjun.cloud.management.model.TokenModel;
-import cn.chenjun.cloud.management.model.UserInfoModel;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.hutool.core.util.NumberUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,22 +28,18 @@ public class UserController extends BaseController {
     @NoLoginRequire
     @PostMapping("/api/user/login")
     public ResultUtil<TokenModel> login(@RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("nonce") String nonce) {
-
         return this.lockRun(() -> userUiService.login(loginName, password, nonce));
-
     }
 
-    @PostMapping("/api/user/password/modify")
-    public ResultUtil<TokenModel> updatePassword(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
-        if (!Constant.UserType.LOCAL.equals(model.getType())) {
-            return this.lockRun(() -> ResultUtil.error(ErrorCode.SERVER_ERROR, "Oauth2方式不支持修改密码"));
-        }
-        return this.lockRun(() -> userUiService.updatePassword(NumberUtil.parseInt(model.getId().toString()), oldPassword, newPassword, nonce));
+    @PostMapping("/api/user/self/modify")
+    public ResultUtil<Void> updateSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestParam(value = "username", defaultValue = "") String username, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
+
+        return this.lockRun(() -> userUiService.updateSelfInfo(model.getUserId(), username, oldPassword, newPassword, nonce));
     }
 
     @PostMapping("/api/user/token/refresh")
-    public ResultUtil<TokenModel> refreshToken(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel loginUser) {
-        return this.lockRun(() -> userUiService.refreshToken(loginUser));
+    public ResultUtil<RefreshTokenModel> refreshToken(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel loginUser) {
+        return this.lockRun(() -> userUiService.refreshToken(loginUser.getUserId()));
     }
 
     @NoLoginRequire
@@ -58,35 +50,41 @@ public class UserController extends BaseController {
 
     @GetMapping("/api/user/signature")
     public ResultUtil<LoginSignatureModel> getLoginSignature(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
-        if (!Constant.UserType.LOCAL.equals(model.getType())) {
-            return this.lockRun(() -> ResultUtil.error(ErrorCode.SERVER_ERROR, "Oauth2方式不支持获取签名"));
-        }
-        return this.lockRun(() -> userUiService.getLoginSignature(NumberUtil.parseInt(model.getId().toString())));
+
+        return this.lockRun(() -> userUiService.getLoginSignature(model.getUserId()));
     }
 
 
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
     @PutMapping("/api/user/register")
-    public ResultUtil<UserInfoModel> register(@RequestParam("loginName") String loginName, @RequestParam("password") String password) {
+    public ResultUtil<UserInfoModel> register(@RequestParam("userName") String userName, @RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
 
-        return this.lockRun(() -> userUiService.register(loginName, password));
+        return this.lockRun(() -> userUiService.register(userName, loginName, password, userType, userStatus));
 
     }
 
+    @GetMapping("/api/user/self")
+    public ResultUtil<UserInfoModel> getSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
 
-    @PostMapping("/api/user/state/update")
+        return this.lockRun(() -> userUiService.getSelfInfo(model.getUserId()));
+
+    }
+
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PostMapping("/api/user/update")
     @LoginRequire
-    public ResultUtil<UserInfoModel> updateUserState(@RequestParam("userId") int userId, @RequestParam("state") short state) {
-
-        return this.lockRun(() -> userUiService.updateUserState(userId, state));
+    public ResultUtil<UserInfoModel> updateUserInfo(@RequestParam("userId") int userId, @RequestParam("userName") String userName, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
+        return this.lockRun(() -> userUiService.updateUser(userId, userName, userType, userStatus));
     }
 
 
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
     @DeleteMapping("/api/user/destroy")
     public ResultUtil<Void> destroyUser(@RequestParam("userId") int userId) {
-
         return this.lockRun(() -> userUiService.destroyUser(userId));
     }
 
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
     @PostMapping("/api/user/password/reset")
     @LoginRequire
     public ResultUtil<UserInfoModel> resetPassword(@RequestParam("userId") int userId, @RequestParam("password") String password) {

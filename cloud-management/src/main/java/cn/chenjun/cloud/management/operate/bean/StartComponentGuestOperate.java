@@ -20,4 +20,5 @@ public class StartComponentGuestOperate extends StartGuestOperate {
     public int getType() {
         return Constant.OperateType.START_COMPONENT_GUEST;
     }
+
 }

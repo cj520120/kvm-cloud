@@ -26,6 +26,18 @@ public class UserInfoModel {
     /**
      * 用户名
      */
+    private String userName;
+    /**
+     * 登录方式
+     */
+    private int loginType;
+    /**
+     * 用户类型
+     */
+    private int userType;
+    /**
+     * 登录名
+     */
     private String loginName;
     /**
      * 密码
@@ -34,7 +46,7 @@ public class UserInfoModel {
     /**
      * 状态
      */
-    private short state;
+    private short userStatus;
     /**
      * 注册时间
      */

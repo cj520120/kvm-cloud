@@ -3,8 +3,10 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.servcie.DnsService;
+import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,7 @@ public class DnsController extends BaseController {
         return this.lockRun(() -> this.dnsService.search(networkId, keyword, no, size));
     }
 
+
     @LoginRequire
     @PutMapping("/api/dns/create")
     public ResultUtil<DnsModel> createDns(@RequestParam("networkId") int networkId,
@@ -44,9 +47,10 @@ public class DnsController extends BaseController {
         return this.lockRun(() -> this.dnsService.createDns(networkId, domain, ip));
     }
 
+
     @LoginRequire
     @DeleteMapping("/api/dns/destroy")
-    public ResultUtil<Void> destroyDns(@RequestParam("dnsId") int dnsId) {
+    public ResultUtil<Void> destroyDns(@RequestParam("id") int dnsId) {
         return this.lockRun(() -> this.dnsService.deleteDns(dnsId));
     }
 

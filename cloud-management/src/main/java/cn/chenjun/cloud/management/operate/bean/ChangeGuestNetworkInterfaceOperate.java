@@ -22,4 +22,9 @@ public class ChangeGuestNetworkInterfaceOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CHANGE_GUEST_NETWORK_INTERFACE;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Nic:" + guestId + ":" + guestNetworkId + ":" + attach;
+    }
 }

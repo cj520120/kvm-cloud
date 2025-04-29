@@ -3,8 +3,10 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.SchemeModel;
 import cn.chenjun.cloud.management.servcie.SchemeService;
+import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +37,8 @@ public class SchemeController extends BaseController {
                                                 @RequestParam("size") int size) {
         return this.lockRun(() -> this.schemeService.search(keyword, no, size));
     }
+
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @PutMapping("/api/scheme/create")
     public ResultUtil<SchemeModel> createScheme(@RequestParam("name") String name,
                                                 @RequestParam("cpu") int cpu,
@@ -46,7 +50,7 @@ public class SchemeController extends BaseController {
         return this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
     }
 
-
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @PostMapping("/api/scheme/modify")
     public ResultUtil<SchemeModel> updateScheme(@RequestParam("schemeId") int schemeId,
                                                 @RequestParam("name") String name,
@@ -59,7 +63,7 @@ public class SchemeController extends BaseController {
         return this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
     }
 
-
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/scheme/destroy")
     public ResultUtil<Void> destroyScheme(@RequestParam("schemeId") int schemeId) {
         return this.lockRun(() -> this.schemeService.destroyScheme(schemeId));

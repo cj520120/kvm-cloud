@@ -70,6 +70,7 @@ public class GroupService extends AbstractService {
 
     public ResultUtil<Void> deleteGroup(int groupId) {
         mapper.deleteById(groupId);
+        this.notifyService.publish(NotifyData.<Void>builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
         return ResultUtil.success();
     }
 

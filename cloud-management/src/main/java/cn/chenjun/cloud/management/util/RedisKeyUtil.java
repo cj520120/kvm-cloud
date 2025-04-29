@@ -12,4 +12,15 @@ public class RedisKeyUtil {
         return "Cloud.Host.Keep." + hostId;
     }
 
+    public static String getUserToken(Integer userId) {
+        return "User.Token." + userId;
+    }
+
+    public static String getTokenUser(String token) {
+        return "User.Token." + token;
+    }
+
+    public static String getUserInfo(Integer userId) {
+        return "User.Info." + userId;
+    }
 }

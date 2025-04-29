@@ -15,10 +15,16 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class ChangeGuestCdRoomOperate extends BaseOperateParam {
     private int guestId;
+    private int cdRoom;
 
 
     @Override
     public int getType() {
         return Constant.OperateType.CHANGE_GUEST_CD_ROOM;
+    }
+
+    @Override
+    public String getId() {
+        return "Vm-Cd:" + guestId + ":" + cdRoom;
     }
 }

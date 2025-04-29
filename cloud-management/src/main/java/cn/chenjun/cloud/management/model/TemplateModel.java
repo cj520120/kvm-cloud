@@ -18,7 +18,6 @@ public class TemplateModel {
     private String uri;
     private String md5;
     private int templateType;
-    private String volumeType;
     private String script;
     private int status;
     private Date createTime;

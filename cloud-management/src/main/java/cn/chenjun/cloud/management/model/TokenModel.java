@@ -26,4 +26,8 @@ public class TokenModel {
      * 过期时间
      */
     private Date expire;
+    /**
+     * 用户信息
+     */
+    private UserInfoModel self;
 }

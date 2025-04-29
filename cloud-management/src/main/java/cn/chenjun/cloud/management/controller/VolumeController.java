@@ -2,10 +2,13 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
+import cn.chenjun.cloud.management.model.SimpleVolumeModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.servcie.VolumeService;
+import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,12 +26,12 @@ public class VolumeController extends BaseController {
     private VolumeService volumeService;
 
     @GetMapping("/api/volume/all")
-    public ResultUtil<List<VolumeModel>> listVolumes() {
+    public ResultUtil<List<SimpleVolumeModel>> listVolumes() {
         return this.lockRun(() -> this.volumeService.listVolumes());
     }
 
     @GetMapping("/api/volume/search")
-    public ResultUtil<Page<VolumeModel>> search(@RequestParam(value = "storageId",required = false) Integer storageId,
+    public ResultUtil<Page<SimpleVolumeModel>> search(@RequestParam(value = "storageId", required = false) Integer storageId,
                                                 @RequestParam(value = "status",required = false) Integer status,
                                                 @RequestParam(value = "templateId",required = false) Integer templateId,
                                                 @RequestParam(value = "volumeType",required = false) String volumeType,
@@ -38,7 +41,7 @@ public class VolumeController extends BaseController {
         return this.lockRun(() -> this.volumeService.search(storageId, status, templateId, volumeType, keyword, no, size));
     }
     @GetMapping("/api/volume/not/attach/all")
-    public ResultUtil<List<VolumeModel>> listNoAttachVolumes(@RequestParam(value = "guestId", defaultValue = "0") int guestId) {
+    public ResultUtil<List<SimpleVolumeModel>> listNoAttachVolumes(@RequestParam(value = "guestId", defaultValue = "0") int guestId) {
         return this.lockRun(() -> this.volumeService.listNoAttachVolumes(guestId));
     }
 
@@ -78,6 +81,15 @@ public class VolumeController extends BaseController {
     @DeleteMapping("/api/volume/destroy")
     public ResultUtil<VolumeModel> destroyVolume(@RequestParam("volumeId") int volumeId) {
         return this.lockRun(() -> this.volumeService.destroyVolume(volumeId));
+    }
+
+    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PutMapping("/api/volume/template/create")
+    public ResultUtil<VolumeModel> createVolumeTemplate(@RequestParam("volumeId") int volumeId,
+                                                        @RequestParam("name") String name) {
+        return this.lockRun(() -> volumeService.createVolumeTemplate(volumeId, name));
+
+
     }
 
     @DeleteMapping("/api/volume/destroy/batch")

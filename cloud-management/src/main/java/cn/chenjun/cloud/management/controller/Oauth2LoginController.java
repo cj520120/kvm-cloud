@@ -73,8 +73,8 @@ public class Oauth2LoginController {
         if (response.getStatusCode() != HttpStatus.OK) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message(response.getBody()).build();
         }
-        Object id = GsonBuilderUtil.create().<Map<String, Object>>fromJson(response.getBody(), new TypeToken<Map<String, Object>>() {
-        }.getType());
+        Map<String, Object> user = GsonBuilderUtil.create().fromJson(response.getBody(), Map.class);
+        Object id = user;
         String idPathStr = this.configService.getConfig(ConfigKey.OAUTH2_USER_ID_PATH);
         List<String> idPaths = GsonBuilderUtil.create().fromJson(idPathStr, new TypeToken<List<String>>() {
         }.getType());
@@ -88,8 +88,21 @@ public class Oauth2LoginController {
         if (id == null) {
             return ResultUtil.<TokenModel>builder().code(ErrorCode.PERMISSION_ERROR).message("未找到用户唯一标识，请检查系统配置").build();
         }
-
-        return this.userService.loginOauth2(String.valueOf(id));
+        String namePathStr = this.configService.getConfig(ConfigKey.OAUTH2_USER_NAME_PATH);
+        List<String> namePaths = GsonBuilderUtil.create().fromJson(namePathStr, new TypeToken<List<String>>() {
+        }.getType());
+        Object name = user;
+        for (String path : namePaths) {
+            if (name != null) {
+                name = ((Map<String, Object>) name).get(path);
+            } else {
+                break;
+            }
+        }
+        if (null == name) {
+            name = id;
+        }
+        return this.userService.loginOauth2(id.toString(), name.toString());
 
     }
 }

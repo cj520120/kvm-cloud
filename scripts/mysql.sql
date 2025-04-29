@@ -450,14 +450,18 @@ DROP TABLE IF EXISTS `tbl_user_info`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_user_info` (
   `user_id` int NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(45) NOT NULL,
   `login_name` varchar(10) NOT NULL,
   `login_password` varchar(64) NOT NULL COMMENT 'SHA_256(PWD+”:”+SALT)',
   `login_password_salt` varchar(45) NOT NULL COMMENT 'SHA2(concat("111111",":",login_password_salt),256)',
+  `login_type` smallint NOT NULL,
+  `user_type` smallint NOT NULL,
   `login_state` smallint NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `IX_LOGIN_NAME` (`login_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -499,8 +503,8 @@ CREATE TABLE `tbl_volume_info` (
 
 
 
-INSERT INTO`tbl_user_info`(`user_id`,`login_name`,`login_password`,`login_password_salt`,`login_state`,`create_time`)
-VALUES(1,'admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,now());
+INSERT INTO`tbl_user_info`(`user_id`,`user_name`,`login_name`,`login_password`,`login_password_salt`,`login_type`,`user_type`,`login_state`,`create_time`)
+VALUES(1,'KVM Local Admin','admin','bf8ff699d7cf5dc1a85e0c143f61b093b60f86f932b0e232ee41314237635f0f','CRY:I0drTv3AlZLWYJ18',0,0,0,now());
 
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('7','1核512MB','1','524288','0','0','0','0','2022-12-28 10:51:27');
 insert into `tbl_scheme_info` (`scheme_id`, `scheme_name`, `scheme_cpu`, `scheme_memory`, `scheme_cpu_share`, `scheme_cpu_sockets`, `scheme_cpu_cores`, `scheme_cpu_threads`, `create_time`) values('8','1核1GB','1','1048576','0','0','0','0','2022-12-28 10:51:27');

@@ -20,4 +20,9 @@ public class CreateHostOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CREATE_HOST;
     }
+
+    @Override
+    public String getId() {
+        return "Host-Create:" + hostId;
+    }
 }

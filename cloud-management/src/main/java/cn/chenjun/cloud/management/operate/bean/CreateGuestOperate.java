@@ -22,4 +22,9 @@ public class CreateGuestOperate extends CreateVolumeOperate {
     public int getType() {
         return Constant.OperateType.CREATE_GUEST;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Create:" + guestId;
+    }
 }

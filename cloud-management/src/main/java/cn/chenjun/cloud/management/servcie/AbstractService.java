@@ -5,19 +5,15 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.BeanConverter;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.hutool.core.convert.impl.BeanConverter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +56,8 @@ public abstract class AbstractService {
     protected GuestSshMapper guestSshMapper;
     @Autowired
     protected ConfigService configService;
+    @Autowired
+    private GroupMapper groupMapper;
 
     protected boolean checkRouteComponentComplete(int networkId) {
         ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
@@ -105,52 +103,106 @@ public abstract class AbstractService {
         return hostId;
     }
 
+
     public GuestModel initGuestInfo(GuestEntity entity) {
-        GuestModel model;
-        switch (entity.getType()) {
-            case Constant.GuestType.COMPONENT:
-                ComponentGuestModel componentGuestModel = new ComponentGuestModel();
-                componentGuestModel.setComponentId(entity.getOtherId());
-                ComponentEntity component = componentMapper.selectById(entity.getOtherId());
-                if (component != null) {
-                    componentGuestModel.setComponentVip(component.getComponentVip());
-                    componentGuestModel.setComponentType(component.getComponentType());
-                    componentGuestModel.setBasicComponentVip(component.getBasicComponentVip());
-                    componentGuestModel.setComponentType(componentGuestModel.getComponentType());
-                }
-                model = componentGuestModel;
-                break;
-            case Constant.GuestType.USER:
-            default:
-                model = new GuestModel();
+        GuestModel model = BeanConverter.convert(entity, GuestModel.class);
+
+        if (Objects.equals(entity.getType(), Constant.GuestType.COMPONENT)) {
+            ComponentEntity component = componentMapper.selectById(entity.getOtherId());
+            model.setComponent(BeanConverter.convert(component, ComponentGuestModel.class));
         }
-        BeanUtils.copyProperties(entity, model);
+        if (model.getGroupId() != 0) {
+            model.setGroup(this.initGroup(this.groupMapper.selectById(model.getGroupId())));
+        }
+        if (model.getSchemeId() != 0) {
+            model.setScheme(this.initScheme(schemeMapper.selectById(model.getSchemeId())));
+        }
+        if (model.getHostId() != 0) {
+            model.setHost(this.initHost(hostMapper.selectById(model.getHostId())));
+        }
+        model.setNetwork(this.initNetwork(networkMapper.selectById(entity.getNetworkId())));
+        if (model.getCdRoom() > 0) {
+            model.setTemplate(this.initTemplateModel(templateMapper.selectById(entity.getCdRoom())));
+        }
         return model;
     }
 
     protected StorageModel initStorageModel(StorageEntity entity) {
-        return new BeanConverter<>(StorageModel.class).convert(entity, null);
+        StorageModel model = BeanConverter.convert(entity, StorageModel.class);
+        if (model.getHostId() != 0) {
+            model.setHost(this.initHost(hostMapper.selectById(model.getHostId())));
+        }
+        return model;
     }
 
     protected SchemeModel initScheme(SchemeEntity entity) {
-        return new BeanConverter<>(SchemeModel.class).convert(entity, null);
+        return BeanConverter.convert(entity, SchemeModel.class);
     }
 
     protected VolumeModel initVolume(GuestDiskEntity disk) {
-        VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volumeMapper.selectById(disk.getVolumeId()), null);
+        VolumeModel model = BeanConverter.convert(volumeMapper.selectById(disk.getVolumeId()), VolumeModel.class);
         model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).deviceBus(disk.getDeviceBus()).guestDiskId(disk.getGuestDiskId()).build());
         return model;
     }
 
-    protected NetworkModel initGuestNetwork(NetworkEntity entity) {
-        return new BeanConverter<>(NetworkModel.class).convert(entity, null);
+
+    protected VolumeModel initVolume(VolumeEntity volume) {
+        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
+        return initVolume(volume, disk);
+    }
+
+    protected List<SimpleVolumeModel> initSimpleVolumeList(List<VolumeEntity> entityList) {
+        List<SimpleVolumeModel> models = BeanConverter.convert(entityList, SimpleVolumeModel.class);
+        List<Integer> volumeIds = models.stream().map(SimpleVolumeModel::getVolumeId).collect(Collectors.toList());
+        List<GuestDiskEntity> diskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().in(GuestDiskEntity.VOLUME_ID, volumeIds));
+
+        List<Integer> guestIds = diskList.stream().map(GuestDiskEntity::getGuestId).collect(Collectors.toList());
+        Map<Integer, GuestDiskEntity> diskMap = diskList.stream().collect(Collectors.toMap(GuestDiskEntity::getVolumeId, o -> o));
+        Map<Integer, GuestEntity> guestMap = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().in(GuestEntity.GUEST_ID, guestIds)).stream().collect(Collectors.toMap(GuestEntity::getGuestId, o -> o));
+        for (SimpleVolumeModel model : models) {
+            GuestDiskEntity disk = diskMap.get(model.getVolumeId());
+            if (disk != null) {
+                model.setAttach(BeanConverter.convert(disk, VolumeAttachModel.class));
+                GuestEntity guest = guestMap.get(disk.getGuestId());
+                model.setGuest(BeanConverter.convert(guest, SimpleGuestModel.class));
+            }
+        }
+        return models;
+
+    }
+
+    protected VolumeModel initVolume(VolumeEntity volume, GuestDiskEntity disk) {
+        VolumeModel model = BeanConverter.convert(volume, VolumeModel.class);
+        if (model.getHostId() != 0) {
+            model.setHost(this.initHost(hostMapper.selectById(volume.getHostId())));
+        }
+        if (disk != null && disk.getGuestId() != 0) {
+            model.setAttach(BeanConverter.convert(disk, VolumeAttachModel.class));
+            model.setGuest(BeanConverter.convert(guestMapper.selectById(disk.getGuestId()), SimpleGuestModel.class));
+        }
+        model.setStorage(BeanConverter.convert(storageMapper.selectById(volume.getStorageId()), SimpleStorageModel.class));
+        if (volume.getTemplateId() > 0) {
+            model.setTemplate(BeanConverter.convert(templateMapper.selectById(volume.getTemplateId()), TemplateModel.class));
+        }
+        return model;
+    }
+
+    protected NetworkModel initNetwork(NetworkEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        NetworkModel model = BeanConverter.convert(entity, NetworkModel.class);
+        if (model.getBasicNetworkId() != 0) {
+            model.setBasic(initNetwork(networkMapper.selectById(model.getBasicNetworkId())));
+        }
+        return model;
     }
 
     protected SshAuthorizedModel initSshAuthorized(SshAuthorizedEntity entity) {
         return SshAuthorizedModel.builder().id(entity.getId()).name(entity.getSshName()).build();
     }
 
-    protected GuestNetworkModel initGuestNetwork(GuestNetworkEntity entity) {
+    protected GuestNetworkModel initNetwork(GuestNetworkEntity entity) {
         return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())
                 .networkId(entity.getNetworkId())
                 .ip(entity.getIp())
@@ -165,25 +217,12 @@ public abstract class AbstractService {
         List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(entity.getHostId()).build());
         entity.setTotalCpu((int) (entity.getTotalCpu() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
         entity.setTotalMemory((long) (entity.getTotalMemory() * (Float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
-        return new BeanConverter<>(HostModel.class).convert(entity, null);
+        return BeanConverter.convert(entity, HostModel.class);
     }
 
     protected TemplateModel initTemplateModel(TemplateEntity entity) {
-        return new BeanConverter<>(TemplateModel.class).convert(entity, null);
+        return BeanConverter.convert(entity, TemplateModel.class);
     }
-
-    protected VolumeModel initVolume(VolumeEntity volume) {
-        VolumeModel model = new BeanConverter<>(VolumeModel.class).convert(volume, null);
-        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
-        if (disk != null && disk.getGuestId() != 0) {
-            GuestEntity guest = this.guestMapper.selectById(disk.getGuestId());
-            if (guest != null) {
-                model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).deviceBus(disk.getDeviceBus()).description(guest.getDescription()).guestDiskId(disk.getGuestDiskId()).build());
-            }
-        }
-        return model;
-    }
-
 
     protected ComponentDetailModel initComponent(ComponentEntity entity) {
 

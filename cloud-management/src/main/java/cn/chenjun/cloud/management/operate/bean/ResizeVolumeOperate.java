@@ -21,4 +21,9 @@ public class ResizeVolumeOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.RESIZE_VOLUME;
     }
+
+    @Override
+    public String getId() {
+        return "Volume-Resize:" + volumeId + ":" + size;
+    }
 }

@@ -21,4 +21,9 @@ public class CreateVolumeTemplateOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CREATE_VOLUME_TEMPLATE;
     }
+
+    @Override
+    public String getId() {
+        return "Vol-CreateTemplate:" + sourceVolumeId + ":" + targetTemplateVolumeId;
+    }
 }

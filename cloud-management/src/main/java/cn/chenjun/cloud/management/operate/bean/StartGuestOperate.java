@@ -21,4 +21,9 @@ public class StartGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.START_GUEST;
     }
+
+    @Override
+    public String getTaskId() {
+        return "Vm-Start:" + guestId + ":" + hostId;
+    }
 }

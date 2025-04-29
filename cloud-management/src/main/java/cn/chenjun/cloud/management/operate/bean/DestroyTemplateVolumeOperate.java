@@ -20,4 +20,9 @@ public class DestroyTemplateVolumeOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.DESTROY_TEMPLATE_VOLUME;
     }
+
+    @Override
+    public String getId() {
+        return "Template-Vol-Destroy:" + volumeId;
+    }
 }

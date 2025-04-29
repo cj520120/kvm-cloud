@@ -22,6 +22,9 @@ import java.util.Date;
 public class UserInfoEntity {
     public static final String USER_ID = "user_id";
     public static final String LOGIN_NAME = "login_name";
+    public static final String USER_NAME = "user_name";
+    public static final String LOGIN_TYPE = "login_type";
+    public static final String USER_TYPE = "user_type";
     public static final String LOGIN_PASSWORD = "login_password";
     public static final String LOGIN_STATE = "login_state";
     public static final String LOGIN_PASSWORD_SALT = "login_password_salt";
@@ -36,6 +39,21 @@ public class UserInfoEntity {
     @TableField(LOGIN_NAME)
     private String loginName;
     /**
+     * 用户名
+     */
+    @TableField(USER_NAME)
+    private String userName;
+    /**
+     * 用户名
+     */
+    @TableField(LOGIN_TYPE)
+    private Short loginType;
+    /**
+     * 用户名
+     */
+    @TableField(USER_TYPE)
+    private Short userType;
+    /**
      * 密码
      */
     @TableField(LOGIN_PASSWORD)
@@ -44,7 +62,7 @@ public class UserInfoEntity {
      *
      */
     @TableField(LOGIN_STATE)
-    private Short loginState;
+    private Short userStatus;
     /**
      * 密码
      */

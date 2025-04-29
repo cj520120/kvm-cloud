@@ -9,13 +9,11 @@ import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.DnsMapper;
 import cn.chenjun.cloud.management.data.mapper.NatMapper;
-import cn.chenjun.cloud.management.model.ComponentDetailModel;
-import cn.chenjun.cloud.management.model.GuestNetworkModel;
-import cn.chenjun.cloud.management.model.NatModel;
-import cn.chenjun.cloud.management.model.NetworkModel;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
+import cn.chenjun.cloud.management.util.BeanConverter;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
 import cn.chenjun.cloud.management.util.IpValidator;
@@ -49,7 +47,7 @@ public class NetworkService extends AbstractService {
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(int guestId) {
         List<GuestNetworkEntity> networkList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         networkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
-        List<GuestNetworkModel> models = networkList.stream().map(this::initGuestNetwork).collect(Collectors.toList());
+        List<GuestNetworkModel> models = networkList.stream().map(this::initNetwork).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
@@ -58,10 +56,10 @@ public class NetworkService extends AbstractService {
         if (network == null) {
             return ResultUtil.error(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
-        return ResultUtil.success(this.initGuestNetwork(network));
+        return ResultUtil.success(this.initNetwork(network));
     }
 
-    public ResultUtil<Page<NetworkModel>> search(String keyword, int no, int size) {
+    public ResultUtil<Page<SimpleNetworkModel>> search(String keyword, int no, int size) {
         QueryWrapper<NetworkEntity> wrapper = new QueryWrapper<>();
         if (!ObjectUtils.isEmpty(keyword)) {
             String condition = "%" + keyword + "%";
@@ -70,15 +68,16 @@ public class NetworkService extends AbstractService {
         int nCount = Math.toIntExact(this.networkMapper.selectCount(wrapper));
         int nOffset = (no - 1) * size;
         wrapper.last("limit " + nOffset + ", " + size);
-        List<NetworkEntity> list = this.networkMapper.selectList(wrapper);
-        List<NetworkModel> models = list.stream().map(this::initGuestNetwork).collect(Collectors.toList());
-        Page<NetworkModel> page = Page.create(nCount, nOffset, size);
+        List<NetworkEntity> networkList = this.networkMapper.selectList(wrapper);
+        List<SimpleNetworkModel> models = BeanConverter.convert(networkList, SimpleNetworkModel.class);
+        Page<SimpleNetworkModel> page = Page.create(nCount, nOffset, size);
         page.setList(models);
         return ResultUtil.success(page);
     }
-    public ResultUtil<List<NetworkModel>> listNetwork() {
+
+    public ResultUtil<List<SimpleNetworkModel>> listNetwork() {
         List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>());
-        List<NetworkModel> models = networkList.stream().map(this::initGuestNetwork).collect(Collectors.toList());
+        List<SimpleNetworkModel> models = BeanConverter.convert(networkList, SimpleNetworkModel.class);
         return ResultUtil.success(models);
     }
 
@@ -199,7 +198,7 @@ public class NetworkService extends AbstractService {
         BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-        return ResultUtil.success(this.initGuestNetwork(network));
+        return ResultUtil.success(this.initNetwork(network));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -213,7 +212,7 @@ public class NetworkService extends AbstractService {
         BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-        return ResultUtil.success(this.initGuestNetwork(network));
+        return ResultUtil.success(this.initNetwork(network));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -225,7 +224,7 @@ public class NetworkService extends AbstractService {
         network.setStatus(Constant.NetworkStatus.MAINTENANCE);
         this.networkMapper.updateById(network);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-        return ResultUtil.success(this.initGuestNetwork(network));
+        return ResultUtil.success(this.initNetwork(network));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -257,7 +256,7 @@ public class NetworkService extends AbstractService {
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().id(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-        return ResultUtil.success(this.initGuestNetwork(network));
+        return ResultUtil.success(this.initNetwork(network));
     }
 
     public ResultUtil<List<ComponentDetailModel>> listNetworkComponent(int networkId) {
@@ -339,6 +338,30 @@ public class NetworkService extends AbstractService {
         List<NatEntity> entityList = this.natMapper.selectList(new QueryWrapper<NatEntity>().eq(NatEntity.COMPONENT_ID, componentId));
         List<NatModel> list = entityList.stream().map(this::initNat).collect(Collectors.toList());
         return ResultUtil.success(list);
+
+    }
+
+    public ResultUtil<Page<NatModel>> searchComponentNat(String keyword, int componentId, int no, int size) {
+        QueryWrapper<NatEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(NatEntity.COMPONENT_ID, componentId);
+        if (!ObjectUtils.isEmpty(keyword)) {
+            queryWrapper.and(o -> {
+                String condition = "%" + keyword + "%";
+                QueryWrapper<NatEntity> wrapper = o;
+                wrapper.like(NatEntity.LOCAL_PORT, condition)
+                        .or().like(NatEntity.PROTOCOL, condition)
+                        .or().like(NatEntity.REMOTE_IP, condition)
+                        .or().like(NatEntity.REMOTE_PORT, condition);
+            });
+        }
+        int nCount = Math.toIntExact(this.natMapper.selectCount(queryWrapper));
+        int nOffset = (no - 1) * size;
+        queryWrapper.last("limit " + nOffset + ", " + size);
+        List<NatEntity> list = this.natMapper.selectList(queryWrapper);
+        List<NatModel> models = list.stream().map(this::initNat).collect(Collectors.toList());
+        Page<NatModel> page = Page.create(nCount, nOffset, size);
+        page.setList(models);
+        return ResultUtil.success(page);
 
     }
 

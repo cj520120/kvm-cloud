@@ -57,14 +57,21 @@ public class GsonNumberAdapter extends TypeAdapter<Object> {
             case NUMBER:
 
                 String numberStr = in.nextString();
-                Double dValue = Double.parseDouble(numberStr);
-                if (dValue == dValue.intValue()) {
-                    return dValue.intValue();
+                if (numberStr.contains(".")) {
+                    double value = Double.parseDouble(numberStr);
+                    if (value <= Float.MAX_VALUE && value >= Float.MIN_VALUE) {
+                        return (float) value;
+                    } else {
+                        return value;
+                    }
+                } else {
+                    long value = Long.parseLong(numberStr);
+                    if (value <= Integer.MAX_VALUE && value >= Integer.MIN_VALUE) {
+                        return (int) value;
+                    } else {
+                        return value;
+                    }
                 }
-                if (dValue == dValue.longValue()) {
-                    return dValue.longValue();
-                }
-                return dValue;
 
             case BOOLEAN:
                 return in.nextBoolean();

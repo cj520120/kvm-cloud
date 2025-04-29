@@ -24,4 +24,9 @@ public class ChangeGuestDiskOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CHANGE_GUEST_DISK;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Disk:" + guestId + ":" + volumeId + ":" + attach;
+    }
 }

@@ -21,4 +21,10 @@ public class DownloadTemplateOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.DOWNLOAD_TEMPLATE;
     }
+
+    @Override
+    public String getId() {
+        return "Template-Download:" + templateVolumeId;
+    }
+
 }

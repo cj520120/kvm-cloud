@@ -20,4 +20,9 @@ public class DestroyTemplateOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.DESTROY_TEMPLATE;
     }
+
+    @Override
+    public String getId() {
+        return "Template-Destroy:" + templateId;
+    }
 }

@@ -20,4 +20,9 @@ public class RebootGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.REBOOT_GUEST;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Reboot:" + guestId;
+    }
 }

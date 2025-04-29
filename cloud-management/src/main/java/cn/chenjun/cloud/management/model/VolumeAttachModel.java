@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class VolumeAttachModel {
     private int guestDiskId;
     private int guestId;
-    private String description;
     private int deviceId;
     private String deviceBus;
 }

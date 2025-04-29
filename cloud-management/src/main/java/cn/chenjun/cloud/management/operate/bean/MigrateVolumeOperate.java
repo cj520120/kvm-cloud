@@ -21,4 +21,9 @@ public class MigrateVolumeOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.MIGRATE_VOLUME;
     }
+
+    @Override
+    public String getId() {
+        return "Vol-Migrate:" + sourceVolumeId + ":" + targetVolumeId;
+    }
 }

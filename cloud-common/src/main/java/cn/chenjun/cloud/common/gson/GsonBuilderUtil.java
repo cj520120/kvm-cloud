@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.text.DateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +23,7 @@ public class GsonBuilderUtil {
                 .registerTypeAdapter(HashMap.class, gsonNumberAdapter)
                 .registerTypeAdapter(List.class, gsonNumberAdapter)
                 .registerTypeAdapter(ArrayList.class, gsonNumberAdapter)
-                .registerTypeAdapter(java.util.Date.class, new DateSerializer()).setDateFormat(DateFormat.LONG, DateFormat.DEFAULT);
+                .registerTypeAdapter(java.util.Date.class, new DateSerializer()).setDateFormat(DateFormat.LONG);
         return gb.create();
     }
 }

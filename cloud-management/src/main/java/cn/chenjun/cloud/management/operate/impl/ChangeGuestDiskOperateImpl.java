@@ -33,9 +33,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
     @Override
     public void operate(ChangeGuestDiskOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        switch (volume.getStatus()) {
-            case cn.chenjun.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
-            case cn.chenjun.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
+
                 GuestEntity guest = guestMapper.selectById(param.getGuestId());
                 boolean isSupportHotplugged = false;
                 switch (param.getDeviceBus()) {
@@ -73,11 +71,6 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                 } else {
                     this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
                 }
-                break;
-            default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正确:" + volume.getStatus());
-
-        }
 
     }
 
@@ -90,20 +83,8 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
 
     @Override
     public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
-        VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume != null) {
-            switch (volume.getStatus()) {
-                case cn.chenjun.cloud.management.util.Constant.VolumeStatus.ATTACH_DISK:
-                case cn.chenjun.cloud.management.util.Constant.VolumeStatus.DETACH_DISK:
-                    volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
-                    volumeMapper.updateById(volume);
-                    break;
-                default:
-                    break;
-            }
-        }
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

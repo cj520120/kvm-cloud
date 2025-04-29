@@ -111,6 +111,7 @@ public class ConfigKey {
     public static final String OAUTH2_REQUEST_TOKEN_URI = "oauth2.request.token.uri";
     public static final String OAUTH2_REDIRECT_URI = "oauth2.redirect.uri";
     public static final String OAUTH2_USER_ID_PATH = "oauth2.user.response.id.path";
+    public static final String OAUTH2_USER_NAME_PATH = "oauth2.user.response.name.path";
     public static final String OAUTH2_USER_AUTHORITIES_PATH = "oauth2.user.response.authorities.path";
     public static final String LOGIN_JWD_PASSWORD = "login.jwt.password";
     public static final String LOGIN_JWD_ISSUER = "login.jwt.issuer";

@@ -20,4 +20,9 @@ public class GuestInfoOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.GUEST_INFO;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Info:" + guestId;
+    }
 }

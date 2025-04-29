@@ -162,12 +162,14 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.OAUTH2_REQUEST_USER_URI, "", "Oauth2 Request User Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.OAUTH2_REDIRECT_URI, "", "Oauth2 Redirect Uri", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.OAUTH2_USER_ID_PATH, "[\"userId\"]", "Oauth2 User Response ID Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+
+        initDefaultConfig(ConfigKey.OAUTH2_USER_NAME_PATH, "[\"userName\"]", "Oauth2 User Response Name Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.OAUTH2_USER_AUTHORITIES_PATH, "[\"authorities\"]", "Oauth2 User Response Authorities Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
     }
 
     private static <T> void initDefaultConfig(String key, T value, String description, int valueType, Object valueOptions, ConfigConvert<T> convert) {
-        DefaultConfigInfo<T> defaultConfig = DefaultConfigInfo.<T>builder().key(key).value(value).description(description).valueType(valueType).valueOptions(valueOptions).convert(convert).build();
+        DefaultConfigInfo<T> defaultConfig = DefaultConfigInfo.<T>builder().key(key).value(value).intern(true).description(description).valueType(valueType).valueOptions(valueOptions).convert(convert).build();
         DEFAULT_CONFIG_LIST_CACHE.add(defaultConfig);
         if (DEFAULT_CONFIG_MAP_CACHE.containsKey(key)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "系统配置Key已存在:" + key);

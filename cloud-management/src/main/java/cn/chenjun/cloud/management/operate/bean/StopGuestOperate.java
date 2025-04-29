@@ -22,4 +22,9 @@ public class StopGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.STOP_GUEST;
     }
+
+    @Override
+    public String getId() {
+        return "Vm-Destroy:" + guestId + ":" + force + ":" + destroy;
+    }
 }

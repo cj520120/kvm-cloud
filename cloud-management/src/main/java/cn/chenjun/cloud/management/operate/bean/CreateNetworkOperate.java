@@ -20,4 +20,10 @@ public class CreateNetworkOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CREATE_NETWORK;
     }
+
+    @Override
+    public String getId() {
+        return "Net-Create:" + networkId;
+    }
+
 }

@@ -149,6 +149,7 @@ public class Constant {
         public static final int UPDATE_COMPONENT_NAT = 12;
         public static final int UPDATE_SSH_KEY = 13;
 
+        public static final int UPDATE_USER_KEY = 14;
 
         public static final int COMPONENT_UPDATE_DNS = 101;
         public static final int COMPONENT_UPDATE_NAT = 102;

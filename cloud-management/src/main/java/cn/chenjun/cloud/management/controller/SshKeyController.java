@@ -3,10 +3,12 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.CreateSshAuthorizedModel;
 import cn.chenjun.cloud.management.model.SshAuthorizedModel;
 import cn.chenjun.cloud.management.servcie.SshAuthorizedService;
 import cn.chenjun.cloud.management.servcie.bean.MemSshInfo;
+import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,25 +48,35 @@ public class SshKeyController extends BaseController {
         return this.lockRun(() -> this.sshAuthorizedService.getSshKey(id));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @LoginRequire
-
     @PutMapping("/api/ssh/import")
     public ResultUtil<SshAuthorizedModel> importSshKey(@RequestParam("name") String name, @RequestParam("publicKey") String publicKey, @RequestParam("privateKey") String privateKey) {
         return this.lockRun(() -> this.sshAuthorizedService.importSshKey(name, publicKey, privateKey));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @LoginRequire
     @PutMapping("/api/ssh/create")
     public ResultUtil<CreateSshAuthorizedModel> createKey(@RequestParam("name") String name) {
         return this.lockRun(() -> this.sshAuthorizedService.createSshKey(name));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @LoginRequire
+    @PostMapping("/api/ssh/modify")
+    public ResultUtil<SshAuthorizedModel> modify(@RequestParam("id") int id, @RequestParam("name") String name) {
+        return this.lockRun(() -> this.sshAuthorizedService.modifySshKey(id, name));
+    }
+
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @LoginRequire
     @DeleteMapping("/api/ssh/destroy")
     public ResultUtil<Void> deleteSshKey(@RequestParam("id") int id) {
         return this.lockRun(() -> this.sshAuthorizedService.deleteSshKey(id));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @LoginRequire
     @PostMapping("/api/ssh/download/key")
     public ResultUtil<String> createDownloadKey(@RequestParam("id") int id) {

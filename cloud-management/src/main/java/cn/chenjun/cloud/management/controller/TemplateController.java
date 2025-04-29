@@ -3,8 +3,10 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.management.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.servcie.TemplateService;
+import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,7 @@ public class TemplateController extends BaseController {
         return this.lockRun(() -> templateService.getTemplateInfo(templateId));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @PutMapping("/api/template/create")
     public ResultUtil<TemplateModel> createTemplate(@RequestParam("name") String name,
                                                     @RequestParam("uri") String uri,
@@ -45,18 +48,21 @@ public class TemplateController extends BaseController {
         return this.lockRun(() -> templateService.createTemplate(name, uri, md5, templateType, script));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @PostMapping("/api/template/script")
     public ResultUtil<TemplateModel> updateTemplateScript(@RequestParam("templateId") int id,
                                                           @RequestParam(value = "script", defaultValue = "") String script) {
         return this.lockRun(() -> templateService.updateTemplateScript(id, script));
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @PostMapping("/api/template/download")
     public ResultUtil<TemplateModel> downloadTemplate(@RequestParam("templateId") int templateId) {
         return this.lockRun(() -> templateService.downloadTemplate(templateId));
 
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @PutMapping("/api/template/volume/create")
     public ResultUtil<TemplateModel> createVolumeTemplate(@RequestParam("volumeId") int volumeId,
                                                           @RequestParam("name") String name) {
@@ -65,6 +71,7 @@ public class TemplateController extends BaseController {
 
     }
 
+    @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/template/destroy")
     public ResultUtil<TemplateModel> destroyTemplate(@RequestParam("templateId") int templateId) {
         return this.lockRun(() -> templateService.destroyTemplate(templateId));

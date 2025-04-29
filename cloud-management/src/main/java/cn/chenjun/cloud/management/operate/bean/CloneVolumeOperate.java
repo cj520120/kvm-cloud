@@ -21,4 +21,9 @@ public class CloneVolumeOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.CLONE_VOLUME;
     }
+
+    @Override
+    public String getId() {
+        return "Vol-Clone:" + sourceVolumeId + ":" + targetVolumeId;
+    }
 }

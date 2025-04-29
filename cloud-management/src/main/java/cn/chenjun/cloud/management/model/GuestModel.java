@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
-
 /**
  * @author chenjun
  */
@@ -14,24 +12,11 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class GuestModel {
-    private int guestId;
-    private String name;
-    private String description;
-    private int cpu;
-    private long memory;
-    private int share;
-    private int cdRoom;
-    private int hostId;
-    private int schemeId;
-    private int lastHostId;
-    private int type;
-    private int networkId;
-    private int groupId;
-    private int status;
-    private int systemCategory;
-    private int bootstrapType;
-    private String guestIp;
-    private Date lastStartTime;
-    private Date createTime;
+public class GuestModel extends SimpleGuestModel {
+    private HostModel host;
+    private GroupModel group;
+    private SchemeModel scheme;
+    private NetworkModel network;
+    private TemplateModel template;
+    private ComponentGuestModel component;
 }
