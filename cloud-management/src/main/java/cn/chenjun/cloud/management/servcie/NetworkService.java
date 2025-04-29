@@ -235,7 +235,7 @@ public class NetworkService extends AbstractService {
         }
 
         if (guestNetworkMapper.selectCount(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, networkId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST).ne(GuestNetworkEntity.ALLOCATE_ID, 0)) > 0) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前网络被其他虚拟机引用，请首先删除虚拟机");
+            throw new CodeException(ErrorCode.NETWORK_HAS_VM, "当前网络被其他虚拟机引用，请首先删除虚拟机");
         }
         network.setStatus(Constant.NetworkStatus.DESTROY);
         this.networkMapper.updateById(network);
@@ -272,7 +272,7 @@ public class NetworkService extends AbstractService {
             return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件未找到");
         }
         if (slaveNumber < 0) {
-            return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "Slave数量必须大于等于0");
+            return ResultUtil.error(ErrorCode.PARAM_ERROR, "Slave数量必须大于等于0");
         }
         entity.setComponentSlaveNumber(slaveNumber);
         this.componentMapper.updateById(entity);
@@ -319,7 +319,7 @@ public class NetworkService extends AbstractService {
         }.getType());
         guestIds.add(component.getMasterGuestId());
         if (!this.guestMapper.selectBatchIds(guestIds).isEmpty()) {
-            return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "请删除网络组件对应的虚拟机");
+            return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_HAS_VM, "请删除网络组件对应的虚拟机");
         }
         List<GuestNetworkEntity> list = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.COMPONENT_VIP));
         for (GuestNetworkEntity guestNetwork : list) {

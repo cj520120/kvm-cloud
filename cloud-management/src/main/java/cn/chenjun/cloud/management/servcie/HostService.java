@@ -151,7 +151,7 @@ public class HostService extends AbstractService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
         if (this.storageMapper.selectCount(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, hostId)) > 0) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
+            throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
         }
         this.hostMapper.deleteById(hostId);
         this.configService.deleteAllocateConfig(Constant.ConfigType.HOST, hostId);

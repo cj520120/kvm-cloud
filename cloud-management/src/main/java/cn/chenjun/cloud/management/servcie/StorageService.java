@@ -284,10 +284,12 @@ public class StorageService extends AbstractService {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
         switch (storage.getStatus()) {
+            case Constant.StorageStatus.INIT:
             case Constant.StorageStatus.READY:
+            case Constant.StorageStatus.MAINTENANCE:
             case Constant.StorageStatus.ERROR:
                 if (volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, storageId)) > 0) {
-                    throw new CodeException(ErrorCode.STORAGE_BUSY, "当前存储有挂载磁盘，请首先迁移存储文件");
+                    throw new CodeException(ErrorCode.STORAGE_HAS_VOLUME, "当前存储有挂载磁盘，请首先迁移存储文件");
                 }
                 storage.setStatus(Constant.StorageStatus.DESTROY);
                 this.storageMapper.updateById(storage);

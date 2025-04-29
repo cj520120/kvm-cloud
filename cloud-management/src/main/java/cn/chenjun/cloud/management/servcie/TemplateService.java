@@ -130,7 +130,7 @@ public class TemplateService extends AbstractService {
                 return ResultUtil.success(this.initTemplateModel(template));
 
             default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "模版未就绪.");
+                throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "模版未就绪.");
         }
     }
 
@@ -138,7 +138,7 @@ public class TemplateService extends AbstractService {
     public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘状态未就绪");
+            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘状态未就绪");
         }
         GuestEntity guest = this.getVolumeGuest(volumeId);
         if (guest != null) {
@@ -147,7 +147,7 @@ public class TemplateService extends AbstractService {
                 case Constant.GuestStatus.ERROR:
                     break;
                 default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+                    throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);
@@ -195,29 +195,23 @@ public class TemplateService extends AbstractService {
         if (template == null) {
             return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
         }
+        int timeout = 0;
         switch (template.getStatus()) {
+            case Constant.TemplateStatus.DESTROY:
             case Constant.TemplateStatus.ERROR:
-            case Constant.TemplateStatus.READY: {
-                template.setStatus(Constant.TemplateStatus.DESTROY);
-                this.templateMapper.updateById(template);
-                BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
-                operateTask.addTask(operate, configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE));
-                TemplateModel source = this.initTemplateModel(template);
-                this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-                return ResultUtil.success(source);
-            }
-            case Constant.TemplateStatus.DESTROY: {
-                BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
-                operateTask.addTask(operate, 0);
-                TemplateModel source = this.initTemplateModel(template);
-                this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-                return ResultUtil.success(source);
-            }
-
-
+                break;
             default:
-                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "快照当前状态未就绪");
+                timeout = configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
+                break;
         }
+        template.setStatus(Constant.TemplateStatus.DESTROY);
+        this.templateMapper.updateById(template);
+        BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
+        operateTask.addTask(operate, timeout);
+        TemplateModel source = this.initTemplateModel(template);
+        this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        return ResultUtil.success(source);
+
     }
 
 }

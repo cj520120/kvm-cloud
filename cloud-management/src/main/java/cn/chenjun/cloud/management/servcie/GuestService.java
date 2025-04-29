@@ -274,7 +274,7 @@ public class GuestService extends AbstractService {
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() != Constant.GuestStatus.STOP) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "只能对关机状态的主机进行重装操作");
+            throw new CodeException(ErrorCode.GUEST_NOT_STOP, "只能对关机状态的主机进行重装操作");
         }
         this.checkSystemComponentComplete(guest.getNetworkId());
         guest.setCdRoom(isoTemplateId);
@@ -303,7 +303,7 @@ public class GuestService extends AbstractService {
         } else {
             GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
             if (guestDisk != null) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
+                throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已经被挂载");
             }
             VolumeEntity volume = this.volumeMapper.selectById(volumeId);
             guestDisk = GuestDiskEntity.builder()
@@ -360,7 +360,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (!Objects.equals(guest.getType(), Constant.GuestType.USER)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "非用户主机由系统管理.");
+            throw new CodeException(ErrorCode.GUEST_NOT_ALLOW_USER_OPERATION, "非用户主机由系统管理.");
         }
         this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
@@ -369,7 +369,7 @@ public class GuestService extends AbstractService {
                 if (hostId == 0) {
                     hostId = allowHostId;
                 } else if (hostId != allowHostId && allowHostId > 0) {
-                    throw new CodeException(ErrorCode.PARAM_ERROR, "该宿主机已经绑定了启动主机ID：" + allowHostId);
+                    throw new CodeException(ErrorCode.GUEST_BIND_OTHER_HOST, "该宿主机已经绑定了启动主机ID：" + allowHostId);
                 }
                 guest.setHostId(0);
                 guest.setStatus(Constant.GuestStatus.STARTING);
@@ -387,7 +387,7 @@ public class GuestService extends AbstractService {
             case Constant.GuestStatus.REBOOT:
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+                throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前主机状态不正确.");
         }
 
 
@@ -396,17 +396,21 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> reboot(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
-            guest.setStatus(Constant.GuestStatus.REBOOT);
-            this.guestMapper.updateById(guest);
-            BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId)
-                    .id(UUID.randomUUID().toString())
-                    .title("重启客户机[" + guest.getDescription() + "]").build();
-            this.operateTask.addTask(operateParam);
-            this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-            return ResultUtil.success(this.initGuestInfo(guest));
+        switch (guest.getStatus()) {
+            case Constant.GuestStatus.STARTING:
+            case Constant.GuestStatus.RUNNING:
+                guest.setStatus(Constant.GuestStatus.REBOOT);
+                this.guestMapper.updateById(guest);
+                BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId)
+                        .id(UUID.randomUUID().toString())
+                        .title("重启客户机[" + guest.getDescription() + "]").build();
+                this.operateTask.addTask(operateParam);
+                this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                return ResultUtil.success(this.initGuestInfo(guest));
+            default:
+                throw new CodeException(ErrorCode.GUEST_NOT_START, "当前主机状态不正确.");
+
         }
-        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -429,7 +433,7 @@ public class GuestService extends AbstractService {
             this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
             return ResultUtil.success(this.initGuestInfo(guest));
         }
-        throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+        throw new CodeException(ErrorCode.GUEST_NOT_START, "当前主机状态不正确.");
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -451,7 +455,7 @@ public class GuestService extends AbstractService {
             case Constant.GuestStatus.STOP:
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不正确.");
+                throw new CodeException(ErrorCode.GUEST_NOT_START, "当前主机状态不正确.");
         }
 
     }
@@ -479,7 +483,7 @@ public class GuestService extends AbstractService {
     public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(int guestId, int deviceId, String deviceType) {
         GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, deviceId));
         if (guestDisk == null) {
-            throw new CodeException(ErrorCode.GUEST_VOLUME_ATTACH_ERROR, "选择的磁盘没有挂载");
+            throw new CodeException(ErrorCode.GUEST_VOLUME_NOT_ATTACH_ERROR, "选择的磁盘没有挂载");
         }
         guestDisk.setDeviceBus(deviceType);
         this.guestDiskMapper.updateById(guestDisk);
@@ -511,15 +515,15 @@ public class GuestService extends AbstractService {
         if (volume.getHostId() > 0) {
             int allowHostId = getGuestMustStartHostId(guest);
             if (allowHostId > 0 && allowHostId != volume.getHostId()) {
-                throw new CodeException(ErrorCode.PARAM_ERROR, "当前主机无法挂载其他主机的本地磁盘");
+                throw new CodeException(ErrorCode.GUEST_BIND_OTHER_HOST, "当前主机无法挂载其他主机的本地磁盘");
             }
         }
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
+            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘未就绪.");
         }
         GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
         if (guestDisk != null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
+            throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已经被挂载");
         }
         List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
         List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
@@ -549,14 +553,14 @@ public class GuestService extends AbstractService {
 
         GuestDiskEntity guestDisk = this.guestDiskMapper.selectById(guestDiskId);
         if (guestDisk == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未挂载");
+            throw new CodeException(ErrorCode.GUEST_VOLUME_NOT_ATTACH_ERROR, "当前磁盘未挂载");
         }
         if (guestDisk.getGuestId() != guestId) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已挂载");
+            throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已挂载");
         }
         VolumeEntity volume = this.volumeMapper.selectById(guestDisk.getVolumeId());
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘未就绪.");
+            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘未就绪.");
         }
         this.guestDiskMapper.deleteById(guestDiskId);
         BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
@@ -619,7 +623,7 @@ public class GuestService extends AbstractService {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
         if (guestNetwork == null || guestNetwork.getAllocateId() != guestId) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前网卡未挂载");
+            throw new CodeException(ErrorCode.NETWORK_NIC_NOT_ATTACH, "当前网卡未挂载");
         }
         BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                 .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(false).guestId(guestId)
@@ -637,38 +641,32 @@ public class GuestService extends AbstractService {
         if (guest == null) {
             return ResultUtil.<GuestModel>builder().code(ErrorCode.GUEST_NOT_FOUND).build();
         }
+        int timeout = 0;
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.ERROR: {
-                guest.setStatus(Constant.GuestStatus.DESTROY);
-                this.guestMapper.updateById(guest);
-                this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-                operateTask.addTask(operate);
+            case Constant.GuestStatus.STOP:
+                if (guest.getType().equals(Constant.GuestType.USER)) {
+                    timeout = configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
+                }
                 break;
-            }
-            case Constant.GuestStatus.STOP: {
-                guest.setStatus(Constant.GuestStatus.DESTROY);
-                this.guestMapper.updateById(guest);
-                this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
-                DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-                operateTask.addTask(operate, guest.getType().equals(Constant.GuestType.USER) ? configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE) : 0);
+            case Constant.GuestStatus.ERROR:
+            case Constant.GuestStatus.DESTROY:
                 break;
-            }
-            case Constant.GuestStatus.DESTROY: {
-                DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-                operateTask.addTask(operate, 0);
-                break;
-            }
             default:
-                return ResultUtil.error(ErrorCode.SERVER_ERROR, "当前主机不是关机状态");
+                return ResultUtil.error(ErrorCode.GUEST_NOT_STOP, "当前主机不是关机状态");
+
         }
+        guest.setStatus(Constant.GuestStatus.DESTROY);
+        this.guestMapper.updateById(guest);
+        this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
+        operateTask.addTask(operate, timeout);
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
     public ResultUtil<String> getVncPassword(int guestId) {
         GuestVncEntity guestVnc = this.guestVncMapper.selectById(guestId);
         if (guestVnc == null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机没有启动");
+            throw new CodeException(ErrorCode.GUEST_NOT_START, "虚拟机没有启动");
         }
         return ResultUtil.success(guestVnc.getPassword());
     }
@@ -685,7 +683,7 @@ public class GuestService extends AbstractService {
         switch (guest.getStatus()) {
             case Constant.GuestStatus.STARTING:
             case Constant.GuestStatus.RUNNING:
-                throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机状态不允许变更配置.");
+                throw new CodeException(ErrorCode.GUEST_IS_RUNNING_ERROR, "当前主机状态不允许变更配置.");
             default:
                 SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
                 guest.setDescription(description);

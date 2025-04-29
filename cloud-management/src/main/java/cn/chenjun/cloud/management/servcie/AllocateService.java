@@ -91,8 +91,11 @@ public class AllocateService extends AbstractService {
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
+            if(host.getStatus() != Constant.HostStatus.ONLINE){
+                throw new CodeException(ErrorCode.HOST_NOT_READY, "主机状态不在线");
+            }
             if (!hostVerify(host, cpu, memory)) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "主机没有可用资源");
+                throw new CodeException(ErrorCode.HOST_NOT_RESOURCE, "主机没有可用资源");
             }
             return host;
         } else {
@@ -131,7 +134,7 @@ public class AllocateService extends AbstractService {
                     }
                     list.sort((o1, o2) -> -Float.compare(scoreMap.get(o1.getHostId()), scoreMap.get(o2.getHostId())));
                 }
-                host = list.stream().findFirst().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_SPACE, "没有可用的主机资源"));
+                host = list.stream().findFirst().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_RESOURCE, "没有可用的主机资源"));
             }
             return host;
         }
