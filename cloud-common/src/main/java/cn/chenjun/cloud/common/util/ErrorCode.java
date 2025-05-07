@@ -51,6 +51,7 @@ public final class ErrorCode {
     public static final int BASE_VOLUME_ERROR = BASE_ERROR * 4;
     public static final int VOLUME_NOT_FOUND = BASE_VOLUME_ERROR + 1;
     public static final int VOLUME_NOT_READY = BASE_VOLUME_ERROR + 2;
+    public static final int VOLUME_EXISTS_ERROR = BASE_VOLUME_ERROR + 3;
     /**
      * Template
      */

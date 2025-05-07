@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.libvirt.Connect;
-import org.libvirt.LibvirtUtil;
-import org.libvirt.StoragePool;
-import org.libvirt.StorageVol;
+import org.libvirt.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -270,8 +267,16 @@ public class VolumeOperate {
     @DispatchBind(command = Constant.Command.VOLUME_CLONE)
 
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
+
+
         StorageUtil.checkStorageSuccess(connect, request.getSourceVolume().getStorage().getName());
         StorageUtil.checkStorageSuccess(connect, request.getTargetVolume().getStorage().getName());
+        StoragePool targetStoragePool= StorageUtil.findStorage(connect, request.getTargetVolume().getStorage().getName(), false);
+        StorageVol targetVol = findVol(targetStoragePool, request.getTargetVolume().getName());
+        if(targetVol !=null){
+            throw new CodeException(ErrorCode.VOLUME_EXISTS_ERROR, "目标磁盘已经存在:" + request.getTargetVolume().getName());
+        }
+
         String sourcePath = getVolumePath(request.getSourceVolume());
         String targetPath = getVolumePath(request.getTargetVolume());
         String[] commands = new String[]{"qemu-img", "convert", "-O", request.getTargetVolume().getType(), sourcePath, targetPath};
