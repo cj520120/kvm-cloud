@@ -264,9 +264,9 @@ public class VolumeService extends AbstractService {
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
-                .deviceId(volume.getDeviceId())
-                .deviceDriver(volume.getDeviceDriver())
-                .guestId(volume.getGuestId())
+                .deviceId(0)
+                .deviceDriver("")
+                .guestId(0)
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(migrateVolume);
