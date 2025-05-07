@@ -8,8 +8,8 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
-import cn.chenjun.cloud.management.operate.Operate;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.Operate;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
@@ -45,8 +45,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
 
     @Autowired
     protected GuestMapper guestMapper;
-    @Autowired
-    protected GuestDiskMapper guestDiskMapper;
     @Autowired
     protected GuestNetworkMapper guestNetworkMapper;
     @Autowired

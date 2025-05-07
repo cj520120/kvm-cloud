@@ -2,8 +2,8 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.annotation.LoginRequire;
-import cn.chenjun.cloud.management.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.core.annotation.LoginRequire;
+import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.servcie.TemplateService;
 import cn.chenjun.cloud.management.util.Constant;

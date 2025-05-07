@@ -40,6 +40,7 @@ public class GuestEntity {
     public static final String GUEST_STATUS = "guest_status";
     public static final String SYSTEM_CATEGORY = "system_category";
     public static final String LAST_START_TIME = "last_start_time";
+    public static final String GUEST_EXTERN = "guest_extern";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO, value = GUEST_ID)
@@ -78,6 +79,8 @@ public class GuestEntity {
     private Integer bootstrapType;
     @TableField(GUEST_STATUS)
     private Integer status;
+    @TableField(GUEST_EXTERN)
+    private String extern;
     @TableField(LAST_START_TIME)
     private Date lastStartTime;
     @TableField(CREATE_TIME)

@@ -6,7 +6,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.TemplateModel;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;

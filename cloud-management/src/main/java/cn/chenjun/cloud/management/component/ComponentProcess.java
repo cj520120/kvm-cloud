@@ -27,4 +27,11 @@ public interface ComponentProcess extends Plugin<Integer> {
      * @return
      */
     GuestQmaRequest getStartQmaRequest(ComponentEntity component, int guestId, Map<String, Object> sysconfig);
+
+    /**
+     * 获取组件组件名称
+     *
+     * @return
+     */
+    String getComponentName();
 }

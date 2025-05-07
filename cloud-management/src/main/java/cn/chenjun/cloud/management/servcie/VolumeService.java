@@ -2,9 +2,9 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
@@ -52,7 +52,7 @@ public class VolumeService extends AbstractService {
 
 
     public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
-        List<GuestDiskEntity> diskList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
+        List<VolumeEntity> diskList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId));
         List<VolumeModel> models = diskList.stream().map(this::initVolume).sorted((o1, o2) -> {
             if (o1.getStatus() == o2.getStatus()) {
                 return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
@@ -64,7 +64,7 @@ public class VolumeService extends AbstractService {
                 return 1;
             }
             return Integer.compare(o1.getStatus(), o2.getStatus());
-        }).sorted(Comparator.comparingInt(o -> o.getAttach().getDeviceId())).collect(Collectors.toList());
+        }).sorted(Comparator.comparingInt(o -> o.getDeviceId())).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 
@@ -100,8 +100,7 @@ public class VolumeService extends AbstractService {
     }
 
     public ResultUtil<List<SimpleVolumeModel>> listNoAttachVolumes(int guestId) {
-        List<Integer> volumeIds = this.guestDiskMapper.selectList(new QueryWrapper<>()).stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().notIn(VolumeEntity.VOLUME_ID, volumeIds));
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, 0));
         int allowHostId = this.getGuestMustStartHostId(guestId);
         List<SimpleVolumeModel> models = new ArrayList<>();
         for (VolumeEntity volume : volumeList) {
@@ -146,6 +145,9 @@ public class VolumeService extends AbstractService {
                 .capacity(volumeSize)
                 .allocation(0L)
                 .status(Constant.VolumeStatus.CREATING)
+                .deviceDriver("")
+                .guestId(0)
+                .deviceId(0)
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(volume);
@@ -312,7 +314,7 @@ public class VolumeService extends AbstractService {
         switch (volume.getStatus()) {
             case Constant.VolumeStatus.ERROR:
             case Constant.VolumeStatus.READY: {
-                if (guestDiskMapper.selectCount(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId)) > 0) {
+                if (volume.getGuestId() > 0) {
                     throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘被系统挂载");
                 }
                 volume.setStatus(Constant.VolumeStatus.DESTROY);

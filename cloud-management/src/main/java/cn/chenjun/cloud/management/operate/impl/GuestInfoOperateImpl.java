@@ -4,19 +4,21 @@ import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestInfoRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.GuestInfoOperate;
-import cn.chenjun.cloud.management.servcie.VncService;
+import cn.chenjun.cloud.management.util.GuestExternNames;
+import cn.chenjun.cloud.management.util.GuestExternUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -26,9 +28,6 @@ import java.util.Objects;
 @Slf4j
 public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, ResultUtil<GuestInfo>> {
 
-
-    @Autowired
-    private VncService vncService;
 
 
     @Override
@@ -62,7 +61,17 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
         if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING) {
             this.allocateService.initHostAllocate();
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                this.vncService.updateVncPort(param.getGuestId(), resultUtil.getData().getVnc());
+
+                Map<String, Map<String, String>> extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+                }.getType());
+                Map<String, String> vncMap = extern.computeIfAbsent(GuestExternNames.VNC, k -> GuestExternUtil.buildVncParam(guest, "", ""));
+                HostEntity host = this.hostMapper.selectById(guest.getHostId());
+                vncMap.put(GuestExternNames.VncNames.HOST, host.getHostIp());
+                if (!Objects.equals(vncMap.get(GuestExternNames.VncNames.PORT), String.valueOf(resultUtil.getData().getVnc()))) {
+                    vncMap.put(GuestExternNames.VncNames.PORT, String.valueOf(resultUtil.getData().getVnc()));
+                    guest.setExtern(GsonBuilderUtil.create().toJson(extern));
+                    this.guestMapper.updateById(guest);
+                }
             }
         }
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());

@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
-import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.error.CodeException;

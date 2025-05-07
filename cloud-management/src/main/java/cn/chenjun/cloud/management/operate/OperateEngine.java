@@ -1,9 +1,10 @@
 package cn.chenjun.cloud.management.operate;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.Operate;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;

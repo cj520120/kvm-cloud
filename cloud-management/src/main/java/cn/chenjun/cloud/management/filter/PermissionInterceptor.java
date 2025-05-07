@@ -2,9 +2,7 @@ package cn.chenjun.cloud.management.filter;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.LoginRequire;
-import cn.chenjun.cloud.management.annotation.NoLoginRequire;
-import cn.chenjun.cloud.management.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.util.RequestContext;

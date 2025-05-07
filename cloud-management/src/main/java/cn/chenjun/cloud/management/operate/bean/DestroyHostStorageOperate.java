@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.operate.bean;
 
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.util.Constant;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

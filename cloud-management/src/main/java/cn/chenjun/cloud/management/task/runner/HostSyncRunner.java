@@ -2,7 +2,7 @@ package cn.chenjun.cloud.management.task.runner;
 
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.HostCheckOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.util.ConfigKey;

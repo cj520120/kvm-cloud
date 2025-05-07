@@ -3,7 +3,7 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.data.entity.TaskEntity;
 import cn.chenjun.cloud.management.data.mapper.TaskMapper;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

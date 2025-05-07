@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management;
 
 import cn.chenjun.cloud.management.component.ComponentProcess;
-import cn.chenjun.cloud.management.operate.Operate;
+import cn.chenjun.cloud.common.core.operate.Operate;
 import cn.chenjun.cloud.management.servcie.meta.MetaDataService;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
 import cn.chenjun.cloud.management.servcie.meta.VendorDataService;

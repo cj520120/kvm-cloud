@@ -52,7 +52,7 @@ public class DomainUtil {
                                         GuestEntity guest,
                                         HostEntity host,
                                         SchemeEntity scheme,
-                                        GuestVncEntity vnc,
+                                        String vncPassword,
                                         List<String> deviceXml
     ) {
 
@@ -61,7 +61,7 @@ public class DomainUtil {
         map.put("vm", ParamBuilder.buildVmParam(guest));
         map.put("host", ParamBuilder.buildHostParam(host));
         map.put("cpu", ParamBuilder.buildCpuParam(guest, scheme));
-        map.put("vnc", ParamBuilder.buildVncParam(vnc));
+        map.put("vnc", ParamBuilder.buildVncParam(vncPassword));
         map.put("device", MapUtil.of("xml", String.join("\n", deviceXml)));
         return TemplateUtil.create().render(tpl, map);
     }

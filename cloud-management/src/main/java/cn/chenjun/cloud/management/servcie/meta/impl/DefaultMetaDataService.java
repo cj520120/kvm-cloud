@@ -1,19 +1,17 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.management.data.entity.MetaDataEntity;
-import cn.chenjun.cloud.management.data.mapper.MetaMapper;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.MetaDataService;
+import cn.chenjun.cloud.management.util.GuestExternNames;
 import cn.chenjun.cloud.management.util.MetaDataType;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -21,27 +19,32 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DefaultMetaDataService implements MetaDataService {
-    @Autowired
-    private MetaMapper metaMapper;
 
 
     @Override
     public MetaData buildCloudInitMetaData(GuestEntity guest) {
-        List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));
-        Set<String> metaNames = list.stream().map(t -> t.getMetaKey() + ": " + t.getMetaValue()).collect(Collectors.toSet());
+        Map<String, Map<String, String>> externMap = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+        }.getType());
+        Map<String, String> metaMap = externMap.getOrDefault(GuestExternNames.META_DATA, new HashMap<>(0));
+        Set<String> metaNames = metaMap.entrySet().stream().map(t -> t.getKey() + ": " + t.getValue()).collect(Collectors.toSet());
         return MetaData.builder().type(MetaDataType.CLOUD).body(String.join("\r\n", metaNames)).build();
     }
 
     @Override
     public String findMetaDataByKey(GuestEntity guest, String key) {
-        MetaDataEntity entity = this.metaMapper.selectOne(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()).eq(MetaDataEntity.META_KEY, key));
-        return entity == null ? "" : entity.getMetaValue();
+        Map<String, Map<String, String>> externMap = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+        }.getType());
+        Map<String, String> metaMap = externMap.getOrDefault(GuestExternNames.META_DATA, new HashMap<>(0));
+        return metaMap.getOrDefault(key, "");
     }
 
     @Override
     public List<String> listMetaDataKeys(GuestEntity guest) {
-        List<MetaDataEntity> list = this.metaMapper.selectList(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guest.getGuestId()));
-        return list.stream().map(MetaDataEntity::getMetaKey).collect(Collectors.toList());
+
+        Map<String, Map<String, String>> externMap = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+        }.getType());
+        Map<String, String> metaMap = externMap.getOrDefault(GuestExternNames.META_DATA, new HashMap<>(0));
+        return new ArrayList<>(metaMap.keySet());
     }
 
     @Override

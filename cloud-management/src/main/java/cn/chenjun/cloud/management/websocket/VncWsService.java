@@ -9,8 +9,11 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.management.util.GuestExternNames;
+import cn.chenjun.cloud.management.util.GuestExternUtil;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.VncClient;
+import com.google.gson.reflect.TypeToken;
 import lombok.SneakyThrows;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +53,6 @@ public class VncWsService {
             log.info("虚拟机当前状态不属于运行状态.id={}", id);
             return;
         }
-
         HostEntity host = SpringContextUtils.getBean(HostMapper.class).selectById(guest.getHostId());
         URI url = new URI(host.getUri().replaceFirst("http", "ws") + "/api/vnc");
         String nonce = String.valueOf(System.nanoTime());

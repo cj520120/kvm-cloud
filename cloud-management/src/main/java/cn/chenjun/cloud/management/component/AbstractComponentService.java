@@ -6,16 +6,14 @@ import cn.chenjun.cloud.common.util.BootstrapType;
 import cn.chenjun.cloud.common.util.SystemCategory;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.chenjun.cloud.management.servcie.AbstractService;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.GuestService;
-import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.NameUtil;
+import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
@@ -267,10 +265,17 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .otherId(componentId)
                 .guestIp("")
                 .networkId(network.getNetworkId())
+                .extern("{}")
                 .type(Constant.GuestType.COMPONENT)
                 .status(Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
+        Map<String, Map<String, String>> externData = new HashMap<>();
+        externData.put(GuestExternNames.META_DATA, GuestExternUtil.buildMetaDataParam(guest, this.getComponentName().replace(" ","_").toLowerCase()));
+        externData.put(GuestExternNames.USER_DATA, GuestExternUtil.buildUserDataParam(guest, "123456", ""));
+        externData.put(GuestExternNames.VNC, GuestExternUtil.buildVncParam(guest, "", "5900"));
+        guest.setExtern(GsonBuilderUtil.create().toJson(externData));
+        this.guestMapper.updateById(guest);
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
@@ -287,16 +292,12 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .templateId(diskTemplateId)
                 .allocation(0L)
                 .capacity(0L)
+                .guestId(guest.getGuestId())
+                .deviceId(0)
+                .deviceDriver(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
                 .status(Constant.VolumeStatus.CREATING)
                 .build();
         this.volumeMapper.insert(volume);
-        GuestDiskEntity guestDisk = GuestDiskEntity.builder()
-                .volumeId(volume.getVolumeId())
-                .guestId(guest.getGuestId())
-                .deviceId(0)
-                .deviceBus(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
-                .build();
-        this.guestDiskMapper.insert(guestDisk);
         GuestNetworkEntity guestNetwork;
         guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
         guestNetwork.setDeviceId(0);

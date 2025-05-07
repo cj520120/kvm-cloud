@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
 import cn.chenjun.cloud.common.util.Constant;

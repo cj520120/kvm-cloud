@@ -1,9 +1,9 @@
 package cn.chenjun.cloud.management.filter;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.annotation.SignRequire;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.SignRequire;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.servcie.UserService;

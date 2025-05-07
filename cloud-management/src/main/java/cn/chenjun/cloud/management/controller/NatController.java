@@ -2,7 +2,7 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.annotation.LoginRequire;
+import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.NatModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import org.springframework.beans.factory.annotation.Autowired;

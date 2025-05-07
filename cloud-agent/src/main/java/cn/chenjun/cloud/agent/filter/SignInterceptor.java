@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.agent.filter;
 
-import cn.chenjun.cloud.agent.annotation.SignRequire;
+import cn.chenjun.cloud.common.core.annotation.SignRequire;
 import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.AppUtils;

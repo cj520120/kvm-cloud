@@ -10,7 +10,7 @@ import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.DnsMapper;
 import cn.chenjun.cloud.management.data.mapper.NatMapper;
 import cn.chenjun.cloud.management.model.*;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.BeanConverter;
@@ -177,7 +177,8 @@ public class NetworkService extends AbstractService {
             }
             ComponentEntity component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(0).slaveGuestIds("[]")
                     .componentType(Constant.ComponentType.ROUTE).networkId(network.getNetworkId())
-                    .componentVip(componentVip.getIp()).basicComponentVip(basicComponentVip.getIp()).build();
+                    .componentVip(componentVip.getIp()).basicComponentVip(basicComponentVip.getIp())
+                    .createTime(new Date()).build();
             componentMapper.insert(component);
             if (type == Constant.NetworkType.VLAN) {
                 basicComponentVip.setDriveType("Vip");
@@ -293,7 +294,9 @@ public class NetworkService extends AbstractService {
         }
         ComponentEntity component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(0).slaveGuestIds("[]")
                 .componentType(type).networkId(network.getNetworkId())
-                .componentVip(componentVip.getIp()).basicComponentVip(basicComponentVip.getIp()).build();
+                .componentVip(componentVip.getIp())
+                .basicComponentVip(basicComponentVip.getIp())
+                .createTime(new Date()).build();
         componentMapper.insert(component);
 
         componentVip.setAllocateId(component.getComponentId());

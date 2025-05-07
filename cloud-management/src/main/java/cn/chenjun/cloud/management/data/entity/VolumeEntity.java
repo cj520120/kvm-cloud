@@ -31,6 +31,9 @@ public class VolumeEntity {
     public static final String VOLUME_ALLOCATION = "volume_allocation";
     public static final String VOLUME_TYPE = "volume_type";
     public static final String VOLUME_STATUS = "volume_status";
+    public static final String GUEST_ID = "guest_id";
+    public static final String DEVICE_ID = "device_id";
+    public static final String DEVICE_DRIVER = "device_driver";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO, value = VOLUME_ID)
@@ -53,6 +56,12 @@ public class VolumeEntity {
     private Long allocation;
     @TableField(VOLUME_TYPE)
     private String type;
+    @TableField(GUEST_ID)
+    private Integer guestId;
+    @TableField(DEVICE_ID)
+    private Integer deviceId;
+    @TableField(DEVICE_DRIVER)
+    private String deviceDriver;
     @TableField(VOLUME_STATUS)
     private Integer status;
     @TableField(CREATE_TIME)

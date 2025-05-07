@@ -6,14 +6,12 @@ import cn.chenjun.cloud.common.bean.VolumeMigrateRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateVolumeOperate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -70,6 +68,11 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
                 targetVolume.setType(resultUtil.getData().getType());
                 targetVolume.setPath(resultUtil.getData().getPath());
+                if (volume != null) {
+                    targetVolume.setDeviceDriver(volume.getDeviceDriver());
+                    targetVolume.setDeviceId(volume.getDeviceId());
+                    targetVolume.setGuestId(volume.getGuestId());
+                }
             } else {
                 targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);
             }
@@ -77,11 +80,6 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
         }
         if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                GuestDiskEntity guestDisk = guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
-                if (guestDisk != null && targetVolume != null) {
-                    guestDisk.setVolumeId(targetVolume.getVolumeId());
-                    guestDiskMapper.updateById(guestDisk);
-                }
                 //提交源磁盘的销毁任务
                 volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);

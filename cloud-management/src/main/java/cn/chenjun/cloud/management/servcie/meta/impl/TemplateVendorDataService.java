@@ -2,11 +2,9 @@ package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.SystemCategory;
-import cn.chenjun.cloud.management.data.entity.GuestDiskEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
-import cn.chenjun.cloud.management.data.mapper.GuestDiskMapper;
 import cn.chenjun.cloud.management.data.mapper.TemplateMapper;
 import cn.chenjun.cloud.management.data.mapper.VolumeMapper;
 import cn.chenjun.cloud.management.servcie.ConfigService;
@@ -37,19 +35,14 @@ public class TemplateVendorDataService implements VendorDataService {
     @Autowired
     private VolumeMapper mapper;
     @Autowired
-    private GuestDiskMapper diskMapper;
-    @Autowired
     private TemplateMapper templateMapper;
 
     @Override
     public MetaData load(GuestEntity guest) {
         StringBuilder sb = new StringBuilder();
         do {
-            GuestDiskEntity guestDisk = diskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()).eq(GuestDiskEntity.DEVICE_ID, 0).last("limit 1"));
-            if (guestDisk == null) {
-                break;
-            }
-            VolumeEntity volumeEntity = mapper.selectById(guestDisk.getVolumeId());
+
+            VolumeEntity volumeEntity = mapper.selectOne(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()).eq(VolumeEntity.DEVICE_ID, 0).last("limit 1"));
             if (volumeEntity == null) {
                 break;
             }

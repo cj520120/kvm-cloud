@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * @author chenjun
  */
@@ -26,6 +28,7 @@ public class ComponentEntity {
     public static final String MASTER_GUEST_ID = "master_guest_id";
     public static final String COMPONENT_SLAVE_NUMBER = "component_slave_number";
     public static final String SLAVE_GUEST_IDS = "slave_guest_ids";
+    public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO, value = COMPONENT_ID)
     private Integer componentId;
@@ -43,4 +46,6 @@ public class ComponentEntity {
     private Integer componentSlaveNumber;
     @TableField(SLAVE_GUEST_IDS)
     private String slaveGuestIds;
+    @TableField(CREATE_TIME)
+    private Date createTime;
 }

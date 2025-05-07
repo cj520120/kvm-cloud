@@ -7,7 +7,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.SyncHostGuestOperate;

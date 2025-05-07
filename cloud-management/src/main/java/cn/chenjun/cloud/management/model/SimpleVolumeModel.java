@@ -25,8 +25,11 @@ public class SimpleVolumeModel {
     private long allocation;
     private String type;
     private int status;
+
+    private int guestId;
+    private int deviceId;
+    private String deviceDriver;
     private Date createTime;
     private SimpleGuestModel guest;
-    private VolumeAttachModel attach;
 
 }

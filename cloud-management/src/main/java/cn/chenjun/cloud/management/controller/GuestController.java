@@ -2,13 +2,11 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.annotation.LoginRequire;
-import cn.chenjun.cloud.management.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.servcie.VolumeService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -103,7 +101,7 @@ public class GuestController extends BaseController {
             userMap.put("sshId", String.valueOf(sshId));
         }
         userMap.put("sshId", String.valueOf(sshId));
-        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, metaMap, userMap, size * 1024 * 1024 * 1024));
+        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId));
     }
 
     
@@ -185,8 +183,8 @@ public class GuestController extends BaseController {
 
     @PostMapping("/api/guest/disk/detach")
     public ResultUtil<GuestModel> detachDisk(@RequestParam("guestId") int guestId,
-                                             @RequestParam("guestDiskId") int guestDiskId) {
-        return this.lockRun(() -> this.guestService.detachDisk(guestId, guestDiskId));
+                                             @RequestParam("volumeId") int volumeId) {
+        return this.lockRun(() -> this.guestService.detachDisk(guestId, volumeId));
     }
 
     @PostMapping("/api/guest/network/attach")

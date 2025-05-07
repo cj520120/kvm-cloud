@@ -23,10 +23,10 @@ public class ParamBuilder {
         return map;
     }
 
-    public static Map<String, Object> buildVncParam(GuestVncEntity guestVncEntity) {
+    public static Map<String, Object> buildVncParam(String vncPassword) {
         Map<String, Object> map = new HashMap<>(0);
-        if (guestVncEntity != null) {
-            map.put("password", guestVncEntity.getPassword());
+        if (vncPassword != null) {
+            map.put("password", vncPassword);
         }
         return map;
     }

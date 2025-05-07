@@ -38,7 +38,8 @@ public class UpdateComponentProcess extends AbstractClusterMessageProcess {
                     .componentVip(entity.getComponentVip())
                     .basicComponentVip(entity.getBasicComponentVip())
                     .slaveGuestIds(GsonBuilderUtil.create().fromJson(entity.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-                    }.getType())).build();
+                    }.getType()))
+                    .createTime(entity.getCreateTime()).build();
             resultUtil = ResultUtil.success(model);
         } else {
             resultUtil = ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件未找到");

@@ -2,18 +2,18 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.data.mapper.GuestPasswordMapper;
-import cn.chenjun.cloud.management.data.mapper.MetaMapper;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,42 +30,6 @@ import java.util.stream.Collectors;
 public class GuestService extends AbstractService {
     @Autowired
     private AllocateService allocateService;
-    @Autowired
-    private GuestPasswordMapper guestPasswordMapper;
-    @Autowired
-    private MetaMapper metaMapper;
-
-    private void initGuestMetaData(int guestId, Map<String, String> metaData, Map<String, String> userData) {
-        GuestEntity guest = this.guestMapper.selectById(guestId);
-        Map<String, String> metaDataMap = new HashMap<>(4);
-        String hostname = "VM-" + guest.getGuestIp().replace(".", "-");
-        metaDataMap.put("hostname", hostname);
-        metaDataMap.put("local-hostname", hostname);
-        metaDataMap.put("instance-id", guest.getName());
-        metaDataMap.putAll(metaData);
-        this.metaMapper.delete(new QueryWrapper<MetaDataEntity>().eq(MetaDataEntity.GUEST_ID, guestId));
-        for (Map.Entry<String, String> entry : metaDataMap.entrySet()) {
-            MetaDataEntity metaDataEntity = MetaDataEntity.builder().guestId(guest.getGuestId()).metaKey(entry.getKey()).metaValue(entry.getValue()).build();
-            this.metaMapper.insert(metaDataEntity);
-        }
-        String password = userData.get("password");
-        this.guestPasswordMapper.deleteById(guestId);
-        if (!StringUtils.isEmpty(password)) {
-            SymmetricCryptoUtil util = SymmetricCryptoUtil.build();
-            GuestPasswordEntity entity = GuestPasswordEntity.builder()
-                    .guestId(guest.getGuestId())
-                    .ivKey(util.getIvKey())
-                    .encodeKey(util.getEncodeKey())
-                    .password(util.encrypt(password))
-                    .build();
-            this.guestPasswordMapper.insert(entity);
-        }
-        String sshId = userData.getOrDefault("sshId", "");
-        if (!ObjectUtils.isEmpty(sshId)) {
-            this.guestSshMapper.delete(new QueryWrapper<GuestSshEntity>().eq(GuestSshEntity.GUEST_ID, guestId));
-            this.guestSshMapper.insert(GuestSshEntity.builder().sshId(NumberUtil.parseInt(sshId)).guestId(guestId).build());
-        }
-    }
 
     private void checkSystemComponentComplete(int networkId) {
         List<ConfigQuery> queryList = new ArrayList<>();
@@ -129,15 +93,15 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceBus
-            , int hostId, int schemeId, int networkId, String networkDeviceType,
+    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceDriver,
+                                              int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int volumeId,
-                                              int storageId, Map<String, String> metaData, Map<String, String> userData, long size) {
+                                              int storageId, long size, String hostName, String password, int sshId) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
-        if (StringUtils.isEmpty(deviceBus)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择总线方式");
+        if (StringUtils.isEmpty(deviceDriver)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请选择磁盘驱动");
         }
         if (StringUtils.isEmpty(networkDeviceType)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择网卡驱动");
@@ -178,10 +142,18 @@ public class GuestService extends AbstractService {
                 .otherId(0)
                 .networkId(networkId)
                 .type(Constant.GuestType.USER)
+                .extern("{}")
                 .status(Constant.GuestStatus.CREATING)
+                .createTime(new Date())
                 .build();
         this.guestMapper.insert(guest);
-
+        SshAuthorizedEntity ssh = sshId <= 0 ? null : this.sshAuthorizedMapper.selectById(sshId);
+        Map<String, Map<String, String>> externData = new HashMap<>();
+        externData.put(GuestExternNames.META_DATA, GuestExternUtil.buildMetaDataParam(guest, hostName));
+        externData.put(GuestExternNames.USER_DATA, GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
+        externData.put(GuestExternNames.VNC, GuestExternUtil.buildVncParam(guest, "", "5900"));
+        guest.setExtern(GsonBuilderUtil.create().toJson(externData));
+        this.guestMapper.updateById(guest);
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setAllocateId(guest.getGuestId());
@@ -192,19 +164,18 @@ public class GuestService extends AbstractService {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            createGuest(hostId, diskTemplateId, deviceBus, volumeType, metaData, userData, size, guest, storage);
+            createGuest(hostId, diskTemplateId, deviceDriver, volumeType, size, guest, storage);
         } else {
-            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
-            if (guestDisk != null) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘已经被挂载");
+            VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+            if (volume == null) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
             }
-            guestDisk = GuestDiskEntity.builder()
-                    .volumeId(volumeId)
-                    .guestId(guest.getGuestId())
-                    .deviceId(0)
-                    .deviceBus(deviceBus)
-                    .build();
-            this.guestDiskMapper.insert(guestDisk);
+            if (volume.getGuestId() > 0) {
+                throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "磁盘已分配给其他客户机");
+            }
+            volume.setGuestId(guest.getGuestId());
+            volume.setDeviceId(0);
+            volume.setDeviceDriver(deviceDriver);
             guest.setStatus(Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
@@ -219,25 +190,22 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
     }
 
-    private void createGuest(int hostId, int diskTemplateId, String deviceType, String volumeType, Map<String, String> metaData, Map<String, String> userData, long size, GuestEntity guest, StorageEntity storage) {
-        GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, deviceType, volumeType, size, guest, storage);
-        this.initGuestMetaData(guest.getGuestId(), metaData, userData);
+    private void createGuest(int hostId, int diskTemplateId, String deviceType, String volumeType, long size, GuestEntity guest, StorageEntity storage) {
+        VolumeEntity volume = createGuestVolume(diskTemplateId, deviceType, volumeType, size, guest, storage);
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())
                 .templateId(diskTemplateId)
-                .volumeId(guestDisk.getVolumeId())
+                .volumeId(volume.getVolumeId())
                 .start(true)
                 .hostId(hostId)
                 .id(UUID.randomUUID().toString())
                 .title("创建客户机[" + guest.getDescription() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
-
-
         this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
     }
 
-    private GuestDiskEntity createGuestVolume(int diskTemplateId, String deviceType, String volumeType, long size, GuestEntity guest, StorageEntity storage) {
+    private VolumeEntity createGuestVolume(int diskTemplateId, String deviceDriver, String volumeType, long size, GuestEntity guest, StorageEntity storage) {
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
@@ -250,23 +218,18 @@ public class GuestService extends AbstractService {
                 .templateId(diskTemplateId)
                 .allocation(0L)
                 .capacity(size)
+                .guestId(0)
+                .guestId(guest.getGuestId())
+                .deviceDriver(deviceDriver)
                 .status(Constant.VolumeStatus.CREATING)
                 .build();
         this.volumeMapper.insert(volume);
-        GuestDiskEntity guestDisk = GuestDiskEntity.builder()
-                .volumeId(volume.getVolumeId())
-                .guestId(guest.getGuestId())
-                .deviceId(0)
-                .deviceBus(deviceType)
-                .build();
-        this.guestDiskMapper.insert(guestDisk);
-
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return guestDisk;
+        return volume;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> reInstall(int guestId, String deviceBus, int systemCategory, int bootstrapType, int isoTemplateId, int diskTemplateId, int volumeId,
+    public ResultUtil<GuestModel> reInstall(int guestId, String deviceDriver, int systemCategory, int bootstrapType, int isoTemplateId, int diskTemplateId, int volumeId,
                                             int storageId, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && volumeId <= 0) {
@@ -280,20 +243,23 @@ public class GuestService extends AbstractService {
         guest.setCdRoom(isoTemplateId);
         guest.setSystemCategory(systemCategory);
         guest.setBootstrapType(bootstrapType);
-        this.guestDiskMapper.delete(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, 0));
+
+        VolumeEntity volume = this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId).eq(VolumeEntity.DEVICE_ID, 0));
+        volume.setGuestId(0);
+        this.volumeMapper.updateById(volume);
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if (volumeId <= 0) {
-            GuestDiskEntity guestDisk = createGuestVolume(diskTemplateId, deviceBus, volumeType, size, guest, storage);
+            volume = createGuestVolume(diskTemplateId, deviceDriver, volumeType, size, guest, storage);
             guest.setStatus(Constant.GuestStatus.CREATING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
                     .templateId(diskTemplateId)
-                    .volumeId(guestDisk.getVolumeId())
+                    .volumeId(volume.getVolumeId())
                     .id(UUID.randomUUID().toString())
                     .hostId(0)
                     .start(true)
@@ -301,18 +267,17 @@ public class GuestService extends AbstractService {
                     .build();
             this.operateTask.addTask(operateParam);
         } else {
-            GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
-            if (guestDisk != null) {
-                throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已经被挂载");
+            volume = this.volumeMapper.selectById(volumeId);
+            if (volume == null) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
             }
-            VolumeEntity volume = this.volumeMapper.selectById(volumeId);
-            guestDisk = GuestDiskEntity.builder()
-                    .volumeId(volumeId)
-                    .guestId(guest.getGuestId())
-                    .deviceId(volume.getHostId())
-                    .deviceBus(deviceBus)
-                    .build();
-            this.guestDiskMapper.insert(guestDisk);
+            if (volume.getGuestId() > 0) {
+                throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "磁盘已分配给其他客户机");
+            }
+            volume.setGuestId(guest.getGuestId());
+            volume.setDeviceDriver(deviceDriver);
+            volume.setDeviceId(0);
+            this.volumeMapper.updateById(volume);
             guest.setStatus(Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
@@ -480,15 +445,15 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(int guestId, int deviceId, String deviceType) {
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId).eq(GuestDiskEntity.DEVICE_ID, deviceId));
-        if (guestDisk == null) {
+    public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(int guestId, int deviceId, String deviceDriver) {
+        VolumeEntity volume = this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId).eq(VolumeEntity.DEVICE_ID, deviceId));
+        if (volume == null) {
             throw new CodeException(ErrorCode.GUEST_VOLUME_NOT_ATTACH_ERROR, "选择的磁盘没有挂载");
         }
-        guestDisk.setDeviceBus(deviceType);
-        this.guestDiskMapper.updateById(guestDisk);
-        this.notifyService.publish(NotifyData.<Void>builder().id(guestDisk.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(this.initVolume(guestDisk));
+        volume.setDeviceDriver(deviceDriver);
+        this.volumeMapper.updateById(volume);
+        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        return ResultUtil.success(this.initVolume(volume));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -506,7 +471,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId, String deviceType) {
+    public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId, String deviceDriver) {
         if (volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要挂载的磁盘");
         }
@@ -521,20 +486,24 @@ public class GuestService extends AbstractService {
         if (volume.getStatus() != Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘未就绪.");
         }
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
-        if (guestDisk != null) {
+
+
+        if (volume.getGuestId() > 0) {
             throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已经被挂载");
         }
-        List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guestId));
-        List<Integer> gustDiskDeviceIds = guestDiskList.stream().map(GuestDiskEntity::getDeviceId).collect(Collectors.toList());
+        List<VolumeEntity> volumes = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId));
+
+        List<Integer> gustDiskDeviceIds = volumes.stream().map(VolumeEntity::getDeviceId).collect(Collectors.toList());
         int deviceId = 0;
         do {
             deviceId++;
         } while (gustDiskDeviceIds.contains(deviceId));
-        guestDisk = GuestDiskEntity.builder().guestId(guestId).volumeId(volumeId).deviceId(deviceId).deviceBus(deviceType).build();
-        this.guestDiskMapper.insert(guestDisk);
+        volume.setDeviceId(deviceId);
+        volume.setGuestId(guestId);
+        volume.setDeviceDriver(deviceDriver);
+        this.volumeMapper.updateById(volume);
         BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
-                        .deviceId(guestDisk.getDeviceId()).deviceBus(guestDisk.getDeviceBus()).attach(true).volumeId(volumeId).guestId(guestId)
+                .deviceId(volume.getDeviceId()).deviceBus(volume.getDeviceDriver()).attach(true).volumeId(volumeId).guestId(guestId)
                         .id(UUID.randomUUID().toString())
                         .title("挂载磁盘[" + guest.getDescription() + "]").build();
         this.operateTask.addTask(operateParam);
@@ -545,26 +514,22 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> detachDisk(int guestId, int guestDiskId) {
-        if (guestDiskId <= 0) {
+    public ResultUtil<GuestModel> detachDisk(int guestId, int volumeId) {
+        if (volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要卸载的磁盘");
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
-
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectById(guestDiskId);
-        if (guestDisk == null) {
+        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+        if (volume == null) {
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
+        }
+        if (volume.getGuestId() != guestId) {
             throw new CodeException(ErrorCode.GUEST_VOLUME_NOT_ATTACH_ERROR, "当前磁盘未挂载");
         }
-        if (guestDisk.getGuestId() != guestId) {
-            throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已挂载");
-        }
-        VolumeEntity volume = this.volumeMapper.selectById(guestDisk.getVolumeId());
-        if (volume.getStatus() != Constant.VolumeStatus.READY) {
-            throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘未就绪.");
-        }
-        this.guestDiskMapper.deleteById(guestDiskId);
+        volume.setGuestId(0);
+        this.volumeMapper.updateById(volume);
         BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
-                        .deviceId(guestDisk.getDeviceId()).deviceBus(guestDisk.getDeviceBus()).attach(false).volumeId(guestDisk.getVolumeId()).guestId(guestId)
+                .deviceId(volume.getDeviceId()).deviceBus(volume.getDeviceDriver()).attach(false).volumeId(volume.getVolumeId()).guestId(guestId)
                         .id(UUID.randomUUID().toString())
                         .title("卸载磁盘[" + guest.getDescription() + "]").build();
         this.operateTask.addTask(operateParam);
@@ -664,11 +629,14 @@ public class GuestService extends AbstractService {
     }
 
     public ResultUtil<String> getVncPassword(int guestId) {
-        GuestVncEntity guestVnc = this.guestVncMapper.selectById(guestId);
-        if (guestVnc == null) {
-            throw new CodeException(ErrorCode.GUEST_NOT_START, "虚拟机没有启动");
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest == null) {
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
         }
-        return ResultUtil.success(guestVnc.getPassword());
+        Map<String, Map<String, String>> externMap = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+        }.getType());
+        Map<String, String> vncMap = externMap.computeIfAbsent(GuestExternNames.VNC, k -> GuestExternUtil.buildVncParam(guest, "", "5900"));
+        return ResultUtil.success(vncMap.get(GuestExternNames.VncNames.PASSWORD));
     }
 
     @Transactional(rollbackFor = Exception.class)

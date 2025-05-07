@@ -2,7 +2,7 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.management.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
 import cn.chenjun.cloud.management.model.SimpleVolumeModel;

@@ -2,8 +2,8 @@ package cn.chenjun.cloud.management.filter;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.LoginRequire;
-import cn.chenjun.cloud.management.annotation.NoLoginRequire;
+import cn.chenjun.cloud.common.core.annotation.LoginRequire;
+import cn.chenjun.cloud.common.core.annotation.NoLoginRequire;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.util.RequestContext;

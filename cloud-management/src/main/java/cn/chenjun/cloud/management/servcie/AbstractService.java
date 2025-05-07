@@ -31,8 +31,6 @@ public abstract class AbstractService {
     @Autowired
     protected VolumeMapper volumeMapper;
     @Autowired
-    protected GuestDiskMapper guestDiskMapper;
-    @Autowired
     protected NetworkMapper networkMapper;
     @Autowired
     protected TemplateMapper templateMapper;
@@ -41,8 +39,7 @@ public abstract class AbstractService {
     @Autowired
     @Lazy
     protected TaskService operateTask;
-    @Autowired
-    protected GuestVncMapper guestVncMapper;
+
 
     @Autowired
     protected SchemeMapper schemeMapper;
@@ -52,8 +49,7 @@ public abstract class AbstractService {
     protected ComponentMapper componentMapper;
     @Autowired
     protected SshAuthorizedMapper sshAuthorizedMapper;
-    @Autowired
-    protected GuestSshMapper guestSshMapper;
+
     @Autowired
     protected ConfigService configService;
     @Autowired
@@ -72,11 +68,11 @@ public abstract class AbstractService {
     }
 
     protected GuestEntity getVolumeGuest(int volumeId) {
-        GuestDiskEntity guestDisk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volumeId));
-        if (guestDisk == null) {
+        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+        if (volume == null) {
             return null;
         }
-        return guestMapper.selectById(guestDisk.getGuestId());
+        return this.guestMapper.selectById(volume.getGuestId());
     }
 
     protected int getGuestMustStartHostId(int guestId) {
@@ -94,9 +90,7 @@ public abstract class AbstractService {
             if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
                 hostId = guest.getHostId();
             } else {
-                List<GuestDiskEntity> guestDiskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
-                List<Integer> volumeIds = guestDiskList.stream().map(GuestDiskEntity::getVolumeId).collect(Collectors.toList());
-                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectBatchIds(volumeIds);
+                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()));
                 hostId = guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id -> id > 0).findFirst().orElse(0);
             }
         }
@@ -139,52 +133,34 @@ public abstract class AbstractService {
         return BeanConverter.convert(entity, SchemeModel.class);
     }
 
-    protected VolumeModel initVolume(GuestDiskEntity disk) {
-        VolumeModel model = BeanConverter.convert(volumeMapper.selectById(disk.getVolumeId()), VolumeModel.class);
-        model.setAttach(VolumeAttachModel.builder().guestId(disk.getGuestId()).deviceId(disk.getDeviceId()).deviceBus(disk.getDeviceBus()).guestDiskId(disk.getGuestDiskId()).build());
-        return model;
-    }
-
 
     protected VolumeModel initVolume(VolumeEntity volume) {
-        GuestDiskEntity disk = this.guestDiskMapper.selectOne(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.VOLUME_ID, volume.getVolumeId()));
-        return initVolume(volume, disk);
-    }
-
-    protected List<SimpleVolumeModel> initSimpleVolumeList(List<VolumeEntity> entityList) {
-        List<SimpleVolumeModel> models = BeanConverter.convert(entityList, SimpleVolumeModel.class);
-        List<Integer> volumeIds = models.stream().map(SimpleVolumeModel::getVolumeId).collect(Collectors.toList());
-        List<GuestDiskEntity> diskList = this.guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().in(GuestDiskEntity.VOLUME_ID, volumeIds));
-
-        List<Integer> guestIds = diskList.stream().map(GuestDiskEntity::getGuestId).collect(Collectors.toList());
-        Map<Integer, GuestDiskEntity> diskMap = diskList.stream().collect(Collectors.toMap(GuestDiskEntity::getVolumeId, o -> o));
-        Map<Integer, GuestEntity> guestMap = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().in(GuestEntity.GUEST_ID, guestIds)).stream().collect(Collectors.toMap(GuestEntity::getGuestId, o -> o));
-        for (SimpleVolumeModel model : models) {
-            GuestDiskEntity disk = diskMap.get(model.getVolumeId());
-            if (disk != null) {
-                model.setAttach(BeanConverter.convert(disk, VolumeAttachModel.class));
-                GuestEntity guest = guestMap.get(disk.getGuestId());
-                model.setGuest(BeanConverter.convert(guest, SimpleGuestModel.class));
-            }
-        }
-        return models;
-
-    }
-
-    protected VolumeModel initVolume(VolumeEntity volume, GuestDiskEntity disk) {
         VolumeModel model = BeanConverter.convert(volume, VolumeModel.class);
         if (model.getHostId() != 0) {
             model.setHost(this.initHost(hostMapper.selectById(volume.getHostId())));
         }
-        if (disk != null && disk.getGuestId() != 0) {
-            model.setAttach(BeanConverter.convert(disk, VolumeAttachModel.class));
-            model.setGuest(BeanConverter.convert(guestMapper.selectById(disk.getGuestId()), SimpleGuestModel.class));
+        if (volume.getGuestId() != 0) {
+            model.setGuest(BeanConverter.convert(guestMapper.selectById(volume.getGuestId()), SimpleGuestModel.class));
         }
         model.setStorage(BeanConverter.convert(storageMapper.selectById(volume.getStorageId()), SimpleStorageModel.class));
         if (volume.getTemplateId() > 0) {
             model.setTemplate(BeanConverter.convert(templateMapper.selectById(volume.getTemplateId()), TemplateModel.class));
         }
         return model;
+    }
+
+    protected List<SimpleVolumeModel> initSimpleVolumeList(List<VolumeEntity> entityList) {
+        List<SimpleVolumeModel> models = BeanConverter.convert(entityList, SimpleVolumeModel.class);
+        List<Integer> guestIds = entityList.stream().map(VolumeEntity::getGuestId).collect(Collectors.toList());
+        Map<Integer, GuestEntity> guestMap = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().in(GuestEntity.GUEST_ID, guestIds)).stream().collect(Collectors.toMap(GuestEntity::getGuestId, o -> o));
+        for (SimpleVolumeModel model : models) {
+            GuestEntity guest = guestMap.get(model.getGuestId());
+            if (guest != null) {
+                model.setGuest(BeanConverter.convert(guest, SimpleGuestModel.class));
+            }
+        }
+        return models;
+
     }
 
     protected NetworkModel initNetwork(NetworkEntity entity) {

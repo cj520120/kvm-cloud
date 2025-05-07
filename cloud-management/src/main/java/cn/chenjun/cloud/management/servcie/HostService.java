@@ -9,7 +9,7 @@ import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.model.HostModel;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;

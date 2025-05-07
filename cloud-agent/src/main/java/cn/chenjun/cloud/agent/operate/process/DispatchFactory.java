@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.agent.operate.process;
 
-import cn.chenjun.cloud.agent.operate.annotation.DispatchBind;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.operate.bean.Consumer;
 import cn.chenjun.cloud.agent.operate.bean.Dispatch;
 import cn.chenjun.cloud.common.error.CodeException;

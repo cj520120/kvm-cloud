@@ -5,14 +5,16 @@ import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.bean.GuestStartRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.operate.bean.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.ConfigService;
-import cn.chenjun.cloud.management.servcie.VncService;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
+import cn.chenjun.cloud.management.util.GuestExternNames;
+import cn.chenjun.cloud.management.util.GuestExternUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Maps;
@@ -34,8 +36,6 @@ import java.util.*;
 public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> extends AbstractOsOperate<T, ResultUtil<GuestInfo>> {
 
 
-    @Autowired
-    private VncService vncService;
 
     @Autowired
     private ConfigService configService;
@@ -52,7 +52,11 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         deviceXmlList.add(this.buildCdXml(guest, systemConfig));
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
         deviceXmlList.addAll(this.buildInterfaceListXml(guest, systemConfig));
-        GuestVncEntity vnc = this.vncService.getGuestVnc(guestId);
+
+        Map<String, Map<String, String>> extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+        }.getType());
+        Map<String, String> vncMap = extern.computeIfAbsent(GuestExternNames.VNC, k -> GuestExternUtil.buildVncParam(guest, "", ""));
+
         guest.setHostId(host.getHostId());
         guest.setLastHostId(host.getHostId());
         guest.setLastStartTime(new Date());
@@ -60,7 +64,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         this.allocateService.initHostAllocate();
         SchemeEntity scheme = this.schemeMapper.selectById(guest.getSchemeId());
         String tpl = (String) systemConfig.get(ConfigKey.VM_DOMAIN_TPL);
-        String xml = DomainUtil.buildDomainXml(tpl, systemConfig, guest, host, scheme, vnc, deviceXmlList);
+        String xml = DomainUtil.buildDomainXml(tpl, systemConfig, guest, host, scheme, vncMap.get(GuestExternNames.VncNames.PASSWORD), deviceXmlList);
         GuestStartRequest request = GuestStartRequest.builder()
                 .name(guest.getName())
                 .qmaRequest(this.buildQmaRequest(param, systemConfig))
@@ -77,7 +81,14 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
                 //写入系统vnc
                 GuestInfo guestInfo = resultUtil.getData();
-                this.vncService.updateVncPort(guestId, guestInfo.getVnc());
+                Map<String, Map<String, String>> extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
+                }.getType());
+                Map<String, String> vncMap = extern.computeIfAbsent(GuestExternNames.VNC, k -> GuestExternUtil.buildVncParam(guest, "", ""));
+                HostEntity host = this.hostMapper.selectById(guest.getHostId());
+                vncMap.put(GuestExternNames.VncNames.HOST, host.getHostIp());
+                vncMap.put(GuestExternNames.VncNames.PORT, String.valueOf(guestInfo.getVnc()));
+                guest.setExtern(GsonBuilderUtil.create().toJson(extern));
+                this.guestMapper.updateById(guest);
             } else {
                 guest.setHostId(0);
                 guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP);
@@ -90,12 +101,12 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
     }
 
     protected List<String> buildDiskListXml(GuestEntity guest, Map<String, Object> sysconfig) {
-        List<GuestDiskEntity> guestDiskEntityList = guestDiskMapper.selectList(new QueryWrapper<GuestDiskEntity>().eq(GuestDiskEntity.GUEST_ID, guest.getGuestId()));
+        List<VolumeEntity> volumes = volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()));
+
         List<String> disks = new ArrayList<>();
         Map<Integer, StorageEntity> storageMap = Maps.newHashMap();
-        guestDiskEntityList.sort(Comparator.comparingInt(GuestDiskEntity::getDeviceId));
-        for (GuestDiskEntity guestDisk : guestDiskEntityList) {
-            VolumeEntity volume = volumeMapper.selectById(guestDisk.getVolumeId());
+        volumes.sort(Comparator.comparingInt(VolumeEntity::getDeviceId));
+        for (VolumeEntity volume : volumes) {
             if (volume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
             }
@@ -113,7 +124,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             Map<String, Object> configMap = new HashMap<>();
             configMap.putAll(sysconfig);
             configMap.putAll(volumeConfigMap);
-            disks.add(this.buildDiskXml(guest, storage, volume, guestDisk.getDeviceId(), guestDisk.getDeviceBus(), configMap));
+            disks.add(this.buildDiskXml(guest, storage, volume, volume.getDeviceId(), volume.getDeviceDriver(), configMap));
         }
         return disks;
     }

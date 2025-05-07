@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,4 +24,5 @@ public class ComponentDetailModel {
     private Integer masterGuestId;
     private Integer componentSlaveNumber;
     private List<Integer> slaveGuestIds;
+    private Date createTime;
 }

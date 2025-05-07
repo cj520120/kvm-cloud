@@ -1,8 +1,8 @@
 package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.annotation.SignRequire;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.annotation.SignRequire;
 import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.servcie.HostService;
 import cn.chenjun.cloud.management.servcie.TaskService;
