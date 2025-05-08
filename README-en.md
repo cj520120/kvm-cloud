@@ -121,7 +121,7 @@ ONBOOT=yes
 NM_CONTRLLED=no
 BRIDGE=br0
 ```
-3)、For OVS configuration, refer to[OVS 网卡设置参考.txt](scripts%2FOVS%20%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E5%8F%82%E8%80%83.txt)
+3)、For OVS configuration, refer to [ovs-bridge-sample.md](scripts/ovs-bridge-sample.md)
 
 #### 4、VNC Configuration
 ```$xslt
