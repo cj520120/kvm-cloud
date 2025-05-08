@@ -1,19 +1,19 @@
 English | [中文](README.md)
 ### Project Introduction
 KVM Cloud is a lightweight private cloud platform implemented in Java, designed to help small and medium-sized enterprises quickly manage computing, storage, and network resources, allowing enterprises to have their own cloud platform. The platform includes, but is not limited to, the following features:
-1. Basic VM functions based on KVM (creation, start, stop, reinstallation, webVNC, etc.)
-2. Support for NFS, glusterfs, and Ceph RBD disk storage pools
-3. Support for dynamic addition and removal of disks
-4. Multi-host management
-5. Support for template maintenance for quick VM creation
-6. Automatic management of virtual machine IPs
-7. Support for multiple network cards
-8. Support for VLAN network segmentation through OVS
-9. Support for cloud-init to configure system passwords
-10. Support for internal DNS resolution
-11. Support for NAT forwarding
-12. Support for key management login
-13. Support for hostname customization
+- Basic VM functions based on KVM (creation, start, stop, reinstallation, webVNC, etc.)
+- Support for NFS, glusterfs, and Ceph RBD disk storage pools
+- Support for dynamic addition and removal of disks
+-  Multi-host management
+- Support for template maintenance for quick VM creation
+- Automatic management of virtual machine IPs
+- Support for multiple network cards
+- Support for VLAN network segmentation through OVS
+- Support for cloud-init to configure vm
+- Support for internal DNS resolution
+- Support for NAT forwarding
+- Support for key management login
+- Support for hostname customization
 
 ### About Upgrade
 - Currently, upgrades from V1 and V2 to the latest version are not supported.
@@ -23,13 +23,13 @@ KVM Cloud is a lightweight private cloud platform implemented in Java, designed 
 ### Operating System
 Linux(intel、amd)
 ### SELinux Configuration
-```sh
+```$xslt
 setenforce 0
 vi /etc/selinux/config
 SELINUX=permissive
 ```
 ### Sysctl Configuration
-```sh
+```$xslt
 vim /etc/sysctl.conf 
 net.ipv4.ip_forward=1               # 设置转发并保存
 sysctl -p
@@ -60,13 +60,13 @@ systemctl start nfs-server
 mkdir -p /data/nfs
 ```
 #### 4、Edit Configuration
-```sh
+```$xslt
 vi /etc/exports
 /data/nfs *(rw,sync,no_root_squash)
 ```
 #### 5、Reload the exportfs File
 ```sh
-  exportfs -a
+exportfs -a
 ```
 #### 6. Restart Services
 ```sh
@@ -77,13 +77,13 @@ systemctl restart nfs-server
 #### 7. Test Mounting
 ```sh
 mount -t nfs 127.0.0.1:/data/nfs /mnt
-df -h        ###查看有了代表成功
+df -h
 umount /mnt
 ```
 
 ### KVM
 #### 1、Verify Host Support for Virtualization
-```sh
+```$xslt
 lsmod | grep kvm # Check the result to confirm if virtualization is supported
 If the host is a VMware virtual machine, enable virtualization technology.
 ```
@@ -94,10 +94,11 @@ yum install java-1.8.0-openjdk* -y
 ```
 
 #### 3、Configure KVM Host Bridge, Add a Bridge
-Note: Use ip addr to check your network interface name. In CentOS 7, the interface name may not be eth0. An incorrect interface name will cause the virtual machine to be inaccessible later. Confirm the correct interface name and configure the bridge:
+    Note: Use ip addr to check your network interface name. In CentOS 7, the interface name may not be eth0. An incorrect interface name will cause the virtual machine to be inaccessible later. 
+    Confirm the correct interface name and configure the bridge:
 
 1)、Create the bridge network interface file:/etc/sysconfig/network-scripts/ifcfg-br0
-```sh
+```$xslt
 DEVICE=br0
 TYPE=Bridge
 ONBOOT=yes
@@ -111,8 +112,8 @@ DNS2=8.8.8.8
 ```
 2)、Modify the default network interface configuration
 
-**Edit the file to match the actual interface name, for example, ifcfg-eth0, located at:/etc/sysconfig/network-scripts/ifcfg-eth0**
-```sh 
+> **Edit the file to match the actual interface name, for example, ifcfg-eth0, located at:/etc/sysconfig/network-scripts/ifcfg-eth0**
+```$xslt
 BOOTPROTO=none
 NAME=eth0
 DEVICE=eth0
@@ -123,7 +124,7 @@ BRIDGE=br0
 3)、For OVS configuration, refer to[OVS 网卡设置参考.txt](scripts%2FOVS%20%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E5%8F%82%E8%80%83.txt)
 
 #### 4、VNC Configuration
-```sh
+```$xslt
 vi /etc/libvirt/qemu.conf
 vnc_listen="0.0.0.0"
 user = "root"
@@ -132,7 +133,7 @@ group = "root"
 #### 5、Libvirtd Configuration
 
 1)、libvirtd configuration
-```sh
+```$xslt
 vi /etc/libvirt/libvirtd.conf
 listen_tls = 0
 listen_tcp = 1
@@ -160,7 +161,7 @@ mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
 3、Modify configuration files
 
 4、Start the management and agent ends, and browse the page：http://localhost:8080/
-```
+```$xslt
 Management: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
 --spring.config.location is an optional parameter used to specify the configuration file. If no modification is needed, you can omit it. The configuration files are located in the src/main/resources directory of each module.
@@ -219,7 +220,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 ### Related Issues
 
 1、Configuration file not found issue leading to database connection problems
-```
+```$xslt
 server.yaml and client.properties are the application.yaml and application.properties files in the management and agent projects, respectively. Modify the names and related configurations as needed when running.
 ```
 2、Backup and recovery
@@ -311,7 +312,6 @@ Use a clean system for installation. If the network is not working, check the fi
 ```
 14、Issue with Ubuntu not starting virtual machines
 ```$xslt
-
 Ubuntu reports: `qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory`
 Disable huge pages, modify the configurations `vm.memory.huge.pages.enable` and `vm.memory.huge.pages.size`, or add `vm.nr_hugepages=10240` to /etc/sysctl.conf (the specific value should be adjusted according to your actual situation).
 ```

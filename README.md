@@ -1,24 +1,24 @@
 中文 | [English](README-en.md)
 ### 项目介绍
-    KVM Cloud 是一款基于Java实现的轻量级私有云平台，旨在帮助中小企业快速实现计算、存储、网络等资源的管理，让企业拥有自己的云平台，包括但不限于如下功能:
-    1、基于KVM的VM基础功能(创建、启动、停止、重装、webVNC等功能)
-    2、支持NFS、glusterfs、Ceph RBD磁盘存储池
-    3、支持磁盘动态添加取消
-    4、多主机管理
-    5、支持模版维护，用于快速创建VM
-    6、虚拟机IP自动管理
-    7、多网卡支持
-    8、通过OVS支持Vlan网络划分
-    9、支持cloud-init配置系统密码
-    10、支持内部dns解析
-    11、支持nat转发
-    12、支持密钥管理登录
-    13、支持主机名定制
+KVM Cloud 是一款基于Java实现的轻量级私有云平台，旨在帮助中小企业快速实现计算、存储、网络等资源的管理，让企业拥有自己的云平台，包括但不限于如下功能:
+- 基于KVM的VM基础功能(创建、启动、停止、重装、webVNC等功能)
+- 支持NFS、glusterfs、Ceph RBD磁盘存储池 
+- 支持磁盘动态添加取消 
+- 多主机管理 
+- 支持模版维护，用于快速创建VM 
+- 虚拟机IP自动管理 
+- 多网卡支持 
+- 通过OVS支持Vlan网络划分 
+- 支持cloud-init配置初始化
+- 支持内部dns解析 
+- 支持nat转发 
+- 支持密钥管理登录 
+- 支持主机名定制
 
 ### 关于升级
-    目前不支持V1、V2升级到最新版本
-    V3.2升级时请重新上传系统模版文件Cloud-System-v3.3.qcow2(md5:d91d1d3e4e9d78593f5727faebf0510e),停止现有网络组件，并重新初始化
-    新版本不在支持采用backingfile方式，升级前请确保所有磁盘文件没有父磁盘的依赖，如果有请通过clone方式将磁盘重新克隆，取消依赖关系，否则删除模版将导致磁盘不可用
+- 目前不支持V1、V2升级到最新版本
+- V3.2升级时请重新上传系统模版文件Cloud-System-v3.3.qcow2(md5:d91d1d3e4e9d78593f5727faebf0510e),停止现有网络组件，并重新初始化
+- 新版本不在支持采用backingfile方式，升级前请确保所有磁盘文件没有父磁盘的依赖，如果有请通过clone方式将磁盘重新克隆，取消依赖关系，否则删除模版将导致磁盘不可用
 ### 操作系统
 Linux(intel、amd)
 ### SELinux配置
@@ -93,8 +93,8 @@ yum install java-1.8.0-openjdk* -y
 ```
 
 #### 3、配置KVM 主机网桥，增加一个网桥
-这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期配置的虚拟机无法正常被访问到！
-确认网卡名无误后配置网桥：
+    这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期配置的虚拟机无法正常被访问到！
+    确认网卡名无误后配置网桥：
 
 1)、创建桥接网卡文件/etc/sysconfig/network-scripts/ifcfg-br0
 ```sh
@@ -111,7 +111,7 @@ DNS2=8.8.8.8
 ```
 2)、修改默认网卡配置
 
- **下面这个编辑 注意改成 ifcfg-实际网卡名,例如eth0，对应文件为:/etc/sysconfig/network-scripts/ifcfg-eth0**
+> **下面这个编辑 注意改成 ifcfg-实际网卡名,例如eth0，对应文件为:/etc/sysconfig/network-scripts/ifcfg-eth0**
 ```sh 
 BOOTPROTO=none
 NAME=eth0
@@ -122,9 +122,9 @@ BRIDGE=br0
 ```
 3)、如需ovs配置，请参考[OVS 网卡设置参考.txt](scripts%2FOVS%20%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E5%8F%82%E8%80%83.txt)
 
-#### 4、VNC配置
-修改 /etc/libvirt/qemu.conf
+#### 4、VNC配置 
 ```sh
+vi /etc/libvirt/qemu.conf
 vnc_listen="0.0.0.0"
 user = "root"
 group = "root"
@@ -143,12 +143,13 @@ auth_unix_rw = "none"
 tcp_port = "16509"
 listen_addr = "0.0.0.0"
 auth_tcp = "none"
+
 vi /etc/sysconfig/libvirtd
-    LIBVIRTD_ARGS="--listen"
+LIBVIRTD_ARGS="--listen"
 systemctl restart libvirtd 
 ```
 #### 项目编译
-```sh
+```$xslt
 mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
 ```
 ### 完成配置
@@ -219,7 +220,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 ### 相关问题
 
 1、关于找不到配置文件问题导致数据库连接问题
-```
+```$xslt
 server.yaml 和 client.properties 内容分别为management和agent项目下的application.yaml和application.properties的文件，运行时自行修改名称及相关配置
 ```
 2、关于备份与恢复
@@ -229,66 +230,71 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 ```
 3、关于网络隔离
 ```$xslt
-    1)、目前只支持OVS桥接状态下的Vlan模式，如需使用，请自行安装OVS。
-    2)、负载均衡器可通过挂载基础网络网卡的方式自行实现。
-
+1、目前只支持OVS桥接状态下的Vlan模式，如需使用，请自行安装OVS。
+2、负载均衡器可通过挂载基础网络网卡的方式自行实现。
 ```
 4、个别windows系统无法找到引导的问题
 ```$xslt
-    1)、首先确认创建的ISO系统类型是否正确
-    2)、如果确认系统类型没有问题，可以通过老毛桃做一个PE的ISO镜像，在创建系统的时候可以通过PE镜像创建，然后进入PE系统，在页面上卸载光盘，重新挂载你要安装的操作系统，然后通过PE安装就可以正常安装了
+1、首先确认创建的ISO系统类型是否正确
+2、如果确认系统类型没有问题，可以通过老毛桃做一个PE的ISO镜像，在创建系统的时候可以通过PE镜像创建，然后进入PE系统，在页面上卸载光盘，重新挂载你要安装的操作系统，然后通过PE安装就可以正常安装了
 ```
 5、windows系统磁盘不识别问题
 ```$xslt
-    1)、windows没有virto的驱动，请安装virtio-win.iso驱动
-    2)、如果是系统盘则需要在磁盘选择页面临时挂载virtio-win.iso驱动后安装或选择ide总线方式
+1、windows没有virto的驱动，请安装virtio-win.iso驱动
+2、如果是系统盘则需要在磁盘选择页面临时挂载virtio-win.iso驱动后安装或选择ide总线方式
 ```
 6、服务器掉电重启后处理
 ```$xslt
-   1、服务器掉电重启后，请在页面手动关闭所有自己创建的虚拟机，然后重新启动，系统虚拟机有自动检测重启功能，无需处理
-   2、掉电可能引起虚拟磁盘损坏，如无法启动，可通过qemu-img check检查并进行相应修复
+1、服务器掉电重启后，请在页面手动关闭所有自己创建的虚拟机，然后重新启动，系统虚拟机有自动检测重启功能，无需处理
+2、掉电可能引起虚拟磁盘损坏，如无法启动，可通过qemu-img check检查并进行相应修复
 ``` 
 7、虚拟机虚拟化嵌套
+
+- 验证KVM 宿主机是否启用了嵌套虚拟化：
 ```$xslt
-1、验证KVM 宿主机是否启用了嵌套虚拟化：
-    基于 Intel 的处理器运行以下命令：cat /sys/module/kvm_intel/parameters/nested
-    基于 AMD 的处理器运行以下命令： cat /sys/module/kvm_amd/parameters/nested
-    上述命令输出N /0表示嵌套虚拟化是禁用的。如果我们得到的输出是Y/1 则表示在您的宿主机已启用嵌套虚拟化
-2、如果需要启用嵌套虚拟化，使用以下内容创建一个文件名为/etc/modprobe.d/kvm-nested.conf 的文件：
-    options kvm-intel nested=1
-    options kvm-intel enable_shadow_vmcs=1
-    options kvm-intel enable_apicv=1
-    options kvm-intel ept=1
-3、reboot 重启机器
-4、现在验证嵌套虚拟化功能是否启用
-    cat /sys/module/kvm_intel/parameters/nested
+基于 Intel 的处理器运行以下命令：cat /sys/module/kvm_intel/parameters/nested
+基于 AMD 的处理器运行以下命令： cat /sys/module/kvm_amd/parameters/nested
+上述命令输出N /0表示嵌套虚拟化是禁用的。如果我们得到的输出是Y/1 则表示在您的宿主机已启用嵌套虚拟化
+``` 
+- 如果需要启用嵌套虚拟化，使用以下内容创建一个文件名为/etc/modprobe.d/kvm-nested.conf 的文件：
+```$xslt
+options kvm-intel nested=1
+options kvm-intel enable_shadow_vmcs=1
+options kvm-intel enable_apicv=1
+options kvm-intel ept=1
+``` 
+- reboot 重启机器
+- 现在验证嵌套虚拟化功能是否启用
+```$xslt
+cat /sys/module/kvm_intel/parameters/nested
 ``` 
 8、cloud-init相关配置
+- cloud-init数据源采用NoCloud,请修改cloud相关配置如下:
 ```$xslt
-1、cloud-init数据源采用NoCloud,请修改cloud相关配置如下:
-    datasource:
-      NoCloud:
-        seedfrom: http://169.254.169.254/
-    datasource_list: [  NoCloud ]
+datasource:
+  NoCloud:
+    seedfrom: http://169.254.169.254/
+datasource_list: [  NoCloud ]
+```
+- 系统模板在安装cloud-init后手动设置相关配置
+  1. 设置允许密码登录:设置ssh_pwauth: 1
+  2. 可设置允许root登录:disable_root: 1 
+  3. ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致 
+  4. 目前只测试了Centos与Ubuntu，Windows请自行实现相关初始化行为 
+  5. 密码只对应默认用户，具体请查看system_info.default_user相关配置 
+  6. 其他配置请参照cloud-init相关配置进行安装 
+  7. 对系统模板请安装qemu-command-agent，并进行相关配置
 
-2、系统模板在安装cloud-init后手动设置相关配置
-    1)、设置允许密码登录:设置ssh_pwauth: 1
-    2)、可设置允许root登录:disable_root: 1 
-    3)、ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致
-    4)、目前只测试了Centos与Ubuntu，Windows请自行实现相关初始化行为
-    5)、密码只对应默认用户，具体请查看system_info.default_user相关配置
-    6)、其他配置请参照cloud-init相关配置进行安装
-    7)、对系统模板请安装qemu-command-agent，并进行相关配置
-    
-    
-3、目前只提供Centos及Ubuntu22.04的系统模版，其他系统模版，请自行实现
+
+- 目前只提供Centos及Ubuntu22.04的系统模版，其他系统模版，请自行实现
     1）、Centos默认用户名为centos，密码为创建系统时输入的密码
     2）、Ubuntu默认用户名为ubuntu，密码为创建系统输入的密码
     3）、系统模版不支持root用户名密码登录，如需root登录，请自行修改
-    
-4、关于自制模版中Ubuntu 22.04无法使用密钥登录问题，执行如下命令
-    1）、echo 'PubkeyAcceptedAlgorithms=+ssh-rsa' >> /etc/ssh/sshd_config
-    2）、systemctl restart sshd
+
+- 关于自制模版中Ubuntu 22.04无法使用密钥登录问题，执行如下命令
+```$xslt
+echo 'PubkeyAcceptedAlgorithms=+ssh-rsa' >> /etc/ssh/sshd_config
+systemctl restart sshd
 ```
 9、页面删除主机后，如需要重新加入主机，请删除该主机Agent目录下config.json，然后重启Agent
 
@@ -312,7 +318,6 @@ Ubuntu: qemu-system-i386 -machine help
 ```
 14、关于ubuntu无法启动虚拟机问题
 ```$xslt
-
 ubuntu 提示qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory
 关闭大页缓存，修改配置vm.memory.huge.pages.enable和vm.memory.huge.pages.size，或在/etc/sysctl.conf 中追加 vm.nr_hugepages=10240 #具体值请根据实际情况修改
 ```
