@@ -1,6 +1,6 @@
 English | [中文](README.md)
 ### Project Introduction
-- KVM Cloud is a lightweight private cloud platform implemented in Java, designed to help small and medium-sized enterprises quickly manage computing, storage, and network resources, allowing enterprises to have their own cloud platform. The platform includes, but is not limited to, the following features:
+KVM Cloud is a lightweight private cloud platform implemented in Java, designed to help small and medium-sized enterprises quickly manage computing, storage, and network resources, allowing enterprises to have their own cloud platform. The platform includes, but is not limited to, the following features:
 1. Basic VM functions based on KVM (creation, start, stop, reinstallation, webVNC, etc.)
 2. Support for NFS, glusterfs, and Ceph RBD disk storage pools
 3. Support for dynamic addition and removal of disks
@@ -131,7 +131,7 @@ group = "root"
 ```
 #### 5、Libvirtd Configuration
 
-1)、edit /etc/sysconfig/libvirtd
+1)、libvirtd configuration
 ```sh
 vi /etc/libvirt/libvirtd.conf
 listen_tls = 0
@@ -144,7 +144,7 @@ tcp_port = "16509"
 listen_addr = "0.0.0.0"
 auth_tcp = "none"
 vi /etc/sysconfig/libvirtd
-    LIBVIRTD_ARGS="--listen"
+LIBVIRTD_ARGS="--listen"
 systemctl restart libvirtd 
 ```
 #### Project Compilation
@@ -172,19 +172,19 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 > **Use bridge network configuration. The IP address range should be consistent with the host's IP segment. You can separate the start and end IP addresses from the host's network to avoid IP conflicts. VLAN is only supported in OVS mode.**
 
-![](images/network.png)
+![](images/en/network.png)
 
 
 7、Create the host`
 `
 
-![](images/host.png)
+![](images/en/host.png)
 
 
 8、Create storage pools
 
 
-![](images/storage.png)
+![](images/en/storage.png)
 
 9、Download the base template (system template: cloud/v3/Cloud-System-V3.3.qcow2)
 
@@ -194,7 +194,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 10、Install Nginx, configure the base download URL, and complete the template configuration on the page
 
 
-![](images/template.png)
+![](images/en/template.png)
 
 
 
@@ -208,12 +208,12 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 13、Create VMs
 
 
-![](images/create-vm.png)
+![](images/en/create-vm.png)
 
 
-![](images/vm.png)
+![](images/en/vm.png)
 
-![](images/vm-info.png)
+![](images/en/vm-info.png)
 
 
 ### Related Issues
@@ -264,7 +264,8 @@ Data is invaluable, it is recommended to back up data in virtual machines.
 ``` 
 8、cloud-init related configuration
 ```$xslt
-1. The cloud-init data source uses NoCloud. Modify the cloud configuration as follows:    datasource:
+1. The cloud-init data source uses NoCloud. Modify the cloud configuration as follows:
+    datasource:
       NoCloud:
         seedfrom: http://169.254.169.254/
     datasource_list: [  NoCloud ]

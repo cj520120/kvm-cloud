@@ -172,19 +172,19 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 > **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突,Vlan只支持OVS方式**
 
-![](images/network.png)
+![](images/zh/network.png)
 
 
 7、创建主机`
 `
 
-![](images/host.png)
+![](images/zh/host.png)
 
 
 8、创建存储池(只支持nfs)
 
 
-![](images/storage.png)
+![](images/zh/storage.png)
 
 9、下载基础模版(系统模版选择cloud/v3/Cloud-System-V3.3.qcow2)
 
@@ -194,7 +194,7 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 10、安装nginx，配置基础下载地址,并在页面完成模版配置
 
 
-![](images/template.png)
+![](images/zh/template.png)
 
  
 
@@ -208,12 +208,12 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 13、创建VM
 
 
-![](images/create-vm.png)
+![](images/zh/create-vm.png)
 
 
-![](images/vm.png)
+![](images/zh/vm.png)
 
-![](images/vm-info.png)
+![](images/zh/vm-info.png)
 
 
 ### 相关问题
