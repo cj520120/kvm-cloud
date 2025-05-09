@@ -147,13 +147,18 @@ public class Constant {
         public static final int UPDATE_DNS = 10;
         public static final int UPDATE_COMPONENT = 11;
         public static final int UPDATE_COMPONENT_NAT = 12;
-        public static final int UPDATE_SSH_KEY = 13;
+        public static final int UPDATE_SSH = 13;
 
-        public static final int UPDATE_USER_KEY = 14;
+        public static final int UPDATE_USER = 14;
 
         public static final int COMPONENT_UPDATE_DNS = 101;
         public static final int COMPONENT_UPDATE_NAT = 102;
 
+
+
+        public static final int GUEST_START_CALLBACK_NOTIFY = 301;
+        public static final int GUEST_STOP_CALLBACK_NOTIFY = 302;
+        public static final int GUEST_RESTART_CALLBACK_NOTIFY = 303;
     }
 
 }

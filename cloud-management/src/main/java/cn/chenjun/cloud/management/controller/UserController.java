@@ -66,7 +66,7 @@ public class UserController extends BaseController {
     @GetMapping("/api/user/self")
     public ResultUtil<UserInfoModel> getSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
 
-        return this.lockRun(() -> userUiService.getSelfInfo(model.getUserId()));
+        return this.lockRun(() -> userUiService.getUserInfo(model.getUserId()));
 
     }
 

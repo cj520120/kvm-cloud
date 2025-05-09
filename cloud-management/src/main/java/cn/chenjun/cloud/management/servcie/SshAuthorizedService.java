@@ -70,7 +70,7 @@ public class SshAuthorizedService extends AbstractService {
     public ResultUtil<SshAuthorizedModel> importSshKey(String name, String publicKey, String privateKey) {
         SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPublicKey(publicKey).sshPrivateKey(privateKey).build();
         this.sshAuthorizedMapper.insert(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH_KEY).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
 
         return ResultUtil.success(this.initSshAuthorized(entity));
     }
@@ -78,7 +78,7 @@ public class SshAuthorizedService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> deleteSshKey(int id) {
         this.sshAuthorizedMapper.deleteById(id);
-        this.notifyService.publish(NotifyData.<Void>builder().id(id).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH_KEY).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(id).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
         return ResultUtil.success();
     }
 
@@ -106,7 +106,7 @@ public class SshAuthorizedService extends AbstractService {
             }
             this.sshAuthorizedMapper.insert(entity);
             model.setId(entity.getId());
-            this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH_KEY).build());
+            this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
 
             return ResultUtil.success(model);
         } catch (Exception err) {
@@ -122,7 +122,7 @@ public class SshAuthorizedService extends AbstractService {
         }
         entity.setSshName(name);
         this.sshAuthorizedMapper.updateById(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH_KEY).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
         return ResultUtil.success(this.initSshAuthorized(entity));
     }
     public ResultUtil<String> createDownloadKey(int id) {

@@ -39,7 +39,7 @@ public class GuestService extends AbstractService {
             return;
         }
         if (!this.checkRouteComponentComplete(networkId)) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "网络服务未初始化完成,请稍后重试");
+            throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络服务未初始化完成,请稍后重试");
         }
     }
 
@@ -383,7 +383,7 @@ public class GuestService extends AbstractService {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
             if (hostId == guest.getHostId()) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "迁移目标主机选择错误.");
+                throw new CodeException(ErrorCode.BASE_HOST_ERROR, "迁移目标主机选择错误.");
             }
             BaseOperateParam operateParam = MigrateGuestOperate.builder()
                     .guestId(guestId)

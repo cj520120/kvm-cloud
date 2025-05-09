@@ -44,7 +44,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
     public void start(int hostId, int guestId, T param) {
         GuestEntity guest = guestMapper.selectById(guestId);
         if (guest.getStatus() != cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
+            throw new CodeException(ErrorCode.GUEST_NOT_STOP, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
         HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
         Map<String, Object> systemConfig = this.loadGuestConfig(hostId, guestId);
@@ -96,6 +96,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
         }
+        this.notifyService.publish(NotifyData.<ResultUtil<GuestEntity>>builder().id(guestId).type(Constant.NotifyType.GUEST_START_CALLBACK_NOTIFY).data(ResultUtil.<GuestEntity>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).data(guest).build()).build());
         this.notifyService.publish(NotifyData.<Void>builder().id(guestId).type(Constant.NotifyType.UPDATE_GUEST).build());
 
     }
@@ -108,15 +109,15 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         volumes.sort(Comparator.comparingInt(VolumeEntity::getDeviceId));
         for (VolumeEntity volume : volumes) {
             if (volume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
+                throw new CodeException(ErrorCode.VOLUME_NOT_READY, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
             }
             StorageEntity storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
                 StorageEntity storageEntity = this.storageMapper.selectById(storageId);
                 if (storageEntity == null) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
+                    throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
                 }
                 if (storageEntity.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getStatus());
+                    throw new CodeException(ErrorCode.STORAGE_NOT_READY, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getStatus());
                 }
                 return storageEntity;
             });
@@ -141,17 +142,17 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
             if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
                 if (network.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
+                    throw new CodeException(ErrorCode.NETWORK_NOT_READY, "虚拟机[" + guest.getName() + "]网络[" + network.getName() + "]未就绪:" + network.getStatus());
                 }
             }
-            if (network.getBasicNetworkId() > 0) {
-                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
-                if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
-                    if (parentNetwork.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
-                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
-                    }
-                }
-            }
+//            if (network.getBasicNetworkId() > 0) {
+//                NetworkEntity parentNetwork = networkMapper.selectById(entity.getNetworkId());
+//                if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
+//                    if (parentNetwork.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
+//                        throw new CodeException(ErrorCode.NETWORK_NOT_READY, "虚拟机[" + guest.getName() + "]网络[" + parentNetwork.getName() + "]未就绪:" + network.getStatus());
+//                    }
+//                }
+//            }
             networkInterfaces.add(this.buildInterfaceXml(network, entity, systemConfig));
 
         }

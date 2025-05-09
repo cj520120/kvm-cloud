@@ -58,6 +58,8 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
             this.allocateService.initHostAllocate();
         }
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<ResultUtil<GuestEntity>>builder().id(param.getGuestId()).type(Constant.NotifyType.GUEST_RESTART_CALLBACK_NOTIFY).data(ResultUtil.<GuestEntity>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).data(guest).build()).build());
+
     }
 
     @Override

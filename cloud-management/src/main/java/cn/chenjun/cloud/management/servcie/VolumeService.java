@@ -178,7 +178,7 @@ public class VolumeService extends AbstractService {
                 case Constant.GuestStatus.ERROR:
                     break;
                 default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+                    throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
         volume.setStatus(Constant.VolumeStatus.CLONE);
@@ -248,7 +248,7 @@ public class VolumeService extends AbstractService {
                 case Constant.GuestStatus.ERROR:
                     break;
                 default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘所在虚拟机正在运行,请关机后重试");
+                    throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
         volume.setStatus(Constant.VolumeStatus.MIGRATE);
@@ -309,10 +309,6 @@ public class VolumeService extends AbstractService {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {
             return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
-        }
-        GuestEntity guest = this.getVolumeGuest(volumeId);
-        if (guest != null) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "当前磁盘正在被虚拟机挂载，请卸载后重试");
         }
         switch (volume.getStatus()) {
             case Constant.VolumeStatus.ERROR:

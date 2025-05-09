@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.mapper.UserInfoMapper;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -121,6 +122,7 @@ public class UserService extends AbstractService {
         }
         loginInfoEntity.setLoginPassword(newPassword);
         loginInfoMapper.updateById(loginInfoEntity);
+        this.notifyService.publish(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
         return ResultUtil.success();
 
     }
@@ -129,7 +131,7 @@ public class UserService extends AbstractService {
     public ResultUtil<RefreshTokenModel> refreshToken(int userId) {
         RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
         userToken.expire(1, TimeUnit.HOURS);
-        return ResultUtil.success(RefreshTokenModel.builder().self(getSelfInfo(userId).getData()).expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))).build());
+        return ResultUtil.success(RefreshTokenModel.builder().self(getUserInfo(userId).getData()).expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))).build());
     }
 
 
@@ -142,6 +144,7 @@ public class UserService extends AbstractService {
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
         entity = UserInfoEntity.builder().userStatus(userStatus).userName(userName).loginType(Constant.LoginType.LOCAL).userType(userType).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
         loginInfoMapper.insert(entity);
+        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getUserId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
         return ResultUtil.success(this.initUserModel(entity));
     }
 
@@ -160,6 +163,8 @@ public class UserService extends AbstractService {
         }
         RBucket<UserInfoModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
         rUserInfo.delete();
+
+        this.notifyService.publish(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
         return ResultUtil.success(this.initUserModel(loginInfoEntity));
     }
 
@@ -234,7 +239,7 @@ public class UserService extends AbstractService {
                 .token(token).self(self).build();
     }
 
-    public ResultUtil<UserInfoModel> getSelfInfo(int userId) {
+    public ResultUtil<UserInfoModel> getUserInfo(int userId) {
         RBucket<UserInfoModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
         if (rUserInfo.isExists()) {
             return ResultUtil.success(rUserInfo.get());
@@ -268,7 +273,7 @@ public class UserService extends AbstractService {
 
 
     public boolean verifyPermission(int userId, int role) {
-        ResultUtil<UserInfoModel> selfInfo = this.getSelfInfo(userId);
+        ResultUtil<UserInfoModel> selfInfo = this.getUserInfo(userId);
         if (selfInfo.getCode() != ErrorCode.SUCCESS) {
             return false;
         }
