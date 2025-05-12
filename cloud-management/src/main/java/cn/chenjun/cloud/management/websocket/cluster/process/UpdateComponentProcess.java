@@ -19,14 +19,14 @@ import java.util.List;
  * @author chenjun
  */
 @Component
-public class UpdateComponentProcess extends AbstractClusterMessageProcess {
+public class UpdateComponentProcess extends AbstractClusterMessageProcess<Void> {
     @Autowired
     private WsSessionManager wsSessionManager;
     @Autowired
     private ComponentMapper mapper;
 
     @Override
-    public void process(NotifyData<?> msg) {
+    protected void doProcess(NotifyData<Void> msg) {
         ComponentEntity entity = this.mapper.selectById(msg.getId());
         ResultUtil<ComponentDetailModel> resultUtil;
         if (entity != null) {

@@ -34,10 +34,10 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                 if (templateVolume != null) {
                     storage = this.storageMapper.selectById(templateVolume.getStorageId());
                     if (storage == null) {
-                        throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "虚拟机[" + guest.getStatus() + "]光盘[" + templateVolume.getName() + "]所属存储池不存在");
+                        throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "虚拟机[" + guest.getDescription() + "]光盘[" + templateVolume.getName() + "]所属存储池不存在");
                     }
                     if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
-                        throw new CodeException(ErrorCode.STORAGE_NOT_READY, "虚拟机[" + guest.getStatus() + "]光盘[" + templateVolume.getName() + "]所属存储池未就绪:" + storage.getStatus());
+                        throw new CodeException(ErrorCode.STORAGE_NOT_READY, "虚拟机[" + guest.getDescription() + "]光盘[" + templateVolume.getName() + "]所属存储池未就绪:" + storage.getName());
                     }
                 } else {
                     throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "光盘镜像未就绪");
@@ -62,7 +62,7 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                     configKey = ConfigKey.VM_CD_LOCAL_TPL;
                     break;
                 default:
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的存储池类型[" + storage.getType() + "]");
+                    throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "不支持的存储池类型[" + storage.getType() + "]");
             }
         }
         String tpl = (String) configParam.get(configKey);

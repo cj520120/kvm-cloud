@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
  * @author chenjun
  */
 @Component
-public class UpdateStorageProcess extends AbstractClusterMessageProcess {
+public class UpdateStorageProcess extends AbstractClusterMessageProcess<Void> {
     @Autowired
     private WsSessionManager wsSessionManager;
     @Autowired
     private StorageService storageService;
 
     @Override
-    public void process(NotifyData<?> msg) {
+    protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<StorageModel> resultUtil = this.storageService.getStorageInfo(msg.getId());
         NotifyData<ResultUtil<StorageModel>> sendMsg = NotifyData.<ResultUtil<StorageModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_STORAGE).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);

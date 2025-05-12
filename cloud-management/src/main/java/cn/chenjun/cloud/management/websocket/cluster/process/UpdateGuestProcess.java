@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
  * @author chenjun
  */
 @Component
-public class UpdateGuestProcess extends AbstractClusterMessageProcess {
+public class UpdateGuestProcess extends AbstractClusterMessageProcess<Void> {
     @Autowired
     private WsSessionManager wsSessionManager;
     @Autowired
     private GuestService guestService;
 
     @Override
-    public void process(NotifyData<?> msg) {
+    protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<GuestModel> resultUtil = this.guestService.getGuestInfo(msg.getId());
         NotifyData<ResultUtil<GuestModel>> sendMsg = NotifyData.<ResultUtil<GuestModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_GUEST).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);

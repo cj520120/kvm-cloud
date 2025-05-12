@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
  * @author chenjun
  */
 @Component
-public class UpdateDnsProcess extends AbstractClusterMessageProcess {
+public class UpdateDnsProcess extends AbstractClusterMessageProcess<Void> {
     @Autowired
     private WsSessionManager wsSessionManager;
     @Autowired
     private DnsService dnsService;
 
     @Override
-    public void process(NotifyData<?> msg) {
+    protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<DnsModel> resultUtil = this.dnsService.getDnsInfo(msg.getId());
         NotifyData<ResultUtil<DnsModel>> sendMsg = NotifyData.<ResultUtil<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_DNS).data(resultUtil).version(System.currentTimeMillis()).build();
         wsSessionManager.sendWebNotify(sendMsg);

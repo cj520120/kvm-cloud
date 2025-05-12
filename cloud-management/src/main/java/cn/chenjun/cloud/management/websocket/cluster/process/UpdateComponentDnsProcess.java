@@ -17,7 +17,7 @@ import java.util.List;
  * @author chenjun
  */
 @Component
-public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess {
+public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess<List<DnsModel>> {
     @Autowired
     private WsSessionManager wsSessionManager;
     @Autowired
@@ -27,8 +27,8 @@ public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void process(NotifyData<?> msg) {
-        List<DnsModel> dnsModelList = (List<DnsModel>) msg.getData();
+    protected void doProcess(NotifyData<List<DnsModel>> msg) {
+        List<DnsModel> dnsModelList = msg.getData();
         if (dnsModelList == null) {
             dnsModelList = this.dnsService.listLocalNetworkDns(msg.getId());
         }
