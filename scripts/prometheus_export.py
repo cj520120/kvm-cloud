@@ -15,8 +15,8 @@ memory_usage_gauge = Gauge('kvm_vm_memory_usage_percent', 'Memory usage percenta
 cpu_usage_gauge = Gauge('kvm_vm_cpu_usage_percent', 'CPU usage percentage of the VM', ['vm_name'])
 disk_read_rate_gauge = Gauge('kvm_vm_disk_read_rate_bytes', 'Disk read rate in bytes/s', ['vm_name', 'disk_device'])
 disk_write_rate_gauge = Gauge('kvm_vm_disk_write_rate_bytes', 'Disk write rate in bytes/s', ['vm_name', 'disk_device'])
-network_rx_rate_gauge = Gauge('kvm_vm_network_rx_rate_bytes', 'Network receive rate in bytes/s', ['vm_name', 'iface_name'])
-network_tx_rate_gauge = Gauge('kvm_vm_network_tx_rate_bytes', 'Network transmit rate in bytes/s', ['vm_name', 'iface_name'])
+network_rx_rate_gauge = Gauge('kvm_vm_network_rx_rate_bytes', 'Network receive rate in bytes/s', ['vm_name', 'iface_mac'])
+network_tx_rate_gauge = Gauge('kvm_vm_network_tx_rate_bytes', 'Network transmit rate in bytes/s', ['vm_name', 'iface_mac'])
 
 # 获取虚拟机的内存使用率
 def get_memory_usage(domain):
@@ -45,10 +45,10 @@ def get_cpu_usage(domain):
 def get_disk_io_rate(domain, disk_device):
     disk_stats = domain.blockStats(disk_device)
     if disk_stats:
-        read_bytes_prev, write_bytes_prev = disk_stats[0], disk_stats[1]
+        read_bytes_prev, write_bytes_prev = disk_stats[1], disk_stats[3]
         time.sleep(1)  # 等待 1 秒
         disk_stats_new = domain.blockStats(disk_device)
-        read_bytes_new, write_bytes_new = disk_stats_new[0], disk_stats_new[1]
+        read_bytes_new, write_bytes_new = disk_stats_new[1], disk_stats_new[3]
         read_rate = read_bytes_new - read_bytes_prev  # 字节/s
         write_rate = write_bytes_new - write_bytes_prev  # 字节/s
         return {"read_rate": read_rate, "write_rate": write_rate}
@@ -84,16 +84,22 @@ def get_disk_devices(domain):
 # 获取虚拟机的网络接口名称
 def get_network_interfaces(domain):
     iface_names = []
+    iface_macs = []
+    iface_list= []
     try:
         xml_desc = domain.XMLDesc(0)
         # 解析 XML 获取网络接口名称
         import xml.etree.ElementTree as ET
         root = ET.fromstring(xml_desc)
+        for ifaceMac in root.findall(".//devices/interface/mac[@address]"):
+            iface_macs.append(ifaceMac.attrib["address"])
         for iface in root.findall(".//devices/interface/target[@dev]"):
             iface_names.append(iface.attrib["dev"])
+        for i in range(len(iface_names)):
+            iface_list.append({'name': iface_names[i], 'mac': iface_macs[i]})
     except Exception as e:
         print(f"Failed to get network interfaces for VM {domain.name()}: {e}")
-    return iface_names
+    return iface_list
 
 # 更新 Prometheus 指标
 def update_metrics(domain, vm_name):
@@ -115,18 +121,20 @@ def update_metrics(domain, vm_name):
 
     # 获取网络实时速率
     iface_names = get_network_interfaces(domain)
-    for iface_name in iface_names:
-        network_rate = get_network_rate(domain, iface_name)
+    for iface in iface_names:
+        network_rate = get_network_rate(domain, iface["name"])
+        print(iface)
         if network_rate is not None:
-            network_rx_rate_gauge.labels(vm_name=vm_name, iface_name=iface_name).set(network_rate["rx_rate"])
-            network_tx_rate_gauge.labels(vm_name=vm_name, iface_name=iface_name).set(network_rate["tx_rate"])
+            mac = iface["mac"]
+            network_rx_rate_gauge.labels(vm_name=vm_name, iface_mac=mac).set(network_rate["rx_rate"])
+            network_tx_rate_gauge.labels(vm_name=vm_name, iface_mac=mac).set(network_rate["tx_rate"])
 
 # 主函数
 def main():
     conn = connect_to_kvm()
 
     # 启动 Prometheus HTTP 服务器
-    start_http_server(8000)  # 暴露指标在 8000 端口
+    start_http_server(9001)  # 暴露指标在 9001 端口
 
     while True:
         # 获取所有虚拟机
