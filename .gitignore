@@ -9,3 +9,4 @@ target
 /web/yarn-error.log
 /web/node_modules/
 /web/dist/
+/build/

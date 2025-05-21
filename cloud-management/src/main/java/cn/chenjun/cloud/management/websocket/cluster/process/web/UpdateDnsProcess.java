@@ -1,11 +1,12 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.web;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.servcie.DnsService;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UpdateDnsProcess extends AbstractClusterMessageProcess<Void> {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
     @Autowired
     private DnsService dnsService;
 
@@ -23,7 +23,7 @@ public class UpdateDnsProcess extends AbstractClusterMessageProcess<Void> {
     protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<DnsModel> resultUtil = this.dnsService.getDnsInfo(msg.getId());
         NotifyData<ResultUtil<DnsModel>> sendMsg = NotifyData.<ResultUtil<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_DNS).data(resultUtil).version(System.currentTimeMillis()).build();
-        wsSessionManager.sendWebNotify(sendMsg);
+        WsSessionManager.sendWebNotify(sendMsg);
     }
 
     @Override

@@ -175,7 +175,8 @@ public class Constant {
     public static class WsClientType {
         public static final short WEB = 0;
         public static final short COMPONENT = 1;
-
+        public static final short AGENT = 2;
+        public static final short VNC = 3;
     }
 
     public static class ConfigValueType {

@@ -5,10 +5,9 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
 import cn.chenjun.cloud.management.websocket.action.WsAction;
-import cn.chenjun.cloud.management.websocket.client.WsClient;
 import cn.chenjun.cloud.management.websocket.message.WsRequest;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +22,7 @@ import java.util.Map;
  */
 @Component
 public class ComponentConnectionAction implements WsAction {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
     @Autowired
     private NetworkMapper networkMapper;
 
@@ -37,9 +35,9 @@ public class ComponentConnectionAction implements WsAction {
         String sign = params.getOrDefault("sign", "").toString();
         NetworkEntity network = this.networkMapper.selectById(networkId);
         if (DigestUtil.md5Hex(network.getSecret() + ":" + networkId + ":" + componentId + ":" + nonce).equals(sign)) {
-            WsClient wsClient = wsSessionManager.registerComponentClient(session, networkId, componentId);
+            WsSessionManager.registerComponentClient(session, networkId, componentId);
             WsMessage<Void> wsMessage = WsMessage.<Void>builder().command(Constant.SocketCommand.COMPONENT_CONNECT_SUCCESS).build();
-            wsClient.send(wsMessage);
+            session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(wsMessage));
         } else {
             WsMessage<Void> wsMessage = WsMessage.<Void>builder().command(Constant.SocketCommand.COMPONENT_CONNECT_FAIL).build();
             session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(wsMessage));

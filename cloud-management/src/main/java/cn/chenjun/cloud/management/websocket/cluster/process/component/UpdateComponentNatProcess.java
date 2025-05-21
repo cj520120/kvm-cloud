@@ -1,12 +1,13 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.component;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.NatModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +18,7 @@ import java.util.List;
  */
 @Component
 public class UpdateComponentNatProcess extends AbstractClusterMessageProcess<Void> {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
     @Autowired
     private NetworkService networkService;
 
@@ -27,7 +27,7 @@ public class UpdateComponentNatProcess extends AbstractClusterMessageProcess<Voi
         ResultUtil<List<NatModel>> resultUtil = this.networkService.listComponentNat(msg.getId());
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_NAT).data(resultUtil.getData()).version(System.currentTimeMillis()).build();
-            wsSessionManager.sendComponentNotify(msg.getId(), sendMsg);
+            WsSessionManager.sendComponentNotify(msg.getId(), sendMsg);
         }
     }
 

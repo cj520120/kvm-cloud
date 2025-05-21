@@ -1,6 +1,8 @@
-package cn.chenjun.cloud.management.websocket;
+package cn.chenjun.cloud.management.websocket.listen;
 
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.event.EventHandler;
+import cn.chenjun.cloud.common.event.EventObject;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -9,20 +11,20 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.GuestExternNames;
-import cn.chenjun.cloud.management.util.GuestExternUtil;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
-import cn.chenjun.cloud.management.websocket.client.VncClient;
-import com.google.gson.reflect.TypeToken;
+import cn.chenjun.cloud.management.websocket.client.WsClient;
+import cn.chenjun.cloud.management.websocket.client.owner.VncOwner;
 import lombok.SneakyThrows;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.websocket.*;
-import javax.websocket.server.PathParam;
+import javax.websocket.MessageHandler;
+import javax.websocket.OnClose;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -33,14 +35,29 @@ import java.util.Objects;
 @Slf4j
 @ServerEndpoint(value = "/api/vnc/{id}")
 @Component
-public class VncWsService {
+public class VncWsService extends AbstractWsService<ByteBuffer> {
 
-    private VncClient proxy;
-    private Session session;
+
+    @Override
+    protected MessageHandler.Whole<ByteBuffer> createMessageHandler(Session session) {
+        MessageHandler.Whole<ByteBuffer> handler = new MessageHandler.Whole<ByteBuffer>() {
+            @SneakyThrows
+            @Override
+            public void onMessage(ByteBuffer message) {
+                WsClient<VncOwner> client = (WsClient<VncOwner>) session.getUserProperties().get("client");
+                if (Objects.isNull(client)) return;
+                client.getOwner().send(message);
+            }
+        };
+        return handler;
+    }
 
     @SneakyThrows
     @OnOpen
-    public void onVncConnect(Session session, @PathParam(value = "id") int id) {
+    @Override
+    public void onConnect(Session session) {
+        super.onConnect(session);
+        int id = Integer.parseInt(session.getPathParameters().get("id"));
         GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
         GuestEntity guest = guestMapper.selectById(id);
         if (guest == null || guest.getHostId() <= 0) {
@@ -70,47 +87,35 @@ public class VncWsService {
         header.put("x-data", data);
 
         log.info("开始连接虚拟机VNC.id={},vnc={}", id, url.toASCIIString());
-        this.proxy = new VncClient(session, new URI(url.toASCIIString()), header);
-        this.proxy.connect();
-
+        VncOwner owner = new VncOwner(new URI(url.toASCIIString()), header);
+        owner.connect();
+        owner.onClose.addEvent(new EventHandler<Void>() {
+            @SneakyThrows
+            @Override
+            public void fire(Object sender, EventObject<Void> obj) {
+                session.close();
+            }
+        });
+        owner.onMessage.addEvent(new EventHandler<ByteBuffer>() {
+            @SneakyThrows
+            @Override
+            public void fire(Object sender, EventObject<ByteBuffer> obj) {
+                session.getBasicRemote().sendBinary(obj.getEvent());
+            }
+        });
+        WsClient<VncOwner> client = WsClient.<VncOwner>builder().owner(owner).session(session).build();
+        session.getUserProperties().put("client", client);
     }
 
+    @SneakyThrows
     @OnClose
-    public void onVncClose() {
-        this.close();
-    }
-
-    @OnMessage
-    public void onVncMessage(byte[] messages, Session session) {
-        this.proxy.send(messages);
-    }
-
-    @OnError
-    public void onVncError(Session session, Throwable error) {
-        this.close();
-    }
-
-    @Synchronized
-    private void close() {
-        if (this.session != null) {
-            try {
-                this.session.close();
-            } catch (Exception ignored) {
-
-            } finally {
-                this.session = null;
-            }
+    @Override
+    public void onClose(Session session) {
+        WsClient<VncOwner> client = (WsClient<VncOwner>) session.getUserProperties().get("client");
+        if (client != null) {
+            client.getOwner().close();
         }
-        if (this.proxy != null) {
-            try {
-                this.proxy.close();
-            } catch (Exception ignored) {
-
-            } finally {
-                this.proxy = null;
-            }
-        }
+        super.onClose(session);
     }
-
 
 }

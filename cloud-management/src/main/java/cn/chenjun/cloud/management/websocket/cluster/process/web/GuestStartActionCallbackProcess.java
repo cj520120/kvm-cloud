@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.web;
 
 import cn.chenjun.cloud.common.util.Constant;
 import org.springframework.stereotype.Component;

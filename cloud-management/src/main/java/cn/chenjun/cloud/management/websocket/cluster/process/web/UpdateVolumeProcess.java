@@ -1,12 +1,13 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.web;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.servcie.VolumeService;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UpdateVolumeProcess extends AbstractClusterMessageProcess<ResultUtil<GuestEntity>> {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
     @Autowired
     private VolumeService volumeService;
 
@@ -24,7 +24,7 @@ public class UpdateVolumeProcess extends AbstractClusterMessageProcess<ResultUti
     protected void doProcess(NotifyData<ResultUtil<GuestEntity>> msg) {
         ResultUtil<VolumeModel> resultUtil = this.volumeService.getVolumeInfo(msg.getId());
         NotifyData<ResultUtil<VolumeModel>> sendMsg = NotifyData.<ResultUtil<VolumeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_VOLUME).data(resultUtil).version(System.currentTimeMillis()).build();
-        wsSessionManager.sendWebNotify(sendMsg);
+        WsSessionManager.sendWebNotify(sendMsg);
     }
 
     @Override

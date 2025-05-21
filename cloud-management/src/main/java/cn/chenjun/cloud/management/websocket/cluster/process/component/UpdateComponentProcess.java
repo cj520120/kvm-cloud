@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.component;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -7,8 +7,9 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.model.ComponentDetailModel;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import com.google.common.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,8 +21,7 @@ import java.util.List;
  */
 @Component
 public class UpdateComponentProcess extends AbstractClusterMessageProcess<Void> {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
     @Autowired
     private ComponentMapper mapper;
 
@@ -46,7 +46,7 @@ public class UpdateComponentProcess extends AbstractClusterMessageProcess<Void> 
         }
 
         NotifyData<ResultUtil<ComponentDetailModel>> sendMsg = NotifyData.<ResultUtil<ComponentDetailModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_COMPONENT).data(resultUtil).version(System.currentTimeMillis()).build();
-        wsSessionManager.sendWebNotify(sendMsg);
+        WsSessionManager.sendWebNotify(sendMsg);
     }
 
     @Override

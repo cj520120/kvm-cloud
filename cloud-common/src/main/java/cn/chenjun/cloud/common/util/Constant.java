@@ -119,6 +119,7 @@ public class Constant {
 
     public static class SocketCommand {
 
+
         public static final int WEB_LOGIN = 100;
         public static final int WEB_LOGIN_SUCCESS = 101;
         public static final int WEB_LOGIN_TOKEN_ERROR = 102;
@@ -131,6 +132,8 @@ public class Constant {
         public static final int COMPONENT_NOTIFY = 203;
         public static final int COMPONENT_DNS_REQUEST = 206;
         public static final int COMPONENT_NAT_REQUEST = 207;
+
+
     }
 
     public static class NotifyType {

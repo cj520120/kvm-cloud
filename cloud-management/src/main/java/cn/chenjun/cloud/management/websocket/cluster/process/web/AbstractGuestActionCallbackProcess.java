@@ -1,18 +1,17 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.web;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public abstract class AbstractGuestActionCallbackProcess extends AbstractClusterMessageProcess<ResultUtil<GuestEntity>> {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
 
 
     @Override
@@ -22,7 +21,7 @@ public abstract class AbstractGuestActionCallbackProcess extends AbstractCluster
         GuestDetail guestDetail = GuestDetail.builder().id(guest.getGuestId()).name(guest.getName()).ip(guest.getGuestIp()).description(guest.getDescription()).build();
         ResultUtil<GuestDetail> result = ResultUtil.<GuestDetail>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).data(guestDetail).build();
         NotifyData<ResultUtil<GuestDetail>> sendMsg = NotifyData.<ResultUtil<GuestDetail>>builder().id(msg.getId()).type(this.getNotifyType()).data(result).version(System.currentTimeMillis()).build();
-        wsSessionManager.sendWebNotify(sendMsg);
+        WsSessionManager.sendWebNotify(sendMsg);
     }
 
 

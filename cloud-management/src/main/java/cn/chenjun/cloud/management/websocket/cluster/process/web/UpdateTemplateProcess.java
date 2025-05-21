@@ -1,11 +1,12 @@
-package cn.chenjun.cloud.management.websocket.cluster.process;
+package cn.chenjun.cloud.management.websocket.cluster.process.web;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.servcie.TemplateService;
-import cn.chenjun.cloud.management.websocket.WsSessionManager;
+import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UpdateTemplateProcess extends AbstractClusterMessageProcess<Void> {
-    @Autowired
-    private WsSessionManager wsSessionManager;
+
     @Autowired
     private TemplateService templateService;
 
@@ -23,7 +23,7 @@ public class UpdateTemplateProcess extends AbstractClusterMessageProcess<Void> {
     protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<TemplateModel> resultUtil = this.templateService.getTemplateInfo(msg.getId());
         NotifyData<ResultUtil<TemplateModel>> sendMsg = NotifyData.<ResultUtil<TemplateModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_TEMPLATE).data(resultUtil).version(System.currentTimeMillis()).build();
-        wsSessionManager.sendWebNotify(sendMsg);
+        WsSessionManager.sendWebNotify(sendMsg);
     }
 
     @Override
