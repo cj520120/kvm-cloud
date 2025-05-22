@@ -1,20 +1,17 @@
 package cn.chenjun.cloud.management.websocket.action.impl;
 
 import cn.chenjun.cloud.common.bean.WsMessage;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.servcie.DnsService;
 import cn.chenjun.cloud.management.websocket.action.WsAction;
-import cn.chenjun.cloud.management.websocket.client.WsClient;
-import cn.chenjun.cloud.management.websocket.client.owner.ComponentWsOwner;
+import cn.chenjun.cloud.management.websocket.client.WebSocket;
+import cn.chenjun.cloud.management.websocket.client.context.ComponentContext;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.chenjun.cloud.management.websocket.message.WsRequest;
-import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.websocket.Session;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,14 +24,14 @@ public class DnsRequestAction implements WsAction {
     private DnsService dnsService;
 
     @Override
-    public void doAction(Session session, WsRequest msg) throws IOException {
-        WsClient<ComponentWsOwner> client = WsSessionManager.getClient(session);
-        if (client == null) {
+    public void doAction(WebSocket webSocket, WsRequest msg) throws IOException {
+        ComponentContext context = (ComponentContext) webSocket.getContext();
+        if (context == null) {
             return;
         }
-        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.dnsService.listLocalNetworkDns(client.getOwner().getNetworkId())).build();
+        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(this.dnsService.listLocalNetworkDns(context.getNetworkId())).build();
         WsMessage<NotifyData<List<DnsModel>>> wsMessage = WsMessage.<NotifyData<List<DnsModel>>>builder().command(Constant.SocketCommand.COMPONENT_NOTIFY).data(sendMsg).build();
-        session.getBasicRemote().sendText(GsonBuilderUtil.create().toJson(wsMessage));
+        webSocket.send(wsMessage);
     }
 
     @Override

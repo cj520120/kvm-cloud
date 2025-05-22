@@ -5,8 +5,8 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.UserInfoModel;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
+import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class UpdateUserProcess extends AbstractClusterMessageProcess<Void> {
     protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<UserInfoModel> resultUtil = this.userService.getUserInfo(msg.getId());
         NotifyData<ResultUtil<UserInfoModel>> sendMsg = NotifyData.<ResultUtil<UserInfoModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_USER).data(resultUtil).version(System.currentTimeMillis()).build();
-        WsSessionManager.sendWebNotify(sendMsg);
+        WebClientManager.sendAll(sendMsg);
     }
 
     @Override

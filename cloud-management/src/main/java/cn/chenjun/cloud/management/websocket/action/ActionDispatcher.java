@@ -1,10 +1,10 @@
 package cn.chenjun.cloud.management.websocket.action;
 
 import cn.chenjun.cloud.management.util.SpringContextUtils;
+import cn.chenjun.cloud.management.websocket.client.WebSocket;
 import cn.chenjun.cloud.management.websocket.message.WsRequest;
+import lombok.SneakyThrows;
 
-import javax.websocket.Session;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -15,11 +15,12 @@ public class ActionDispatcher {
         ACTION_LIST = SpringContextUtils.getBeanCollection(WsAction.class);
     }
 
-    public static void dispatch(Session session, WsRequest msg) throws IOException {
+    @SneakyThrows
+    public static void dispatch(WebSocket webSocket, WsRequest msg) {
 
         for (WsAction action : ACTION_LIST) {
             if (Objects.equals(action.getCommand(), msg.getCommand())) {
-                action.doAction(session, msg);
+                action.doAction(webSocket, msg);
                 return;
             }
         }

@@ -5,8 +5,8 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.SshAuthorizedModel;
 import cn.chenjun.cloud.management.servcie.SshAuthorizedService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
+import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import cn.chenjun.cloud.management.websocket.util.WsSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class UpdateSshKeyProcess extends AbstractClusterMessageProcess<Void> {
     protected void doProcess(NotifyData<Void> msg) {
         ResultUtil<SshAuthorizedModel> resultUtil = this.sshAuthorizedService.getSshKey(msg.getId());
         NotifyData<ResultUtil<SshAuthorizedModel>> sendMsg = NotifyData.<ResultUtil<SshAuthorizedModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SSH).data(resultUtil).version(System.currentTimeMillis()).build();
-        WsSessionManager.sendWebNotify(sendMsg);
+        WebClientManager.sendAll(sendMsg);
     }
 
     @Override

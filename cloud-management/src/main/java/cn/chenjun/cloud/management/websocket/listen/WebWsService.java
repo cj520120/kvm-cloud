@@ -2,13 +2,12 @@ package cn.chenjun.cloud.management.websocket.listen;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.management.websocket.action.ActionDispatcher;
+import cn.chenjun.cloud.management.websocket.client.WebSocket;
 import cn.chenjun.cloud.management.websocket.message.WsRequest;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.MessageHandler;
-import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 /**
@@ -20,15 +19,15 @@ import javax.websocket.server.ServerEndpoint;
 public class WebWsService extends AbstractWsService<String> {
 
     @Override
-    protected MessageHandler.Whole<String> createMessageHandler(Session session) {
-        return new MessageHandler.Whole<String>() {
-
-            @SneakyThrows
+    protected MessageHandler.Whole<String> createMessageHandler(WebSocket webSocket) {
+        MessageHandler.Whole<String> handler = new MessageHandler.Whole<String>() {
             @Override
             public void onMessage(String json) {
                 WsRequest msg = GsonBuilderUtil.create().fromJson(json, WsRequest.class);
-                ActionDispatcher.dispatch(session, msg);
+                ActionDispatcher.dispatch(webSocket, msg);
             }
         };
+        return handler;
     }
+
 }

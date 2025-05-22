@@ -11,7 +11,7 @@ public class EventListener<T> {
     private final List<EventHandler<T>> listener = Collections.synchronizedList(new ArrayList<>());
     private ReadWriteLock lock = new ReentrantReadWriteLock(false);
 
-    public void notify(Object sender, T target) {
+    public void fire(Object sender, T target) {
         try {
             this.lock.readLock().lock();
             Collection<EventHandler<T>> listener = this.listener;
@@ -20,7 +20,7 @@ public class EventListener<T> {
                 Iterator<EventHandler<T>> iterator = listener.iterator();
                 while (iterator.hasNext()) {
                     EventHandler<T> ev = iterator.next();
-                    this.notify(ev, sender, model);
+                    this.fire(ev, sender, model);
                 }
 
             }
@@ -29,7 +29,7 @@ public class EventListener<T> {
         }
     }
 
-    protected void notify(EventHandler<T> ev, Object sender, EventObject<T> target) {
+    protected void fire(EventHandler<T> ev, Object sender, EventObject<T> target) {
         try {
             ev.fire(sender, target);
         } catch (Exception err) {
