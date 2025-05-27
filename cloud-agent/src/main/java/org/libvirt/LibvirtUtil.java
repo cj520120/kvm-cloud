@@ -41,7 +41,7 @@ public class LibvirtUtil extends ErrorHandler {
         /**
          * Current allocation bytes
          */
-        public long allocation;;
+        public long allocation;
 
         /**
          * This is meant to be called from the JNI side, as a convenience

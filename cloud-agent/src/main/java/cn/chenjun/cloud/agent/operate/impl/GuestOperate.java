@@ -1,9 +1,9 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
-import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.VncUtil;
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
@@ -15,8 +15,8 @@ import com.google.gson.reflect.TypeToken;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.DocumentException;
-import org.libvirt.Error;
 import org.libvirt.*;
+import org.libvirt.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -91,8 +91,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_INFO)
-
     public GuestInfo getGustInfo(Connect connect, GuestInfoRequest request) throws Exception {
+
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             return this.initVmResponse(domain);
@@ -102,16 +102,17 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.ALL_GUEST_INFO)
-
     public List<GuestInfo> listAllGuestInfo(Connect connect, NoneRequest request) throws Exception {
         List<GuestInfo> list = new ArrayList<>();
         int[] ids = connect.listDomains();
         for (int id : ids) {
+
             Domain domain = connect.domainLookupByID(id);
             list.add(initVmResponse(domain));
         }
         String[] namesOfDefinedDomain = connect.listDefinedDomains();
         for (String stopDomain : namesOfDefinedDomain) {
+
             Domain domain = connect.domainLookupByName(stopDomain);
             list.add(initVmResponse(domain));
         }
@@ -126,6 +127,7 @@ public class GuestOperate {
         List<GuestInfo> list = new ArrayList<>();
         int[] ids = connect.listDomains();
         for (int id : ids) {
+
             Domain domain = connect.domainLookupByID(id);
             if (names.contains(domain.getName())) {
                 map.put(domain.getName(), initVmResponse(domain));
@@ -133,6 +135,7 @@ public class GuestOperate {
         }
         String[] namesOfDefinedDomain = connect.listDefinedDomains();
         for (String stopDomain : namesOfDefinedDomain) {
+
             Domain domain = connect.domainLookupByName(stopDomain);
             if (names.contains(domain.getName())) {
                 map.put(domain.getName(), initVmResponse(domain));
@@ -145,7 +148,6 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_SHUTDOWN)
-
     public Void shutdown(Connect connect, GuestShutdownRequest request) throws Exception {
         this.stopDomain(connect, request.getName(), request.getExpire());
         return null;
@@ -153,8 +155,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_REBOOT)
-
     public Void reboot(Connect connect, GuestRebootRequest request) throws Exception {
+
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -172,8 +174,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_CD_ROOM)
-
     public Void detachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -185,8 +187,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_CD_ROOM)
-
     public Void attachCdRoom(Connect connect, ChangeGuestCdRoomRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -197,8 +199,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_DISK)
-
     public Void attachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -209,8 +211,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_DISK)
-
     public Void detachDisk(Connect connect, ChangeGuestDiskRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -221,8 +223,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_NIC)
-
     public Void attachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -233,8 +235,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DETACH_NIC)
-
     public Void detachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -245,8 +247,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_START)
-
     public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
+
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             if (domain.getInfo().state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
@@ -255,7 +257,7 @@ public class GuestOperate {
             domain.destroy();
             try{
                 domain.undefine();
-            }catch (Exception err){
+            } catch (Exception ignored) {
 
             }
         }
@@ -309,6 +311,7 @@ public class GuestOperate {
         long stopTime = System.currentTimeMillis();
         while (true) {
             try {
+
                 Domain domain = this.findDomainByName(connect, name);
                 if (domain == null) {
                     break;
@@ -317,7 +320,7 @@ public class GuestOperate {
                     domain.destroy();
                     try {
                         domain.undefine();
-                    }catch (Exception err){
+                    } catch (Exception ignored) {
 
                     }
                 } else {
@@ -327,12 +330,12 @@ public class GuestOperate {
                     } else {
                         try {
                             domain.destroy();
-                        } catch (Exception err) {
+                        } catch (Exception ignored) {
 
                         }
                         try {
                             domain.undefine();
-                        }catch (Exception err){
+                        } catch (Exception ignored) {
 
                         }
                     }
@@ -347,8 +350,8 @@ public class GuestOperate {
     }
 
     @DispatchBind(command = Constant.Command.GUEST_QMA)
-
     public Void qma(Connect connect, GuestQmaRequest request) throws Exception {
+
         Domain domain = connect.domainLookupByName(request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -360,16 +363,17 @@ public class GuestOperate {
     @DispatchBind(command = Constant.Command.GUEST_DESTROY)
 
     public Void destroy(Connect connect, GuestDestroyRequest request) throws Exception {
+
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain != null) {
             try {
                 domain.destroy();
-            } catch (Exception er) {
+            } catch (Exception ignored) {
 
             }
             try {
                 domain.undefine(Domain.UndefineFlags.MANAGED_SAVE | Domain.UndefineFlags.SNAPSHOTS_METADATA);
-            } catch (Exception err) {
+            } catch (Exception ignored) {
             }
         }
         return null;
@@ -378,6 +382,7 @@ public class GuestOperate {
     @DispatchBind(command = Constant.Command.GUEST_MIGRATE)
 
     public Void migrate(Connect connect, GuestMigrateRequest request) throws Exception {
+
         Domain domain = this.findDomainByName(connect, request.getName());
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
@@ -392,11 +397,12 @@ public class GuestOperate {
 
     private Domain findDomainByName(Connect connect, String name) throws Exception {
         int[] ids = connect.listDomains();
-
         for (int id : ids) {
             Domain domain = connect.domainLookupByID(id);
             if (Objects.equals(domain.getName(), name)) {
                 return domain;
+            } else {
+                domain.free();
             }
         }
         String[] namesOfDefinedDomain = connect.listDefinedDomains();
@@ -404,6 +410,8 @@ public class GuestOperate {
             Domain domain = connect.domainLookupByName(stopDomain);
             if (Objects.equals(domain.getName(), name)) {
                 return domain;
+            } else {
+                domain.free();
             }
         }
         return null;

@@ -60,23 +60,20 @@ public class OperateEngine {
     }
 
     @EventListener
-    public void onOperateFinish(OperateFinishBean operateFinishBean) {
-        this.executor.submit(() -> {
-
-            lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> {
+    public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
+        this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> {
+            try {
+                Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
+                BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);
                 try {
-                    Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
-                    BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);
-                    try {
-                        this.onFinish(operateParam, operateFinishBean.getResult());
-                        this.taskService.deleteTask(operateFinishBean.getTaskId());
-                    } catch (Exception err) {
-                        log.error("任务回调失败.param={} result={}", operateParam, operateFinishBean.getResult(), err);
-                    }
+                    this.onFinish(operateParam, operateFinishBean.getResult());
+                    this.taskService.deleteTask(operateFinishBean.getTaskId());
                 } catch (Exception err) {
-                    log.error("解析任务参数出错:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
+                    log.error("任务回调失败.param={} result={}", operateParam, operateFinishBean.getResult(), err);
                 }
-            });
-        });
+            } catch (Exception err) {
+                log.error("解析任务参数出错:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
+            }
+        }));
     }
 }

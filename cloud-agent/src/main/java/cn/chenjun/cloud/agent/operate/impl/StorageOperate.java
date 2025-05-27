@@ -1,11 +1,11 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.StorageUtil;
 import cn.chenjun.cloud.common.bean.StorageCreateRequest;
 import cn.chenjun.cloud.common.bean.StorageDestroyRequest;
 import cn.chenjun.cloud.common.bean.StorageInfo;
 import cn.chenjun.cloud.common.bean.StorageInfoRequest;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -122,7 +122,7 @@ public class StorageOperate {
             if (Objects.equals(request.getType(), Constant.StorageType.CEPH_RBD)) {
                 try {
                     connect.secretLookupByUUIDString(request.getName()).undefine();
-                } catch (Exception err) {
+                } catch (Exception ignored) {
 
                 }
             }

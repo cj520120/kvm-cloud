@@ -30,7 +30,7 @@ public class Constant {
     }
 
     public static class StorageSupportCategory {
-        public static final int TEMPLATE = 1 << 0;
+        public static final int TEMPLATE = 1;
         public static final int VOLUME = 1 << 1;
     }
 
@@ -202,7 +202,7 @@ public class Constant {
         public static final String NO = "no";
     }
 
-    public class UserState {
+    public static class UserState {
         /**
          * 启用
          */

@@ -44,18 +44,18 @@ public class Page<T> implements Serializable {
      */
     private int length;
 
-    public static <T extends Object> Page<T> create(int total, int index, int length) {
-        int nPageCount = 0;
+    public static <T> Page<T> create(int total, int index, int length) {
+        int nPageCount;
         if (total % length == 0) {
             nPageCount = total / length;
         } else {
             nPageCount = total / length + 1;
         }
-        int page = (index / length) + 1 < 0 ? 0 : (index / length) + 1;
+        int page = Math.max((index / length) + 1, 0);
         return Page.<T>builder().page(page).index(index).length(length).pageCount(nPageCount).pageSize(length).total(total).build();
     }
 
-    public static <T extends Object> Page<T> create(Page<?> page) {
+    public static <T> Page<T> create(Page<?> page) {
         Page<T> paginationClass = new Page<T>();
         paginationClass.page = page.page;
         paginationClass.index = page.index;

@@ -15,5 +15,5 @@ public interface Consumer<T, V> {
      * @return
      * @throws Exception
      */
-    V dispatch(Connect connect, T param) throws Exception;
+    T dispatch(Connect connect, V param) throws Exception;
 }

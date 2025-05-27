@@ -67,7 +67,7 @@ public class MetaController {
     private String buildMetaResponse(List<MetaData> partList) {
         partList = partList.stream().filter(Objects::nonNull).collect(Collectors.toList());
         StringBuilder sb = new StringBuilder();
-        if (partList != null && !partList.isEmpty()) {
+        if (!partList.isEmpty()) {
             if (partList.size() == 1) {
                 MetaData metaData = partList.get(0);
                 sb.append(metaData.getType().getFirstLine());

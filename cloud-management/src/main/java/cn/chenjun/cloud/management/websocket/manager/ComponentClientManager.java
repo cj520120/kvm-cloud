@@ -35,9 +35,9 @@ public class ComponentClientManager {
 
     public static synchronized <T> void send(int componentId, NotifyData<T> message) {
         WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.WEB_NOTIFY).data(message).build();
-        List<WebSocket> wsList = new ArrayList<>();
+        List<WebSocket> wsList;
         synchronized (COMPONENT_CLIENT_MAP) {
-            wsList.addAll(COMPONENT_CLIENT_MAP.getOrDefault(componentId, new ArrayList<>()));
+            wsList = new ArrayList<>(COMPONENT_CLIENT_MAP.getOrDefault(componentId, new ArrayList<>()));
         }
         wsList.forEach((webSocket) -> {
             try {

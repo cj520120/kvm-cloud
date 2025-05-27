@@ -64,7 +64,7 @@ public class VolumeService extends AbstractService {
                 return 1;
             }
             return Integer.compare(o1.getStatus(), o2.getStatus());
-        }).sorted(Comparator.comparingInt(o -> o.getDeviceId())).collect(Collectors.toList());
+        }).sorted(Comparator.comparingInt(SimpleVolumeModel::getDeviceId)).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
 

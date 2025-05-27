@@ -1,9 +1,9 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.agent.util.CommandExecutor;
 import cn.chenjun.cloud.agent.util.StorageUtil;
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -14,6 +14,7 @@ import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.libvirt.*;
 import org.springframework.stereotype.Component;
@@ -64,7 +65,6 @@ public class VolumeOperate {
         if (findVol == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在:" + request.getSourceName());
         }
-
         LibvirtUtil.StorageVolInfo storageVolInfo = LibvirtUtil.getVolInfo(findVol);
         VolumeInfo volume = VolumeInfo.builder().storage(request.getSourceStorage())
                 .name(request.getSourceName())
@@ -79,6 +79,7 @@ public class VolumeOperate {
 
     @DispatchBind(command = Constant.Command.LIST_STORAGE_VOLUME)
     public List<String> listStorageVolume(Connect connect, ListStorageVolumeRequest request) throws Exception {
+
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getName(), false);
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "当前存储池未就绪:[" + request.getName() + "]");
@@ -181,11 +182,17 @@ public class VolumeOperate {
         CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
         if (commandResult.getExitCode() == 0) {
             VolumeInfoRequest volumeInfoRequest = VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage().getName()).sourceName(request.getVolume().getName()).build();
-            return this.getInfo(connect, volumeInfoRequest);
+
+            VolumeInfo volumeInfo = this.getInfo(connect, volumeInfoRequest);
+            if (!ObjectUtils.isEmpty(request.getVm())) {
+                refreshDomainVolSize(connect, request.getVm(), volumeInfo.getName(), volumeInfo.getCapacity());
+            }
+            return volumeInfo;
         } else {
             throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
         }
     }
+
 
     @DispatchBind(command = Constant.Command.VOLUME_DOWNLOAD)
 
@@ -303,4 +310,42 @@ public class VolumeOperate {
         }
 
     }
+
+    private void refreshDomainVolSize(Connect connect, String vm, String volName, long capacity) {
+        try {
+
+            Domain domain = connect.domainLookupByName(vm);
+            if (domain != null) {
+                String xml = domain.getXMLDesc(0);
+                String dev = "";
+                try (StringReader sr = new StringReader(xml)) {
+                    SAXReader reader = new SAXReader();
+                    reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                    Document doc = reader.read(sr);
+                    List<Node> diskList = doc.selectNodes("/domain/devices/disk[@device='disk']");
+
+                    for (Node node : diskList) {
+                        Element element = (Element) node;
+                        Element sourceElement = (Element) element.selectSingleNode("source");
+                        String diskPath = sourceElement.attributeValue("file", "");
+                        String namePath = sourceElement.attributeValue("name", "");
+                        if (diskPath.endsWith("/" + volName) || namePath.endsWith(volName)) {
+                            Element targetElement = (Element) element.selectSingleNode("target");
+                            dev = targetElement.attributeValue("dev");
+                            break;
+                        }
+                    }
+
+                }
+                if (!ObjectUtils.isEmpty(dev)) {
+                    log.info("虚拟机磁盘刷新:{} dev:{} capacity:{}", vm, dev, capacity);
+                    domain.blockResize(dev, capacity, Domain.BlockResizeFlags.BYTES);
+                }
+            }
+        } catch (Exception ignored) {
+
+        }
+    }
+
+
 }

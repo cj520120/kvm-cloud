@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class DnsmasqInitialize implements RouteComponentQmaInitialize {
-    private final int MIN_DHCP_SIZE = 2;
+    private final static int MIN_DHCP_SIZE = 2;
     @Autowired
     protected GuestNetworkMapper guestNetworkMapper;
     @Autowired

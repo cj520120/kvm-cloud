@@ -23,6 +23,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -33,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class OperateDispatch implements CommandLineRunner {
+public class OperateDispatch implements CommandLineRunner, Closeable {
     @Autowired
     private DispatchFactory dispatchFactory;
 
@@ -46,9 +48,9 @@ public class OperateDispatch implements CommandLineRunner {
     private ApplicationConfig applicationConfig;
 
 
-    public ResultUtil<Object> dispatch(String data) {
+    public <T, V> ResultUtil<T> dispatch(String data) {
         TaskRequest task = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
-        Dispatch<?, ?> dispatch = this.dispatchFactory.getDispatch(task.getCommand());
+        Dispatch<T, V> dispatch = this.dispatchFactory.getDispatch(task.getCommand());
         if (dispatch == null) {
             return ResultUtil.error(ErrorCode.SERVER_ERROR, "不支持的操作:" + task.getCommand());
         }
@@ -57,24 +59,24 @@ public class OperateDispatch implements CommandLineRunner {
             DispatchProcess dispatchProcess = DispatchProcess.builder().dispatch(dispatch).task(task).build();
             TaskPoolUtil.push(dispatchProcess);
             log.info("提交异步任务:{}[{}]", task.getCommand(), task.getTaskId());
-            return ResultUtil.builder().code(ErrorCode.AGENT_TASK_ASYNC_WAIT).build();
+            return ResultUtil.<T>builder().code(ErrorCode.AGENT_TASK_ASYNC_WAIT).build();
         } else {
             log.info("同步执行任务{}[{}]", task.getCommand(), task.getTaskId());
             return dispatchTaskConsumer(task, dispatch);
         }
     }
 
-    private ResultUtil<Object> dispatchTaskConsumer(TaskRequest task, Dispatch dispatch) {
-        ResultUtil<Object> executeResult = null;
+    private <T, V> ResultUtil<T> dispatchTaskConsumer(TaskRequest task, Dispatch<T, V> dispatch) {
+        ResultUtil<T> executeResult = null;
         Connect connect = null;
         try {
             connect = ConnectFactory.create();
             log.info("开始执行任务:{}-{}",task.getCommand(),task.getTaskId());
             long startTime = System.currentTimeMillis();
 
-            Object param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());
-            Consumer consumer = dispatch.getConsumer();
-            Object result = consumer.dispatch(connect, param);
+            V param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());
+            Consumer<T, V> consumer = dispatch.getConsumer();
+            T result = consumer.dispatch(connect, param);
             log.info("dispatch async={} cost={}ms command={} param={} result={}", dispatch.isAsync(), System.currentTimeMillis() - startTime, task.getCommand(), task.getData(), result);
             executeResult = ResultUtil.success(result);
         } catch (CodeException err) {
@@ -98,7 +100,7 @@ public class OperateDispatch implements CommandLineRunner {
         return executeResult;
     }
 
-    private void submitTaskCallback(TaskRequest task, ResultUtil<Object> resultUtil) {
+    private <T> void submitTaskCallback(TaskRequest task, ResultUtil<T> resultUtil) {
         String result = GsonBuilderUtil.create().toJson(resultUtil);
         try {
             String nonce = String.valueOf(System.nanoTime());
@@ -132,6 +134,13 @@ public class OperateDispatch implements CommandLineRunner {
         DispatchProcess dispatchProcess = TaskPoolUtil.offer();
         if (dispatchProcess != null) {
             this.dispatchTaskConsumer(dispatchProcess.getTask(), dispatchProcess.getDispatch());
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (this.executor != null) {
+            this.executor.shutdown();
         }
     }
 }

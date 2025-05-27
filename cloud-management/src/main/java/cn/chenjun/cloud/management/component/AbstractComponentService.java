@@ -203,8 +203,8 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             return;
         }
 
-        Integer hostId = 0;
-        Integer allowHostId = this.guestService.getGuestMustStartHostId(guest);
+        Integer hostId;
+        int allowHostId = this.guestService.getGuestMustStartHostId(guest);
         if (allowHostId > 0) {
             hostId = allowHostId;
             if (!hostIds.contains(hostId)) {

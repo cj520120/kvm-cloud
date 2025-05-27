@@ -74,7 +74,7 @@ public class VncWsService implements NioCallback {
             }
             log.info("开始查询虚拟机信息:{}", name);
             connect = ConnectFactory.create();
-            int port = 0;
+            int port;
             try {
                 String xml = connect.domainLookupByName(name).getXMLDesc(0);
                 port = VncUtil.getVnc(xml);

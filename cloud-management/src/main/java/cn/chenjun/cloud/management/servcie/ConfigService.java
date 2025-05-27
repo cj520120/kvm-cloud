@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ConfigService {
-    private static final List<DefaultConfigInfo> DEFAULT_CONFIG_LIST_CACHE = new ArrayList<>();
-    private static final Map<String, DefaultConfigInfo> DEFAULT_CONFIG_MAP_CACHE = new HashMap<>();
+    private static final List<DefaultConfigInfo<?>> DEFAULT_CONFIG_LIST_CACHE = new ArrayList<>();
+    private static final Map<String, DefaultConfigInfo<?>> DEFAULT_CONFIG_MAP_CACHE = new HashMap<>();
     @Autowired
     private ConfigMapper mapper;
 
@@ -82,7 +82,7 @@ public class ConfigService {
 
         initDefaultConfig(ConfigKey.VM_CPU_MODEL, "host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough", "host-model", "custom"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, "no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<VCpuTune>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_BIND_HOST, 0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, "no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
@@ -182,7 +182,7 @@ public class ConfigService {
     }
 
     public <T> T getConfig(List<ConfigQuery> queryList, String key) {
-        DefaultConfigInfo<T> defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(key);
+        DefaultConfigInfo<T> defaultConfig = ( DefaultConfigInfo<T>)DEFAULT_CONFIG_MAP_CACHE.get(key);
         T value = null;
         if (defaultConfig != null) {
             value = defaultConfig.getValue();
@@ -201,7 +201,7 @@ public class ConfigService {
             return (T) queryStr;
         } else {
             if (value == null) {
-                new CodeException(ErrorCode.SERVER_ERROR, "未知的配置项:" + key);
+                throw new CodeException(ErrorCode.SERVER_ERROR, "未知的配置项:" + key);
             }
             return value;
         }
@@ -212,12 +212,12 @@ public class ConfigService {
         Map<String, Object> map = new HashMap<>();
         for (ConfigQuery query : queryList) {
             if (query.getType() == Constant.ConfigType.DEFAULT) {
-                DEFAULT_CONFIG_LIST_CACHE.stream().forEach(config -> map.put(config.getKey(), config.getValue()));
+                DEFAULT_CONFIG_LIST_CACHE.forEach(config -> map.put(config.getKey(), config.getValue()));
             }
             List<ConfigEntity> list = this.mapper.selectList(new QueryWrapper<ConfigEntity>().eq(ConfigEntity.CONFIG_ALLOCATE_TYPE, query.getType()).eq(ConfigEntity.CONFIG_ALLOCATE_ID, query.getId()));
-            list.stream().forEach(config -> {
+            list.forEach(config -> {
                 Object configValue = config.getConfigValue();
-                DefaultConfigInfo defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
+                DefaultConfigInfo<?> defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
                 if (defaultConfig != null) {
                     configValue = defaultConfig.getConvert().convert(config.getConfigValue());
                 }
@@ -231,7 +231,7 @@ public class ConfigService {
         List<ConfigModel> list = new ArrayList<>();
         Map<String, ConfigModel> map = new HashMap<>();
         if (allocateType == Constant.ConfigType.DEFAULT) {
-            DEFAULT_CONFIG_LIST_CACHE.stream().forEach(config -> {
+            DEFAULT_CONFIG_LIST_CACHE.forEach(config -> {
                 ConfigModel model = new ConfigModel();
                 BeanUtils.copyProperties(config, model);
                 model.setDefaultParam(true);
@@ -240,10 +240,10 @@ public class ConfigService {
             });
         }
         List<ConfigEntity> searchList = this.mapper.selectList(new QueryWrapper<ConfigEntity>().eq(ConfigEntity.CONFIG_ALLOCATE_TYPE, allocateType).eq(ConfigEntity.CONFIG_ALLOCATE_ID, allocateId));
-        searchList.stream().forEach(config -> {
+        searchList.forEach(config -> {
             ConfigModel model = map.get(config.getConfigKey());
             if (model == null) {
-                DefaultConfigInfo defaultConfigInfo = DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
+                DefaultConfigInfo<?> defaultConfigInfo = DEFAULT_CONFIG_MAP_CACHE.get(config.getConfigKey());
                 if (defaultConfigInfo != null) {
                     model = new ConfigModel();
                     BeanUtils.copyProperties(defaultConfigInfo, model);
@@ -277,7 +277,7 @@ public class ConfigService {
         ConfigEntity entity = this.mapper.selectOne(queryWrapper);
         boolean isFind = entity != null;
         if (!isFind) {
-            DefaultConfigInfo defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(configKey);
+            DefaultConfigInfo<?> defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(configKey);
             if (defaultConfig == null) {
                 throw new CodeException(ErrorCode.CONFIG_NOT_EXISTS_ERROR, "配置项不存在");
             } else {
@@ -305,7 +305,7 @@ public class ConfigService {
             throw new CodeException(ErrorCode.CONFIG_NOT_EXISTS_ERROR, "配置项不存在");
         }
         this.mapper.deleteById(id);
-        DefaultConfigInfo defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(entity.getConfigKey());
+        DefaultConfigInfo<?> defaultConfig = DEFAULT_CONFIG_MAP_CACHE.get(entity.getConfigKey());
         ConfigModel model = null;
         if (defaultConfig != null) {
             model = new ConfigModel();
@@ -316,7 +316,7 @@ public class ConfigService {
     }
 
     private ConfigModel initConfigModel(ConfigEntity entity) {
-        DefaultConfigInfo info = DEFAULT_CONFIG_MAP_CACHE.get(entity.getConfigKey());
+        DefaultConfigInfo<?> info = DEFAULT_CONFIG_MAP_CACHE.get(entity.getConfigKey());
         ConfigModel model = new ConfigModel();
         if (info != null) {
             BeanUtils.copyProperties(info, model);

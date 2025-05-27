@@ -8,6 +8,7 @@ import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RequestContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -26,7 +27,7 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
     private UserService userService;
 
     @Override
-    public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse,@NonNull  Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
             RequestContext.remove();
             String token = httpServletRequest.getHeader(Constant.HttpHeaderNames.TOKEN_HEADER);
@@ -37,7 +38,7 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
                         RequestContext.set(RequestContext.Context.builder().self(resultUtil.getData()).build());
                         httpServletRequest.setAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE, resultUtil.getData());
                     }
-                } catch (Exception err) {
+                } catch (Exception ignored) {
 
                 }
             }

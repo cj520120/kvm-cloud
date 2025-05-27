@@ -52,9 +52,8 @@ public class StorageVolumeClearOperateImpl extends AbstractOperate<StorageVolume
 
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             List<String> volumeNames = resultUtil.getData();
-            List<String> useVolumeNames = new ArrayList<>();
             List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, param.getStorageId()));
-            useVolumeNames.addAll(volumeList.stream().map(VolumeEntity::getName).collect(Collectors.toList()));
+            List<String> useVolumeNames = new ArrayList<>(volumeList.stream().map(VolumeEntity::getName).collect(Collectors.toList()));
             List<TemplateVolumeEntity> templateVolumeList = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, param.getStorageId()));
             useVolumeNames.addAll(templateVolumeList.stream().map(TemplateVolumeEntity::getName).collect(Collectors.toList()));
             List<String> destroyVolumeNames = new ArrayList<>();

@@ -39,7 +39,7 @@ public class CommandExecutor {
             // 获取退出码
             exitCode = process.waitFor();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+           log.error("执行Shell脚本失败", e);
         }
         return CommandResult.builder().output(outputBuilder.toString()).error(errorBuilder.toString()).exitCode(exitCode).build();
     }

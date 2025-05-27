@@ -9,21 +9,17 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 public class EventListener<T> {
     private final List<EventHandler<T>> listener = Collections.synchronizedList(new ArrayList<>());
-    private ReadWriteLock lock = new ReentrantReadWriteLock(false);
+    private final ReadWriteLock lock = new ReentrantReadWriteLock(false);
 
     public void fire(Object sender, T target) {
         try {
             this.lock.readLock().lock();
             Collection<EventHandler<T>> listener = this.listener;
-            if (listener != null) {
-                final EventObject<T> model = new EventObject<T>(target);
-                Iterator<EventHandler<T>> iterator = listener.iterator();
-                while (iterator.hasNext()) {
-                    EventHandler<T> ev = iterator.next();
-                    this.fire(ev, sender, model);
-                }
-
+            final EventObject<T> model = new EventObject<T>(target);
+            for (EventHandler<T> ev : listener) {
+                this.fire(ev, sender, model);
             }
+
         } finally {
             this.lock.readLock().unlock();
         }

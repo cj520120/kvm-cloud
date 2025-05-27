@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.bean.VolumeResizeRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
@@ -33,8 +34,18 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
             if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
+            GuestEntity guest = this.guestMapper.selectById(volume.getGuestId());
+            int hostId = 0;
+            String vm = "";
+            HostEntity host = null;
+            if (guest != null && guest.getHostId() > 0) {
+                host = this.hostMapper.selectById(guest.getHostId());
+                vm = guest.getName();
+            } else {
+                host = this.allocateService.allocateHost(hostId, volume.getHostId(), 0, 0);
+            }
             VolumeResizeRequest request = VolumeResizeRequest.builder()
+                    .vm(vm)
                     .volume(initVolume(storage, volume))
                     .size(param.getSize())
                     .build();

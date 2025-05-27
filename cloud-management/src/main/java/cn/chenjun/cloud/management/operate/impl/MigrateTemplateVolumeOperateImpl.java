@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -31,14 +32,14 @@ public class MigrateTemplateVolumeOperateImpl extends AbstractOperate<MigrateTem
     @Override
     public void operate(MigrateTemplateVolumeOperate param) {
         TemplateVolumeEntity volume = templateVolumeMapper.selectById(param.getSourceTemplateVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE) {
+        if (Objects.equals(volume.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE)) {
             StorageEntity sourceStorage = storageMapper.selectById(volume.getStorageId());
             TemplateVolumeEntity targetVolume = templateVolumeMapper.selectById(param.getTargetTemplateVolumeId());
             if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标模版磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
             TemplateEntity template = this.templateMapper.selectById(targetVolume.getTemplateId());
-            if (template.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE) {
+            if (!Objects.equals(template.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + volume.getName() + "]状态不正常:" + template.getStatus());
             }
 
@@ -70,7 +71,7 @@ public class MigrateTemplateVolumeOperateImpl extends AbstractOperate<MigrateTem
             return;
         }
         TemplateEntity template = this.templateMapper.selectById(targetVolume.getTemplateId());
-        if (template.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE) {
+        if (!Objects.equals(template.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE)) {
             return;
         }
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {

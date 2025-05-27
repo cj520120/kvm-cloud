@@ -44,12 +44,23 @@ public class TemplateUtil {
     }
 
     public static String toHex(Integer decimal, Integer minLength) {
-        String hexString = Integer.toHexString(decimal);
-        while (hexString.length() < minLength) {
-            hexString = "0" + hexString;
+        if (decimal == null || minLength == null || minLength <= 0) {
+            throw new IllegalArgumentException("Invalid input");
         }
 
-        return "0x" + hexString;
+        String hexString = Integer.toHexString(decimal);
+        if (hexString.length() >= minLength) {
+            return "0x" + hexString;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("0x");
+        for (int i = hexString.length(); i < minLength; i++) {
+            sb.append("0");
+        }
+        sb.append(hexString);
+
+        return sb.toString();
     }
 
     public static Integer parseInteger(Double value) {

@@ -88,19 +88,6 @@ public class GuestController extends BaseController {
                                               @RequestParam(value = "hostname", defaultValue = "") String hostName,
                                               @RequestParam(value = "password", defaultValue = "") String password,
                                               @RequestParam(value = "sshId", defaultValue = "0") int sshId) {
-        Map<String, String> metaMap = new HashMap<>();
-        Map<String, String> userMap = new HashMap<>();
-        if (!ObjectUtils.isEmpty(hostName)) {
-            metaMap.put("hostname", hostName);
-            metaMap.put("local-hostname", hostName);
-        }
-        if (!ObjectUtils.isEmpty(password)) {
-            userMap.put("password", password);
-        }
-        if (sshId > 0) {
-            userMap.put("sshId", String.valueOf(sshId));
-        }
-        userMap.put("sshId", String.valueOf(sshId));
         return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId));
     }
 

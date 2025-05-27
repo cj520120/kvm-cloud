@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,12 +37,7 @@ public class RestTemplateConfig {
     public static CloseableHttpClient acceptsUntrustedCertsHttpClient()
             throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         HttpClientBuilder b = HttpClientBuilder.create();
-        SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                return true;
-            }
-        }).build();
+        SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (arg0, arg1) -> true).build();
         b.setSSLContext(sslContext);
         HostnameVerifier hostnameVerifier = NoopHostnameVerifier.INSTANCE;
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
@@ -63,12 +59,12 @@ public class RestTemplateConfig {
         RestTemplate restTemplate = new RestTemplate(httpsFactory);
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override
-            public boolean hasError(ClientHttpResponse clientHttpResponse) {
+            public boolean hasError(@NonNull ClientHttpResponse clientHttpResponse) {
                 return false;
             }
 
             @Override
-            public void handleError(ClientHttpResponse clientHttpResponse) {
+            public void handleError(@NonNull ClientHttpResponse clientHttpResponse) {
 
             }
         });
