@@ -36,11 +36,6 @@ import java.util.*;
 public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> extends AbstractOsOperate<T, ResultUtil<GuestInfo>> {
 
 
-
-    @Autowired
-    private ConfigService configService;
-
-
     public void start(int hostId, int guestId, T param) {
         GuestEntity guest = guestMapper.selectById(guestId);
         if (guest.getStatus() != cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
@@ -137,7 +132,6 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<String> networkInterfaces = new ArrayList<>();
-        String tpl = (String) systemConfig.get(ConfigKey.VM_INTERFACE_TPL);
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
             if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
@@ -146,7 +140,6 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 }
             }
             networkInterfaces.add(this.buildInterfaceXml(network, entity, systemConfig));
-
         }
         return networkInterfaces;
     }

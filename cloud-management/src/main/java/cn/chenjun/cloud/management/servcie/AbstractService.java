@@ -67,6 +67,13 @@ public abstract class AbstractService {
         return !componentGuestList.isEmpty();
     }
 
+    protected String getVolumeType(StorageEntity storage) {
+        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
+        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
+        }
+        return volumeType;
+    }
     protected GuestEntity getVolumeGuest(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {

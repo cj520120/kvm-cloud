@@ -159,10 +159,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
-            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        }
+        String volumeType = getVolumeType(storage);
         if (volumeId <= 0) {
             createGuest(hostId, diskTemplateId, deviceDriver, volumeType, size, guest, storage);
         } else {
@@ -248,10 +245,7 @@ public class GuestService extends AbstractService {
         volume.setGuestId(0);
         this.volumeMapper.updateById(volume);
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
-            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        }
+        String volumeType = getVolumeType(storage);
         if (volumeId <= 0) {
             volume = createGuestVolume(diskTemplateId, deviceDriver, volumeType, size, guest, storage);
             guest.setStatus(Constant.GuestStatus.CREATING);
@@ -469,6 +463,55 @@ public class GuestService extends AbstractService {
                 return ResultUtil.success(this.initGuestInfo(guest));
 
     }
+    public ResultUtil<VolumeModel> createDisk(int guestId, String diskDriver, String description, int storageId, long volumeSize){
+        if (StringUtils.isEmpty(description)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘描述信息");
+        }
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        String volumeType = getVolumeType(storage);
+        int bindHostId = getGuestMustStartHostId(guest);
+        if(bindHostId > 0 && storage.getHostId()>0 && bindHostId != storage.getHostId()){
+            throw new CodeException(ErrorCode.GUEST_BIND_OTHER_HOST, "当前主机无法挂载其他主机的本地磁盘");
+        }
+        int deviceId = allocateGuestDiskDeviceId(guestId);
+        String volumeName = NameUtil.generateVolumeName();
+        VolumeEntity volume = VolumeEntity.builder()
+                .storageId(storage.getStorageId())
+                .templateId(0)
+                .hostId(storage.getHostId())
+                .description(description)
+                .name(volumeName)
+                .path(storage.getMountPath() + "/" + volumeName)
+                .type(volumeType)
+                .capacity(volumeSize)
+                .allocation(0L)
+                .status(Constant.VolumeStatus.CREATING)
+                .deviceDriver(diskDriver)
+                .guestId(guestId)
+                .deviceId(deviceId)
+                .createTime(new Date())
+                .build();
+        this.volumeMapper.insert(volume);
+
+        BaseOperateParam operateParam = CreateGuestVolumeOperate.builder().id(UUID.randomUUID().toString()).title("创建磁盘[" + volume.getName() + "]").guestId(guestId).volumeId(volume.getVolumeId()).templateId(0).build();
+        operateTask.addTask(operateParam);
+        VolumeModel model = this.initVolume(volume);
+        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        return ResultUtil.success(model);
+
+    }
+
+
+    private int allocateGuestDiskDeviceId(int guestId) {
+        List<VolumeEntity> volumes = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId));
+        List<Integer> gustDiskDeviceIds = volumes.stream().map(VolumeEntity::getDeviceId).collect(Collectors.toList());
+        int deviceId = 0;
+        do {
+            deviceId++;
+        } while (gustDiskDeviceIds.contains(deviceId));
+        return deviceId;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<AttachGuestVolumeModel> attachDisk(int guestId, int volumeId, String deviceDriver) {
@@ -487,17 +530,10 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘未就绪.");
         }
 
-
         if (volume.getGuestId() > 0) {
             throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘已经被挂载");
         }
-        List<VolumeEntity> volumes = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId));
-
-        List<Integer> gustDiskDeviceIds = volumes.stream().map(VolumeEntity::getDeviceId).collect(Collectors.toList());
-        int deviceId = 0;
-        do {
-            deviceId++;
-        } while (gustDiskDeviceIds.contains(deviceId));
+        int deviceId = allocateGuestDiskDeviceId(guestId);
         volume.setDeviceId(deviceId);
         volume.setGuestId(guestId);
         volume.setDeviceDriver(deviceDriver);

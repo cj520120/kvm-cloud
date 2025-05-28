@@ -148,6 +148,7 @@ public class Constant {
         public static int MIGRATE_TEMPLATE_VOLUME = 37;
         public static int DESTROY_TEMPLATE_VOLUME = 38;
         public static int STORAGE_VOLUME_CLEAR = 39;
+        public static int CREATE_GUEST_VOLUME = 39;
     }
 
     public static class LoginType {

@@ -8,13 +8,10 @@ import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.servcie.VolumeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -161,6 +158,14 @@ public class GuestController extends BaseController {
         return this.lockRun(() -> this.guestService.modifyGuestDiskDeviceType(guestId, deviceId, deviceBus));
     }
 
+    @PutMapping("/api/guest/disk/create")
+    public ResultUtil<VolumeModel> createVolume(@RequestParam("guestId") int guestId,
+                                                @RequestParam("diskDriver") String diskDriver,
+                                                @RequestParam("description") String description,
+                                                @RequestParam("storageId") int storageId,
+                                                @RequestParam("volumeSize") long volumeSize) {
+        return this.lockRun(() -> this.guestService.createDisk(guestId, diskDriver, description, storageId, volumeSize * 1024 * 1024 * 1024));
+    }
     @PostMapping("/api/guest/disk/attach")
     public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
                                                          @RequestParam("volumeId") int volumeId,

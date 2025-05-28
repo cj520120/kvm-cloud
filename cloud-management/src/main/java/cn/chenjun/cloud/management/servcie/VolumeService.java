@@ -129,10 +129,7 @@ public class VolumeService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
-            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        }
+        String volumeType = getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
@@ -162,10 +159,7 @@ public class VolumeService extends AbstractService {
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId) {
 
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
-            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        }
+        String volumeType = getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
@@ -232,10 +226,7 @@ public class VolumeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
         StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
-        String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
-        if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
-            volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
-        }
+        String volumeType =getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
