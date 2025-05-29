@@ -26,49 +26,47 @@ public class AllocateService extends AbstractService {
 
 
     public StorageEntity allocateStorage(int category, int storageId) {
-        StorageEntity storage;
         if (storageId > 0) {
-            storage = storageMapper.selectById(storageId);
+            StorageEntity storage = storageMapper.selectById(storageId);
             if (storage == null) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
             }
-            boolean isSupport = (storage.getSupportCategory() & category) == category;
-            if (!isSupport) {
+            if ((storage.getSupportCategory() & category) != category) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "选择的存储磁盘分类不支持选定类型");
             }
-        } else {
-            List<StorageEntity> storageList = storageMapper.selectList(new QueryWrapper<>());
-            storageList = storageList.stream().filter(t -> {
-                boolean isSupport = !Objects.equals(t.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL);//本地磁盘不参与自动分配
-                isSupport = isSupport && (t.getSupportCategory() & category) == category;
-                return isSupport && Objects.equals(t.getStatus(), Constant.StorageStatus.READY);
-            }).collect(Collectors.toList());
-            Map<Integer, Float> scoreMap = new HashMap<>(storageList.size());
-            for (StorageEntity entity : storageList) {
-                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build(), ConfigQuery.builder().type(Constant.ConfigType.STORAGE).id(entity.getStorageId()).build());
+            return storage;
+        }
+
+        QueryWrapper<StorageEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.ne(StorageEntity.STORAGE_TYPE, cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)
+                .eq(StorageEntity.STORAGE_STATUS, Constant.StorageStatus.READY)
+                .apply(StorageEntity.STORAGE_SUPPORT_CATEGORY + " & {0} = {0}", category);
+        List<StorageEntity> storageList = storageMapper.selectList(queryWrapper);
+
+        Map<Integer, Float> scoreMap = storageList.parallelStream().collect(Collectors.toMap(StorageEntity::getStorageId, entity -> {
+            List<ConfigQuery> queryList = Arrays.asList(
+                    ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build(),
+                    ConfigQuery.builder().type(Constant.ConfigType.STORAGE).id(entity.getStorageId()).build()
+            );
                 float storageWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT);
                 float availableValue = entity.getAvailable() / (1024.0f * 1024.0f * 1024.0f * 1024.0f);
-                float score = availableValue * storageWeight;
-                scoreMap.put(entity.getStorageId(), score);
-                log.info("分配存储池计算权重,storage={},weight={},available={}TB,score={}", entity.getDescription(), storageWeight, availableValue, score);
-            }
-            log.info("开始重新计算存储池排序");
-            storageList.sort((o1, o2) -> -Float.compare(scoreMap.get(o1.getStorageId()), scoreMap.get(o2.getStorageId())));
-            log.info("结束存储池排序");
-            storage = storageList.stream().findFirst().orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
-        }
-        return storage;
+            return availableValue * storageWeight;
+        }));
+
+        return storageList.stream()
+                .max((o1, o2) -> Float.compare(scoreMap.get(o1.getStorageId()), scoreMap.get(o2.getStorageId())))
+                .orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
     }
 
     public GuestNetworkEntity allocateNetwork(int networkId) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("network_id", networkId);
-        wrapper.eq("allocate_id", 0);
-        wrapper.eq("allocate_type", Constant.NetworkAllocateType.DEFAULT);
-        wrapper.last("limit 0,1");
+        wrapper.eq(GuestNetworkEntity.NETWORK_ID, networkId)
+                .eq(GuestNetworkEntity.ALLOCATE_ID, 0)
+                .eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.DEFAULT)
+                .last("LIMIT 1");
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
         if (guestNetwork == null) {
-            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "没有可用的网络资源");
+            throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "没有可用的网络资源，networkId=" + networkId);
         }
         return guestNetwork;
     }
@@ -134,7 +132,7 @@ public class AllocateService extends AbstractService {
                     }
                     list.sort((o1, o2) -> -Float.compare(scoreMap.get(o1.getHostId()), scoreMap.get(o2.getHostId())));
                 }
-                host = list.stream().findFirst().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_RESOURCE, "没有可用的主机资源"));
+                host = list.stream().findFirst().orElseThrow(() -> new CodeException(ErrorCode.HOST_NOT_RESOURCE, "没有可用的主机资源，cpu=" + cpu + ", memory=" + memory));
             }
             return host;
         }

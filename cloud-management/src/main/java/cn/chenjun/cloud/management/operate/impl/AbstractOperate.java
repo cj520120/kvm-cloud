@@ -1,6 +1,8 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
+import cn.chenjun.cloud.common.core.operate.Operate;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
@@ -8,8 +10,6 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.*;
-import cn.chenjun.cloud.common.core.operate.Operate;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
@@ -17,6 +17,7 @@ import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
@@ -86,51 +84,63 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
 
     @SuppressWarnings({"unchecked"})
     protected void asyncInvoker(HostEntity host, T param, String command, Object data) {
+        Objects.requireNonNull(host, "host cannot be null");
+        Objects.requireNonNull(host.getUri(), "host uri cannot be null");
+        Objects.requireNonNull(host.getClientId(), "clientId cannot be null");
+        Objects.requireNonNull(host.getClientSecret(), "clientSecret cannot be null");
+
         this.executor.submit(() -> {
+            Gson gson = GsonBuilderUtil.create();
             try {
                 TaskRequest taskRequest = TaskRequest.builder()
                         .command(command)
-                        .data(GsonBuilderUtil.create().toJson(data))
+                        .data(gson.toJson(data))
                         .taskId(param.getTaskId()).build();
+
                 String nonce = String.valueOf(System.nanoTime());
                 Map<String, Object> map = new HashMap<>(6);
-                map.put("data", GsonBuilderUtil.create().toJson(taskRequest));
+                map.put("data", gson.toJson(taskRequest));
                 map.put("timestamp", System.currentTimeMillis());
+
                 String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
                 map.put("sign", sign);
-                String url = host.getUri();
-                if (!url.endsWith("/")) {
-                    url += "/";
-                }
-                url += "api/operate";
+
+                String url = host.getUri().endsWith("/")
+                        ? host.getUri() + "api/operate"
+                        : host.getUri() + "/api/operate";
+
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
                 MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
-                map.forEach((k, v) -> requestMap.add(k, v.toString()));
+                map.forEach((k, v) -> requestMap.add(k, v != null ? v.toString() : ""));
+
                 RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
                         .post(URI.create(url))
                         .headers(httpHeaders)
                         .body(requestMap);
+
                 ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
                 if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "请求出错.status=" + responseEntity.getStatusCode());
+                    throw new CodeException(ErrorCode.SERVER_ERROR,
+                            "Request failed with status: " + responseEntity.getStatusCode());
                 }
+
                 String response = responseEntity.getBody();
-                ResultUtil<Object> resultUtil = GsonBuilderUtil.create().fromJson(response, this.getCallResultType());
+                ResultUtil<Object> resultUtil = gson.fromJson(response, this.getCallResultType());
+
                 if (resultUtil == null) {
-                    ResultUtil<V> submitResult = ResultUtil.error(ErrorCode.SERVER_ERROR, "请求出错.response=" + response);
-                    this.onSubmitFinishEvent(param.getTaskId(), (V) submitResult);
+                    this.onSubmitFinishEvent(param.getTaskId(),
+                            (V) ResultUtil.error(ErrorCode.SERVER_ERROR, "Invalid response: " + response));
                 } else if (resultUtil.getCode() != ErrorCode.AGENT_TASK_ASYNC_WAIT) {
                     this.onSubmitFinishEvent(param.getTaskId(), (V) resultUtil);
                 }
             } catch (Exception err) {
-                ResultUtil<V> submitResult = ResultUtil.error(ErrorCode.SERVER_ERROR, "数据请求出错");
-                this.onSubmitFinishEvent(param.getTaskId(), (V) submitResult);
+                this.onSubmitFinishEvent(param.getTaskId(), (V) ResultUtil.error(ErrorCode.SERVER_ERROR, "Request error: " + err.getMessage()));
             }
         });
-
-
     }
+
 
 
     @SuppressWarnings("unchecked")
