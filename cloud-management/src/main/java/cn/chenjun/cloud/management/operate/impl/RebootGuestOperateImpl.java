@@ -29,7 +29,7 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
     public void operate(RebootGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
         HostEntity host = hostMapper.selectById(guest.getLastHostId());
-        if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.REBOOT) {
+        if (guest.getStatus() == Constant.GuestStatus.REBOOT) {
             GuestRebootRequest request = GuestRebootRequest.builder().name(guest.getName()).build();
             this.asyncInvoker(host, param, Constant.Command.GUEST_REBOOT, request);
         } else {
@@ -47,12 +47,12 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
     @Override
     public void onFinish(RebootGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.REBOOT) {
+        if (guest != null && guest.getStatus() == Constant.GuestStatus.REBOOT) {
             if (guest.getHostId() > 0) {
-                guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
+                guest.setStatus(Constant.GuestStatus.RUNNING);
             } else {
                 guest.setLastHostId(0);
-                guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP);
+                guest.setStatus(Constant.GuestStatus.STOP);
             }
             guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
@@ -64,6 +64,6 @@ public class RebootGuestOperateImpl extends AbstractOperate<RebootGuestOperate, 
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.REBOOT_GUEST;
+        return Constant.OperateType.REBOOT_GUEST;
     }
 }

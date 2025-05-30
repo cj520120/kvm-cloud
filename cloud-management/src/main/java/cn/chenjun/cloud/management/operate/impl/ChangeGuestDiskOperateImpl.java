@@ -51,7 +51,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                     if (storage == null) {
                         throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
                     }
-                    if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+                    if (storage.getStatus() != Constant.StorageStatus.READY) {
                         throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
                     }
                     Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
@@ -89,6 +89,6 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CHANGE_GUEST_DISK;
+        return Constant.OperateType.CHANGE_GUEST_DISK;
     }
 }

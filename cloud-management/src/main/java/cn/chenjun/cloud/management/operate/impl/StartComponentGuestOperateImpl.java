@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.component.ComponentProcess;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
@@ -52,7 +53,7 @@ public class StartComponentGuestOperateImpl extends AbstractStartGuestOperateImp
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.START_COMPONENT_GUEST;
+        return Constant.OperateType.START_COMPONENT_GUEST;
     }
 
 

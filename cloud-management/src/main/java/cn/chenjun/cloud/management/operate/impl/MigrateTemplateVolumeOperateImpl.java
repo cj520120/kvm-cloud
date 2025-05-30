@@ -32,14 +32,14 @@ public class MigrateTemplateVolumeOperateImpl extends AbstractOperate<MigrateTem
     @Override
     public void operate(MigrateTemplateVolumeOperate param) {
         TemplateVolumeEntity volume = templateVolumeMapper.selectById(param.getSourceTemplateVolumeId());
-        if (Objects.equals(volume.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE)) {
+        if (Objects.equals(volume.getStatus(), Constant.TemplateStatus.MIGRATE)) {
             StorageEntity sourceStorage = storageMapper.selectById(volume.getStorageId());
             TemplateVolumeEntity targetVolume = templateVolumeMapper.selectById(param.getTargetTemplateVolumeId());
-            if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.CREATING) {
+            if (targetVolume.getStatus() != Constant.TemplateStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标模版磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
             TemplateEntity template = this.templateMapper.selectById(targetVolume.getTemplateId());
-            if (!Objects.equals(template.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE)) {
+            if (!Objects.equals(template.getStatus(), Constant.TemplateStatus.MIGRATE)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + volume.getName() + "]状态不正常:" + template.getStatus());
             }
 
@@ -71,29 +71,29 @@ public class MigrateTemplateVolumeOperateImpl extends AbstractOperate<MigrateTem
             return;
         }
         TemplateEntity template = this.templateMapper.selectById(targetVolume.getTemplateId());
-        if (!Objects.equals(template.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.MIGRATE)) {
+        if (!Objects.equals(template.getStatus(), Constant.TemplateStatus.MIGRATE)) {
             return;
         }
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+            targetVolume.setStatus(Constant.TemplateStatus.READY);
             targetVolume.setAllocation(resultUtil.getData().getAllocation());
             targetVolume.setCapacity(resultUtil.getData().getCapacity());
             targetVolume.setType(resultUtil.getData().getType());
             targetVolume.setPath(resultUtil.getData().getPath());
             templateVolumeMapper.updateById(targetVolume);
 
-            sourceVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY);
+            sourceVolume.setStatus(Constant.TemplateStatus.DESTROY);
             templateVolumeMapper.updateById(sourceVolume);
             this.taskService.addTask(DestroyTemplateVolumeOperate.builder().title("删除老模版磁盘").id(UUID.randomUUID().toString()).volumeId(sourceVolume.getTemplateVolumeId()).build());
 
         } else {
-            targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY);
+            targetVolume.setStatus(Constant.TemplateStatus.DESTROY);
             templateVolumeMapper.updateById(targetVolume);
             this.taskService.addTask(DestroyTemplateVolumeOperate.builder().title("删除迁移失败的模版磁盘").id(UUID.randomUUID().toString()).volumeId(targetVolume.getTemplateVolumeId()).build());
-            sourceVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+            sourceVolume.setStatus(Constant.TemplateStatus.READY);
             templateVolumeMapper.updateById(sourceVolume);
         }
-        template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+        template.setStatus(Constant.TemplateStatus.READY);
         this.templateMapper.updateById(template);
         this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
 
@@ -101,6 +101,6 @@ public class MigrateTemplateVolumeOperateImpl extends AbstractOperate<MigrateTem
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.MIGRATE_TEMPLATE_VOLUME;
+        return Constant.OperateType.MIGRATE_TEMPLATE_VOLUME;
     }
 }

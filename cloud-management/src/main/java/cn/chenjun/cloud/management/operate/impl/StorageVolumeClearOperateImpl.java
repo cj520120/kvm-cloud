@@ -82,6 +82,6 @@ public class StorageVolumeClearOperateImpl extends AbstractOperate<StorageVolume
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.STORAGE_VOLUME_CLEAR;
+        return Constant.OperateType.STORAGE_VOLUME_CLEAR;
     }
 }

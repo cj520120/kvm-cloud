@@ -30,10 +30,10 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
     @Override
     public void operate(MigrateVolumeOperate param) {
         VolumeEntity sourceVolume = volumeMapper.selectById(param.getSourceVolumeId());
-        if (sourceVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
+        if (sourceVolume.getStatus() == Constant.VolumeStatus.MIGRATE) {
             StorageEntity sourceStorage = storageMapper.selectById(sourceVolume.getStorageId());
             VolumeEntity targetVolume = volumeMapper.selectById(param.getTargetVolumeId());
-            if (targetVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
+            if (targetVolume.getStatus() != Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + sourceVolume.getName() + "]状态不正常:" + sourceVolume.getStatus());
             }
             HostEntity host = this.allocateService.allocateHost(0, Math.max(sourceVolume.getHostId(), targetVolume.getHostId()), 0, 0);
@@ -61,9 +61,9 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
     public void onFinish(MigrateVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getSourceVolumeId());
         VolumeEntity targetVolume = volumeMapper.selectById(param.getTargetVolumeId());
-        if (targetVolume != null && targetVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
+        if (targetVolume != null && targetVolume.getStatus() == Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
+                targetVolume.setStatus(Constant.VolumeStatus.READY);
                 targetVolume.setAllocation(resultUtil.getData().getAllocation());
                 targetVolume.setCapacity(resultUtil.getData().getCapacity());
                 targetVolume.setType(resultUtil.getData().getType());
@@ -74,18 +74,18 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
                     targetVolume.setGuestId(volume.getGuestId());
                 }
             } else {
-                targetVolume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);
+                targetVolume.setStatus(Constant.VolumeStatus.ERROR);
             }
             volumeMapper.updateById(targetVolume);
         }
-        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.MIGRATE) {
+        if (volume != null && volume.getStatus() == Constant.VolumeStatus.MIGRATE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 //提交源磁盘的销毁任务
-                volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY);
+                volume.setStatus(Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 this.taskService.addTask(DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).volumeId(volume.getVolumeId()).build());
             } else {
-                volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
+                volume.setStatus(Constant.VolumeStatus.READY);
                 volumeMapper.updateById(volume);
             }
         }
@@ -95,6 +95,6 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.MIGRATE_VOLUME;
+        return Constant.OperateType.MIGRATE_VOLUME;
     }
 }

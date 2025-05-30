@@ -32,7 +32,7 @@ public class StorageVolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOp
     @Override
     public void operate(VolumeCheckOperate param) {
         StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, param.getStorageId())).stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY)).collect(Collectors.toList());
+        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, param.getStorageId())).stream().filter(t -> Objects.equals(t.getStatus(), Constant.VolumeStatus.READY)).collect(Collectors.toList());
         if (volumeList.isEmpty()) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
@@ -84,6 +84,6 @@ public class StorageVolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOp
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.VOLUME_CHECK;
+        return Constant.OperateType.VOLUME_CHECK;
     }
 }

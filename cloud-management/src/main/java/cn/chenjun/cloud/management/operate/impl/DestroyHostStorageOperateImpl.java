@@ -39,12 +39,12 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
 
         }
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
-        if (!Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY)) {
+        if (!Objects.equals(storage.getStatus(), Constant.StorageStatus.DESTROY)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
 
         }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
-        if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
+        if (host == null || !Objects.equals(Constant.HostStatus.ONLINE, host.getStatus())) {
             //主机未就绪直接提交成功
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
             return;
@@ -75,16 +75,16 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
                 this.taskService.addTask(operate);
             } else {
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
-                if (storage != null && storage.getStatus() == cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY) {
+                if (storage != null && storage.getStatus() == Constant.StorageStatus.DESTROY) {
                     storageMapper.deleteById(param.getStorageId());
-                    this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.STORAGE, param.getStorageId());
+                    this.configService.deleteAllocateConfig(Constant.ConfigType.STORAGE, param.getStorageId());
                     templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, param.getStorageId()));
                 }
             }
         } else {
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
-            if (storage != null && Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.DESTROY)) {
-                storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.ERROR);
+            if (storage != null && Objects.equals(storage.getStatus(), Constant.StorageStatus.DESTROY)) {
+                storage.setStatus(Constant.StorageStatus.ERROR);
                 storageMapper.updateById(storage);
             }
         }
@@ -94,6 +94,6 @@ public class DestroyHostStorageOperateImpl extends AbstractOperate<DestroyHostSt
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_HOST_STORAGE;
+        return Constant.OperateType.DESTROY_HOST_STORAGE;
     }
 }

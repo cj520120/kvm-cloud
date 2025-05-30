@@ -5,9 +5,9 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.NoLoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.UserService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,13 +32,13 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/api/user/self/modify")
-    public ResultUtil<Void> updateSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestParam(value = "username", defaultValue = "") String username, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
+    public ResultUtil<Void> updateSelfInfo(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestParam(value = "username", defaultValue = "") String username, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
 
         return this.lockRun(() -> userUiService.updateSelfInfo(model.getUserId(), username, oldPassword, newPassword, nonce));
     }
 
     @PostMapping("/api/user/token/refresh")
-    public ResultUtil<RefreshTokenModel> refreshToken(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel loginUser) {
+    public ResultUtil<RefreshTokenModel> refreshToken(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel loginUser) {
         return this.lockRun(() -> userUiService.refreshToken(loginUser.getUserId()));
     }
 
@@ -49,13 +49,13 @@ public class UserController extends BaseController {
     }
 
     @GetMapping("/api/user/signature")
-    public ResultUtil<LoginSignatureModel> getLoginSignature(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
+    public ResultUtil<LoginSignatureModel> getLoginSignature(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
 
         return this.lockRun(() -> userUiService.getLoginSignature(model.getUserId()));
     }
 
 
-    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @PutMapping("/api/user/register")
     public ResultUtil<UserInfoModel> register(@RequestParam("userName") String userName, @RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
 
@@ -64,13 +64,13 @@ public class UserController extends BaseController {
     }
 
     @GetMapping("/api/user/self")
-    public ResultUtil<UserInfoModel> getSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
+    public ResultUtil<UserInfoModel> getSelfInfo(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
 
         return this.lockRun(() -> userUiService.getUserInfo(model.getUserId()));
 
     }
 
-    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @PostMapping("/api/user/update")
     @LoginRequire
     public ResultUtil<UserInfoModel> updateUserInfo(@RequestParam("userId") int userId, @RequestParam("userName") String userName, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
@@ -78,7 +78,7 @@ public class UserController extends BaseController {
     }
 
 
-    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @DeleteMapping("/api/user/destroy")
     public ResultUtil<Void> destroyUser(@RequestParam("userId") int userId) {
         return this.lockRun(() -> userUiService.destroyUser(userId));

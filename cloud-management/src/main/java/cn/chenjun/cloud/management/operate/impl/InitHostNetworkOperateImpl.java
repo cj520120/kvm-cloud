@@ -35,32 +35,32 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
         }
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
         switch (network.getStatus()) {
-            case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
-            case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
+            case Constant.NetworkStatus.CREATING:
+            case Constant.NetworkStatus.MAINTENANCE:
                 break;
             default:
                 throw new CodeException(ErrorCode.SERVER_ERROR, "网络状态不是创建状态");
         }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
-        if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
+        if (host == null || !Objects.equals(Constant.HostStatus.ONLINE, host.getStatus())) {
             //主机未就绪直接提交成功
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
             return;
         }
 
         List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
         Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
 
         switch (network.getType()) {
-            case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
+            case Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
             }
             break;
-            case cn.chenjun.cloud.management.util.Constant.NetworkType.VLAN: {
+            case Constant.NetworkType.VLAN: {
                 NetworkEntity basicNetworkEntity = networkMapper.selectById(network.getBasicNetworkId());
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
@@ -93,9 +93,9 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
                 if (network != null) {
                     switch (network.getStatus()) {
-                        case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
-                        case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                            network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.INSTALL);
+                        case Constant.NetworkStatus.CREATING:
+                        case Constant.NetworkStatus.MAINTENANCE:
+                            network.setStatus(Constant.NetworkStatus.INSTALL);
                             networkMapper.updateById(network);
                         default:
                             break;
@@ -114,9 +114,9 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
             if (network != null) {
                 switch (network.getStatus()) {
-                    case cn.chenjun.cloud.management.util.Constant.NetworkStatus.CREATING:
-                    case cn.chenjun.cloud.management.util.Constant.NetworkStatus.MAINTENANCE:
-                        network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.ERROR);
+                    case Constant.NetworkStatus.CREATING:
+                    case Constant.NetworkStatus.MAINTENANCE:
+                        network.setStatus(Constant.NetworkStatus.ERROR);
                         networkMapper.updateById(network);
                     default:
                         break;
@@ -128,6 +128,6 @@ public class InitHostNetworkOperateImpl extends AbstractOperate<InitHostNetworkO
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.INIT_HOST_NETWORK;
+        return Constant.OperateType.INIT_HOST_NETWORK;
     }
 }

@@ -4,13 +4,12 @@ import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.bean.GuestStartRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
-import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import cn.chenjun.cloud.management.util.GuestExternNames;
@@ -20,7 +19,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -38,7 +36,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
 
     public void start(int hostId, int guestId, T param) {
         GuestEntity guest = guestMapper.selectById(guestId);
-        if (guest.getStatus() != cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
+        if (guest.getStatus() != Constant.GuestStatus.STARTING) {
             throw new CodeException(ErrorCode.GUEST_NOT_STOP, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
         HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
@@ -71,9 +69,9 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
 
     protected void finish(int guestId, ResultUtil<GuestInfo> resultUtil) {
         GuestEntity guest = guestMapper.selectById(guestId);
-        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STARTING) {
+        if (guest != null && guest.getStatus() == Constant.GuestStatus.STARTING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
+                guest.setStatus(Constant.GuestStatus.RUNNING);
                 //写入系统vnc
                 GuestInfo guestInfo = resultUtil.getData();
                 Map<String, Map<String, String>> extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
@@ -86,7 +84,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 this.guestMapper.updateById(guest);
             } else {
                 guest.setHostId(0);
-                guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP);
+                guest.setStatus(Constant.GuestStatus.STOP);
             }
             this.guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
@@ -103,7 +101,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         Map<Integer, StorageEntity> storageMap = Maps.newHashMap();
         volumes.sort(Comparator.comparingInt(VolumeEntity::getDeviceId));
         for (VolumeEntity volume : volumes) {
-            if (volume.getStatus() != cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY) {
+            if (volume.getStatus() != Constant.VolumeStatus.READY) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
             }
             StorageEntity storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
@@ -111,7 +109,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 if (storageEntity == null) {
                     throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
                 }
-                if (storageEntity.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+                if (storageEntity.getStatus() != Constant.StorageStatus.READY) {
                     throw new CodeException(ErrorCode.STORAGE_NOT_READY, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getName());
                 }
                 return storageEntity;
@@ -129,13 +127,13 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
     protected abstract GuestQmaRequest buildQmaRequest(T param, Map<String, Object> systemConfig);
 
     protected List<String> buildInterfaceListXml(GuestEntity guest, Map<String, Object> systemConfig) {
-        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.management.util.Constant.NetworkAllocateType.GUEST));
+        List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
         List<String> networkInterfaces = new ArrayList<>();
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
-            if (!guest.getType().equals(cn.chenjun.cloud.management.util.Constant.GuestType.COMPONENT)) {
-                if (network.getStatus() != cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY) {
+            if (!guest.getType().equals(Constant.GuestType.COMPONENT)) {
+                if (network.getStatus() != Constant.NetworkStatus.READY) {
                     throw new CodeException(ErrorCode.NETWORK_NOT_READY, "虚拟机[" + guest.getDescription() + "]网络[" + network.getName() + "]未就绪." );
                 }
             }

@@ -80,6 +80,6 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.STORAGE_CHECK;
+        return Constant.OperateType.STORAGE_CHECK;
     }
 }

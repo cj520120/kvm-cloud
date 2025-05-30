@@ -49,7 +49,7 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
         RBucket<Long> rBucket = this.redissonClient.getBucket(hostKeepKey);
         boolean isNotify = false;
         if (hostInfo != null) {
-            isNotify = !Objects.equals(updateHost.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
+            isNotify = !Objects.equals(updateHost.getStatus(), Constant.HostStatus.ONLINE);
             updateHost.setHostName(hostInfo.getHostName());
             updateHost.setOsName(hostInfo.getName());
             updateHost.setOsVersion(hostInfo.getOsVersion());
@@ -64,16 +64,16 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
             updateHost.setModel(hostInfo.getCpu().getModel());
             updateHost.setFrequency(hostInfo.getCpu().getFrequency());
             updateHost.setHypervisor(hostInfo.getHypervisor());
-            updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
+            updateHost.setStatus(Constant.HostStatus.ONLINE);
             hostMapper.updateById(updateHost);
             List<ConfigQuery> queryList = new ArrayList<>(2);
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(1).build());
+            queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
+            queryList.add(ConfigQuery.builder().type(Constant.ConfigType.HOST).id(1).build());
             int expire = this.configService.getConfig(queryList, ConfigKey.DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND);
             rBucket.set(System.currentTimeMillis(), Math.max(1, expire * 2), TimeUnit.SECONDS);
         } else if (!rBucket.isExists()) {
-            isNotify = !Objects.equals(updateHost.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);
-            updateHost.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE);
+            isNotify = !Objects.equals(updateHost.getStatus(), Constant.HostStatus.OFFLINE);
+            updateHost.setStatus(Constant.HostStatus.OFFLINE);
             hostMapper.updateById(updateHost);
         }
         if (isNotify) {
@@ -83,6 +83,6 @@ public class HostCheckOperateImpl extends AbstractOperate<HostCheckOperate, Resu
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.HOST_CHECK;
+        return Constant.OperateType.HOST_CHECK;
     }
 }

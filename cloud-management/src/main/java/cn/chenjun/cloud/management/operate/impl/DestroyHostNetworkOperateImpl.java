@@ -39,24 +39,24 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             return;
         }
         NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-        if (!Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY, network.getStatus())) {
+        if (!Objects.equals(Constant.NetworkStatus.DESTROY, network.getStatus())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "网络状态不是销毁状态");
         }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
-        if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
+        if (host == null || !Objects.equals(Constant.HostStatus.ONLINE, host.getStatus())) {
             //主机未就绪直接提交成功
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
             return;
         }
         switch (network.getType()) {
-            case cn.chenjun.cloud.management.util.Constant.NetworkType.BASIC: {
+            case Constant.NetworkType.BASIC: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                         .poolId(network.getPoolId())
                         .build();
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_DESTROY_BASIC, basicBridgeNetwork);
             }
             break;
-            case cn.chenjun.cloud.management.util.Constant.NetworkType.VLAN: {
+            case Constant.NetworkType.VLAN: {
                 NetworkEntity basicNetworkEntity = networkMapper.selectById(network.getBasicNetworkId());
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
@@ -89,7 +89,7 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             }
             if (hostIds.isEmpty()) {
                 NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-                if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
+                if (network != null && network.getStatus() == Constant.NetworkStatus.DESTROY) {
                     networkMapper.deleteById(param.getNetworkId());
                     guestNetworkMapper.delete(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, param.getNetworkId()));
                 }
@@ -103,8 +103,8 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
             }
         } else {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
-                network.setStatus(cn.chenjun.cloud.management.util.Constant.NetworkStatus.ERROR);
+            if (network != null && network.getStatus() == Constant.NetworkStatus.DESTROY) {
+                network.setStatus(Constant.NetworkStatus.ERROR);
                 networkMapper.updateById(network);
             }
         }
@@ -114,6 +114,6 @@ public class DestroyHostNetworkOperateImpl extends AbstractOperate<DestroyHostNe
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_HOST_NETWORK;
+        return Constant.OperateType.DESTROY_HOST_NETWORK;
     }
 }

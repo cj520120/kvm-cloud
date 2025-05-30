@@ -4,15 +4,15 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.BeanConverter;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
-import cn.chenjun.cloud.management.util.BeanConverter;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -42,7 +42,7 @@ public class VolumeService extends AbstractService {
         if (volume == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
         }
-        if (!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)) {
+        if (!Objects.equals(volume.getStatus(), cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY)) {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
         }
         volume.setStatus(status);
@@ -57,10 +57,10 @@ public class VolumeService extends AbstractService {
             if (o1.getStatus() == o2.getStatus()) {
                 return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
             }
-            if (o1.getStatus() == Constant.VolumeStatus.READY) {
+            if (o1.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
                 return -1;
             }
-            if (o2.getStatus() == Constant.VolumeStatus.READY) {
+            if (o2.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
                 return 1;
             }
             return Integer.compare(o1.getStatus(), o2.getStatus());
@@ -104,7 +104,7 @@ public class VolumeService extends AbstractService {
         int allowHostId = this.getGuestMustStartHostId(guestId);
         List<SimpleVolumeModel> models = new ArrayList<>();
         for (VolumeEntity volume : volumeList) {
-            if (!Objects.equals(volume.getStatus(), Constant.VolumeStatus.READY)) {
+            if (!Objects.equals(volume.getStatus(), cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY)) {
                 continue;
             }
             if (allowHostId == 0 || volume.getHostId() == 0 || volume.getHostId() == allowHostId) {
@@ -128,7 +128,7 @@ public class VolumeService extends AbstractService {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType = getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
@@ -141,7 +141,7 @@ public class VolumeService extends AbstractService {
                 .type(volumeType)
                 .capacity(volumeSize)
                 .allocation(0L)
-                .status(Constant.VolumeStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
                 .deviceDriver("")
                 .guestId(0)
                 .deviceId(0)
@@ -158,24 +158,24 @@ public class VolumeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId) {
 
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType = getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
-        VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.CLONE);
+        VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, cn.chenjun.cloud.common.util.Constant.VolumeStatus.CLONE);
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "跨宿主机本地磁盘无法完成克隆，如需进行操作，请先迁移到共享存储，然后再进行克隆");
         }
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
         if (guest != null) {
             switch (guest.getStatus()) {
-                case Constant.GuestStatus.STOP:
-                case Constant.GuestStatus.ERROR:
+                case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+                case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
                     break;
                 default:
                     throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
-        volume.setStatus(Constant.VolumeStatus.CLONE);
+        volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CLONE);
         this.volumeMapper.updateById(volume);
         VolumeEntity cloneVolume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
@@ -187,7 +187,7 @@ public class VolumeService extends AbstractService {
                 .type(volumeType)
                 .capacity(volume.getCapacity())
                 .allocation(0L)
-                .status(Constant.VolumeStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(cloneVolume);
@@ -209,9 +209,9 @@ public class VolumeService extends AbstractService {
         if (size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入新增的磁盘大小");
         }
-        VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, Constant.VolumeStatus.RESIZE);
+        VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, cn.chenjun.cloud.common.util.Constant.VolumeStatus.RESIZE);
         volume.setCapacity(volume.getCapacity() + size);
-        volume.setStatus(Constant.VolumeStatus.RESIZE);
+        volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.RESIZE);
         this.volumeMapper.updateById(volume);
         BaseOperateParam operateParam = ResizeVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .title("更改磁盘大小[" + volume.getName() + "]")
@@ -225,24 +225,24 @@ public class VolumeService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType =getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
-        VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, Constant.VolumeStatus.MIGRATE);
+        VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, cn.chenjun.cloud.common.util.Constant.VolumeStatus.MIGRATE);
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "跨宿主机本地磁盘无法完成迁移，如需进行操作，请先迁移到共享存储，然后再进行迁移");
         }
         GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
         if (guest != null) {
             switch (guest.getStatus()) {
-                case Constant.GuestStatus.STOP:
-                case Constant.GuestStatus.ERROR:
+                case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+                case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
                     break;
                 default:
                     throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
             }
         }
-        volume.setStatus(Constant.VolumeStatus.MIGRATE);
+        volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.MIGRATE);
         this.volumeMapper.updateById(volume);
         VolumeEntity migrateVolume = VolumeEntity.builder()
                 .description(volume.getDescription())
@@ -254,7 +254,7 @@ public class VolumeService extends AbstractService {
                 .type(volumeType)
                 .capacity(volume.getCapacity())
                 .allocation(0L)
-                .status(Constant.VolumeStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
                 .deviceId(0)
                 .deviceDriver("")
                 .guestId(0)
@@ -302,15 +302,15 @@ public class VolumeService extends AbstractService {
             return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
         }
         switch (volume.getStatus()) {
-            case Constant.VolumeStatus.ERROR:
-            case Constant.VolumeStatus.READY: {
+            case cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR:
+            case cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY: {
                 if (volume.getGuestId() > 0) {
                     throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘被系统挂载");
                 }
-                volume.setStatus(Constant.VolumeStatus.DESTROY);
+                volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.DESTROY);
                 volumeMapper.updateById(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate, volume.getStatus() == Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE));
+                operateTask.addTask(operate, volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE));
                 VolumeModel source = this.initVolume(volume);
                 this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return ResultUtil.success(source);

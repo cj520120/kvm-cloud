@@ -2,7 +2,7 @@ package cn.chenjun.cloud.management.operate.bean;
 
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.util.Constant;
+import cn.chenjun.cloud.common.util.Constant;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 

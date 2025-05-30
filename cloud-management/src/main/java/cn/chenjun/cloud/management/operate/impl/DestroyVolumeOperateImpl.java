@@ -29,9 +29,9 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
     @Override
     public void operate(DestroyVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY) {
+        if (volume.getStatus() == Constant.VolumeStatus.DESTROY) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+            if (storage.getStatus() != Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
             HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
@@ -55,15 +55,15 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
     @Override
     public void onFinish(DestroyVolumeOperate param, ResultUtil<Void> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.DESTROY) {
+        if (volume != null && volume.getStatus() == Constant.VolumeStatus.DESTROY) {
             volumeMapper.deleteById(param.getVolumeId());
         }
-        this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.VOLUME, param.getVolumeId());
+        this.configService.deleteAllocateConfig(Constant.ConfigType.VOLUME, param.getVolumeId());
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_VOLUME;
+        return Constant.OperateType.DESTROY_VOLUME;
     }
 }

@@ -4,10 +4,10 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.NetworkModel;
 import cn.chenjun.cloud.management.model.SimpleNetworkModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +38,7 @@ public class NetworkController extends BaseController {
         return this.lockRun(() -> networkService.listNetwork());
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/network/create")
     public ResultUtil<NetworkModel> createNetwork(@RequestParam("name") String name,
                                                   @RequestParam("startIp") String startIp,
@@ -57,13 +57,13 @@ public class NetworkController extends BaseController {
         return this.lockRun(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/register")
     public ResultUtil<NetworkModel> registerNetwork(@RequestParam("networkId") int networkId) {
         return this.lockRun(() -> networkService.registerNetwork(networkId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/maintenance")
     public ResultUtil<NetworkModel> maintenanceNetwork(@RequestParam("networkId") int networkId) {
         return this.lockRun(() -> networkService.maintenanceNetwork(networkId));

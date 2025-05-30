@@ -2,16 +2,16 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.TemplateModel;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -78,7 +78,7 @@ public class TemplateService extends AbstractService {
         if (StringUtils.isEmpty(uri)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "Please input template uri.");
         }
-        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).md5(md5.trim()).status(Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
+        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).md5(md5.trim()).status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
         this.templateMapper.insert(template);
         this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
@@ -99,16 +99,16 @@ public class TemplateService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> downloadTemplate(int templateId) {
-        StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE, 0);
+        StorageEntity storage = allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.TEMPLATE, 0);
         TemplateEntity template = this.templateMapper.selectById(templateId);
         switch (template.getStatus()) {
-            case Constant.TemplateStatus.READY:
-            case Constant.TemplateStatus.DOWNLOAD:
-            case Constant.TemplateStatus.ERROR:
+            case cn.chenjun.cloud.common.util.Constant.TemplateStatus.READY:
+            case cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD:
+            case cn.chenjun.cloud.common.util.Constant.TemplateStatus.ERROR:
                 this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
                 String volName = NameUtil.generateTemplateVolumeName();
                 String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE);
-                if (Objects.equals(template.getTemplateType(), Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
+                if (Objects.equals(template.getTemplateType(), cn.chenjun.cloud.common.util.Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
                     volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
                 TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
@@ -119,10 +119,10 @@ public class TemplateService extends AbstractService {
                         .type(volumeType)
                         .allocation(0L)
                         .capacity(0L)
-                        .status(Constant.TemplateStatus.DOWNLOAD)
+                        .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD)
                         .build();
                 this.templateVolumeMapper.insert(templateVolume);
-                template.setStatus(Constant.TemplateStatus.DOWNLOAD);
+                template.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD);
                 this.templateMapper.updateById(template);
                 BaseOperateParam operateParam = DownloadTemplateOperate.builder().id(UUID.randomUUID().toString()).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
@@ -137,14 +137,14 @@ public class TemplateService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
-        if (volume.getStatus() != Constant.VolumeStatus.READY) {
+        if (volume.getStatus() != cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘状态未就绪");
         }
         GuestEntity guest = this.getVolumeGuest(volumeId);
         if (guest != null) {
             switch (guest.getStatus()) {
-                case Constant.GuestStatus.STOP:
-                case Constant.GuestStatus.ERROR:
+                case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+                case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
                     break;
                 default:
                     throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
@@ -153,15 +153,15 @@ public class TemplateService extends AbstractService {
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);
         this.volumeMapper.updateById(volume);
 
-        StorageEntity storage = allocateService.allocateStorage(Constant.StorageSupportCategory.TEMPLATE, 0);
+        StorageEntity storage = allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.TEMPLATE, 0);
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE);
         if (cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         TemplateEntity template = TemplateEntity.builder().uri(String.valueOf(volumeId))
-                .name(name).templateType(Constant.TemplateType.VOLUME)
+                .name(name).templateType(cn.chenjun.cloud.common.util.Constant.TemplateType.VOLUME)
                 .script("")
-                .status(Constant.TemplateStatus.CREATING).build();
+                .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.CREATING).build();
         this.templateMapper.insert(template);
         String volumeName = NameUtil.generateTemplateVolumeName();
         TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
@@ -172,7 +172,7 @@ public class TemplateService extends AbstractService {
                 .type(volumeType)
                 .capacity(0L)
                 .allocation(0L)
-                .status(Constant.TemplateStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.CREATING)
                 .build();
         this.templateVolumeMapper.insert(templateVolume);
 
@@ -197,14 +197,14 @@ public class TemplateService extends AbstractService {
         }
         int timeout = 0;
         switch (template.getStatus()) {
-            case Constant.TemplateStatus.DESTROY:
-            case Constant.TemplateStatus.ERROR:
+            case cn.chenjun.cloud.common.util.Constant.TemplateStatus.DESTROY:
+            case cn.chenjun.cloud.common.util.Constant.TemplateStatus.ERROR:
                 break;
             default:
                 timeout = configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
                 break;
         }
-        template.setStatus(Constant.TemplateStatus.DESTROY);
+        template.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DESTROY);
         this.templateMapper.updateById(template);
         BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
         operateTask.addTask(operate, timeout);

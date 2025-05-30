@@ -29,13 +29,13 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
     @Override
     public void operate(MigrateGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.MIGRATE) {
+        if (guest.getStatus() == Constant.GuestStatus.MIGRATE) {
             if (Objects.equals(param.getSourceHostId(), param.getToHostId())) {
                 this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
                 return;
             }
             HostEntity host = this.hostMapper.selectById(param.getToHostId());
-            if (host == null || !Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
+            if (host == null || !Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机不存在或未就绪");
             }
             HostEntity sourceHost = this.hostMapper.selectById(param.getSourceHostId());
@@ -59,8 +59,8 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
     @Override
     public void onFinish(MigrateGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.MIGRATE) {
-            guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
+        if (guest != null && guest.getStatus() == Constant.GuestStatus.MIGRATE) {
+            guest.setStatus(Constant.GuestStatus.RUNNING);
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setHostId(param.getToHostId());
                 guest.setLastHostId(param.getToHostId());
@@ -82,6 +82,6 @@ public class MigrateGuestOperateImpl extends AbstractOperate<MigrateGuestOperate
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.MIGRATE_GUEST;
+        return Constant.OperateType.MIGRATE_GUEST;
     }
 }

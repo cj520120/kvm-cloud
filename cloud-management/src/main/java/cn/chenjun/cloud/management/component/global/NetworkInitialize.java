@@ -2,6 +2,8 @@ package cn.chenjun.cloud.management.component.global;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.JinjavaParser;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
@@ -10,8 +12,6 @@ import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.TemplateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.ObjectUtils;
@@ -38,7 +38,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
     public List<GuestQmaRequest.QmaBody> initialize(ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
         List<GuestQmaRequest.QmaBody> commands = new ArrayList<>();
         //写入网卡固定IP
-        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST));
         guestNetworkList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
 
         List<String> routeCommands = new ArrayList<>();
@@ -69,7 +69,7 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         map.put("__SYS__", sysconfig);
         map.put("commands", routeCommands);
         map.put("check-address", sysconfig.get(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
-        networkCheckScript = TemplateUtil.create().render(networkCheckScript, map);
+        networkCheckScript = JinjavaParser.create().render(networkCheckScript, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/tmp/network_check.sh").fileBody(networkCheckScript).build())).build());
 
 
@@ -95,6 +95,6 @@ public class NetworkInitialize implements GlobalComponentQmaInitialize {
         map.put("otherIpList", otherIpList);
         List<String> dnsList = Arrays.stream(dns.split(",")).filter(ObjectUtils::isNotEmpty).collect(Collectors.toList());
         map.put("dnsList", dnsList);
-        return TemplateUtil.create().render(body, map).replaceAll("(?m)^[ \t]*\r?\n", "");
+        return JinjavaParser.create().render(body, map).replaceAll("(?m)^[ \t]*\r?\n", "");
     }
 }

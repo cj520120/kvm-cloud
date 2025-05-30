@@ -1,7 +1,8 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.JinjavaParser;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
@@ -11,9 +12,7 @@ import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.VendorDataService;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.MetaDataType;
-import cn.chenjun.cloud.management.util.TemplateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -66,14 +65,14 @@ public class TemplateVendorDataService implements VendorDataService {
             Map<String, Object> map = new HashMap<>();
             map.put("__SYS__", sysconfig);
             map.put("vm", GsonBuilderUtil.create().fromJson(GsonBuilderUtil.create().toJson(guest), Map.class));
-            script = TemplateUtil.create().render(script, map);
+            script = JinjavaParser.create().render(script, map);
         }
         return MetaData.builder().type(MetaDataType.CLOUD).body(script).build();
     }
 
     @Override
     public boolean supports(@NonNull GuestEntity guest) {
-        return guest.getSystemCategory() != SystemCategory.WINDOWS;
+        return guest.getSystemCategory() != Constant.SystemCategory.WINDOWS;
     }
 
 }

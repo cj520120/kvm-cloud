@@ -41,7 +41,7 @@ public abstract class AbstractOsOperate<T extends BaseOperateParam, V extends Re
                     String.format("虚拟机[%s]光盘[%s]所属存储池不存在", guest.getDescription(), templateVolume.getName()));
         }
 
-        if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+        if (storage.getStatus() != Constant.StorageStatus.READY) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY,
                     String.format("虚拟机[%s]光盘[%s]所属存储池未就绪:%s", guest.getDescription(), templateVolume.getName(), storage.getName()));
         }

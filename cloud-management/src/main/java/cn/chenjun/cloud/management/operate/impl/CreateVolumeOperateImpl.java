@@ -36,16 +36,16 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
     @Override
     public void operate(T param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
+        if (volume.getStatus() == Constant.VolumeStatus.CREATING) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+            if (storage.getStatus() != Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
             HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
             if (param.getTemplateId() > 0) {
                 List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
                 Collections.shuffle(templateVolumeList);
-                TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
+                TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
                 StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
 
                 VolumeCloneRequest request = VolumeCloneRequest.builder()
@@ -76,16 +76,16 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
     @Override
     public void onFinish(T param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.CREATING) {
+        if (volume.getStatus() == Constant.VolumeStatus.CREATING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 volume.setTemplateId(param.getTemplateId());
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setCapacity(resultUtil.getData().getCapacity());
                 volume.setType(resultUtil.getData().getType());
                 volume.setPath(resultUtil.getData().getPath());
-                volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
+                volume.setStatus(Constant.VolumeStatus.READY);
             } else {
-                volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.ERROR);
+                volume.setStatus(Constant.VolumeStatus.ERROR);
             }
             volumeMapper.updateById(volume);
         }
@@ -96,6 +96,6 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_VOLUME;
+        return Constant.OperateType.CREATE_VOLUME;
     }
 }

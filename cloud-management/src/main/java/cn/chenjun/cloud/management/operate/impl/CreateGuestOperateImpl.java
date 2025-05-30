@@ -2,12 +2,12 @@ package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,26 +30,26 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
         if (guest != null) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 if (param.isStart()) {
-                    if (Objects.equals(Constant.GuestType.USER, guest.getType())) {
-                        guest.setStatus(Constant.GuestStatus.STARTING);
+                    if (Objects.equals(cn.chenjun.cloud.common.util.Constant.GuestType.USER, guest.getType())) {
+                        guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING);
                         guestMapper.updateById(guest);
                         BaseOperateParam operateParam = StartGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + guest.getDescription() + "]").hostId(param.getHostId()).guestId(param.getGuestId()).build();
                         this.taskService.addTask(operateParam);
                     } else {
-                        guest.setStatus(Constant.GuestStatus.STOP);
+                        guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP);
                         guestMapper.updateById(guest);
                     }
 
                 } else {
                     guest.setHostId(0);
                     guest.setLastHostId(0);
-                    guest.setStatus(Constant.GuestStatus.STOP);
+                    guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP);
                     guestMapper.updateById(guest);
                     this.allocateService.initHostAllocate();
                 }
             } else {
                 guest.setLastHostId(0);
-                guest.setStatus(Constant.GuestStatus.ERROR);
+                guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR);
                 guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
             }
@@ -60,6 +60,6 @@ public class CreateGuestOperateImpl extends CreateVolumeOperateImpl<CreateGuestO
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_GUEST;
+        return Constant.OperateType.CREATE_GUEST;
     }
 }

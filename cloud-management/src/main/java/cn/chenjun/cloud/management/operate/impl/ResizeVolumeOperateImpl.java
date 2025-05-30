@@ -29,9 +29,9 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
     @Override
     public void operate(ResizeVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.RESIZE) {
+        if (volume.getStatus() == Constant.VolumeStatus.RESIZE) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+            if (storage.getStatus() != Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
             GuestEntity guest = this.guestMapper.selectById(volume.getGuestId());
@@ -65,14 +65,14 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
     @Override
     public void onFinish(ResizeVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if (volume != null && volume.getStatus() == cn.chenjun.cloud.management.util.Constant.VolumeStatus.RESIZE) {
+        if (volume != null && volume.getStatus() == Constant.VolumeStatus.RESIZE) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 volume.setCapacity(resultUtil.getData().getCapacity());
                 volume.setAllocation(resultUtil.getData().getAllocation());
                 volume.setType(resultUtil.getData().getType());
                 volume.setPath(resultUtil.getData().getPath());
             }
-            volume.setStatus(cn.chenjun.cloud.management.util.Constant.VolumeStatus.READY);
+            volume.setStatus(Constant.VolumeStatus.READY);
             volumeMapper.updateById(volume);
         }
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
@@ -80,6 +80,6 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.RESIZE_VOLUME;
+        return Constant.OperateType.RESIZE_VOLUME;
     }
 }

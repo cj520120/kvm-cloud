@@ -2,11 +2,11 @@ package cn.chenjun.cloud.management.component.nat;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.JinjavaParser;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
-import cn.chenjun.cloud.management.util.TemplateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ public class NatServiceInitialize implements NatComponentQmaInitialize {
         map.put("secret", network.getSecret());
         map.put("networkId", network.getNetworkId());
         map.put("componentId", component.getComponentId());
-        natPython = TemplateUtil.create().render(natPython, map);
+        natPython = JinjavaParser.create().render(natPython, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/local/nat-service/nat.py").fileBody(natPython).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/usr/lib/systemd/system/nat-service.service").fileBody(natService).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("systemctl").args(new String[]{"daemon-reload"}).checkSuccess(true).build())).build());

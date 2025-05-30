@@ -29,24 +29,28 @@ public abstract class AbstractRunner {
             if (!this.isStart()) {
                 return;
             }
-            lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> {
+            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
                 if (this.getPeriodSeconds() > 0) {
-                    String key = RedisKeyUtil.JOB_RUN_TIME + this.getClass().getName();
+                    String key = this.getJobKey();
                     RBucket<Long> rBucket = redissonClient.getBucket(key);
                     if (rBucket.isExists()) {
                         return;
                     }
                     rBucket.set(System.currentTimeMillis(), Math.max(1, this.getPeriodSeconds()), TimeUnit.SECONDS);
                 }
-                try {
-                    log.info("开始执行周期任务: {}，当前任务周期 {}s", this.getName(), this.getPeriodSeconds());
-                    this.dispatch();
-                } catch (Exception err) {
-                    log.info("执行周期任务失败: {}", this.getName(), err);
-                }
+                this.doWork();
             });
         } catch (Exception err) {
             log.error("周期任务执行失败.", err);
+        }
+    }
+
+    public void doWork() {
+        try {
+            log.info("开始执行周期任务: {}，当前任务周期 {}s", this.getName(), this.getPeriodSeconds());
+            this.dispatch();
+        } catch (Exception err) {
+            log.info("执行周期任务失败: {}", this.getName(), err);
         }
     }
 
@@ -58,6 +62,9 @@ public abstract class AbstractRunner {
         return 10;
     }
 
+    protected String getJobKey() {
+        return RedisKeyUtil.getGlobalJobKey(this.getClass().getName());
+    }
     /**
      * 任务分发
      *

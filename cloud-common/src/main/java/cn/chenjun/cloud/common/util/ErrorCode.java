@@ -7,7 +7,10 @@ public final class ErrorCode {
     public static final int SUCCESS = 0;
     public static final int PARAM_ERROR = 300;
     public static final int SERVER_ERROR = 500;
-    public static final int NO_LOGIN_ERROR = 401;
+    public static final int NO_LOGIN_ERROR = 401;    /**
+     * 不支持的method
+     */
+    public static final int NOT_SUPPORT_METHOD = 415;
     public static final int BASE_ERROR = 1000000;
     /**
      * Network

@@ -3,16 +3,16 @@ package cn.chenjun.cloud.management.component.route;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.common.util.JinjavaParser;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.IpCalculate;
-import cn.chenjun.cloud.management.util.TemplateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
             throw new CodeException(ErrorCode.SERVER_ERROR, "Dnsmasq初始化失败.组件所属网络不存在,ComponentId=" + component.getComponentId());
         }
         List<GuestNetworkEntity> allGuestNetwork = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.NETWORK_ID, component.getNetworkId()));
-        Optional<GuestNetworkEntity> optional = allGuestNetwork.stream().filter(t -> Objects.equals(t.getAllocateId(), guestId) && Objects.equals(t.getAllocateType(), Constant.NetworkAllocateType.GUEST)).findFirst();
+        Optional<GuestNetworkEntity> optional = allGuestNetwork.stream().filter(t -> Objects.equals(t.getAllocateId(), guestId) && Objects.equals(t.getAllocateType(), cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST)).findFirst();
         if (!optional.isPresent()) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "Dnsmasq初始化失败.未找到监听网卡,ComponentId=" + component.getComponentId() + ",GuestId=" + guestId);
         }
@@ -79,7 +79,7 @@ public class DnsmasqInitialize implements RouteComponentQmaInitialize {
         }).collect(Collectors.toList());
         map.put("dhcpList", dhcpList);
         map.put("__SYS__", sysconfig);
-        String dnsmasqConfig = TemplateUtil.create().render(config, map);
+        String dnsmasqConfig = JinjavaParser.create().render(config, map);
         //下载dnsmasq
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "dnsmasq"}).build())).build());
         //写入dnsmasq

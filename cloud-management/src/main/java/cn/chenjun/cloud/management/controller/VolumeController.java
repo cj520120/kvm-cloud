@@ -3,12 +3,12 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.CloneModel;
 import cn.chenjun.cloud.management.model.MigrateModel;
 import cn.chenjun.cloud.management.model.SimpleVolumeModel;
 import cn.chenjun.cloud.management.model.VolumeModel;
 import cn.chenjun.cloud.management.servcie.VolumeService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

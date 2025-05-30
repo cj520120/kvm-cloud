@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.util;
+package cn.chenjun.cloud.common.util;
 
 import com.hubspot.jinjava.Jinjava;
 import com.hubspot.jinjava.lib.fn.ELFunctionDefinition;
@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
-public class TemplateUtil {
+public class JinjavaParser {
     public static Jinjava create() {
         Jinjava jinjava = new Jinjava();
-        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseUrlList", TemplateUtil.class, "parseUrlList", String.class, String.class));
-        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseRandomFirstUri", TemplateUtil.class, "parseRandomFirstUri", String.class, String.class));
-        jinjava.registerFunction(new ELFunctionDefinition("cloud", "toHex", TemplateUtil.class, "toHex", Integer.class, Integer.class));
-        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseInteger", TemplateUtil.class, "parseInteger", Double.class));
+        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseUrlList", JinjavaParser.class, "parseUrlList", String.class, String.class));
+        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseRandomFirstUri", JinjavaParser.class, "parseRandomFirstUri", String.class, String.class));
+        jinjava.registerFunction(new ELFunctionDefinition("cloud", "toHex", JinjavaParser.class, "toHex", Integer.class, Integer.class));
+        jinjava.registerFunction(new ELFunctionDefinition("cloud", "parseInteger", JinjavaParser.class, "parseInteger", Double.class));
         return jinjava;
     }
 

@@ -1,8 +1,9 @@
 package cn.chenjun.cloud.management.task.runner;
 
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.SyncHostTaskIdOperate;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.util.ConfigKey;
@@ -38,7 +39,7 @@ public class TaskIdSyncRunner extends AbstractRunner {
     protected void dispatch() {
         List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : hostList) {
-            if (Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
+            if (Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
                 BaseOperateParam operateParam = SyncHostTaskIdOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString()).title("同步主机任务列表").build();
                 this.taskService.addTask(operateParam);
             }

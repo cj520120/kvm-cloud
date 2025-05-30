@@ -71,6 +71,6 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOsOperate<Ch
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CHANGE_GUEST_NETWORK_INTERFACE;
+        return Constant.OperateType.CHANGE_GUEST_NETWORK_INTERFACE;
     }
 }

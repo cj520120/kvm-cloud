@@ -3,11 +3,11 @@ package cn.chenjun.cloud.management.servcie;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.UserInfoEntity;
 import cn.chenjun.cloud.management.data.mapper.UserInfoMapper;
 import cn.chenjun.cloud.management.model.*;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.lang.UUID;
@@ -42,7 +42,7 @@ public class UserService extends AbstractService {
 
     public ResultUtil<TokenModel> login(String loginName, String password, String nonce) {
 
-        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName).eq(UserInfoEntity.LOGIN_TYPE, Constant.LoginType.LOCAL));
+        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName).eq(UserInfoEntity.LOGIN_TYPE, cn.chenjun.cloud.common.util.Constant.LoginType.LOCAL));
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, "用户名或密码错误");
         }
@@ -50,26 +50,26 @@ public class UserService extends AbstractService {
         if (!realPassword.equals(password)) {
             throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, "用户名或密码错误");
         }
-        if (loginInfoEntity.getUserStatus() != Constant.UserState.ABLE) {
+        if (loginInfoEntity.getUserStatus() != cn.chenjun.cloud.common.util.Constant.UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return ResultUtil.success(buildToken(loginInfoEntity));
     }
 
     public ResultUtil<TokenModel> loginOauth2(String id, String name) {
-        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, id).eq(UserInfoEntity.LOGIN_TYPE, Constant.LoginType.OAUTH2));
+        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, id).eq(UserInfoEntity.LOGIN_TYPE, cn.chenjun.cloud.common.util.Constant.LoginType.OAUTH2));
         if (loginInfoEntity == null) {
             loginInfoEntity = new UserInfoEntity();
             loginInfoEntity.setLoginName(id);
             loginInfoEntity.setUserName(name);
             loginInfoEntity.setLoginPassword("");
-            loginInfoEntity.setUserStatus(Constant.UserState.ABLE);
-            loginInfoEntity.setLoginType(Constant.LoginType.OAUTH2);
+            loginInfoEntity.setUserStatus(cn.chenjun.cloud.common.util.Constant.UserState.ABLE);
+            loginInfoEntity.setLoginType(cn.chenjun.cloud.common.util.Constant.LoginType.OAUTH2);
             loginInfoEntity.setLoginPasswordSalt("");
-            loginInfoEntity.setUserType(Constant.UserType.USER);
+            loginInfoEntity.setUserType(cn.chenjun.cloud.common.util.Constant.UserType.USER);
             loginInfoEntity.setCreateTime(new Date());
             loginInfoMapper.insert(loginInfoEntity);
-        } else if (loginInfoEntity.getUserStatus() != Constant.UserState.ABLE) {
+        } else if (loginInfoEntity.getUserStatus() != cn.chenjun.cloud.common.util.Constant.UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
         return ResultUtil.success(this.buildToken(loginInfoEntity));
@@ -142,7 +142,7 @@ public class UserService extends AbstractService {
         }
         String salt = "CRY:" + RandomStringUtils.randomAlphanumeric(16);
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
-        entity = UserInfoEntity.builder().userStatus(userStatus).userName(userName).loginType(Constant.LoginType.LOCAL).userType(userType).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
+        entity = UserInfoEntity.builder().userStatus(userStatus).userName(userName).loginType(cn.chenjun.cloud.common.util.Constant.LoginType.LOCAL).userType(userType).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
         loginInfoMapper.insert(entity);
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getUserId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
         return ResultUtil.success(this.initUserModel(entity));
@@ -157,7 +157,7 @@ public class UserService extends AbstractService {
         loginInfoEntity.setUserStatus(state);
         loginInfoEntity.setUserType(userType);
         this.loginInfoMapper.updateById(loginInfoEntity);
-        if (state == Constant.UserState.DISABLE) {
+        if (state == cn.chenjun.cloud.common.util.Constant.UserState.DISABLE) {
             RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
             userToken.delete();
         }
@@ -278,10 +278,10 @@ public class UserService extends AbstractService {
             return false;
         }
         switch (role) {
-            case Constant.UserType.SUPPER_ADMIN:
-                return selfInfo.getData().getUserType() == Constant.UserType.SUPPER_ADMIN;
-            case Constant.UserType.ADMIN:
-                return selfInfo.getData().getUserType() == Constant.UserType.ADMIN || selfInfo.getData().getUserType() == Constant.UserType.SUPPER_ADMIN;
+            case cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN:
+                return selfInfo.getData().getUserType() == cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN;
+            case cn.chenjun.cloud.common.util.Constant.UserType.ADMIN:
+                return selfInfo.getData().getUserType() == cn.chenjun.cloud.common.util.Constant.UserType.ADMIN || selfInfo.getData().getUserType() == Constant.UserType.SUPPER_ADMIN;
             default:
                 return true;
         }

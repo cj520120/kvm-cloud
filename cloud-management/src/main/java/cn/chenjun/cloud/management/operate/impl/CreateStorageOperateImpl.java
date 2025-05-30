@@ -1,12 +1,12 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateStorageOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -34,7 +34,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
         StorageEntity storage = this.storageMapper.selectById(param.getStorageId());
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>())
                 .stream().filter(t -> {
-                    if (!Objects.equals(t.getStatus(), Constant.HostStatus.ONLINE)) {
+                    if (!Objects.equals(t.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
                         return false;
                     }
                     return !storage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL) || Objects.equals(storage.getHostId(), t.getHostId());
@@ -61,7 +61,7 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
     public void onFinish(CreateStorageOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
-            if (storage != null && storage.getStatus() == Constant.StorageStatus.INIT) {
+            if (storage != null && storage.getStatus() == cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT) {
                 storage.setStatus(Constant.StorageStatus.ERROR);
                 storageMapper.updateById(storage);
             }
@@ -74,6 +74,6 @@ public class CreateStorageOperateImpl extends AbstractOperate<CreateStorageOpera
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_STORAGE;
+        return cn.chenjun.cloud.common.util.Constant.OperateType.CREATE_STORAGE;
     }
 }

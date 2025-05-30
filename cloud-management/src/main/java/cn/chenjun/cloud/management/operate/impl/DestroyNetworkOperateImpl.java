@@ -32,7 +32,7 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
     @Override
     public void operate(DestroyNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
-        List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
+        List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
         DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().id(UUID.randomUUID().toString())
                 .title(param.getTitle())
                 .networkId(param.getNetworkId())
@@ -52,9 +52,9 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
     public void onFinish(DestroyNetworkOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (network != null && network.getStatus() == cn.chenjun.cloud.management.util.Constant.NetworkStatus.DESTROY) {
+            if (network != null && network.getStatus() == Constant.NetworkStatus.DESTROY) {
                 networkMapper.deleteById(param.getNetworkId());
-                this.configService.deleteAllocateConfig(cn.chenjun.cloud.management.util.Constant.ConfigType.NETWORK, param.getNetworkId());
+                this.configService.deleteAllocateConfig(Constant.ConfigType.NETWORK, param.getNetworkId());
             }
         }
 
@@ -63,6 +63,6 @@ public class DestroyNetworkOperateImpl extends AbstractOperate<DestroyNetworkOpe
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_NETWORK;
+        return Constant.OperateType.DESTROY_NETWORK;
     }
 }

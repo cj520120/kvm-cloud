@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.MetaDataService;
@@ -49,6 +49,6 @@ public class DefaultMetaDataService implements MetaDataService {
 
     @Override
     public boolean supports(@NonNull GuestEntity guest) {
-        return guest.getSystemCategory() != SystemCategory.WINDOWS;
+        return guest.getSystemCategory() != Constant.SystemCategory.WINDOWS;
     }
 }

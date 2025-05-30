@@ -2,14 +2,14 @@ package cn.chenjun.cloud.management.component.global;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.JinjavaParser;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
-import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.TemplateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
@@ -79,7 +79,7 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
         map.put("__SYS__", sysconfig);
         map.put("vrrpList", vrrpList);
         String config = new String(Base64.getDecoder().decode(ResourceUtil.readUtf8Str("tpl/component/keepalived/keepalived.tpl")), StandardCharsets.UTF_8);
-        config = TemplateUtil.create().render(config, map);
+        config = JinjavaParser.create().render(config, map);
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.EXECUTE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.Execute.builder().command("sh").args(new String[]{"/tmp/check_install_service_shell.sh", "keepalived"}).build())).build());
         commands.add(GuestQmaRequest.QmaBody.builder().command(GuestQmaRequest.QmaType.WRITE_FILE).data(GsonBuilderUtil.create().toJson(GuestQmaRequest.WriteFile.builder().fileName("/etc/keepalived/keepalived.conf").fileBody(config).build())).build());
         //启动keepalive

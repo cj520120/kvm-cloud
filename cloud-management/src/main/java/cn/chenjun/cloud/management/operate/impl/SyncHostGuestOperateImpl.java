@@ -3,11 +3,11 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.SyncHostGuestOperate;
@@ -39,7 +39,7 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
             return;
 
         }
-        if (!Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
+        if (!Objects.equals(Constant.HostStatus.ONLINE, host.getStatus())) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "主机当前不在线"));
         }
         this.asyncInvoker(host, param, Constant.Command.ALL_GUEST_INFO, NoneRequest.builder());
@@ -64,10 +64,10 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
             Map<String, GuestEntity> map = guestEntityList.stream().collect(Collectors.toMap(GuestEntity::getName, Function.identity()));
             for (String guestName : guestNames) {
                 GuestEntity guest = map.get(guestName);
-                if (guest == null || Objects.equals(cn.chenjun.cloud.management.util.Constant.GuestStatus.MIGRATE, guest.getStatus())) {
+                if (guest == null || Objects.equals(Constant.GuestStatus.MIGRATE, guest.getStatus())) {
                     continue;
                 }
-                if (!Objects.equals(guest.getHostId(), param.getHostId()) || Objects.equals(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP, guest.getStatus())) {
+                if (!Objects.equals(guest.getHostId(), param.getHostId()) || Objects.equals(Constant.GuestStatus.STOP, guest.getStatus())) {
                     BaseOperateParam operate = DestroyHostGuestOperate.builder().hostId(param.getHostId()).name(guestName).title("同步停止主机:" + guest.getGuestId()).id(UUID.randomUUID().toString()).build();
                     this.taskService.addTask(operate);
                 }
@@ -77,12 +77,12 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
         {
             List<GuestEntity> guestEntityList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.HOST_ID, param.getHostId()));
             for (GuestEntity guest : guestEntityList) {
-                if (Objects.equals(guest.getStatus(), cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING)
+                if (Objects.equals(guest.getStatus(), Constant.GuestStatus.RUNNING)
                         && System.currentTimeMillis() - guest.getLastStartTime().getTime() > TimeUnit.MINUTES.toMillis(1)) {
                     //上次超过1分钟，则开始检测
                     if (!guestNames.contains(guest.getName())) {
                         //无效的主机状态，开始自动关机
-                        guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOPPING);
+                        guest.setStatus(Constant.GuestStatus.STOPPING);
                         this.guestMapper.updateById(guest);
                         BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guest.getGuestId()).force(true)
                                 .id(UUID.randomUUID().toString())
@@ -96,6 +96,6 @@ public class SyncHostGuestOperateImpl extends AbstractOperate<SyncHostGuestOpera
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.SYNC_HOST_GUEST;
+        return Constant.OperateType.SYNC_HOST_GUEST;
     }
 }

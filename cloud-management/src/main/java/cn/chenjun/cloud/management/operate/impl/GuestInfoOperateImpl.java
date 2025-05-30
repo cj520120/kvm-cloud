@@ -33,10 +33,10 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
     @Override
     public void operate(GuestInfoOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING) {
+        if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
 
             HostEntity host = this.hostMapper.selectById(guest.getHostId());
-            if (host == null || !Objects.equals(host.getStatus(), cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE)) {
+            if (host == null || !Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "主机不存在或未就绪");
             }
             GuestInfoRequest request = GuestInfoRequest.builder()
@@ -58,7 +58,7 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
     @Override
     public void onFinish(GuestInfoOperate param, ResultUtil<GuestInfo> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING) {
+        if (guest != null && guest.getStatus() == Constant.GuestStatus.RUNNING) {
             this.allocateService.initHostAllocate();
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
 
@@ -79,6 +79,6 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.GUEST_INFO;
+        return Constant.OperateType.GUEST_INFO;
     }
 }

@@ -1,19 +1,19 @@
 package cn.chenjun.cloud.management.task.runner;
 
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.MapUtil;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.data.mapper.StorageMapper;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateStorageOperate;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
-import cn.chenjun.cloud.management.util.MapUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +48,9 @@ public class InitLocalStorageRunner extends AbstractRunner {
 
         if (!hostMap.isEmpty()) {
             for (HostEntity host : hostMap.values()) {
-                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
+                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
                 String enable = this.configService.getConfig(queryList, ConfigKey.STORAGE_LOCAL_ENABLE);
-                if (Objects.equals(Constant.Enable.YES, enable)) {
+                if (Objects.equals(cn.chenjun.cloud.common.util.Constant.Enable.YES, enable)) {
                     String path = this.configService.getConfig(queryList, ConfigKey.STORAGE_LOCAL_PATH);
                     Map<String, String> storageParm = MapUtil.of("path", path);
                     String paramStr = GsonBuilderUtil.create().toJson(storageParm);
@@ -64,11 +64,11 @@ public class InitLocalStorageRunner extends AbstractRunner {
                                 .hostId(host.getHostId())
                                 .param(paramStr)
                                 .mountPath(path)
-                                .supportCategory(Constant.StorageSupportCategory.VOLUME)
+                                .supportCategory(Constant.StorageCategory.VOLUME)
                                 .allocation(0L)
                                 .capacity(0L)
                                 .available(0L)
-                                .status(Constant.StorageStatus.INIT)
+                                .status(cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT)
                                 .build();
                         this.storageMapper.insert(storage);
                         BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
@@ -89,6 +89,6 @@ public class InitLocalStorageRunner extends AbstractRunner {
 
     @Override
     protected boolean isStart() {
-        return Objects.equals(this.configService.getConfig(ConfigKey.STORAGE_LOCAL_ENABLE), Constant.Enable.YES);
+        return Objects.equals(this.configService.getConfig(ConfigKey.STORAGE_LOCAL_ENABLE), cn.chenjun.cloud.common.util.Constant.Enable.YES);
     }
 }

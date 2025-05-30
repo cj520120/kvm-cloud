@@ -16,7 +16,7 @@ public class NotifyService {
     private final RTopic topic;
 
     public NotifyService(@Autowired RedissonClient redissonClient) {
-        topic = redissonClient.getTopic(RedisKeyUtil.GLOBAL_NOTIFY_KET);
+        topic = redissonClient.getTopic(RedisKeyUtil.getGlobalNotifyKey());
     }
 
     public <T> void publish(NotifyData<T> notifyData) {

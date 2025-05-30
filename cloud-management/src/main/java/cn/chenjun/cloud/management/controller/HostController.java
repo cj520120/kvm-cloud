@@ -4,9 +4,9 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.servcie.HostService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +37,7 @@ public class HostController extends BaseController {
         return this.lockRun(() -> hostService.getHostInfo(hostId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/host/create")
     public ResultUtil<HostModel> createHost(@RequestParam("displayName") String displayName,
                                             @RequestParam("hostIp") String hostIp,
@@ -46,13 +46,13 @@ public class HostController extends BaseController {
         return this.lockRun(() -> hostService.createHost(displayName, hostIp, uri, nic));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/host/register")
     public ResultUtil<HostModel> registerHost(@RequestParam("hostId") int hostId) {
         return this.lockRun(() -> hostService.registerHost(hostId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/host/maintenance")
     public ResultUtil<HostModel> maintenanceHost(@RequestParam("hostId") int hostId) {
         return this.lockRun(() -> hostService.maintenanceHost(hostId));

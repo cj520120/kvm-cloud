@@ -1,19 +1,21 @@
 package cn.chenjun.cloud.management.component;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.BootstrapType;
-import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartComponentGuestOperate;
 import cn.chenjun.cloud.management.servcie.AbstractService;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.GuestService;
-import cn.chenjun.cloud.management.util.*;
+import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.GuestExternNames;
+import cn.chenjun.cloud.management.util.GuestExternUtil;
+import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
@@ -67,7 +69,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             return;
         }
 
-        if (masterGuest.getStatus() == Constant.GuestStatus.RUNNING) {
+        if (masterGuest.getStatus() == cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING) {
             if (!checkComponentSlaveNumber(component)) {
                 return;
             }
@@ -181,7 +183,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
     private int getTemplateId() {
         int templateId;
-        List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_TYPE, Constant.TemplateType.SYSTEM).eq(TemplateEntity.TEMPLATE_STATUS, Constant.TemplateStatus.READY));
+        List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_TYPE, cn.chenjun.cloud.common.util.Constant.TemplateType.SYSTEM).eq(TemplateEntity.TEMPLATE_STATUS, cn.chenjun.cloud.common.util.Constant.TemplateStatus.READY));
         if (templateList.isEmpty()) {
             log.warn("系统模版未就绪，等待就绪后创建系统组件.{}", this.getComponentName());
             templateId = -1;
@@ -193,12 +195,12 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     }
 
     private void startComponentGuest(GuestEntity guest, List<Integer> hostIds) {
-        if (guest.getStatus().equals(Constant.GuestStatus.ERROR)) {
+        if (guest.getStatus().equals(cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR)) {
             log.info("当前组件{}:{}状态错误，准备删除重建", this.getComponentName(), guest.getName());
             this.guestService.destroyGuest(guest.getGuestId());
             return;
         }
-        if (!guest.getStatus().equals(Constant.GuestStatus.STOP)) {
+        if (!guest.getStatus().equals(cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP)) {
             log.info("当前组件{}:{}状态不是停止状态，无需操作", this.getComponentName(), guest.getName());
             return;
         }
@@ -220,7 +222,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 hostId = hostIds.get(0);
             }
         }
-        guest.setStatus(Constant.GuestStatus.STARTING);
+        guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING);
         guest.setLastHostId(hostId);
         guestMapper.updateById(guest);
         BaseOperateParam operateParam = StartComponentGuestOperate.builder().id(UUID.randomUUID().toString()).title("启动系统主机[" + this.getComponentName() + "]").guestId(guest.getGuestId()).hostId(hostId).componentType(this.getComponentType()).build();
@@ -230,11 +232,11 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
 
     private void destroySlaveGuest(GuestEntity guest) {
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STOP:
-            case Constant.GuestStatus.ERROR:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
                 this.guestService.destroyGuest(guest.getGuestId());
                 break;
-            case Constant.GuestStatus.RUNNING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING:
                 this.guestService.shutdown(guest.getGuestId(), true);
                 break;
             default:
@@ -248,13 +250,13 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         int systemCpuShare = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
         long systemMemory = (int) configService.getConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024;
 
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, 0);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, 0);
         GuestEntity guest = GuestEntity.builder()
                 .name(NameUtil.generateGuestName())
                 .groupId(0)
                 .description(name)
-                .systemCategory(SystemCategory.CENTOS)
-                .bootstrapType(BootstrapType.BIOS)
+                .systemCategory(Constant.SystemCategory.CENTOS)
+                .bootstrapType(cn.chenjun.cloud.common.util.Constant.BootstrapType.BIOS)
                 .cpu(systemCpu)
                 .share(systemCpuShare)
                 .memory(systemMemory)
@@ -266,8 +268,8 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .guestIp("")
                 .networkId(network.getNetworkId())
                 .extern("{}")
-                .type(Constant.GuestType.COMPONENT)
-                .status(Constant.GuestStatus.CREATING)
+                .type(cn.chenjun.cloud.common.util.Constant.GuestType.COMPONENT)
+                .status(cn.chenjun.cloud.common.util.Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
         Map<String, Map<String, String>> externData = new HashMap<>();
@@ -303,11 +305,11 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
         guestNetwork.setAllocateId(guest.getGuestId());
-        guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
         guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
-        if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
+        if (Objects.equals(network.getType(), cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN)) {
             //调整基础网络网卡为第一网卡
             guestNetwork.setDeviceId(1);
             this.guestNetworkMapper.updateById(guestNetwork);
@@ -316,7 +318,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             basicGuestNetwork.setDeviceId(0);
             basicGuestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
             basicGuestNetwork.setAllocateId(guest.getGuestId());
-            basicGuestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+            basicGuestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
             this.guestNetworkMapper.updateById(basicGuestNetwork);
         }
         BaseOperateParam operateParam = CreateGuestOperate.builder()

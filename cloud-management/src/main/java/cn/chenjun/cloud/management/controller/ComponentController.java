@@ -3,11 +3,11 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.ComponentDetailModel;
 import cn.chenjun.cloud.management.model.GuestModel;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.servcie.NetworkService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,16 +26,16 @@ public class ComponentController extends BaseController {
         return this.lockRun(() -> networkService.listNetworkComponent(networkId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/component/slave/number")
     public ResultUtil<ComponentDetailModel> updateComponentSlaveNumber(@RequestParam("componentId") int componentId, @RequestParam("number") int number) {
         return this.lockRun(() -> networkService.updateComponentSlaveNumber(componentId, number));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/component/nat/create")
     public ResultUtil<ComponentDetailModel> createNatComponent(@RequestParam("networkId") int networkId) {
-        return this.lockRun(() -> networkService.createComponent(networkId, Constant.ComponentType.NAT));
+        return this.lockRun(() -> networkService.createComponent(networkId, cn.chenjun.cloud.common.util.Constant.ComponentType.NAT));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)

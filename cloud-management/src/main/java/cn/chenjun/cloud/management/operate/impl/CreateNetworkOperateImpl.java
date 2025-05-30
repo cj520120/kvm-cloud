@@ -1,12 +1,12 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -32,7 +32,7 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
     @Override
     public void operate(CreateNetworkOperate param) {
         List<HostEntity> hosts = hostMapper.selectList(new QueryWrapper<>());
-        List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
+        List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
         InitHostNetworkOperate operate = InitHostNetworkOperate.builder().id(UUID.randomUUID().toString())
                 .title(param.getTitle())
                 .networkId(param.getNetworkId())
@@ -53,8 +53,8 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
     public void onFinish(CreateNetworkOperate param, ResultUtil<Void> resultUtil) {
         if (resultUtil.getCode() != ErrorCode.SUCCESS) {
             NetworkEntity network = networkMapper.selectById(param.getNetworkId());
-            if (network != null && Objects.equals(network.getStatus(), Constant.NetworkStatus.CREATING)) {
-                network.setStatus(Constant.NetworkStatus.ERROR);
+            if (network != null && Objects.equals(network.getStatus(), cn.chenjun.cloud.common.util.Constant.NetworkStatus.CREATING)) {
+                network.setStatus(cn.chenjun.cloud.common.util.Constant.NetworkStatus.ERROR);
                 networkMapper.updateById(network);
             }
         }
@@ -65,6 +65,6 @@ public class CreateNetworkOperateImpl extends AbstractOperate<CreateNetworkOpera
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_NETWORK;
+        return Constant.OperateType.CREATE_NETWORK;
     }
 }

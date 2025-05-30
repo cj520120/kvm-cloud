@@ -2,13 +2,13 @@ package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -35,7 +35,7 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
         if (guest == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机[" + param.getGuestId() + "]已经删除");
         }
-        if (!guest.getStatus().equals(Constant.GuestStatus.DESTROY)) {
+        if (!guest.getStatus().equals(cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "销毁虚拟机失败:[" + guest.getName() + ",虚拟机状态不正常：" + guest.getStatus());
         }
         this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
@@ -50,11 +50,11 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
     @Override
     public void onFinish(DestroyGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = this.guestMapper.selectById(param.getGuestId());
-        if (guest == null || !guest.getStatus().equals(Constant.GuestStatus.DESTROY)) {
+        if (guest == null || !guest.getStatus().equals(cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY)) {
             return;
         }
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
+            List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST));
             for (GuestNetworkEntity guestNetwork : guestNetworkList) {
                 guestNetwork.setAllocateId(0);
                 guestNetwork.setDeviceId(0);
@@ -70,9 +70,9 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
                 taskService.addTask(operate);
                 this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
             }
-            this.configService.deleteAllocateConfig(Constant.ConfigType.GUEST, param.getGuestId());
+            this.configService.deleteAllocateConfig(cn.chenjun.cloud.common.util.Constant.ConfigType.GUEST, param.getGuestId());
             this.guestMapper.deleteById(guest.getGuestId());
-            this.configService.deleteAllocateConfig(Constant.ConfigType.GUEST, guest.getGuestId());
+            this.configService.deleteAllocateConfig(cn.chenjun.cloud.common.util.Constant.ConfigType.GUEST, guest.getGuestId());
             this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
             this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
@@ -82,6 +82,6 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_GUEST;
+        return cn.chenjun.cloud.common.util.Constant.OperateType.DESTROY_GUEST;
     }
 }

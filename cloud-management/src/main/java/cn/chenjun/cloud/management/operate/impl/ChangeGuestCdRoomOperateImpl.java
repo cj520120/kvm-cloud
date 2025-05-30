@@ -54,6 +54,6 @@ public class ChangeGuestCdRoomOperateImpl extends AbstractOsOperate<ChangeGuestC
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CHANGE_GUEST_CD_ROOM;
+        return Constant.OperateType.CHANGE_GUEST_CD_ROOM;
     }
 }

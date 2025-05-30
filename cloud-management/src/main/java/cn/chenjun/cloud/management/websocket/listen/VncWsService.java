@@ -2,11 +2,11 @@ package cn.chenjun.cloud.management.websocket.listen;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.HostMapper;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.WebSocket;
 import cn.chenjun.cloud.management.websocket.client.context.VncProxyContext;

@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.entity.ConfigEntity;
@@ -10,13 +11,11 @@ import cn.chenjun.cloud.management.model.ConfigModel;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.servcie.bean.DefaultConfigInfo;
 import cn.chenjun.cloud.management.servcie.convert.ConfigConvert;
-import cn.chenjun.cloud.management.servcie.convert.bean.VCpuTune;
 import cn.chenjun.cloud.management.servcie.convert.impl.FloatConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.IntegerConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.StringConvert;
 import cn.chenjun.cloud.management.servcie.convert.impl.VCpuTuneConvert;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +35,7 @@ public class ConfigService {
     public ConfigService(@Autowired ApplicationConfig applicationConfig) {
         initDefaultConfig(ConfigKey.DEFAULT_MANAGER_URI, applicationConfig.getManagerUri(), "系统通信地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_BASE_URI, "/", "Websocket通信基础地址(用于VNC和页面实时更新)", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, Constant.Enable.YES, "是否启动网络组件(特殊情况下使用)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.YES, "是否启动网络组件(特殊情况下使用)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER, cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, "系统组件网络驱动", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.NetworkDriver.VIRTIO, cn.chenjun.cloud.common.util.Constant.NetworkDriver.RTL8139, cn.chenjun.cloud.common.util.Constant.NetworkDriver.E1000), StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS, "8.8.8.8", "系统组件网络检测地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU, 1, "系统组件Cpu", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
@@ -53,7 +52,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_HOST_MEMORY_WEIGHT, 20.0f, "申请主机时剩余内存占比权重(每GB)", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT, 1.0f, "申请磁盘时存储池占比权重(每TB)", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
-        initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_ENABLE, Constant.Enable.YES, "是否使用virtio-scsi控制器", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.YES, "是否使用virtio-scsi控制器", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_QUEUE_NUMBER, 4, "virtio-scsi控制器 queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
         initDefaultConfig(ConfigKey.DEFAULT_DISK_TYPE, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
@@ -81,23 +80,23 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND, 120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CPU_MODEL, "host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough", "host-model", "custom"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, "no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, "no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_BIND_HOST, 0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, "no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, "no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, "strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict", "preferred", "interleave"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, "0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, "yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, "yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_MODEL, "virtio", "内存气球驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("none", "virtio"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_PERIOD, 10, "内存气球回收周期(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
-        initDefaultConfig(ConfigKey.VM_MEMORY_HUGE_PAGES_ENABLE, Constant.Enable.NO, "是否启用大页内存", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_MEMORY_HUGE_PAGES_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "是否启用大页内存", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MEMORY_HUGE_PAGES_SIZE, 0, "大页内存设置值(GiB)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPU_CACHE_ENABLE, Constant.Enable.NO, "启用Cpu L3缓存(需要硬件支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPU_VIRTUALIZATION_ENABLE, Constant.Enable.NO, "允许虚拟机内再运行虚拟化（需Intel/AMD支持)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_CACHE_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "启用Cpu L3缓存(需要硬件支持)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CPU_VIRTUALIZATION_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "允许虚拟机内再运行虚拟化（需Intel/AMD支持)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPU_VIRTUALIZATION_NAME, "vmx", "嵌套虚拟化名称(intel:vmx,amd:svm)", Constant.ConfigValueType.SELECT, Arrays.asList("vmx", "svm"), StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CLOCK_TYPE, "utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime", "timezone", "variable"), StringConvert.Default);
@@ -107,7 +106,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.STORAGE_LOCAL_ENABLE, Constant.Enable.NO, "是否启用本地存储(实验阶段,不支持系统组件创建和启动，系统必须至少包含一个用于磁盘存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "是否启用本地存储(实验阶段,不支持系统组件创建和启动，系统必须至少包含一个用于磁盘存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.STORAGE_LOCAL_PATH, "/data", "本地存储路径，需要在主机节点提前创建", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.STORAGE_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
@@ -148,12 +147,12 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_INTERFACE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/interface/interface.xml"), "vm 基础网络网卡配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
 
-        initDefaultConfig(ConfigKey.LOGIN_JWD_PASSWORD, "#$1fa)&*WS09", "登录使用的JWT 密码", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
-        initDefaultConfig(ConfigKey.LOGIN_JWD_ISSUER, "CJ Cloud Management", "登录使用的JWT ISSUser", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.LOGIN_JWD_PASSWORD, "#$1fa)&*WS09", "登录使用的JWT 密码", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.LOGIN_JWD_ISSUER, "CJ Cloud Management", "登录使用的JWT ISSUser", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.LOGIN_JWT_EXPIRE_MINUTES, (int) TimeUnit.DAYS.toMinutes(1), "登录token有效期(小时)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
-        initDefaultConfig(ConfigKey.OAUTH2_ENABLE, Constant.Enable.NO, "是否启用Oauth2", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.OAUTH2_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "是否启用Oauth2", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.OAUTH2_TITLE, "Oauth2 Login", "Oauth2 Title", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.OAUTH2_CLIENT_ID, "", "Oauth2 Client Id", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.OAUTH2_CLIENT_SECRET, "", "Oauth2 Client Secret", Constant.ConfigValueType.STRING, null, StringConvert.Default);

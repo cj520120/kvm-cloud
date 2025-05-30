@@ -30,15 +30,15 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
     public void operate(DownloadTemplateOperate param) {
         TemplateVolumeEntity templateVolume = templateVolumeMapper.selectById(param.getTemplateVolumeId());
         TemplateEntity template = templateMapper.selectById(templateVolume.getTemplateId());
-        if (template.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
+        if (template.getStatus() != Constant.TemplateStatus.DOWNLOAD) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + template.getName() + "]状态不是下载状态:" + template.getStatus());
         }
-        if (templateVolume.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
+        if (templateVolume.getStatus() != Constant.TemplateStatus.DOWNLOAD) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + template.getName() + "]磁盘文件不是下载状态:" + template.getStatus());
         }
 
         StorageEntity storage = storageMapper.selectById(templateVolume.getStorageId());
-        if (storage.getStatus() != cn.chenjun.cloud.management.util.Constant.StorageStatus.READY) {
+        if (storage.getStatus() != Constant.StorageStatus.READY) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
         }
         HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
@@ -66,23 +66,23 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         if (templateVolume != null) {
             TemplateEntity template = templateMapper.selectById(templateVolume.getTemplateId());
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                if (templateVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                    templateVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+                if (templateVolume.getStatus() == Constant.TemplateStatus.DOWNLOAD) {
+                    templateVolume.setStatus(Constant.TemplateStatus.READY);
                     templateVolume.setCapacity(resultUtil.getData().getCapacity());
                     templateVolume.setAllocation(resultUtil.getData().getAllocation());
                     templateVolumeMapper.updateById(templateVolume);
                 }
-                if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                    template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.READY);
+                if (template != null && template.getStatus() == Constant.TemplateStatus.DOWNLOAD) {
+                    template.setStatus(Constant.TemplateStatus.READY);
                     templateMapper.updateById(template);
                 }
             } else {
-                if (templateVolume.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                    templateVolume.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.ERROR);
+                if (templateVolume.getStatus() == Constant.TemplateStatus.DOWNLOAD) {
+                    templateVolume.setStatus(Constant.TemplateStatus.ERROR);
                     templateVolumeMapper.updateById(templateVolume);
                 }
-                if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DOWNLOAD) {
-                    template.setStatus(cn.chenjun.cloud.management.util.Constant.TemplateStatus.ERROR);
+                if (template != null && template.getStatus() == Constant.TemplateStatus.DOWNLOAD) {
+                    template.setStatus(Constant.TemplateStatus.ERROR);
                     templateMapper.updateById(template);
                 }
             }
@@ -93,6 +93,6 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DOWNLOAD_TEMPLATE;
+        return Constant.OperateType.DOWNLOAD_TEMPLATE;
     }
 }

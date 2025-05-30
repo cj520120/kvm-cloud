@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
@@ -8,7 +9,6 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.Constant;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,8 +45,8 @@ public class AllocateService extends AbstractService {
 
         Map<Integer, Float> scoreMap = storageList.parallelStream().collect(Collectors.toMap(StorageEntity::getStorageId, entity -> {
             List<ConfigQuery> queryList = Arrays.asList(
-                    ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build(),
-                    ConfigQuery.builder().type(Constant.ConfigType.STORAGE).id(entity.getStorageId()).build()
+                    ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build(),
+                    ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.STORAGE).id(entity.getStorageId()).build()
             );
                 float storageWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT);
                 float availableValue = entity.getAvailable() / (1024.0f * 1024.0f * 1024.0f * 1024.0f);
@@ -62,7 +62,7 @@ public class AllocateService extends AbstractService {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         wrapper.eq(GuestNetworkEntity.NETWORK_ID, networkId)
                 .eq(GuestNetworkEntity.ALLOCATE_ID, 0)
-                .eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.DEFAULT)
+                .eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.DEFAULT)
                 .last("LIMIT 1");
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
         if (guestNetwork == null) {
@@ -74,7 +74,7 @@ public class AllocateService extends AbstractService {
     public List<HostEntity> listAllocateHost(int cpu, long memory) {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
-            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
         }
@@ -86,10 +86,10 @@ public class AllocateService extends AbstractService {
     public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
+            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
-            if(host.getStatus() != Constant.HostStatus.ONLINE){
+            if (host.getStatus() != cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE) {
                 throw new CodeException(ErrorCode.HOST_NOT_READY, "主机状态不在线");
             }
             if (!hostVerify(host, cpu, memory)) {
@@ -100,7 +100,7 @@ public class AllocateService extends AbstractService {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : list) {
 
-                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
+                List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
                 host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
                 host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
             }
@@ -116,7 +116,7 @@ public class AllocateService extends AbstractService {
                 if (cpu > 0 && memory > 0) {
                     Map<Integer, Float> scoreMap = new HashMap<>(list.size());
                     for (HostEntity entity : list) {
-                        List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build(), ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(entity.getHostId()).build());
+                        List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(entity.getHostId()).build());
                         float cpuWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_HOST_CPU_WEIGHT);
                         float memoryWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_HOST_MEMORY_WEIGHT);
                         float overCpu = this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU);
@@ -139,7 +139,7 @@ public class AllocateService extends AbstractService {
     }
 
     private boolean hostVerify(HostEntity host, int cpu, long memory) {
-        if (!Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
+        if (!Objects.equals(host.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
             return false;
         }
         int allocateCpu = host.getAllocationCpu() + cpu;

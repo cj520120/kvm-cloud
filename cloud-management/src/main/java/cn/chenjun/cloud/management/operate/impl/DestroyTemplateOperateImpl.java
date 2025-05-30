@@ -33,7 +33,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
     @Override
     public void operate(DestroyTemplateOperate param) {
         TemplateEntity template = this.templateMapper.selectById(param.getTemplateId());
-        if (template.getStatus() != cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
+        if (template.getStatus() != Constant.TemplateStatus.DESTROY) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + template.getName() + "]状态不正确:" + template.getStatus());
         }
         List<TemplateVolumeEntity> volumes = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
@@ -63,7 +63,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
     @Override
     public void onFinish(DestroyTemplateOperate param, ResultUtil<Void> resultUtil) {
         TemplateEntity template = this.templateMapper.selectById(param.getTemplateId());
-        if (template != null && template.getStatus() == cn.chenjun.cloud.management.util.Constant.TemplateStatus.DESTROY) {
+        if (template != null && template.getStatus() == Constant.TemplateStatus.DESTROY) {
             this.templateMapper.deleteById(template);
             this.guestMapper.detachCdByTemplateId(template.getTemplateId());
             this.notifyService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
@@ -73,6 +73,6 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_TEMPLATE;
+        return Constant.OperateType.DESTROY_TEMPLATE;
     }
 }

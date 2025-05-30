@@ -1,13 +1,13 @@
 package cn.chenjun.cloud.management.servcie.meta.impl;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.SystemCategory;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
 import cn.chenjun.cloud.management.util.GuestExternNames;
 import cn.chenjun.cloud.management.util.MetaDataType;
-import cn.chenjun.cloud.management.util.SymmetricCryptoUtil;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -47,6 +47,6 @@ public class WindowsUserDataService implements UserDataService {
 
     @Override
     public boolean supports(@NonNull GuestEntity guest) {
-        return guest.getSystemCategory() == SystemCategory.WINDOWS;
+        return guest.getSystemCategory() == Constant.SystemCategory.WINDOWS;
     }
 }

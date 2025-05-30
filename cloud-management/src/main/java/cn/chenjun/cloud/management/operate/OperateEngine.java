@@ -1,10 +1,10 @@
 package cn.chenjun.cloud.management.operate;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.core.operate.Operate;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
@@ -61,7 +61,7 @@ public class OperateEngine {
 
     @EventListener
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
-        this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> {
+        this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
             try {
                 Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
                 BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);

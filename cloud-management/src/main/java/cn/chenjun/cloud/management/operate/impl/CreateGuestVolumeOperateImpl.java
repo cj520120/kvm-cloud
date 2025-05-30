@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.VolumeInfo;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
@@ -24,7 +25,7 @@ public class CreateGuestVolumeOperateImpl  extends CreateVolumeOperateImpl<Creat
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_GUEST_VOLUME;
+        return Constant.OperateType.CREATE_GUEST_VOLUME;
     }
 
     @Override

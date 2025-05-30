@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.component;
 
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.component.route.RouteComponentQmaInitialize;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

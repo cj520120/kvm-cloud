@@ -5,12 +5,17 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.common.util.BeanConverter;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
-import cn.chenjun.cloud.management.util.*;
+import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.GuestExternNames;
+import cn.chenjun.cloud.management.util.GuestExternUtil;
+import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -33,9 +38,9 @@ public class GuestService extends AbstractService {
 
     private void checkSystemComponentComplete(int networkId) {
         List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(networkId).build());
-        if (Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.NO)) {
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.NETWORK).id(networkId).build());
+        if (Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), cn.chenjun.cloud.common.util.Constant.Enable.NO)) {
             return;
         }
         if (!this.checkRouteComponentComplete(networkId)) {
@@ -79,7 +84,7 @@ public class GuestService extends AbstractService {
 
 
     public ResultUtil<List<GuestModel>> listSystemGuests(int componentId) {
-        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.OTHER_ID, componentId).eq(GuestEntity.GUEST_TYPE, Constant.GuestType.COMPONENT));
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.OTHER_ID, componentId).eq(GuestEntity.GUEST_TYPE, cn.chenjun.cloud.common.util.Constant.GuestType.COMPONENT));
         List<GuestModel> models = guestList.stream().map(this::initGuestInfo).collect(Collectors.toList());
         return ResultUtil.success(models);
     }
@@ -115,7 +120,7 @@ public class GuestService extends AbstractService {
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
         }
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
             if (hostId > 0 && !Objects.equals(hostId, storage.getHostId())) {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "使用本地存储时，只能在存储所在机器启动");
@@ -141,9 +146,9 @@ public class GuestService extends AbstractService {
                 .guestIp(guestNetwork.getIp())
                 .otherId(0)
                 .networkId(networkId)
-                .type(Constant.GuestType.USER)
+                .type(cn.chenjun.cloud.common.util.Constant.GuestType.USER)
                 .extern("{}")
-                .status(Constant.GuestStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.GuestStatus.CREATING)
                 .createTime(new Date())
                 .build();
         this.guestMapper.insert(guest);
@@ -157,7 +162,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setDeviceId(0);
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setAllocateId(guest.getGuestId());
-        guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
         String volumeType = getVolumeType(storage);
         if (volumeId <= 0) {
@@ -173,7 +178,7 @@ public class GuestService extends AbstractService {
             volume.setGuestId(guest.getGuestId());
             volume.setDeviceId(0);
             volume.setDeviceDriver(deviceDriver);
-            guest.setStatus(Constant.GuestStatus.STARTING);
+            guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
@@ -218,7 +223,7 @@ public class GuestService extends AbstractService {
                 .guestId(0)
                 .guestId(guest.getGuestId())
                 .deviceDriver(deviceDriver)
-                .status(Constant.VolumeStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
                 .build();
         this.volumeMapper.insert(volume);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
@@ -233,7 +238,7 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        if (guest.getStatus() != Constant.GuestStatus.STOP) {
+        if (guest.getStatus() != cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP) {
             throw new CodeException(ErrorCode.GUEST_NOT_STOP, "只能对关机状态的主机进行重装操作");
         }
         this.checkSystemComponentComplete(guest.getNetworkId());
@@ -244,11 +249,11 @@ public class GuestService extends AbstractService {
         VolumeEntity volume = this.volumeMapper.selectOne(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId).eq(VolumeEntity.DEVICE_ID, 0));
         volume.setGuestId(0);
         this.volumeMapper.updateById(volume);
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType = getVolumeType(storage);
         if (volumeId <= 0) {
             volume = createGuestVolume(diskTemplateId, deviceDriver, volumeType, size, guest, storage);
-            guest.setStatus(Constant.GuestStatus.CREATING);
+            guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.CREATING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = CreateGuestOperate.builder()
                     .guestId(guest.getGuestId())
@@ -272,7 +277,7 @@ public class GuestService extends AbstractService {
             volume.setDeviceDriver(deviceDriver);
             volume.setDeviceId(0);
             this.volumeMapper.updateById(volume);
-            guest.setStatus(Constant.GuestStatus.STARTING);
+            guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING);
             this.guestMapper.updateById(guest);
             BaseOperateParam operateParam = StartGuestOperate.builder()
                     .guestId(guest.getGuestId())
@@ -318,12 +323,12 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> start(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        if (!Objects.equals(guest.getType(), Constant.GuestType.USER)) {
+        if (!Objects.equals(guest.getType(), cn.chenjun.cloud.common.util.Constant.GuestType.USER)) {
             throw new CodeException(ErrorCode.GUEST_NOT_ALLOW_USER_OPERATION, "非用户主机由系统管理.");
         }
         this.checkSystemComponentComplete(guest.getNetworkId());
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STOP:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
                 int allowHostId = getGuestMustStartHostId(guest);
                 if (hostId == 0) {
                     hostId = allowHostId;
@@ -331,7 +336,7 @@ public class GuestService extends AbstractService {
                     throw new CodeException(ErrorCode.GUEST_BIND_OTHER_HOST, "该宿主机已经绑定了启动主机ID：" + allowHostId);
                 }
                 guest.setHostId(0);
-                guest.setStatus(Constant.GuestStatus.STARTING);
+                guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING);
                 this.guestMapper.updateById(guest);
                 this.allocateService.initHostAllocate();
                 BaseOperateParam operateParam = StartGuestOperate.builder().hostId(hostId).guestId(guestId)
@@ -340,10 +345,10 @@ public class GuestService extends AbstractService {
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
-            case Constant.GuestStatus.RUNNING:
-            case Constant.GuestStatus.STARTING:
-            case Constant.GuestStatus.CREATING:
-            case Constant.GuestStatus.REBOOT:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.CREATING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.REBOOT:
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前主机状态不正确.");
@@ -356,9 +361,9 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> reboot(int guestId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STARTING:
-            case Constant.GuestStatus.RUNNING:
-                guest.setStatus(Constant.GuestStatus.REBOOT);
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING:
+                guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.REBOOT);
                 this.guestMapper.updateById(guest);
                 BaseOperateParam operateParam = RebootGuestOperate.builder().guestId(guestId)
                         .id(UUID.randomUUID().toString())
@@ -375,7 +380,7 @@ public class GuestService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<GuestModel> migrate(int guestId, int hostId) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        if (guest.getStatus() == Constant.GuestStatus.RUNNING) {
+        if (guest.getStatus() == cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING) {
             if (hostId == guest.getHostId()) {
                 throw new CodeException(ErrorCode.BASE_HOST_ERROR, "迁移目标主机选择错误.");
             }
@@ -385,7 +390,7 @@ public class GuestService extends AbstractService {
                     .toHostId(hostId)
                     .id(UUID.randomUUID().toString())
                     .title("迁移客户机[" + guest.getDescription() + "]").build();
-            guest.setStatus(Constant.GuestStatus.MIGRATE);
+            guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.MIGRATE);
             guest.setHostId(hostId);
             this.guestMapper.updateById(guest);
             this.operateTask.addTask(operateParam);
@@ -399,11 +404,11 @@ public class GuestService extends AbstractService {
     public ResultUtil<GuestModel> shutdown(int guestId, boolean force) {
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STARTING:
-            case Constant.GuestStatus.RUNNING:
-            case Constant.GuestStatus.REBOOT:
-            case Constant.GuestStatus.STOPPING:
-                guest.setStatus(Constant.GuestStatus.STOPPING);
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.REBOOT:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOPPING:
+                guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STOPPING);
                 this.guestMapper.updateById(guest);
                 BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guestId).force(force)
                         .id(UUID.randomUUID().toString())
@@ -411,7 +416,7 @@ public class GuestService extends AbstractService {
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
                 return ResultUtil.success(this.initGuestInfo(guest));
-            case Constant.GuestStatus.STOP:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
                 return ResultUtil.success(this.initGuestInfo(guest));
             default:
                 throw new CodeException(ErrorCode.GUEST_NOT_START, "当前主机状态不正确.");
@@ -468,7 +473,7 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘描述信息");
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
-        StorageEntity storage = this.allocateService.allocateStorage(Constant.StorageSupportCategory.VOLUME, storageId);
+        StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType = getVolumeType(storage);
         int bindHostId = getGuestMustStartHostId(guest);
         if(bindHostId > 0 && storage.getHostId()>0 && bindHostId != storage.getHostId()){
@@ -486,7 +491,7 @@ public class GuestService extends AbstractService {
                 .type(volumeType)
                 .capacity(volumeSize)
                 .allocation(0L)
-                .status(Constant.VolumeStatus.CREATING)
+                .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
                 .deviceDriver(diskDriver)
                 .guestId(guestId)
                 .deviceId(deviceId)
@@ -526,7 +531,7 @@ public class GuestService extends AbstractService {
                 throw new CodeException(ErrorCode.GUEST_BIND_OTHER_HOST, "当前主机无法挂载其他主机的本地磁盘");
             }
         }
-        if (volume.getStatus() != Constant.VolumeStatus.READY) {
+        if (volume.getStatus() != cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘未就绪.");
         }
 
@@ -589,7 +594,7 @@ public class GuestService extends AbstractService {
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId));
         List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
         int deviceId = -1;
-        for (int i = 0; i < Constant.MAX_DEVICE_ID; i++) {
+        for (int i = 0; i < Constant.MAX_DEVICE_COUNT; i++) {
             if (!guestNetworkDeviceIds.contains(i)) {
                 deviceId = i;
                 break;
@@ -601,7 +606,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setDeviceId(deviceId);
         guestNetwork.setDriveType(driveType);
         guestNetwork.setAllocateId(guestId);
-        guestNetwork.setAllocateType(Constant.NetworkAllocateType.GUEST);
+        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
         this.guestNetworkMapper.updateById(guestNetwork);
         BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                         .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
@@ -644,19 +649,19 @@ public class GuestService extends AbstractService {
         }
         int timeout = 0;
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STOP:
-                if (guest.getType().equals(Constant.GuestType.USER)) {
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+                if (guest.getType().equals(cn.chenjun.cloud.common.util.Constant.GuestType.USER)) {
                     timeout = configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
                 }
                 break;
-            case Constant.GuestStatus.ERROR:
-            case Constant.GuestStatus.DESTROY:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY:
                 break;
             default:
                 return ResultUtil.error(ErrorCode.GUEST_NOT_STOP, "当前主机不是关机状态");
 
         }
-        guest.setStatus(Constant.GuestStatus.DESTROY);
+        guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY);
         this.guestMapper.updateById(guest);
         this.notifyService.publish(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
@@ -685,8 +690,8 @@ public class GuestService extends AbstractService {
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
         switch (guest.getStatus()) {
-            case Constant.GuestStatus.STARTING:
-            case Constant.GuestStatus.RUNNING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING:
+            case cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING:
                 throw new CodeException(ErrorCode.GUEST_IS_RUNNING_ERROR, "当前主机状态不允许变更配置.");
             default:
                 SchemeEntity scheme = this.schemeMapper.selectById(schemeId);

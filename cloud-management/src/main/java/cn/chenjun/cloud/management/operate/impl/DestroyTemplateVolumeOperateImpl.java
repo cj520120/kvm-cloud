@@ -57,6 +57,6 @@ public class DestroyTemplateVolumeOperateImpl extends AbstractOperate<DestroyTem
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_TEMPLATE_VOLUME;
+        return Constant.OperateType.DESTROY_TEMPLATE_VOLUME;
     }
 }

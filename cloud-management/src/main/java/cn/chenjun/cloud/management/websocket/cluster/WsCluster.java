@@ -34,7 +34,7 @@ public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<
 
     @Override
     public void run(String... args) throws Exception {
-        topic = redissonClient.getTopic(RedisKeyUtil.GLOBAL_NOTIFY_KET);
+        topic = redissonClient.getTopic(RedisKeyUtil.getGlobalNotifyKey());
         topic.addListener(NotifyData.class, this);
     }
 
@@ -43,7 +43,7 @@ public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<
         try {
             Optional<ClusterMessageProcess> optional = this.processPluginRegistry.getPluginFor(msg.getType());
             ClusterMessageProcess process = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的注册方式"));
-            lockRunner.lockRun(RedisKeyUtil.GLOBAL_LOCK_KEY, () -> process.process(msg));
+            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> process.process(msg));
         } catch (Exception err) {
             log.error("process cluster msg fail.msg={}", msg, err);
         }

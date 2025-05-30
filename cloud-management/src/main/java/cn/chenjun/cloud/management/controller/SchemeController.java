@@ -4,9 +4,9 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.SchemeModel;
 import cn.chenjun.cloud.management.servcie.SchemeService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +38,7 @@ public class SchemeController extends BaseController {
         return this.lockRun(() -> this.schemeService.search(keyword, no, size));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/scheme/create")
     public ResultUtil<SchemeModel> createScheme(@RequestParam("name") String name,
                                                 @RequestParam("cpu") int cpu,
@@ -50,7 +50,7 @@ public class SchemeController extends BaseController {
         return this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/scheme/modify")
     public ResultUtil<SchemeModel> updateScheme(@RequestParam("schemeId") int schemeId,
                                                 @RequestParam("name") String name,

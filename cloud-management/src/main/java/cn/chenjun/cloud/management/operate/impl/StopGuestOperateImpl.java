@@ -33,14 +33,14 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
     @Override
     public void operate(StopGuestOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest.getStatus() != cn.chenjun.cloud.management.util.Constant.GuestStatus.STOPPING) {
+        if (guest.getStatus() != Constant.GuestStatus.STOPPING) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "客户机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
         HostEntity host = hostMapper.selectById(guest.getHostId());
         if (host == null) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
         } else {
-            if (host.getStatus() == cn.chenjun.cloud.management.util.Constant.HostStatus.OFFLINE) {
+            if (host.getStatus() == Constant.HostStatus.OFFLINE) {
                 this.onFinish(param, ResultUtil.success());
             }
             if (!param.isForce()) {
@@ -66,14 +66,14 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
     @Override
     public void onFinish(StopGuestOperate param, ResultUtil<Void> resultUtil) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        if (guest != null && guest.getStatus() == cn.chenjun.cloud.management.util.Constant.GuestStatus.STOPPING) {
+        if (guest != null && guest.getStatus() == Constant.GuestStatus.STOPPING) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 guest.setLastHostId(guest.getHostId());
                 guest.setHostId(0);
-                guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.STOP);
+                guest.setStatus(Constant.GuestStatus.STOP);
             } else {
                 guest.setLastHostId(guest.getHostId());
-                guest.setStatus(cn.chenjun.cloud.management.util.Constant.GuestStatus.RUNNING);
+                guest.setStatus(Constant.GuestStatus.RUNNING);
             }
             guestMapper.updateById(guest);
             this.allocateService.initHostAllocate();
@@ -85,6 +85,6 @@ public class StopGuestOperateImpl extends AbstractOperate<StopGuestOperate, Resu
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.STOP_GUEST;
+        return Constant.OperateType.STOP_GUEST;
     }
 }

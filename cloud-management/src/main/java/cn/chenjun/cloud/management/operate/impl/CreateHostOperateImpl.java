@@ -46,20 +46,20 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
     @Override
     public void operate(CreateHostOperate param) {
         HostEntity host = this.hostMapper.selectById(param.getHostId());
-        List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.StorageStatus.READY, t.getStatus())).collect(Collectors.toList());
-        List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkStatus.READY, t.getStatus())).collect(Collectors.toList());
+        List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(Constant.StorageStatus.READY, t.getStatus())).collect(Collectors.toList());
+        List<NetworkEntity> networkList = this.networkMapper.selectList(new QueryWrapper<>()).stream().filter(t -> Objects.equals(Constant.NetworkStatus.READY, t.getStatus())).collect(Collectors.toList());
         Map<String, Object> systemConfig = this.loadGuestConfig(param.getHostId(), 0);
         List<StorageCreateRequest> createStorageRequest = storageList.stream().filter(storage -> {
             if (storage.getType().equalsIgnoreCase(Constant.StorageType.LOCAL) && !Objects.equals(storage.getStorageId(), host.getHostId())) {
                 return false;
             }
-            return Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.READY);
+            return Objects.equals(storage.getStatus(), Constant.StorageStatus.READY);
         }).map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
         Map<Integer, NetworkEntity> basicBridgeNetworkMap = networkList.stream().collect(Collectors.toMap(NetworkEntity::getNetworkId, Function.identity()));
         List<BasicBridgeNetwork> basicBridgeNetworks = new ArrayList<>();
         List<VlanNetwork> vlanNetworkList = new ArrayList<>();
         for (NetworkEntity network : networkList) {
-            if (Objects.equals(cn.chenjun.cloud.management.util.Constant.NetworkType.VLAN, network.getType())) {
+            if (Objects.equals(Constant.NetworkType.VLAN, network.getType())) {
                 NetworkEntity basicBridgeNetwork = basicBridgeNetworkMap.get(network.getBasicNetworkId());
                 if (basicBridgeNetwork != null) {
                     vlanNetworkList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, systemConfig));
@@ -121,9 +121,9 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
                 host.setEmulator(hostInfo.getEmulator());
                 host.setHostName(hostInfo.getHostName());
 
-                host.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE);
+                host.setStatus(Constant.HostStatus.ONLINE);
             } else {
-                host.setStatus(cn.chenjun.cloud.management.util.Constant.HostStatus.ERROR);
+                host.setStatus(Constant.HostStatus.ERROR);
             }
             this.hostMapper.updateById(host);
         }
@@ -133,6 +133,6 @@ public class CreateHostOperateImpl extends AbstractOperate<CreateHostOperate, Re
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.CREATE_HOST;
+        return Constant.OperateType.CREATE_HOST;
     }
 }

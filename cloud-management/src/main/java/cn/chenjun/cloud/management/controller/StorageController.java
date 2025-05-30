@@ -4,10 +4,10 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.SimpleStorageModel;
 import cn.chenjun.cloud.management.model.StorageModel;
 import cn.chenjun.cloud.management.servcie.StorageService;
-import cn.chenjun.cloud.management.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +40,7 @@ public class StorageController extends BaseController {
         return this.lockRun(() -> storageService.getStorageInfo(storageId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/storage/create")
     public ResultUtil<StorageModel> createStorage(@RequestParam("description") String description,
                                                   @RequestParam("supportCategory") int supportCategory,
@@ -49,31 +49,31 @@ public class StorageController extends BaseController {
         return this.lockRun(() -> storageService.createStorage(supportCategory, description, type, param));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/support/category/update")
     public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestParam("storageId") int storageId, @RequestParam("supportCategory") int supportCategory) {
         return this.lockRun(() -> storageService.updateStorageSupportCategory(storageId, supportCategory));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/register")
     public ResultUtil<StorageModel> registerStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.registerStorage(storageId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/migrate")
     public ResultUtil<StorageModel> migrateStorage(@RequestParam("sourceStorageId") int sourceStorageId, @RequestParam("destStorageId") int destStorageId) {
         return this.lockRun(() -> storageService.migrateStorage(sourceStorageId, destStorageId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/maintenance")
     public ResultUtil<StorageModel> maintenanceStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.maintenanceStorage(storageId));
     }
 
-    @PermissionRequire(role = Constant.UserType.ADMIN)
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @DeleteMapping("/api/storage/destroy")
     public ResultUtil<StorageModel> destroyStorage(@RequestParam("storageId") int storageId) {
         return this.lockRun(() -> storageService.destroyStorage(storageId));

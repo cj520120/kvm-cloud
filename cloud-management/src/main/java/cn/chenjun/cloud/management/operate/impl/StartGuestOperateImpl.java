@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.operate.impl;
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,7 @@ public class StartGuestOperateImpl extends AbstractStartGuestOperateImpl<StartGu
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.START_GUEST;
+        return Constant.OperateType.START_GUEST;
     }
 
     @Override

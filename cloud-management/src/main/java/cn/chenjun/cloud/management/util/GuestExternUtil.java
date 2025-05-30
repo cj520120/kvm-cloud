@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.util;
 
+import cn.chenjun.cloud.common.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;

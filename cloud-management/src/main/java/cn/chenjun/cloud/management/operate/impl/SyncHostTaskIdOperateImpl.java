@@ -50,6 +50,6 @@ public class SyncHostTaskIdOperateImpl extends AbstractOperate<SyncHostTaskIdOpe
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.SYNC_HOST_TASK_ID;
+        return Constant.OperateType.SYNC_HOST_TASK_ID;
     }
 }

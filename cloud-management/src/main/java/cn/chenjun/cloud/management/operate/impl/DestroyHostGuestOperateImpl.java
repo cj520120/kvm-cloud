@@ -24,7 +24,7 @@ public class DestroyHostGuestOperateImpl extends AbstractOperate<DestroyHostGues
     @Override
     public void operate(DestroyHostGuestOperate param) {
         HostEntity host = hostMapper.selectById(param.getHostId());
-        if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
+        if (host == null || !Objects.equals(Constant.HostStatus.ONLINE, host.getStatus())) {
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
         } else {
             GuestDestroyRequest request = GuestDestroyRequest.builder().name(param.getName()).build();
@@ -46,6 +46,6 @@ public class DestroyHostGuestOperateImpl extends AbstractOperate<DestroyHostGues
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.DESTROY_HOST_GUEST;
+        return Constant.OperateType.DESTROY_HOST_GUEST;
     }
 }

@@ -29,7 +29,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
     @Override
     public void operate(InitHostStorageOperate param) {
         StorageEntity storage = storageMapper.selectById(param.getStorageId());
-        if (!Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
+        if (!Objects.equals(storage.getStatus(), Constant.StorageStatus.INIT)) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]状态不正确:" + storage.getStatus());
 
         }
@@ -37,15 +37,15 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             throw new CodeException(ErrorCode.SERVER_ERROR, "存储池[" + storage.getName() + "]无法创建，没有可用的主机分配");
         }
         HostEntity host = hostMapper.selectById(param.getNextHostIds().get(0));
-        if (host == null || !Objects.equals(cn.chenjun.cloud.management.util.Constant.HostStatus.ONLINE, host.getStatus())) {
+        if (host == null || !Objects.equals(Constant.HostStatus.ONLINE, host.getStatus())) {
             //主机未就绪直接提交成功
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.<StorageInfo>builder().build());
             return;
         }
         List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.STORAGE).id(storage.getStorageId()).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.management.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.STORAGE).id(storage.getStorageId()).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.HOST).id(host.getHostId()).build());
         Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
         StorageCreateRequest request = buildStorageCreateRequest(storage, sysconfig);
         this.asyncInvoker(host, param, Constant.Command.STORAGE_CREATE, request);
@@ -70,7 +70,7 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
             StorageInfo info = resultUtil.getData();
 
-            if (storage != null && Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
+            if (storage != null && Objects.equals(storage.getStatus(), Constant.StorageStatus.INIT)) {
                 if (info != null) {
                     storage.setAllocation(resultUtil.getData().getAllocation());
                     storage.setCapacity(resultUtil.getData().getCapacity());
@@ -83,14 +83,14 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
                             .build();
                     this.taskService.addTask(operate);
                 } else {
-                    storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.READY);
+                    storage.setStatus(Constant.StorageStatus.READY);
                 }
                 storageMapper.updateById(storage);
             }
         } else {
             StorageEntity storage = storageMapper.selectById(param.getStorageId());
-            if (storage != null && Objects.equals(storage.getStatus(), cn.chenjun.cloud.management.util.Constant.StorageStatus.INIT)) {
-                storage.setStatus(cn.chenjun.cloud.management.util.Constant.StorageStatus.ERROR);
+            if (storage != null && Objects.equals(storage.getStatus(), Constant.StorageStatus.INIT)) {
+                storage.setStatus(Constant.StorageStatus.ERROR);
                 storageMapper.updateById(storage);
             }
         }
@@ -101,6 +101,6 @@ public class InitHostStorageOperateImpl extends AbstractOperate<InitHostStorageO
 
     @Override
     public int getType() {
-        return cn.chenjun.cloud.management.util.Constant.OperateType.INIT_HOST_STORAGE;
+        return Constant.OperateType.INIT_HOST_STORAGE;
     }
 }
