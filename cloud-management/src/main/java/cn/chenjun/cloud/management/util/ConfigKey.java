@@ -12,6 +12,7 @@ public class ConfigKey {
     public static final String SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES = "system.component.qma.check.timeout.minutes";
     public static final String SYSTEM_COMPONENT_PIP_INSTALL_SOURCE = "system.component.pip.source";
     public static final String SYSTEM_COMPONENT_YUM_INSTALL_SOURCE = "system.component.yum.repo";
+    public static final String SYSTEM_COMPONENT_BOOTSTRAP_TYPE = "system.component.bootstrap.type";
 
 
     public static final String DEFAULT_VIRTIO_SCSI_ENABLE = "default.virtio-scsi.enable";

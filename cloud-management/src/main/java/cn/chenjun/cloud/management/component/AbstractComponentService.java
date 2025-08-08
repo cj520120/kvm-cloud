@@ -249,14 +249,25 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         int systemCpu = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU);
         int systemCpuShare = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE);
         long systemMemory = (int) configService.getConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024;
+        String bootStrapTypeStr = this.configService.getConfig(ConfigKey.SYSTEM_COMPONENT_BOOTSTRAP_TYPE);
 
+        int bootStrapType;
+        switch (bootStrapTypeStr) {
+            case Constant.BootstrapType.UEFI_STR:
+                bootStrapType = Constant.BootstrapType.UEFI;
+                break;
+            default:
+                bootStrapType = Constant.BootstrapType.BIOS;
+                break;
+
+        }
         StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, 0);
         GuestEntity guest = GuestEntity.builder()
                 .name(NameUtil.generateGuestName())
                 .groupId(0)
                 .description(name)
                 .systemCategory(Constant.SystemCategory.CENTOS)
-                .bootstrapType(cn.chenjun.cloud.common.util.Constant.BootstrapType.BIOS)
+                .bootstrapType(bootStrapType)
                 .cpu(systemCpu)
                 .share(systemCpuShare)
                 .memory(systemMemory)

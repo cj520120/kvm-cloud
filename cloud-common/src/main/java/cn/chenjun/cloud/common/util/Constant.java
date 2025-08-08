@@ -172,6 +172,8 @@ public class Constant {
     public static class BootstrapType {
         public static final int BIOS = 0;
         public static final int UEFI = 1;
+        public static final String UEFI_STR = "UEFI";
+        public static final String BIOS_STR = "BIOS";
     }
 
     public static class Enable {

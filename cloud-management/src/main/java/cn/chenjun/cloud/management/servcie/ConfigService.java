@@ -45,6 +45,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES, 10, "系统组件qma启动超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_PIP_INSTALL_SOURCE, "", "系统组件pip加速源", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_YUM_INSTALL_SOURCE, "", "系统组件yum加速源", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_BOOTSTRAP_TYPE, Constant.BootstrapType.BIOS_STR,"系统组件固件类型", Constant.ConfigValueType.SELECT,  Arrays.asList(Constant.BootstrapType.BIOS_STR, Constant.BootstrapType.UEFI_STR),StringConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_OVER_CPU, 1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_OVER_MEMORY, 1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 
