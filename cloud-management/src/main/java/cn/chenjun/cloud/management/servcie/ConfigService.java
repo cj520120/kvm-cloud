@@ -103,7 +103,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_CLOCK_TYPE, "utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime", "timezone", "variable"), StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_TYPE, "pflash", "Uefi Loader Type", Constant.ConfigValueType.SELECT, Arrays.asList("pflash", "rom"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH, "/usr/share/edk2.git/ovmf-x64/OVMF_CODE-pure-efi.fd", "Uefi Loader Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH, "/usr/share/edk2/ovmf/OVMF_CODE.fd", "Uefi Loader Path", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
