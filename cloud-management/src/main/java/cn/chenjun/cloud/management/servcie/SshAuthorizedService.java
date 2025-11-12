@@ -9,9 +9,12 @@ import cn.chenjun.cloud.management.model.SshAuthorizedModel;
 import cn.chenjun.cloud.management.servcie.bean.MemSshInfo;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.KeyPair;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.OpenSSHPrivateKeyUtil;
+import org.bouncycastle.crypto.util.OpenSSHPublicKeyUtil;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPairGenerator;
+import java.security.Security;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +42,9 @@ public class SshAuthorizedService extends AbstractService {
     @Autowired
     private RedissonClient redissonClient;
 
+    static {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
 
     public ResultUtil<List<SshAuthorizedModel>> listAllSshKeys() {
         List<SshAuthorizedEntity> list = this.sshAuthorizedMapper.selectList(new QueryWrapper<>());
@@ -84,37 +94,37 @@ public class SshAuthorizedService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<CreateSshAuthorizedModel> createSshKey(String name) {
-        JSch jsch = new JSch();
-        try {
-            KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA);
-            CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().build();
-            SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).build();
-            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                keyPair.writePublicKey(outputStream, "CJ-KVM");
-                String publicKey = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                model.setPublicKey(publicKey);
-                model.setId(entity.getId());
-                model.setPublicKey(publicKey);
-                model.setName(name);
-                entity.setSshPublicKey(publicKey);
-            }
-            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                keyPair.writePrivateKey(outputStream);
-                String privateKey = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                model.setPrivateKey(privateKey);
-                entity.setSshPrivateKey(privateKey);
-            }
-            this.sshAuthorizedMapper.insert(entity);
-            model.setId(entity.getId());
-            this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
 
-            return ResultUtil.success(model);
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA","BC");
+            keyPairGenerator.initialize(2048);
+            java.security.KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            AsymmetricKeyParameter privateKeyParam = org.bouncycastle.crypto.util.PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded());
+            AsymmetricKeyParameter publicKeyParam = org.bouncycastle.crypto.util.PublicKeyFactory.createKey(keyPair.getPublic().getEncoded());
+            byte[] privateKeyBuffer = OpenSSHPrivateKeyUtil.encodePrivateKey(privateKeyParam);
+            byte[] publicKeyBuffer = OpenSSHPublicKeyUtil.encodePublicKey(publicKeyParam);
+            try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()){
+                PemWriter pemWriter = new PemWriter(new OutputStreamWriter(outputStream));
+                pemWriter.writeObject(new PemObject("RSA PRIVATE KEY", privateKeyBuffer));
+                pemWriter.close();
+                String privateKey= new String(outputStream.toByteArray(), StandardCharsets.UTF_8) ;
+                String publicKey="ssh-rsa "+Base64.getEncoder().encodeToString(publicKeyBuffer) +"cj-kvm-ssh-key";
+                SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPrivateKey(privateKey).sshPublicKey(publicKey).build();
+                this.sshAuthorizedMapper.insert(entity);
+                CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(entity.getId()).name(name).publicKey(publicKey).privateKey(privateKey).build();
+                this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
+                return ResultUtil.success(model);
+            }
+
         } catch (Exception err) {
             log.error("SSH密钥生成失败", err);
             return ResultUtil.error(ErrorCode.SSH_AUTHORIZED_CREATE_ERROR, "SSH密钥生成失败");
         }
     }
 
+    public static void main(String[] args) {
+        new SshAuthorizedService().createSshKey("test");
+    }
     public ResultUtil<SshAuthorizedModel> modifySshKey(int id, String name) {
         SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
         if (entity == null) {

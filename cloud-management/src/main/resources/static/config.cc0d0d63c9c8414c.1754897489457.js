@@ -1,1 +1,0 @@
-"use strict";(self["webpackChunkkvm_cloud_web"]=self["webpackChunkkvm_cloud_web"]||[]).push([[229],{8035:function(e,n,u){u.r(n),u.d(n,{default:function(){return o}});var a=u(6918),t=u(7471),c=Object.assign({name:"Config"},{__name:"Config",setup(e){return(e,n)=>((0,a.uX)(),(0,a.Wv)(t.A,{allocateType:0,allocateId:0}))}});const l=c;var o=l}}]);
