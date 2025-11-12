@@ -108,7 +108,7 @@ public class SshAuthorizedService extends AbstractService {
                 pemWriter.writeObject(new PemObject("RSA PRIVATE KEY", privateKeyBuffer));
                 pemWriter.close();
                 String privateKey= new String(outputStream.toByteArray(), StandardCharsets.UTF_8) ;
-                String publicKey="ssh-rsa "+Base64.getEncoder().encodeToString(publicKeyBuffer) +"cj-kvm-ssh-key";
+                String publicKey="ssh-rsa "+Base64.getEncoder().encodeToString(publicKeyBuffer) +" cj-kvm-ssh-key";
                 SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPrivateKey(privateKey).sshPublicKey(publicKey).build();
                 this.sshAuthorizedMapper.insert(entity);
                 CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(entity.getId()).name(name).publicKey(publicKey).privateKey(privateKey).build();
