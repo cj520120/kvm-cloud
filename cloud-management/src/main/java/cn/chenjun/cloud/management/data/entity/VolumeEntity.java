@@ -35,6 +35,7 @@ public class VolumeEntity {
     public static final String DEVICE_ID = "device_id";
     public static final String DEVICE_DRIVER = "device_driver";
     public static final String CREATE_TIME = "create_time";
+    public static final String SERIAL = "volume_serial";
 
     @TableId(type = IdType.AUTO, value = VOLUME_ID)
     private Integer volumeId;
@@ -64,6 +65,8 @@ public class VolumeEntity {
     private String deviceDriver;
     @TableField(VOLUME_STATUS)
     private Integer status;
+    @TableField(SERIAL)
+    private String serial;
     @TableField(CREATE_TIME)
     private Date createTime;
 

@@ -13,6 +13,7 @@ import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.DiskSerialUtil;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -146,6 +147,7 @@ public class VolumeService extends AbstractService {
                 .guestId(0)
                 .deviceId(0)
                 .createTime(new Date())
+                .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);
         BaseOperateParam operateParam = CreateVolumeOperate.builder().id(UUID.randomUUID().toString()).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
@@ -188,6 +190,7 @@ public class VolumeService extends AbstractService {
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
+                .serial(DiskSerialUtil.generateDiskSerial())
                 .createTime(new Date())
                 .build();
         this.volumeMapper.insert(cloneVolume);
@@ -205,7 +208,7 @@ public class VolumeService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) { 
+    public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) {
         if (size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入新增的磁盘大小");
         }
@@ -226,7 +229,7 @@ public class VolumeService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
         StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
-        String volumeType =getVolumeType(storage);
+        String volumeType = getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = this.findAndUpdateVolumeStatus(sourceVolumeId, cn.chenjun.cloud.common.util.Constant.VolumeStatus.MIGRATE);
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
@@ -259,6 +262,7 @@ public class VolumeService extends AbstractService {
                 .deviceDriver("")
                 .guestId(0)
                 .createTime(new Date())
+                .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(migrateVolume);
         BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(UUID.randomUUID().toString())
@@ -295,6 +299,7 @@ public class VolumeService extends AbstractService {
         }
         return this.getVolumeInfo(volumeId);
     }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);

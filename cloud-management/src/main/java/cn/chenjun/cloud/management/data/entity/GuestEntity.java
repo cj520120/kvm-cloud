@@ -41,6 +41,7 @@ public class GuestEntity {
     public static final String SYSTEM_CATEGORY = "system_category";
     public static final String LAST_START_TIME = "last_start_time";
     public static final String GUEST_EXTERN = "guest_extern";
+    public static final String GUEST_UUID = "guest_uuid";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO, value = GUEST_ID)
@@ -49,6 +50,8 @@ public class GuestEntity {
     private Integer groupId;
     @TableField(GUEST_NAME)
     private String name;
+    @TableField(GUEST_UUID)
+    private String uuid;
     @TableField(GUEST_DESCRIPTION)
     private String description;
     @TableField(GUEST_CPU)

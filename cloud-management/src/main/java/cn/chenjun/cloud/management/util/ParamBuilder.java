@@ -34,6 +34,7 @@ public class ParamBuilder {
     public static Map<String, Object> buildVmParam(GuestEntity guest) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", guest.getName());
+        map.put("uuid", guest.getUuid());
         map.put("description", guest.getDescription());
         map.put("memory", guest.getMemory());
         map.put("bootstrapType", guest.getBootstrapType());
@@ -112,6 +113,7 @@ public class ParamBuilder {
         map.put("type", volume.getType());
         map.put("bus", deviceType);
         map.put("name", volume.getName());
+        map.put("serial", volume.getSerial());
         return map;
     }
 }

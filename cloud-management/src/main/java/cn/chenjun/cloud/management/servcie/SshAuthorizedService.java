@@ -67,6 +67,7 @@ public class SshAuthorizedService extends AbstractService {
         page.setList(models);
         return ResultUtil.success(page);
     }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<SshAuthorizedModel> getSshKey(int id) {
         SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
@@ -96,19 +97,19 @@ public class SshAuthorizedService extends AbstractService {
     public ResultUtil<CreateSshAuthorizedModel> createSshKey(String name) {
 
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA","BC");
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
             keyPairGenerator.initialize(2048);
             java.security.KeyPair keyPair = keyPairGenerator.generateKeyPair();
             AsymmetricKeyParameter privateKeyParam = org.bouncycastle.crypto.util.PrivateKeyFactory.createKey(keyPair.getPrivate().getEncoded());
             AsymmetricKeyParameter publicKeyParam = org.bouncycastle.crypto.util.PublicKeyFactory.createKey(keyPair.getPublic().getEncoded());
             byte[] privateKeyBuffer = OpenSSHPrivateKeyUtil.encodePrivateKey(privateKeyParam);
             byte[] publicKeyBuffer = OpenSSHPublicKeyUtil.encodePublicKey(publicKeyParam);
-            try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()){
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
                 PemWriter pemWriter = new PemWriter(new OutputStreamWriter(outputStream));
                 pemWriter.writeObject(new PemObject("RSA PRIVATE KEY", privateKeyBuffer));
                 pemWriter.close();
-                String privateKey= new String(outputStream.toByteArray(), StandardCharsets.UTF_8) ;
-                String publicKey="ssh-rsa "+Base64.getEncoder().encodeToString(publicKeyBuffer) +" cj-kvm-ssh-key";
+                String privateKey = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                String publicKey = "ssh-rsa " + Base64.getEncoder().encodeToString(publicKeyBuffer) + " cj-kvm-ssh-key";
                 SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPrivateKey(privateKey).sshPublicKey(publicKey).build();
                 this.sshAuthorizedMapper.insert(entity);
                 CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(entity.getId()).name(name).publicKey(publicKey).privateKey(privateKey).build();
@@ -125,6 +126,7 @@ public class SshAuthorizedService extends AbstractService {
     public static void main(String[] args) {
         new SshAuthorizedService().createSshKey("test");
     }
+
     public ResultUtil<SshAuthorizedModel> modifySshKey(int id, String name) {
         SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
         if (entity == null) {
@@ -135,6 +137,7 @@ public class SshAuthorizedService extends AbstractService {
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
         return ResultUtil.success(this.initSshAuthorized(entity));
     }
+
     public ResultUtil<String> createDownloadKey(int id) {
         SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
         if (entity == null) {

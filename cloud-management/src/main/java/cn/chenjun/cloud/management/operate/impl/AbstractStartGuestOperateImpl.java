@@ -134,7 +134,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             NetworkEntity network = networkMapper.selectById(entity.getNetworkId());
             if (!guest.getType().equals(Constant.GuestType.COMPONENT)) {
                 if (network.getStatus() != Constant.NetworkStatus.READY) {
-                    throw new CodeException(ErrorCode.NETWORK_NOT_READY, "虚拟机[" + guest.getDescription() + "]网络[" + network.getName() + "]未就绪." );
+                    throw new CodeException(ErrorCode.NETWORK_NOT_READY, "虚拟机[" + guest.getDescription() + "]网络[" + network.getName() + "]未就绪.");
                 }
             }
             networkInterfaces.add(this.buildInterfaceXml(network, entity, systemConfig));

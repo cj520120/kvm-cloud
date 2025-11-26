@@ -44,6 +44,7 @@ public class VncWsService extends AbstractWsService<ByteBuffer> {
         };
         return handler;
     }
+
     @SneakyThrows
     @Override
     protected void onConnection(WebSocket webSocket) {

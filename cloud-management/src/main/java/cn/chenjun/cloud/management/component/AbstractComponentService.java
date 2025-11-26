@@ -12,10 +12,7 @@ import cn.chenjun.cloud.management.servcie.AbstractService;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.GuestService;
-import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.GuestExternNames;
-import cn.chenjun.cloud.management.util.GuestExternUtil;
-import cn.chenjun.cloud.management.util.NameUtil;
+import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
@@ -265,6 +262,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         GuestEntity guest = GuestEntity.builder()
                 .name(NameUtil.generateGuestName())
                 .groupId(0)
+                .uuid(UUID.randomUUID().toString())
                 .description(name)
                 .systemCategory(Constant.SystemCategory.CENTOS)
                 .bootstrapType(bootStrapType)
@@ -284,7 +282,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .build();
         this.guestMapper.insert(guest);
         Map<String, Map<String, String>> externData = new HashMap<>();
-        externData.put(GuestExternNames.META_DATA, GuestExternUtil.buildMetaDataParam(guest, this.getComponentName().replace(" ","_").toLowerCase()));
+        externData.put(GuestExternNames.META_DATA, GuestExternUtil.buildMetaDataParam(guest, this.getComponentName().replace(" ", "_").toLowerCase()));
         externData.put(GuestExternNames.USER_DATA, GuestExternUtil.buildUserDataParam(guest, "123456", ""));
         externData.put(GuestExternNames.VNC, GuestExternUtil.buildVncParam(guest, "", "5900"));
         guest.setExtern(GsonBuilderUtil.create().toJson(externData));
@@ -309,6 +307,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .deviceId(0)
                 .deviceDriver(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
                 .status(Constant.VolumeStatus.CREATING)
+                .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);
         GuestNetworkEntity guestNetwork;

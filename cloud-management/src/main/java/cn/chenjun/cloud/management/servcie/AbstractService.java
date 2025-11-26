@@ -74,6 +74,7 @@ public abstract class AbstractService {
         }
         return volumeType;
     }
+
     protected GuestEntity getVolumeGuest(int volumeId) {
         VolumeEntity volume = this.volumeMapper.selectById(volumeId);
         if (volume == null) {

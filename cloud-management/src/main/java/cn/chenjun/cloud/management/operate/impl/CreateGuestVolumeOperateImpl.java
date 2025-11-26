@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 @Component
 @Slf4j
-public class CreateGuestVolumeOperateImpl  extends CreateVolumeOperateImpl<CreateGuestVolumeOperate> {
+public class CreateGuestVolumeOperateImpl extends CreateVolumeOperateImpl<CreateGuestVolumeOperate> {
 
     @Override
     public int getType() {
@@ -31,7 +31,7 @@ public class CreateGuestVolumeOperateImpl  extends CreateVolumeOperateImpl<Creat
     @Override
     public void onFinish(CreateGuestVolumeOperate param, ResultUtil<VolumeInfo> resultUtil) {
         super.onFinish(param, resultUtil);
-        if(resultUtil.getCode() == ErrorCode.SUCCESS){
+        if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             GuestEntity guest = this.guestMapper.selectById(param.getGuestId());
             VolumeEntity volume = this.volumeMapper.selectById(param.getVolumeId());
             BaseOperateParam operate = ChangeGuestDiskOperate.builder()

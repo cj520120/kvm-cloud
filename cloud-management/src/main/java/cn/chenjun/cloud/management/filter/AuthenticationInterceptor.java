@@ -31,7 +31,7 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
     private HostMapper hostMapper;
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse,@NonNull  Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, @NonNull Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();

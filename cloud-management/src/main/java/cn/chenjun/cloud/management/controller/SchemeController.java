@@ -32,7 +32,7 @@ public class SchemeController extends BaseController {
     }
 
     @GetMapping("/api/scheme/search")
-    public ResultUtil<Page<SchemeModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
+    public ResultUtil<Page<SchemeModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
                                                 @RequestParam("no") int no,
                                                 @RequestParam("size") int size) {
         return this.lockRun(() -> this.schemeService.search(keyword, no, size));

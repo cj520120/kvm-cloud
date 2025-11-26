@@ -29,6 +29,7 @@ public class SimpleVolumeModel {
     private int guestId;
     private int deviceId;
     private String deviceDriver;
+    private String serial;
     private Date createTime;
     private SimpleGuestModel guest;
 

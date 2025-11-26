@@ -25,14 +25,16 @@ public class TemplateController extends BaseController {
     public ResultUtil<List<TemplateModel>> listTemplate() {
         return this.lockRun(() -> templateService.listTemplate());
     }
+
     @GetMapping("/api/template/search")
-    public ResultUtil<Page<TemplateModel>> search(@RequestParam(value = "templateType",required = false) Integer templateType,
-                                                  @RequestParam(value = "templateStatus",required = false) Integer templateStatus,
+    public ResultUtil<Page<TemplateModel>> search(@RequestParam(value = "templateType", required = false) Integer templateType,
+                                                  @RequestParam(value = "templateStatus", required = false) Integer templateStatus,
                                                   @RequestParam("keyword") String keyword,
                                                   @RequestParam("no") int no,
                                                   @RequestParam("size") int size) {
         return this.lockRun(() -> templateService.search(templateType, templateStatus, keyword, no, size));
     }
+
     @GetMapping("/api/template/info")
     public ResultUtil<TemplateModel> getTemplateInfo(@RequestParam("templateId") int templateId) {
         return this.lockRun(() -> templateService.getTemplateInfo(templateId));

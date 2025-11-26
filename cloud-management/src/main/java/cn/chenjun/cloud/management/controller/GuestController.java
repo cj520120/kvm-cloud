@@ -35,14 +35,14 @@ public class GuestController extends BaseController {
 
     @GetMapping("/api/guest/search")
     public ResultUtil<Page<SimpleGuestModel>> search(@RequestParam(value = "guestType", required = false) Integer guestType,
-                                               @RequestParam(value = "groupId",required = false) Integer groupId,
-                                               @RequestParam(value = "networkId",required = false) Integer networkId,
-                                               @RequestParam(value = "hostId",required = false) Integer hostId,
-                                               @RequestParam(value = "schemeId",required = false) Integer schemeId,
-                                               @RequestParam(value = "status",required = false) Integer status,
-                                               @RequestParam(value = "keyword",required = false) String keyword,
-                                               @RequestParam("no") int no,
-                                               @RequestParam("size") int size) {
+                                                     @RequestParam(value = "groupId", required = false) Integer groupId,
+                                                     @RequestParam(value = "networkId", required = false) Integer networkId,
+                                                     @RequestParam(value = "hostId", required = false) Integer hostId,
+                                                     @RequestParam(value = "schemeId", required = false) Integer schemeId,
+                                                     @RequestParam(value = "status", required = false) Integer status,
+                                                     @RequestParam(value = "keyword", required = false) String keyword,
+                                                     @RequestParam("no") int no,
+                                                     @RequestParam("size") int size) {
         return this.lockRun(() -> this.guestService.search(guestType, groupId, networkId, hostId, schemeId, status, keyword, no, size));
     }
 
@@ -66,7 +66,7 @@ public class GuestController extends BaseController {
         return this.lockRun(() -> this.volumeService.listGuestVolumes(guestId));
     }
 
-    
+
     @PutMapping("/api/guest/create")
     public ResultUtil<GuestModel> createGuest(@RequestParam("description") String description,
                                               @RequestParam("category") int systemCategory,
@@ -88,7 +88,7 @@ public class GuestController extends BaseController {
         return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId));
     }
 
-    
+
     @PostMapping("/api/guest/reinstall")
     public ResultUtil<GuestModel> reInstall(@RequestParam("guestId") int guestId,
                                             @RequestParam("category") int systemCategory,
@@ -166,6 +166,7 @@ public class GuestController extends BaseController {
                                                 @RequestParam("volumeSize") long volumeSize) {
         return this.lockRun(() -> this.guestService.createDisk(guestId, diskDriver, description, storageId, volumeSize * 1024 * 1024 * 1024));
     }
+
     @PostMapping("/api/guest/disk/attach")
     public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
                                                          @RequestParam("volumeId") int volumeId,
@@ -193,6 +194,7 @@ public class GuestController extends BaseController {
                                                 @RequestParam("guestNetworkId") int guestNetworkId) {
         return this.lockRun(() -> this.guestService.detachNetwork(guestId, guestNetworkId));
     }
+
     @PostMapping("/api/guest/modify")
     public ResultUtil<GuestModel> updateGuest(@RequestParam("guestId") int guestId,
                                               @RequestParam("category") int systemCategory,
@@ -203,7 +205,7 @@ public class GuestController extends BaseController {
         return this.lockRun(() -> this.guestService.modifyGuest(guestId, systemCategory, bootstrapType, groupId, description, schemeId));
     }
 
-    
+
     @DeleteMapping("/api/guest/destroy")
     public ResultUtil<GuestModel> destroyGuest(@RequestParam("guestId") int guestId) {
         return this.lockRun(() -> this.guestService.destroyGuest(guestId));

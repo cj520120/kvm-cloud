@@ -81,6 +81,7 @@ DROP TABLE IF EXISTS `tbl_guest_info`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_guest_info` (
   `guest_id` int NOT NULL AUTO_INCREMENT,
+  `guest_uuid` varchar(45) NOT NULL,
   `system_category` int NOT NULL DEFAULT '100',
   `guest_name` varchar(45) NOT NULL,
   `guest_description` varchar(45) NOT NULL,
@@ -101,8 +102,10 @@ CREATE TABLE `tbl_guest_info` (
   `guest_status` int NOT NULL,
   `last_start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`guest_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  PRIMARY KEY (`guest_id`),
+  KEY `IX_UUID` (`guest_uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 
 --
@@ -400,6 +403,7 @@ CREATE TABLE `tbl_volume_info` (
   `device_id` int NOT NULL DEFAULT '0',
   `device_driver` varchar(45) NOT NULL DEFAULT 'virtio',
   `volume_status` int NOT NULL,
+  `volume_serial` varchar(45) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`volume_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

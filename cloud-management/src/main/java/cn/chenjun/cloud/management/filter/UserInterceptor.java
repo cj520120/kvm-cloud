@@ -27,7 +27,7 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
     private UserService userService;
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse,@NonNull  Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, @NonNull Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
             RequestContext.remove();
             String token = httpServletRequest.getHeader(Constant.HttpHeaderNames.TOKEN_HEADER);

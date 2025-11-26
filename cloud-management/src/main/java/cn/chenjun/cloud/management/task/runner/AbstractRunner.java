@@ -65,6 +65,7 @@ public abstract class AbstractRunner {
     protected String getJobKey() {
         return RedisKeyUtil.getGlobalJobKey(this.getClass().getName());
     }
+
     /**
      * 任务分发
      *

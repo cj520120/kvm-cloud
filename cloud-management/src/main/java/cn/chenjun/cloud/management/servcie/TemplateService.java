@@ -62,6 +62,7 @@ public class TemplateService extends AbstractService {
         page.setList(models);
         return ResultUtil.success(page);
     }
+
     public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
         TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_ID, templateId));
         if (template == null) {

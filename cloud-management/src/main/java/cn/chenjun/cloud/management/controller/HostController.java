@@ -27,11 +27,12 @@ public class HostController extends BaseController {
     }
 
     @GetMapping("/api/host/search")
-    public ResultUtil<Page<HostModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
+    public ResultUtil<Page<HostModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
                                               @RequestParam("no") int no,
                                               @RequestParam("size") int size) {
         return this.lockRun(() -> hostService.search(keyword, no, size));
     }
+
     @GetMapping("/api/host/info")
     public ResultUtil<HostModel> getHostInfo(@RequestParam("hostId") int hostId) {
         return this.lockRun(() -> hostService.getHostInfo(hostId));

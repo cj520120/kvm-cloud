@@ -16,6 +16,7 @@ import java.util.Date;
 @SuperBuilder
 public class SimpleGuestModel {
     private int guestId;
+    private String uuid;
     private String name;
     private String description;
     private int cpu;

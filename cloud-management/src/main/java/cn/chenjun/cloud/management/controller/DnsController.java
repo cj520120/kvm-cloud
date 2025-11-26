@@ -30,7 +30,7 @@ public class DnsController extends BaseController {
     @LoginRequire
     @GetMapping("/api/dns/search")
     public ResultUtil<Page<DnsModel>> search(@RequestParam("networkId") int networkId,
-                                             @RequestParam(value = "keyword",required = false) String keyword,
+                                             @RequestParam(value = "keyword", required = false) String keyword,
                                              @RequestParam("no") int no,
                                              @RequestParam("size") int size) {
         return this.lockRun(() -> this.dnsService.search(networkId, keyword, no, size));

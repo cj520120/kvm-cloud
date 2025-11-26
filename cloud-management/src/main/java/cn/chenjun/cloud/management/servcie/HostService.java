@@ -54,6 +54,7 @@ public class HostService extends AbstractService {
         page.setList(models);
         return ResultUtil.success(page);
     }
+
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<HostModel> getHostInfo(int hostId) {
         HostEntity host = this.hostMapper.selectById(hostId);

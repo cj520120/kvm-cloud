@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 public abstract class AbstractGuestActionCallbackProcess extends AbstractClusterMessageProcess<ResultUtil<GuestEntity>> {
 
 
-
     @Override
     protected void doProcess(NotifyData<ResultUtil<GuestEntity>> msg) {
         ResultUtil<GuestEntity> resultUtil = msg.getData();

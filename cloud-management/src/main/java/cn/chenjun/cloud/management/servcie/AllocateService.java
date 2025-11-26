@@ -48,8 +48,8 @@ public class AllocateService extends AbstractService {
                     ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build(),
                     ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.STORAGE).id(entity.getStorageId()).build()
             );
-                float storageWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT);
-                float availableValue = entity.getAvailable() / (1024.0f * 1024.0f * 1024.0f * 1024.0f);
+            float storageWeight = this.configService.getConfig(queryList, ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT);
+            float availableValue = entity.getAvailable() / (1024.0f * 1024.0f * 1024.0f * 1024.0f);
             return availableValue * storageWeight;
         }));
 

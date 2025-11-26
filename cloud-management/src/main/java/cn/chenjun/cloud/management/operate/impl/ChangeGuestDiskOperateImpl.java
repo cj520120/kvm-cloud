@@ -34,43 +34,43 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
     public void operate(ChangeGuestDiskOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
 
-                GuestEntity guest = guestMapper.selectById(param.getGuestId());
-                boolean isSupportHotplugged = false;
-                switch (param.getDeviceBus()) {
-                    case Constant.DiskDriveType.VIRTIO:
-                    case Constant.DiskDriveType.SCSI:
-                        //只有virtio和scsi支持热拔插
-                        isSupportHotplugged = true;
-                        break;
-                    default:
-                        break;
-                }
-                if (isSupportHotplugged && guest.getHostId() > 0) {
-                    HostEntity host = hostMapper.selectById(guest.getHostId());
-                    StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
-                    if (storage == null) {
-                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
-                    }
-                    if (storage.getStatus() != Constant.StorageStatus.READY) {
-                        throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
-                    }
-                    Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
+        GuestEntity guest = guestMapper.selectById(param.getGuestId());
+        boolean isSupportHotplugged = false;
+        switch (param.getDeviceBus()) {
+            case Constant.DiskDriveType.VIRTIO:
+            case Constant.DiskDriveType.SCSI:
+                //只有virtio和scsi支持热拔插
+                isSupportHotplugged = true;
+                break;
+            default:
+                break;
+        }
+        if (isSupportHotplugged && guest.getHostId() > 0) {
+            HostEntity host = hostMapper.selectById(guest.getHostId());
+            StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
+            if (storage == null) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
+            }
+            if (storage.getStatus() != Constant.StorageStatus.READY) {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
+            }
+            Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
 
-                    Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
-                    Map<String, Object> configMap = new HashMap<>();
-                    configMap.putAll(guestConfig);
-                    configMap.putAll(volumeConfigMap);
-                    String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);
-                    ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
-                    if (param.isAttach()) {
-                        this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
-                    } else {
-                        this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
-                    }
+            Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
+            Map<String, Object> configMap = new HashMap<>();
+            configMap.putAll(guestConfig);
+            configMap.putAll(volumeConfigMap);
+            String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);
+            ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
+            if (param.isAttach()) {
+                this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+            } else {
+                this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+            }
 
-                } else {
-                    this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
-                }
+        } else {
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        }
 
     }
 

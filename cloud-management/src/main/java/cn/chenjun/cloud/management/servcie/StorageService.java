@@ -12,6 +12,7 @@ import cn.chenjun.cloud.management.model.SimpleStorageModel;
 import cn.chenjun.cloud.management.model.StorageModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.DiskSerialUtil;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -58,6 +59,7 @@ public class StorageService extends AbstractService {
         page.setList(models);
         return ResultUtil.success(page);
     }
+
     public ResultUtil<StorageModel> getStorageInfo(int storageId) {
         StorageEntity storage = this.storageMapper.selectById(storageId);
         if (storage == null) {
@@ -111,6 +113,7 @@ public class StorageService extends AbstractService {
                         .allocation(0L)
                         .status(Constant.VolumeStatus.CREATING)
                         .createTime(new Date())
+                        .serial(DiskSerialUtil.generateDiskSerial())
                         .build();
                 this.volumeMapper.insert(migrateVolume);
                 BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(UUID.randomUUID().toString())

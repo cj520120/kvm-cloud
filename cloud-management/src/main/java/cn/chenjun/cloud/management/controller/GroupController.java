@@ -25,29 +25,30 @@ public class GroupController extends BaseController {
     }
 
     @GetMapping("/api/group/search")
-    public ResultUtil<Page<GroupModel>> search(@RequestParam(value = "keyword",required = false) String keyword,
+    public ResultUtil<Page<GroupModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
                                                @RequestParam("no") int no,
                                                @RequestParam("size") int size) {
         return this.lockRun(() -> this.groupService.search(keyword, no, size));
     }
+
     @GetMapping("/api/group/info")
     public ResultUtil<GroupModel> getGroupInfo(@RequestParam("groupId") int groupId) {
         return this.lockRun(() -> this.groupService.getGroup(groupId));
     }
 
-    
+
     @PutMapping("/api/group/create")
     public ResultUtil<GroupModel> createGroup(@RequestParam("groupName") String groupName) {
         return this.lockRun(() -> this.groupService.createGroup(groupName));
     }
 
-    
+
     @PostMapping("/api/group/update")
     public ResultUtil<GroupModel> updateGroup(@RequestParam("groupId") int groupId, @RequestParam("groupName") String groupName) {
         return this.lockRun(() -> this.groupService.updateGroup(groupId, groupName));
     }
 
-    
+
     @DeleteMapping("/api/group/destroy")
     public ResultUtil<Void> deleteGroup(@RequestParam("groupId") int groupId) {
         return this.lockRun(() -> this.groupService.deleteGroup(groupId));

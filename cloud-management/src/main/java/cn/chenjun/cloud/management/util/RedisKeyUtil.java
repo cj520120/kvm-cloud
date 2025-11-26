@@ -16,6 +16,7 @@ public class RedisKeyUtil {
     public static String getGlobalJobKey(String jobName) {
         return "Cloud.Job." + jobName;
     }
+
     public static String getHostLastKeepKey(int hostId) {
         return "Cloud.Host.Keep." + hostId;
     }

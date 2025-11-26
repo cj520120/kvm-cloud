@@ -14,7 +14,8 @@ public class BaseController {
     public <T> T lockRun(LockRunner.LockAction<T> runnable) {
         return this.lockRun(RedisKeyUtil.getGlobalLockKey(), runnable);
     }
-    public <T> T lockRun(String lockKey,LockRunner.LockAction<T> runnable) {
+
+    public <T> T lockRun(String lockKey, LockRunner.LockAction<T> runnable) {
         return lockRunner.lockCall(lockKey, runnable);
     }
 }

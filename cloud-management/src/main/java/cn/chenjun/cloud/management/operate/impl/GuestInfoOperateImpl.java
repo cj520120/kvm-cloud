@@ -29,7 +29,6 @@ import java.util.Objects;
 public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, ResultUtil<GuestInfo>> {
 
 
-
     @Override
     public void operate(GuestInfoOperate param) {
         GuestEntity guest = guestMapper.selectById(param.getGuestId());

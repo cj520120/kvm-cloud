@@ -142,7 +142,6 @@ public abstract class AbstractOperate<T extends BaseOperateParam, V extends Resu
     }
 
 
-
     @SuppressWarnings("unchecked")
     @Override
     public void process(BaseOperateParam param) {

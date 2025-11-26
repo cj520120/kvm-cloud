@@ -191,6 +191,7 @@ public class UserService extends AbstractService {
         page.setList(models);
         return ResultUtil.success(page);
     }
+
     public ResultUtil<UserInfoModel> resetPassword(int userId, String password) {
         UserInfoEntity loginInfoEntity = this.loginInfoMapper.selectById(userId);
         if (loginInfoEntity == null) {

@@ -49,6 +49,7 @@ public class GroupService extends AbstractService {
         page.setList(models);
         return ResultUtil.success(page);
     }
+
     public ResultUtil<GroupModel> getGroup(Integer groupId) {
         GroupInfoEntity entity = mapper.selectById(groupId);
         if (entity == null) {

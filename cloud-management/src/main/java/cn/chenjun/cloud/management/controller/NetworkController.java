@@ -29,10 +29,11 @@ public class NetworkController extends BaseController {
 
     @GetMapping("/api/network/search")
     public ResultUtil<Page<SimpleNetworkModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
-                                                 @RequestParam("no") int no,
-                                                 @RequestParam("size") int size) {
+                                                       @RequestParam("no") int no,
+                                                       @RequestParam("size") int size) {
         return this.lockRun(() -> networkService.search(keyword, no, size));
     }
+
     @GetMapping("/api/network/all")
     public ResultUtil<List<SimpleNetworkModel>> listNetwork() {
         return this.lockRun(() -> networkService.listNetwork());
