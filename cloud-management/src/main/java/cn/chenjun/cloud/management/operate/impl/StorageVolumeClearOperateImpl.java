@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.StorageVolumeCleanOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class StorageVolumeClearOperateImpl extends AbstractOperate<StorageVolume
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在"));
         } else {
             ListStorageVolumeRequest request = ListStorageVolumeRequest.builder().name(storage.getName()).build();
-            HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
             this.asyncInvoker(host, param, Constant.Command.LIST_STORAGE_VOLUME, request);
         }
     }
@@ -67,7 +68,7 @@ public class StorageVolumeClearOperateImpl extends AbstractOperate<StorageVolume
                 log.info("开始清理未关联磁盘:{}", destroyVolumeNames);
                 StorageEntity storage = storageMapper.selectById(param.getStorageId());
                 if (storage != null) {
-                    HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+                    HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
                     DestroyUnLinkVolumeRequest request = DestroyUnLinkVolumeRequest.builder()
                             .storage(storage.getName())
                             .volumes(destroyVolumeNames)

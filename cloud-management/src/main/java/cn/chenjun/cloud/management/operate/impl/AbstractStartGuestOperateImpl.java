@@ -10,10 +10,7 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.DomainUtil;
-import cn.chenjun.cloud.management.util.GuestExternNames;
-import cn.chenjun.cloud.management.util.GuestExternUtil;
+import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Maps;
@@ -39,7 +36,8 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
         if (guest.getStatus() != Constant.GuestStatus.STARTING) {
             throw new CodeException(ErrorCode.GUEST_NOT_STOP, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
-        HostEntity host = this.allocateService.allocateHost(guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
+        int hostRole=guest.getType()== Constant.GuestType.COMPONENT? HostRole.COMPONENT :HostRole.USER;
+        HostEntity host = this.allocateService.allocateHost(hostRole,guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
         Map<String, Object> systemConfig = this.loadGuestConfig(hostId, guestId);
         List<String> deviceXmlList = new ArrayList<>();
         deviceXmlList.add(this.buildCdXml(guest, systemConfig));

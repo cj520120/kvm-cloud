@@ -12,6 +12,7 @@ import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateVolumeOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateTemplateVolumeOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +43,7 @@ public class MigrateTemplateVolumeOperateImpl extends AbstractOperate<MigrateTem
             if (!Objects.equals(template.getStatus(), Constant.TemplateStatus.MIGRATE)) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "模版[" + volume.getName() + "]状态不正常:" + template.getStatus());
             }
-
-            HostEntity host = this.allocateService.allocateHost(0, sourceStorage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, sourceStorage.getHostId(), 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceVolume(initVolume(sourceStorage, volume))

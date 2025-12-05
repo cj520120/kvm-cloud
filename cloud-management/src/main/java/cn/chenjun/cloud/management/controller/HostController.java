@@ -43,8 +43,9 @@ public class HostController extends BaseController {
     public ResultUtil<HostModel> createHost(@RequestParam("displayName") String displayName,
                                             @RequestParam("hostIp") String hostIp,
                                             @RequestParam("uri") String uri,
-                                            @RequestParam("nic") String nic) {
-        return this.lockRun(() -> hostService.createHost(displayName, hostIp, uri, nic));
+                                            @RequestParam("nic") String nic,
+                                            @RequestParam("role") int role) {
+        return this.lockRun(() -> hostService.createHost(displayName, hostIp, uri, nic,role));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
@@ -58,7 +59,11 @@ public class HostController extends BaseController {
     public ResultUtil<HostModel> maintenanceHost(@RequestParam("hostId") int hostId) {
         return this.lockRun(() -> hostService.maintenanceHost(hostId));
     }
-
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
+    @PostMapping("/api/host/role/update")
+    public ResultUtil<HostModel> updateHostRole(@RequestParam("hostId") int hostId,@RequestParam("role") int role) {
+        return this.lockRun(() -> hostService.updateHostRole(hostId,role));
+    }
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/host/destroy")
     public ResultUtil<Void> destroyHost(@RequestParam("hostId") int hostId) {

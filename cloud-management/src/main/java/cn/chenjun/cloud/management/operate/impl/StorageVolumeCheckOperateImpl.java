@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.VolumeCheckOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -37,7 +38,7 @@ public class StorageVolumeCheckOperateImpl extends AbstractOperate<VolumeCheckOp
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
             List<VolumeInfoRequest> requests = volumeList.stream().map(t -> VolumeInfoRequest.builder().sourceName(t.getName()).sourceStorage(storage.getName()).build()).collect(Collectors.toList());
-            HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_VOLUME_INFO, requests);
         }
     }

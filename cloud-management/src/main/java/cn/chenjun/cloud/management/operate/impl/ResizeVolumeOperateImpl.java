@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ResizeVolumeOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
                 host = this.hostMapper.selectById(guest.getHostId());
                 vm = guest.getName();
             } else {
-                host = this.allocateService.allocateHost(hostId, volume.getHostId(), 0, 0);
+                host = this.allocateService.allocateHost(HostRole.ALL,hostId, volume.getHostId(), 0, 0);
             }
             VolumeResizeRequest request = VolumeResizeRequest.builder()
                     .vm(vm)

@@ -54,8 +54,8 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void checkAndStart(NetworkEntity network, ComponentEntity component) {
-
         List<HostEntity> hostList = allocateService.listAllocateHost(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_CPU), (int) configService.getConfig(ConfigKey.SYSTEM_COMPONENT_MEMORY) * 1024);
+        hostList= hostList.stream().filter(host -> (host.getRole() & HostRole.COMPONENT) == HostRole.COMPONENT).collect(Collectors.toList());
         List<Integer> hostIds = hostList.stream().map(HostEntity::getHostId).collect(Collectors.toList());
         if (hostIds.isEmpty()) {
             log.warn("没有可用的主机，无法检查网络组件:{}", this.getComponentName());
@@ -65,7 +65,6 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         if (masterGuest == null) {
             return;
         }
-
         if (masterGuest.getStatus() == cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING) {
             if (!checkComponentSlaveNumber(component)) {
                 return;

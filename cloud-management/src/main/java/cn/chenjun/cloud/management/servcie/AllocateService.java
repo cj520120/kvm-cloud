@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.HostRole;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -74,18 +75,21 @@ public class AllocateService extends AbstractService {
     public List<HostEntity> listAllocateHost(int cpu, long memory) {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
+
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
         }
-        list = list.stream().filter(t -> hostVerify(t, cpu, memory))
-                .collect(Collectors.toList());
+        list = list.stream().filter(t -> hostVerify(t, cpu, memory)).collect(Collectors.toList());
         return list;
     }
 
-    public HostEntity allocateHost(int hostId, int mustHostId, int cpu, long memory) {
+    public HostEntity allocateHost(int role,int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
+            if (role!= HostRole.ALL && (host.getRole() & role) != role) {
+                throw new CodeException(ErrorCode.HOST_ROLE_NOT_SUPPORT, "主机角色不支持");
+            }
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
@@ -99,7 +103,9 @@ public class AllocateService extends AbstractService {
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
             for (HostEntity host : list) {
-
+                if (role!= HostRole.ALL && (host.getRole() & role) != role) {
+                    continue;
+                }
                 List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
                 host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
                 host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));

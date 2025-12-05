@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
             if (storage.getStatus() != Constant.StorageStatus.READY) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
             }
-            HostEntity host = this.allocateService.allocateHost(0, volume.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, volume.getHostId(), 0, 0);
             VolumeDestroyRequest request = VolumeDestroyRequest.builder()
                     .volume(initVolume(storage, volume))
                     .build();

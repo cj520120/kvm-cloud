@@ -123,10 +123,6 @@ public class SshAuthorizedService extends AbstractService {
         }
     }
 
-    public static void main(String[] args) {
-        new SshAuthorizedService().createSshKey("test");
-    }
-
     public ResultUtil<SshAuthorizedModel> modifySshKey(int id, String name) {
         SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
         if (entity == null) {

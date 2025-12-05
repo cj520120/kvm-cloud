@@ -35,6 +35,7 @@ public class HostEntity {
     public static final String HOST_TOTAL_MEMORY = "host_total_memory";
     public static final String HOST_TOTAL_CPU = "host_total_cpu";
     public static final String HOST_CPU_ARCH = "host_cpu_arch";
+    public static final String HOST_ROLE = "host_role";
     public static final String HOST_CPU_VENDOR = "host_cpu_vendor";
     public static final String HOST_HYPERVISOR = "host_hypervisor";
     public static final String HOST_EMULATOR = "host_emulator";
@@ -66,6 +67,8 @@ public class HostEntity {
     private String nic;
     @TableField(HOST_URI)
     private String uri;
+    @TableField(HOST_ROLE)
+    private Integer role;
     @TableField(HOST_ALLOCATION_MEMORY)
     private Long allocationMemory;
     @TableField(HOST_ALLOCATION_CPU)

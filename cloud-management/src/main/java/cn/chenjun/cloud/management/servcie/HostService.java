@@ -10,6 +10,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -74,7 +75,7 @@ public class HostService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic) {
+    public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic,int role) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入主机名称");
         }
@@ -105,6 +106,7 @@ public class HostService extends AbstractService {
                 .sockets(0)
                 .threads(0)
                 .cores(0)
+                .role(role)
                 .status(Constant.HostStatus.REGISTER).build();
         this.hostMapper.insert(host);
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString())
@@ -144,6 +146,19 @@ public class HostService extends AbstractService {
         return ResultUtil.success(this.initHost(host));
 
     }
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<HostModel> updateHostRole(int hostId,int role) {
+        HostEntity host = this.hostMapper.selectById(hostId);
+        if (host == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+        }
+
+        host.setRole(role);
+        this.hostMapper.updateById(host);
+        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        return ResultUtil.success(this.initHost(host));
+
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public ResultUtil<Void> destroyHost(int hostId) {
@@ -151,10 +166,14 @@ public class HostService extends AbstractService {
         if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq(GuestEntity.HOST_ID, hostId)) > 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
-        if (this.storageMapper.selectCount(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, hostId)) > 0) {
-            throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
+        List<StorageEntity> storageList= this.storageMapper.selectList(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, hostId));
+        for (StorageEntity storage:storageList){
+            if (this.volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, storage.getStorageId()))>0) {
+                throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
+            }
         }
         this.hostMapper.deleteById(hostId);
+        this.storageMapper.delete(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, hostId));
         this.configService.deleteAllocateConfig(Constant.ConfigType.HOST, hostId);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return ResultUtil.success();

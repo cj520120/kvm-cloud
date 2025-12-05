@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -44,7 +45,7 @@ public class DestroyTemplateOperateImpl extends AbstractOperate<DestroyTemplateO
         for (TemplateVolumeEntity volume : volumes) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
             if (storage != null) {
-                HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+                HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
                 VolumeDestroyRequest request = VolumeDestroyRequest.builder()
                         .volume(initVolume(storage, volume))
                         .build();

@@ -75,6 +75,7 @@ public final class ErrorCode {
     public static final int HOST_NOT_READY = BASE_HOST_ERROR + 2;
     public static final int HOST_NOT_RESOURCE = BASE_HOST_ERROR + 3;
     public static final int HOST_HAS_LOCAL_STORAGE = BASE_HOST_ERROR + 4;
+    public static final int HOST_ROLE_NOT_SUPPORT = BASE_HOST_ERROR + 5;
 
     /**
      * Scheme

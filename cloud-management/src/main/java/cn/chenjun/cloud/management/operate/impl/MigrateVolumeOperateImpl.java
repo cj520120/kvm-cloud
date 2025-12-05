@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateVolumeOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class MigrateVolumeOperateImpl extends AbstractOperate<MigrateVolumeOpera
             if (targetVolume.getStatus() != Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + sourceVolume.getName() + "]状态不正常:" + sourceVolume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(0, Math.max(sourceVolume.getHostId(), targetVolume.getHostId()), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, Math.max(sourceVolume.getHostId(), targetVolume.getHostId()), 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(targetVolume.getStorageId());
             VolumeMigrateRequest request = VolumeMigrateRequest.builder()
                     .sourceVolume(initVolume(sourceStorage, sourceVolume))

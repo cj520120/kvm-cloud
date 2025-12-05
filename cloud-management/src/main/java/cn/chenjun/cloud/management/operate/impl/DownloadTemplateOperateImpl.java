@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         if (storage.getStatus() != Constant.StorageStatus.READY) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
         }
-        HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+        HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
         StorageEntity targetStorage = storageMapper.selectById(templateVolume.getStorageId());
 
         VolumeDownloadRequest request = VolumeDownloadRequest.builder()

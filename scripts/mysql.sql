@@ -141,12 +141,13 @@ CREATE TABLE `tbl_host_info` (
   `host_display_name` varchar(45) NOT NULL,
   `client_id` varchar(45) NOT NULL,
   `client_secret` varchar(45) NOT NULL,
-  `host_name` varchar(45) NOT NULL DEFAULT '',
+  `host_name` varchar(64) NOT NULL DEFAULT '',
   `host_os_name` varchar(64) NOT NULL,
   `host_os_version` varchar(64) NOT NULL,
   `host_ip` varchar(20) NOT NULL,
   `host_nic_name` varchar(20) NOT NULL,
   `host_uri` varchar(128) NOT NULL,
+  `host_role` int NOT NULL DEFAULT '3',
   `host_allocation_memory` bigint NOT NULL,
   `host_allocation_cpu` int NOT NULL,
   `host_total_memory` bigint NOT NULL,
@@ -161,9 +162,10 @@ CREATE TABLE `tbl_host_info` (
   `host_cpu_sockets` int NOT NULL DEFAULT '0',
   `host_cpu_threads` int NOT NULL DEFAULT '0',
   `host_status` int NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`host_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 
 --

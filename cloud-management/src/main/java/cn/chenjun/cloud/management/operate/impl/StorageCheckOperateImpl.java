@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
@@ -35,7 +36,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
             List<StorageInfoRequest> requests = Collections.singletonList(StorageInfoRequest.builder().name(storage.getName()).build());
-            HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_STORAGE_INFO, requests);
         }
     }

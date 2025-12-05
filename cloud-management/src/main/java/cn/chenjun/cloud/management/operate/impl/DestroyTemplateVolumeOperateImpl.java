@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateVolumeOperate;
+import cn.chenjun.cloud.management.util.HostRole;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,7 @@ public class DestroyTemplateVolumeOperateImpl extends AbstractOperate<DestroyTem
         TemplateVolumeEntity volume = this.templateVolumeMapper.selectById(param.getVolumeId());
         if (volume != null) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            HostEntity host = this.allocateService.allocateHost(0, storage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
             VolumeDestroyRequest request = VolumeDestroyRequest.builder()
                     .volume(initVolume(storage, volume))
                     .build();
