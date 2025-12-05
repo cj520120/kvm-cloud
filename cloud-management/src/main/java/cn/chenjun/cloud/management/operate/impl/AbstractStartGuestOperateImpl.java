@@ -37,6 +37,7 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             throw new CodeException(ErrorCode.GUEST_NOT_STOP, "虚拟机[" + guest.getName() + "]状态不正确:" + guest.getStatus());
         }
         int hostRole=guest.getType()== Constant.GuestType.COMPONENT? HostRole.COMPONENT :HostRole.USER;
+        log.info("开始启动主机,guestId={} hostId={} hostRole={}",guest.getGuestId(),hostId,hostRole);
         HostEntity host = this.allocateService.allocateHost(hostRole,guest.getLastHostId(), hostId, guest.getCpu(), guest.getMemory());
         Map<String, Object> systemConfig = this.loadGuestConfig(hostId, guestId);
         List<String> deviceXmlList = new ArrayList<>();

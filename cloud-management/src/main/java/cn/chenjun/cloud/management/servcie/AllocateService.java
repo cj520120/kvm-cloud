@@ -75,7 +75,6 @@ public class AllocateService extends AbstractService {
     public List<HostEntity> listAllocateHost(int cpu, long memory) {
         List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
         for (HostEntity host : list) {
-
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
             host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
             host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
@@ -102,22 +101,23 @@ public class AllocateService extends AbstractService {
             return host;
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
+            if (role!= HostRole.ALL) {
+                list.removeIf(t -> (t.getRole() & role) != role);
+                log.info("过滤主机角色,role={}", role);
+            }
             for (HostEntity host : list) {
-                if (role!= HostRole.ALL && (host.getRole() & role) != role) {
-                    continue;
-                }
                 List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
                 host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
                 host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
             }
             //获取满足的主机列表
-            list = list.stream().filter(t -> hostVerify(t, cpu, memory)).collect(Collectors.toList());
-
+            list = list.stream().filter(t -> hostVerify(t,cpu, memory)).collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
             if (hostId > 0) {
                 host = list.stream().filter(t -> Objects.equals(t.getHostId(), hostId)).findFirst().orElse(null);
             }
+
             if (host == null) {
                 if (cpu > 0 && memory > 0) {
                     Map<Integer, Float> scoreMap = new HashMap<>(list.size());
