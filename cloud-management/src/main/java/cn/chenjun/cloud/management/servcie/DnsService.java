@@ -62,7 +62,7 @@ public class DnsService extends AbstractService {
             return new ArrayList<>();
         }
         List<DnsModel> list = new ArrayList<>();
-        List<GuestEntity> guestList = this.guestMapper.findGuestByNetworkId(networkId);
+        List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.NETWORK_ID, networkId));
         for (GuestEntity guest : guestList) {
             list.add(DnsModel.builder().domain(guest.getName() + "." + network.getDomain()).ip(guest.getGuestIp()).build());
         }

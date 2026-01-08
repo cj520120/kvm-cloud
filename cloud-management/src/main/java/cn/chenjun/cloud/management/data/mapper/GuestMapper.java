@@ -21,13 +21,4 @@ public interface GuestMapper extends BaseMapper<GuestEntity> {
      */
     @Update("update tbl_guest_info set guest_cd_room=0 where guest_cd_room=#{templateId}")
     void detachCdByTemplateId(@Param("templateId") int templateId);
-
-    /**
-     * 获取网络下的所有主机
-     *
-     * @param networkId
-     * @return
-     */
-    @Select("select * from tbl_guest_info where network_id=${networkId}")
-    List<GuestEntity> findGuestByNetworkId(@Param("networkId") int networkId);
 }
