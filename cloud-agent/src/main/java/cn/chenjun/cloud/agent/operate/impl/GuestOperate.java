@@ -333,8 +333,17 @@ public class GuestOperate {
                         } catch (Exception ignored) {
 
                         }
+                        try{
+                            if(domain.hasManagedSaveImage()>0){
+                                domain.managedSaveRemove();
+                            }
+                        }catch (Exception ignored) {
+
+                        }
                         try {
-                            domain.undefine();
+                            int VIR_DOMAIN_UNDEFINE_MANAGED_SAVE = 1;
+                            int VIR_DOMAIN_UNDEFINE_NVRAM = 4;
+                            domain.undefine(VIR_DOMAIN_UNDEFINE_MANAGED_SAVE |VIR_DOMAIN_UNDEFINE_NVRAM);
                         } catch (Exception ignored) {
 
                         }
