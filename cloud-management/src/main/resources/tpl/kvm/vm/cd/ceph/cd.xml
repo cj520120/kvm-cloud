@@ -1,6 +1,6 @@
 <disk type="network" device="cdrom">
     <driver name="qemu"/>
-    <target dev="hda" bus="ide"/>
+    <target dev="hda" bus="sata"/>
     {% if template.name %}
     <source protocol="rbd" name="{{storage.param.pool}}/{{template.name}}">
         {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}
