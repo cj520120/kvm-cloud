@@ -25,6 +25,7 @@ public class SimpleGuestModel {
     private int cdRoom;
     private int hostId;
     private int schemeId;
+    private int bindHostId;
     private int lastHostId;
     private int type;
     private int networkId;

@@ -25,13 +25,6 @@ public class ComponentController extends BaseController {
     public ResultUtil<List<ComponentDetailModel>> listNetworkComponent(@RequestParam("networkId") int networkId) {
         return this.lockRun(() -> networkService.listNetworkComponent(networkId));
     }
-
-    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
-    @PostMapping("/api/component/slave/number")
-    public ResultUtil<ComponentDetailModel> updateComponentSlaveNumber(@RequestParam("componentId") int componentId, @RequestParam("number") int number) {
-        return this.lockRun(() -> networkService.updateComponentSlaveNumber(componentId, number));
-    }
-
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/component/nat/create")
     public ResultUtil<ComponentDetailModel> createNatComponent(@RequestParam("networkId") int networkId) {

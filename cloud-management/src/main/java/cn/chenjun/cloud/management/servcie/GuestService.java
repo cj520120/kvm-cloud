@@ -16,6 +16,7 @@ import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,19 +29,15 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
+@Slf4j
 @Service
 public class GuestService extends AbstractService {
     @Autowired
     private AllocateService allocateService;
 
     private void checkSystemComponentComplete(int networkId) {
-        List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.NETWORK).id(networkId).build());
-        if (Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), cn.chenjun.cloud.common.util.Constant.Enable.NO)) {
-            return;
-        }
-        if (!this.checkRouteComponentComplete(networkId)) {
+        NetworkEntity network = this.networkMapper.selectById(networkId);
+        if(network == null || !Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)) {
             throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络服务未初始化完成,请稍后重试");
         }
     }
@@ -93,9 +90,30 @@ public class GuestService extends AbstractService {
         }
         return ResultUtil.success(this.initGuestInfo(guest));
     }
+    public ResultUtil<GuestModel> bindGuestHost(int guestId, int hostId) {
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if (guest == null) {
+            return ResultUtil.error(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
+        }
+        if(Objects.equals(guest.getBindHostId(), hostId)){
+            return ResultUtil.success(this.initGuestInfo(guest));
+        }
+        if(!Objects.equals(guest.getStatus(), Constant.GuestStatus.STOP)){
+            throw new CodeException(ErrorCode.GUEST_NOT_STOP, "只能对关机状态的主机进行操作");
+        }
+        List<VolumeEntity> volumes = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId));
+        for (VolumeEntity volume : volumes) {
+            if(volume.getHostId()>0&&!Objects.equals(volume.getHostId(), hostId)){
+                return ResultUtil.error(ErrorCode.GUEST_VOLUME_BIND_OTHER_HOST,"虚拟机磁盘已经绑定了主机，无法进行相关操作");
+            }
+        }
+        guest.setBindHostId(hostId);
+        this.guestMapper.updateById(guest);
+        return ResultUtil.success(this.initGuestInfo(guest));
+    }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceDriver,
+    public ResultUtil<GuestModel> createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceDriver,int bindHostId,
                                               int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int volumeId,
                                               int storageId, long size, String hostName, String password, int sshId) {
@@ -117,13 +135,31 @@ public class GuestService extends AbstractService {
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
         }
+        int mustHostId=0;
+
         StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
             if (hostId > 0 && !Objects.equals(hostId, storage.getHostId())) {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "使用本地存储时，只能在存储所在机器启动");
             }
-            hostId = storage.getHostId();
+            mustHostId = storage.getHostId();
         }
+        if(mustHostId==0 && volumeId > 0  ) {
+            VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+            if (volume == null) {
+                throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
+            }
+            mustHostId=volume.getHostId();
+        }
+        if (bindHostId==0){
+            bindHostId=mustHostId;
+        }else if (mustHostId>0&&bindHostId!=mustHostId){
+            throw new CodeException(ErrorCode.PARAM_ERROR, "绑定主机与存储所在机器不一致");
+        }
+        if (hostId <= 0) {
+            hostId = bindHostId;
+        }
+
         this.checkSystemComponentComplete(networkId);
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
@@ -139,11 +175,13 @@ public class GuestService extends AbstractService {
                 .memory(scheme.getMemory())
                 .cdRoom(isoTemplateId)
                 .hostId(0)
+                .bindHostId(bindHostId)
                 .lastHostId(0)
                 .schemeId(schemeId)
                 .guestIp(guestNetwork.getIp())
                 .otherId(0)
                 .networkId(networkId)
+                .bindHostId(bindHostId)
                 .type(cn.chenjun.cloud.common.util.Constant.GuestType.USER)
                 .extern("{}")
                 .status(cn.chenjun.cloud.common.util.Constant.GuestStatus.CREATING)
@@ -222,6 +260,7 @@ public class GuestService extends AbstractService {
                 .guestId(guest.getGuestId())
                 .deviceDriver(deviceDriver)
                 .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
+                .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);
@@ -467,6 +506,47 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
 
     }
+    public ResultUtil<VolumeModel> createGuestBlockDevice(int guestId,  String description, String devicePath, String diskDriver){
+        if (StringUtils.isEmpty(description)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入设备描述信息");
+        }
+        GuestEntity guest = this.guestMapper.selectById(guestId);
+        if(guest==null){
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND,"虚拟机不存在");
+        }
+        if(guest.getBindHostId()<=0){
+            throw new CodeException(ErrorCode.GUEST_BIND_HOST_ERROR,"虚拟机未绑定主机");
+        }
+        int deviceId = allocateGuestDiskDeviceId(guestId);
+        String volumeName = NameUtil.generateVolumeName();
+        VolumeEntity volume = VolumeEntity.builder()
+                .storageId(0)
+                .templateId(0)
+                .hostId(guest.getBindHostId())
+                .description(description)
+                .name(volumeName)
+                .path(devicePath)
+                .type("block")
+                .capacity(0L)
+                .allocation(0L)
+                .status(Constant.VolumeStatus.READY)
+                .deviceDriver(diskDriver)
+                .guestId(guestId)
+                .deviceId(deviceId)
+                .createTime(new Date())
+                .device(Constant.DeviceType.BLOCK)
+                .serial(DiskSerialUtil.generateDiskSerial())
+                .build();
+        this.volumeMapper.insert(volume);
+        VolumeModel model = this.initVolume(volume);
+        BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
+                .deviceId(volume.getDeviceId()).deviceBus(volume.getDeviceDriver()).attach(true).volumeId(volume.getVolumeId()).guestId(guestId)
+                .id(UUID.randomUUID().toString())
+                .title("挂在磁盘[" + guest.getDescription() + "]").build();
+        this.operateTask.addTask(operateParam);
+        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        return ResultUtil.success(model);
+    }
 
     public ResultUtil<VolumeModel> createDisk(int guestId, String diskDriver, String description, int storageId, long volumeSize) {
         if (StringUtils.isEmpty(description)) {
@@ -496,6 +576,7 @@ public class GuestService extends AbstractService {
                 .guestId(guestId)
                 .deviceId(deviceId)
                 .createTime(new Date())
+                .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);

@@ -14,6 +14,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class GuestModel extends SimpleGuestModel {
     private HostModel host;
+    private HostModel bindHost;
     private GroupModel group;
     private SchemeModel scheme;
     private NetworkModel network;

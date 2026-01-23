@@ -51,6 +51,10 @@ public class Constant {
         public static final String VPC = "vpc";
 
     }
+    public static class  DeviceType {
+        public static final String DISK = "disk";
+        public static final String BLOCK = "block";
+    }
 
     public static class Command {
         public static final String CHECK_TASK = "CheckTask";

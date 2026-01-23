@@ -23,6 +23,7 @@ public class SimpleVolumeModel {
     private String path;
     private long capacity;
     private long allocation;
+    private String device;
     private String type;
     private int status;
 

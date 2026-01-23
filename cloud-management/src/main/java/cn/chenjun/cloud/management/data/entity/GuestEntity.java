@@ -24,12 +24,12 @@ public class GuestEntity {
     public static final String GROUP_ID = "group_id";
     public static final String GUEST_NAME = "guest_name";
     public static final String GUEST_DESCRIPTION = "guest_description";
-    public static final String GUEST_BUS_TYPE = "guest_bus_type";
     public static final String GUEST_BOOTSTRAP_TYPE = "guest_bootstrap_type";
     public static final String GUEST_CPU = "guest_cpu";
     public static final String GUEST_CPU_SPEED = "guest_cpu_share";
     public static final String GUEST_MEMORY = "guest_memory";
     public static final String GUEST_CD_ROOM = "guest_cd_room";
+    public static final String BIND_HOST_ID = "bind_host_id";
     public static final String HOST_ID = "host_id";
     public static final String LAST_HOST_ID = "last_host_id";
     public static final String SCHEME_ID = "scheme_id";
@@ -62,6 +62,8 @@ public class GuestEntity {
     private Long memory;
     @TableField(GUEST_CD_ROOM)
     private Integer cdRoom;
+    @TableField(BIND_HOST_ID)
+    private Integer bindHostId;
     @TableField(HOST_ID)
     private Integer hostId;
     @TableField(LAST_HOST_ID)

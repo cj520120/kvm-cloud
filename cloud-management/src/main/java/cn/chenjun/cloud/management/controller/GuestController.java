@@ -75,6 +75,7 @@ public class GuestController extends BaseController {
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("networkId") int networkId,
                                               @RequestParam("networkDeviceDriver") String networkDeviceType,
+                                              @RequestParam(value = "bindHostId", defaultValue = "0") int bindHostId,
                                               @RequestParam(value = "hostId", defaultValue = "0") int hostId,
                                               @RequestParam(value = "isoTemplateId", defaultValue = "0") int isoTemplateId,
                                               @RequestParam(value = "diskTemplateId", defaultValue = "0") int diskTemplateId,
@@ -85,7 +86,7 @@ public class GuestController extends BaseController {
                                               @RequestParam(value = "hostname", defaultValue = "") String hostName,
                                               @RequestParam(value = "password", defaultValue = "") String password,
                                               @RequestParam(value = "sshId", defaultValue = "0") int sshId) {
-        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId));
+        return this.lockRun(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus,bindHostId, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId));
     }
 
 
@@ -209,6 +210,22 @@ public class GuestController extends BaseController {
     @DeleteMapping("/api/guest/destroy")
     public ResultUtil<GuestModel> destroyGuest(@RequestParam("guestId") int guestId) {
         return this.lockRun(() -> this.guestService.destroyGuest(guestId));
+    }
+    @PostMapping("/api/guest/host/bind")
+    public ResultUtil<GuestModel> bindHost(@RequestParam("guestId") int guestId,
+                                           @RequestParam("hostId") int hostId) {
+        return this.lockRun(() -> this.guestService.bindGuestHost(guestId, hostId));
+    }
+    @PostMapping("/api/guest/host/unbind")
+    public ResultUtil<GuestModel> unbindHost(@RequestParam("guestId") int guestId) {
+        return this.lockRun(() -> this.guestService.bindGuestHost(guestId,0));
+    }
+    @PutMapping("/api/guest/disk/block/create")
+    public ResultUtil<VolumeModel> createGuestBlockDevice(@RequestParam("guestId") int guestId,
+                                              @RequestParam("diskDriver") String diskDriver,
+                                              @RequestParam("devicePath") String devicePath,
+                                              @RequestParam("description") String description  ) {
+        return this.lockRun(() -> this.guestService.createGuestBlockDevice(guestId, description, devicePath, diskDriver));
     }
 
 }

@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.component;
 
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import org.springframework.plugin.core.Plugin;
 
@@ -17,8 +18,14 @@ public interface ComponentProcess extends Plugin<Integer> {
      * @param network
      * @param component
      */
-    void checkAndStart(NetworkEntity network, ComponentEntity component);
+    boolean checkAndStart(NetworkEntity network, ComponentEntity component, HostEntity host, boolean isMaster);
 
+    /**
+     * 清理主机上的组件
+     * @param component
+     * @param host
+     */
+    void cleanHostComponent(ComponentEntity component, HostEntity host);
     /**
      * 获取组件启动脚本
      *

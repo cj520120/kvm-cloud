@@ -1,32 +1,31 @@
 package cn.chenjun.cloud.management.task.runner;
 
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.component.ComponentProcess;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
+import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class ComponentCheckRunner extends AbstractRunner {
 
@@ -40,7 +39,8 @@ public class ComponentCheckRunner extends AbstractRunner {
     private PluginRegistry<ComponentProcess, Integer> processPluginRegistry;
     @Autowired
     private ComponentMapper componentMapper;
-
+    @Autowired
+    private HostMapper hostMapper;
     @Override
     public int getPeriodSeconds() {
         return configService.getConfig(ConfigKey.DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
@@ -54,40 +54,62 @@ public class ComponentCheckRunner extends AbstractRunner {
             queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build());
             queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
             boolean isCheckComponentEnable = Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), cn.chenjun.cloud.common.util.Constant.Enable.YES);
-            if (network.getStatus() == cn.chenjun.cloud.common.util.Constant.NetworkStatus.READY || network.getStatus() == cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
-                if (isCheckComponentEnable) {
-                    List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
-                    for (ComponentEntity component : components) {
-                        processPluginRegistry.getPluginFor(component.getComponentType()).ifPresent(componentProcess -> componentProcess.checkAndStart(network, component));
-                    }
-                    //检测Route组件
-                    ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, cn.chenjun.cloud.common.util.Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, network.getNetworkId()).last("limit 0 ,1"));
-                    if (component == null) {
-                        return;
-                    }
-                    List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-                    }.getType());
-                    componentGuestIds.add(component.getMasterGuestId());
-                    List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
-                    if (network.getStatus() == cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL && !componentGuestList.isEmpty()) {
-                        //检测route组件是否已经初始化
-                        network.setStatus(cn.chenjun.cloud.common.util.Constant.NetworkStatus.READY);
-                        networkMapper.updateById(network);
-                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-                    } else if (network.getStatus() == cn.chenjun.cloud.common.util.Constant.NetworkStatus.READY && componentGuestList.isEmpty()) {
-                        //检测route组件
-                        network.setStatus(cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL);
-                        networkMapper.updateById(network);
-                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-                    }
-                } else if (network.getStatus() == cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
+            List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
+            switch (network.getStatus()) {
+                case Constant.NetworkStatus.READY:
+                case Constant.NetworkStatus.INSTALL:
+                    break;
+                default:
+                    continue;
+            }
+            if (!isCheckComponentEnable) {
+                if (network.getStatus() != cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
                     network.setStatus(Constant.NetworkStatus.READY);
                     networkMapper.updateById(network);
                     this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+                    return;
+                }
+            }
+            hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
+            int size = hostList.size();
+            List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
+            for (ComponentEntity component : components) {
+                boolean componentReady = false;
+                for (int i = 0; i < size; i++) {
+                    HostEntity host = hostList.get(i);
+                    if (!Objects.equals(host.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
+                        continue;
+                    }
+                    boolean isMaster = i == 0;
+                    Optional<ComponentProcess> optional = processPluginRegistry.getPluginFor(component.getComponentType());
+                    if (optional.isPresent()) {
+                        ComponentProcess process = optional.get();
+                        try {
+                            if (!HostRole.isComponent(host.getRole())) {
+                                process.cleanHostComponent(component, host);
+                            } else {
+                                boolean isReady = process.checkAndStart(network, component, host, isMaster);
+                                componentReady |= isReady;
+
+                            }
+                        } catch (Exception e) {
+                            log.error("组件检测失败: {}", component.getComponentType(), e);
+                        }
+                    }
+                }
+                if (Objects.equals(Constant.ComponentType.ROUTE, component.getComponentType())) {
+                    if (componentReady && !Objects.equals(Constant.NetworkStatus.READY, network.getStatus())) {
+                        network.setStatus(Constant.NetworkStatus.READY);
+                        networkMapper.updateById(network);
+                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+                    } else if (!componentReady && !Objects.equals(Constant.NetworkStatus.INSTALL, network.getStatus())) {
+                        network.setStatus(Constant.NetworkStatus.INSTALL);
+                        networkMapper.updateById(network);
+                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+                    }
                 }
             }
         }
-
     }
 
     @Override

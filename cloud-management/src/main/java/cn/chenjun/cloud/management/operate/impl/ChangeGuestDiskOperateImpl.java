@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -47,25 +48,36 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
         }
         if (isSupportHotplugged && guest.getHostId() > 0) {
             HostEntity host = hostMapper.selectById(guest.getHostId());
-            StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
-            if (storage == null) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
-            }
-            if (storage.getStatus() != Constant.StorageStatus.READY) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
-            }
-            Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
+            if(Objects.equals(volume.getDevice(),Constant.DeviceType.DISK)) {
+                StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
+                if (storage == null) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
+                }
+                if (storage.getStatus() != Constant.StorageStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
+                }
+                Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
 
-            Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
-            Map<String, Object> configMap = new HashMap<>();
-            configMap.putAll(guestConfig);
-            configMap.putAll(volumeConfigMap);
-            String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);
-            ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
-            if (param.isAttach()) {
-                this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
-            } else {
-                this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
+                Map<String, Object> configMap = new HashMap<>();
+                configMap.putAll(guestConfig);
+                configMap.putAll(volumeConfigMap);
+                String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);
+                ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
+                if (param.isAttach()) {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+                } else {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                }
+            }else {
+                Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(),guest.getGuestId());
+                String xml = this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap) ;
+                ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
+                if (param.isAttach()) {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+                } else {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                }
             }
 
         } else {
@@ -83,6 +95,11 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
 
     @Override
     public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
+        VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
+        if(Objects.equals(volume.getDevice(),Constant.DeviceType.BLOCK) && !param.isAttach()){
+            //卸载block类型的磁盘时，直接删除磁盘记录
+            volumeMapper.deleteById(param.getVolumeId());
+        }
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }

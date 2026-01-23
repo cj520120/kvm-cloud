@@ -20,9 +20,6 @@ public class ComponentDetailModel {
     private Integer componentType;
     private String componentVip;
     private String basicComponentVip;
-    private Integer networkId;
-    private Integer masterGuestId;
-    private Integer componentSlaveNumber;
-    private List<Integer> slaveGuestIds;
+    private Integer networkId; 
     private Date createTime;
 }

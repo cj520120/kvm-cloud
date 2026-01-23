@@ -36,6 +36,8 @@ public final class ErrorCode {
     public static final int GUEST_NOT_ALLOW_USER_OPERATION = BASE_GUEST_ERROR + 7;
     public static final int GUEST_BIND_OTHER_HOST = BASE_GUEST_ERROR + 8;
     public static final int GUEST_IS_RUNNING_ERROR = BASE_GUEST_ERROR + 9;
+    public static final int GUEST_VOLUME_BIND_OTHER_HOST = BASE_GUEST_ERROR + 10;
+    public static final int GUEST_BIND_HOST_ERROR = BASE_GUEST_ERROR + 11;
     /**
      * Agent
      */

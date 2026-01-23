@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * 销毁磁盘
@@ -31,15 +32,19 @@ public class DestroyVolumeOperateImpl extends AbstractOperate<DestroyVolumeOpera
     public void operate(DestroyVolumeOperate param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == Constant.VolumeStatus.DESTROY) {
-            StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != Constant.StorageStatus.READY) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
+            if(!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)){
+                this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+            }else {
+                StorageEntity storage = storageMapper.selectById(volume.getStorageId());
+                if (storage.getStatus() != Constant.StorageStatus.READY) {
+                    throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
+                }
+                HostEntity host = this.allocateService.allocateHost(HostRole.ALL, 0, volume.getHostId(), 0, 0);
+                VolumeDestroyRequest request = VolumeDestroyRequest.builder()
+                        .volume(initVolume(storage, volume))
+                        .build();
+                this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
             }
-            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, volume.getHostId(), 0, 0);
-            VolumeDestroyRequest request = VolumeDestroyRequest.builder()
-                    .volume(initVolume(storage, volume))
-                    .build();
-            this.asyncInvoker(host, param, Constant.Command.VOLUME_DESTROY, request);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正确:" + volume.getStatus());
         }

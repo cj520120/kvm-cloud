@@ -38,28 +38,32 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
     public void operate(T param) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
         if (volume.getStatus() == Constant.VolumeStatus.CREATING) {
-            StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            if (storage.getStatus() != Constant.StorageStatus.READY) {
-                throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
-            }
-            HostEntity host = this.allocateService.allocateHost(HostRole.ALL, 0, volume.getHostId(), 0, 0);
-            if (param.getTemplateId() > 0) {
-                List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
-                Collections.shuffle(templateVolumeList);
-                TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
-                StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
+            if(!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)){
+                this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "不支持的操作"));
+            }else {
+                StorageEntity storage = storageMapper.selectById(volume.getStorageId());
+                if (storage.getStatus() != Constant.StorageStatus.READY) {
+                    throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
+                }
+                HostEntity host = this.allocateService.allocateHost(HostRole.ALL, 0, volume.getHostId(), 0, 0);
+                if (param.getTemplateId() > 0) {
+                    List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
+                    Collections.shuffle(templateVolumeList);
+                    TemplateVolumeEntity templateVolume = templateVolumeList.stream().filter(t -> Objects.equals(t.getStatus(), Constant.TemplateStatus.READY)).findFirst().orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "当前模版未就绪"));
+                    StorageEntity parentStorage = storageMapper.selectById(templateVolume.getStorageId());
 
-                VolumeCloneRequest request = VolumeCloneRequest.builder()
-                        .sourceVolume(initVolume(parentStorage, templateVolume))
-                        .targetVolume(initVolume(storage, volume))
-                        .build();
-                this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
+                    VolumeCloneRequest request = VolumeCloneRequest.builder()
+                            .sourceVolume(initVolume(parentStorage, templateVolume))
+                            .targetVolume(initVolume(storage, volume))
+                            .build();
+                    this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
 
-            } else {
-                VolumeCreateRequest request = VolumeCreateRequest.builder()
-                        .volume(initVolume(storage, volume))
-                        .build();
-                this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
+                } else {
+                    VolumeCreateRequest request = VolumeCreateRequest.builder()
+                            .volume(initVolume(storage, volume))
+                            .build();
+                    this.asyncInvoker(host, param, Constant.Command.VOLUME_CREATE, request);
+                }
             }
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());

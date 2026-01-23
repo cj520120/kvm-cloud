@@ -31,14 +31,10 @@ public class UpdateComponentProcess extends AbstractClusterMessageProcess<Void> 
         ResultUtil<ComponentDetailModel> resultUtil;
         if (entity != null) {
             ComponentDetailModel model = ComponentDetailModel.builder().componentId(entity.getComponentId())
-                    .networkId(entity.getNetworkId())
-                    .componentSlaveNumber(entity.getComponentSlaveNumber())
+                    .networkId(entity.getNetworkId()) 
                     .componentType(entity.getComponentType())
-                    .masterGuestId(entity.getMasterGuestId())
                     .componentVip(entity.getComponentVip())
                     .basicComponentVip(entity.getBasicComponentVip())
-                    .slaveGuestIds(GsonBuilderUtil.create().fromJson(entity.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-                    }.getType()))
                     .createTime(entity.getCreateTime()).build();
             resultUtil = ResultUtil.success(model);
         } else {

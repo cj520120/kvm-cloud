@@ -84,7 +84,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, "no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_BIND_HOST, 0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+//        initDefaultConfig(ConfigKey.VM_BIND_HOST, 0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, "no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, "strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict", "preferred", "interleave"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, "0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
@@ -139,6 +139,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_DISK_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_BLOCK_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/block/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CD_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CD_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);

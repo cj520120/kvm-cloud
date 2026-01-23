@@ -55,17 +55,6 @@ public abstract class AbstractService {
     @Autowired
     private GroupMapper groupMapper;
 
-    protected boolean checkRouteComponentComplete(int networkId) {
-        ComponentEntity component = this.componentMapper.selectOne(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.COMPONENT_TYPE, Constant.ComponentType.ROUTE).eq(ComponentEntity.NETWORK_ID, networkId).last("limit 0 ,1"));
-        if (component == null) {
-            return true;
-        }
-        List<Integer> componentGuestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-        }.getType());
-        componentGuestIds.add(component.getMasterGuestId());
-        List<GuestEntity> componentGuestList = guestMapper.selectBatchIds(componentGuestIds).stream().filter(guestEntity -> Objects.equals(guestEntity.getStatus(), Constant.GuestStatus.RUNNING)).collect(Collectors.toList());
-        return !componentGuestList.isEmpty();
-    }
 
     protected String getVolumeType(StorageEntity storage) {
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
@@ -93,16 +82,16 @@ public abstract class AbstractService {
         if (guest == null) {
             return 0;
         }
-        int hostId = this.configService.getConfig(Collections.singletonList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
-        if (hostId == 0) {
-            if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
-                hostId = guest.getHostId();
-            } else {
-                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()));
-                hostId = guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id -> id > 0).findFirst().orElse(0);
-            }
-        }
-        return hostId;
+//        int hostId = this.configService.getConfig(Collections.singletonList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
+//        if (hostId == 0) {
+//            if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
+//                hostId = guest.getHostId();
+//            } else {
+//                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()));
+//                hostId = guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id -> id > 0).findFirst().orElse(0);
+//            }
+//        }
+        return guest.getBindHostId();
     }
 
 
@@ -121,6 +110,9 @@ public abstract class AbstractService {
         }
         if (model.getHostId() != 0) {
             model.setHost(this.initHost(hostMapper.selectById(model.getHostId())));
+        }
+        if(model.getBindHostId() != 0) {
+            model.setBindHost(this.initHost(hostMapper.selectById(entity.getBindHostId())));
         }
         model.setNetwork(this.initNetwork(networkMapper.selectById(entity.getNetworkId())));
         if (model.getCdRoom() > 0) {
@@ -212,13 +204,9 @@ public abstract class AbstractService {
 
         return ComponentDetailModel.builder().componentId(entity.getComponentId())
                 .networkId(entity.getNetworkId())
-                .componentSlaveNumber(entity.getComponentSlaveNumber())
                 .componentType(entity.getComponentType())
-                .masterGuestId(entity.getMasterGuestId())
                 .componentVip(entity.getComponentVip())
-                .basicComponentVip(entity.getBasicComponentVip())
-                .slaveGuestIds(GsonBuilderUtil.create().fromJson(entity.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-                }.getType())).build();
+                .basicComponentVip(entity.getBasicComponentVip()) .build();
     }
 
     protected NatModel initNat(NatEntity entity) {

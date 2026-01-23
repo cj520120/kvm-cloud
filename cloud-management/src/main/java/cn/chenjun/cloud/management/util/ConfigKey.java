@@ -40,7 +40,7 @@ public class ConfigKey {
     public static final String DEFAULT_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.storage.volume.sync.timeout.second";
     public static final String DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND = "default.task.expire.timeout.second";
 
-    public static final String VM_BIND_HOST = "vm.bind.host";
+//    public static final String VM_BIND_HOST = "vm.bind.host";
     public static final String VM_CPU_MODEL = "vm.cpu.model";
     public static final String VM_NUMA_MEMORY_ENABLE = "vm.numa.memory.enable";
     public static final String VM_NUMA_MEMORY_MODEL = "vm.numa.memory.model";
@@ -92,6 +92,7 @@ public class ConfigKey {
     public static final String VM_DISK_GLUSTERFS_TPL = "vm.disk.glusterfs.tpl";
     public static final String VM_DISK_CEPH_RBD_TPL = "vm.disk.ceph.rbd.tpl";
     public static final String VM_DISK_LOCAL_TPL = "vm.disk.local.tpl";
+    public static final String VM_DISK_BLOCK_TPL = "vm.disk.block.tpl";
     public static final String VM_DISK_CACHE = "vm.disk.cache";
     public static final String VM_DISK_AIO = "vm.disk.aio";
 

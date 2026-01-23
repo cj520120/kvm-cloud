@@ -7,4 +7,8 @@ public class HostRole {
      * 不指定
      */
     public static final int ALL = 0xFFFF;
+
+    public static boolean isComponent(int role) {
+        return (role & COMPONENT) == COMPONENT || role == ALL;
+    }
 }

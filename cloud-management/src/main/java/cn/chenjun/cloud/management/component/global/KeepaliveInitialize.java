@@ -1,28 +1,34 @@
 package cn.chenjun.cloud.management.component.global;
 
+import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
+import cn.chenjun.cloud.common.bean.HostInfo;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.JinjavaParser;
 import cn.chenjun.cloud.management.component.route.ComponentOrder;
-import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
-import cn.chenjun.cloud.management.data.entity.NetworkEntity;
+import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import cn.chenjun.cloud.management.data.mapper.GuestNetworkMapper;
+import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
+import cn.chenjun.cloud.management.util.HostRole;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     public static final int MASTER_PRIORITY = 100;
@@ -31,10 +37,25 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     private GuestNetworkMapper guestNetworkMapper;
     @Autowired
     private NetworkMapper networkMapper;
+    @Autowired
+    private HostMapper hostMapper;
+    @Autowired
+    private GuestMapper guestMapper;
 
-    private static Map<String, Object> buildKeepAliveParam(String name, String nic, String vip, ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
-        List<Integer> slaveIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-        }.getType());
+    private   Map<String, Object> buildKeepAliveParam(String name, String nic, String vip, ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
+
+        List<HostEntity> hostList=hostMapper.selectList(new QueryWrapper<>());
+        hostList.removeIf(host->!HostRole.isComponent(host.getRole()));
+        hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
+        Map<Integer,Integer> hostIdMap=new HashMap<>();
+        for (int i = 0; i < hostList.size(); i++) {
+            hostIdMap.put(hostList.get(i).getHostId(), i);
+        }
+        GuestEntity guest=guestMapper.selectById(guestId);
+        if(!hostIdMap.containsKey(guest.getBindHostId())){
+            throw new RuntimeException("guest bind host not found");
+        }
+        int index=hostIdMap.getOrDefault(guest.getBindHostId(), ThreadLocalRandom.current().nextInt(hostList.size()+10,hostList.size()+20));
         int routeId = component.getComponentId() % 255;
         routeId = Math.max(1, routeId);
         Map<String, Object> map = new HashMap<>(3);
@@ -45,10 +66,9 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
         //非抢占模式全部为backup
         map.put("state", "BACKUP");
         map.put("routeId", routeId);
-        if (component.getMasterGuestId() == guestId) {
+        if (index==0) {
             map.put("priority", MASTER_PRIORITY);
         } else {
-            int index = slaveIds.indexOf(guestId) + 1;
             map.put("priority", Math.max(1, SLAVE_PRIORITY - index));
         }
         return map;

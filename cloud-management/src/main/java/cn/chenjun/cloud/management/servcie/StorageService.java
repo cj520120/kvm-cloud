@@ -113,6 +113,7 @@ public class StorageService extends AbstractService {
                         .allocation(0L)
                         .status(Constant.VolumeStatus.CREATING)
                         .createTime(new Date())
+                        .device(Constant.DeviceType.DISK)
                         .serial(DiskSerialUtil.generateDiskSerial())
                         .build();
                 this.volumeMapper.insert(migrateVolume);

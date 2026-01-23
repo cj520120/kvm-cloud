@@ -103,21 +103,26 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
             if (volume.getStatus() != Constant.VolumeStatus.READY) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]未就绪:" + volume.getStatus());
             }
-            StorageEntity storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
-                StorageEntity storageEntity = this.storageMapper.selectById(storageId);
-                if (storageEntity == null) {
-                    throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
-                }
-                if (storageEntity.getStatus() != Constant.StorageStatus.READY) {
-                    throw new CodeException(ErrorCode.STORAGE_NOT_READY, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getName());
-                }
-                return storageEntity;
-            });
-            Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
-            Map<String, Object> configMap = new HashMap<>();
-            configMap.putAll(sysconfig);
-            configMap.putAll(volumeConfigMap);
-            disks.add(this.buildDiskXml(guest, storage, volume, volume.getDeviceId(), volume.getDeviceDriver(), configMap));
+            if(Objects.equals(volume.getDevice(),Constant.DeviceType.DISK)) {
+                StorageEntity storage = storageMap.computeIfAbsent(volume.getStorageId(), storageId -> {
+                    StorageEntity storageEntity = this.storageMapper.selectById(storageId);
+                    if (storageEntity == null) {
+                        throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
+                    }
+                    if (storageEntity.getStatus() != Constant.StorageStatus.READY) {
+                        throw new CodeException(ErrorCode.STORAGE_NOT_READY, "虚拟机[" + guest.getDescription() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storageEntity.getName());
+                    }
+                    return storageEntity;
+                });
+                Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
+                Map<String, Object> configMap = new HashMap<>();
+                configMap.putAll(sysconfig);
+                configMap.putAll(volumeConfigMap);
+                disks.add(this.buildDiskXml(guest, storage, volume, volume.getDeviceId(), volume.getDeviceDriver(), configMap));
+            }else{
+                Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(),guest.getGuestId());
+                disks.add(this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap));
+            }
         }
         return disks;
     }

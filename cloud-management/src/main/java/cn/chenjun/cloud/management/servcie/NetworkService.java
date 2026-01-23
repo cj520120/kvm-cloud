@@ -175,7 +175,7 @@ public class NetworkService extends AbstractService {
             if (type == cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN) {
                 basicComponentVip = this.allocateService.allocateNetwork(basicNetworkId);
             }
-            ComponentEntity component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(0).slaveGuestIds("[]")
+            ComponentEntity component = ComponentEntity.builder()
                     .componentType(cn.chenjun.cloud.common.util.Constant.ComponentType.ROUTE).networkId(network.getNetworkId())
                     .componentVip(componentVip.getIp()).basicComponentVip(basicComponentVip.getIp())
                     .createTime(new Date()).build();
@@ -267,21 +267,6 @@ public class NetworkService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<ComponentDetailModel> updateComponentSlaveNumber(int componentId, int slaveNumber) {
-        ComponentEntity entity = this.componentMapper.selectById(componentId);
-        if (entity == null) {
-            return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件未找到");
-        }
-        if (slaveNumber < 0) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "Slave数量必须大于等于0");
-        }
-        entity.setComponentSlaveNumber(slaveNumber);
-        this.componentMapper.updateById(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
-        return ResultUtil.success(this.initComponent(entity));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
     public ResultUtil<ComponentDetailModel> createComponent(int networkId, int type) {
         NetworkEntity network = this.networkMapper.selectById(networkId);
         if (network == null) {
@@ -292,7 +277,7 @@ public class NetworkService extends AbstractService {
         if (Objects.equals(network.getType(), cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN)) {
             basicComponentVip = this.allocateService.allocateNetwork(network.getBasicNetworkId());
         }
-        ComponentEntity component = ComponentEntity.builder().masterGuestId(0).componentSlaveNumber(0).slaveGuestIds("[]")
+        ComponentEntity component = ComponentEntity.builder()
                 .componentType(type).networkId(network.getNetworkId())
                 .componentVip(componentVip.getIp())
                 .basicComponentVip(basicComponentVip.getIp())
@@ -317,12 +302,6 @@ public class NetworkService extends AbstractService {
         ComponentEntity component = this.componentMapper.selectById(componentId);
         if (component == null) {
             return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "网络组件不存在");
-        }
-        List<Integer> guestIds = GsonBuilderUtil.create().fromJson(component.getSlaveGuestIds(), new TypeToken<List<Integer>>() {
-        }.getType());
-        guestIds.add(component.getMasterGuestId());
-        if (!this.guestMapper.selectBatchIds(guestIds).isEmpty()) {
-            return ResultUtil.error(ErrorCode.NETWORK_COMPONENT_HAS_VM, "请删除网络组件对应的虚拟机");
         }
         List<GuestNetworkEntity> list = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP));
         for (GuestNetworkEntity guestNetwork : list) {

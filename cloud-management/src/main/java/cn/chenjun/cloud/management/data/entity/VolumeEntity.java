@@ -30,6 +30,7 @@ public class VolumeEntity {
     public static final String VOLUME_CAPACITY = "volume_capacity";
     public static final String VOLUME_ALLOCATION = "volume_allocation";
     public static final String VOLUME_TYPE = "volume_type";
+    public static final String DEVICE_TYPE = "device_type";
     public static final String VOLUME_STATUS = "volume_status";
     public static final String GUEST_ID = "guest_id";
     public static final String DEVICE_ID = "device_id";
@@ -55,6 +56,8 @@ public class VolumeEntity {
     private Long capacity;
     @TableField(VOLUME_ALLOCATION)
     private Long allocation;
+    @TableField(DEVICE_TYPE)
+    private String device;
     @TableField(VOLUME_TYPE)
     private String type;
     @TableField(GUEST_ID)

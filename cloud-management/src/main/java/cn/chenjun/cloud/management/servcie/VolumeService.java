@@ -147,6 +147,7 @@ public class VolumeService extends AbstractService {
                 .guestId(0)
                 .deviceId(0)
                 .createTime(new Date())
+                .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);
@@ -190,6 +191,7 @@ public class VolumeService extends AbstractService {
                 .capacity(volume.getCapacity())
                 .allocation(0L)
                 .status(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CREATING)
+                .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .createTime(new Date())
                 .build();
@@ -262,6 +264,7 @@ public class VolumeService extends AbstractService {
                 .deviceDriver("")
                 .guestId(0)
                 .createTime(new Date())
+                .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(migrateVolume);
