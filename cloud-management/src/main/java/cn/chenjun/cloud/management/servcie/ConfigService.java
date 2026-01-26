@@ -52,8 +52,6 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_HOST_CPU_WEIGHT, 30.0f, "申请主机时剩余CPU占比权重", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_HOST_MEMORY_WEIGHT, 20.0f, "申请主机时剩余内存占比权重(每GB)", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_ALLOCATE_STORAGE_WEIGHT, 1.0f, "申请磁盘时存储池占比权重(每TB)", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
-
-        initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.YES, "是否使用virtio-scsi控制器", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_VIRTIO_SCSI_QUEUE_NUMBER, 4, "virtio-scsi控制器 queue 大小", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
         initDefaultConfig(ConfigKey.DEFAULT_DISK_TYPE, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
@@ -70,8 +68,8 @@ public class ConfigService {
                 cn.chenjun.cloud.common.util.Constant.VolumeType.VMDK
         ), StringConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE, 10, "虚拟机关机最大等待时间，超过时间则直接进行销毁操作(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE, 10, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND, 60, "清理未关联系统组件间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE, 30, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND, 10, "清理未关联系统组件间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND, 10, "系统组件状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND, 30, "宿主机运行虚拟机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND, 30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
@@ -81,11 +79,8 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND, 120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CPU_MODEL, "host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough", "host-model", "custom"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_ENABLE, "no", "是否启用Cpu绑定策略功能（需要配置在虚拟机配置中,请在虚拟机绑定主机的情况下使用）", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
-//        initDefaultConfig(ConfigKey.VM_BIND_HOST, 0, "虚拟机绑定主机ID(只支持配置在虚拟机配置中)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_ENABLE, "no", "是否启用numa(请在虚拟机绑定主机的情况下使用，并配置在单独的虚拟机配置中)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, "strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict", "preferred", "interleave"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, "0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
@@ -107,7 +102,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.STORAGE_LOCAL_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "是否启用本地存储(实验阶段,不支持系统组件创建和启动，系统必须至少包含一个用于磁盘存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "是否启用本地存储(系统必须至少包含一个用于模版存储的共享存储池)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.STORAGE_LOCAL_PATH, "/data", "本地存储路径，需要在主机节点提前创建", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.STORAGE_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
@@ -140,6 +135,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_DISK_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_BLOCK_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/block/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_FILE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/file/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_CD_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CD_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);

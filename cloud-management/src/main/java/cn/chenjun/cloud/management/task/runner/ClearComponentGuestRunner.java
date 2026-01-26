@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -40,22 +38,26 @@ public class ClearComponentGuestRunner extends AbstractRunner {
     @Override
     protected void dispatch() {
         List<GuestEntity> guestList = this.guestMapper.selectList(new QueryWrapper<GuestEntity>().eq(GuestEntity.GUEST_TYPE, Constant.GuestType.COMPONENT));
-        List<Integer> componentIds = guestList.stream().map(GuestEntity::getOtherId).collect(Collectors.toList());
-        if (!ObjectUtils.isEmpty(componentIds)) {
-            Map<Integer, ComponentEntity> componentMap = this.componentMapper.selectBatchIds(componentIds).stream().collect(Collectors.toMap(ComponentEntity::getComponentId, Function.identity()));
-            guestList.stream().filter(guest -> !componentMap.containsKey(guest.getOtherId())).forEach(guest -> {
-                switch (guest.getType()) {
-                    case Constant.GuestStatus.RUNNING:
-                        guestService.shutdown(guest.getGuestId(), true);
-                        break;
-                    case Constant.GuestStatus.STOP:
-                    case Constant.GuestStatus.ERROR:
-                        guestService.destroyGuest(guest.getGuestId());
-                        break;
-                    default:
-                        break;
+        if (!ObjectUtils.isEmpty(guestList)) {
+            List<Integer> allComponentIds = this.componentMapper.selectList(new QueryWrapper<>()).stream().map(ComponentEntity::getComponentId).collect(Collectors.toList());
+            for (GuestEntity guestEntity : guestList) {
+                Integer componentId = guestEntity.getOtherId();
+                boolean isClean = !allComponentIds.contains(componentId) || ObjectUtils.equals(guestEntity.getBindHostId(), 0);
+                if (isClean) {
+                    switch (guestEntity.getStatus()) {
+                        case Constant.GuestStatus.STARTING:
+                        case Constant.GuestStatus.RUNNING:
+                            guestService.shutdown(guestEntity.getGuestId(), true);
+                            break;
+                        case Constant.GuestStatus.STOP:
+                        case Constant.GuestStatus.ERROR:
+                            guestService.destroyGuest(guestEntity.getGuestId());
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            });
+            }
         }
 
     }

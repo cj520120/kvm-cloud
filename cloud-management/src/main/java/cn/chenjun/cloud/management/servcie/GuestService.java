@@ -11,7 +11,6 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
-import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -506,7 +505,8 @@ public class GuestService extends AbstractService {
         return ResultUtil.success(this.initGuestInfo(guest));
 
     }
-    public ResultUtil<VolumeModel> createGuestBlockDevice(int guestId,  String description, String devicePath, String diskDriver){
+
+    public ResultUtil<VolumeModel> bindHostDevice(int guestId, String device, String description, String devicePath, String diskDriver, String diskFormat) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入设备描述信息");
         }
@@ -517,6 +517,13 @@ public class GuestService extends AbstractService {
         if(guest.getBindHostId()<=0){
             throw new CodeException(ErrorCode.GUEST_BIND_HOST_ERROR,"虚拟机未绑定主机");
         }
+        switch (device) {
+            case Constant.DeviceType.BLOCK:
+            case Constant.DeviceType.FILE:
+                break;
+            default:
+                throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的设备类型");
+        }
         int deviceId = allocateGuestDiskDeviceId(guestId);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
@@ -526,7 +533,7 @@ public class GuestService extends AbstractService {
                 .description(description)
                 .name(volumeName)
                 .path(devicePath)
-                .type("block")
+                .type(diskFormat)
                 .capacity(0L)
                 .allocation(0L)
                 .status(Constant.VolumeStatus.READY)
@@ -534,7 +541,7 @@ public class GuestService extends AbstractService {
                 .guestId(guestId)
                 .deviceId(deviceId)
                 .createTime(new Date())
-                .device(Constant.DeviceType.BLOCK)
+                .device(device)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);

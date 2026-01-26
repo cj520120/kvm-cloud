@@ -27,6 +27,14 @@ public class DomainUtil {
         return JinjavaParser.create().render(tpl, map);
     }
 
+    public static String buildHostFileXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, VolumeEntity volume, int deviceId, String deviceType) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("disk", ParamBuilder.buildDiskParam(volume, deviceId, deviceType));
+        map.put("file", ParamBuilder.buildHostFileParam(volume));
+        map.put("__SYS__", systemConfig);
+        return JinjavaParser.create().render(tpl, map);
+    }
+
     public static String buildCdXml(String tpl, Map<String, Object> systemConfig, StorageEntity storage, TemplateVolumeEntity volume) {
         Map<String, Object> map = new HashMap<>();
         map.put("storage", ParamBuilder.buildStorageParam(storage));

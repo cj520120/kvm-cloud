@@ -122,4 +122,10 @@ public class ParamBuilder {
         map.put("device", volume.getPath());
         return map;
     }
+
+    public static Map<String, Object> buildHostFileParam(VolumeEntity volume) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("path", volume.getPath());
+        return map;
+    }
 }

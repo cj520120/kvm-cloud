@@ -14,7 +14,7 @@
     </memoryBacking>
     {% endif %}
     <vcpu placement="static">{{cpu.number}}</vcpu>
-    {% if __SYS__["vm.numa.memory.enable"] =='yes' %}
+    {% if __SYS__["vm.numa.memory.model"] and  __SYS__["vm.numa.memory.node"]  %}
     <numatune>
         <memory mode='{{__SYS__["vm.numa.memory.model"]}}' nodeset='{{__SYS__["vm.numa.memory.node"]}}'/>
     </numatune>
@@ -23,12 +23,9 @@
         {% if cpu.share > 0 %}
         <shares>{{cpu.share}}</shares>
         {% endif %}
-
-        {% if __SYS__["vm.cputune.vcpupin.enable"] =='yes' %}
         {% for vcpu in __SYS__["vm.cputune.vcpupin.config"] %}
         <vcpupin vcpu="{{vcpu.vcpu}}" cpuset="{{vcpu.cpuset}}"/>
         {% endfor %}
-        {% endif %}
     </cputune>
     <cpu mode="{{__SYS__['vm.cpu.model']}}" check="partial">
         <model fallback="allow">Nehalem</model>
@@ -86,12 +83,9 @@
     <on_crash>destroy</on_crash>
     <devices>
         <emulator>{{host.emulator}}</emulator>
-        {% if __SYS__["default.virtio-scsi.enable"] == "yes"%}
-        <!--virtio-scsi控制器,其他控制器会默认添加，无需加入-->
         <controller type='scsi' index='0' model='virtio-scsi'>
             <driver queues = "{{__SYS__['default.virtio-scsi.queue.number']}}"/>
         </controller>
-        {% endif %}
         {{device.xml}}
         {{__SYS__['vm.device.default.tpl']}}
         {% if __SYS__["vm.memory.memballoon.enable"] =="yes" %}

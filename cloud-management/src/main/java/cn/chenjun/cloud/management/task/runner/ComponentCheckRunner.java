@@ -15,12 +15,14 @@ import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -29,6 +31,7 @@ import java.util.*;
 @Component
 public class ComponentCheckRunner extends AbstractRunner {
 
+    static final List<Integer> NETWORK_STATUS_CHECK_LIST = Arrays.asList(Constant.NetworkStatus.READY, Constant.NetworkStatus.INSTALL);
     @Autowired
     protected NotifyService notifyService;
     @Autowired
@@ -48,20 +51,27 @@ public class ComponentCheckRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() throws Exception {
-        List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>());
+        List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>()).stream().filter(network -> NETWORK_STATUS_CHECK_LIST.contains(network.getStatus())).collect(Collectors.toList());
+        if (ObjectUtils.isEmpty(networkList)) {
+            log.warn("没有找到需要检测的网络，等待网络添加后继续...");
+            return;
+        }
+        List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
+        if (ObjectUtils.isEmpty(hostList)) {
+            log.warn("没有找到任何主机，等待系统组件主机添加后继续...");
+            return;
+        }
+        hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
+        Optional<HostEntity> masterHostOptional = hostList.stream().filter(host -> HostRole.isComponent(host.getRole())).findFirst();
+        if (!masterHostOptional.isPresent()) {
+            log.warn("没有找到任何组件主机，等待系统组件主机添加后继续...");
+            return;
+        }
+        HostEntity masterHost = masterHostOptional.get();
+        int hostSize = hostList.size();
+
         for (NetworkEntity network : networkList) {
-            List<ConfigQuery> queryList = new ArrayList<>();
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build());
-            queryList.add(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
-            boolean isCheckComponentEnable = Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), cn.chenjun.cloud.common.util.Constant.Enable.YES);
-            List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
-            switch (network.getStatus()) {
-                case Constant.NetworkStatus.READY:
-                case Constant.NetworkStatus.INSTALL:
-                    break;
-                default:
-                    continue;
-            }
+            boolean isCheckComponentEnable = checkNetworkHasComponent(network);
             if (!isCheckComponentEnable) {
                 if (network.getStatus() != cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
                     network.setStatus(Constant.NetworkStatus.READY);
@@ -70,22 +80,21 @@ public class ComponentCheckRunner extends AbstractRunner {
                     return;
                 }
             }
-            hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
-            int size = hostList.size();
             List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
             for (ComponentEntity component : components) {
                 boolean componentReady = false;
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < hostSize; i++) {
                     HostEntity host = hostList.get(i);
                     if (!Objects.equals(host.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
                         continue;
                     }
-                    boolean isMaster = i == 0;
+                    boolean isMaster = masterHost.getHostId() == host.getHostId();
                     Optional<ComponentProcess> optional = processPluginRegistry.getPluginFor(component.getComponentType());
                     if (optional.isPresent()) {
                         ComponentProcess process = optional.get();
                         try {
                             if (!HostRole.isComponent(host.getRole())) {
+                                // 非组件主机清理组件
                                 process.cleanHostComponent(component, host);
                             } else {
                                 boolean isReady = process.checkAndStart(network, component, host, isMaster);
@@ -110,6 +119,14 @@ public class ComponentCheckRunner extends AbstractRunner {
                 }
             }
         }
+    }
+
+    private boolean checkNetworkHasComponent(NetworkEntity network) {
+        List<ConfigQuery> queryList = new ArrayList<>();
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
+        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
+        boolean isCheckComponentEnable = Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.YES);
+        return isCheckComponentEnable;
     }
 
     @Override

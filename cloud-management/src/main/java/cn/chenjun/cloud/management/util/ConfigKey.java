@@ -15,7 +15,6 @@ public class ConfigKey {
     public static final String SYSTEM_COMPONENT_BOOTSTRAP_TYPE = "system.component.bootstrap.type";
 
 
-    public static final String DEFAULT_VIRTIO_SCSI_ENABLE = "default.virtio-scsi.enable";
     public static final String DEFAULT_VIRTIO_SCSI_QUEUE_NUMBER = "default.virtio-scsi.queue.number";
     public static final String DEFAULT_DISK_TYPE = "default.disk.type";
     public static final String DEFAULT_TEMPLATE_DISK_TYPE = "default.template.disk.type";
@@ -40,12 +39,9 @@ public class ConfigKey {
     public static final String DEFAULT_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.storage.volume.sync.timeout.second";
     public static final String DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND = "default.task.expire.timeout.second";
 
-//    public static final String VM_BIND_HOST = "vm.bind.host";
     public static final String VM_CPU_MODEL = "vm.cpu.model";
-    public static final String VM_NUMA_MEMORY_ENABLE = "vm.numa.memory.enable";
     public static final String VM_NUMA_MEMORY_MODEL = "vm.numa.memory.model";
     public static final String VM_NUMA_MEMORY_NODE = "vm.numa.memory.node";
-    public static final String VM_CPUTUNE_VCPUPIN_ENABLE = "vm.cputune.vcpupin.enable";
     public static final String VM_CPUTUNE_VCPUPIN_CONFIG = "vm.cputune.vcpupin.config";
     public static final String VM_MEMORY_MEMBALLOON_ENABLE = "vm.memory.memballoon.enable";
     public static final String VM_MEMORY_MEMBALLOON_PERIOD = "vm.memory.memballoon.period";
@@ -93,6 +89,7 @@ public class ConfigKey {
     public static final String VM_DISK_CEPH_RBD_TPL = "vm.disk.ceph.rbd.tpl";
     public static final String VM_DISK_LOCAL_TPL = "vm.disk.local.tpl";
     public static final String VM_DISK_BLOCK_TPL = "vm.disk.block.tpl";
+    public static final String VM_DISK_FILE_TPL = "vm.disk.host.file.tpl";
     public static final String VM_DISK_CACHE = "vm.disk.cache";
     public static final String VM_DISK_AIO = "vm.disk.aio";
 

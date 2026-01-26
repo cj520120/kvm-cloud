@@ -119,9 +119,14 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
                 configMap.putAll(sysconfig);
                 configMap.putAll(volumeConfigMap);
                 disks.add(this.buildDiskXml(guest, storage, volume, volume.getDeviceId(), volume.getDeviceDriver(), configMap));
-            }else{
+            } else if (Objects.equals(volume.getDevice(), Constant.DeviceType.BLOCK)) {
                 Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(),guest.getGuestId());
                 disks.add(this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap));
+            } else if (Objects.equals(volume.getDevice(), Constant.DeviceType.FILE)) {
+                Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(), guest.getGuestId());
+                disks.add(this.buildHostFileXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap));
+            } else {
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的磁盘类型[" + volume.getDevice() + "]");
             }
         }
         return disks;

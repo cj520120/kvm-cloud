@@ -54,6 +54,7 @@ public class Constant {
     public static class  DeviceType {
         public static final String DISK = "disk";
         public static final String BLOCK = "block";
+        public static final String FILE = "file";
     }
 
     public static class Command {

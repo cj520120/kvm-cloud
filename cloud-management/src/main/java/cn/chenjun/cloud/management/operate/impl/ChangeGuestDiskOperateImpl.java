@@ -36,17 +36,8 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
 
         GuestEntity guest = guestMapper.selectById(param.getGuestId());
-        boolean isSupportHotplugged = false;
-        switch (param.getDeviceBus()) {
-            case Constant.DiskDriveType.VIRTIO:
-            case Constant.DiskDriveType.SCSI:
-                //只有virtio和scsi支持热拔插
-                isSupportHotplugged = true;
-                break;
-            default:
-                break;
-        }
-        if (isSupportHotplugged && guest.getHostId() > 0) {
+
+        if (guest.getHostId() > 0) {
             HostEntity host = hostMapper.selectById(guest.getHostId());
             if(Objects.equals(volume.getDevice(),Constant.DeviceType.DISK)) {
                 StorageEntity storage = this.storageMapper.selectById(volume.getStorageId());
@@ -71,7 +62,14 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
                 }
             }else {
                 Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(),guest.getGuestId());
-                String xml = this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap) ;
+                String xml;
+                if (volume.getDevice().equals(Constant.DeviceType.BLOCK)) {
+                    xml = this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap);
+                } else if (volume.getDevice().equals(Constant.DeviceType.FILE)) {
+                    xml = this.buildHostFileXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap);
+                } else {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的磁盘类型[" + volume.getDevice() + "]");
+                }
                 ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
                 if (param.isAttach()) {
                     this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
@@ -96,7 +94,7 @@ public class ChangeGuestDiskOperateImpl extends AbstractOsOperate<ChangeGuestDis
     @Override
     public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
         VolumeEntity volume = volumeMapper.selectById(param.getVolumeId());
-        if(Objects.equals(volume.getDevice(),Constant.DeviceType.BLOCK) && !param.isAttach()){
+        if (!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK) && !param.isAttach()) {
             //卸载block类型的磁盘时，直接删除磁盘记录
             volumeMapper.deleteById(param.getVolumeId());
         }

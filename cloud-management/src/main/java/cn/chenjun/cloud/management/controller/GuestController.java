@@ -220,12 +220,15 @@ public class GuestController extends BaseController {
     public ResultUtil<GuestModel> unbindHost(@RequestParam("guestId") int guestId) {
         return this.lockRun(() -> this.guestService.bindGuestHost(guestId,0));
     }
-    @PutMapping("/api/guest/disk/block/create")
-    public ResultUtil<VolumeModel> createGuestBlockDevice(@RequestParam("guestId") int guestId,
-                                              @RequestParam("diskDriver") String diskDriver,
-                                              @RequestParam("devicePath") String devicePath,
-                                              @RequestParam("description") String description  ) {
-        return this.lockRun(() -> this.guestService.createGuestBlockDevice(guestId, description, devicePath, diskDriver));
+
+    @PutMapping("/api/guest/disk/bind/host")
+    public ResultUtil<VolumeModel> bindHostDevice(@RequestParam("guestId") int guestId,
+                                                  @RequestParam("deviceType") String deviceType,
+                                                  @RequestParam(value = "diskFormat", required = false) String diskFormat,
+                                                  @RequestParam("diskDriver") String diskDriver,
+                                                  @RequestParam("devicePath") String devicePath,
+                                                  @RequestParam("description") String description) {
+        return this.lockRun(() -> this.guestService.bindHostDevice(guestId, deviceType, description, devicePath, diskDriver, diskFormat));
     }
 
 }
