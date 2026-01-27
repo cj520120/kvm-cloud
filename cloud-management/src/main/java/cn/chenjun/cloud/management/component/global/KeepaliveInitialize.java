@@ -1,8 +1,6 @@
 package cn.chenjun.cloud.management.component.global;
 
-import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestQmaRequest;
-import cn.chenjun.cloud.common.bean.HostInfo;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.JinjavaParser;
@@ -15,7 +13,6 @@ import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.util.HostRole;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +42,7 @@ public class KeepaliveInitialize implements GlobalComponentQmaInitialize {
     private   Map<String, Object> buildKeepAliveParam(String name, String nic, String vip, ComponentEntity component, int guestId, Map<String, Object> sysconfig) {
 
         List<HostEntity> hostList=hostMapper.selectList(new QueryWrapper<>());
-        hostList.removeIf(host->!HostRole.isComponent(host.getRole()));
+        hostList.removeIf(host -> !HostRole.isMaster(host.getRole()));
         hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
         Map<Integer,Integer> hostIdMap=new HashMap<>();
         for (int i = 0; i < hostList.size(); i++) {

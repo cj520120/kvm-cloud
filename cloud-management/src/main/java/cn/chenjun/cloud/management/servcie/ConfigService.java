@@ -81,8 +81,8 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_CPU_MODEL, "host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough", "host-model", "custom"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, "strict", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict", "preferred", "interleave"), StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, "0", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_MODEL, "", "numa内存分配模式", Constant.ConfigValueType.SELECT, Arrays.asList("strict", "preferred", "interleave"), StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_NUMA_MEMORY_NODE, "", "NUMA 节点编号（如 0、0-1、1,3）", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_ENABLE, "yes", "是否支持内存气球技术(需要系统内核支持)", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MEMORY_MEMBALLOON_MODEL, "virtio", "内存气球驱动方式", Constant.ConfigValueType.SELECT, Arrays.asList("none", "virtio"), StringConvert.Default);

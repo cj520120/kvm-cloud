@@ -62,7 +62,7 @@ public class ComponentCheckRunner extends AbstractRunner {
             return;
         }
         hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
-        Optional<HostEntity> masterHostOptional = hostList.stream().filter(host -> HostRole.isComponent(host.getRole())).findFirst();
+        Optional<HostEntity> masterHostOptional = hostList.stream().filter(host -> HostRole.isMaster(host.getRole())).findFirst();
         if (!masterHostOptional.isPresent()) {
             log.warn("没有找到任何组件主机，等待系统组件主机添加后继续...");
             return;
@@ -93,7 +93,7 @@ public class ComponentCheckRunner extends AbstractRunner {
                     if (optional.isPresent()) {
                         ComponentProcess process = optional.get();
                         try {
-                            if (!HostRole.isComponent(host.getRole())) {
+                            if (!HostRole.isMaster(host.getRole())) {
                                 // 非组件主机清理组件
                                 process.cleanHostComponent(component, host);
                             } else {
