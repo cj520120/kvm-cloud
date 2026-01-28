@@ -211,6 +211,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
         guestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
+        guestNetwork.setAllocateDescription("Guest Basic Nic");
         this.guestNetworkMapper.updateById(guestNetwork);
         guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
@@ -223,6 +224,7 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
             basicGuestNetwork.setDeviceId(0);
             basicGuestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
             basicGuestNetwork.setAllocateId(guest.getGuestId());
+            guestNetwork.setAllocateDescription("Guest Basic Nic");
             basicGuestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
             this.guestNetworkMapper.updateById(basicGuestNetwork);
         }

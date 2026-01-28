@@ -56,9 +56,11 @@ public class DestroyGuestOperateImpl extends AbstractOperate<DestroyGuestOperate
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guest.getGuestId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST));
             for (GuestNetworkEntity guestNetwork : guestNetworkList) {
-                guestNetwork.setAllocateId(0);
                 guestNetwork.setDeviceId(0);
-                guestNetwork.setDriveType("");
+                guestNetwork.setAllocateId(0);
+                guestNetwork.setAllocateType(Constant.NetworkAllocateType.DEFAULT);
+                guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
+                guestNetwork.setAllocateDescription("");
                 this.guestNetworkMapper.updateById(guestNetwork);
             }
             List<VolumeEntity> volumes = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()));

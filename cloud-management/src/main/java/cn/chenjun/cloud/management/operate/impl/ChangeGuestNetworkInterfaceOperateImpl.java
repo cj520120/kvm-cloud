@@ -62,6 +62,9 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOsOperate<Ch
             if (guestNetwork != null) {
                 guestNetwork.setAllocateId(0);
                 guestNetwork.setDeviceId(0);
+                guestNetwork.setAllocateType(Constant.NetworkAllocateType.DEFAULT);
+                guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
+                guestNetwork.setAllocateDescription("");
                 guestNetworkMapper.updateById(guestNetwork);
             }
         }

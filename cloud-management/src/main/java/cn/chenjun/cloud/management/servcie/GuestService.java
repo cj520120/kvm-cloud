@@ -198,6 +198,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setDriveType(networkDeviceType);
         guestNetwork.setAllocateId(guest.getGuestId());
         guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
+        guestNetwork.setAllocateDescription("Guest Basic Nic");
         this.guestNetworkMapper.updateById(guestNetwork);
         String volumeType = getVolumeType(storage);
         if (volumeId <= 0) {
@@ -696,6 +697,7 @@ public class GuestService extends AbstractService {
         guestNetwork.setDriveType(driveType);
         guestNetwork.setAllocateId(guestId);
         guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
+        guestNetwork.setAllocateDescription("Guest Attach Nic");
         this.guestNetworkMapper.updateById(guestNetwork);
         BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                 .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)

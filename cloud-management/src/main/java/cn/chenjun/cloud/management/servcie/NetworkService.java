@@ -250,7 +250,9 @@ public class NetworkService extends AbstractService {
             //取消vip地址
             List<GuestNetworkEntity> guestNetworkEntityList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, componentEntity.getComponentId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP));
             for (GuestNetworkEntity guestNetwork : guestNetworkEntityList) {
-                guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
+                guestNetwork.setAllocateType(Constant.NetworkAllocateType.DEFAULT);
+                guestNetwork.setAllocateDescription("");
+                guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
                 guestNetwork.setAllocateId(0);
                 this.guestNetworkMapper.updateById(guestNetwork);
             }
@@ -311,7 +313,9 @@ public class NetworkService extends AbstractService {
         List<GuestNetworkEntity> list = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, component.getComponentId()).eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP));
         for (GuestNetworkEntity guestNetwork : list) {
             guestNetwork.setAllocateId(0);
-            guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
+            guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
+            guestNetwork.setAllocateType(Constant.NetworkAllocateType.DEFAULT);
+            guestNetwork.setAllocateDescription("");
             this.guestNetworkMapper.updateById(guestNetwork);
         }
         this.componentMapper.deleteById(component);
