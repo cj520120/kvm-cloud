@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.NetworkModel;
+import cn.chenjun.cloud.management.model.NicMode;
 import cn.chenjun.cloud.management.model.SimpleNetworkModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,23 @@ public class NetworkController extends BaseController {
                                                   @RequestParam(value = "basicNetworkId", defaultValue = "0") int basicNetworkId) {
         return this.lockRun(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
     }
-
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
+    @GetMapping("/api/network/nics")
+    public ResultUtil<List<NicMode>> listNetworkNic(@RequestParam("networkId") int networkId) {
+        return this.lockRun(() -> networkService.listNetworkNic(networkId));
+    }
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
+    @PostMapping("/api/network/nic/special/allocate")
+    public ResultUtil< NicMode> allocateSpecialNetworkNic(@RequestParam("guestNetworkId") int guestNetworkId,
+                                                          @RequestParam("allocateId") int allocateId,
+                                                          @RequestParam("allocateDescription") String allocateDescription) {
+        return this.lockRun(() -> networkService.allocateSpecialNetworkNic(guestNetworkId,  allocateId,allocateDescription));
+    }
+    @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
+    @PostMapping("/api/network/nic/special/release")
+    public ResultUtil<NicMode> releaseSpecialNetworkNic(@RequestParam("guestNetworkId") int guestNetworkId) {
+        return this.lockRun(() -> networkService.releaseSpecialNetworkNic(guestNetworkId));
+    }
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/register")
     public ResultUtil<NetworkModel> registerNetwork(@RequestParam("networkId") int networkId) {

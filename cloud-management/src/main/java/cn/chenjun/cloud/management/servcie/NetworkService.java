@@ -4,7 +4,6 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -20,7 +19,7 @@ import cn.chenjun.cloud.management.util.IpValidator;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +32,7 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
+@Slf4j
 @Service
 public class NetworkService extends AbstractService {
     @Autowired
@@ -158,7 +158,8 @@ public class NetworkService extends AbstractService {
         for (String ip : ips) {
             GuestNetworkEntity guestNetwork = GuestNetworkEntity.builder()
                     .allocateId(0)
-                    .allocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST)
+                    .allocateType(Constant.NetworkAllocateType.DEFAULT)
+                    .allocateDescription("")
                     .ip(ip)
                     .networkId(network.getNetworkId())
                     .mac(IpCalculate.getRandomMacAddress())
@@ -181,14 +182,16 @@ public class NetworkService extends AbstractService {
                     .createTime(new Date()).build();
             componentMapper.insert(component);
             if (type == cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN) {
-                basicComponentVip.setDriveType("Vip");
+                basicComponentVip.setDriveType(Constant.NetworkDriver.VIRTIO);
                 basicComponentVip.setAllocateId(component.getComponentId());
                 basicComponentVip.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP);
+                basicComponentVip.setAllocateDescription("Route Basic VIP["+network.getName()+"]");
                 this.guestNetworkMapper.updateById(basicComponentVip);
             }
-            componentVip.setDriveType("Vip");
+            componentVip.setDriveType(Constant.NetworkDriver.VIRTIO);
             componentVip.setAllocateId(component.getComponentId());
             componentVip.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP);
+            componentVip.setAllocateDescription("Route VIP["+network.getName()+"]");
             this.guestNetworkMapper.updateById(componentVip);
             if (type == cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN && ObjectUtils.isEmpty(gateway)) {
                 //如果没有硬件网关地址，则将VIP设置为模拟网关
@@ -286,9 +289,11 @@ public class NetworkService extends AbstractService {
 
         componentVip.setAllocateId(component.getComponentId());
         componentVip.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP);
+        componentVip.setAllocateDescription("Nat VIP ["+network.getName()+"]");
         this.guestNetworkMapper.updateById(componentVip);
         if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
             basicComponentVip.setAllocateId(component.getComponentId());
+            basicComponentVip.setAllocateDescription("Nat Basic VIP ["+network.getName()+"]");
             basicComponentVip.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP);
             this.guestNetworkMapper.updateById(basicComponentVip);
         }
@@ -368,5 +373,52 @@ public class NetworkService extends AbstractService {
         this.natMapper.deleteById(natId);
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
         return ResultUtil.success();
+    }
+
+    public ResultUtil<List<NicMode>> listNetworkNic(int networkId) {
+        QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq(GuestNetworkEntity.NETWORK_ID, networkId);
+        List<GuestNetworkEntity> list = this.guestNetworkMapper.selectList(wrapper);
+        List<NicMode> nicModes = list.stream().map(this::initNicModel).collect(Collectors.toList());
+        return ResultUtil.success(nicModes);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<NicMode> allocateSpecialNetworkNic(int guestNetworkId,int allocateId, String allocateDescription) {
+        if (guestNetworkId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "参数错误");
+        }
+        GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
+        if(guestNetwork==null){
+            throw new CodeException(ErrorCode.PARAM_ERROR, "参数错误");
+        }
+        if(guestNetwork.getAllocateType()!=Constant.NetworkAllocateType.DEFAULT){
+            throw new CodeException(ErrorCode.PARAM_ERROR, "该地址已经被分配");
+        }
+        guestNetwork.setAllocateType(Constant.NetworkAllocateType.CUSTOM);
+        guestNetwork.setAllocateId(allocateId);
+        guestNetwork.setAllocateDescription(allocateDescription);
+        this.guestNetworkMapper.updateById(guestNetwork);
+        return ResultUtil.success(this.initNicModel(guestNetwork));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResultUtil<NicMode> releaseSpecialNetworkNic(int guestNetworkId) {
+        GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
+        if (guestNetwork == null) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "参数错误");
+        }
+        if (guestNetwork.getAllocateType() != Constant.NetworkAllocateType.CUSTOM) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "只允许释放自定义的网络分配");
+        }
+        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.DEFAULT);
+        guestNetwork.setAllocateId(0);
+        guestNetwork.setAllocateDescription("");
+        this.guestNetworkMapper.updateById(guestNetwork);
+        return ResultUtil.success(this.initNicModel(guestNetwork));
+    }
+
+    protected NicMode initNicModel(GuestNetworkEntity entity) {
+        return NicMode.builder().id(entity.getGuestNetworkId()).allocateType(entity.getAllocateType()).allocateId(entity.getAllocateId()).allocateDescription(entity.getAllocateDescription()).mac(entity.getMac()).ip(entity.getIp()).build();
     }
 }

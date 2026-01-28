@@ -23,6 +23,7 @@ public class GuestNetworkEntity {
     public static final String GUEST_NETWORK_ID = "guest_network_id";
     public static final String ALLOCATE_ID = "allocate_id";
     public static final String ALLOCATE_TYPE = "allocate_type";
+    public static final String ALLOCATE_DESCRIPTION = "allocate_description";
     public static final String NETWORK_ID = "network_id";
     public static final String DEVICE_ID = "device_id";
     public static final String DEVICE_TYPE = "device_type";
@@ -36,6 +37,8 @@ public class GuestNetworkEntity {
     private Integer allocateId;
     @TableField(ALLOCATE_TYPE)
     private Integer allocateType;
+    @TableField(ALLOCATE_DESCRIPTION)
+    private String allocateDescription;
     @TableField(NETWORK_ID)
     private Integer networkId;
     @TableField(DEVICE_ID)

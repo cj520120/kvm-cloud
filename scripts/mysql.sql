@@ -122,6 +122,7 @@ CREATE TABLE `tbl_guest_network` (
   `network_ip` varchar(20) NOT NULL,
   `allocate_id` int NOT NULL,
   `allocate_type` int NOT NULL DEFAULT '0',
+  `allocate_description` varchar(256) NOT NULL DEFAULT '',
   `create_time` timestamp NOT NULL,
   PRIMARY KEY (`guest_network_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -257,9 +257,9 @@ public class Constant {
 
     public static class NetworkAllocateType {
         public static final int DEFAULT = 0;
-        public static final int GUEST = 0;
-        public static final int COMPONENT_VIP = 1;
-        public static final int CUSTOM = 2;
+        public static final int GUEST = 1;
+        public static final int COMPONENT_VIP = 2;
+        public static final int CUSTOM = 3;
     }
 
     public static class NetworkStatus {
