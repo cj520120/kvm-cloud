@@ -46,7 +46,10 @@
         <type>hvm</type>
         {% endif %}
         {% if vm.bootstrapType == 1 %}
-        <loader readyonly="yes" type="{{__SYS__['vm.uefi.loader.type']}}">{{__SYS__["vm.uefi.loader.path"]}}</loader>
+        <loader readyonly="yes" type="pflash">{{__SYS__["vm.uefi.loader.path"]}}</loader>
+        {% if __SYS__["vm.uefi.loader.vargs.template.path"] %}
+        <nvram template= '{{__SYS__["vm.uefi.loader.vargs.template.path"]}}'>{{__SYS__["vm.uefi.loader.vargs.base.path"]}}{{vm.name}}_VARS.fd</nvram>
+        {% endif %}
         {% endif %}
         <boot dev="hd"/>
         <boot dev="cdrom"/>

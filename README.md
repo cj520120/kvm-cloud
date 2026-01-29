@@ -310,7 +310,7 @@ Ubuntu: qemu-system-i386 -machine help
 
 12、UEFI 支持
 ```$xslt
-需要调整系统配置项vm.uefi.loader.type和vm.uefi.loader.path
+需要调整系统配置项vm.uefi.loader.path 、vm.uefi.loader.vargs.template.path 、vm.uefi.loader.vargs.base.path
 ```
 13、关于网络不通问题
 ```$xslt

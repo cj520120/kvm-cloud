@@ -69,11 +69,6 @@ public abstract class AbstractStartGuestOperateImpl<T extends BaseOperateParam> 
 
     }
 
-    public static void main(String[] args) {
-        String str="{\"user-data\":{\"password-iv-key\":\"3489941149206981\",\"password-encode-key\":\"1447338018203704\",\"password\":\"JvrKkihANXftLDNjgwLmYw\\u003d\\u003d\"},\"meta-data\":{\"local-hostname\":\"route_vm\",\"hostname\":\"route_vm\",\"instance-id\":\"VM-mqUJrCGQVF\"},\"vnc\":{\"host\":\"192.168.1.85\",\"port\":\"5901\",\"password\":\"u78CDdQW\"}}";
-        System.out.println(GsonBuilderUtil.create().fromJson(str,GuestExtern.class));
-    }
-
     protected void finish(int guestId, ResultUtil<GuestInfo> resultUtil) {
         GuestEntity guest = guestMapper.selectById(guestId);
         if (guest != null && guest.getStatus() == Constant.GuestStatus.STARTING) {

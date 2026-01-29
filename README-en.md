@@ -304,7 +304,7 @@ The query command is as follows:
 
 12、UEFI Support
 ```$xslt
-Adjust the system configuration items `vm.uefi.loader.type` and `vm.uefi.loader.path`
+Adjust the system configuration items `vm.uefi.loader.path` 、 `vm.uefi.loader.vargs.template.path` and vm.uefi.loader.vargs.base.path.
 ```
 13、Network connectivity issues
 ```$xslt

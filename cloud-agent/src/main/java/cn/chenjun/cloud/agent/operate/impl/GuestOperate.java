@@ -8,20 +8,27 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.libvirt.*;
 import org.libvirt.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
 
+import java.io.File;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -262,6 +269,7 @@ public class GuestOperate {
             }
         }
         log.info("create vm={}", request.getXml());
+        initVmDirectory(request.getXml());
         domain = connect.domainCreateXML(request.getXml(), 0);
         if (Objects.nonNull(request.getQmaRequest())) {
             long start = System.currentTimeMillis();
@@ -508,7 +516,33 @@ public class GuestOperate {
         }
         return info;
     }
+    private void initVmDirectory(String xml){
+        try (StringReader sr = new StringReader(xml)) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+            Element channelSourceElement = (Element) doc.selectSingleNode("/domain/devices/channel/source");
+            if(channelSourceElement!=null) {
+                String path = channelSourceElement.attributeValue("path");
+                if(!ObjectUtils.isEmpty(path)) {
+                    String parentPath=new File(path).getParent();
+                    FileUtil.mkdir(parentPath);
+                    log.info("初始化虚拟机channel目录:{}",parentPath);
+                }
+            }
+            Element nvramElement = (Element) doc.selectSingleNode("/domain/os/nvram");
+            if(nvramElement!=null){
+                String path = nvramElement.getText();
+                if(!ObjectUtils.isEmpty(path)){
+                    String parentPath=new File(path).getParent();
+                    FileUtil.mkdir(parentPath);
+                    log.info("初始化虚拟机nvram目录:{}",parentPath);
+                }
+            }
+        }catch (Exception ignored){
 
+        }
+    }
     static final class MigrateFlags {
         /**
          * live migration

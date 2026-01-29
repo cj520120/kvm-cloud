@@ -94,9 +94,26 @@ public class VolumeOperate {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "当前存储池未就绪:[" + request.getStorage() + "]");
         }
         for (String volume : request.getVolumes()) {
-            StorageVol storageVol = this.findVol(storagePool, volume);
-            if (storageVol != null) {
-                storageVol.delete(0);
+            try {
+                StorageVol storageVol = this.findVol(storagePool, volume);
+                String path=storageVol.getPath();
+                if(!ObjectUtils.isEmpty(path)){
+                    try {
+                        File file=new File(path);
+                        if(file.exists() && file.isDirectory()){
+                            log.info("Volume[{}]是存储目录，跳过:{}",volume,path);
+                            continue;
+                        }
+
+                    }catch (Exception ignored) {
+
+                    }
+                }
+                if (storageVol != null) {
+                    storageVol.delete(0);
+                }
+            }catch (Exception ignored) {
+                log.warn("删除存储卷失败:{}", volume);
             }
         }
         return null;

@@ -53,8 +53,9 @@ public class ConfigKey {
     public static final String VM_CPU_VIRTUALIZATION_ENABLE = "vm.cpu.virtualization.enable";
     public static final String VM_CPU_VIRTUALIZATION_NAME = "vm.cpu.virtualization.name";
 
-    public static final String VM_DEFAULT_UEFI_LOADER_TYPE = "vm.uefi.loader.type";
     public static final String VM_DEFAULT_UEFI_LOADER_PATH = "vm.uefi.loader.path";
+    public static final String VM_DEFAULT_UEFI_LOADER_VARGS_TEMPLATE_PATH = "vm.uefi.loader.vargs.template.path";
+    public static final String VM_DEFAULT_UEFI_LOADER_VARGS_BASE_PATH = "vm.uefi.loader.vargs.base.path";
 
     public static final String VM_MACHINE_ARCH = "vm.machine.arch";
     public static final String VM_MACHINE_NAME = "vm.machine.name";
