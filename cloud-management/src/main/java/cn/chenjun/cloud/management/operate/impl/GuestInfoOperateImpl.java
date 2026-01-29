@@ -10,7 +10,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.GuestInfoOperate;
-import cn.chenjun.cloud.management.util.GuestExternNames;
+import cn.chenjun.cloud.management.servcie.bean.GuestExtern;
 import cn.chenjun.cloud.management.util.GuestExternUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -60,14 +59,17 @@ public class GuestInfoOperateImpl extends AbstractOperate<GuestInfoOperate, Resu
         if (guest != null && guest.getStatus() == Constant.GuestStatus.RUNNING) {
             this.allocateService.initHostAllocate();
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-
-                Map<String, Map<String, String>> extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
-                }.getType());
-                Map<String, String> vncMap = extern.computeIfAbsent(GuestExternNames.VNC, k -> GuestExternUtil.buildVncParam(guest, "", ""));
+                GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
+                if(extern==null){
+                    extern = new GuestExtern();
+                }
+                if(extern.getVnc()==null){
+                    extern.setVnc(GuestExternUtil.buildVncParam(guest, "", ""));
+                }
                 HostEntity host = this.hostMapper.selectById(guest.getHostId());
-                vncMap.put(GuestExternNames.VncNames.HOST, host.getHostIp());
-                if (!Objects.equals(vncMap.get(GuestExternNames.VncNames.PORT), String.valueOf(resultUtil.getData().getVnc()))) {
-                    vncMap.put(GuestExternNames.VncNames.PORT, String.valueOf(resultUtil.getData().getVnc()));
+                extern.getVnc().setHost(host.getHostIp());
+                if (!Objects.equals(extern.getVnc().getPort(), String.valueOf(resultUtil.getData().getVnc()))) {
+                    extern.getVnc().setPort(String.valueOf(resultUtil.getData().getVnc()));
                     guest.setExtern(GsonBuilderUtil.create().toJson(extern));
                     this.guestMapper.updateById(guest);
                 }

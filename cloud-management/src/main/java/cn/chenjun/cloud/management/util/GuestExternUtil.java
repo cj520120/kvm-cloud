@@ -2,46 +2,47 @@ package cn.chenjun.cloud.management.util;
 
 import cn.chenjun.cloud.common.util.SymmetricCryptoUtil;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.servcie.bean.GuestExtern;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class GuestExternUtil {
     private static final int VNC_PASSWORD_SIZE = 8;
 
-    public static Map<String, String> buildMetaDataParam(GuestEntity guest, String hostname) {
-        Map<String, String> metaDataMap = new HashMap<>(4);
+    public static GuestExtern.MetaData buildMetaDataParam(GuestEntity guest, String hostname) {
+        GuestExtern.MetaData metaData = new GuestExtern.MetaData();
         if (ObjectUtils.isEmpty(hostname)) {
             hostname = "VM-" + guest.getGuestIp().replace(".", "-");
         }
-        metaDataMap.put(GuestExternNames.MetaDataNames.HOSTNAME, hostname);
-        metaDataMap.put(GuestExternNames.MetaDataNames.LOCAL_HOSTNAME, hostname);
-        metaDataMap.put(GuestExternNames.MetaDataNames.INSTANCE_ID, guest.getName());
-        return metaDataMap;
+        metaData.setHostname(hostname);
+        metaData.setLocalHostname(hostname);
+        metaData.setInstanceId(guest.getName());
+        return metaData;
     }
 
-    public static Map<String, String> buildUserDataParam(GuestEntity guest, String password, String sshPublicKey) {
-        Map<String, String> userDataMap = new HashMap<>(3);
+    public static  GuestExtern.UserData buildUserDataParam(GuestEntity guest, String password, String sshPublicKey) {
+        GuestExtern.UserData userData = new GuestExtern.UserData();
         if (!StringUtils.isEmpty(password)) {
             SymmetricCryptoUtil util = SymmetricCryptoUtil.build();
-            userDataMap.put(GuestExternNames.UserDataNames.PASSWORD_IV_KEY, util.getIvKey());
-            userDataMap.put(GuestExternNames.UserDataNames.PASSWORD_ENCODE_KEY, util.getEncodeKey());
-            userDataMap.put(GuestExternNames.UserDataNames.PASSWORD, util.encrypt(password));
+            userData.setPasswordIvKey(util.getIvKey());
+            userData.setPasswordEncodeKey(util.getEncodeKey());
+            userData.setPassword(util.encrypt(password));
         }
-        if (!StringUtils.isEmpty(sshPublicKey)) {
-            userDataMap.put(GuestExternNames.UserDataNames.SSH_PUBLIC_KEY, sshPublicKey);
-        }
-        return userDataMap;
+        userData.setSshPublicKey(sshPublicKey);
+        return userData;
     }
 
-    public static Map<String, String> buildVncParam(GuestEntity guest, String host, String port) {
-        Map<String, String> vncMap = new HashMap<>(1);
-        vncMap.put(GuestExternNames.VncNames.PORT, port);
-        vncMap.put(GuestExternNames.VncNames.HOST, host);
-        vncMap.put(GuestExternNames.VncNames.PASSWORD, RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
-        return vncMap;
+    public static GuestExtern.Vnc buildVncParam(GuestEntity guest, String host, String port) {
+        GuestExtern.Vnc vnc = new GuestExtern.Vnc();
+        vnc.setHost(host);
+        vnc.setPort(port);
+        vnc.setPassword(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
+        return vnc;
     }
 }

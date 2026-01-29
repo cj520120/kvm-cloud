@@ -11,6 +11,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
+import cn.chenjun.cloud.management.servcie.bean.GuestExtern;
 import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -187,11 +188,11 @@ public class GuestService extends AbstractService {
                 .build();
         this.guestMapper.insert(guest);
         SshAuthorizedEntity ssh = sshId <= 0 ? null : this.sshAuthorizedMapper.selectById(sshId);
-        Map<String, Map<String, String>> externData = new HashMap<>();
-        externData.put(GuestExternNames.META_DATA, GuestExternUtil.buildMetaDataParam(guest, hostName));
-        externData.put(GuestExternNames.USER_DATA, GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
-        externData.put(GuestExternNames.VNC, GuestExternUtil.buildVncParam(guest, "", "5900"));
-        guest.setExtern(GsonBuilderUtil.create().toJson(externData));
+        GuestExtern extern = new GuestExtern();
+        extern.setMetaData(GuestExternUtil.buildMetaDataParam(guest, hostName));
+        extern.setUserData(GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
+        extern.setVnc(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        guest.setExtern(GsonBuilderUtil.create().toJson(extern));
 
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId, guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, networkDeviceType, "Guest Basic Nic");
         guest.setGuestIp(guestNetwork.getIp());
@@ -756,10 +757,14 @@ public class GuestService extends AbstractService {
         if (guest == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
         }
-        Map<String, Map<String, String>> externMap = GsonBuilderUtil.create().fromJson(guest.getExtern(), new TypeToken<Map<String, Map<String, String>>>() {
-        }.getType());
-        Map<String, String> vncMap = externMap.computeIfAbsent(GuestExternNames.VNC, k -> GuestExternUtil.buildVncParam(guest, "", "5900"));
-        return ResultUtil.success(vncMap.get(GuestExternNames.VncNames.PASSWORD));
+        GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
+        if(extern == null){
+            extern = new GuestExtern();
+        }
+        if(extern.getVnc() == null){
+            extern.setVnc(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        }
+        return ResultUtil.success(extern.getVnc().getPassword());
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -82,15 +82,6 @@ public abstract class AbstractService {
         if (guest == null) {
             return 0;
         }
-//        int hostId = this.configService.getConfig(Collections.singletonList(ConfigQuery.builder().id(guest.getGuestId()).type(Constant.ConfigType.GUEST).build()), ConfigKey.VM_BIND_HOST);
-//        if (hostId == 0) {
-//            if (guest.getStatus().equals(Constant.GuestStatus.RUNNING) || guest.getStatus().equals(Constant.GuestStatus.STARTING) || guest.getStatus().equals(Constant.GuestStatus.STOPPING)) {
-//                hostId = guest.getHostId();
-//            } else {
-//                List<VolumeEntity> guestVolumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guest.getGuestId()));
-//                hostId = guestVolumeList.stream().map(VolumeEntity::getHostId).filter(id -> id > 0).findFirst().orElse(0);
-//            }
-//        }
         return guest.getBindHostId();
     }
 

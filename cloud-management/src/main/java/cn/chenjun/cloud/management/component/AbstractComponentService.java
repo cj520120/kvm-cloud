@@ -12,6 +12,7 @@ import cn.chenjun.cloud.management.servcie.AbstractService;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.GuestService;
+import cn.chenjun.cloud.management.servcie.bean.GuestExtern;
 import cn.chenjun.cloud.management.util.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -175,11 +176,11 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .status(cn.chenjun.cloud.common.util.Constant.GuestStatus.CREATING)
                 .build();
         this.guestMapper.insert(guest);
-        Map<String, Map<String, String>> externData = new HashMap<>();
-        externData.put(GuestExternNames.META_DATA, GuestExternUtil.buildMetaDataParam(guest, this.getComponentName().replace(" ", "_").toLowerCase()));
-        externData.put(GuestExternNames.USER_DATA, GuestExternUtil.buildUserDataParam(guest, "123456", ""));
-        externData.put(GuestExternNames.VNC, GuestExternUtil.buildVncParam(guest, "", "5900"));
-        guest.setExtern(GsonBuilderUtil.create().toJson(externData));
+        GuestExtern extern = new GuestExtern();
+        extern.setMetaData(GuestExternUtil.buildMetaDataParam(guest, this.getComponentName().replace(" ", "_").toLowerCase()));
+        extern.setUserData(GuestExternUtil.buildUserDataParam(guest, "123456", ""));
+        extern.setVnc(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        guest.setExtern(GsonBuilderUtil.create().toJson(extern));
         this.guestMapper.updateById(guest);
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
