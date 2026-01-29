@@ -38,7 +38,7 @@ public class CloneVolumeOperateImpl extends AbstractOperate<CloneVolumeOperate, 
             if (cloneVolume.getStatus() != Constant.VolumeStatus.CREATING) {
                 throw new CodeException(ErrorCode.SERVER_ERROR, "目标磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
             }
-            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, Math.max(sourceStorage.getHostId(), cloneVolume.getHostId()), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.NONE,0, Math.max(sourceStorage.getHostId(), cloneVolume.getHostId()), 0, 0);
             StorageEntity targetStorage = storageMapper.selectById(cloneVolume.getStorageId());
             VolumeCloneRequest request = VolumeCloneRequest.builder()
                     .sourceVolume(initVolume(sourceStorage, volume))

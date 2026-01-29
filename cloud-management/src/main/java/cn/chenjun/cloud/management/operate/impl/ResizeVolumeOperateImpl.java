@@ -43,7 +43,7 @@ public class ResizeVolumeOperateImpl extends AbstractOperate<ResizeVolumeOperate
                 host = this.hostMapper.selectById(guest.getHostId());
                 vm = guest.getName();
             } else {
-                host = this.allocateService.allocateHost(HostRole.ALL,hostId, volume.getHostId(), 0, 0);
+                host = this.allocateService.allocateHost(HostRole.NONE,hostId, volume.getHostId(), 0, 0);
             }
             VolumeResizeRequest request = VolumeResizeRequest.builder()
                     .vm(vm)

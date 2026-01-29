@@ -36,7 +36,7 @@ public class StorageCheckOperateImpl extends AbstractOperate<StorageCheckOperate
             this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(new ArrayList<>()));
         } else {
             List<StorageInfoRequest> requests = Collections.singletonList(StorageInfoRequest.builder().name(storage.getName()).build());
-            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.NONE,0, storage.getHostId(), 0, 0);
             this.asyncInvoker(host, param, Constant.Command.BATCH_STORAGE_INFO, requests);
         }
     }

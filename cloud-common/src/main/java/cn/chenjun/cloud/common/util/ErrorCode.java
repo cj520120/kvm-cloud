@@ -24,6 +24,7 @@ public final class ErrorCode {
     public static final int NETWORK_COMPONENT_HAS_VM = BASE_NETWORK_ERROR + 6;
     public static final int NETWORK_NIC_NOT_ATTACH = BASE_NETWORK_ERROR + 7;
     public static final int NETWORK_NOT_READY = BASE_NETWORK_ERROR + 8;
+    public static final int NETWORK_NIC_NOT_FOUND = BASE_NETWORK_ERROR + 9;
     /**
      * GUEST
      */

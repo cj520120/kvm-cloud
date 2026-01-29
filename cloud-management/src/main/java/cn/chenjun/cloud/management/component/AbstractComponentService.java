@@ -205,28 +205,14 @@ public abstract class AbstractComponentService<T extends ComponentQmaInitialize>
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeMapper.insert(volume);
-        GuestNetworkEntity guestNetwork;
-        guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId());
-        guestNetwork.setDeviceId(0);
-        guestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
-        guestNetwork.setAllocateId(guest.getGuestId());
-        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
-        guestNetwork.setAllocateDescription("Guest Basic Nic");
-        this.guestNetworkMapper.updateById(guestNetwork);
+        String driveType = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER);
+        boolean isVlan = Objects.equals(network.getType(), cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN);
+        int deviceId = isVlan ? 1 : 0;
+        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, deviceId, driveType, "Component Guest Basic Nic");
         guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
-        if (Objects.equals(network.getType(), cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN)) {
-            //调整基础网络网卡为第一网卡
-            guestNetwork.setDeviceId(1);
-            this.guestNetworkMapper.updateById(guestNetwork);
-
-            GuestNetworkEntity basicGuestNetwork = this.allocateService.allocateNetwork(network.getBasicNetworkId());
-            basicGuestNetwork.setDeviceId(0);
-            basicGuestNetwork.setDriveType(configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER));
-            basicGuestNetwork.setAllocateId(guest.getGuestId());
-            guestNetwork.setAllocateDescription("Guest Basic Nic");
-            basicGuestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
-            this.guestNetworkMapper.updateById(basicGuestNetwork);
+        if (isVlan) {
+            this.allocateService.allocateNetwork(network.getBasicNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, driveType, "Component Guest Basic Nic");
         }
         BaseOperateParam operateParam = CreateGuestOperate.builder()
                 .guestId(guest.getGuestId())

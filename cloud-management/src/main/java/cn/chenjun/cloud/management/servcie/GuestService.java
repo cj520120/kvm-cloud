@@ -161,7 +161,6 @@ public class GuestService extends AbstractService {
 
         this.checkSystemComponentComplete(networkId);
         SchemeEntity scheme = this.schemeMapper.selectById(schemeId);
-        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
         GuestEntity guest = GuestEntity.builder()
                 .groupId(groupId)
                 .uuid(UUID.randomUUID().toString())
@@ -177,7 +176,7 @@ public class GuestService extends AbstractService {
                 .bindHostId(bindHostId)
                 .lastHostId(0)
                 .schemeId(schemeId)
-                .guestIp(guestNetwork.getIp())
+                .guestIp("")
                 .otherId(0)
                 .networkId(networkId)
                 .bindHostId(bindHostId)
@@ -193,13 +192,10 @@ public class GuestService extends AbstractService {
         externData.put(GuestExternNames.USER_DATA, GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
         externData.put(GuestExternNames.VNC, GuestExternUtil.buildVncParam(guest, "", "5900"));
         guest.setExtern(GsonBuilderUtil.create().toJson(externData));
+
+        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId, guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, networkDeviceType, "Guest Basic Nic");
+        guest.setGuestIp(guestNetwork.getIp());
         this.guestMapper.updateById(guest);
-        guestNetwork.setDeviceId(0);
-        guestNetwork.setDriveType(networkDeviceType);
-        guestNetwork.setAllocateId(guest.getGuestId());
-        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
-        guestNetwork.setAllocateDescription("Guest Basic Nic");
-        this.guestNetworkMapper.updateById(guestNetwork);
         String volumeType = getVolumeType(storage);
         if (volumeId <= 0) {
             createGuest(hostId, diskTemplateId, deviceDriver, volumeType, size, guest, storage);
@@ -680,8 +676,7 @@ public class GuestService extends AbstractService {
         }
         GuestEntity guest = this.guestMapper.selectById(guestId);
 
-        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId);
-        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId));
+        List<GuestNetworkEntity> guestNetworkList = this.guestNetworkMapper.selectList(new QueryWrapper<GuestNetworkEntity>().eq(GuestNetworkEntity.ALLOCATE_ID, guestId).eq(GuestNetworkEntity.ALLOCATE_TYPE, Constant.NetworkAllocateType.GUEST));
         List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
         int deviceId = -1;
         for (int i = 0; i < Constant.MAX_DEVICE_COUNT; i++) {
@@ -693,12 +688,8 @@ public class GuestService extends AbstractService {
         if (deviceId < 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前挂载超过最大网卡数量限制");
         }
-        guestNetwork.setDeviceId(deviceId);
-        guestNetwork.setDriveType(driveType);
-        guestNetwork.setAllocateId(guestId);
-        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.GUEST);
-        guestNetwork.setAllocateDescription("Guest Attach Nic");
-        this.guestNetworkMapper.updateById(guestNetwork);
+
+        GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId, guest.getGuestId(), Constant.NetworkAllocateType.GUEST, deviceId, driveType, "Guest Attach Nic");
         BaseOperateParam operateParam = ChangeGuestNetworkInterfaceOperate.builder()
                 .guestNetworkId(guestNetwork.getGuestNetworkId()).attach(true).guestId(guestId)
                 .id(UUID.randomUUID().toString())

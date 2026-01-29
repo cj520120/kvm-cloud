@@ -59,34 +59,41 @@ public class AllocateService extends AbstractService {
                 .orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
     }
 
-    public GuestNetworkEntity allocateNetwork(int networkId) {
+    public GuestNetworkEntity allocateNetwork(int networkId, int allocateId, int allocateType, int deviceId, String device, String allocateDescription) {
         QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
         wrapper.eq(GuestNetworkEntity.NETWORK_ID, networkId)
-                .eq(GuestNetworkEntity.ALLOCATE_ID, 0)
                 .eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.DEFAULT)
                 .last("LIMIT 1");
         GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
         if (guestNetwork == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "没有可用的网络资源，networkId=" + networkId);
         }
+        guestNetwork.setAllocateId(allocateId);
+        guestNetwork.setAllocateType(allocateType);
+        guestNetwork.setDeviceId(deviceId);
+        guestNetwork.setDriveType(device);
+        guestNetwork.setAllocateDescription(allocateDescription);
+        this.guestNetworkMapper.updateById(guestNetwork);
         return guestNetwork;
     }
 
-    public List<HostEntity> listAllocateHost(int cpu, long memory) {
-        List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
-        for (HostEntity host : list) {
-            List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
-            host.setTotalCpu((int) (host.getTotalCpu() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_CPU)));
-            host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
+    public GuestNetworkEntity releaseNetwork(int guestNetworkId) {
+        GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
+        if (guestNetwork == null) {
+            throw new CodeException(ErrorCode.NETWORK_NIC_NOT_FOUND, "网络不存在");
         }
-        list = list.stream().filter(t -> hostVerify(t, cpu, memory)).collect(Collectors.toList());
-        return list;
+        guestNetwork.setAllocateId(0);
+        guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.DEFAULT);
+        guestNetwork.setAllocateDescription("");
+        guestNetwork.setDeviceId(0);
+        guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
+        this.guestNetworkMapper.updateById(guestNetwork);
+        return guestNetwork;
     }
-
     public HostEntity allocateHost(int role,int hostId, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostMapper.selectById(mustHostId);
-            if (role!= HostRole.ALL && (host.getRole() & role) != role) {
+            if (role!= HostRole.NONE && (host.getRole() & role) != role) {
                 throw new CodeException(ErrorCode.HOST_ROLE_NOT_SUPPORT, "主机角色不支持");
             }
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
@@ -101,8 +108,8 @@ public class AllocateService extends AbstractService {
             return host;
         } else {
             List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
-            if (role!= HostRole.ALL) {
-                list.removeIf(t -> (t.getRole() & role) != role);
+            if (role!= HostRole.NONE) {
+                list.removeIf(t -> !HostRole.hasRole(t.getRole(), role));
                 log.info("过滤主机角色,role={}", role);
             }
             for (HostEntity host : list) {

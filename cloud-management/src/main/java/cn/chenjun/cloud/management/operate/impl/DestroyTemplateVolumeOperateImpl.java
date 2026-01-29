@@ -31,7 +31,7 @@ public class DestroyTemplateVolumeOperateImpl extends AbstractOperate<DestroyTem
         TemplateVolumeEntity volume = this.templateVolumeMapper.selectById(param.getVolumeId());
         if (volume != null) {
             StorageEntity storage = storageMapper.selectById(volume.getStorageId());
-            HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
+            HostEntity host = this.allocateService.allocateHost(HostRole.NONE,0, storage.getHostId(), 0, 0);
             VolumeDestroyRequest request = VolumeDestroyRequest.builder()
                     .volume(initVolume(storage, volume))
                     .build();

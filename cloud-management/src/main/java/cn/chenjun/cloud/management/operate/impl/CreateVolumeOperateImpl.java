@@ -45,7 +45,7 @@ public class CreateVolumeOperateImpl<T extends CreateVolumeOperate> extends Abst
                 if (storage.getStatus() != Constant.StorageStatus.READY) {
                     throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
                 }
-                HostEntity host = this.allocateService.allocateHost(HostRole.ALL, 0, volume.getHostId(), 0, 0);
+                HostEntity host = this.allocateService.allocateHost(HostRole.NONE, 0, volume.getHostId(), 0, 0);
                 if (param.getTemplateId() > 0) {
                     List<TemplateVolumeEntity> templateVolumeList = templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, param.getTemplateId()));
                     Collections.shuffle(templateVolumeList);

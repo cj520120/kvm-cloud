@@ -60,12 +60,7 @@ public class ChangeGuestNetworkInterfaceOperateImpl extends AbstractOsOperate<Ch
         if (!param.isAttach()) {
             GuestNetworkEntity guestNetwork = guestNetworkMapper.selectById(param.getGuestNetworkId());
             if (guestNetwork != null) {
-                guestNetwork.setAllocateId(0);
-                guestNetwork.setDeviceId(0);
-                guestNetwork.setAllocateType(Constant.NetworkAllocateType.DEFAULT);
-                guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
-                guestNetwork.setAllocateDescription("");
-                guestNetworkMapper.updateById(guestNetwork);
+                this.allocateService.releaseNetwork(param.getGuestNetworkId());
             }
         }
         this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());

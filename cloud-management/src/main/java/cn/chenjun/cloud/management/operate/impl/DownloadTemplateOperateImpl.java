@@ -42,7 +42,7 @@ public class DownloadTemplateOperateImpl extends AbstractOperate<DownloadTemplat
         if (storage.getStatus() != Constant.StorageStatus.READY) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
         }
-        HostEntity host = this.allocateService.allocateHost(HostRole.ALL,0, storage.getHostId(), 0, 0);
+        HostEntity host = this.allocateService.allocateHost(HostRole.NONE,0, storage.getHostId(), 0, 0);
         StorageEntity targetStorage = storageMapper.selectById(templateVolume.getStorageId());
 
         VolumeDownloadRequest request = VolumeDownloadRequest.builder()
