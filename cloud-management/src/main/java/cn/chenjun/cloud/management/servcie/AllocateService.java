@@ -10,10 +10,10 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.HostRole;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ public class AllocateService extends AbstractService {
 
     public StorageEntity allocateStorage(int category, int storageId) {
         if (storageId > 0) {
-            StorageEntity storage = storageMapper.selectById(storageId);
+            StorageEntity storage = storageDao.findById(storageId);
             if (storage == null) {
                 throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
             }
@@ -38,12 +38,11 @@ public class AllocateService extends AbstractService {
             return storage;
         }
 
-        QueryWrapper<StorageEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne(StorageEntity.STORAGE_TYPE, cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)
-                .eq(StorageEntity.STORAGE_STATUS, Constant.StorageStatus.READY)
-                .apply(StorageEntity.STORAGE_SUPPORT_CATEGORY + " & {0} = {0}", category);
-        List<StorageEntity> storageList = storageMapper.selectList(queryWrapper);
-
+        List<StorageEntity> storageList = storageDao.listAll().stream().filter(
+                storage -> (storage.getSupportCategory() & category) == category
+                        && storage.getStatus() == cn.chenjun.cloud.common.util.Constant.StorageStatus.READY
+                        && storage.getType() != cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL
+        ).collect(Collectors.toList());
         Map<Integer, Float> scoreMap = storageList.parallelStream().collect(Collectors.toMap(StorageEntity::getStorageId, entity -> {
             List<ConfigQuery> queryList = Arrays.asList(
                     ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).id(0).build(),
@@ -59,26 +58,24 @@ public class AllocateService extends AbstractService {
                 .orElseThrow(() -> new CodeException(ErrorCode.STORAGE_NOT_SPACE, "没有可用的存储池资源"));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public GuestNetworkEntity allocateNetwork(int networkId, int allocateId, int allocateType, int deviceId, String device, String allocateDescription) {
-        QueryWrapper<GuestNetworkEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq(GuestNetworkEntity.NETWORK_ID, networkId)
-                .eq(GuestNetworkEntity.ALLOCATE_TYPE, cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.DEFAULT)
-                .last("LIMIT 1");
-        GuestNetworkEntity guestNetwork = guestNetworkMapper.selectOne(wrapper);
+        GuestNetworkEntity guestNetwork = guestNetworkDao.allocate(networkId);//.selectOne(wrapper);
         if (guestNetwork == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_SPACE, "没有可用的网络资源，networkId=" + networkId);
         }
         guestNetwork.setAllocateId(allocateId);
         guestNetwork.setAllocateType(allocateType);
         guestNetwork.setDeviceId(deviceId);
-        guestNetwork.setDriveType(device);
+        guestNetwork.setDeviceType(device);
         guestNetwork.setAllocateDescription(allocateDescription);
-        this.guestNetworkMapper.updateById(guestNetwork);
+        this.guestNetworkDao.update(guestNetwork);
         return guestNetwork;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public GuestNetworkEntity releaseNetwork(int guestNetworkId) {
-        GuestNetworkEntity guestNetwork = this.guestNetworkMapper.selectById(guestNetworkId);
+        GuestNetworkEntity guestNetwork = this.guestNetworkDao.findById(guestNetworkId);
         if (guestNetwork == null) {
             throw new CodeException(ErrorCode.NETWORK_NIC_NOT_FOUND, "网络不存在");
         }
@@ -86,13 +83,14 @@ public class AllocateService extends AbstractService {
         guestNetwork.setAllocateType(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.DEFAULT);
         guestNetwork.setAllocateDescription("");
         guestNetwork.setDeviceId(0);
-        guestNetwork.setDriveType(Constant.NetworkDriver.VIRTIO);
-        this.guestNetworkMapper.updateById(guestNetwork);
+        guestNetwork.setDeviceType(Constant.NetworkDriver.VIRTIO);
+        this.guestNetworkDao.update(guestNetwork);
         return guestNetwork;
     }
-    public HostEntity allocateHost(int role,int hostId, int mustHostId, int cpu, long memory) {
+
+    public HostEntity allocateHost(int role, int hostId, String arch, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
-            HostEntity host = this.hostMapper.selectById(mustHostId);
+            HostEntity host = this.hostDao.findById(mustHostId);
             if (role!= HostRole.NONE && (host.getRole() & role) != role) {
                 throw new CodeException(ErrorCode.HOST_ROLE_NOT_SUPPORT, "主机角色不支持");
             }
@@ -102,12 +100,12 @@ public class AllocateService extends AbstractService {
             if (host.getStatus() != cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE) {
                 throw new CodeException(ErrorCode.HOST_NOT_READY, "主机状态不在线");
             }
-            if (!hostVerify(host, cpu, memory)) {
+            if (!hostVerify(host, cpu, memory, arch)) {
                 throw new CodeException(ErrorCode.HOST_NOT_RESOURCE, "主机没有可用资源");
             }
             return host;
         } else {
-            List<HostEntity> list = this.hostMapper.selectList(new QueryWrapper<>());
+            List<HostEntity> list = this.hostDao.listAll();
             if (role!= HostRole.NONE) {
                 list.removeIf(t -> !HostRole.hasRole(t.getRole(), role));
                 log.info("过滤主机角色,role={}", role);
@@ -118,7 +116,7 @@ public class AllocateService extends AbstractService {
                 host.setTotalMemory((long) (host.getTotalMemory() * (float) this.configService.getConfig(queryList, ConfigKey.DEFAULT_OVER_MEMORY)));
             }
             //获取满足的主机列表
-            list = list.stream().filter(t -> hostVerify(t,cpu, memory)).collect(Collectors.toList());
+            list = list.stream().filter(t -> hostVerify(t, cpu, memory, arch)).collect(Collectors.toList());
             Collections.shuffle(list);
             HostEntity host = null;
             if (hostId > 0) {
@@ -151,8 +149,11 @@ public class AllocateService extends AbstractService {
         }
     }
 
-    private boolean hostVerify(HostEntity host, int cpu, long memory) {
+    private boolean hostVerify(HostEntity host, int cpu, long memory, String arch) {
         if (!Objects.equals(host.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
+            return false;
+        }
+        if (!ObjectUtils.isEmpty(arch) && !arch.equalsIgnoreCase(host.getArch())) {
             return false;
         }
         int allocateCpu = host.getAllocationCpu() + cpu;
@@ -162,10 +163,9 @@ public class AllocateService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public void initHostAllocate() {
-        List<HostEntity> hosts = this.hostMapper.selectList(new QueryWrapper<>());
-        Map<Integer, List<GuestEntity>> map = guestMapper.selectList(new QueryWrapper<GuestEntity>().gt(GuestEntity.HOST_ID, 0)).stream().collect(Collectors.groupingBy(GuestEntity::getHostId));
+        List<HostEntity> hosts = this.hostDao.listAll();
         for (HostEntity host : hosts) {
-            List<GuestEntity> guestList = map.get(host.getHostId());
+            List<GuestEntity> guestList = this.guestDao.listRunningByHostId(host.getHostId());
             if (guestList == null) {
                 host.setAllocationCpu(0);
                 host.setAllocationMemory(0L);
@@ -173,7 +173,6 @@ public class AllocateService extends AbstractService {
                 host.setAllocationCpu(guestList.stream().mapToInt(GuestEntity::getCpu).sum());
                 host.setAllocationMemory(guestList.stream().mapToLong(GuestEntity::getMemory).sum());
             }
-            this.hostMapper.updateById(host);
         }
     }
 }

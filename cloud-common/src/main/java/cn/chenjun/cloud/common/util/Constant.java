@@ -97,7 +97,6 @@ public class Constant {
         public static final String GUEST_DETACH_DISK = "DetachDisk";
         public static final String GUEST_ATTACH_NIC = "AttachNic";
         public static final String GUEST_DETACH_NIC = "DetachNic";
-        public static final String GUEST_QMA = "QMAGuest";
 
     }
 
@@ -137,9 +136,11 @@ public class Constant {
         public static final int COMPONENT_CONNECT_SUCCESS = 201;
         public static final int COMPONENT_CONNECT_FAIL = 202;
         public static final int COMPONENT_NOTIFY = 203;
+        public static final int COMPONENT_HEART_BEAT = 204;
         public static final int COMPONENT_DNS_REQUEST = 206;
         public static final int COMPONENT_NAT_REQUEST = 207;
-
+        public static final int COMPONENT_META_REQUEST = 208;
+        public static final int COMPONENT_META_RESPONSE = 209;
 
     }
 
@@ -180,16 +181,31 @@ public class Constant {
         public static final String UEFI_STR = "UEFI";
         public static final String BIOS_STR = "BIOS";
     }
+    public static class CloudWaitFlag {
+        public static final int YES = 1;
+        public static final int NO = 0;
+    }
 
     public static class Enable {
         public static final String YES = "yes";
         public static final String NO = "no";
+
     }
 
     public static class ComponentType {
         public static final int ROUTE = 1;
         public static final int NAT = 2;
 
+        public static String getComponentName(int componentType) {
+            switch (componentType) {
+                case ROUTE:
+                    return "route";
+                case NAT:
+                    return "nat";
+                default:
+                    throw new IllegalArgumentException("不支持的组件类型：" + componentType);
+            }
+        }
     }
 
     public static class ConfigType {
@@ -238,6 +254,17 @@ public class Constant {
         public static final int ERROR = 4;
     }
 
+    public static class ComponentGuestStatus {
+        public static final int CREATING = 0;
+        public static final int INSTALL = 1;
+        public static final int ONLINE = 2;
+        public static final int OFFLINE = 3;
+        public static final int STOP = 4;
+        public static final int DESTROY = 5;
+        public static final int ERROR = 6;
+
+    }
+
     public static class HttpHeaderNames {
         /**
          * 登陆HTTP TOKEN 头
@@ -281,7 +308,6 @@ public class Constant {
         public static int DESTROY_HOST_STORAGE = 1;
         public static int SYNC_HOST_GUEST = 2;
         public static int DESTROY_GUEST = 3;
-        public static int START_COMPONENT_GUEST = 4;
         public static int CREATE_STORAGE = 5;
         public static int DESTROY_STORAGE = 6;
         public static int CHANGE_GUEST_NETWORK_INTERFACE = 7;

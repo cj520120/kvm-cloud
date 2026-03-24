@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.websocket.cluster.process.web;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.SshAuthorizedModel;
+import cn.chenjun.cloud.management.servcie.ConvertService;
 import cn.chenjun.cloud.management.servcie.SshAuthorizedService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
@@ -18,10 +19,12 @@ public class UpdateSshKeyProcess extends AbstractClusterMessageProcess<Void> {
 
     @Autowired
     private SshAuthorizedService sshAuthorizedService;
+    @Autowired
+    private ConvertService convertService;
 
     @Override
     protected void doProcess(NotifyData<Void> msg) {
-        ResultUtil<SshAuthorizedModel> resultUtil = this.sshAuthorizedService.getSshKey(msg.getId());
+        ResultUtil<SshAuthorizedModel> resultUtil = getResourceData(() -> this.sshAuthorizedService.getSshKey(msg.getId()), this.convertService::initSshModel);
         NotifyData<ResultUtil<SshAuthorizedModel>> sendMsg = NotifyData.<ResultUtil<SshAuthorizedModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SSH).data(resultUtil).version(System.currentTimeMillis()).build();
         WebClientManager.sendAll(sendMsg);
     }

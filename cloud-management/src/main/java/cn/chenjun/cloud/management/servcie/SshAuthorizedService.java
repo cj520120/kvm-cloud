@@ -1,14 +1,11 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
-import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
-import cn.chenjun.cloud.management.model.CreateSshAuthorizedModel;
-import cn.chenjun.cloud.management.model.SshAuthorizedModel;
 import cn.chenjun.cloud.management.servcie.bean.MemSshInfo;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.OpenSSHPrivateKeyUtil;
@@ -20,7 +17,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -31,7 +27,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -46,55 +41,43 @@ public class SshAuthorizedService extends AbstractService {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
 
-    public ResultUtil<List<SshAuthorizedModel>> listAllSshKeys() {
-        List<SshAuthorizedEntity> list = this.sshAuthorizedMapper.selectList(new QueryWrapper<>());
-        List<SshAuthorizedModel> models = list.stream().map(this::initSshAuthorized).collect(Collectors.toList());
-        return ResultUtil.success(models);
+    public List<SshAuthorizedEntity> listAllSshKeys() {
+        List<SshAuthorizedEntity> list = this.sshAuthorizedDao.listAll();
+        return list;
     }
 
-    public ResultUtil<Page<SshAuthorizedModel>> search(String keyword, int no, int size) {
-        QueryWrapper<SshAuthorizedEntity> wrapper = new QueryWrapper<>();
-        if (!ObjectUtils.isEmpty(keyword)) {
-            String condition = "%" + keyword + "%";
-            wrapper.like(SshAuthorizedEntity.SSH_NAME, condition);
-        }
-        int nCount = Math.toIntExact(this.sshAuthorizedMapper.selectCount(wrapper));
-        int nOffset = (no - 1) * size;
-        wrapper.last("limit " + nOffset + ", " + size);
-        List<SshAuthorizedEntity> list = this.sshAuthorizedMapper.selectList(wrapper);
-        List<SshAuthorizedModel> models = list.stream().map(this::initSshAuthorized).collect(Collectors.toList());
-        Page<SshAuthorizedModel> page = Page.create(nCount, nOffset, size);
-        page.setList(models);
-        return ResultUtil.success(page);
+    public Page<SshAuthorizedEntity> search(String keyword, int no, int size) {
+
+        Page<SshAuthorizedEntity> page = this.sshAuthorizedDao.search(keyword, no, size);
+        return page;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SshAuthorizedModel> getSshKey(int id) {
-        SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
+    public SshAuthorizedEntity getSshKey(int id) {
+        SshAuthorizedEntity entity = this.sshAuthorizedDao.findById(id);
         if (entity == null) {
-            return ResultUtil.error(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
+            throw new CodeException(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
         }
-        return ResultUtil.success(this.initSshAuthorized(entity));
+        return entity;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<SshAuthorizedModel> importSshKey(String name, String publicKey, String privateKey) {
+    public SshAuthorizedEntity importSshKey(String name, String publicKey, String privateKey) {
         SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPublicKey(publicKey).sshPrivateKey(privateKey).build();
-        this.sshAuthorizedMapper.insert(entity);
+        this.sshAuthorizedDao.insert(entity);
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
 
-        return ResultUtil.success(this.initSshAuthorized(entity));
+        return entity;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> deleteSshKey(int id) {
-        this.sshAuthorizedMapper.deleteById(id);
+    public void deleteSshKey(int id) {
+        this.sshAuthorizedDao.deleteById(id);
         this.notifyService.publish(NotifyData.<Void>builder().id(id).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
-        return ResultUtil.success();
+
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<CreateSshAuthorizedModel> createSshKey(String name) {
+    public SshAuthorizedEntity createSshKey(String name) {
 
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
@@ -111,43 +94,42 @@ public class SshAuthorizedService extends AbstractService {
                 String privateKey = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
                 String publicKey = "ssh-rsa " + Base64.getEncoder().encodeToString(publicKeyBuffer) + " cj-kvm-ssh-key";
                 SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPrivateKey(privateKey).sshPublicKey(publicKey).build();
-                this.sshAuthorizedMapper.insert(entity);
-                CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(entity.getId()).name(name).publicKey(publicKey).privateKey(privateKey).build();
+                this.sshAuthorizedDao.insert(entity);
                 this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
-                return ResultUtil.success(model);
+                return entity;
             }
 
         } catch (Exception err) {
             log.error("SSH密钥生成失败", err);
-            return ResultUtil.error(ErrorCode.SSH_AUTHORIZED_CREATE_ERROR, "SSH密钥生成失败");
+            throw new CodeException(ErrorCode.SSH_AUTHORIZED_CREATE_ERROR, "SSH密钥生成失败");
         }
     }
 
-    public ResultUtil<SshAuthorizedModel> modifySshKey(int id, String name) {
-        SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
+    @Transactional(rollbackFor = Exception.class)
+    public SshAuthorizedEntity modifySshKey(int id, String name) {
+        SshAuthorizedEntity entity = this.sshAuthorizedDao.findById(id);
         if (entity == null) {
-            return ResultUtil.error(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
+            throw new CodeException(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
         }
         entity.setSshName(name);
-        this.sshAuthorizedMapper.updateById(entity);
+        this.sshAuthorizedDao.update(entity);
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
-        return ResultUtil.success(this.initSshAuthorized(entity));
+        return entity;
     }
 
-    public ResultUtil<String> createDownloadKey(int id) {
-        SshAuthorizedEntity entity = this.sshAuthorizedMapper.selectById(id);
+    public String createDownloadKey(int id) {
+        SshAuthorizedEntity entity = this.sshAuthorizedDao.findById(id);
         if (entity == null) {
-            return ResultUtil.error(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
+            throw new CodeException(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
         }
         String token = UUID.randomUUID().toString().replace("-", "");
         RBucket<MemSshInfo> rBucket = redissonClient.getBucket("SSH." + token);
 
         rBucket.set(MemSshInfo.builder().id(id).name(entity.getSshName()).privateKey(entity.getSshPrivateKey()).publicKey(entity.getSshPublicKey()).build(), 10, TimeUnit.MINUTES);
-        return ResultUtil.success(token);
+        return token;
     }
 
     public MemSshInfo getDownloadKey(String token) {
-
         RBucket<MemSshInfo> rBucket = redissonClient.getBucket("SSH." + token);
         return rBucket.getAndDelete();
     }

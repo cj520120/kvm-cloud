@@ -5,7 +5,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.servcie.UserService;
-import cn.chenjun.cloud.management.util.RequestContext;
+import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -15,6 +15,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 /**
  * @author chenjun
@@ -29,13 +30,14 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, @NonNull Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
-            RequestContext.remove();
+            RequestContextHolderUtil.initContext();
+            RequestContextHolderUtil.put(RequestContextHolderUtil.REQUEST_ID, UUID.randomUUID());
             String token = httpServletRequest.getHeader(Constant.HttpHeaderNames.TOKEN_HEADER);
             if (!StringUtils.isEmpty(token)) {
                 try {
                     ResultUtil<LoginUserModel> resultUtil = userService.getUserIdByToken(token);
                     if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-                        RequestContext.set(RequestContext.Context.builder().self(resultUtil.getData()).build());
+                        RequestContextHolderUtil.put(RequestContextHolderUtil.CURRENT_USER, resultUtil.getData());
                         httpServletRequest.setAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE, resultUtil.getData());
                     }
                 } catch (Exception ignored) {
@@ -46,4 +48,8 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
         return true;
     }
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        RequestContextHolderUtil.clearContext();
+    }
 }

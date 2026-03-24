@@ -1,9 +1,13 @@
 package cn.chenjun.cloud.common.bean;
 
+import cn.chenjun.cloud.common.util.BeanConverter;
+import cn.hutool.core.util.ObjectUtil;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -63,6 +67,35 @@ public class Page<T> implements Serializable {
         paginationClass.pageCount = page.pageCount;
         paginationClass.pageSize = page.pageSize;
         paginationClass.total = page.total;
+        return paginationClass;
+    }
+
+    public static <T> Page<T> create(Page<?> page, List<T> list) {
+        Page<T> paginationClass = new Page<T>();
+        paginationClass.page = page.page;
+        paginationClass.index = page.index;
+        paginationClass.length = page.length;
+        paginationClass.pageCount = page.pageCount;
+        paginationClass.pageSize = page.pageSize;
+        paginationClass.total = page.total;
+        paginationClass.list = list;
+        return paginationClass;
+    }
+
+    public static <S, T> Page<T> convert(Page<S> page, BeanConverter.Converter<S, T> converter) {
+        Page<T> paginationClass = new Page<T>();
+        paginationClass.page = page.page;
+        paginationClass.index = page.index;
+        paginationClass.length = page.length;
+        paginationClass.pageCount = page.pageCount;
+        paginationClass.pageSize = page.pageSize;
+        paginationClass.total = page.total;
+        List<S> sourceList = page.getList();
+        if (!ObjectUtil.isEmpty(sourceList)) {
+            paginationClass.list = sourceList.stream().map(converter::convert).collect(Collectors.toList());
+        } else {
+            paginationClass.list = new ArrayList<>();
+        }
         return paginationClass;
     }
 }

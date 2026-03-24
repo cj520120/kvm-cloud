@@ -3,16 +3,19 @@ package cn.chenjun.cloud.management.util;
 public class ConfigKey {
     public static final String SYSTEM_COMPONENT_NETWORK_DRIVER = "system.component.network.driver";
 
-    public static final String SYSTEM_COMPONENT_NETWORK_CHECK_ADDRESS = "system.component.network.check.address";
     public static final String SYSTEM_COMPONENT_CPU = "system.component.cpu.number";
     public static final String SYSTEM_COMPONENT_MEMORY = "system.component.memory";
     public static final String SYSTEM_COMPONENT_ENABLE = "system.component.enable";
     public static final String SYSTEM_COMPONENT_CPU_SHARE = "system.component.cpu.share";
     public static final String SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES = "system.component.qma.execute.timeout.minutes";
-    public static final String SYSTEM_COMPONENT_QMA_CHECK_TIMEOUT_MINUTES = "system.component.qma.check.timeout.minutes";
-    public static final String SYSTEM_COMPONENT_PIP_INSTALL_SOURCE = "system.component.pip.source";
-    public static final String SYSTEM_COMPONENT_YUM_INSTALL_SOURCE = "system.component.yum.repo";
     public static final String SYSTEM_COMPONENT_BOOTSTRAP_TYPE = "system.component.bootstrap.type";
+    public static final String SYSTEM_COMPONENT_SYSTEM_TYPE = "system.component.system.type";
+    public static final String SYSTEM_COMPONENT_USER_NAME = "system.component.user.name";
+    public static final String SYSTEM_COMPONENT_USER_PASSWORD = "system.component.user.password";
+    public static final String SYSTEM_COMPONENT_CLOUD_INIT_TPL = "system.component.cloud.init.tpl";
+    public static final String SYSTEM_COMPONENT_CLOUD_INIT_PATH = "system.component.cloud.init.path";
+    public static final String SYSTEM_COMPONENT_CONNET_TIMEOUT_SECONDS = "system.component.connect.timeout.seconds";
+    public static final String SYSTEM_COMPONENT_CONNET_MAX_ERROR_COUNT = "system.component.max.error.count";
 
 
     public static final String DEFAULT_VIRTIO_SCSI_QUEUE_NUMBER = "default.virtio-scsi.queue.number";
@@ -30,7 +33,7 @@ public class ConfigKey {
     public static final String DEFAULT_DESTROY_DELAY_MINUTE = "default.destroy.delay.timeout.minutes";
     public static final String DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE = "default.vm.stop.max.wait.timeout.minutes";
 
-    public static final String DEFAULT_TASK_CLEAR_COMPONENT_TIMEOUT_SECOND = "default.component.clear.timeout.second";
+
     public static final String DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default.component.check.timeout.second";
     public static final String DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND = "default.host.guest.sync.check.timeout.second";
     public static final String DEFAULT_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND = "default.host.task.sync.check.timeout.second";
@@ -38,6 +41,7 @@ public class ConfigKey {
     public static final String DEFAULT_TASK_STORAGE_CHECK_TIMEOUT_SECOND = "default.storage.check.timeout.second";
     public static final String DEFAULT_TASK_STORAGE_VOLUME_SYNC_TIMEOUT_SECOND = "default.storage.volume.sync.timeout.second";
     public static final String DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND = "default.task.expire.timeout.second";
+    public static final String DEFAULT_TASK_WAIT_DELAY_SECOND = "default.task.wait.delay.second";
 
     public static final String VM_CPU_MODEL = "vm.cpu.model";
     public static final String VM_NUMA_MEMORY_MODEL = "vm.numa.memory.model";
@@ -61,8 +65,6 @@ public class ConfigKey {
     public static final String VM_MACHINE_NAME = "vm.machine.name";
 
 
-    public static final String STORAGE_LOCAL_ENABLE = "storage.local.enable";
-    public static final String STORAGE_LOCAL_PATH = "storage.local.path";
     public static final String STORAGE_NFS_TPL = "storage.nfs.tpl";
     public static final String STORAGE_LOCAL_TPL = "storage.local.tpl";
     public static final String STORAGE_GLUSTERFS_TPL = "storage.glusterfs.tpl";

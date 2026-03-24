@@ -42,6 +42,8 @@ public class GuestEntity {
     public static final String LAST_START_TIME = "last_start_time";
     public static final String GUEST_EXTERN = "guest_extern";
     public static final String GUEST_UUID = "guest_uuid";
+    public static final String GUEST_ARCH = "guest_arch";
+    public static final String GUEST_TEMPLATE_ID = "guest_template_id";
     public static final String CREATE_TIME = "create_time";
 
     @TableId(type = IdType.AUTO, value = GUEST_ID)
@@ -52,6 +54,8 @@ public class GuestEntity {
     private String name;
     @TableField(GUEST_UUID)
     private String uuid;
+    @TableField(GUEST_TEMPLATE_ID)
+    private Integer templateId;
     @TableField(GUEST_DESCRIPTION)
     private String description;
     @TableField(GUEST_CPU)
@@ -70,6 +74,8 @@ public class GuestEntity {
     private Integer lastHostId;
     @TableField(SCHEME_ID)
     private Integer schemeId;
+    @TableField(GUEST_ARCH)
+    private String arch;
     @TableField(NETWORK_ID)
     private Integer networkId;
     @TableField(GUEST_IP)

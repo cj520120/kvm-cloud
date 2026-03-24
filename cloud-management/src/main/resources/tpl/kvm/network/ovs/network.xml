@@ -1,21 +1,4 @@
-<network>
-    <name>{{network.name}}</name>
-    <uuid>{{network.uuid}}</uuid>
-    <description>{{network.description}}</description>
-    <forward mode='bridge'/>
-    <bridge name='{{network.bridge}}'/>
-    <virtualport type='openvswitch'/>
-    {% if network.vlanId > 0 %}
-    <vlan trunk='yes'>
-        <tag id='{{network.vlanId}}'/>
-    </vlan>
-    {% endif %}
-    <portgroup name="defaultNetwork" default='yes'>
-        {% if network.vlanId > 0 %}
-        <vlan>
-            <tag id="{{network.vlanId}}"/>
-        </vlan>
-        {% endif %}
-    </portgroup>
-</network>
-
+{
+  "encoding": "b64",
+  "content": "PG5ldHdvcms+CiAgICA8bmFtZT57e25ldHdvcmsubmFtZX19PC9uYW1lPgogICAgPHV1aWQ+e3tuZXR3b3JrLnV1aWR9fTwvdXVpZD4KICAgIDxkZXNjcmlwdGlvbj57e25ldHdvcmsuZGVzY3JpcHRpb259fTwvZGVzY3JpcHRpb24+CiAgICA8Zm9yd2FyZCBtb2RlPSdicmlkZ2UnLz4KICAgIDxicmlkZ2UgbmFtZT0ne3tuZXR3b3JrLmJyaWRnZX19Jy8+CiAgICA8dmlydHVhbHBvcnQgdHlwZT0nb3BlbnZzd2l0Y2gnLz4KICAgIHslIGlmIG5ldHdvcmsudmxhbklkID4gMCAlfQogICAgPHZsYW4gdHJ1bms9J3llcyc+CiAgICAgICAgPHRhZyBpZD0ne3tuZXR3b3JrLnZsYW5JZH19Jy8+CiAgICA8L3ZsYW4+CiAgICB7JSBlbmRpZiAlfQogICAgPHBvcnRncm91cCBuYW1lPSJkZWZhdWx0TmV0d29yayIgZGVmYXVsdD0neWVzJz4KICAgICAgICB7JSBpZiBuZXR3b3JrLnZsYW5JZCA+IDAgJX0KICAgICAgICA8dmxhbj4KICAgICAgICAgICAgPHRhZyBpZD0ie3tuZXR3b3JrLnZsYW5JZH19Ii8+CiAgICAgICAgPC92bGFuPgogICAgICAgIHslIGVuZGlmICV9CiAgICA8L3BvcnRncm91cD4KPC9uZXR3b3JrPgoK"
+}

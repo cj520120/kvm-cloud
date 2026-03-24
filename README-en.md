@@ -187,11 +187,26 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 ![](images/en/storage.png)
 
-9、Download the base template (system template: cloud/v3/Cloud-System-V3.3.qcow2)
-
-> **Baidu Netdisk link: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn Extraction code: 1bpn**
-
-
+9、Download the base template
+```$xslt
+Official images based on Red Hat (with iptables support) are recommended. Examples:
+> https://yum.oracle.com/templates/OracleLinux/OL10/u1/x86_64/OL10U1_x86_64-kvm-b270.qcow2
+> https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-20260223.0.x86_64.qcow2
+Restriction
+Do not use domestic Linux distribution images.
+They have inconsistent support for cloud-init, which may lead to initialization failures. Test compatibility on your own if necessary.
+Alternative Download (If Links Are Unavailable)
+Path: cloud/v5/OL10U1_x86_64-kvm-b270.qcow2
+Link: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ Access Code: 1bpn
+Key Notes
+Network Requirement: The system template requires network access to download installation packages during initialization. Ensure proper network configuration.
+Initialization Duration: Depends on network speed.
+Status Check: Use the virsh console command to log in to the system and check the initialization status.
+Default Template Credentials
+ 
+Default User:kvm-user
+Default Password: Kvm@123456
+```
 10、Install Nginx, configure the base download URL, and complete the template configuration on the page
 
 
@@ -222,48 +237,14 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 1、Configuration file not found issue leading to database connection problems
 ```$xslt
 server.yaml and client.properties are the application.yaml and application.properties files in the management and agent projects, respectively. Modify the names and related configurations as needed when running.
-```
-2、Backup and recovery
-```$xslt
-Perform a complete backup of the database and storage pool；
-Data is invaluable, it is recommended to back up data in virtual machines.
-```
+``` 
 3、Network isolation
 ```$xslt
 1) Currently, only VLAN mode is supported in OVS bridge state. If needed, install OVS.
 2) Load balancers can be implemented by mounting the basic network interface.
 
-```
-4、Boot issues with some Windows systems
-```$xslt
-1) First, confirm that the ISO system type is correct.
-2) If the system type is confirmed to be correct, you can create a PE ISO image using Laomaotao. When creating the system, use the PE image, enter the PE system, unmount the CD, and re-mount the operating system you want to install, then install it through PE.
-```
-5、Disk recognition issues with Windows systems
-```$xslt
-1) Windows lacks the virtio driver, install the virtio-win.iso driver.
-2) If it is a system disk, temporarily mount the virtio-win.iso driver during disk selection or choose the IDE bus method.
-```
-6、Handling server power loss and reboot
-```$xslt
-1. After a server power loss and reboot, manually shut down all the virtual machines you created on the page, then restart them. The system VMs have an automatic detection and restart function, so no action is needed.
-2. A power loss may cause virtual disk damage. If the VM cannot start, use `qemu-img check` to check and perform the necessary repairs.
 ``` 
-7、Nested virtualization
-```$xslt
-1. Verify if nested virtualization is enabled on the KVM host:
-   - For Intel processors, run the following command: `cat /sys/module/kvm_intel/parameters/nested`
-   - For AMD processors, run the following command: `cat /sys/module/kvm_amd/parameters/nested`
-   - If the output is N/0, nested virtualization is disabled. If the output is Y/1, nested virtualization is enabled on your host.
-2. If you need to enable nested virtualization, create a file named /etc/modprobe.d/kvm-nested.conf with the following content:    options kvm-intel nested=1
-    options kvm-intel enable_shadow_vmcs=1
-    options kvm-intel enable_apicv=1
-    options kvm-intel ept=1
-3. Reboot the machine
-4. Verify if nested virtualization is enabled
-    cat /sys/module/kvm_intel/parameters/nested
-``` 
-8、cloud-init related configuration
+3、cloud-init related configuration
 ```$xslt
 1. The cloud-init data source uses NoCloud. Modify the cloud configuration as follows:
     datasource:
@@ -271,29 +252,9 @@ Data is invaluable, it is recommended to back up data in virtual machines.
         seedfrom: http://169.254.169.254/
     datasource_list: [  NoCloud ]
 
-2. After installing cloud-init, manually set the related configurations in the system template:
-    1) Enable password login: set `ssh_pwauth: 1` 
-    2) Enable root login: set `disable_root: 1` 
-    3) For Ubuntu, modify /etc/cloud/cloud.cfg.d/50-curtin-networking.cfg to ensure the default network interface name matches the assigned network interface name. 
-    4) Currently, only CentOS and Ubuntu have been tested. For Windows, implement the related initialization behavior yourself. 
-    5) The password only corresponds to the default user. For more details, see the `system_info.default_user` configuration. 
-    6) Refer to cloud-init related configurations for other settings. 
-    7) Install and configure `qemu-command-agent` in the system template. 
-     
-3. Currently, only CentOS and Ubuntu 22.04 system templates are provided. For other system templates, implement them yourself.
-    1) The default username for CentOS is `centos`, and the password is the one you input during system creation. 
-    2) The default username for Ubuntu is `ubuntu`, and the password is the one you input during system creation. 
-    3) The system template does not support root username and password login. If you need root login, modify it yourself. 
-    
-4、4. For the issue of Ubuntu 22.04 not being able to log in with a key in custom templates, execute the following commands:
-    1）、echo 'PubkeyAcceptedAlgorithms=+ssh-rsa' >> /etc/ssh/sshd_config
-    2）、systemctl restart sshd
-```
-9、After deleting a host from the page, if you need to rejoin the host, delete the config.json file in the host's Agent directory and restart the Agent.
-
-10、For the issue of signature errors, ensure that the management and agent ends have synchronized time.
-
-11、Modify default machine settings
+2. The user template requires qemu-guest-agent to be installed and guest-exec to be enabled, otherwise it cannot be configured for startup initialization
+``` 
+4、Modify default machine settings
 ```$xslt
 Adjust the system configuration items `vm.machine.name` and `vm.machine.arch`.
 The specific supported configurations depend on the operating system.
@@ -302,16 +263,7 @@ The query command is as follows:
   Ubuntu: qemu-system-i386 -machine help
 ```
 
-12、UEFI Support
+5、UEFI Support
 ```$xslt
 Adjust the system configuration items `vm.uefi.loader.path` 、 `vm.uefi.loader.vargs.template.path` and vm.uefi.loader.vargs.base.path.
-```
-13、Network connectivity issues
-```$xslt
-Use a clean system for installation. If the network is not working, check the firewall, iptables, etc.
-```
-14、Issue with Ubuntu not starting virtual machines
-```$xslt
-Ubuntu reports: `qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory`
-Disable huge pages, modify the configurations `vm.memory.huge.pages.enable` and `vm.memory.huge.pages.size`, or add `vm.nr_hugepages=10240` to /etc/sysctl.conf (the specific value should be adjusted according to your actual situation).
-```
+``` 

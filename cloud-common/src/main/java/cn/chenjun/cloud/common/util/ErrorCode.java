@@ -5,6 +5,7 @@ package cn.chenjun.cloud.common.util;
  */
 public final class ErrorCode {
     public static final int SUCCESS = 0;
+    public static final int WAITING = 100;
     public static final int PARAM_ERROR = 300;
     public static final int SERVER_ERROR = 500;
     public static final int NO_LOGIN_ERROR = 401;    /**

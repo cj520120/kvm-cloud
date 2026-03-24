@@ -1,11 +1,11 @@
 package cn.chenjun.cloud.management.filter;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.servcie.UserService;
-import cn.chenjun.cloud.management.util.RequestContext;
+import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +33,7 @@ public class PermissionInterceptor extends HandlerInterceptorAdapter {
             Method method = handlerMethod.getMethod();
             PermissionRequire permissionRequire = method.getAnnotation(PermissionRequire.class);
             if (permissionRequire != null) {
-                LoginUserModel loginUserModel = RequestContext.getCurrent().getSelf();
+                LoginUserModel loginUserModel = RequestContextHolderUtil.get(RequestContextHolderUtil.CURRENT_USER);
                 boolean verifySuccess = false;
                 if (loginUserModel != null) {
                     verifySuccess = userService.verifyPermission(loginUserModel.getUserId(), permissionRequire.role());

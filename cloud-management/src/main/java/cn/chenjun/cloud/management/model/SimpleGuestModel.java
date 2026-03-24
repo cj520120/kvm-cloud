@@ -21,6 +21,7 @@ public class SimpleGuestModel {
     private String description;
     private int cpu;
     private long memory;
+    private String arch;
     private int share;
     private int cdRoom;
     private int hostId;

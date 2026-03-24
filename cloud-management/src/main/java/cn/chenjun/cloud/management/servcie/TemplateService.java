@@ -1,30 +1,25 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.model.TemplateModel;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -36,77 +31,71 @@ public class TemplateService extends AbstractService {
     private AllocateService allocateService;
 
 
-    public ResultUtil<List<TemplateModel>> listTemplate() {
-        List<TemplateEntity> templateList = this.templateMapper.selectList(new QueryWrapper<>());
-        List<TemplateModel> models = templateList.stream().map(this::initTemplateModel).collect(Collectors.toList());
-        return ResultUtil.success(models);
+    public List<TemplateEntity> listTemplate() {
+        List<TemplateEntity> templateList = this.templateDao.listAll();
+        return templateList;
     }
 
-    public ResultUtil<Page<TemplateModel>> search(Integer templateType, Integer templateStatus, String keyword, int no, int size) {
-        QueryWrapper<TemplateEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(templateType != null, TemplateEntity.TEMPLATE_TYPE, templateType);
-        queryWrapper.eq(templateStatus != null, TemplateEntity.TEMPLATE_STATUS, templateStatus);
-        if (!ObjectUtils.isEmpty(keyword)) {
-            queryWrapper.and(o -> {
-                String condition = "%" + keyword + "%";
-                QueryWrapper<TemplateEntity> wrapper = o;
-                wrapper.like(TemplateEntity.TEMPLATE_NAME, condition);
-            });
-        }
-        int nCount = Math.toIntExact(this.templateMapper.selectCount(queryWrapper));
-        int nOffset = (no - 1) * size;
-        queryWrapper.last("limit " + nOffset + ", " + size);
-        List<TemplateEntity> list = this.templateMapper.selectList(queryWrapper);
-        List<TemplateModel> models = list.stream().map(this::initTemplateModel).collect(Collectors.toList());
-        Page<TemplateModel> page = Page.create(nCount, nOffset, size);
-        page.setList(models);
-        return ResultUtil.success(page);
+    public Page<TemplateEntity> search(Integer templateType, Integer templateStatus, String keyword, int no, int size) {
+
+        Page<TemplateEntity> page = this.templateDao.search(templateType, templateStatus, keyword, no, size);
+        return page;
     }
 
-    public ResultUtil<TemplateModel> getTemplateInfo(int templateId) {
-        TemplateEntity template = this.templateMapper.selectOne(new QueryWrapper<TemplateEntity>().eq(TemplateEntity.TEMPLATE_ID, templateId));
+    public TemplateEntity getTemplateById(int templateId) {
+        TemplateEntity template = this.templateDao.findById(templateId);
         if (template == null) {
-            return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "Template not found.");
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "Template not found.");
         }
-        return ResultUtil.success(this.initTemplateModel(template));
+        return template;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createTemplate(String name, String uri, String md5, int templateType, String initScript) {
+    public TemplateEntity createTemplate(String name, String uri, String md5, int templateType, String arch, String localCloudCfg, String vendorData, int cloudWaitFlag) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "Please input template name.");
         }
         if (StringUtils.isEmpty(uri)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "Please input template uri.");
         }
-        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).templateType(templateType).md5(md5.trim()).status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD).script(initScript).build();
-        this.templateMapper.insert(template);
+        TemplateEntity template = TemplateEntity.builder().uri(uri.trim()).name(name.trim()).
+                templateType(templateType)
+                .arch(arch)
+                .md5(md5.trim())
+                .localCloudCfg(localCloudCfg)
+                .cloudWaitFlag(cloudWaitFlag)
+                .vendorData(vendorData)
+                .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD)
+                .build();
+        this.templateDao.insert(template);
         this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> updateTemplateScript(int id, String initScript) {
+    public TemplateEntity updateTemplateScript(int id, String localCloudCfg, String vendorData, int cloudWaitFlag) {
 
-        TemplateEntity template = templateMapper.selectById(id);
+        TemplateEntity template = templateDao.findById(id);
         if (template == null) {
             throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "Template not found.");
         }
-        template.setScript(initScript);
-        templateMapper.updateById(template);
+        template.setVendorData(vendorData);
+        template.setLocalCloudCfg(localCloudCfg);
+        template.setCloudWaitFlag(cloudWaitFlag);
+        templateDao.update(template);
         this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-        return ResultUtil.success(this.initTemplateModel(template));
+        return template;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> downloadTemplate(int templateId) {
+    public TemplateEntity downloadTemplate(int templateId) {
         StorageEntity storage = allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.TEMPLATE, 0);
-        TemplateEntity template = this.templateMapper.selectById(templateId);
+        TemplateEntity template = this.templateDao.findById(templateId);
         switch (template.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.TemplateStatus.READY:
             case cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD:
             case cn.chenjun.cloud.common.util.Constant.TemplateStatus.ERROR:
-                this.templateVolumeMapper.delete(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.TEMPLATE_ID, templateId));
+                this.templateVolumeDao.deleteByTemplateId(template.getTemplateId());
                 String volName = NameUtil.generateTemplateVolumeName();
                 String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE);
                 if (Objects.equals(template.getTemplateType(), cn.chenjun.cloud.common.util.Constant.TemplateType.ISO) || cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD.equals(storage.getType())) {
@@ -122,13 +111,13 @@ public class TemplateService extends AbstractService {
                         .capacity(0L)
                         .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD)
                         .build();
-                this.templateVolumeMapper.insert(templateVolume);
+                this.templateVolumeDao.insert(templateVolume);
                 template.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD);
-                this.templateMapper.updateById(template);
+                this.templateDao.update(template);
                 BaseOperateParam operateParam = DownloadTemplateOperate.builder().id(UUID.randomUUID().toString()).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-                return ResultUtil.success(this.initTemplateModel(template));
+                return template;
 
             default:
                 throw new CodeException(ErrorCode.TEMPLATE_NOT_READY, "模版未就绪.");
@@ -136,8 +125,8 @@ public class TemplateService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> createVolumeTemplate(int volumeId, String name) {
-        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+    public TemplateEntity createVolumeTemplate(int volumeId, String name, String arch) {
+        VolumeEntity volume = this.volumeDao.findById(volumeId);
         if (volume.getStatus() != cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘状态未就绪");
         }
@@ -152,7 +141,7 @@ public class TemplateService extends AbstractService {
             }
         }
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);
-        this.volumeMapper.updateById(volume);
+        this.volumeDao.update(volume);
 
         StorageEntity storage = allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.TEMPLATE, 0);
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE);
@@ -161,9 +150,13 @@ public class TemplateService extends AbstractService {
         }
         TemplateEntity template = TemplateEntity.builder().uri(String.valueOf(volumeId))
                 .name(name).templateType(cn.chenjun.cloud.common.util.Constant.TemplateType.VOLUME)
-                .script("")
+                .arch(arch)
+                .vendorData("")
+                .localCloudCfg("")
+                .md5("")
+                .cloudWaitFlag(Constant.CloudWaitFlag.NO)
                 .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.CREATING).build();
-        this.templateMapper.insert(template);
+        this.templateDao.insert(template);
         String volumeName = NameUtil.generateTemplateVolumeName();
         TemplateVolumeEntity templateVolume = TemplateVolumeEntity.builder()
                 .storageId(storage.getStorageId())
@@ -175,7 +168,7 @@ public class TemplateService extends AbstractService {
                 .allocation(0L)
                 .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.CREATING)
                 .build();
-        this.templateVolumeMapper.insert(templateVolume);
+        this.templateVolumeDao.insert(templateVolume);
 
         BaseOperateParam operateParam = CreateVolumeTemplateOperate.builder()
                 .id(UUID.randomUUID().toString())
@@ -186,15 +179,15 @@ public class TemplateService extends AbstractService {
         operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         this.notifyService.publish(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(this.initTemplateModel(template));
+        return template;
 
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<TemplateModel> destroyTemplate(int templateId) {
-        TemplateEntity template = this.templateMapper.selectById(templateId);
+    public TemplateEntity destroyTemplate(int templateId) {
+        TemplateEntity template = this.templateDao.findById(templateId);
         if (template == null) {
-            return ResultUtil.error(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
+            throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
         }
         int timeout = 0;
         switch (template.getStatus()) {
@@ -206,13 +199,15 @@ public class TemplateService extends AbstractService {
                 break;
         }
         template.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DESTROY);
-        this.templateMapper.updateById(template);
+        this.templateDao.update(template);
         BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
         operateTask.addTask(operate, timeout);
-        TemplateModel source = this.initTemplateModel(template);
         this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-        return ResultUtil.success(source);
+        return template;
 
     }
 
+    public List<TemplateEntity> listTemplateByIds(List<Integer> templateIds) {
+        return this.templateDao.listByIds(templateIds);
+    }
 }

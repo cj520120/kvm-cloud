@@ -5,14 +5,17 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.UserInfoEntity;
-import cn.chenjun.cloud.management.data.mapper.UserInfoMapper;
-import cn.chenjun.cloud.management.model.*;
+import cn.chenjun.cloud.management.data.dao.UserInfoDao;
+import cn.chenjun.cloud.management.data.entity.UserEntity;
+import cn.chenjun.cloud.management.model.LoginUserModel;
+import cn.chenjun.cloud.management.model.UserModel;
+import cn.chenjun.cloud.management.servcie.bean.RefreshTokenInfo;
+import cn.chenjun.cloud.management.servcie.bean.TokenInfo;
+import cn.chenjun.cloud.management.servcie.bean.UserSignatureInfo;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -24,7 +27,6 @@ import org.springframework.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -32,17 +34,15 @@ import java.util.stream.Collectors;
 @Service
 public class UserService extends AbstractService {
     @Autowired
-    private UserInfoMapper loginInfoMapper;
+    private UserInfoDao userDao;
 
-    @Autowired
-    private ConfigService configService;
     @Autowired
     private RedissonClient redissonClient;
 
 
-    public ResultUtil<TokenModel> login(String loginName, String password, String nonce) {
+    public TokenInfo login(String loginName, String password, String nonce) {
 
-        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName).eq(UserInfoEntity.LOGIN_TYPE, cn.chenjun.cloud.common.util.Constant.LoginType.LOCAL));
+        UserEntity loginInfoEntity = userDao.findByLoginNameAndLoginType(Constant.LoginType.LOCAL, loginName);
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.USER_LOGIN_NAME_OR_PASSWORD_ERROR, "用户名或密码错误");
         }
@@ -53,13 +53,13 @@ public class UserService extends AbstractService {
         if (loginInfoEntity.getUserStatus() != cn.chenjun.cloud.common.util.Constant.UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
-        return ResultUtil.success(buildToken(loginInfoEntity));
+        return buildToken(loginInfoEntity);
     }
 
-    public ResultUtil<TokenModel> loginOauth2(String id, String name) {
-        UserInfoEntity loginInfoEntity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, id).eq(UserInfoEntity.LOGIN_TYPE, cn.chenjun.cloud.common.util.Constant.LoginType.OAUTH2));
+    public TokenInfo loginOauth2(String id, String name) {
+        UserEntity loginInfoEntity = userDao.findByLoginNameAndLoginType(cn.chenjun.cloud.common.util.Constant.LoginType.OAUTH2, id);
         if (loginInfoEntity == null) {
-            loginInfoEntity = new UserInfoEntity();
+            loginInfoEntity = new UserEntity();
             loginInfoEntity.setLoginName(id);
             loginInfoEntity.setUserName(name);
             loginInfoEntity.setLoginPassword("");
@@ -68,22 +68,17 @@ public class UserService extends AbstractService {
             loginInfoEntity.setLoginPasswordSalt("");
             loginInfoEntity.setUserType(cn.chenjun.cloud.common.util.Constant.UserType.USER);
             loginInfoEntity.setCreateTime(new Date());
-            loginInfoMapper.insert(loginInfoEntity);
+            userDao.insert(loginInfoEntity);
         } else if (loginInfoEntity.getUserStatus() != cn.chenjun.cloud.common.util.Constant.UserState.ABLE) {
             throw new CodeException(ErrorCode.USER_FORBID_ERROR, "用户已禁用");
         }
-        return ResultUtil.success(this.buildToken(loginInfoEntity));
+        return this.buildToken(loginInfoEntity);
     }
 
-    public ResultUtil<UserInfoModel> findUserById(int userId) {
-        return ResultUtil.success(this.initUserModel(loginInfoMapper.selectById(userId)));
+    public UserEntity findUserById(int userId) {
+        return userDao.findById(userId);
     }
 
-
-    public ResultUtil<UserInfoModel> findUserByLoginName(String loginName) {
-        UserInfoEntity user = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
-        return ResultUtil.success(this.initUserModel(user));
-    }
 
     public ResultUtil<LoginUserModel> getUserIdByToken(String token) {
         if (StringUtils.isEmpty(token)) {
@@ -102,9 +97,9 @@ public class UserService extends AbstractService {
     }
 
 
-    public ResultUtil<Void> updateSelfInfo(Integer userId, String userName, String oldPassword, String newPassword, String nonce) {
+    public void updateSelfInfo(Integer userId, String userName, String oldPassword, String newPassword, String nonce) {
 
-        UserInfoEntity loginInfoEntity = this.loginInfoMapper.selectById(userId);
+        UserEntity loginInfoEntity = this.userDao.findById(userId);
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
@@ -121,79 +116,67 @@ public class UserService extends AbstractService {
             }
         }
         loginInfoEntity.setLoginPassword(newPassword);
-        loginInfoMapper.updateById(loginInfoEntity);
+        userDao.update(loginInfoEntity);
         this.notifyService.publish(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
-        return ResultUtil.success();
+
 
     }
 
 
-    public ResultUtil<RefreshTokenModel> refreshToken(int userId) {
+    public RefreshTokenInfo refreshToken(int userId) {
         RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
         userToken.expire(1, TimeUnit.HOURS);
-        return ResultUtil.success(RefreshTokenModel.builder().self(getUserInfo(userId).getData()).expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))).build());
+        return RefreshTokenInfo.builder().self(getUserInfo(userId)).expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))).build();
     }
 
 
-    public ResultUtil<UserInfoModel> register(String userName, String loginName, String password, short userType, short userStatus) {
-        UserInfoEntity entity = loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
+    public UserEntity register(String userName, String loginName, String password, short userType, short userStatus) {
+        UserEntity entity = userDao.findByLoginNameAndLoginType(Constant.LoginType.LOCAL, loginName);
         if (entity != null) {
             throw new CodeException(ErrorCode.USER_NOT_FOUND, "用户已经存在");
         }
         String salt = "CRY:" + RandomStringUtils.randomAlphanumeric(16);
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
-        entity = UserInfoEntity.builder().userStatus(userStatus).userName(userName).loginType(cn.chenjun.cloud.common.util.Constant.LoginType.LOCAL).userType(userType).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
-        loginInfoMapper.insert(entity);
+        entity = UserEntity.builder().userStatus(userStatus).userName(userName).loginType(cn.chenjun.cloud.common.util.Constant.LoginType.LOCAL).userType(userType).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
+        userDao.insert(entity);
         this.notifyService.publish(NotifyData.<Void>builder().id(entity.getUserId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
-        return ResultUtil.success(this.initUserModel(entity));
+        return entity;
     }
 
-    public ResultUtil<UserInfoModel> updateUser(int userId, String userName, short userType, short state) {
-        UserInfoEntity loginInfoEntity = this.loginInfoMapper.selectById(userId);
+    public UserEntity updateUser(int userId, String userName, short userType, short state) {
+        UserEntity loginInfoEntity = this.userDao.findById(userId);
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.USER_NOT_FOUND, "登陆用户不存在");
         }
         loginInfoEntity.setUserName(userName);
         loginInfoEntity.setUserStatus(state);
         loginInfoEntity.setUserType(userType);
-        this.loginInfoMapper.updateById(loginInfoEntity);
+        this.userDao.update(loginInfoEntity);
         if (state == cn.chenjun.cloud.common.util.Constant.UserState.DISABLE) {
             RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
             userToken.delete();
         }
-        RBucket<UserInfoModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
+        RBucket<UserModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
         rUserInfo.delete();
 
         this.notifyService.publish(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
-        return ResultUtil.success(this.initUserModel(loginInfoEntity));
+        return loginInfoEntity;
     }
 
 
-    public ResultUtil<List<UserInfoModel>> listUsers() {
+    public List<UserEntity> listUsers() {
 
-        List<UserInfoEntity> list = this.loginInfoMapper.selectList(new QueryWrapper<>());
-        return ResultUtil.success(list.stream().map(this::initUserModel).collect(Collectors.toList()));
+        List<UserEntity> list = this.userDao.listAll();
+        return list;
     }
 
-    public ResultUtil<Page<UserInfoModel>> search(String keyword, int no, int size) {
-        QueryWrapper<UserInfoEntity> queryWrapper = new QueryWrapper<>();
-        if (!ObjectUtils.isEmpty(keyword)) {
-            String condition = "%" + keyword + "%";
-            queryWrapper.like(UserInfoEntity.LOGIN_NAME, condition);
-
-        }
-        int nCount = Math.toIntExact(this.loginInfoMapper.selectCount(queryWrapper));
-        int nOffset = (no - 1) * size;
-        queryWrapper.last("limit " + nOffset + ", " + size);
-        List<UserInfoEntity> list = this.loginInfoMapper.selectList(queryWrapper);
-        List<UserInfoModel> models = list.stream().map(this::initUserModel).collect(Collectors.toList());
-        Page<UserInfoModel> page = Page.create(nCount, nOffset, size);
-        page.setList(models);
-        return ResultUtil.success(page);
+    public Page<UserEntity> search(String keyword, int no, int size) {
+        Page<UserEntity> page = this.userDao.search(keyword, no, size);
+        return page;
     }
 
-    public ResultUtil<UserInfoModel> resetPassword(int userId, String password) {
-        UserInfoEntity loginInfoEntity = this.loginInfoMapper.selectById(userId);
+    public UserEntity resetPassword(int userId, String password) {
+        UserEntity loginInfoEntity = this.userDao.findById(userId);
         if (loginInfoEntity == null) {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登陆用户不存在");
         }
@@ -201,90 +184,75 @@ public class UserService extends AbstractService {
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
         loginInfoEntity.setLoginPassword(pwd);
         loginInfoEntity.setLoginPasswordSalt(salt);
-        this.loginInfoMapper.updateById(loginInfoEntity);
-        return ResultUtil.success(this.initUserModel(loginInfoEntity));
+        this.userDao.update(loginInfoEntity);
+        return loginInfoEntity;
     }
 
 
-    public ResultUtil<Void> destroyUser(int userId) {
-        this.loginInfoMapper.deleteById(userId);
-        return ResultUtil.success();
+    public void destroyUser(int userId) {
+        this.userDao.deleteById(userId);
+
     }
 
-    public ResultUtil<LoginSignatureModel> getSignature(String loginName) {
+    public UserSignatureInfo getSignature(String loginName) {
         if (StringUtils.isEmpty(loginName)) {
-            return ResultUtil.error(ErrorCode.PARAM_ERROR, "用户名不能为空");
+            throw new CodeException(ErrorCode.PARAM_ERROR, "用户名不能为空");
         }
 
-        UserInfoEntity loginInfoBean = this.loginInfoMapper.selectOne(new QueryWrapper<UserInfoEntity>().eq(UserInfoEntity.LOGIN_NAME, loginName));
-        LoginSignatureModel model = LoginSignatureModel.builder().signature(loginInfoBean == null ? UUID.randomUUID().toString() : loginInfoBean.getLoginPasswordSalt()).nonce(String.valueOf(System.currentTimeMillis())).build();
-        return ResultUtil.success(model);
+        UserEntity loginInfoBean = this.userDao.findByLoginNameAndLoginType(Constant.LoginType.LOCAL, loginName);
+        UserSignatureInfo model = UserSignatureInfo.builder().signature(loginInfoBean == null ? UUID.randomUUID().toString() : loginInfoBean.getLoginPasswordSalt()).nonce(String.valueOf(System.currentTimeMillis())).build();
+        return model;
     }
 
-    public ResultUtil<LoginSignatureModel> getLoginSignature(Integer userId) {
-        UserInfoEntity loginInfoBean = this.loginInfoMapper.selectById(userId);
-        LoginSignatureModel model = LoginSignatureModel.builder().signature(loginInfoBean == null ? UUID.randomUUID().toString() : loginInfoBean.getLoginPasswordSalt()).nonce(String.valueOf(System.currentTimeMillis())).build();
-        return ResultUtil.success(model);
+    public UserSignatureInfo getLoginSignature(Integer userId) {
+        UserEntity loginInfoBean = this.userDao.findById(userId);
+        UserSignatureInfo model = UserSignatureInfo.builder().signature(loginInfoBean == null ? UUID.randomUUID().toString() : loginInfoBean.getLoginPasswordSalt()).nonce(String.valueOf(System.currentTimeMillis())).build();
+        return model;
     }
 
-    private TokenModel buildToken(UserInfoEntity userInfo) {
-        String token = UUID.randomUUID().toString().replace("-", "").toUpperCase();
-        RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userInfo.getUserId()));
-        userToken.set(token, 1, TimeUnit.HOURS);
-        RBucket<Integer> tokenUser = redissonClient.getBucket(RedisKeyUtil.getTokenUser(token));
-        tokenUser.set(userInfo.getUserId(), 1, TimeUnit.HOURS);
-        UserInfoModel self = initUserModel(userInfo);
-        RBucket<UserInfoModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userInfo.getUserId()));
-        rUserInfo.set(self, 7, TimeUnit.DAYS);
-        return TokenModel.builder().expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)))
-                .token(token).self(self).build();
-    }
 
-    public ResultUtil<UserInfoModel> getUserInfo(int userId) {
-        RBucket<UserInfoModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
+    public UserEntity getUserInfo(int userId) {
+        RBucket<UserEntity> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
         if (rUserInfo.isExists()) {
-            return ResultUtil.success(rUserInfo.get());
+            return rUserInfo.get();
         } else {
-            UserInfoEntity user = loginInfoMapper.selectById(userId);
+            UserEntity user = userDao.findById(userId);
             if (user != null) {
-                UserInfoModel model = initUserModel(user);
-                rUserInfo.set(model, 7, TimeUnit.DAYS);
-                return ResultUtil.success(model);
+                rUserInfo.set(user, 7, TimeUnit.DAYS);
+                return user;
             } else {
                 throw new CodeException(ErrorCode.USER_NOT_FOUND, "用户不存在");
             }
         }
     }
 
-    private UserInfoModel initUserModel(UserInfoEntity loginInfoEntity) {
-        if (loginInfoEntity == null) {
-            return null;
-        }
-        UserInfoModel userModel = new UserInfoModel();
-        userModel.setUserId(loginInfoEntity.getUserId());
-        userModel.setUserName(loginInfoEntity.getUserName());
-        userModel.setLoginType(loginInfoEntity.getLoginType());
-        userModel.setUserType(loginInfoEntity.getUserType());
-        userModel.setLoginName(loginInfoEntity.getLoginName());
-        userModel.setPasswordSalt(loginInfoEntity.getLoginPasswordSalt());
-        userModel.setUserStatus(loginInfoEntity.getUserStatus());
-        userModel.setRegisterTime(loginInfoEntity.getCreateTime());
-        return userModel;
-    }
+
 
 
     public boolean verifyPermission(int userId, int role) {
-        ResultUtil<UserInfoModel> selfInfo = this.getUserInfo(userId);
-        if (selfInfo.getCode() != ErrorCode.SUCCESS) {
+        UserEntity selfInfo = this.getUserInfo(userId);
+        if (selfInfo == null) {
             return false;
         }
         switch (role) {
             case cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN:
-                return selfInfo.getData().getUserType() == cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN;
+                return selfInfo.getUserType() == cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN;
             case cn.chenjun.cloud.common.util.Constant.UserType.ADMIN:
-                return selfInfo.getData().getUserType() == cn.chenjun.cloud.common.util.Constant.UserType.ADMIN || selfInfo.getData().getUserType() == Constant.UserType.SUPPER_ADMIN;
+                return selfInfo.getUserType() == cn.chenjun.cloud.common.util.Constant.UserType.ADMIN || selfInfo.getUserType() == Constant.UserType.SUPPER_ADMIN;
             default:
                 return true;
         }
+    }
+
+    private TokenInfo buildToken(UserEntity userInfo) {
+        String token = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userInfo.getUserId()));
+        userToken.set(token, 1, TimeUnit.HOURS);
+        RBucket<Integer> tokenUser = redissonClient.getBucket(RedisKeyUtil.getTokenUser(token));
+        tokenUser.set(userInfo.getUserId(), 1, TimeUnit.HOURS);
+        RBucket<UserEntity> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userInfo.getUserId()));
+        rUserInfo.set(userInfo, 7, TimeUnit.DAYS);
+        return TokenInfo.builder().expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)))
+                .token(token).self(userInfo).build();
     }
 }

@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.websocket.cluster.process.web;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.TemplateModel;
+import cn.chenjun.cloud.management.servcie.ConvertService;
 import cn.chenjun.cloud.management.servcie.TemplateService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
@@ -18,10 +19,12 @@ public class UpdateTemplateProcess extends AbstractClusterMessageProcess<Void> {
 
     @Autowired
     private TemplateService templateService;
+    @Autowired
+    private ConvertService convertService;
 
     @Override
     protected void doProcess(NotifyData<Void> msg) {
-        ResultUtil<TemplateModel> resultUtil = this.templateService.getTemplateInfo(msg.getId());
+        ResultUtil<TemplateModel> resultUtil = getResourceData(() -> this.templateService.getTemplateById(msg.getId()), this.convertService::initTemplateModel);
         NotifyData<ResultUtil<TemplateModel>> sendMsg = NotifyData.<ResultUtil<TemplateModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_TEMPLATE).data(resultUtil).version(System.currentTimeMillis()).build();
         WebClientManager.sendAll(sendMsg);
     }

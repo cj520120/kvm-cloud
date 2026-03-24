@@ -1,86 +1,65 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.util.BeanConverter;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
-import cn.chenjun.cloud.management.model.SimpleStorageModel;
-import cn.chenjun.cloud.management.model.StorageModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DiskSerialUtil;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @Service
-public class StorageService extends AbstractService {
+public class StorageService extends AbstractHostStorageService {
 
 
-    public ResultUtil<List<SimpleStorageModel>> listStorage() {
-        List<StorageEntity> storageList = this.storageMapper.selectList(new QueryWrapper<>());
-        List<SimpleStorageModel> models = BeanConverter.convert(storageList, SimpleStorageModel.class);
-        return ResultUtil.success(models);
+    public List<StorageEntity> listStorage() {
+        List<StorageEntity> storageList = this.storageDao.listAll();
+        return storageList;
     }
 
-    public ResultUtil<Page<SimpleStorageModel>> search(Integer storageType, Integer storageStatus, String keyword, int no, int size) {
-        QueryWrapper<StorageEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(storageType != null, StorageEntity.STORAGE_TYPE, storageType);
-        queryWrapper.eq(storageStatus != null, StorageEntity.STORAGE_STATUS, storageStatus);
-        if (!ObjectUtils.isEmpty(keyword)) {
-            queryWrapper.and(o -> {
-                String condition = "%" + keyword + "%";
-                QueryWrapper<StorageEntity> wrapper = o;
-                wrapper.like(StorageEntity.STORAGE_NAME, condition);
-            });
-        }
-        int nCount = Math.toIntExact(this.storageMapper.selectCount(queryWrapper));
-        int nOffset = (no - 1) * size;
-        queryWrapper.last("limit " + nOffset + ", " + size);
-        List<StorageEntity> storageList = this.storageMapper.selectList(queryWrapper);
-        List<SimpleStorageModel> models = BeanConverter.convert(storageList, SimpleStorageModel.class);
-        Page<SimpleStorageModel> page = Page.create(nCount, nOffset, size);
-        page.setList(models);
-        return ResultUtil.success(page);
+    public Page<StorageEntity> search(Integer storageType, Integer storageStatus, String keyword, int no, int size) {
+
+        Page<StorageEntity> page = this.storageDao.search(storageType, storageStatus, keyword, no, size);
+        return page;
     }
 
-    public ResultUtil<StorageModel> getStorageInfo(int storageId) {
-        StorageEntity storage = this.storageMapper.selectById(storageId);
+    public StorageEntity getStorageInfo(int storageId) {
+        StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {
-            return ResultUtil.error(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
-        return ResultUtil.success(this.initStorageModel(storage));
+        return storage;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> migrateStorage(int sourceStorageId, int destStorageId) {
-        StorageEntity sourceStorage = this.storageMapper.selectById(sourceStorageId);
-        StorageEntity destStorage = this.storageMapper.selectById(destStorageId);
+    public StorageEntity migrateStorage(int sourceStorageId, int destStorageId) {
+        StorageEntity sourceStorage = this.storageDao.findById(sourceStorageId);
+        StorageEntity destStorage = this.storageDao.findById(destStorageId);
         if (sourceStorage == null || (sourceStorage.getStatus() != cn.chenjun.cloud.common.util.Constant.StorageStatus.READY && sourceStorage.getStatus() != cn.chenjun.cloud.common.util.Constant.StorageStatus.MAINTENANCE)) {
-            return ResultUtil.error(ErrorCode.STORAGE_NOT_FOUND, "源存储池未就绪");
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "源存储池未就绪");
         }
         if (destStorage == null || (destStorage.getStatus() != cn.chenjun.cloud.common.util.Constant.StorageStatus.READY)) {
-            return ResultUtil.error(ErrorCode.STORAGE_NOT_FOUND, "目标存储池未就绪");
+            throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "目标存储池未就绪");
         }
         if (sourceStorage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL) && destStorage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
             if (!Objects.equals(sourceStorage.getHostId(), destStorage.getHostId())) {
-                return ResultUtil.error(ErrorCode.STORAGE_NOT_SUPPORT, "不能跨主机迁移本地存储池");
+                throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "不能跨主机迁移本地存储池");
             }
         }
 
@@ -89,7 +68,7 @@ public class StorageService extends AbstractService {
             defaultVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
         if ((destStorage.getSupportCategory() & cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME) == cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME) {
-            List<VolumeEntity> sourceVolumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, sourceStorageId));
+            List<VolumeEntity> sourceVolumeList = this.volumeDao.listByStorageId(sourceStorageId);
             for (VolumeEntity volume : sourceVolumeList) {
                 if (volume.getStatus() != cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
                     continue;
@@ -99,7 +78,7 @@ public class StorageService extends AbstractService {
                     continue;
                 }
                 volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.MIGRATE);
-                this.volumeMapper.updateById(volume);
+                this.volumeDao.update(volume);
                 String volumeName = NameUtil.generateVolumeName();
                 VolumeEntity migrateVolume = VolumeEntity.builder()
                         .description(volume.getDescription())
@@ -116,7 +95,7 @@ public class StorageService extends AbstractService {
                         .device(Constant.DeviceType.DISK)
                         .serial(DiskSerialUtil.generateDiskSerial())
                         .build();
-                this.volumeMapper.insert(migrateVolume);
+                this.volumeDao.insert(migrateVolume);
                 BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(UUID.randomUUID().toString())
                         .title("迁移磁盘[" + volume.getName() + "]")
                         .sourceVolumeId(volume.getVolumeId())
@@ -130,12 +109,12 @@ public class StorageService extends AbstractService {
         }
         defaultVolumeType = this.configService.getConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE);
         if ((destStorage.getSupportCategory() & cn.chenjun.cloud.common.util.Constant.StorageCategory.TEMPLATE) == cn.chenjun.cloud.common.util.Constant.StorageCategory.TEMPLATE) {
-            List<TemplateVolumeEntity> templateVolumeEntityList = this.templateVolumeMapper.selectList(new QueryWrapper<TemplateVolumeEntity>().eq(TemplateVolumeEntity.STORAGE_ID, sourceStorageId));
+            List<TemplateVolumeEntity> templateVolumeEntityList = this.templateVolumeDao.listByStorageId(sourceStorageId);
             for (TemplateVolumeEntity sourceVolume : templateVolumeEntityList) {
                 if (sourceVolume.getStatus() != cn.chenjun.cloud.common.util.Constant.TemplateStatus.READY) {
                     continue;
                 }
-                TemplateEntity template = this.templateMapper.selectById(sourceVolume.getTemplateId());
+                TemplateEntity template = this.templateDao.findById(sourceVolume.getTemplateId());
                 if (template.getStatus() != cn.chenjun.cloud.common.util.Constant.TemplateStatus.READY) {
                     continue;
                 }
@@ -144,7 +123,7 @@ public class StorageService extends AbstractService {
                     templateVolumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
                 }
                 template.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.MIGRATE);
-                this.templateMapper.updateById(template);
+                this.templateDao.update(template);
                 String volumeName = NameUtil.generateTemplateVolumeName();
                 TemplateVolumeEntity targetVolume = TemplateVolumeEntity.builder()
                         .storageId(destStorageId)
@@ -156,9 +135,9 @@ public class StorageService extends AbstractService {
                         .capacity(0L)
                         .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.CREATING)
                         .build();
-                this.templateVolumeMapper.insert(targetVolume);
+                this.templateVolumeDao.insert(targetVolume);
                 sourceVolume.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.MIGRATE);
-                this.templateVolumeMapper.updateById(sourceVolume);
+                this.templateVolumeDao.update(sourceVolume);
                 BaseOperateParam operateParam = MigrateTemplateVolumeOperate.builder().id(UUID.randomUUID().toString())
                         .title("迁移模版磁盘[" + targetVolume.getName() + "]")
                         .sourceTemplateVolumeId(sourceVolume.getTemplateVolumeId())
@@ -172,15 +151,12 @@ public class StorageService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> createStorage(int supportCategory, String description, String type, String param) {
+    public StorageEntity createStorage(int supportCategory, String description, String type, String param) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入存储池名称");
         }
         if (StringUtils.isEmpty(type)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择存储池类型");
-        }
-        if (Objects.equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL, type)) {
-            throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "本地存储池不支持主动创建");
         }
         if (StringUtils.isEmpty(param)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "存储池参数不正确");
@@ -192,6 +168,11 @@ public class StorageService extends AbstractService {
             case cn.chenjun.cloud.common.util.Constant.StorageType.GLUSTERFS:
                 mountPath = "/mnt/" + storageName;
                 break;
+            case Constant.StorageType.LOCAL:
+                Map<String, Object> paramMap = GsonBuilderUtil.create().fromJson(param, new TypeToken<Map<String, Object>>() {
+                });
+                mountPath = (String) paramMap.get("path");
+                break;
             default:
                 mountPath = "";
                 break;
@@ -201,6 +182,7 @@ public class StorageService extends AbstractService {
                 .name(storageName)
                 .type(type)
                 .hostId(0)
+                .parentId(0)
                 .param(param)
                 .mountPath(mountPath)
                 .supportCategory(supportCategory)
@@ -209,52 +191,60 @@ public class StorageService extends AbstractService {
                 .available(0L)
                 .status(cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT)
                 .build();
-        this.storageMapper.insert(storage);
+        this.storageDao.insert(storage);
+        if (storage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
+            // 如果是本地存储，则需要在所有主机上注册
+            List<HostEntity> hostList = this.hostDao.listAll();
+            for (HostEntity host : hostList) {
+                this.checkAndInitHostLocalStorage(storage, host);
+            }
+        }
         BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
-        return ResultUtil.success(this.initStorageModel(storage));
+        return storage;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> registerStorage(int storageId) {
-        StorageEntity storage = this.storageMapper.selectById(storageId);
+    public StorageEntity registerStorage(int storageId) {
+        StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
+
+
         switch (storage.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.READY:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.ERROR:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.MAINTENANCE:
-                storage.setStatus(cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT);
-                this.storageMapper.updateById(storage);
+                updateStorageStatus(storage, cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT);
                 BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("注册存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
-                return ResultUtil.success(this.initStorageModel(storage));
+                return storage;
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> updateStorageSupportCategory(int storageId, int supportCategory) {
-        StorageEntity storage = this.storageMapper.selectById(storageId);
+    public StorageEntity updateStorageSupportCategory(int storageId, int supportCategory) {
+        StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
         storage.setSupportCategory(supportCategory);
-        this.storageMapper.updateById(storage);
+        this.storageDao.update(storage);
 
         this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
-        return ResultUtil.success(this.initStorageModel(storage));
+        return storage;
 
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> maintenanceStorage(int storageId) {
-        StorageEntity storage = this.storageMapper.selectById(storageId);
+    public StorageEntity maintenanceStorage(int storageId) {
+        StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
@@ -262,18 +252,33 @@ public class StorageService extends AbstractService {
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.READY:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.MAINTENANCE:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.ERROR:
-                storage.setStatus(cn.chenjun.cloud.common.util.Constant.StorageStatus.MAINTENANCE);
-                this.storageMapper.updateById(storage);
-                this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
-                return ResultUtil.success(this.initStorageModel(storage));
+                updateStorageStatus(storage, Constant.StorageStatus.MAINTENANCE);
+                return storage;
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
         }
     }
 
+    private void updateStorageStatus(StorageEntity storage, int status) {
+        storage.setStatus(status);
+        this.storageDao.update(storage);
+        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+
+
+        if (storage.getType().equalsIgnoreCase(Constant.StorageType.LOCAL) && storage.getHostId() == 0) {
+            // 如果是本地存储，则需要在所有主机上注册
+            List<StorageEntity> childStorageList = this.storageDao.listStorageByParentStorageId(storage.getStorageId());
+            for (StorageEntity childStorage : childStorageList) {
+                childStorage.setStatus(status);
+                this.storageDao.update(childStorage);
+                this.notifyService.publish(NotifyData.<Void>builder().id(childStorage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+            }
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> clearUnLinkVolume(int storageId) {
-        StorageEntity storage = this.storageMapper.selectById(storageId);
+    public StorageEntity clearUnLinkVolume(int storageId) {
+        StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
         }
@@ -283,27 +288,53 @@ public class StorageService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<StorageModel> destroyStorage(int storageId) {
-        StorageEntity storage = this.storageMapper.selectById(storageId);
+    public StorageEntity destroyStorage(int storageId) {
+        StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_FOUND, "存储池不存在");
+        }
+        if (storage.getType().equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL) && storage.getHostId() > 0) {
+            throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "本地存储不支持单独销毁");
+        }
+        if (volumeDao.countByStorageId(storageId) > 0) {
+            throw new CodeException(ErrorCode.STORAGE_HAS_VOLUME, "当前存储有挂载磁盘，请首先迁移存储文件");
+        }
+        if (storage.getType().equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
+            List<StorageEntity> childStorageList = this.storageDao.listStorageByParentStorageId(storage.getStorageId());
+            for (StorageEntity childStorage : childStorageList) {
+                if (volumeDao.countByStorageId(childStorage.getStorageId()) > 0) {
+                    throw new CodeException(ErrorCode.STORAGE_HAS_VOLUME, "当前存储有挂载磁盘，请首先迁移存储文件");
+                }
+            }
         }
         switch (storage.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.READY:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.MAINTENANCE:
             case cn.chenjun.cloud.common.util.Constant.StorageStatus.ERROR:
-                if (volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, storageId)) > 0) {
-                    throw new CodeException(ErrorCode.STORAGE_HAS_VOLUME, "当前存储有挂载磁盘，请首先迁移存储文件");
-                }
                 storage.setStatus(cn.chenjun.cloud.common.util.Constant.StorageStatus.DESTROY);
-                this.storageMapper.updateById(storage);
+                this.storageDao.update(storage);
                 BaseOperateParam operateParam = DestroyStorageOperate.builder().id(UUID.randomUUID().toString()).title("销毁存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
                 this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
-                return ResultUtil.success(this.initStorageModel(storage));
+
+                if (storage.getType().equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
+                    List<StorageEntity> childStorageList = this.storageDao.listStorageByParentStorageId(storage.getStorageId());
+                    for (StorageEntity childStorage : childStorageList) {
+                        childStorage.setStatus(cn.chenjun.cloud.common.util.Constant.StorageStatus.DESTROY);
+                        this.storageDao.update(childStorage);
+                        BaseOperateParam childOperateParam = DestroyStorageOperate.builder().id(UUID.randomUUID().toString()).title("销毁存储池[" + childStorage.getName() + "]").storageId(childStorage.getStorageId()).build();
+                        this.operateTask.addTask(childOperateParam);
+                        this.notifyService.publish(NotifyData.<Void>builder().id(childStorage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                    }
+                }
+                return storage;
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
         }
+    }
+
+    public List<StorageEntity> listLocalStorage() {
+        return this.storageDao.listLocalStorage();
     }
 }

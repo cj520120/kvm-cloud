@@ -1,12 +1,11 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.management.data.entity.TaskEntity;
-import cn.chenjun.cloud.management.data.mapper.TaskMapper;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
+import cn.chenjun.cloud.management.data.dao.TaskDao;
+import cn.chenjun.cloud.management.data.entity.TaskEntity;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +26,7 @@ public class TaskService {
     @Autowired
     protected ConfigService configService;
     @Autowired
-    private TaskMapper taskMapper;
+    private TaskDao taskDao;
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -48,41 +47,40 @@ public class TaskService {
                     .expireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(delayMinute)))
                     .createTime(new Date(System.currentTimeMillis()))
                     .build();
-            taskMapper.insert(task);
+            taskDao.insert(task);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void keepTask(String taskId) {
         int expire = configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
-        taskMapper.keep(taskId, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expire)));
+        taskDao.keep(taskId, new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expire)));
     }
 
 
     @Transactional(rollbackFor = Exception.class)
     public List<TaskEntity> listCanRunTask(int count) {
-        QueryWrapper<TaskEntity> wrapper = new QueryWrapper<TaskEntity>().lt(TaskEntity.EXPIRE_TIME, new Date(System.currentTimeMillis()));
-        wrapper.last("limit 0," + count);
-        return this.taskMapper.selectList(wrapper);
+        return this.taskDao.listCanRunTask(count);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public boolean startTask(TaskEntity entity) {
         int expireSecond = this.configService.getConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND);
         Date expireTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expireSecond));
-        return this.taskMapper.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0;
+        return this.taskDao.updateVersion(entity.getTaskId(), entity.getVersion(), expireTime) > 0;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteTask(String taskId) {
-        this.taskMapper.deleteById(taskId);
+        this.taskDao.deleteById(taskId);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public TaskEntity findTask(String taskId) {
-        return this.taskMapper.selectOne(new QueryWrapper<TaskEntity>().eq(TaskEntity.TASK_ID, taskId));
+        return this.taskDao.findById(taskId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void submitTaskFinish(String taskId, String result) {
         TaskEntity task = this.findTask(taskId);
         if (task == null) {
@@ -90,5 +88,12 @@ public class TaskService {
             return;
         }
         this.applicationContext.publishEvent(OperateFinishBean.builder().taskId(taskId).operateType(task.getType()).param(task.getParam()).result(result).build());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean delayTask(TaskEntity entity) {
+        int nextDelaySecond = this.configService.getConfig(ConfigKey.DEFAULT_TASK_WAIT_DELAY_SECOND);
+        Date delayTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(nextDelaySecond));
+        return this.taskDao.updateVersion(entity.getTaskId(), entity.getVersion(), delayTime) > 0;
     }
 }

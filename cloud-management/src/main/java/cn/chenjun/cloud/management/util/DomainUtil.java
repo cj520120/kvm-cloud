@@ -70,7 +70,8 @@ public class DomainUtil {
                                         HostEntity host,
                                         SchemeEntity scheme,
                                         String vncPassword,
-                                        List<String> deviceXml
+                                        List<String> deviceXml,
+                                        List<String> metaDataXml
     ) {
 
         Map<String, Object> map = new HashMap<>();
@@ -80,6 +81,7 @@ public class DomainUtil {
         map.put("cpu", ParamBuilder.buildCpuParam(guest, scheme));
         map.put("vnc", ParamBuilder.buildVncParam(vncPassword));
         map.put("device", MapUtil.of("xml", String.join("\n", deviceXml)));
+        map.put("meta_data", String.join("\n", metaDataXml));
         return JinjavaParser.create().render(tpl, map);
     }
 }

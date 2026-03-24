@@ -1,27 +1,23 @@
 package cn.chenjun.cloud.management.task.runner;
 
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
-import cn.chenjun.cloud.management.component.ComponentProcess;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
-import cn.chenjun.cloud.management.data.mapper.ComponentMapper;
-import cn.chenjun.cloud.management.data.mapper.GuestMapper;
-import cn.chenjun.cloud.management.data.mapper.HostMapper;
-import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
+import cn.chenjun.cloud.management.servcie.ComponentService;
+import cn.chenjun.cloud.management.servcie.HostService;
+import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.servcie.NotifyService;
-import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.HostRole;
-import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -30,20 +26,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ComponentCheckRunner extends AbstractRunner {
-
     static final List<Integer> NETWORK_STATUS_CHECK_LIST = Arrays.asList(Constant.NetworkStatus.READY, Constant.NetworkStatus.INSTALL);
     @Autowired
     protected NotifyService notifyService;
     @Autowired
-    protected GuestMapper guestMapper;
+    private NetworkService networkService;
     @Autowired
-    private NetworkMapper networkMapper;
+    private HostService hostService;
     @Autowired
-    private PluginRegistry<ComponentProcess, Integer> processPluginRegistry;
-    @Autowired
-    private ComponentMapper componentMapper;
-    @Autowired
-    private HostMapper hostMapper;
+    private ComponentService componentService;
+
     @Override
     public int getPeriodSeconds() {
         return configService.getConfig(ConfigKey.DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND);
@@ -51,87 +43,73 @@ public class ComponentCheckRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() throws Exception {
-        List<NetworkEntity> networkList = networkMapper.selectList(new QueryWrapper<>()).stream().filter(network -> NETWORK_STATUS_CHECK_LIST.contains(network.getStatus())).collect(Collectors.toList());
+        log.debug("开始检测系统组件...");
+        List<NetworkEntity> networkList = networkService.listNetwork().stream().filter(network -> NETWORK_STATUS_CHECK_LIST.contains(network.getStatus())).collect(Collectors.toList());
         if (ObjectUtils.isEmpty(networkList)) {
             log.warn("没有找到需要检测的网络，等待网络添加后继续...");
             return;
         }
-        List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
+        List<HostEntity> hostList = this.hostService.listAllHost();
         if (ObjectUtils.isEmpty(hostList)) {
             log.warn("没有找到任何主机，等待系统组件主机添加后继续...");
             return;
         }
-        hostList.sort(Comparator.comparingInt(HostEntity::getHostId));
-        Optional<HostEntity> masterHostOptional = hostList.stream().filter(host -> HostRole.isMaster(host.getRole())).findFirst();
-        if (!masterHostOptional.isPresent()) {
-            log.warn("没有找到任何组件主机，等待系统组件主机添加后继续...");
+        List<HostEntity> masterHostList = hostList.stream().filter(host -> HostRole.isMaster(host.getRole())).collect(Collectors.toList());
+        if (ObjectUtils.isEmpty(masterHostList)) {
+            log.warn("没有找到任何主节点，等待系统组件主机添加后继续...");
             return;
         }
-        HostEntity masterHost = masterHostOptional.get();
-        int hostSize = hostList.size();
-
         for (NetworkEntity network : networkList) {
-            boolean isCheckComponentEnable = checkNetworkHasComponent(network);
-            if (!isCheckComponentEnable) {
-                if (network.getStatus() != cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
-                    network.setStatus(Constant.NetworkStatus.READY);
-                    networkMapper.updateById(network);
-                    this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-                    return;
-                }
+            if (!this.componentService.checkNetworkIsEnableComponent(network.getNetworkId())) {
+                continue;
             }
-            List<ComponentEntity> components = this.componentMapper.selectList(new QueryWrapper<ComponentEntity>().eq(ComponentEntity.NETWORK_ID, network.getNetworkId()));
-            for (ComponentEntity component : components) {
-                boolean componentReady = false;
-                for (int i = 0; i < hostSize; i++) {
-                    HostEntity host = hostList.get(i);
-                    if (!Objects.equals(host.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
-                        continue;
-                    }
-                    boolean isMaster = masterHost.getHostId() == host.getHostId();
-                    Optional<ComponentProcess> optional = processPluginRegistry.getPluginFor(component.getComponentType());
-                    if (optional.isPresent()) {
-                        ComponentProcess process = optional.get();
-                        try {
-                            if (!HostRole.isMaster(host.getRole())) {
-                                // 非组件主机清理组件
-                                process.cleanHostComponent(component, host);
-                            } else {
-                                boolean isReady = process.checkAndStart(network, component, host, isMaster);
-                                componentReady |= isReady;
+            if (network.getStatus() == Constant.NetworkStatus.MAINTENANCE) {
+                log.warn("网络处于维护状态，等待网络就绪后继续...");
+                continue;
+            }
+            List<ComponentEntity> componentList = this.componentService.listComponentByNetworkId(network.getNetworkId());
+            for (ComponentEntity component : componentList) {
+                boolean isComponentReady = false;
+                try {
+                    isComponentReady = this.componentService.checkNetworkComponentReady(masterHostList, component, network);
 
-                            }
+                } catch (Exception e) {
+                    log.error("检测网络[{}]失败", network.getNetworkId(), e);
+                }
+                if (isComponentReady) {
+                    try {
+                        this.componentService.cleanOldComponentGuest(component.getComponentId(), masterHostList.stream().map(HostEntity::getHostId).collect(Collectors.toList()));
+                    } catch (Exception e) {
+                        log.error("清理组件虚拟机失败,component_id={}", component.getComponentId());
+                    }
+                    try {
+                        this.componentService.cleanUnlinkComponentGuest(component.getComponentId());
+                    } catch (Exception e) {
+                        log.error("清理未关联的组件虚拟机失败,component_id={}", component.getComponentId());
+                    }
+                }
+
+                for (HostEntity host : hostList) {
+                    if (HostRole.isMaster(host.getRole())) {
+                        try {
+                            this.componentService.checkAndCreateMissComponentGuest(component.getComponentId(), host.getHostId());
+                        } catch (CodeException err) {
+                            log.error("安装系统组件失败.componentId={} msg={},跳出安装检测...", component.getComponentId(), err.getMessage());
+                            break;
                         } catch (Exception e) {
-                            log.error("组件检测失败: {}", component.getComponentType(), e);
+                            log.error("安装系统组件失败,component_id={}", component.getComponentId(), e);
+                            break;
                         }
                     }
                 }
-                if (Objects.equals(Constant.ComponentType.ROUTE, component.getComponentType())) {
-                    if (componentReady && !Objects.equals(Constant.NetworkStatus.READY, network.getStatus())) {
-                        network.setStatus(Constant.NetworkStatus.READY);
-                        networkMapper.updateById(network);
-                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-                    } else if (!componentReady && !Objects.equals(Constant.NetworkStatus.INSTALL, network.getStatus())) {
-                        network.setStatus(Constant.NetworkStatus.INSTALL);
-                        networkMapper.updateById(network);
-                        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
-                    }
-                }
             }
         }
     }
 
-    private boolean checkNetworkHasComponent(NetworkEntity network) {
-        List<ConfigQuery> queryList = new ArrayList<>();
-        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
-        queryList.add(ConfigQuery.builder().type(Constant.ConfigType.NETWORK).id(network.getNetworkId()).build());
-        boolean isCheckComponentEnable = Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.YES);
-        return isCheckComponentEnable;
-    }
-
     @Override
-    protected String getName() {
+    public String getName() {
         return "系统组件检测";
     }
+
 
 }

@@ -1,8 +1,4 @@
-<interface type="network">
-    <mac address="{{network.mac}}"/>
-    <model type="{{network.type}}"/>
-    <source network='{{network.network}}'/>
-    <address type="pci" domain="0x0000" bus="{{cloud:toHex(__SYS__['vm.network.pci.bus'],4)}}" slot="{{cloud:toHex(__SYS__['vm.network.pci.slot']+network.deviceId,4)}}" function="{{cloud:toHex(__SYS__['vm.network.pci.function'],4)}}"/>
-    <link state="up"/>
-    <alias name='net{{network.deviceId}}'/>
-</interface>
+{
+  "encoding": "b64",
+  "content": "PGludGVyZmFjZSB0eXBlPSJuZXR3b3JrIj4KICAgIDxtYWMgYWRkcmVzcz0ie3tuZXR3b3JrLm1hY319Ii8+CiAgICA8bW9kZWwgdHlwZT0ie3tuZXR3b3JrLnR5cGV9fSIvPgogICAgPHNvdXJjZSBuZXR3b3JrPSd7e25ldHdvcmsubmV0d29ya319Jy8+CiAgICA8YWRkcmVzcyB0eXBlPSJwY2kiIGRvbWFpbj0iMHgwMDAwIiBidXM9Int7Y2xvdWQ6dG9IZXgoX19TWVNfX1sndm0ubmV0d29yay5wY2kuYnVzJ10sNCl9fSIgc2xvdD0ie3tjbG91ZDp0b0hleChfX1NZU19fWyd2bS5uZXR3b3JrLnBjaS5zbG90J10rbmV0d29yay5kZXZpY2VJZCw0KX19IiBmdW5jdGlvbj0ie3tjbG91ZDp0b0hleChfX1NZU19fWyd2bS5uZXR3b3JrLnBjaS5mdW5jdGlvbiddLDQpfX0iLz4KICAgIDxsaW5rIHN0YXRlPSJ1cCIvPgogICAgPGFsaWFzIG5hbWU9J25ldHt7bmV0d29yay5kZXZpY2VJZH19Jy8+CjwvaW50ZXJmYWNlPg=="
+}

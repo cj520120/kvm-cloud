@@ -25,5 +25,5 @@ public class RefreshTokenModel {
     /**
      * 用户信息
      */
-    private UserInfoModel self;
+    private UserModel self;
 }

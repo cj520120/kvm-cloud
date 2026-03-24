@@ -12,5 +12,4 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
     private String managerUri;
-
 }

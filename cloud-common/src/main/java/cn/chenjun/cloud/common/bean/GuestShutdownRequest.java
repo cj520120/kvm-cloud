@@ -20,6 +20,6 @@ public class GuestShutdownRequest {
     /**
      * 等待超时时间
      */
-    private long expire;
+    private long expireMillis;
 
 }

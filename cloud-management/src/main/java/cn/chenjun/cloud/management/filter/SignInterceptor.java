@@ -5,10 +5,9 @@ import cn.chenjun.cloud.common.core.annotation.SignRequire;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.management.data.mapper.HostMapper;
+import cn.chenjun.cloud.management.servcie.HostService;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.hutool.core.util.NumberUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,7 +33,7 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
     private UserService userService;
 
     @Autowired
-    private HostMapper hostMapper;
+    private HostService hostService;
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, @NonNull Object handler) throws Exception {
@@ -54,7 +53,7 @@ public class SignInterceptor extends HandlerInterceptorAdapter {
                 String clientId = (String) map.get("clientId");
                 String nonce = (String) map.get("nonce");
                 long timestamp = NumberUtil.parseLong((String) map.getOrDefault("timestamp", "0"));
-                HostEntity host = hostMapper.selectOne(new QueryWrapper<HostEntity>().eq(HostEntity.CLIENT_ID, clientId));
+                HostEntity host = hostService.getHostByClientId(clientId);
                 boolean isSuccess = false;
                 long expire = timestamp + Objects.requireNonNull(require).timeout();
                 String message = "成功";

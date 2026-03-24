@@ -24,6 +24,7 @@ public class StorageEntity {
     public static final String STORAGE_DESCRIPTION = "storage_description";
     public static final String STORAGE_NAME = "storage_name";
     public static final String STORAGE_TYPE = "storage_type";
+    public static final String STORAGE_PARENT_ID = "storage_parent_id";
     public static final String STORAGE_HOST_ID = "storage_host_id";
     public static final String STORAGE_PARM = "storage_parm";
     public static final String STORAGE_SUPPORT_CATEGORY = "storage_support_category";
@@ -42,6 +43,8 @@ public class StorageEntity {
     private String name;
     @TableField(STORAGE_TYPE)
     private String type;
+    @TableField(STORAGE_PARENT_ID)
+    private Integer parentId;
     @TableField(STORAGE_HOST_ID)
     private Integer hostId;
     @TableField(STORAGE_PARM)

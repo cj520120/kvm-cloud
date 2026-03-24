@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Volume {
+    private String storage;
     private String name;
     private String path;
     private String type;
     private long capacity;
-    private Storage storage;
 }

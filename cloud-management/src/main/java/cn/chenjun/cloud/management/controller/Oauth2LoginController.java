@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.TokenModel;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.UserService;
+import cn.chenjun.cloud.management.servcie.bean.TokenInfo;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.Oauth2;
 import com.google.gson.reflect.TypeToken;
@@ -29,7 +30,7 @@ import java.util.Map;
  * @author chenjun
  */
 @Controller
-public class Oauth2LoginController {
+public class Oauth2LoginController extends BaseController {
 
     @Autowired
     private RestTemplate restTemplate;
@@ -102,7 +103,11 @@ public class Oauth2LoginController {
         if (null == name) {
             name = id;
         }
-        return this.userService.loginOauth2(id.toString(), name.toString());
+        TokenInfo tokenInfo = this.userService.loginOauth2(id.toString(), name.toString());
+        TokenModel tokenModel = new TokenModel();
+        tokenModel.setToken(tokenInfo.getToken());
+        tokenModel.setSelf(this.convertService.initUserModel(tokenInfo.getSelf()));
+        return ResultUtil.<TokenModel>builder().data(tokenModel).build();
 
     }
 }

@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
 import cn.chenjun.cloud.management.model.CreateSshAuthorizedModel;
 import cn.chenjun.cloud.management.model.SshAuthorizedModel;
 import cn.chenjun.cloud.management.servcie.SshAuthorizedService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -32,7 +34,10 @@ public class SshKeyController extends BaseController {
     @LoginRequire
     @GetMapping("/api/ssh/all")
     public ResultUtil<List<SshAuthorizedModel>> listAllSshKeys() {
-        return this.lockRun(() -> this.sshAuthorizedService.listAllSshKeys());
+        List<SshAuthorizedEntity> sshs = this.sshAuthorizedService.listAllSshKeys();
+
+        List<SshAuthorizedModel> models = sshs.stream().map(this.convertService::initSshModel).collect(Collectors.toList());
+        return ResultUtil.success(models);
     }
 
     @LoginRequire
@@ -40,48 +45,57 @@ public class SshKeyController extends BaseController {
     public ResultUtil<Page<SshAuthorizedModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
                                                        @RequestParam("no") int no,
                                                        @RequestParam("size") int size) {
-        return this.lockRun(() -> this.sshAuthorizedService.search(keyword, no, size));
+        Page<SshAuthorizedEntity> page = this.sshAuthorizedService.search(keyword, no, size);
+        Page<SshAuthorizedModel> pageModels = Page.convert(page, this.convertService::initSshModel);
+        return ResultUtil.success(pageModels);
     }
 
     @LoginRequire
     @GetMapping("/api/ssh/info")
     public ResultUtil<SshAuthorizedModel> getSshKey(@RequestParam("id") int id) {
-        return this.lockRun(() -> this.sshAuthorizedService.getSshKey(id));
+        SshAuthorizedEntity ssh = this.sshAuthorizedService.getSshKey(id);
+        return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @PutMapping("/api/ssh/import")
     public ResultUtil<SshAuthorizedModel> importSshKey(@RequestParam("name") String name, @RequestParam("publicKey") String publicKey, @RequestParam("privateKey") String privateKey) {
-        return this.lockRun(() -> this.sshAuthorizedService.importSshKey(name, publicKey, privateKey));
+        SshAuthorizedEntity ssh = this.lockRun(() -> this.sshAuthorizedService.importSshKey(name, publicKey, privateKey));
+        return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @PutMapping("/api/ssh/create")
     public ResultUtil<CreateSshAuthorizedModel> createKey(@RequestParam("name") String name) {
-        return this.lockRun(() -> this.sshAuthorizedService.createSshKey(name));
+        SshAuthorizedEntity ssh = this.lockRun(() -> this.sshAuthorizedService.createSshKey(name));
+        CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(ssh.getId()).name(name).publicKey(ssh.getSshPublicKey()).privateKey(ssh.getSshPrivateKey()).build();
+        return ResultUtil.success(model);
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @PostMapping("/api/ssh/modify")
     public ResultUtil<SshAuthorizedModel> modify(@RequestParam("id") int id, @RequestParam("name") String name) {
-        return this.lockRun(() -> this.sshAuthorizedService.modifySshKey(id, name));
+        SshAuthorizedEntity ssh = this.lockRun(() -> this.sshAuthorizedService.modifySshKey(id, name));
+        return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @DeleteMapping("/api/ssh/destroy")
     public ResultUtil<Void> deleteSshKey(@RequestParam("id") int id) {
-        return this.lockRun(() -> this.sshAuthorizedService.deleteSshKey(id));
+        this.lockRun(() -> this.sshAuthorizedService.deleteSshKey(id));
+        return ResultUtil.success();
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @LoginRequire
     @PostMapping("/api/ssh/download/key")
     public ResultUtil<String> createDownloadKey(@RequestParam("id") int id) {
-        return this.lockRun(() -> this.sshAuthorizedService.createDownloadKey(id));
+        String token = this.sshAuthorizedService.createDownloadKey(id);
+        return ResultUtil.success(token);
     }
 
     @GetMapping("/api/ssh/download")

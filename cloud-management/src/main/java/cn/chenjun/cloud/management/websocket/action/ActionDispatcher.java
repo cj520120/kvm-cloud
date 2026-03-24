@@ -17,7 +17,7 @@ public class ActionDispatcher {
 
     @SneakyThrows
     public static void dispatch(WebSocket webSocket, WsRequest msg) {
-
+        webSocket.setLastActiveTime(System.currentTimeMillis());
         for (WsAction action : ACTION_LIST) {
             if (Objects.equals(action.getCommand(), msg.getCommand())) {
                 action.doAction(webSocket, msg);

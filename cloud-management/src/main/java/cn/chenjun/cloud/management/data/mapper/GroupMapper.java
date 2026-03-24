@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.data.mapper;
 
-import cn.chenjun.cloud.management.data.entity.GroupInfoEntity;
+import cn.chenjun.cloud.management.data.entity.GroupEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
  * @author chenjun
  */
 @Repository
-public interface GroupMapper extends BaseMapper<GroupInfoEntity> {
+public interface GroupMapper extends BaseMapper<GroupEntity> {
 
 }

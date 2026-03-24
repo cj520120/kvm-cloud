@@ -2,8 +2,7 @@ package cn.chenjun.cloud.management.controller;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.SignRequire;
-import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.model.HostModel;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.servcie.HostService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +30,8 @@ public class AgentController {
     @SignRequire
     @PostMapping("/api/agent/register")
     public ResultUtil<Void> report(@RequestParam("clientId") String clientId) {
-
-        ResultUtil<HostModel> resultUtil = this.hostService.getHostInfoByClientId(clientId);
-        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
-            return ResultUtil.<Void>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).build();
-        }
-        hostService.registerHost(resultUtil.getData().getHostId());
+        HostEntity host = this.hostService.getHostInfoByClientId(clientId);
+        hostService.registerHost(host.getHostId());
         return ResultUtil.success();
     }
 }

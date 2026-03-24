@@ -1,9 +1,4 @@
-<disk type="file" device="cdrom">
-    <driver name="qemu"/>
-    <target dev="hda" bus="sata"/>
-    {% if template.name %}
-    <source file="{{storage.mount}}/{{template.name}}"/>
-    {% endif %}
-    <readonly/>
-    <address type="drive" controller="0" bus="0" target="0" unit="0"/>
-</disk>
+{
+  "encoding": "b64",
+  "content": "PGRpc2sgdHlwZT0iZmlsZSIgZGV2aWNlPSJjZHJvbSI+CiAgICA8ZHJpdmVyIG5hbWU9InFlbXUiLz4KICAgIDx0YXJnZXQgZGV2PSJoZGEiIGJ1cz0ic2F0YSIvPgogICAgeyUgaWYgdGVtcGxhdGUubmFtZSAlfQogICAgPHNvdXJjZSBmaWxlPSJ7e3N0b3JhZ2UubW91bnR9fS97e3RlbXBsYXRlLm5hbWV9fSIvPgogICAgeyUgZW5kaWYgJX0KICAgIDxyZWFkb25seS8+CiAgICA8YWRkcmVzcyB0eXBlPSJkcml2ZSIgY29udHJvbGxlcj0iMCIgYnVzPSIwIiB0YXJnZXQ9IjAiIHVuaXQ9IjAiLz4KPC9kaXNrPg=="
+}

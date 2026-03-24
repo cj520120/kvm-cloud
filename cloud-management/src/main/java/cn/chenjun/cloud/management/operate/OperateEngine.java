@@ -2,7 +2,7 @@ package cn.chenjun.cloud.management.operate;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
-import cn.chenjun.cloud.common.core.operate.Operate;
+import cn.chenjun.cloud.common.core.operate.OperateService;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.servcie.LockRunner;
@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 public class OperateEngine {
 
     @Autowired
-    private PluginRegistry<Operate, Integer> operatePluginRegistry;
+    private PluginRegistry<OperateService, Integer> operatePluginRegistry;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -40,29 +40,39 @@ public class OperateEngine {
     @Transactional(rollbackFor = Exception.class)
     public void onFinish(BaseOperateParam operateParam, String result) {
         log.info("onFinish type={} param={} result={}", operateParam.getClass().getName(), operateParam, result);
-        Optional<Operate> optional = this.operatePluginRegistry.getPluginFor(operateParam.getType());
-        optional.ifPresent(operate -> {
+        Optional<OperateService> optional = this.operatePluginRegistry.getPluginFor(operateParam.getType());
+        optional.ifPresent(operateService -> {
             ResultUtil<?> resultUtil;
             try {
-                resultUtil = GsonBuilderUtil.create().fromJson(result, operate.getCallResultType());
+                resultUtil = GsonBuilderUtil.create().fromJson(result, operateService.getCallResultType());
             } catch (Exception err) {
                 resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
             }
-            operate.onComplete(operateParam, resultUtil);
+            operateService.onComplete(operateParam, resultUtil);
         });
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void process(BaseOperateParam operateParam) {
         log.info("process type={} param={}", operateParam.getClass().getName(), operateParam);
-        Optional<Operate> optional = this.operatePluginRegistry.getPluginFor(operateParam.getType());
-        optional.ifPresent(operate -> operate.process(operateParam));
+        Optional<OperateService> optional = this.operatePluginRegistry.getPluginFor(operateParam.getType());
+
+        optional.ifPresent(operateService -> {
+            if (operateService.requireLock()) {
+                lockRunner.lockRun(operateService.getLockKey(operateParam), () -> {
+                    operateService.process(operateParam);
+                });
+            } else {
+                operateService.process(operateParam);
+            }
+        });
     }
 
     @EventListener
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
         this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
             try {
+                log.info("任务回调:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
                 Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
                 BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);
                 try {

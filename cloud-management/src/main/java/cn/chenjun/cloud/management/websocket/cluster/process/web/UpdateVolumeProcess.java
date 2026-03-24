@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.model.VolumeModel;
+import cn.chenjun.cloud.management.servcie.ConvertService;
 import cn.chenjun.cloud.management.servcie.VolumeService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
@@ -19,10 +20,12 @@ public class UpdateVolumeProcess extends AbstractClusterMessageProcess<ResultUti
 
     @Autowired
     private VolumeService volumeService;
+    @Autowired
+    private ConvertService convertService;
 
     @Override
     protected void doProcess(NotifyData<ResultUtil<GuestEntity>> msg) {
-        ResultUtil<VolumeModel> resultUtil = this.volumeService.getVolumeInfo(msg.getId());
+        ResultUtil<VolumeModel> resultUtil = this.getResourceData(() -> volumeService.getVolumeById(msg.getId()), this.convertService::initVolumeModel);
         NotifyData<ResultUtil<VolumeModel>> sendMsg = NotifyData.<ResultUtil<VolumeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_VOLUME).data(resultUtil).version(System.currentTimeMillis()).build();
         WebClientManager.sendAll(sendMsg);
     }

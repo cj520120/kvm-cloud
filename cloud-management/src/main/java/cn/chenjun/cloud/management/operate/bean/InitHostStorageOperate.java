@@ -19,7 +19,7 @@ import java.util.List;
 @SuperBuilder
 public class InitHostStorageOperate extends BaseOperateParam {
     private int storageId;
-    private List<Integer> nextHostIds;
+    private List<InitHostStorageOperate.HostStorageBind> hostStorageBinds;
 
     @Override
     public String toString() {
@@ -29,5 +29,14 @@ public class InitHostStorageOperate extends BaseOperateParam {
     @Override
     public int getType() {
         return Constant.OperateType.INIT_HOST_STORAGE;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HostStorageBind {
+        private Integer storageId;
+        private Integer hostId;
     }
 }

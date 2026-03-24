@@ -15,12 +15,10 @@ KVM Cloud 是一款基于Java实现的轻量级私有云平台，旨在帮助中
 - 支持密钥管理登录 
 - 支持主机名定制
 
-### 关于升级
-- 目前不支持V1、V2升级到最新版本
-- V3.2升级时请重新上传系统模版文件Cloud-System-v3.3.qcow2(md5:d91d1d3e4e9d78593f5727faebf0510e),停止现有网络组件，并重新初始化
-- 新版本不在支持采用backingfile方式，升级前请确保所有磁盘文件没有父磁盘的依赖，如果有请通过clone方式将磁盘重新克隆，取消依赖关系，否则删除模版将导致磁盘不可用
 ### 操作系统
-Linux(intel、amd)
+Linux(目前只提供x86_64架构)
+### 配置说明
+文档只提供基于Centos7的配置说明，其他Linux发行版请自行参考
 ### SELinux配置
 ```sh
 setenforce 0
@@ -92,7 +90,7 @@ yum install qemu-kvm libvirt bridge-utils
 yum install java-1.8.0-openjdk* -y
 ```
 
-#### 3、配置KVM 主机网桥，增加一个网桥
+#### 3、配置KVM主机网桥，增加一个网桥
     这一步一定注意：使用`ip addr`查看你的`网卡名`，在`CentOS 7`中网卡名可能不是`eth0`，错误的网卡名会导致后期配置的虚拟机无法正常被访问到！
     确认网卡名无误后配置网桥：
 
@@ -187,19 +185,29 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 
 ![](images/zh/storage.png)
 
-9、下载基础模版(系统模版选择cloud/v3/Cloud-System-V3.3.qcow2)
+9、下载基础模版
+```$xslt
+使用基于 RedHat、支持 iptables的官方镜像，示例如下：
+> https://yum.oracle.com/templates/OracleLinux/OL10/u1/x86_64/OL10U1_x86_64-kvm-b270.qcow2
+> https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-20260223.0.x86_64.qcow2
+ 
+请务使用国内发行版镜像，国内版本对 cloud-init 的支持存在差异，可能导致系统初始化失败；若确有使用需求，请自行测试兼容性。
 
-> **百度网盘链接: https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn 提取码: 1bpn**
+备用下载地址（官方链接失效时）
+模版路径：cloud/v5/OL10U1_x86_64-kvm-b270.qcow2
+百度网盘链接：https://pan.baidu.com/s/1bOAeuvFj8hG4skDaoZnYtQ?pwd=1bpn 提取码：1bpn
 
+注意事项
+1、系统模版初始化过程中需要通过网络下载安装包，需保证网络配置正常；
+2、初始化耗时由网络速度决定，可使用virsh console命令登录系统自行查看初始化状态。
 
-10、安装nginx，配置基础下载地址,并在页面完成模版配置
-
+模版默认账号信息  
+默认用户名：kvm-user
+默认密码：Kvm@123456
+```
+10、配置系统模版
 
 ![](images/zh/template.png)
-
- 
-
-
 
 11、等待系统模版下载完成，并初始化系统VM成功
 
@@ -231,7 +239,6 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 3、关于网络隔离
 ```$xslt
 1、目前只支持OVS桥接状态下的Vlan模式，如需使用，请自行安装OVS。
-2、负载均衡器可通过挂载基础网络网卡的方式自行实现。
 ```
 4、个别windows系统无法找到引导的问题
 ```$xslt
@@ -245,8 +252,7 @@ server.yaml 和 client.properties 内容分别为management和agent项目下的a
 ```
 6、服务器掉电重启后处理
 ```$xslt
-1、服务器掉电重启后，请在页面手动关闭所有自己创建的虚拟机，然后重新启动，系统虚拟机有自动检测重启功能，无需处理
-2、掉电可能引起虚拟磁盘损坏，如无法启动，可通过qemu-img check检查并进行相应修复
+掉电可能引起虚拟磁盘损坏，如无法启动，可通过qemu-img check检查并进行相应修复
 ``` 
 7、虚拟机虚拟化嵌套
 
@@ -275,27 +281,9 @@ datasource:
   NoCloud:
     seedfrom: http://169.254.169.254/
 datasource_list: [  NoCloud ]
-```
-- 系统模板在安装cloud-init后手动设置相关配置
-  1. 设置允许密码登录:设置ssh_pwauth: 1
-  2. 可设置允许root登录:disable_root: 1 
-  3. ubuntu修改/etc/cloud/cloud.cfg.d/50-curtin-networking.cfg 保证默认网卡名和分配网卡名一致 
-  4. 目前只测试了Centos与Ubuntu，Windows请自行实现相关初始化行为 
-  5. 密码只对应默认用户，具体请查看system_info.default_user相关配置 
-  6. 其他配置请参照cloud-init相关配置进行安装 
-  7. 对系统模板请安装qemu-command-agent，并进行相关配置
+```  
+- 用户模版需要安装qemu-guest-agent，并且启用guest-exec，否则无法配置启动初始化
 
-
-- 目前只提供Centos及Ubuntu22.04的系统模版，其他系统模版，请自行实现
-    1）、Centos默认用户名为centos，密码为创建系统时输入的密码
-    2）、Ubuntu默认用户名为ubuntu，密码为创建系统输入的密码
-    3）、系统模版不支持root用户名密码登录，如需root登录，请自行修改
-
-- 关于自制模版中Ubuntu 22.04无法使用密钥登录问题，执行如下命令
-```$xslt
-echo 'PubkeyAcceptedAlgorithms=+ssh-rsa' >> /etc/ssh/sshd_config
-systemctl restart sshd
-```
 9、页面删除主机后，如需要重新加入主机，请删除该主机Agent目录下config.json，然后重启Agent
 
 10、关于提示签名错误问题，请确保管理端跟agent端时间同步

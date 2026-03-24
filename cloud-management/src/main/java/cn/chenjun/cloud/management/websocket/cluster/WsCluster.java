@@ -4,6 +4,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.cluster.process.ClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +42,15 @@ public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<
     @Override
     public void onMessage(CharSequence channel, NotifyData<?> msg) {
         try {
+
+            RequestContextHolderUtil.initContext();
             Optional<ClusterMessageProcess> optional = this.processPluginRegistry.getPluginFor(msg.getType());
             ClusterMessageProcess process = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的注册方式"));
             lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> process.process(msg));
         } catch (Exception err) {
             log.error("process cluster msg fail.msg={}", msg, err);
+        }finally {
+            RequestContextHolderUtil.clearContext();
         }
     }
 

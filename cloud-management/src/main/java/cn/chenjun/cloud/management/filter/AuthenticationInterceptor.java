@@ -1,12 +1,12 @@
 package cn.chenjun.cloud.management.filter;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.NoLoginRequire;
-import cn.chenjun.cloud.management.data.mapper.HostMapper;
+import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.servcie.UserService;
-import cn.chenjun.cloud.management.util.RequestContext;
+import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +27,6 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private HostMapper hostMapper;
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, @NonNull Object handler) throws Exception {
@@ -40,7 +38,8 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
             if (!needLogin && !method.isAnnotationPresent(NoLoginRequire.class)) {
                 needLogin = method.getDeclaringClass().isAnnotationPresent(LoginRequire.class);
             }
-            if (needLogin && null == RequestContext.getCurrent().getSelf()) {
+            LoginUserModel loginUserModel = RequestContextHolderUtil.get(RequestContextHolderUtil.CURRENT_USER);
+            if (needLogin && loginUserModel == null) {
                 httpServletResponse.setContentType("application/json; charset=utf-8");
                 httpServletResponse.setStatus(HttpStatus.OK.value());
                 httpServletResponse.getWriter().print(new Gson().toJson(ResultUtil.<Void>builder().code(ErrorCode.NO_LOGIN_ERROR).build()));
