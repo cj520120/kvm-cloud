@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.util;
 
 public class ConfigKey {
     public static final String SYSTEM_COMPONENT_NETWORK_DRIVER = "system.component.network.driver";
+    public static final String SYSTEM_COMPONENT_DISK_DRIVER = "system.component.disk.driver";
 
     public static final String SYSTEM_COMPONENT_CPU = "system.component.cpu.number";
     public static final String SYSTEM_COMPONENT_MEMORY = "system.component.memory";

@@ -40,6 +40,8 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CPU_SHARE, 0, "系统组件Cpu Share", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_QMA_EXECUTE_TIMEOUT_MINUTES, 60, "系统组件单个qma执行命令超时时间(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_BOOTSTRAP_TYPE, Constant.BootstrapType.BIOS_STR, "系统组件固件类型", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.BootstrapType.BIOS_STR, Constant.BootstrapType.UEFI_STR), StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_DISK_DRIVER, Constant.DiskDriveType.VIRTIO, "系统组件磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.DiskDriveType.SCSI,Constant.DiskDriveType.VIRTIO,Constant.DiskDriveType.SATA), StringConvert.Default);
+
         initDefaultConfig(ConfigKey.DEFAULT_OVER_CPU, 1.0f, "系统Cpu超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_OVER_MEMORY, 1.0f, "系统内存超分比例", Constant.ConfigValueType.FLOAT, null, FloatConvert.Default);
 

@@ -89,6 +89,8 @@ public class ComponentService extends AbstractService {
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.CEPH_RBD)) {
             volumeType = cn.chenjun.cloud.common.util.Constant.VolumeType.RAW;
         }
+        String nicDriveType = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER);
+        String diskDriveType = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_DISK_DRIVER);
         String volumeName = NameUtil.generateVolumeName();
         VolumeEntity volume = VolumeEntity.builder()
                 .description("ROOT-" + guest.getGuestId())
@@ -103,21 +105,20 @@ public class ComponentService extends AbstractService {
                 .capacity(0L)
                 .guestId(guest.getGuestId())
                 .deviceId(0)
-                .deviceDriver(cn.chenjun.cloud.common.util.Constant.DiskDriveType.VIRTIO)
+                .deviceDriver(diskDriveType)
                 .status(Constant.VolumeStatus.CREATING)
                 .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
         this.volumeDao.insert(volume);
-        String driveType = configService.getConfig(ConfigKey.SYSTEM_COMPONENT_NETWORK_DRIVER);
         NetworkEntity network = this.networkDao.findById(component.getNetworkId());
 
         if (Objects.equals(network.getType(), cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN)) {
-            this.allocateService.allocateNetwork(network.getBasicNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, driveType, "Component Guest Basic Nic");
-            GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 1, driveType, "Component Guest Basic Nic");
+            this.allocateService.allocateNetwork(network.getBasicNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
+            GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 1, nicDriveType, "Component Guest Basic Nic");
             guest.setGuestIp(currentGuestNetwork.getIp());
         } else {
-            GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, driveType, "Component Guest Basic Nic");
+            GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
             guest.setGuestIp(currentGuestNetwork.getIp());
         }
 
