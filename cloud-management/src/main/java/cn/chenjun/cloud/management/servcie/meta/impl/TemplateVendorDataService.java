@@ -49,7 +49,7 @@ public class TemplateVendorDataService implements VendorDataService {
             if (template == null) {
                 break;
             }
-            String script = template.getScript();
+            String script = template.getVendorData();
             if (ObjectUtils.isEmpty(script)) {
                 break;
             }

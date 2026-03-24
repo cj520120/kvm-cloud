@@ -4,7 +4,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.bean.WsMessage;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.mapper.NetworkMapper;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.websocket.action.WsAction;
@@ -24,8 +23,6 @@ import java.io.IOException;
 public class WebConnectionAction implements WsAction {
     @Autowired
     private UserService userService;
-    @Autowired
-    private NetworkMapper networkMapper;
 
     @Override
     public void doAction(WebSocket webSocket, WsRequest msg) throws IOException {
@@ -34,7 +31,8 @@ public class WebConnectionAction implements WsAction {
             ResultUtil<LoginUserModel> resultUtil = this.userService.getUserIdByToken(token);
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 LoginUserModel user = resultUtil.getData();
-                webSocket.setContext(UserContext.builder().userId(user.getUserId()).build());
+                UserContext context = UserContext.builder().userId(user.getUserId()).build();
+                webSocket.login(context);
                 WebClientManager.addClient(user.getUserId(), webSocket);
                 WsMessage<Void> wsMessage = WsMessage.<Void>builder().command(Constant.SocketCommand.WEB_LOGIN_SUCCESS).build();
                 webSocket.send(wsMessage);

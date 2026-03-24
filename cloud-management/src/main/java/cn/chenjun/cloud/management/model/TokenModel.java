@@ -29,5 +29,5 @@ public class TokenModel {
     /**
      * 用户信息
      */
-    private UserInfoModel self;
+    private UserModel self;
 }

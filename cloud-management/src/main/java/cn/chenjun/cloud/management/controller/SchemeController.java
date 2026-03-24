@@ -5,12 +5,14 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.management.data.entity.SchemeEntity;
 import cn.chenjun.cloud.management.model.SchemeModel;
 import cn.chenjun.cloud.management.servcie.SchemeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -23,19 +25,25 @@ public class SchemeController extends BaseController {
 
     @GetMapping("/api/scheme/info")
     public ResultUtil<SchemeModel> getSchemeInfo(@RequestParam("schemeId") int schemeId) {
-        return this.lockRun(() -> this.schemeService.getSchemeInfo(schemeId));
+        SchemeEntity scheme = this.schemeService.getSchemeInfo(schemeId);
+        return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
     @GetMapping("/api/scheme/all")
     public ResultUtil<List<SchemeModel>> listScheme() {
-        return this.lockRun(() -> this.schemeService.listScheme());
+
+        List<SchemeEntity> schemes = this.schemeService.listScheme();
+        List<SchemeModel> models = schemes.stream().map(this.convertService::initSchemeModel).collect(Collectors.toList());
+        return ResultUtil.success(models);
     }
 
     @GetMapping("/api/scheme/search")
     public ResultUtil<Page<SchemeModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
                                                 @RequestParam("no") int no,
                                                 @RequestParam("size") int size) {
-        return this.lockRun(() -> this.schemeService.search(keyword, no, size));
+        Page<SchemeEntity> page = this.schemeService.search(keyword, no, size);
+        Page<SchemeModel> models = Page.convert(page, this.convertService::initSchemeModel);
+        return ResultUtil.success(models);
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
@@ -47,7 +55,8 @@ public class SchemeController extends BaseController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
+        SchemeEntity scheme = this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
+        return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
@@ -60,12 +69,14 @@ public class SchemeController extends BaseController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        return this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
+        SchemeEntity scheme = this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
+        return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/scheme/destroy")
     public ResultUtil<Void> destroyScheme(@RequestParam("schemeId") int schemeId) {
-        return this.lockRun(() -> this.schemeService.destroyScheme(schemeId));
+        this.lockRun(() -> this.schemeService.destroyScheme(schemeId));
+        return ResultUtil.success();
     }
 }

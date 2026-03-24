@@ -5,8 +5,8 @@ import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.management.data.mapper.GuestMapper;
-import cn.chenjun.cloud.management.data.mapper.HostMapper;
+import cn.chenjun.cloud.management.servcie.GuestService;
+import cn.chenjun.cloud.management.servcie.HostService;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.client.WebSocket;
 import cn.chenjun.cloud.management.websocket.client.context.VncProxyContext;
@@ -50,9 +50,9 @@ public class VncWsService extends AbstractWsService<ByteBuffer> {
     protected void onConnection(WebSocket webSocket) {
         super.onConnection(webSocket);
         int id = NumberUtil.parseInt(webSocket.getSession().getPathParameters().get("id"));
-        GuestMapper guestMapper = SpringContextUtils.getBean(GuestMapper.class);
-        GuestEntity guest = guestMapper.selectById(id);
-        if (guest == null || guest.getHostId() <= 0) {
+        GuestService guestService = SpringContextUtils.getBean(GuestService.class);
+        GuestEntity guest = guestService.getGuestInfo(id);
+        if (guest.getHostId() <= 0) {
             webSocket.close();
             log.info("虚拟机未运行或不存在.id={}", id);
             return;
@@ -62,7 +62,7 @@ public class VncWsService extends AbstractWsService<ByteBuffer> {
             log.info("虚拟机当前状态不属于运行状态.id={}", id);
             return;
         }
-        HostEntity host = SpringContextUtils.getBean(HostMapper.class).selectById(guest.getHostId());
+        HostEntity host = SpringContextUtils.getBean(HostService.class).getHostInfo(guest.getHostId());
         URI url = new URI(host.getUri().replaceFirst("http", "ws") + "/api/vnc");
         String nonce = String.valueOf(System.nanoTime());
         Map<String, Object> map = new HashMap<>(6);

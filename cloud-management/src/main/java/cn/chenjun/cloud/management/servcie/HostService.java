@@ -1,81 +1,63 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
-import cn.chenjun.cloud.management.data.entity.VolumeEntity;
-import cn.chenjun.cloud.management.model.HostModel;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
  */
 @Service
-public class HostService extends AbstractService {
+public class HostService extends AbstractHostStorageService {
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<List<HostModel>> listAllHost() {
-        List<HostEntity> hostList = this.hostMapper.selectList(new QueryWrapper<>());
-        List<HostModel> models = hostList.stream().map(this::initHost).collect(Collectors.toList());
-        return ResultUtil.success(models);
+    public List<HostEntity> listAllHost() {
+        List<HostEntity> hostList = this.hostDao.listAll();
+        return hostList;
     }
 
-    public ResultUtil<Page<HostModel>> search(String keyword, int no, int size) {
-        QueryWrapper<HostEntity> wrapper = new QueryWrapper<>();
-        if (!ObjectUtils.isEmpty(keyword)) {
-            String condition = "%" + keyword + "%";
-            wrapper.like(HostEntity.HOST_DISPLAY_NAME, condition)
-                    .or().like(HostEntity.HOST_IP, condition)
-                    .or().like(HostEntity.HOST_OS_NAME, condition);
-
-        }
-        int nCount = Math.toIntExact(this.hostMapper.selectCount(wrapper));
-        int nOffset = (no - 1) * size;
-        wrapper.last("limit " + nOffset + ", " + size);
-        List<HostEntity> list = this.hostMapper.selectList(wrapper);
-        List<HostModel> models = list.stream().map(this::initHost).collect(Collectors.toList());
-        Page<HostModel> page = Page.create(nCount, nOffset, size);
-        page.setList(models);
-        return ResultUtil.success(page);
+    public Page<HostEntity> search(String keyword, int no, int size) {
+        Page<HostEntity> page = this.hostDao.search(keyword, no, size);
+        return page;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> getHostInfo(int hostId) {
-        HostEntity host = this.hostMapper.selectById(hostId);
-        if (host == null) {
-            return ResultUtil.error(ErrorCode.HOST_NOT_FOUND, "主机不存在");
-        }
-        return ResultUtil.success(this.initHost(host));
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> getHostInfoByClientId(String clientId) {
-        HostEntity host = this.hostMapper.selectOne(new QueryWrapper<HostEntity>().eq(HostEntity.CLIENT_ID, clientId));
+    public HostEntity getHostInfo(int hostId) {
+        HostEntity host = this.hostDao.findById(hostId);
         if (host == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
-        return ResultUtil.success(this.initHost(host));
+        return host;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> createHost(String name, String ip, String uri, String nic,int role) {
+    public HostEntity getHostByClientId(String clientId) {
+        HostEntity host = this.hostDao.findByClientId(clientId);
+        if (host == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+        }
+        return host;
+    }
+
+    public HostEntity getHostInfoByClientId(String clientId) {
+        HostEntity host = this.hostDao.findByClientId(clientId);
+        if (host == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
+        }
+        return host;
+    }
+
+    public HostEntity createHost(String name, String ip, String uri, String nic, int role) {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入主机名称");
         }
@@ -108,74 +90,84 @@ public class HostService extends AbstractService {
                 .cores(0)
                 .role(role)
                 .status(Constant.HostStatus.REGISTER).build();
-        this.hostMapper.insert(host);
+        this.hostDao.insert(host);
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString())
                 .title("添加主机[" + host.getDisplayName() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
-        return ResultUtil.success(this.initHost(host));
+        return host;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> registerHost(int hostId) {
-        HostEntity host = this.hostMapper.selectById(hostId);
+    public HostEntity registerHost(int hostId) {
+        HostEntity host = this.getHostInfo(hostId);
         host.setStatus(Constant.HostStatus.REGISTER);
         if (StringUtils.isEmpty(host.getClientId())) {
             host.setClientId(AppUtils.getAppId());
             host.setClientSecret(AppUtils.getAppSecret(host.getClientId()));
         }
-        this.hostMapper.updateById(host);
+        this.hostDao.update(host);
+        List<StorageEntity> storageList = this.storageDao.listLocalStorage();
+        for (StorageEntity storageEntity : storageList) {
+            this.checkAndInitHostLocalStorage(storageEntity, host);
+        }
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString())
                 .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
-        return ResultUtil.success(this.initHost(host));
+        return host;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> maintenanceHost(int hostId) {
-        HostEntity host = this.hostMapper.selectById(hostId);
+    public HostEntity maintenanceHost(int hostId) {
+        HostEntity host = this.hostDao.findById(hostId);
         if (host == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
 
         host.setStatus(Constant.HostStatus.MAINTENANCE);
-        this.hostMapper.updateById(host);
+        this.hostDao.update(host);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
-        return ResultUtil.success(this.initHost(host));
+        return host;
 
     }
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<HostModel> updateHostRole(int hostId,int role) {
-        HostEntity host = this.hostMapper.selectById(hostId);
+    public HostEntity updateHostRole(int hostId, int role) {
+        HostEntity host = this.hostDao.findById(hostId);
         if (host == null) {
             throw new CodeException(ErrorCode.HOST_NOT_FOUND, "主机不存在");
         }
 
         host.setRole(role);
-        this.hostMapper.updateById(host);
+        this.hostDao.update(host);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
-        return ResultUtil.success(this.initHost(host));
+        return host;
 
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<Void> destroyHost(int hostId) {
-        HostEntity host = this.hostMapper.selectById(hostId);
-        if (this.guestMapper.selectCount(new QueryWrapper<GuestEntity>().eq(GuestEntity.HOST_ID, hostId)) > 0) {
+    public void destroyHost(int hostId) {
+        HostEntity host = this.hostDao.findById(hostId);
+        if (this.guestDao.countByHostId(hostId) > 0) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
         }
-        List<StorageEntity> storageList= this.storageMapper.selectList(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, hostId));
+        List<StorageEntity> storageList = this.storageDao.listByHostId(hostId);
         for (StorageEntity storage:storageList){
-            if (this.volumeMapper.selectCount(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.STORAGE_ID, storage.getStorageId()))>0) {
+            if (this.volumeDao.countByStorageId(storage.getStorageId()) > 0) {
                 throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
             }
         }
-        this.hostMapper.deleteById(hostId);
-        this.storageMapper.delete(new QueryWrapper<StorageEntity>().eq(StorageEntity.STORAGE_HOST_ID, hostId));
+        this.hostDao.deleteById(hostId);
+        this.storageDao.deleteByHostId(hostId);
         this.configService.deleteAllocateConfig(Constant.ConfigType.HOST, hostId);
         this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
-        return ResultUtil.success();
+
     }
+
+    public List<HostEntity> listHostByIds(List<Integer> hostIds) {
+        return this.hostDao.listByIds(hostIds);
+    }
+
+
 }

@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 /**
  * 磁盘
  *
@@ -16,11 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VolumeInfo implements Serializable {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+public class VolumeInfo {
     /**
      * 存储池
      */

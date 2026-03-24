@@ -1,12 +1,4 @@
-
-<pool type='dir'>
-    <name>{{storage.name}}</name>
-    <target>
-        <path>{{storage.param.path}}</path>
-        <permissions>
-            <mode>0777</mode>
-            <owner>0</owner>
-            <group>0</group>
-        </permissions>
-    </target>
-</pool>
+{
+  "encoding": "b64",
+  "content": "Cjxwb29sIHR5cGU9J2Rpcic+CiAgICA8bmFtZT57e3N0b3JhZ2UubmFtZX19PC9uYW1lPgogICAgPHRhcmdldD4KICAgICAgICA8cGF0aD57e3N0b3JhZ2UucGFyYW0ucGF0aH19PC9wYXRoPgogICAgICAgIDxwZXJtaXNzaW9ucz4KICAgICAgICAgICAgPG1vZGU+MDc3NzwvbW9kZT4KICAgICAgICAgICAgPG93bmVyPjA8L293bmVyPgogICAgICAgICAgICA8Z3JvdXA+MDwvZ3JvdXA+CiAgICAgICAgPC9wZXJtaXNzaW9ucz4KICAgIDwvdGFyZ2V0Pgo8L3Bvb2w+"
+}

@@ -19,6 +19,7 @@ public class SimpleStorageModel {
     private String type;
     private String param;
     private String mountPath;
+    private int parentId;
     private int hostId;
     private int supportCategory;
     private long capacity;

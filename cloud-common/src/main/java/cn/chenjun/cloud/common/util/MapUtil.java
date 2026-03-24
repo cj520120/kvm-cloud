@@ -4,24 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MapUtil {
-    public static <K, V> Map<K, V> of(K k1, V v1) {
+    public static <K, V> Map<K, V> of(Object... args) {
         Map<K, V> map = new HashMap<>();
-        map.put(k1, v1);
-        return map;
-    }
-
-    public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2) {
-        Map<K, V> map = new HashMap<>();
-        map.put(k1, v1);
-        map.put(k2, v2);
-        return map;
-    }
-
-    public static <K, V> Map<K, V> of(K k1, V v1, K k2, V v2, K k3, V v3) {
-        Map<K, V> map = new HashMap<>();
-        map.put(k1, v1);
-        map.put(k2, v2);
-        map.put(k3, v3);
+        int length = args.length;
+        if (length % 2 != 0) {
+            throw new IllegalArgumentException("args length must be even");
+        }
+        for (int i = 0; i < length; i += 2) {
+            map.put((K) args[i], (V) args[i + 1]);
+        }
         return map;
     }
 }

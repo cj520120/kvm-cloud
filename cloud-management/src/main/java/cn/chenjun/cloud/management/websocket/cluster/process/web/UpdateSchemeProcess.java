@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.websocket.cluster.process.web;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.SchemeModel;
+import cn.chenjun.cloud.management.servcie.ConvertService;
 import cn.chenjun.cloud.management.servcie.SchemeService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
@@ -18,10 +19,12 @@ public class UpdateSchemeProcess extends AbstractClusterMessageProcess<Void> {
 
     @Autowired
     private SchemeService schemeService;
+    @Autowired
+    private ConvertService convertService;
 
     @Override
     protected void doProcess(NotifyData<Void> msg) {
-        ResultUtil<SchemeModel> resultUtil = this.schemeService.getSchemeInfo(msg.getId());
+        ResultUtil<SchemeModel> resultUtil = getResourceData(() -> this.schemeService.getSchemeInfo(msg.getId()), this.convertService::initSchemeModel);
         NotifyData<ResultUtil<SchemeModel>> sendMsg = NotifyData.<ResultUtil<SchemeModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_SCHEME).data(resultUtil).version(System.currentTimeMillis()).build();
         WebClientManager.sendAll(sendMsg);
     }

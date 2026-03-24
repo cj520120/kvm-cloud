@@ -1,5 +1,7 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -19,8 +21,11 @@ public class LockRunner {
         try {
             lock.lock(10, TimeUnit.SECONDS);
             runnable.run();
+        } catch (CodeException err) {
+            throw err;
         } catch (Exception err) {
             log.error("执行失败.lock-key:{}", key, err);
+            throw new CodeException(ErrorCode.SERVER_ERROR, err);
         } finally {
             if (lock != null) {
                 try {

@@ -6,11 +6,14 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.ConfigModel;
 import cn.chenjun.cloud.management.model.SystemConfigModel;
 import cn.chenjun.cloud.management.servcie.ConfigService;
+import cn.chenjun.cloud.management.servcie.bean.ConfigInfo;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -19,6 +22,15 @@ import java.util.List;
 public class ConfigController extends BaseController {
     @Autowired
     private ConfigService configService;
+
+    private ConfigModel initConfig(ConfigInfo config) {
+        if (config == null) {
+            return null;
+        }
+        ConfigModel model = new ConfigModel();
+        BeanUtils.copyProperties(config, model);
+        return model;
+    }
 
     @GetMapping("/api/config")
     public ResultUtil<SystemConfigModel> getSystemConfig() {
@@ -33,7 +45,9 @@ public class ConfigController extends BaseController {
     @LoginRequire
     @GetMapping("/api/config/search")
     public ResultUtil<List<ConfigModel>> listConfig(@RequestParam("allocateType") int allocateType, @RequestParam("allocateId") int allocateId) {
-        return this.lockRun(() -> this.configService.listConfig(allocateType, allocateId));
+        List<ConfigInfo> configInfos = this.configService.listConfig(allocateType, allocateId);
+        List<ConfigModel> list = configInfos.stream().map(this::initConfig).collect(Collectors.toList());
+        return ResultUtil.success(list);
     }
 
     @LoginRequire
@@ -42,7 +56,10 @@ public class ConfigController extends BaseController {
                                                 @RequestParam("allocateType") int allocateType,
                                                 @RequestParam("allocateId") int allocateId,
                                                 @RequestParam("configValue") String configValue) {
-        return this.lockRun(() -> this.configService.createConfig(configKey, allocateType, allocateId, configValue));
+        ConfigInfo info = this.lockRun(() -> {
+            return this.configService.createConfig(configKey, allocateType, allocateId, configValue);
+        });
+        return ResultUtil.success(this.initConfig(info));
     }
 
     @LoginRequire
@@ -51,12 +68,14 @@ public class ConfigController extends BaseController {
                                                 @RequestParam("allocateType") int allocateType,
                                                 @RequestParam("allocateId") int allocateId,
                                                 @RequestParam("configValue") String configValue) {
-        return this.lockRun(() -> this.configService.updateConfig(configKey, allocateType, allocateId, configValue));
+        ConfigInfo info = this.lockRun(() -> this.configService.updateConfig(configKey, allocateType, allocateId, configValue));
+        return ResultUtil.success(this.initConfig(info));
     }
 
     @LoginRequire
     @DeleteMapping("/api/config/destroy")
     public ResultUtil<ConfigModel> deleteConfig(@RequestParam("id") int id) {
-        return this.lockRun(() -> this.configService.deleteConfig(id));
+        ConfigInfo info = this.lockRun(() -> this.configService.deleteConfig(id));
+        return ResultUtil.success(this.initConfig(info));
     }
 }

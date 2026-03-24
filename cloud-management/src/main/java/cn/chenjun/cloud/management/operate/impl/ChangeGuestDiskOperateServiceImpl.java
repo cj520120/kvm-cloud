@@ -1,0 +1,109 @@
+package cn.chenjun.cloud.management.operate.impl;
+
+import cn.chenjun.cloud.common.bean.ChangeGuestDiskRequest;
+import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.data.entity.GuestEntity;
+import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.data.entity.StorageEntity;
+import cn.chenjun.cloud.management.data.entity.VolumeEntity;
+import cn.chenjun.cloud.management.operate.bean.ChangeGuestDiskOperate;
+import cn.chenjun.cloud.management.websocket.message.NotifyData;
+import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+
+/**
+ * 更改磁盘挂载
+ *
+ * @author chenjun
+ */
+@Component
+@Slf4j
+public class ChangeGuestDiskOperateServiceImpl extends AbstractOsOperateService<ChangeGuestDiskOperate, ResultUtil<Void>> {
+
+
+    @Override
+    public void operate(ChangeGuestDiskOperate param) {
+        VolumeEntity volume = volumeDao.findById(param.getVolumeId());
+
+        GuestEntity guest = guestDao.findById(param.getGuestId());
+
+        if (guest.getHostId() > 0) {
+            HostEntity host = hostDao.findById(guest.getHostId());
+            if(Objects.equals(volume.getDevice(),Constant.DeviceType.DISK)) {
+                StorageEntity storage = this.storageDao.findById(volume.getStorageId());
+                if (storage == null) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
+                }
+                if (storage.getStatus() != Constant.StorageStatus.READY) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池未就绪:" + storage.getStatus());
+                }
+                Map<String, Object> guestConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
+
+                Map<String, Object> volumeConfigMap = this.loadVolumeConfig(storage.getStorageId(), volume.getVolumeId());
+                Map<String, Object> configMap = new HashMap<>();
+                configMap.putAll(guestConfig);
+                configMap.putAll(volumeConfigMap);
+                String xml = this.buildDiskXml(guest, storage, volume, param.getDeviceId(), param.getDeviceBus(), configMap);
+                ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
+                if (param.isAttach()) {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+                } else {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                }
+            }else {
+                Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(),guest.getGuestId());
+                String xml;
+                if (volume.getDevice().equals(Constant.DeviceType.BLOCK)) {
+                    xml = this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap);
+                } else if (volume.getDevice().equals(Constant.DeviceType.FILE)) {
+                    xml = this.buildHostFileXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap);
+                } else {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的磁盘类型[" + volume.getDevice() + "]");
+                }
+                ChangeGuestDiskRequest disk = ChangeGuestDiskRequest.builder().name(guest.getName()).xml(xml).build();
+                if (param.isAttach()) {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_DISK, disk);
+                } else {
+                    this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
+                }
+            }
+
+        } else {
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        }
+
+    }
+
+
+    @Override
+    public Type getCallResultType() {
+        return new TypeToken<ResultUtil<Void>>() {
+        }.getType();
+    }
+
+    @Override
+    public void onFinish(ChangeGuestDiskOperate param, ResultUtil<Void> resultUtil) {
+        VolumeEntity volume = volumeDao.findById(param.getVolumeId());
+        if (!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK) && !param.isAttach()) {
+            //卸载block类型的磁盘时，直接删除磁盘记录
+            volumeDao.deleteById(param.getVolumeId());
+        }
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+    }
+
+    @Override
+    public int getType() {
+        return Constant.OperateType.CHANGE_GUEST_DISK;
+    }
+}

@@ -44,7 +44,7 @@ public class GuestNetworkEntity {
     @TableField(DEVICE_ID)
     private Integer deviceId;
     @TableField(DEVICE_TYPE)
-    private String driveType;
+    private String deviceType;
     @TableField(NETWORK_MAC_ADDRESS)
     private String mac;
     @TableField(NETWORK_IP)

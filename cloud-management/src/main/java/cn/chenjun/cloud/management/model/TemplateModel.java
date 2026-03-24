@@ -16,9 +16,12 @@ public class TemplateModel {
     private int templateId;
     private String name;
     private String uri;
+    private String arch;
     private String md5;
     private int templateType;
-    private String script;
+    private String vendorData;
+    private String localCloudCfg;
+    private int cloudWaitFlag;
     private int status;
     private Date createTime;
 }

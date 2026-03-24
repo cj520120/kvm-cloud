@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class GuestStartRequest {
     private String name;
     private String xml;
-    private GuestQmaRequest qmaRequest;
+    private boolean waitCloudInit;
+    private int waitCloudInitTimeoutSeconds;
 
 }

@@ -1,13 +1,4 @@
-<pool type="rbd">
-    <name>{{storage.name}}</name>
-    <source>
-        {% set __hostList=cloud:parseUrlList(storage.param.uri,"6789") %}
-        {% for __host in __hostList %}
-        <host name='{{__host.address}}' port='{{__host.port}}'/>
-        {% endfor %}
-        <name>{{storage.param.pool}}</name>
-        <auth type='ceph' username='{{storage.param.username}}'>
-            <secret uuid='{{storage.name}}'/>
-        </auth>
-    </source>
-</pool>
+{
+  "encoding": "b64",
+  "content": "PHBvb2wgdHlwZT0icmJkIj4KICAgIDxuYW1lPnt7c3RvcmFnZS5uYW1lfX08L25hbWU+CiAgICA8c291cmNlPgogICAgICAgIHslIHNldCBfX2hvc3RMaXN0PWNsb3VkOnBhcnNlVXJsTGlzdChzdG9yYWdlLnBhcmFtLnVyaSwiNjc4OSIpICV9CiAgICAgICAgeyUgZm9yIF9faG9zdCBpbiBfX2hvc3RMaXN0ICV9CiAgICAgICAgPGhvc3QgbmFtZT0ne3tfX2hvc3QuYWRkcmVzc319JyBwb3J0PSd7e19faG9zdC5wb3J0fX0nLz4KICAgICAgICB7JSBlbmRmb3IgJX0KICAgICAgICA8bmFtZT57e3N0b3JhZ2UucGFyYW0ucG9vbH19PC9uYW1lPgogICAgICAgIDxhdXRoIHR5cGU9J2NlcGgnIHVzZXJuYW1lPSd7e3N0b3JhZ2UucGFyYW0udXNlcm5hbWV9fSc+CiAgICAgICAgICAgIDxzZWNyZXQgdXVpZD0ne3tzdG9yYWdlLm5hbWV9fScvPgogICAgICAgIDwvYXV0aD4KICAgIDwvc291cmNlPgo8L3Bvb2w+"
+}

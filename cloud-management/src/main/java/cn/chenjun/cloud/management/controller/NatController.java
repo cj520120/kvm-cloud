@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
+import cn.chenjun.cloud.management.data.entity.NatEntity;
 import cn.chenjun.cloud.management.model.NatModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,9 @@ public class NatController extends BaseController {
     public ResultUtil<Page<NatModel>> search(@RequestParam("componentId") int componentId, @RequestParam(value = "keyword", required = false) String keyword,
                                              @RequestParam("no") int no,
                                              @RequestParam("size") int size) {
-        return this.lockRun(() -> networkService.searchComponentNat(keyword, componentId, no, size));
+        Page<NatEntity> page = networkService.searchComponentNat(keyword, componentId, no, size);
+        Page<NatModel> pageModel = Page.convert(page, this.convertService::initNatModel);
+        return ResultUtil.success(pageModel);
     }
 
     @PutMapping("/api/nat/create")
@@ -30,11 +33,13 @@ public class NatController extends BaseController {
                                                           @RequestParam("protocol") String protocol,
                                                           @RequestParam("remoteIp") String remoteIp,
                                                           @RequestParam("remotePort") int remotePort) {
-        return this.lockRun(() -> networkService.createComponentNat(componentId, localPort, protocol, remoteIp, remotePort));
+        NatEntity entity = this.lockRun(() -> networkService.createComponentNat(componentId, localPort, protocol, remoteIp, remotePort));
+        return ResultUtil.success(convertService.initNatModel(entity));
     }
 
     @DeleteMapping("/api/nat/destroy")
     public ResultUtil<Void> destroyNetworkComponentNat(@RequestParam("natId") int natId) {
-        return this.lockRun(() -> networkService.deleteComponentNat(natId));
+        networkService.deleteComponentNat(natId);
+        return ResultUtil.success();
     }
 }

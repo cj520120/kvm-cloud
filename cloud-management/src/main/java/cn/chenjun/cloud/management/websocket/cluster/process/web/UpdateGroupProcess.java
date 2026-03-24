@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.websocket.cluster.process.web;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.model.GroupModel;
+import cn.chenjun.cloud.management.servcie.ConvertService;
 import cn.chenjun.cloud.management.servcie.GroupService;
 import cn.chenjun.cloud.management.websocket.cluster.process.AbstractClusterMessageProcess;
 import cn.chenjun.cloud.management.websocket.manager.WebClientManager;
@@ -18,10 +19,12 @@ public class UpdateGroupProcess extends AbstractClusterMessageProcess<Void> {
 
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private ConvertService convertService;
 
     @Override
     protected void doProcess(NotifyData<Void> msg) {
-        ResultUtil<GroupModel> resultUtil = this.groupService.getGroup(msg.getId());
+        ResultUtil<GroupModel> resultUtil = this.getResourceData(() -> this.groupService.getGroupById(msg.getId()), this.convertService::initGroupModel);
         NotifyData<ResultUtil<GroupModel>> sendMsg = NotifyData.<ResultUtil<GroupModel>>builder().id(msg.getId()).type(Constant.NotifyType.UPDATE_GROUP).data(resultUtil).version(System.currentTimeMillis()).build();
         WebClientManager.sendAll(sendMsg);
     }

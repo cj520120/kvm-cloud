@@ -64,7 +64,7 @@ public class ParamBuilder {
 //        int deviceId = guestNetwork.getDeviceId() + DomainUtil.MIN_NIC_DEVICE_ID;
         Map<String, Object> map = new HashMap<>();
         map.put("mac", guestNetwork.getMac());
-        map.put("type", guestNetwork.getDriveType());
+        map.put("type", guestNetwork.getDeviceType());
         map.put("network", network.getPoolId());
         map.put("deviceId", guestNetwork.getDeviceId());
         return map;

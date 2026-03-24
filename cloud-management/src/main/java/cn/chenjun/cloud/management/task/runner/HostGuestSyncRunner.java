@@ -3,11 +3,10 @@ package cn.chenjun.cloud.management.task.runner;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.management.data.mapper.HostMapper;
 import cn.chenjun.cloud.management.operate.bean.SyncHostGuestOperate;
+import cn.chenjun.cloud.management.servcie.HostService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.util.ConfigKey;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +22,7 @@ import java.util.UUID;
 public class HostGuestSyncRunner extends AbstractRunner {
 
     @Autowired
-    private HostMapper hostMapper;
+    private HostService hostService;
     @Autowired
     private TaskService taskService;
 
@@ -35,7 +34,7 @@ public class HostGuestSyncRunner extends AbstractRunner {
 
     @Override
     protected void dispatch() {
-        List<HostEntity> hostList = hostMapper.selectList(new QueryWrapper<>());
+        List<HostEntity> hostList = hostService.listAllHost();
         for (HostEntity host : hostList) {
             if (host.getStatus() == Constant.HostStatus.ONLINE) {
                 BaseOperateParam operate = SyncHostGuestOperate.builder().hostId(host.getHostId()).title("同步主机客户机信息").id(UUID.randomUUID().toString()).build();
@@ -45,7 +44,7 @@ public class HostGuestSyncRunner extends AbstractRunner {
     }
 
     @Override
-    protected String getName() {
+    public String getName() {
         return "同步主机虚拟机";
     }
 

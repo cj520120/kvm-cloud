@@ -1,30 +1,26 @@
 package cn.chenjun.cloud.management.servcie;
 
 import cn.chenjun.cloud.common.bean.Page;
-import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
-import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
-import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.operate.bean.*;
+import cn.chenjun.cloud.management.servcie.bean.CloneInfo;
+import cn.chenjun.cloud.management.servcie.bean.MigrateVolumeInfo;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DiskSerialUtil;
 import cn.chenjun.cloud.management.util.NameUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun
@@ -39,7 +35,7 @@ public class VolumeService extends AbstractService {
 
 
     private VolumeEntity findAndUpdateVolumeStatus(int volumeId, int status) {
-        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+        VolumeEntity volume = this.volumeDao.findById(volumeId);
         if (volume == null) {
             throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
         }
@@ -47,14 +43,14 @@ public class VolumeService extends AbstractService {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
         }
         volume.setStatus(status);
-        this.volumeMapper.updateById(volume);
+        this.volumeDao.update(volume);
         return volume;
     }
 
 
-    public ResultUtil<List<VolumeModel>> listGuestVolumes(int guestId) {
-        List<VolumeEntity> diskList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, guestId));
-        List<VolumeModel> models = diskList.stream().map(this::initVolume).sorted((o1, o2) -> {
+    public List<VolumeEntity> listGuestVolumes(int guestId) {
+        List<VolumeEntity> diskList = this.volumeDao.listByGuestId(guestId);
+        Collections.sort(diskList, (o1, o2) -> {
             if (o1.getStatus() == o2.getStatus()) {
                 return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
             }
@@ -65,67 +61,41 @@ public class VolumeService extends AbstractService {
                 return 1;
             }
             return Integer.compare(o1.getStatus(), o2.getStatus());
-        }).sorted(Comparator.comparingInt(SimpleVolumeModel::getDeviceId)).collect(Collectors.toList());
-        return ResultUtil.success(models);
+        });
+
+        return diskList;
     }
 
-    public ResultUtil<Page<SimpleVolumeModel>> search(Integer storageId, Integer status, Integer templateId, String volumeType, String keyword, int no, int size) {
-        QueryWrapper<VolumeEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(storageId != null, VolumeEntity.STORAGE_ID, storageId);
-        queryWrapper.eq(templateId != null, VolumeEntity.TEMPLATE_ID, templateId);
-        queryWrapper.eq(status != null, VolumeEntity.VOLUME_STATUS, status);
-        queryWrapper.eq(!ObjectUtils.isEmpty(volumeType), VolumeEntity.VOLUME_TYPE, volumeType);
-        if (!ObjectUtils.isEmpty(keyword)) {
-            queryWrapper.and(o -> {
-                String condition = "%" + keyword + "%";
-                QueryWrapper<VolumeEntity> wrapper = o;
-                wrapper.like(VolumeEntity.VOLUME_NAME, condition)
-                        .or().like(VolumeEntity.VOLUME_DESCRIPTION, condition);
-            });
-        }
-        int nCount = Math.toIntExact(this.volumeMapper.selectCount(queryWrapper));
-        int nOffset = (no - 1) * size;
-        queryWrapper.last("limit " + nOffset + ", " + size);
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(queryWrapper);
-        List<SimpleVolumeModel> models = this.initSimpleVolumeList(volumeList);
-        Page<SimpleVolumeModel> page = Page.create(nCount, nOffset, size);
-        page.setList(models);
-        return ResultUtil.success(page);
+    public Page<VolumeEntity> search(Integer storageId, Integer status, Integer templateId, String volumeType, String keyword, int no, int size) {
+        Page<VolumeEntity> page = this.volumeDao.search(storageId, status, templateId, volumeType, keyword, no, size);
+        return page;
 
     }
 
-    public ResultUtil<List<SimpleVolumeModel>> listVolumes() {
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<>());
-        List<SimpleVolumeModel> models = this.initSimpleVolumeList(volumeList);
-        return ResultUtil.success(models);
+    public List<VolumeEntity> listVolumes() {
+        List<VolumeEntity> volumeList = this.volumeDao.listAll();
+        return volumeList;
     }
 
-    public ResultUtil<List<SimpleVolumeModel>> listNoAttachVolumes(int guestId) {
-        List<VolumeEntity> volumeList = this.volumeMapper.selectList(new QueryWrapper<VolumeEntity>().eq(VolumeEntity.GUEST_ID, 0));
-        int allowHostId = this.getGuestMustStartHostId(guestId);
-        List<SimpleVolumeModel> models = new ArrayList<>();
+    public List<VolumeEntity> listNoAttachVolumes(int guestId) {
+        GuestEntity guest = this.guestDao.findById(guestId);
+        List<VolumeEntity> volumeList = this.volumeDao.listByGuestId(0);
+        int allowHostId = guest == null ? 0 : guest.getBindHostId();
+        List<VolumeEntity> models = new ArrayList<>();
         for (VolumeEntity volume : volumeList) {
             if (!Objects.equals(volume.getStatus(), cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY)) {
                 continue;
             }
             if (allowHostId == 0 || volume.getHostId() == 0 || volume.getHostId() == allowHostId) {
-                models.add(BeanConverter.convert(volume, SimpleVolumeModel.class));
+                models.add(volume);
             }
         }
-        return ResultUtil.success(models);
-    }
-
-    public ResultUtil<VolumeModel> getVolumeInfo(int volumeId) {
-        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
-        if (volume == null) {
-            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
-        }
-        return ResultUtil.success(this.initVolume(volume));
+        return models;
     }
 
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolume(String description, int storageId, int templateId, long volumeSize) {
+    public VolumeEntity createVolume(String description, int storageId, int templateId, long volumeSize) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘备注");
         }
@@ -150,16 +120,16 @@ public class VolumeService extends AbstractService {
                 .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
-        this.volumeMapper.insert(volume);
+        this.volumeDao.insert(volume);
         BaseOperateParam operateParam = CreateVolumeOperate.builder().id(UUID.randomUUID().toString()).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
         operateTask.addTask(operateParam);
-        VolumeModel model = this.initVolume(volume);
+
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(model);
+        return volume;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<CloneModel> cloneVolume(String description, int sourceVolumeId, int storageId) {
+    public CloneInfo cloneVolume(String description, int sourceVolumeId, int storageId) {
 
         StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType = getVolumeType(storage);
@@ -179,7 +149,7 @@ public class VolumeService extends AbstractService {
             }
         }
         volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.CLONE);
-        this.volumeMapper.updateById(volume);
+        this.volumeDao.update(volume);
         VolumeEntity cloneVolume = VolumeEntity.builder()
                 .storageId(storage.getStorageId())
                 .hostId(storage.getHostId())
@@ -195,29 +165,27 @@ public class VolumeService extends AbstractService {
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .createTime(new Date())
                 .build();
-        this.volumeMapper.insert(cloneVolume);
+        this.volumeDao.insert(cloneVolume);
         BaseOperateParam operateParam = CloneVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(cloneVolume.getVolumeId())
                 .title("克隆磁盘[" + volume.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
-        VolumeModel source = this.initVolume(volume);
-        VolumeModel clone = this.initVolume(cloneVolume);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         this.notifyService.publish(NotifyData.<Void>builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(CloneModel.builder().source(source).clone(clone).build());
+        return CloneInfo.builder().source(volume).clone(cloneVolume).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> resizeVolume(int volumeId, long size) {
+    public VolumeEntity resizeVolume(int volumeId, long size) {
         if (size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入新增的磁盘大小");
         }
         VolumeEntity volume = this.findAndUpdateVolumeStatus(volumeId, cn.chenjun.cloud.common.util.Constant.VolumeStatus.RESIZE);
         volume.setCapacity(volume.getCapacity() + size);
         volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.RESIZE);
-        this.volumeMapper.updateById(volume);
+        this.volumeDao.update(volume);
         BaseOperateParam operateParam = ResizeVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .title("更改磁盘大小[" + volume.getName() + "]")
                 .volumeId(volume.getVolumeId())
@@ -225,11 +193,11 @@ public class VolumeService extends AbstractService {
                 .build();
         operateTask.addTask(operateParam);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(this.initVolume(volume));
+        return volume;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<MigrateModel> migrateVolume(int sourceVolumeId, int storageId) {
+    public MigrateVolumeInfo migrateVolume(int sourceVolumeId, int storageId) {
         StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         String volumeType = getVolumeType(storage);
         String volumeName = NameUtil.generateVolumeName();
@@ -248,7 +216,7 @@ public class VolumeService extends AbstractService {
             }
         }
         volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.MIGRATE);
-        this.volumeMapper.updateById(volume);
+        this.volumeDao.update(volume);
         VolumeEntity migrateVolume = VolumeEntity.builder()
                 .description(volume.getDescription())
                 .storageId(storage.getStorageId())
@@ -267,47 +235,42 @@ public class VolumeService extends AbstractService {
                 .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
-        this.volumeMapper.insert(migrateVolume);
+        this.volumeDao.insert(migrateVolume);
         BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .title("迁移磁盘[" + volume.getName() + "]")
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(migrateVolume.getVolumeId())
                 .build();
         operateTask.addTask(operateParam);
-        VolumeModel source = this.initVolume(volume);
-        VolumeModel migrate = this.initVolume(migrateVolume);
         this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(migrate.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        return ResultUtil.success(MigrateModel.builder().source(source).migrate(migrate).build());
+        this.notifyService.publish(NotifyData.<Void>builder().id(migrateVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        return MigrateVolumeInfo.builder().source(volume).migrate(migrateVolume).build();
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<List<VolumeModel>> batchDestroyVolume(List<Integer> volumeIds) {
-        List<VolumeModel> models = new ArrayList<>(volumeIds.size());
+    public List<VolumeEntity> batchDestroyVolume(List<Integer> volumeIds) {
+        List<VolumeEntity> models = new ArrayList<>(volumeIds.size());
         for (Integer volumeId : volumeIds) {
             try {
-                models.add(this.destroyVolume(volumeId).getData());
+                models.add(this.destroyVolume(volumeId));
             } catch (Exception ignored) {
 
             }
         }
-        return ResultUtil.success(models);
+        return models;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> createVolumeTemplate(int volumeId, String name) {
-        ResultUtil<TemplateModel> resultUtil = this.templateService.createVolumeTemplate(volumeId, name);
-        if (resultUtil.getCode() != ErrorCode.SUCCESS) {
-            return ResultUtil.error(resultUtil.getCode(), resultUtil.getMessage());
-        }
-        return this.getVolumeInfo(volumeId);
+    public VolumeEntity createVolumeTemplate(int volumeId, String name, String arch) {
+        this.templateService.createVolumeTemplate(volumeId, name, arch);
+        return this.getVolumeById(volumeId);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResultUtil<VolumeModel> destroyVolume(int volumeId) {
-        VolumeEntity volume = this.volumeMapper.selectById(volumeId);
+    public VolumeEntity destroyVolume(int volumeId) {
+        VolumeEntity volume = this.volumeDao.findById(volumeId);
         if (volume == null) {
-            return ResultUtil.error(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
+            throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
         }
         switch (volume.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR:
@@ -316,19 +279,18 @@ public class VolumeService extends AbstractService {
                     throw new CodeException(ErrorCode.GUEST_VOLUME_HAS_ATTACH_ERROR, "当前磁盘被系统挂载");
                 }
                 volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.DESTROY);
-                volumeMapper.updateById(volume);
+                volumeDao.update(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate, volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE));
-                VolumeModel source = this.initVolume(volume);
+
                 this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-                return ResultUtil.success(source);
+                return volume;
             }
             case Constant.VolumeStatus.DESTROY: {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate, 0);
-                VolumeModel source = this.initVolume(volume);
                 this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-                return ResultUtil.success(source);
+                return volume;
             }
             default:
                 throw new CodeException(ErrorCode.VOLUME_NOT_READY, "磁盘当前状态未就绪");
