@@ -109,11 +109,11 @@ public class ConvertService {
             model.setHost(this.initHostModel(RequestContextHolderUtil.get("Host." + volume.getHostId(), () -> this.hostService.getHostById(volume.getHostId()))));
         }
         if (volume.getGuestId() != 0) {
-            model.setGuest(BeanConverter.convert((volume.getGuestId()), SimpleGuestModel.class));
+            model.setGuest(BeanConverter.convert(RequestContextHolderUtil.get("Guest." + volume.getGuestId(), () ->this.guestService.getGuestById(volume.getGuestId())), SimpleGuestModel.class));
         }
-        model.setStorage(BeanConverter.convert(RequestContextHolderUtil.get("Storage." + volume.getHostId(), () -> this.storageService.getStorageById(volume.getStorageId())), SimpleStorageModel.class));
+        model.setStorage(BeanConverter.convert(RequestContextHolderUtil.get("Storage." + volume.getStorageId(), () -> this.storageService.getStorageById(volume.getStorageId())), SimpleStorageModel.class));
         if (volume.getTemplateId() > 0) {
-            model.setTemplate(BeanConverter.convert(RequestContextHolderUtil.get("Template." + volume.getHostId(), () -> this.templateService.getTemplateById(volume.getTemplateId())), TemplateModel.class));
+            model.setTemplate(BeanConverter.convert(RequestContextHolderUtil.get("Template." + volume.getTemplateId(), () -> this.templateService.getTemplateById(volume.getTemplateId())), TemplateModel.class));
         }
         return model;
     }
