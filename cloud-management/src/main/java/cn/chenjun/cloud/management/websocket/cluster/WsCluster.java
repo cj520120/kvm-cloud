@@ -28,8 +28,6 @@ import java.util.Optional;
 public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<?>> {
     @Autowired
     private RedissonClient redissonClient;
-    @Autowired
-    private LockRunner lockRunner;
     private RTopic topic;
     @Autowired
     private PluginRegistry<ClusterMessageProcess, Integer> processPluginRegistry;
@@ -43,11 +41,10 @@ public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<
     @Override
     public void onMessage(CharSequence channel, NotifyData<?> msg) {
         try {
-
             RequestContextHolderUtil.initContext();
             Optional<ClusterMessageProcess> optional = this.processPluginRegistry.getPluginFor(msg.getType());
             ClusterMessageProcess process = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的注册方式"));
-            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> process.process(msg));
+            process.process(msg);
         } catch (Exception err) {
             log.error("process cluster msg fail.msg={}", msg, err);
         }finally {

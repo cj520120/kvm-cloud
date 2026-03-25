@@ -22,7 +22,11 @@ public class NotifyService {
     }
 
     public <T> void publish(NotifyData<T> data) {
-        this.topic.publish(data);
+        try {
+            this.topic.publish(data);
+        }catch (Exception e){
+            log.error("发布消息失败:{}",data,e);
+        }
     }
 
 

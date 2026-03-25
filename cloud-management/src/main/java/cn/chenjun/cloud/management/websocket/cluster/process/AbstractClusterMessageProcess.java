@@ -4,14 +4,17 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.servcie.LockRunner;
+import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
-
-import java.util.concurrent.Callable;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author chenjun
  */
 public abstract class AbstractClusterMessageProcess<T> implements ClusterMessageProcess {
+    @Autowired
+    private LockRunner lockRunner;
 
     @Override
     public boolean supports(Integer type) {
@@ -34,9 +37,9 @@ public abstract class AbstractClusterMessageProcess<T> implements ClusterMessage
 
     protected abstract void doProcess(NotifyData<T> msg);
 
-    protected <S, T> ResultUtil<T> getResourceData(Callable<S> callable, BeanConverter.Converter<S, T> converter) {
+    protected <S, T> ResultUtil<T> getResourceData(LockRunner.LockAction<S> runnable, BeanConverter.Converter<S, T> converter) {
         try {
-            S result = callable.call();
+            S result = lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), runnable);
             T data = converter.convert(result);
             return ResultUtil.<T>builder().data(data).code(ErrorCode.SUCCESS).build();
         } catch (CodeException e) {

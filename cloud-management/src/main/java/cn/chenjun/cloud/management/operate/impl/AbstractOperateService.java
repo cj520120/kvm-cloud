@@ -14,9 +14,7 @@ import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
-import cn.chenjun.cloud.management.util.ConfigKey;
-import cn.chenjun.cloud.management.util.DomainUtil;
-import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.util.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.redisson.api.RedissonClient;
@@ -109,6 +107,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
         Objects.requireNonNull(host.getClientSecret(), "clientSecret cannot be null");
 
         this.executor.submit(() -> {
+            RequestContextHolderUtil.initContext();
             Gson gson = GsonBuilderUtil.create();
             try {
                 TaskRequest taskRequest = TaskRequest.builder()
@@ -156,6 +155,9 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 }
             } catch (Exception err) {
                 this.onSubmitFinishEvent(param.getTaskId(), (V) ResultUtil.error(ErrorCode.SERVER_ERROR, "Request error: " + err.getMessage()));
+            }finally {
+                RequestContextHolderUtil.clearContext();
+                NotifyContextHolderUtil.afterCompletion();
             }
         });
     }

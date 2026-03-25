@@ -72,24 +72,25 @@ public class OperateEngine {
 
     @EventListener
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
-        this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
-            try {
-                RequestContextHolderUtil.initContext();
-                log.info("任务回调:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
-                Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
-                BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);
+        this.executor.submit(() ->{
+            RequestContextHolderUtil.initContext();
+            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
                 try {
-                    this.onFinish(operateParam, operateFinishBean.getResult());
-                    this.taskService.deleteTask(operateFinishBean.getTaskId());
+                    log.info("任务回调:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
+                    Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
+                    BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);
+                    try {
+                        this.onFinish(operateParam, operateFinishBean.getResult());
+                        this.taskService.deleteTask(operateFinishBean.getTaskId());
+                    } catch (Exception err) {
+                        log.error("任务回调失败.param={} result={}", operateParam, operateFinishBean.getResult(), err);
+                    }
                 } catch (Exception err) {
-                    log.error("任务回调失败.param={} result={}", operateParam, operateFinishBean.getResult(), err);
+                    log.error("解析任务参数出错:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
                 }
-            } catch (Exception err) {
-                log.error("解析任务参数出错:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
-            }finally {
-                RequestContextHolderUtil.clearContext();
-                NotifyContextHolderUtil.afterCompletion();
-            }
-        }));
+            });
+            RequestContextHolderUtil.clearContext();
+            NotifyContextHolderUtil.afterCompletion();
+        });
     }
 }
