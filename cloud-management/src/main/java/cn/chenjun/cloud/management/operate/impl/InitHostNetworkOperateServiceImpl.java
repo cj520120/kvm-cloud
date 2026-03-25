@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +101,7 @@ public class InitHostNetworkOperateServiceImpl extends AbstractOperateService<In
                         default:
                             break;
                     }
-                    this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                    NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
                 }
             } else {
                 InitHostNetworkOperate operate = InitHostNetworkOperate.builder().id(UUID.randomUUID().toString())
@@ -121,7 +122,7 @@ public class InitHostNetworkOperateServiceImpl extends AbstractOperateService<In
                     default:
                         break;
                 }
-                this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
     }

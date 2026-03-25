@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 /**
  * @author chenjun
  */
@@ -17,4 +19,16 @@ public class NotifyData<T> {
     private int id;
     private T data;
     private long version;
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof NotifyData)) return false;
+        NotifyData<?> that = (NotifyData<?>) o;
+        return type == that.type && id == that.id && Objects.equals(data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, id, data);
+    }
 }

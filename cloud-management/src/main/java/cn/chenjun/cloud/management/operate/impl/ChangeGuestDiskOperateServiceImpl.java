@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestDiskOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -98,8 +99,8 @@ public class ChangeGuestDiskOperateServiceImpl extends AbstractOsOperateService<
             //卸载block类型的磁盘时，直接删除磁盘记录
             volumeDao.deleteById(param.getVolumeId());
         }
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

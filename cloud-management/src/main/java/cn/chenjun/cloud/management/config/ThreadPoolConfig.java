@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.config;
 
-
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

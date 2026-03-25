@@ -8,6 +8,7 @@ import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestNetworkInterfaceOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +64,7 @@ public class ChangeGuestNetworkInterfaceOperateServiceImpl extends AbstractOsOpe
                 this.allocateService.releaseNetwork(param.getGuestNetworkId());
             }
         }
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 
     }
 

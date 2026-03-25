@@ -5,7 +5,10 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
-import cn.chenjun.cloud.management.servcie.*;
+import cn.chenjun.cloud.management.servcie.ComponentService;
+import cn.chenjun.cloud.management.servcie.HostService;
+import cn.chenjun.cloud.management.servcie.LockRunner;
+import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.HostRole;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
@@ -25,8 +28,7 @@ import java.util.stream.Collectors;
 @Component
 public class ComponentCheckRunner extends AbstractRunner {
     static final List<Integer> NETWORK_STATUS_CHECK_LIST = Arrays.asList(Constant.NetworkStatus.READY, Constant.NetworkStatus.INSTALL);
-    @Autowired
-    protected NotifyService notifyService;
+
     @Autowired
     private NetworkService networkService;
     @Autowired

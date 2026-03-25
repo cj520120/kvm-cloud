@@ -9,6 +9,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateVolumeTemplateOperate;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -85,9 +86,9 @@ public class CreateVolumeTemplateOperateServiceImpl extends AbstractOperateServi
             }
         }
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getSourceVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
         if (targetVolume != null) {
-            this.notifyService.publish(NotifyData.<Void>builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(targetVolume.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
     }
 

@@ -12,13 +12,11 @@ import cn.chenjun.cloud.management.data.dao.*;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.servcie.AllocateService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
-import cn.chenjun.cloud.management.servcie.NotifyService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
-import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.redisson.api.RedissonClient;
@@ -64,8 +62,6 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     protected SchemeDao schemeDao;
     @Autowired
     protected AllocateService allocateService;
-    @Autowired
-    protected NotifyService notifyService;
     @Autowired
     @Lazy
     protected TaskService taskService;
@@ -174,12 +170,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     @SuppressWarnings("unchecked")
     @Override
     public void onComplete(BaseOperateParam param, ResultUtil<?> resultUtil) {
-        try {
-            RequestContextHolderUtil.initContext();
-            this.onFinish((T) param, (V) resultUtil);
-        }finally {
-            RequestContextHolderUtil.clearContext();
-        }
+        this.onFinish((T) param, (V) resultUtil);
     }
 
 

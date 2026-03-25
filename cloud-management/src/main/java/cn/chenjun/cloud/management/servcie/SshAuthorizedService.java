@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
 import cn.chenjun.cloud.management.servcie.bean.MemSshInfo;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -64,7 +65,7 @@ public class SshAuthorizedService extends AbstractService {
     public SshAuthorizedEntity importSshKey(String name, String publicKey, String privateKey) {
         SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPublicKey(publicKey).sshPrivateKey(privateKey).build();
         this.sshAuthorizedDao.insert(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
 
         return entity;
     }
@@ -72,7 +73,7 @@ public class SshAuthorizedService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteSshKey(int id) {
         this.sshAuthorizedDao.deleteById(id);
-        this.notifyService.publish(NotifyData.<Void>builder().id(id).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(id).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
 
     }
 
@@ -95,7 +96,7 @@ public class SshAuthorizedService extends AbstractService {
                 String publicKey = "ssh-rsa " + Base64.getEncoder().encodeToString(publicKeyBuffer) + " cj-kvm-ssh-key";
                 SshAuthorizedEntity entity = SshAuthorizedEntity.builder().sshName(name).sshPrivateKey(privateKey).sshPublicKey(publicKey).build();
                 this.sshAuthorizedDao.insert(entity);
-                this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
                 return entity;
             }
 
@@ -113,7 +114,7 @@ public class SshAuthorizedService extends AbstractService {
         }
         entity.setSshName(name);
         this.sshAuthorizedDao.update(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_SSH).build());
         return entity;
     }
 

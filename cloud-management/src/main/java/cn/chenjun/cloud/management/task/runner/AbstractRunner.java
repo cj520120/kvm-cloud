@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.task.runner;
 
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.LockRunner;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public abstract class AbstractRunner {
             log.error("周期任务执行失败.", err);
         }finally {
             RequestContextHolderUtil.clearContext();
+            NotifyContextHolderUtil.afterCompletion();
         }
     }
 

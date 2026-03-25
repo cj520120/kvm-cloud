@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.VolumeCheckOperate;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,7 @@ public class StorageVolumeCheckOperateServiceImpl extends AbstractOperateService
                             .path(info.getPath())
                             .build();
                     this.volumeDao.update(updateVolume);
-                    this.notifyService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());
+                    NotifyContextHolderUtil.append(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_VOLUME).id(sourceVolume.getVolumeId()).build());
                 }
             }
         }

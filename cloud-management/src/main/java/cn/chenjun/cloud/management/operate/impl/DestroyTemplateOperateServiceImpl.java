@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.data.entity.TemplateEntity;
 import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +67,7 @@ public class DestroyTemplateOperateServiceImpl extends AbstractOperateService<De
         if (template != null && template.getStatus() == Constant.TemplateStatus.DESTROY) {
             this.templateDao.deleteById(template.getTemplateId());
             this.guestDao.detachCdByTemplateId(template.getTemplateId());
-            this.notifyService.publish(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getTemplateId()).type(Constant.NotifyType.UPDATE_TEMPLATE).build());
         }
 
     }

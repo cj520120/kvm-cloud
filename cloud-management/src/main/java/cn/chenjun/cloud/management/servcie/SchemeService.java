@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.SchemeEntity;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +71,7 @@ public class SchemeService extends AbstractService {
         verifySchemeParam(name, cpu, memory, share, sockets, cores, threads);
         SchemeEntity entity = SchemeEntity.builder().name(name).cpu(cpu).memory(memory).share(share).sockets(sockets).cores(cores).threads(threads).build();
         this.schemeDao.insert(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
 
         return entity;
     }
@@ -90,14 +91,14 @@ public class SchemeService extends AbstractService {
         entity.setCores(cores);
         entity.setThreads(threads);
         this.schemeDao.update(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getSchemeId()).type(Constant.NotifyType.UPDATE_SCHEME).build());
         return entity;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void destroyScheme(int schemeId) {
         this.schemeDao.deleteById(schemeId);
-        this.notifyService.publish(NotifyData.<Void>builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(schemeId).type(Constant.NotifyType.UPDATE_SCHEME).build());
 
     }
 

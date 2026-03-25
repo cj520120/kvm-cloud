@@ -14,6 +14,7 @@ import cn.chenjun.cloud.management.servcie.bean.MigrateVolumeInfo;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DiskSerialUtil;
 import cn.chenjun.cloud.management.util.NameUtil;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,7 +125,7 @@ public class VolumeService extends AbstractService {
         BaseOperateParam operateParam = CreateVolumeOperate.builder().id(UUID.randomUUID().toString()).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
         operateTask.addTask(operateParam);
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return volume;
     }
 
@@ -172,8 +173,8 @@ public class VolumeService extends AbstractService {
                 .title("克隆磁盘[" + volume.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(cloneVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return CloneInfo.builder().source(volume).clone(cloneVolume).build();
     }
 
@@ -192,7 +193,7 @@ public class VolumeService extends AbstractService {
                 .size(volume.getCapacity())
                 .build();
         operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return volume;
     }
 
@@ -242,8 +243,8 @@ public class VolumeService extends AbstractService {
                 .targetVolumeId(migrateVolume.getVolumeId())
                 .build();
         operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(migrateVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(migrateVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return MigrateVolumeInfo.builder().source(volume).migrate(migrateVolume).build();
     }
 
@@ -283,13 +284,13 @@ public class VolumeService extends AbstractService {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate, volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE));
 
-                this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return volume;
             }
             case Constant.VolumeStatus.DESTROY: {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
                 operateTask.addTask(operate, 0);
-                this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return volume;
             }
             default:

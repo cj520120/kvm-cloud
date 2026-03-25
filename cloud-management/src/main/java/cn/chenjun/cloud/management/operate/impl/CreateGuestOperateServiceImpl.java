@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StartGuestOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -53,9 +54,9 @@ public class CreateGuestOperateServiceImpl extends CreateVolumeOperateServiceImp
                 guestDao.update(guest);
                 this.allocateService.initHostAllocate();
             }
-            this.notifyService.publish(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
         }
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

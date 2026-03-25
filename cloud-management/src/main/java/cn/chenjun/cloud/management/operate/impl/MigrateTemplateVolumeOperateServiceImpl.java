@@ -13,6 +13,7 @@ import cn.chenjun.cloud.management.data.entity.TemplateVolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyTemplateVolumeOperate;
 import cn.chenjun.cloud.management.operate.bean.MigrateTemplateVolumeOperate;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +96,7 @@ public class MigrateTemplateVolumeOperateServiceImpl extends AbstractOperateServ
         }
         template.setStatus(Constant.TemplateStatus.READY);
         this.templateDao.update(template);
-        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
 
     }
 

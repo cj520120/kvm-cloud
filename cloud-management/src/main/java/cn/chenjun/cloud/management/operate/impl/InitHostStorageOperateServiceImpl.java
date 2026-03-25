@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.InitHostStorageOperate;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -90,7 +91,7 @@ public class InitHostStorageOperateServiceImpl extends AbstractOperateService<In
                 storage.setStatus(Constant.StorageStatus.ERROR);
             }
             storageDao.update(storage);
-            this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
         }
         if (!hostStorageBinds.isEmpty()) {
             InitHostStorageOperate operate = InitHostStorageOperate.builder().id(UUID.randomUUID().toString())
@@ -108,7 +109,7 @@ public class InitHostStorageOperateServiceImpl extends AbstractOperateService<In
                 }
             }
             storageDao.update(storage);
-            this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
         }
     }
 

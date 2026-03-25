@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class DestroyVolumeOperateServiceImpl extends AbstractOperateService<Dest
             volumeDao.deleteById(param.getVolumeId());
         }
         this.configService.deleteAllocateConfig(Constant.ConfigType.VOLUME, param.getVolumeId());
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getVolumeId()).type(Constant.NotifyType.UPDATE_VOLUME).build());
     }
 
     @Override

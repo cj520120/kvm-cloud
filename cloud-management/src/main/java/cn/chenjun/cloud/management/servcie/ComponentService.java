@@ -146,7 +146,7 @@ public class ComponentService extends AbstractService {
                 .build();
         this.componentGuestDao.insert(componentGuest);
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(componentGuest.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(componentGuest.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
         return componentGuest;
     }
 
@@ -174,7 +174,7 @@ public class ComponentService extends AbstractService {
             if (network.getStatus() != cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
                 network.setStatus(Constant.NetworkStatus.READY);
                 this.networkDao.update(network);
-                this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
 
             }
             log.info("网络不需要安装组件，network_id={}", network.getNetworkId());
@@ -211,11 +211,11 @@ public class ComponentService extends AbstractService {
             if (componentReady && !Objects.equals(Constant.NetworkStatus.READY, network.getStatus())) {
                 network.setStatus(Constant.NetworkStatus.READY);
                 this.networkDao.update(network);
-                this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             } else if (!componentReady && !Objects.equals(Constant.NetworkStatus.INSTALL, network.getStatus())) {
                 network.setStatus(Constant.NetworkStatus.INSTALL);
                 this.networkDao.update(network);
-                this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(Constant.NotifyType.UPDATE_NETWORK).build());
             }
         }
         return componentReady;

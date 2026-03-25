@@ -10,6 +10,7 @@ import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -122,7 +123,7 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
             }
             this.hostDao.update(host);
         }
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
 
     }
 

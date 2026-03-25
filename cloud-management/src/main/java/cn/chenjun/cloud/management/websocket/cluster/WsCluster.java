@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.websocket.cluster;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.servcie.LockRunner;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.cluster.process.ClusterMessageProcess;
@@ -51,6 +52,7 @@ public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<
             log.error("process cluster msg fail.msg={}", msg, err);
         }finally {
             RequestContextHolderUtil.clearContext();
+            NotifyContextHolderUtil.afterCompletion();
         }
     }
 

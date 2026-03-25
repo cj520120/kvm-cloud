@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateStorageOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public abstract class AbstractHostStorageService extends AbstractService {
             this.storageDao.insert(storage);
             BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
             this.operateTask.addTask(operateParam);
-            this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
         }
     }
 }

@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.StorageCheckOperate;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +72,7 @@ public class StorageCheckOperateServiceImpl extends AbstractOperateService<Stora
                                 .allocation(info.getAllocation())
                                 .build();
                         this.storageDao.update(updateStorage);
-                        this.notifyService.publish(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
+                        NotifyContextHolderUtil.append(NotifyData.<Void>builder().type(Constant.NotifyType.UPDATE_STORAGE).id(sourceEntity.getStorageId()).build());
                     }
                 }
             }

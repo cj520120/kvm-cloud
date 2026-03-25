@@ -12,6 +12,7 @@ import cn.chenjun.cloud.management.model.UserModel;
 import cn.chenjun.cloud.management.servcie.bean.RefreshTokenInfo;
 import cn.chenjun.cloud.management.servcie.bean.TokenInfo;
 import cn.chenjun.cloud.management.servcie.bean.UserSignatureInfo;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.core.lang.UUID;
@@ -117,7 +118,7 @@ public class UserService extends AbstractService {
         }
         loginInfoEntity.setLoginPassword(newPassword);
         userDao.update(loginInfoEntity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
 
 
     }
@@ -139,7 +140,7 @@ public class UserService extends AbstractService {
         String pwd = DigestUtil.sha256Hex(password + ":" + salt);
         entity = UserEntity.builder().userStatus(userStatus).userName(userName).loginType(cn.chenjun.cloud.common.util.Constant.LoginType.LOCAL).userType(userType).loginName(loginName).loginPasswordSalt(salt).loginPassword(pwd).createTime(new Date()).build();
         userDao.insert(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getUserId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getUserId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
         return entity;
     }
 
@@ -159,7 +160,7 @@ public class UserService extends AbstractService {
         RBucket<UserModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
         rUserInfo.delete();
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(userId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_USER).build());
         return loginInfoEntity;
     }
 

@@ -9,6 +9,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +96,7 @@ public class HostService extends AbstractHostStorageService {
                 .title("添加主机[" + host.getDisplayName() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return host;
     }
 
@@ -115,7 +116,7 @@ public class HostService extends AbstractHostStorageService {
         BaseOperateParam operateParam = CreateHostOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString())
                 .title("注册主机[" + host.getDisplayName() + "]").build();
         this.operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return host;
     }
 
@@ -128,7 +129,7 @@ public class HostService extends AbstractHostStorageService {
 
         host.setStatus(Constant.HostStatus.MAINTENANCE);
         this.hostDao.update(host);
-        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return host;
 
     }
@@ -141,7 +142,7 @@ public class HostService extends AbstractHostStorageService {
 
         host.setRole(role);
         this.hostDao.update(host);
-        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
         return host;
 
     }
@@ -161,7 +162,7 @@ public class HostService extends AbstractHostStorageService {
         this.hostDao.deleteById(hostId);
         this.storageDao.deleteByHostId(hostId);
         this.configService.deleteAllocateConfig(Constant.ConfigType.HOST, hostId);
-        this.notifyService.publish(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(host.getHostId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_HOST).build());
 
     }
 

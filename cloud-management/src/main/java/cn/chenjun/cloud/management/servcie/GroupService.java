@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GroupEntity;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,7 @@ public class GroupService extends AbstractService {
     public GroupEntity createGroup(String groupName) {
         GroupEntity entity = GroupEntity.builder().groupName(groupName).createTime(new Date()).build();
         groupDao.insert(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
         return entity;
     }
 
@@ -48,7 +49,7 @@ public class GroupService extends AbstractService {
         }
         entity.setGroupName(groupName);
         groupDao.update(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getGroupId()).type(Constant.NotifyType.UPDATE_GROUP).build());
         return entity;
     }
 
@@ -56,7 +57,7 @@ public class GroupService extends AbstractService {
 
     public void deleteGroup(int groupId) {
         groupDao.deleteById(groupId);
-        this.notifyService.publish(NotifyData.<Void>builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(groupId).type(Constant.NotifyType.UPDATE_GROUP).build());
 
     }
 

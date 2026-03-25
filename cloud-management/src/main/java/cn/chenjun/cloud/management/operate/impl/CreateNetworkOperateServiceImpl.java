@@ -7,6 +7,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +59,7 @@ public class CreateNetworkOperateServiceImpl extends AbstractOperateService<Crea
             }
         }
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
 
     }
 

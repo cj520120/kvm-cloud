@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.data.entity.DnsEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.model.DnsModel;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,17 +54,17 @@ public class DnsService extends AbstractService {
         DnsEntity entity = this.dnsDao.findById(dnsId);
         if (entity != null) {
             this.dnsDao.deleteById(dnsId);
-            this.notifyService.publish(NotifyData.<List<DnsModel>>builder().id(entity.getNetworkId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(entity.getNetworkId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
         }
-        this.notifyService.publish(NotifyData.<Void>builder().id(dnsId).type(Constant.NotifyType.UPDATE_DNS).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(dnsId).type(Constant.NotifyType.UPDATE_DNS).build());
 
     }
 
     public DnsEntity createDns(int networkId, String domain, String ip) {
         DnsEntity entity = DnsEntity.builder().dnsIp(ip).dnsDomain(domain).networkId(networkId).createTime(new Date()).build();
         dnsDao.insert(entity);
-        this.notifyService.publish(NotifyData.<List<DnsModel>>builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getDnsId()).type(Constant.NotifyType.UPDATE_DNS).build());
+        NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getDnsId()).type(Constant.NotifyType.UPDATE_DNS).build());
         return entity;
     }
 

@@ -8,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 public class GuestExternUtil {
     private static final int VNC_PASSWORD_SIZE = 8;

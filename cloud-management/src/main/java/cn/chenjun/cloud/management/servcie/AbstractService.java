@@ -38,8 +38,6 @@ public abstract class AbstractService {
     @Autowired
     protected SchemeDao schemeDao;
     @Autowired
-    protected NotifyService notifyService;
-    @Autowired
     protected ComponentDao componentDao;
     @Autowired
     protected SshAuthorizedDao sshAuthorizedDao;

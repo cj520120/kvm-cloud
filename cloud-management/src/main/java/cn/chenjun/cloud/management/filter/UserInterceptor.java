@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.model.LoginUserModel;
 import cn.chenjun.cloud.management.servcie.UserService;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,5 +52,6 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         RequestContextHolderUtil.clearContext();
+        NotifyContextHolderUtil.afterCompletion();
     }
 }

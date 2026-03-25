@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.ChangeGuestCdRoomOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class ChangeGuestCdRoomOperateServiceImpl extends AbstractOsOperateServic
 
     @Override
     public void onFinish(ChangeGuestCdRoomOperate param, ResultUtil<Void> resultUtil) {
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
     }
 
     @Override

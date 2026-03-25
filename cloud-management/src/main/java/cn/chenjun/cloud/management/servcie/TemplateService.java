@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.operate.bean.DestroyTemplateOperate;
 import cn.chenjun.cloud.management.operate.bean.DownloadTemplateOperate;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.NameUtil;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,7 @@ public class TemplateService extends AbstractService {
                 .status(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DOWNLOAD)
                 .build();
         this.templateDao.insert(template);
-        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return this.downloadTemplate(template.getTemplateId());
     }
 
@@ -83,7 +84,7 @@ public class TemplateService extends AbstractService {
         template.setLocalCloudCfg(localCloudCfg);
         template.setCloudWaitFlag(cloudWaitFlag);
         templateDao.update(template);
-        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return template;
     }
 
@@ -116,7 +117,7 @@ public class TemplateService extends AbstractService {
                 this.templateDao.update(template);
                 BaseOperateParam operateParam = DownloadTemplateOperate.builder().id(UUID.randomUUID().toString()).title("下载模版[" + template.getName() + "]").templateVolumeId(templateVolume.getTemplateVolumeId()).build();
                 operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
                 return template;
 
             default:
@@ -177,8 +178,8 @@ public class TemplateService extends AbstractService {
                 .title("创建磁盘模版[" + template.getName() + "]")
                 .build();
         operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volumeId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return template;
 
     }
@@ -202,7 +203,7 @@ public class TemplateService extends AbstractService {
         this.templateDao.update(template);
         BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
         operateTask.addTask(operate, timeout);
-        this.notifyService.publish(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return template;
 
     }

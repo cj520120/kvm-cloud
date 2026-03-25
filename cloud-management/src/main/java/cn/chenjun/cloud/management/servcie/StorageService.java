@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DiskSerialUtil;
 import cn.chenjun.cloud.management.util.NameUtil;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -102,8 +103,8 @@ public class StorageService extends AbstractHostStorageService {
                         .targetVolumeId(migrateVolume.getVolumeId())
                         .build();
                 operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-                this.notifyService.publish(NotifyData.<Void>builder().id(migrateVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(migrateVolume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
 
             }
         }
@@ -144,7 +145,7 @@ public class StorageService extends AbstractHostStorageService {
                         .targetTemplateVolumeId(targetVolume.getTemplateVolumeId())
                         .build();
                 operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(template.getTemplateId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
             }
         }
         return this.getStorageInfo(sourceStorageId);
@@ -201,7 +202,7 @@ public class StorageService extends AbstractHostStorageService {
         }
         BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("创建存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
         this.operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
         return storage;
     }
 
@@ -221,7 +222,7 @@ public class StorageService extends AbstractHostStorageService {
                 updateStorageStatus(storage, cn.chenjun.cloud.common.util.Constant.StorageStatus.INIT);
                 BaseOperateParam operateParam = CreateStorageOperate.builder().id(UUID.randomUUID().toString()).title("注册存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
                 return storage;
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_READY, "等待存储池状态就绪");
@@ -237,7 +238,7 @@ public class StorageService extends AbstractHostStorageService {
         storage.setSupportCategory(supportCategory);
         this.storageDao.update(storage);
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
         return storage;
 
     }
@@ -262,7 +263,7 @@ public class StorageService extends AbstractHostStorageService {
     private void updateStorageStatus(StorageEntity storage, int status) {
         storage.setStatus(status);
         this.storageDao.update(storage);
-        this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
 
 
         if (storage.getType().equalsIgnoreCase(Constant.StorageType.LOCAL) && storage.getHostId() == 0) {
@@ -271,7 +272,7 @@ public class StorageService extends AbstractHostStorageService {
             for (StorageEntity childStorage : childStorageList) {
                 childStorage.setStatus(status);
                 this.storageDao.update(childStorage);
-                this.notifyService.publish(NotifyData.<Void>builder().id(childStorage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(childStorage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
             }
         }
     }
@@ -316,7 +317,7 @@ public class StorageService extends AbstractHostStorageService {
                 this.storageDao.update(storage);
                 BaseOperateParam operateParam = DestroyStorageOperate.builder().id(UUID.randomUUID().toString()).title("销毁存储池[" + storage.getName() + "]").storageId(storage.getStorageId()).build();
                 this.operateTask.addTask(operateParam);
-                this.notifyService.publish(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
 
                 if (storage.getType().equals(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
                     List<StorageEntity> childStorageList = this.storageDao.listStorageByParentStorageId(storage.getStorageId());
@@ -325,7 +326,7 @@ public class StorageService extends AbstractHostStorageService {
                         this.storageDao.update(childStorage);
                         BaseOperateParam childOperateParam = DestroyStorageOperate.builder().id(UUID.randomUUID().toString()).title("销毁存储池[" + childStorage.getName() + "]").storageId(childStorage.getStorageId()).build();
                         this.operateTask.addTask(childOperateParam);
-                        this.notifyService.publish(NotifyData.<Void>builder().id(childStorage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+                        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(childStorage.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
                     }
                 }
                 return storage;

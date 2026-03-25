@@ -147,8 +147,8 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
             this.guestDao.update(guest);
             this.allocateService.initHostAllocate();
         }
-        this.notifyService.publish(NotifyData.<ResultUtil<GuestEntity>>builder().id(param.getGuestId()).type(Constant.NotifyType.GUEST_START_CALLBACK_NOTIFY).data(ResultUtil.<GuestEntity>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).data(guest).build()).build());
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
+        NotifyContextHolderUtil.append(NotifyData.<ResultUtil<GuestEntity>>builder().id(param.getGuestId()).type(Constant.NotifyType.GUEST_START_CALLBACK_NOTIFY).data(ResultUtil.<GuestEntity>builder().code(resultUtil.getCode()).message(resultUtil.getMessage()).data(guest).build()).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
 
     }
 

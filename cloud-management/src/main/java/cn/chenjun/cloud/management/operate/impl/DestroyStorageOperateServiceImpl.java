@@ -7,6 +7,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostStorageOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyStorageOperate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,7 @@ public class DestroyStorageOperateServiceImpl extends AbstractOperateService<Des
             }
         }
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getStorageId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_STORAGE).build());
     }
 
     @Override

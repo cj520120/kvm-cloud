@@ -16,6 +16,7 @@ import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
 import cn.chenjun.cloud.management.util.IpCalculate;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.crypto.digest.DigestUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -142,7 +143,7 @@ public class NetworkService extends AbstractService {
         }
         BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
     }
 
@@ -156,7 +157,7 @@ public class NetworkService extends AbstractService {
         this.networkDao.update(network);
         BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
         this.operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
     }
 
@@ -168,7 +169,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(cn.chenjun.cloud.common.util.Constant.NetworkStatus.MAINTENANCE);
         this.networkDao.update(network);
-        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
     }
 
@@ -198,7 +199,7 @@ public class NetworkService extends AbstractService {
         }
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().id(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
         this.operateTask.addTask(operateParam);
-        this.notifyService.publish(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
     }
 
@@ -226,7 +227,7 @@ public class NetworkService extends AbstractService {
             component.setBasicComponentVip(basicComponentVip.getIp());
         }
         componentMapper.update(component);
-        this.notifyService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
         return component;
     }
 
@@ -244,7 +245,7 @@ public class NetworkService extends AbstractService {
         this.componentGuestMapper.deleteByComponentId(componentId);
         this.natMapper.deleteByComponentId(componentId);
 
-        this.notifyService.publish(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());
 
     }
 
@@ -268,7 +269,7 @@ public class NetworkService extends AbstractService {
         }
         NatEntity entity = NatEntity.builder().componentId(componentId).localPort(localPort).protocol(protocol).remotePort(remotePort).remoteIp(remoteIp).createTime(new Date()).build();
         this.natMapper.insert(entity);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
         return entity;
     }
 
@@ -279,7 +280,7 @@ public class NetworkService extends AbstractService {
             return;
         }
         this.natMapper.deleteById(natId);
-        this.notifyService.publish(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT_NAT).build());
 
     }
 

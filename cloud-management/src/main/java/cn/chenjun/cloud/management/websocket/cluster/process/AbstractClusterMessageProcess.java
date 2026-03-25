@@ -4,7 +4,6 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 
 import java.util.concurrent.Callable;

@@ -8,6 +8,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
+import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +74,6 @@ public class OperateEngine {
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
         this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
             try {
-
                 RequestContextHolderUtil.initContext();
                 log.info("任务回调:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
                 Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
@@ -88,6 +88,7 @@ public class OperateEngine {
                 log.error("解析任务参数出错:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
             }finally {
                 RequestContextHolderUtil.clearContext();
+                NotifyContextHolderUtil.afterCompletion();
             }
         }));
     }
