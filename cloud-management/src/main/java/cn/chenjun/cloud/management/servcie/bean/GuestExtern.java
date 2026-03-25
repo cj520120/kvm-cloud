@@ -11,6 +11,8 @@ public class GuestExtern {
     private UserData userData;
     @SerializedName(GuestExternNames.VNC)
     private Vnc vnc;
+    @SerializedName(GuestExternNames.VENDOR_DATA)
+    private String initVendorData;
 
     @Data
     public static class MetaData {
@@ -49,6 +51,7 @@ public class GuestExtern {
     public static class GuestExternNames {
         public static final String META_DATA = "meta-data";
         public static final String USER_DATA = "user-data";
+        public static final String VENDOR_DATA = "vendor-data";
         public static final String VNC = "vnc";
 
         public static final class VncNames {

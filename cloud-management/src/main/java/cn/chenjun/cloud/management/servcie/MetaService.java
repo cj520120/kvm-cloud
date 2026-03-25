@@ -7,7 +7,6 @@ import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.MetaDataService;
 import cn.chenjun.cloud.management.servcie.meta.UserDataService;
 import cn.chenjun.cloud.management.servcie.meta.VendorDataService;
-import cn.hutool.crypto.digest.DigestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.plugin.core.PluginRegistry;
@@ -60,7 +59,7 @@ public class MetaService extends AbstractService {
         return data.toString();
     }
 
-    public String findMetaDataByKey(String key, int networkId, String ip, String nonce, String sign) {
+    public String findMetaDataByKey(String key, int networkId, String ip) {
         StringBuilder data = new StringBuilder();
         do {
             GuestNetworkEntity guestNetwork = guestNetworkDao.findByIp(networkId, ip);
@@ -69,9 +68,6 @@ public class MetaService extends AbstractService {
             }
             NetworkEntity network = networkDao.findById(guestNetwork.getNetworkId());
             if (network == null) {
-                break;
-            }
-            if (!DigestUtil.md5Hex(network.getSecret() + ":" + nonce + ":" + ip).equals(sign)) {
                 break;
             }
             GuestEntity guest = guestDao.findById(guestNetwork.getAllocateId());
@@ -98,7 +94,7 @@ public class MetaService extends AbstractService {
             List<VendorDataService> vendorDataServiceList = vendorDataPluginRegistry.getPluginsFor(guest);
             for (VendorDataService vendorDataService : vendorDataServiceList) {
                 MetaData metaData = vendorDataService.load(guest);
-                if (!ObjectUtils.isEmpty(metaData.getBody())) {
+                if (metaData != null && !ObjectUtils.isEmpty(metaData.getBody())) {
                     metaDataList.add(metaData);
                 }
             }
@@ -106,7 +102,7 @@ public class MetaService extends AbstractService {
         return metaDataList;
     }
 
-    public List<MetaData> findGuestInitData(int networkId, String ip) {
+    public List<MetaData> findGuestUserData(int networkId, String ip) {
         List<MetaData> metaDataList = new ArrayList<>();
         do {
             GuestEntity guest = getRequestGuest(networkId, ip);
@@ -114,7 +110,7 @@ public class MetaService extends AbstractService {
             List<UserDataService> userDataServiceList = userDataPluginRegistry.getPluginsFor(guest);
             for (UserDataService userDataService : userDataServiceList) {
                 MetaData metaData = userDataService.load(guest);
-                if (!ObjectUtils.isEmpty(metaData.getBody())) {
+                if (metaData != null && !ObjectUtils.isEmpty(metaData.getBody())) {
                     metaDataList.add(metaData);
                 }
             }

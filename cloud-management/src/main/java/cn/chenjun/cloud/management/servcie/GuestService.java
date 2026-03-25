@@ -92,7 +92,7 @@ public class GuestService extends AbstractService {
     public GuestEntity createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceDriver, int bindHostId,
                                               int hostId, int schemeId, int networkId, String networkDeviceType,
                                               int isoTemplateId, int diskTemplateId, int volumeId,
-                                   int storageId, long size, String hostName, String password, int sshId, String arch) {
+                                   int storageId, long size, String hostName, String password, int sshId, String arch, String initVendorData) {
 
         int mustHostId=0;
 
@@ -153,6 +153,7 @@ public class GuestService extends AbstractService {
         extern.setMetaData(GuestExternUtil.buildMetaDataParam(guest, hostName));
         extern.setUserData(GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
         extern.setVnc(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        extern.setInitVendorData(initVendorData);
         guest.setExtern(GsonBuilderUtil.create().toJson(extern));
 
         GuestNetworkEntity guestNetwork = this.allocateService.allocateNetwork(networkId, guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, networkDeviceType, "Guest Basic Nic");

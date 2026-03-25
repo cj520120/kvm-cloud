@@ -107,7 +107,8 @@ public class GuestController extends BaseController {
                                               @RequestParam(value = "groupId", defaultValue = "0") int groupId,
                                               @RequestParam(value = "hostname", defaultValue = "") String hostName,
                                               @RequestParam(value = "password", defaultValue = "") String password,
-                                              @RequestParam(value = "sshId", defaultValue = "0") int sshId) {
+                                              @RequestParam(value = "sshId", defaultValue = "0") int sshId,
+                                              @RequestParam(value = "initVendorData", defaultValue = "") String initVendorData) {
         if (StringUtils.isEmpty(description)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的描述信息");
         }
@@ -126,7 +127,7 @@ public class GuestController extends BaseController {
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
         }
-        GuestEntity guest = this.globalLockCall(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, bindHostId, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId, arch));
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, bindHostId, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId, arch, initVendorData));
         return ResultUtil.success(this.convertService.initGuestModel(guest));
     }
 

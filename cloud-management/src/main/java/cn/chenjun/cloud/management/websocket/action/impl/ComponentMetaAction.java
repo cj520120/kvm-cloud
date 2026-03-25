@@ -1,15 +1,21 @@
 package cn.chenjun.cloud.management.websocket.action.impl;
 
 import cn.chenjun.cloud.common.bean.WsMessage;
-import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
-import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.servcie.MetaService;
 import cn.chenjun.cloud.management.servcie.bean.MetaData;
+import cn.chenjun.cloud.management.util.MetaDataType;
 import cn.chenjun.cloud.management.websocket.action.WsAction;
 import cn.chenjun.cloud.management.websocket.client.WebSocket;
 import cn.chenjun.cloud.management.websocket.client.context.ComponentContext;
 import cn.chenjun.cloud.management.websocket.message.WsRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,13 +23,51 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class ComponentMetaAction implements WsAction {
     @Autowired
     private MetaService metaService;
+
+    @SneakyThrows
+    private static String buildMetaResponse(List<MetaData> partList) {
+        YAMLFactory factory = new YAMLFactory();
+        factory.configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false);
+        ObjectMapper mapper = new ObjectMapper(factory);
+        ObjectNode firstNode = mapper.createObjectNode();
+        for (MetaData metaData : partList) {
+            try {
+                deepMerge(firstNode, mapper.readTree(metaData.getBody()));
+            } catch (Exception e) {
+                log.error("解析yaml失败,跳过该配置.原始内容:{}", metaData.getBody(), e);
+            }
+        }
+        String sb = MetaDataType.CLOUD.getFirstLine() +
+                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(firstNode);
+        return sb;
+    }
+
+    public static void deepMerge(ObjectNode base, JsonNode override) {
+        Iterator<String> iterator = override.fieldNames();
+        while (iterator.hasNext()) {
+            String field = iterator.next();
+            JsonNode baseNode = base.get(field);
+            JsonNode overrideNode = override.get(field);
+            if (baseNode instanceof ObjectNode && overrideNode instanceof ObjectNode) {
+                deepMerge((ObjectNode) baseNode, overrideNode);
+            } else if (baseNode instanceof ArrayNode && overrideNode instanceof ArrayNode) {
+                ((ArrayNode) baseNode).addAll((ArrayNode) overrideNode);
+            } else {
+                base.set(field, overrideNode);
+            }
+        }
+    }
+
+    @Override
+    public int getCommand() {
+        return Constant.SocketCommand.COMPONENT_META_REQUEST;
+    }
 
     @Override
     public void doAction(WebSocket webSocket, WsRequest msg) throws IOException {
@@ -36,20 +80,27 @@ public class ComponentMetaAction implements WsAction {
             Map<String, Object> map = new HashMap<>();
             map.put("request-id", requestId);
             try {
-                List<MetaData> dataList = null;
+                String response = "";
+                map.put("status", HttpStatus.OK.value());
                 if ("meta-data".equals(type)) {
                     MetaData metaData = metaService.loadAllGuestMetaData(context.getNetworkId(), ip);
-                    dataList = Collections.singletonList(metaData);
+                    List<MetaData> dataList = Collections.singletonList(metaData);
+                    response = buildMetaResponse(dataList);
+                } else if ("meta-data-keys".equals(type)) {
+                    response = metaService.listMetaDataKeys(context.getNetworkId(), ip);
+                } else if ("meta-data-info ".equals(type)) {
+                    String metaKey = msg.getData().getOrDefault("meta-key", "").toString();
+                    response = metaService.findMetaDataByKey(metaKey, context.getNetworkId(), ip);
                 } else if ("user-data".equals(type)) {
-                    dataList = this.metaService.findGuestInitData(context.getNetworkId(), ip);
+                    List<MetaData> dataList = this.metaService.findGuestUserData(context.getNetworkId(), ip);
+                    response = buildMetaResponse(dataList);
                 } else if ("vendor-data".equals(type)) {
-                    dataList = this.metaService.findGuestVendorData(context.getNetworkId(), ip);
+                    List<MetaData> dataList = this.metaService.findGuestVendorData(context.getNetworkId(), ip);
+                    response = buildMetaResponse(dataList);
                 } else {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的类型");
+                    map.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
                 }
-                String response = buildMetaResponse(dataList);
                 map.put("data", response);
-                map.put("status", HttpStatus.OK.value());
             } catch (Exception e) {
                 log.error("获取组件元数据失败", e);
                 map.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -59,46 +110,4 @@ public class ComponentMetaAction implements WsAction {
         }
     }
 
-    @Override
-    public int getCommand() {
-        return Constant.SocketCommand.COMPONENT_META_REQUEST;
-    }
-
-
-    private String buildMetaResponse(List<MetaData> partList) {
-        partList = partList.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        StringBuilder sb = new StringBuilder();
-        if (!partList.isEmpty()) {
-            if (partList.size() == 1) {
-                MetaData metaData = partList.get(0);
-                sb.append(metaData.getType().getFirstLine());
-                sb.append(metaData.getBody());
-            } else {
-                String boundary = UUID.randomUUID().toString().replace("-", "").toLowerCase(Locale.ROOT);
-                sb.append("Content-Type: multipart/mixed; boundary=\"").append(boundary).append("\"\n");
-                sb.append("MIME-Version: 1.0\n");
-                sb.append("Number-Attachments: ").append(partList.size()).append("\n\n");
-                for (int i = 0; i < partList.size(); i++) {
-                    MetaData metaData = partList.get(i);
-                    sb.append(buildConfig(metaData, boundary, i));
-                }
-                sb.append("--").append(boundary).append("--");
-            }
-        }
-        return sb.toString();
-    }
-
-    private String buildConfig(MetaData metaData, String boundary, int index) {
-        String firstLine = metaData.getType().getFirstLine();
-        String contextType = metaData.getType().getContextType();
-        String config = metaData.getBody().replace(firstLine, "").trim();
-        String sb = "--" + boundary + "\n" +
-                "Content-Type: " + contextType + "; charset=\"utf-8\"\n" +
-                "MIME-Version: 1.0\n" +
-                "Content-Transfer-Encoding: 7bit\n" +
-                "Content-Disposition: attachment; filename=\"part-00" + index + "\"\n\n" +
-                config +
-                "\n";
-        return sb;
-    }
 }
