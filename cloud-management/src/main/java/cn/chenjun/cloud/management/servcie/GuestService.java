@@ -287,7 +287,6 @@ public class GuestService extends AbstractService {
         return guest;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public List<GuestEntity> batchStart(List<Integer> guestIds) {
         List<GuestEntity> models = new ArrayList<>(guestIds.size());
         for (Integer guestId : guestIds) {

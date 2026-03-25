@@ -37,18 +37,14 @@ public class ComponentController extends BaseController {
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/component/nat/create")
     public ResultUtil<ComponentDetailModel> createNatComponent(@RequestParam("networkId") int networkId) {
-        return this.lockRun(() -> {
-            ComponentEntity componentEntity = this.networkService.createComponent(networkId, cn.chenjun.cloud.common.util.Constant.ComponentType.NAT);
-            return ResultUtil.success(this.convertService.initComponentModel(componentEntity));
-        });
+        ComponentEntity componentEntity = this.globalLockCall(() -> this.networkService.createComponent(networkId, cn.chenjun.cloud.common.util.Constant.ComponentType.NAT));
+        return ResultUtil.success(this.convertService.initComponentModel(componentEntity));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/component")
     public ResultUtil<Void> destroyNetworkComponent(@RequestParam("componentId") int componentId) {
-        this.lockRun(() -> {
-            networkService.destroyComponent(componentId);
-        });
+        this.globalLockCall(() -> networkService.destroyComponent(componentId));
         return ResultUtil.success();
     }
 

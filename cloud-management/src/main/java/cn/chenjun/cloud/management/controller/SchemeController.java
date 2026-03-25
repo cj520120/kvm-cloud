@@ -55,7 +55,7 @@ public class SchemeController extends BaseController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        SchemeEntity scheme = this.lockRun(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
+        SchemeEntity scheme = this.globalLockCall(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
         return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
@@ -69,14 +69,14 @@ public class SchemeController extends BaseController {
                                                 @RequestParam("sockets") int sockets,
                                                 @RequestParam("cores") int cores,
                                                 @RequestParam("threads") int threads) {
-        SchemeEntity scheme = this.lockRun(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
+        SchemeEntity scheme = this.globalLockCall(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
         return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/scheme/destroy")
     public ResultUtil<Void> destroyScheme(@RequestParam("schemeId") int schemeId) {
-        this.lockRun(() -> this.schemeService.destroyScheme(schemeId));
+        this.globalLockCall(() -> this.schemeService.destroyScheme(schemeId));
         return ResultUtil.success();
     }
 }

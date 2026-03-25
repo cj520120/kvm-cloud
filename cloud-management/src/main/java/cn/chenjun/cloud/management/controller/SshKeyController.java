@@ -61,7 +61,7 @@ public class SshKeyController extends BaseController {
     @LoginRequire
     @PutMapping("/api/ssh/import")
     public ResultUtil<SshAuthorizedModel> importSshKey(@RequestParam("name") String name, @RequestParam("publicKey") String publicKey, @RequestParam("privateKey") String privateKey) {
-        SshAuthorizedEntity ssh = this.lockRun(() -> this.sshAuthorizedService.importSshKey(name, publicKey, privateKey));
+        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.importSshKey(name, publicKey, privateKey));
         return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
@@ -69,7 +69,7 @@ public class SshKeyController extends BaseController {
     @LoginRequire
     @PutMapping("/api/ssh/create")
     public ResultUtil<CreateSshAuthorizedModel> createKey(@RequestParam("name") String name) {
-        SshAuthorizedEntity ssh = this.lockRun(() -> this.sshAuthorizedService.createSshKey(name));
+        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.createSshKey(name));
         CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(ssh.getId()).name(name).publicKey(ssh.getSshPublicKey()).privateKey(ssh.getSshPrivateKey()).build();
         return ResultUtil.success(model);
     }
@@ -78,7 +78,7 @@ public class SshKeyController extends BaseController {
     @LoginRequire
     @PostMapping("/api/ssh/modify")
     public ResultUtil<SshAuthorizedModel> modify(@RequestParam("id") int id, @RequestParam("name") String name) {
-        SshAuthorizedEntity ssh = this.lockRun(() -> this.sshAuthorizedService.modifySshKey(id, name));
+        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.modifySshKey(id, name));
         return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
@@ -86,7 +86,7 @@ public class SshKeyController extends BaseController {
     @LoginRequire
     @DeleteMapping("/api/ssh/destroy")
     public ResultUtil<Void> deleteSshKey(@RequestParam("id") int id) {
-        this.lockRun(() -> this.sshAuthorizedService.deleteSshKey(id));
+        this.globalLockCall(() -> this.sshAuthorizedService.deleteSshKey(id));
         return ResultUtil.success();
     }
 

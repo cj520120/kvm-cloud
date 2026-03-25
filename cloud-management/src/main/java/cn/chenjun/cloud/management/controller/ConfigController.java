@@ -56,7 +56,7 @@ public class ConfigController extends BaseController {
                                                 @RequestParam("allocateType") int allocateType,
                                                 @RequestParam("allocateId") int allocateId,
                                                 @RequestParam("configValue") String configValue) {
-        ConfigInfo info = this.lockRun(() -> {
+        ConfigInfo info = this.globalLockCall(() -> {
             return this.configService.createConfig(configKey, allocateType, allocateId, configValue);
         });
         return ResultUtil.success(this.initConfig(info));
@@ -68,14 +68,14 @@ public class ConfigController extends BaseController {
                                                 @RequestParam("allocateType") int allocateType,
                                                 @RequestParam("allocateId") int allocateId,
                                                 @RequestParam("configValue") String configValue) {
-        ConfigInfo info = this.lockRun(() -> this.configService.updateConfig(configKey, allocateType, allocateId, configValue));
+        ConfigInfo info = this.globalLockCall(() -> this.configService.updateConfig(configKey, allocateType, allocateId, configValue));
         return ResultUtil.success(this.initConfig(info));
     }
 
     @LoginRequire
     @DeleteMapping("/api/config/destroy")
     public ResultUtil<ConfigModel> deleteConfig(@RequestParam("id") int id) {
-        ConfigInfo info = this.lockRun(() -> this.configService.deleteConfig(id));
+        ConfigInfo info = this.globalLockCall(() -> this.configService.deleteConfig(id));
         return ResultUtil.success(this.initConfig(info));
     }
 }

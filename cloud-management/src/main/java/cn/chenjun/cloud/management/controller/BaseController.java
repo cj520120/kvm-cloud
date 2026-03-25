@@ -16,18 +16,18 @@ public class BaseController {
     @Autowired
     private LockRunner lockRunner;
 
-    public <T> T lockRun(LockRunner.LockAction<T> runnable) {
-        return this.lockRun(RedisKeyUtil.getGlobalLockKey(), runnable);
+    public <T> T globalLockCall(LockRunner.LockAction<T> runnable) {
+        return this.globalLockCall(RedisKeyUtil.getGlobalLockKey(), runnable);
     }
 
-    public void lockRun(Runnable runnable) {
-        this.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
+    public void globalLockCall(Runnable runnable) {
+        this.globalLockCall(RedisKeyUtil.getGlobalLockKey(), () -> {
             runnable.run();
             return null;
         });
     }
 
-    public <T> T lockRun(String lockKey, LockRunner.LockAction<T> runnable) {
+    public <T> T globalLockCall(String lockKey, LockRunner.LockAction<T> runnable) {
         return lockRunner.lockCall(lockKey, runnable);
     }
 }

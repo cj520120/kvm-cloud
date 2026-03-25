@@ -46,21 +46,21 @@ public class GroupController extends BaseController {
 
     @PutMapping("/api/group/create")
     public ResultUtil<GroupModel> createGroup(@RequestParam("groupName") String groupName) {
-        GroupEntity entity = this.lockRun(() -> this.groupService.createGroup(groupName));
+        GroupEntity entity = this.globalLockCall(() -> this.groupService.createGroup(groupName));
         return ResultUtil.success(this.convertService.initGroupModel(entity));
     }
 
 
     @PostMapping("/api/group/update")
     public ResultUtil<GroupModel> updateGroup(@RequestParam("groupId") int groupId, @RequestParam("groupName") String groupName) {
-        GroupEntity entity = this.lockRun(() -> this.groupService.updateGroup(groupId, groupName));
+        GroupEntity entity = this.globalLockCall(() -> this.groupService.updateGroup(groupId, groupName));
         return ResultUtil.success(this.convertService.initGroupModel(entity));
     }
 
 
     @DeleteMapping("/api/group/destroy")
     public ResultUtil<Void> deleteGroup(@RequestParam("groupId") int groupId) {
-        this.lockRun(() -> this.groupService.deleteGroup(groupId));
+        this.globalLockCall(() -> this.groupService.deleteGroup(groupId));
         return ResultUtil.success();
     }
 }

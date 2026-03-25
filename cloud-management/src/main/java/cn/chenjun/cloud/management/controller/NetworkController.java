@@ -113,7 +113,7 @@ public class NetworkController extends BaseController {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "请输入基础网络");
             }
         }
-        NetworkEntity network = this.lockRun(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
+        NetworkEntity network = this.globalLockCall(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
         return ResultUtil.success(this.convertService.initNetworkModel(network));
     }
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
@@ -128,33 +128,33 @@ public class NetworkController extends BaseController {
     public ResultUtil< NicMode> allocateSpecialNetworkNic(@RequestParam("guestNetworkId") int guestNetworkId,
                                                           @RequestParam("allocateId") int allocateId,
                                                           @RequestParam("allocateDescription") String allocateDescription) {
-        GuestNetworkEntity nic = this.lockRun(() -> networkService.allocateSpecialNetworkNic(guestNetworkId, allocateId, allocateDescription));
+        GuestNetworkEntity nic = this.globalLockCall(() -> networkService.allocateSpecialNetworkNic(guestNetworkId, allocateId, allocateDescription));
         return ResultUtil.success(this.convertService.initNicModel(nic));
     }
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/nic/special/release")
     public ResultUtil<NicMode> releaseSpecialNetworkNic(@RequestParam("guestNetworkId") int guestNetworkId) {
-        GuestNetworkEntity nic = this.lockRun(() -> networkService.releaseSpecialNetworkNic(guestNetworkId));
+        GuestNetworkEntity nic = this.globalLockCall(() -> networkService.releaseSpecialNetworkNic(guestNetworkId));
         return ResultUtil.success(this.convertService.initNicModel(nic));
     }
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/register")
     public ResultUtil<NetworkModel> registerNetwork(@RequestParam("networkId") int networkId) {
-        NetworkEntity network = this.lockRun(() -> networkService.registerNetwork(networkId));
+        NetworkEntity network = this.globalLockCall(() -> networkService.registerNetwork(networkId));
         return ResultUtil.success(this.convertService.initNetworkModel(network));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/maintenance")
     public ResultUtil<NetworkModel> maintenanceNetwork(@RequestParam("networkId") int networkId) {
-        NetworkEntity network = this.lockRun(() -> networkService.maintenanceNetwork(networkId));
+        NetworkEntity network = this.globalLockCall(() -> networkService.maintenanceNetwork(networkId));
         return ResultUtil.success(this.convertService.initNetworkModel(network));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/network/destroy")
     public ResultUtil<NetworkModel> destroyNetwork(@RequestParam("networkId") int networkId) {
-        NetworkEntity network = this.lockRun(() -> networkService.destroyNetwork(networkId));
+        NetworkEntity network = this.globalLockCall(() -> networkService.destroyNetwork(networkId));
         return ResultUtil.success(this.convertService.initNetworkModel(network));
     }
 }

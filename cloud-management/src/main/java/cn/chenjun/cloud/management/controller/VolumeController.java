@@ -68,7 +68,7 @@ public class VolumeController extends BaseController {
     public ResultUtil<VolumeModel> createVolume(@RequestParam("description") String description,
                                                 @RequestParam("storageId") int storageId,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        VolumeEntity volume = this.lockRun(() -> this.volumeService.createVolume(description, storageId, 0, volumeSize * 1024 * 1024 * 1024));
+        VolumeEntity volume = this.globalLockCall(() -> this.volumeService.createVolume(description, storageId, 0, volumeSize * 1024 * 1024 * 1024));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
     }
 
@@ -76,7 +76,7 @@ public class VolumeController extends BaseController {
     public ResultUtil<CloneModel> cloneVolume(@RequestParam("description") String description,
                                               @RequestParam("sourceVolumeId") int sourceVolumeId,
                                               @RequestParam("storageId") int storageId) {
-        CloneInfo info = this.lockRun(() -> this.volumeService.cloneVolume(description, sourceVolumeId, storageId));
+        CloneInfo info = this.globalLockCall(() -> this.volumeService.cloneVolume(description, sourceVolumeId, storageId));
         CloneModel model = CloneModel.builder().source(this.convertService.initVolumeModel(info.getSource())).clone(this.convertService.initVolumeModel(info.getClone())).build();
         return ResultUtil.success(model);
     }
@@ -85,7 +85,7 @@ public class VolumeController extends BaseController {
     public ResultUtil<MigrateModel> migrateVolume(
             @RequestParam("sourceVolumeId") int sourceVolumeId,
             @RequestParam("storageId") int storageId) {
-        MigrateVolumeInfo info = this.lockRun(() -> this.volumeService.migrateVolume(sourceVolumeId, storageId));
+        MigrateVolumeInfo info = this.globalLockCall(() -> this.volumeService.migrateVolume(sourceVolumeId, storageId));
         MigrateModel model = MigrateModel.builder().source(this.convertService.initVolumeModel(info.getSource())).migrate(this.convertService.initVolumeModel(info.getMigrate())).build();
         return ResultUtil.success(model);
     }
@@ -94,13 +94,13 @@ public class VolumeController extends BaseController {
     public ResultUtil<VolumeModel> resizeVolume(
             @RequestParam("volumeId") int volumeId,
             @RequestParam("size") long size) {
-        VolumeEntity volume = this.lockRun(() -> this.volumeService.resizeVolume(volumeId, size * 1024 * 1024 * 1024));
+        VolumeEntity volume = this.globalLockCall(() -> this.volumeService.resizeVolume(volumeId, size * 1024 * 1024 * 1024));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
     }
 
     @DeleteMapping("/api/volume/destroy")
     public ResultUtil<VolumeModel> destroyVolume(@RequestParam("volumeId") int volumeId) {
-        VolumeEntity volume = this.lockRun(() -> this.volumeService.destroyVolume(volumeId));
+        VolumeEntity volume = this.globalLockCall(() -> this.volumeService.destroyVolume(volumeId));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
     }
 
@@ -109,7 +109,7 @@ public class VolumeController extends BaseController {
     public ResultUtil<VolumeModel> createVolumeTemplate(@RequestParam("volumeId") int volumeId,
                                                         @RequestParam("name") String name,
                                                         @RequestParam("arch") String arch) {
-        VolumeEntity volume = this.lockRun(() -> volumeService.createVolumeTemplate(volumeId, name, arch));
+        VolumeEntity volume = this.globalLockCall(() -> volumeService.createVolumeTemplate(volumeId, name, arch));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
 
 
@@ -118,7 +118,7 @@ public class VolumeController extends BaseController {
     @DeleteMapping("/api/volume/destroy/batch")
     public ResultUtil<List<SimpleVolumeModel>> batchDestroyVolume(@RequestParam("volumeIds") String volumeIdsStr) {
         List<Integer> volumeIds = Arrays.stream(volumeIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-        List<VolumeEntity> volumes = this.lockRun(() -> this.volumeService.batchDestroyVolume(volumeIds));
+        List<VolumeEntity> volumes = this.globalLockCall(() -> this.volumeService.batchDestroyVolume(volumeIds));
         List<SimpleVolumeModel> models = this.convertService.initSimpleVolumeModels(volumes);
         return ResultUtil.success(models);
     }

@@ -54,42 +54,42 @@ public class StorageController extends BaseController {
                                                   @RequestParam("supportCategory") int supportCategory,
                                                   @RequestParam("type") String type,
                                                   @RequestParam("param") String param) {
-        StorageEntity storage = this.lockRun(() -> storageService.createStorage(supportCategory, description, type, param));
+        StorageEntity storage = this.globalLockCall(() -> storageService.createStorage(supportCategory, description, type, param));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/support/category/update")
     public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestParam("storageId") int storageId, @RequestParam("supportCategory") int supportCategory) {
-        StorageEntity storage = this.lockRun(() -> storageService.updateStorageSupportCategory(storageId, supportCategory));
+        StorageEntity storage = this.globalLockCall(() -> storageService.updateStorageSupportCategory(storageId, supportCategory));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/register")
     public ResultUtil<StorageModel> registerStorage(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.lockRun(() -> storageService.registerStorage(storageId));
+        StorageEntity storage = this.globalLockCall(() -> storageService.registerStorage(storageId));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/migrate")
     public ResultUtil<StorageModel> migrateStorage(@RequestParam("sourceStorageId") int sourceStorageId, @RequestParam("destStorageId") int destStorageId) {
-        StorageEntity storage = this.lockRun(() -> storageService.migrateStorage(sourceStorageId, destStorageId));
+        StorageEntity storage = this.globalLockCall(() -> storageService.migrateStorage(sourceStorageId, destStorageId));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/maintenance")
     public ResultUtil<StorageModel> maintenanceStorage(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.lockRun(() -> storageService.maintenanceStorage(storageId));
+        StorageEntity storage = this.globalLockCall(() -> storageService.maintenanceStorage(storageId));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @DeleteMapping("/api/storage/destroy")
     public ResultUtil<StorageModel> destroyStorage(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.lockRun(() -> storageService.destroyStorage(storageId));
+        StorageEntity storage = this.globalLockCall(() -> storageService.destroyStorage(storageId));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
 
     }
@@ -97,7 +97,7 @@ public class StorageController extends BaseController {
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/storage/clear")
     public ResultUtil<StorageModel> clearUnLinkVolume(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.lockRun(() -> storageService.clearUnLinkVolume(storageId));
+        StorageEntity storage = this.globalLockCall(() -> storageService.clearUnLinkVolume(storageId));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
 
     }

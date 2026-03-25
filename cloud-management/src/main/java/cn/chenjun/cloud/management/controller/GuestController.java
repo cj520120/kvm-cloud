@@ -126,7 +126,7 @@ public class GuestController extends BaseController {
         if (isoTemplateId > 0 && size <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入磁盘大小");
         }
-        GuestEntity guest = this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, bindHostId, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId, arch);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.createGuest(groupId, description, systemCategory, bootstrapType, deviceBus, bindHostId, hostId, schemeId, networkId, networkDeviceType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024, hostName, password, sshId, arch));
         return ResultUtil.success(this.convertService.initGuestModel(guest));
     }
 
@@ -143,14 +143,14 @@ public class GuestController extends BaseController {
                                             @RequestParam(value = "diskSize", defaultValue = "0") long size) {
 
 
-        GuestEntity guest = this.guestService.reInstall(guestId, deviceBus, systemCategory, bootstrapType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.reInstall(guestId, deviceBus, systemCategory, bootstrapType, isoTemplateId, diskTemplateId, volumeId, storageId, size * 1024 * 1024 * 1024));
         return ResultUtil.success(this.convertService.initGuestModel(guest));
     }
 
     @PostMapping("/api/guest/start/batch")
     public ResultUtil<List<GuestModel>> batchStart(@RequestParam("guestIds") String guestIdsStr) {
         List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-        List<GuestEntity> guests = this.guestService.batchStart(guestIds);
+        List<GuestEntity> guests = this.globalLockCall(() -> this.guestService.batchStart(guestIds));
         List<GuestModel> models = this.convertService.initGuestList(guests);
         return ResultUtil.success(models);
     }
@@ -158,7 +158,7 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/shutdown/batch")
     public ResultUtil<List<GuestModel>> batchStop(@RequestParam("guestIds") String guestIdsStr) {
         List<Integer> guestIds = Arrays.stream(guestIdsStr.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-        List<GuestEntity> guests = this.guestService.batchStop(guestIds);
+        List<GuestEntity> guests = this.globalLockCall(() -> this.guestService.batchStop(guestIds));
         List<GuestModel> models = this.convertService.initGuestList(guests);
         return ResultUtil.success(models);
     }
@@ -166,7 +166,7 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/start")
     public ResultUtil<GuestModel> start(@RequestParam("guestId") int guestId,
                                         @RequestParam("hostId") int hostId) {
-        GuestEntity guest = this.guestService.start(guestId, hostId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.start(guestId, hostId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
 
@@ -174,14 +174,14 @@ public class GuestController extends BaseController {
 
     @PostMapping("/api/guest/reboot")
     public ResultUtil<GuestModel> reboot(@RequestParam("guestId") int guestId) {
-        GuestEntity guest = this.guestService.reboot(guestId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.reboot(guestId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
 
     @PostMapping("/api/guest/migrate")
     public ResultUtil<GuestModel> migrate(@RequestParam("guestId") int guestId, @RequestParam("hostId") int hostId) {
-        GuestEntity guest = this.guestService.migrate(guestId, hostId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.migrate(guestId, hostId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
@@ -190,7 +190,7 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/shutdown")
     public ResultUtil<GuestModel> shutdown(@RequestParam("guestId") int guestId,
                                            @RequestParam(value = "force", required = false) boolean force) {
-        GuestEntity guest = this.guestService.shutdown(guestId, force);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.shutdown(guestId, force));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
 
@@ -199,14 +199,14 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/cd/attach")
     public ResultUtil<GuestModel> attachCdRoom(@RequestParam("guestId") int guestId,
                                                @RequestParam("templateId") int templateId) {
-        GuestEntity guest = this.guestService.attachCdRoom(guestId, templateId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.attachCdRoom(guestId, templateId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
 
     @PostMapping("/api/guest/cd/detach")
     public ResultUtil<GuestModel> detachCdRoom(@RequestParam("guestId") int guestId) {
-        GuestEntity guest = this.guestService.detachCdRoom(guestId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.detachCdRoom(guestId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
@@ -215,7 +215,7 @@ public class GuestController extends BaseController {
     public ResultUtil<VolumeModel> modifyGuestDiskDeviceType(@RequestParam("guestId") int guestId,
                                                              @RequestParam("deviceId") int deviceId,
                                                              @RequestParam("driver") String deviceBus) {
-        VolumeEntity volume = this.guestService.modifyGuestDiskDeviceType(guestId, deviceId, deviceBus);
+        VolumeEntity volume = this.globalLockCall(() -> this.guestService.modifyGuestDiskDeviceType(guestId, deviceId, deviceBus));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
     }
 
@@ -225,7 +225,7 @@ public class GuestController extends BaseController {
                                                 @RequestParam("description") String description,
                                                 @RequestParam("storageId") int storageId,
                                                 @RequestParam("volumeSize") long volumeSize) {
-        VolumeEntity volume = this.guestService.createDisk(guestId, diskDriver, description, storageId, volumeSize * 1024 * 1024 * 1024);
+        VolumeEntity volume = this.globalLockCall(() -> this.guestService.createDisk(guestId, diskDriver, description, storageId, volumeSize * 1024 * 1024 * 1024));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
 
     }
@@ -234,7 +234,7 @@ public class GuestController extends BaseController {
     public ResultUtil<AttachGuestVolumeModel> attachDisk(@RequestParam("guestId") int guestId,
                                                          @RequestParam("volumeId") int volumeId,
                                                          @RequestParam("diskDriver") String diskDriver) {
-        AttachVolumeInfo attach = this.guestService.attachDisk(guestId, volumeId, diskDriver);
+        AttachVolumeInfo attach = this.globalLockCall(() -> this.guestService.attachDisk(guestId, volumeId, diskDriver));
         AttachGuestVolumeModel model = new AttachGuestVolumeModel();
         model.setGuest(this.convertService.initGuestModel(attach.getGuest()));
         model.setVolume(this.convertService.initVolumeModel(attach.getVolume()));
@@ -244,7 +244,7 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/disk/detach")
     public ResultUtil<GuestModel> detachDisk(@RequestParam("guestId") int guestId,
                                              @RequestParam("volumeId") int volumeId) {
-        GuestEntity guest = this.guestService.detachDisk(guestId, volumeId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.detachDisk(guestId, volumeId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
@@ -254,7 +254,7 @@ public class GuestController extends BaseController {
     public ResultUtil<AttachGuestNetworkModel> attachNetwork(@RequestParam("guestId") int guestId,
                                                              @RequestParam("networkId") int networkId,
                                                              @RequestParam("driver") String driveType) {
-        AttachNicInfo attach = this.guestService.attachNetwork(guestId, networkId, driveType);
+        AttachNicInfo attach = this.globalLockCall(() -> this.guestService.attachNetwork(guestId, networkId, driveType));
         AttachGuestNetworkModel model = new AttachGuestNetworkModel();
         model.setGuest(this.convertService.initGuestModel(attach.getGuest()));
         model.setNetwork(this.convertService.initGuestNetworkModel(attach.getNic()));
@@ -265,7 +265,7 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/network/detach")
     public ResultUtil<GuestModel> detachNetwork(@RequestParam("guestId") int guestId,
                                                 @RequestParam("guestNetworkId") int guestNetworkId) {
-        GuestEntity guest = this.guestService.detachNetwork(guestId, guestNetworkId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.detachNetwork(guestId, guestNetworkId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
@@ -277,7 +277,7 @@ public class GuestController extends BaseController {
                                               @RequestParam("description") String description,
                                               @RequestParam("schemeId") int schemeId,
                                               @RequestParam("groupId") int groupId) {
-        GuestEntity guest = this.guestService.modifyGuest(guestId, systemCategory, bootstrapType, groupId, description, schemeId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.modifyGuest(guestId, systemCategory, bootstrapType, groupId, description, schemeId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
@@ -285,20 +285,20 @@ public class GuestController extends BaseController {
 
     @DeleteMapping("/api/guest/destroy")
     public ResultUtil<GuestModel> destroyGuest(@RequestParam("guestId") int guestId) {
-        GuestEntity guest = this.guestService.destroyGuest(guestId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.destroyGuest(guestId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
     @PostMapping("/api/guest/host/bind")
     public ResultUtil<GuestModel> bindHost(@RequestParam("guestId") int guestId,
                                            @RequestParam("hostId") int hostId) {
-        GuestEntity guest = this.guestService.bindGuestHost(guestId, hostId);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.bindGuestHost(guestId, hostId));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
     @PostMapping("/api/guest/host/unbind")
     public ResultUtil<GuestModel> unbindHost(@RequestParam("guestId") int guestId) {
-        GuestEntity guest = this.guestService.bindGuestHost(guestId, 0);
+        GuestEntity guest = this.globalLockCall(() -> this.guestService.bindGuestHost(guestId, 0));
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
@@ -310,7 +310,7 @@ public class GuestController extends BaseController {
                                                   @RequestParam("diskDriver") String diskDriver,
                                                   @RequestParam("devicePath") String devicePath,
                                                   @RequestParam("description") String description) {
-        VolumeEntity volume = this.guestService.bindHostDevice(guestId, deviceType, description, devicePath, diskDriver, diskFormat);
+        VolumeEntity volume = this.globalLockCall(() -> this.guestService.bindHostDevice(guestId, deviceType, description, devicePath, diskDriver, diskFormat));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
     }
 

@@ -66,7 +66,7 @@ public class ConfigService {
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW
         ), StringConvert.Default);
-        initDefaultConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认模版磁盘驱动", Constant.ConfigValueType.SELECT, Arrays.asList(
+        initDefaultConfig(ConfigKey.DEFAULT_TEMPLATE_DISK_TYPE, cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2, "默认模版磁盘类型", Constant.ConfigValueType.SELECT, Arrays.asList(
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW2,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.RAW,
                 cn.chenjun.cloud.common.util.Constant.VolumeType.QCOW,

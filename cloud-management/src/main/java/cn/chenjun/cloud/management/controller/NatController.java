@@ -33,13 +33,13 @@ public class NatController extends BaseController {
                                                           @RequestParam("protocol") String protocol,
                                                           @RequestParam("remoteIp") String remoteIp,
                                                           @RequestParam("remotePort") int remotePort) {
-        NatEntity entity = this.lockRun(() -> networkService.createComponentNat(componentId, localPort, protocol, remoteIp, remotePort));
+        NatEntity entity = this.globalLockCall(() -> networkService.createComponentNat(componentId, localPort, protocol, remoteIp, remotePort));
         return ResultUtil.success(convertService.initNatModel(entity));
     }
 
     @DeleteMapping("/api/nat/destroy")
     public ResultUtil<Void> destroyNetworkComponentNat(@RequestParam("natId") int natId) {
-        networkService.deleteComponentNat(natId);
+        this.globalLockCall(() -> networkService.deleteComponentNat(natId));
         return ResultUtil.success();
     }
 }

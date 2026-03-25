@@ -58,7 +58,7 @@ public class TemplateController extends BaseController {
                                                     @RequestParam(value = "localCloudCfg", defaultValue = "") String localCloudCfg,
                                                     @RequestParam(value = "vendorData", defaultValue = "") String vendorData,
                                                     @RequestParam(value = "cloudWaitFlag", defaultValue = "0") int cloudWaitFlag) {
-        TemplateEntity template = this.lockRun(() -> templateService.createTemplate(name, uri, md5, templateType, arch, localCloudCfg, vendorData, cloudWaitFlag));
+        TemplateEntity template = this.globalLockCall(() -> templateService.createTemplate(name, uri, md5, templateType, arch, localCloudCfg, vendorData, cloudWaitFlag));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
     }
 
@@ -68,14 +68,14 @@ public class TemplateController extends BaseController {
                                                           @RequestParam(value = "localCloudCfg", defaultValue = "") String localCloudCfg,
                                                           @RequestParam(value = "vendorData", defaultValue = "") String vendorData,
                                                           @RequestParam(value = "cloudWaitFlag", defaultValue = "0") int cloudWaitFlag) {
-        TemplateEntity template = this.lockRun(() -> templateService.updateTemplateScript(id, localCloudCfg, vendorData, cloudWaitFlag));
+        TemplateEntity template = this.globalLockCall(() -> templateService.updateTemplateScript(id, localCloudCfg, vendorData, cloudWaitFlag));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/template/download")
     public ResultUtil<TemplateModel> downloadTemplate(@RequestParam("templateId") int templateId) {
-        TemplateEntity template = this.lockRun(() -> templateService.downloadTemplate(templateId));
+        TemplateEntity template = this.globalLockCall(() -> templateService.downloadTemplate(templateId));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
 
 
@@ -86,7 +86,7 @@ public class TemplateController extends BaseController {
     public ResultUtil<TemplateModel> createVolumeTemplate(@RequestParam("volumeId") int volumeId,
                                                           @RequestParam("name") String name,
                                                           @RequestParam("arch") String arch) {
-        TemplateEntity template = this.lockRun(() -> templateService.createVolumeTemplate(volumeId, name, arch));
+        TemplateEntity template = this.globalLockCall(() -> templateService.createVolumeTemplate(volumeId, name, arch));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
 
 
@@ -95,7 +95,7 @@ public class TemplateController extends BaseController {
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/template/destroy")
     public ResultUtil<TemplateModel> destroyTemplate(@RequestParam("templateId") int templateId) {
-        TemplateEntity template = this.lockRun(() -> templateService.destroyTemplate(templateId));
+        TemplateEntity template = this.globalLockCall(() -> templateService.destroyTemplate(templateId));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
     }
 }

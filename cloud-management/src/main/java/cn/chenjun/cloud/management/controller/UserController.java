@@ -44,7 +44,7 @@ public class UserController extends BaseController {
     @PostMapping("/api/user/self/modify")
     public ResultUtil<Void> updateSelfInfo(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestParam(value = "username", defaultValue = "") String username, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
 
-        userUiService.updateSelfInfo(model.getUserId(), username, oldPassword, newPassword, nonce);
+        this.globalLockCall(() -> userUiService.updateSelfInfo(model.getUserId(), username, oldPassword, newPassword, nonce));
         return ResultUtil.success();
     }
 
@@ -82,7 +82,7 @@ public class UserController extends BaseController {
     @PutMapping("/api/user/register")
     public ResultUtil<UserModel> register(@RequestParam("userName") String userName, @RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
 
-        UserEntity user = userUiService.register(userName, loginName, password, userType, userStatus);
+        UserEntity user = this.globalLockCall(() -> userUiService.register(userName, loginName, password, userType, userStatus));
         return ResultUtil.success(this.convertService.initUserModel(user));
 
     }
@@ -99,7 +99,7 @@ public class UserController extends BaseController {
     @PostMapping("/api/user/update")
     @LoginRequire
     public ResultUtil<UserModel> updateUserInfo(@RequestParam("userId") int userId, @RequestParam("userName") String userName, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
-        UserEntity user = userUiService.updateUser(userId, userName, userType, userStatus);
+        UserEntity user = this.globalLockCall(() -> userUiService.updateUser(userId, userName, userType, userStatus));
         return ResultUtil.success(this.convertService.initUserModel(user));
     }
 
@@ -107,7 +107,7 @@ public class UserController extends BaseController {
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @DeleteMapping("/api/user/destroy")
     public ResultUtil<Void> destroyUser(@RequestParam("userId") int userId) {
-        userUiService.destroyUser(userId);
+        this.globalLockCall(() -> userUiService.destroyUser(userId));
         return ResultUtil.success();
     }
 
@@ -115,7 +115,7 @@ public class UserController extends BaseController {
     @PostMapping("/api/user/password/reset")
     @LoginRequire
     public ResultUtil<UserModel> resetPassword(@RequestParam("userId") int userId, @RequestParam("password") String password) {
-        UserEntity user = userUiService.resetPassword(userId, password);
+        UserEntity user = this.globalLockCall(() -> userUiService.resetPassword(userId, password));
         return ResultUtil.success(this.convertService.initUserModel(user));
     }
 

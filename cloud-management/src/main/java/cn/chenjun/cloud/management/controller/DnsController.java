@@ -48,7 +48,7 @@ public class DnsController extends BaseController {
     public ResultUtil<DnsModel> createDns(@RequestParam("networkId") int networkId,
                                           @RequestParam("domain") String domain,
                                           @RequestParam("ip") String ip) {
-        DnsEntity entity = this.lockRun(() -> this.dnsService.createDns(networkId, domain, ip));
+        DnsEntity entity = this.globalLockCall(() -> this.dnsService.createDns(networkId, domain, ip));
         DnsModel model = this.convertService.initDnsModel(entity);
         return ResultUtil.success(model);
     }
@@ -57,9 +57,7 @@ public class DnsController extends BaseController {
     @LoginRequire
     @DeleteMapping("/api/dns/destroy")
     public ResultUtil<Void> destroyDns(@RequestParam("id") int dnsId) {
-        this.lockRun(() -> {
-            this.dnsService.deleteDns(dnsId);
-        });
+        this.globalLockCall(() -> this.dnsService.deleteDns(dnsId));
         return ResultUtil.success();
     }
 
