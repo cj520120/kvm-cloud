@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 public class ConvertService {
 
     @Autowired
-    private LockRunner lockRunner;
-    @Autowired
     private ComponentService componentService;
     @Autowired
     private GroupService groupService;

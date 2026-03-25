@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.task.runner;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -29,6 +30,7 @@ public abstract class AbstractRunner {
             if (!this.isStart()) {
                 return;
             }
+            RequestContextHolderUtil.initContext();
             lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
                 if (this.getPeriodSeconds() > 0) {
                     String key = this.getJobKey();
@@ -42,6 +44,8 @@ public abstract class AbstractRunner {
             });
         } catch (Exception err) {
             log.error("周期任务执行失败.", err);
+        }finally {
+            RequestContextHolderUtil.clearContext();
         }
     }
 

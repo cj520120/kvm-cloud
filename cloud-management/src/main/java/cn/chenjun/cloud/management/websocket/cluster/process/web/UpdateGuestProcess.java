@@ -33,4 +33,5 @@ public class UpdateGuestProcess extends AbstractClusterMessageProcess<Void> {
     public int getType() {
         return Constant.NotifyType.UPDATE_GUEST;
     }
+
 }

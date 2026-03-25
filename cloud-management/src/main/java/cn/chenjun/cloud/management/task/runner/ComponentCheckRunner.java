@@ -5,12 +5,10 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
-import cn.chenjun.cloud.management.servcie.ComponentService;
-import cn.chenjun.cloud.management.servcie.HostService;
-import cn.chenjun.cloud.management.servcie.NetworkService;
-import cn.chenjun.cloud.management.servcie.NotifyService;
+import cn.chenjun.cloud.management.servcie.*;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.HostRole;
+import cn.chenjun.cloud.management.util.RedisKeyUtil;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,8 @@ public class ComponentCheckRunner extends AbstractRunner {
     private HostService hostService;
     @Autowired
     private ComponentService componentService;
+    @Autowired
+    private LockRunner lockRunner;
 
     @Override
     public int getPeriodSeconds() {
@@ -71,14 +71,14 @@ public class ComponentCheckRunner extends AbstractRunner {
             for (ComponentEntity component : componentList) {
                 boolean isComponentReady = false;
                 try {
-                    isComponentReady = this.componentService.checkNetworkComponentReady(masterHostList, component, network);
+                    isComponentReady = lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), () -> this.componentService.checkNetworkComponentReady(masterHostList, component, network));
 
                 } catch (Exception e) {
                     log.error("检测网络[{}]失败", network.getNetworkId(), e);
                 }
                 if (isComponentReady) {
                     try {
-                        this.componentService.cleanOldComponentGuest(component.getComponentId(), masterHostList.stream().map(HostEntity::getHostId).collect(Collectors.toList()));
+                        lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> this.componentService.cleanOldComponentGuest(component.getComponentId(), masterHostList.stream().map(HostEntity::getHostId).collect(Collectors.toList())));
                     } catch (Exception e) {
                         log.error("清理组件虚拟机失败,component_id={}", component.getComponentId());
                     }
@@ -92,7 +92,8 @@ public class ComponentCheckRunner extends AbstractRunner {
                 for (HostEntity host : hostList) {
                     if (HostRole.isMaster(host.getRole())) {
                         try {
-                            this.componentService.checkAndCreateMissComponentGuest(component.getComponentId(), host.getHostId());
+                            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> this.componentService.checkAndCreateMissComponentGuest(component.getComponentId(), host.getHostId()));
+
                         } catch (CodeException err) {
                             log.error("安装系统组件失败.componentId={} msg={},跳出安装检测...", component.getComponentId(), err.getMessage());
                             break;

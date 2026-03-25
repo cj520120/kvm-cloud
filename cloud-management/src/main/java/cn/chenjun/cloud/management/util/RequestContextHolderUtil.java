@@ -42,6 +42,9 @@ public class RequestContextHolderUtil {
     }
 
     public static void initContext() {
+        if (REQUEST_CONTEXT.get() != null) {
+            clearContext();
+        }
         REQUEST_CONTEXT.set(new HashMap<>());
     }
 

@@ -145,6 +145,8 @@ public class ComponentService extends AbstractService {
                 .status(Constant.ComponentGuestStatus.CREATING)
                 .build();
         this.componentGuestDao.insert(componentGuest);
+
+        this.notifyService.publish(NotifyData.<Void>builder().id(componentGuest.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
         return componentGuest;
     }
 

@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.servcie.LockRunner;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.OperateFinishBean;
 import cn.chenjun.cloud.management.util.RedisKeyUtil;
+import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,6 +73,8 @@ public class OperateEngine {
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
         this.executor.submit(() -> lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
             try {
+
+                RequestContextHolderUtil.initContext();
                 log.info("任务回调:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
                 Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());
                 BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(operateFinishBean.getParam(), paramClass);
@@ -83,6 +86,8 @@ public class OperateEngine {
                 }
             } catch (Exception err) {
                 log.error("解析任务参数出错:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
+            }finally {
+                RequestContextHolderUtil.clearContext();
             }
         }));
     }
