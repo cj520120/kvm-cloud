@@ -43,9 +43,11 @@ public class LockRunner {
             lock = redissonClient.getLock(key);
             lock.lock(10, TimeUnit.SECONDS);
             return runnable.run();
+        } catch (CodeException err) {
+            throw err;
         } catch (Exception err) {
             log.error("执行失败.lock-key:{}", key, err);
-            throw err;
+            throw new CodeException(ErrorCode.SERVER_ERROR, err);
         } finally {
             if (lock != null) {
                 try {
@@ -65,6 +67,6 @@ public class LockRunner {
          *
          * @return 结果
          */
-        T run();
+        T run() throws Exception;
     }
 }

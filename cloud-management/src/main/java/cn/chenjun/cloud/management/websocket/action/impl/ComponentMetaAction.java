@@ -9,6 +9,7 @@ import cn.chenjun.cloud.management.websocket.action.WsAction;
 import cn.chenjun.cloud.management.websocket.client.WebSocket;
 import cn.chenjun.cloud.management.websocket.client.context.ComponentContext;
 import cn.chenjun.cloud.management.websocket.message.WsRequest;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -88,9 +89,12 @@ public class ComponentMetaAction implements WsAction {
                     response = buildMetaResponse(dataList);
                 } else if ("meta-data-keys".equals(type)) {
                     response = metaService.listMetaDataKeys(context.getNetworkId(), ip);
-                } else if ("meta-data-info ".equals(type)) {
+                } else if ("meta-data-info".equals(type)) {
                     String metaKey = msg.getData().getOrDefault("meta-key", "").toString();
                     response = metaService.findMetaDataByKey(metaKey, context.getNetworkId(), ip);
+                    if(ObjectUtils.isEmpty(response)){
+                        map.put("status", HttpStatus.NOT_FOUND.value());
+                    }
                 } else if ("user-data".equals(type)) {
                     List<MetaData> dataList = this.metaService.findGuestUserData(context.getNetworkId(), ip);
                     response = buildMetaResponse(dataList);
