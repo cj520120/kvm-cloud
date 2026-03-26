@@ -44,7 +44,7 @@ public class CreateVolumeTemplateOperateServiceImpl extends AbstractOperateServi
                     .targetVolume(initVolume(targetStorage, targetVolume))
                     .build();
 
-            this.asyncInvoker(host, param, Constant.Command.VOLUME_CLONE, request);
+            this.asyncInvoker(host, param, Constant.Command.CREATE_VOLUME_TEMPLATE, request);
         } else {
             throw new CodeException(ErrorCode.SERVER_ERROR, "原磁盘[" + volume.getName() + "]状态不正常:" + volume.getStatus());
         }

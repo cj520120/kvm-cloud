@@ -266,7 +266,6 @@ public class VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.VOLUME_CLONE)
-
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
 
 
@@ -290,7 +289,10 @@ public class VolumeOperate {
         }
 
     }
-
+    @DispatchBind(command = Constant.Command.CREATE_VOLUME_TEMPLATE)
+    public VolumeInfo createVolumeTemplate(Connect connect, VolumeCloneRequest request) throws Exception {
+        return clone(connect, request);
+    }
     private void init(StorageVol vol, VolumeInfo info) throws Exception {
         String xml = vol.getXMLDesc(0);
         try (StringReader sr = new StringReader(xml)) {

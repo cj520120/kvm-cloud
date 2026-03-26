@@ -76,6 +76,7 @@ public class Constant {
         public static final String VOLUME_DESTROY = "DestroyVolume";
         public static final String DESTROY_UNLINK_VOLUME = "DestroyUnLinkVolume";
         public static final String VOLUME_CLONE = "CloneVolume";
+        public static final String CREATE_VOLUME_TEMPLATE = "CreateVolumeTemplate";
         public static final String VOLUME_RESIZE = "ResizeVolume";
         public static final String LIST_STORAGE_VOLUME = "ListStorageVolume";
 
