@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Graphics;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -149,7 +151,7 @@ public class GuestService extends AbstractService {
         GuestExtern extern = new GuestExtern();
         extern.setMetaData(GuestExternUtil.buildMetaDataParam(guest, hostName));
         extern.setUserData(GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
-        extern.setVnc(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", "5900"));
         extern.setInitVendorData(initVendorData);
         guest.setExtern(GsonBuilderUtil.create().toJson(extern));
 
@@ -709,7 +711,7 @@ public class GuestService extends AbstractService {
         return guest;
     }
 
-    public String getVncPassword(int guestId) {
+    public Graphics getGuestGraphics(int guestId) {
         GuestEntity guest = this.guestDao.findById(guestId);
         if (guest == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
@@ -718,10 +720,19 @@ public class GuestService extends AbstractService {
         if(extern == null){
             extern = new GuestExtern();
         }
-        if(extern.getVnc() == null){
-            extern.setVnc(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        Graphics graphics = new Graphics();
+        if(extern.getGraphics() == null){
+            throw new CodeException(ErrorCode.GUEST_NOT_START, "虚拟机未启动");
+        }else{
+            graphics.setPort(Integer.parseInt(extern.getGraphics().getPort()));
+            graphics.setPassword(extern.getGraphics().getPassword());
+            if(ObjectUtils.isEmpty(extern.getGraphics().getProtocol()))
+                extern.getGraphics().setProtocol("vnc");
+            else{
+                extern.getGraphics().setProtocol(extern.getGraphics().getProtocol());
+            }
         }
-        return extern.getVnc().getPassword();
+        return graphics;
     }
 
     @Transactional(rollbackFor = Exception.class)

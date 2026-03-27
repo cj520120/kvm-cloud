@@ -3,7 +3,7 @@ package cn.chenjun.cloud.agent.operate.impl;
 import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.util.CloudInitHelper;
 import cn.chenjun.cloud.agent.util.DomainUtil;
-import cn.chenjun.cloud.agent.util.VncUtil;
+import cn.chenjun.cloud.agent.util.GraphicsUtil;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -221,7 +221,7 @@ public class GuestOperate {
      *
      * @param connect
      * @param name
-     * @param timeout
+     * @param timeoutMillis
      * @throws Exception
      */
     private void stopDomain(Connect connect, String name, long timeoutMillis) throws Exception {
@@ -292,7 +292,8 @@ public class GuestOperate {
                 .build();
         if (domainInfo.state == DomainInfo.DomainState.VIR_DOMAIN_RUNNING) {
             String xml = domain.getXMLDesc(0);
-            info.setVnc(VncUtil.getVnc(xml));
+            Graphics graphics = GraphicsUtil.getGraphics(xml);
+            info.setGraphics(graphics);
         }
         return info;
     }

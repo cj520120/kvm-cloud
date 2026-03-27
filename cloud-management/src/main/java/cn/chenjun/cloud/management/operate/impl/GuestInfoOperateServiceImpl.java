@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl;
 
+import cn.chenjun.cloud.common.bean.Graphics;
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestInfoRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
@@ -64,13 +65,21 @@ public class GuestInfoOperateServiceImpl extends AbstractOperateService<GuestInf
                 if(extern==null){
                     extern = new GuestExtern();
                 }
-                if(extern.getVnc()==null){
-                    extern.setVnc(GuestExternUtil.buildVncParam(guest, "", ""));
+                if(extern.getGraphics()==null){
+                    extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", ""));
                 }
                 HostEntity host = this.hostDao.findById(guest.getHostId());
-                extern.getVnc().setHost(host.getHostIp());
-                if (!Objects.equals(extern.getVnc().getPort(), String.valueOf(resultUtil.getData().getVnc()))) {
-                    extern.getVnc().setPort(String.valueOf(resultUtil.getData().getVnc()));
+                extern.getGraphics().setHost(host.getHostIp());
+                Graphics graphics = resultUtil.getData().getGraphics();
+                if (graphics == null) {
+                    graphics = Graphics.builder().protocol("vnc").port(Integer.parseInt(extern.getGraphics().getPort())).build();
+                }
+                String type = graphics.getProtocol();
+                int port = graphics.getPort();
+                String oldType = extern.getGraphics().getProtocol();
+                int oldPort = Integer.parseInt(extern.getGraphics().getPort());
+                if (!Objects.equals(oldType, type) || oldPort != port) {
+                    extern.getGraphics().setPort(String.valueOf(port));
                     guest.setExtern(GsonBuilderUtil.create().toJson(extern));
                     this.guestDao.update(guest);
                 }

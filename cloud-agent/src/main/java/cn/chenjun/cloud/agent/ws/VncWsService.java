@@ -7,7 +7,7 @@ import cn.chenjun.cloud.agent.sock.NioSelector;
 import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.agent.util.ConnectFactory;
 import cn.chenjun.cloud.agent.util.SpringContextUtils;
-import cn.chenjun.cloud.agent.util.VncUtil;
+import cn.chenjun.cloud.agent.util.GraphicsUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.AppUtils;
@@ -77,7 +77,7 @@ public class VncWsService implements NioCallback {
             int port;
             try {
                 String xml = connect.domainLookupByName(name).getXMLDesc(0);
-                port = VncUtil.getVnc(xml);
+                port = GraphicsUtil.getGraphics(xml).getPort();
             } catch (Exception err) {
                 log.error("查询虚拟机信息信息失败.name={}", name, err);
                 throw new CodeException(ErrorCode.SERVER_ERROR, err);

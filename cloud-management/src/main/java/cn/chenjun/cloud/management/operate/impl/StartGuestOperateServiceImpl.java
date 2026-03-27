@@ -83,8 +83,8 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
         deviceXmlList.addAll(this.buildInterfaceListXml(guest, guestNetworkEntityList, systemConfig));
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
-        if (extern.getVnc() == null) {
-            extern.setVnc(GuestExternUtil.buildVncParam(guest, "", ""));
+        if (extern.getGraphics() == null) {
+            extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", ""));
         }
         guest.setHostId(host.getHostId());
         guest.setLastHostId(host.getHostId());
@@ -98,7 +98,7 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
             tpl = (String) systemConfig.get(ConfigKey.VM_DOMAIN_TPL);
         }
 
-        String xml = DomainUtil.buildDomainXml(tpl, systemConfig, guest, host, scheme, extern.getVnc().getPassword(), deviceXmlList, metaDataXmlList);
+        String xml = DomainUtil.buildDomainXml(tpl, systemConfig, guest, host, scheme, extern.getGraphics().getPassword(), deviceXmlList, metaDataXmlList);
         request.setXml(xml);
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
@@ -131,13 +131,14 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
                 //写入系统vnc
                 GuestInfo guestInfo = resultUtil.getData();
                 GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
-                if (extern.getVnc() == null) {
-                    extern.setVnc(GuestExternUtil.buildVncParam(guest, "", ""));
+                if (extern.getGraphics() == null) {
+                    extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", ""));
                 }
 
                 HostEntity host = this.hostDao.findById(guest.getHostId());
-                extern.getVnc().setHost(host.getHostIp());
-                extern.getVnc().setPort(String.valueOf(guestInfo.getVnc()));
+                extern.getGraphics().setHost(host.getHostIp());
+                extern.getGraphics().setPort(String.valueOf(guestInfo.getGraphics().getPort()));
+                extern.getGraphics().setProtocol(guestInfo.getGraphics().getProtocol());
                 guest.setExtern(GsonBuilderUtil.create().toJson(extern));
                 this.guestDao.update(guest);
             } else {

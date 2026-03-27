@@ -35,11 +35,12 @@ public class GuestExternUtil {
         return userData;
     }
 
-    public static GuestExtern.Vnc buildVncParam(GuestEntity guest, String host, String port) {
-        GuestExtern.Vnc vnc = new GuestExtern.Vnc();
-        vnc.setHost(host);
-        vnc.setPort(port);
-        vnc.setPassword(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
-        return vnc;
+    public static GuestExtern.Graphics buildVncParam(GuestEntity guest, String host, String port) {
+        GuestExtern.Graphics graphics = new GuestExtern.Graphics();
+        graphics.setHost(host);
+        graphics.setPort(port);
+        graphics.setProtocol("vnc");
+        graphics.setPassword(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
+        return graphics;
     }
 }

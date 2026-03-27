@@ -45,8 +45,8 @@ public class GuestInfo implements Serializable {
      * 虚拟机UUID
      */
     private String uuid;
-    /**
-     * VNC端口号
-     */
-    private int vnc;
+
+
+
+    private Graphics graphics;
 }

@@ -9,8 +9,8 @@ public class GuestExtern {
     private MetaData metaData;
     @SerializedName(GuestExternNames.USER_DATA)
     private UserData userData;
-    @SerializedName(GuestExternNames.VNC)
-    private Vnc vnc;
+    @SerializedName(value=GuestExternNames.GRAPHICS,alternate = {GuestExternNames.VNC})
+    private Graphics graphics;
     @SerializedName(GuestExternNames.VENDOR_DATA)
     private String initVendorData;
 
@@ -38,13 +38,15 @@ public class GuestExtern {
     }
 
     @Data
-    public static class Vnc {
+    public static class Graphics {
         @SerializedName(GuestExternNames.VncNames.PASSWORD)
         private String password;
         @SerializedName(GuestExternNames.VncNames.PORT)
         private String port;
         @SerializedName(GuestExternNames.VncNames.HOST)
         private String host;
+        @SerializedName(GuestExternNames.VncNames.PROTOCOL)
+        private String protocol;
 
     }
 
@@ -52,10 +54,13 @@ public class GuestExtern {
         public static final String META_DATA = "meta-data";
         public static final String USER_DATA = "user-data";
         public static final String VENDOR_DATA = "vendor-data";
+        @Deprecated
         public static final String VNC = "vnc";
+        public static final String GRAPHICS = "graphics";
 
         public static final class VncNames {
             public static final String PASSWORD = "password";
+            public static final String PROTOCOL = "protocol";
             public static final String PORT = "port";
             public static final String HOST = "host";
         }
