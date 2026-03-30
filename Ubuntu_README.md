@@ -8,7 +8,8 @@ egrep -c '(vmx|svm)' /proc/cpuinfo
 ```
 ### 防火墙配置
 ```shell
-# 放行相关端口
+# 放行相关
+# 端口
 sudo ufw allow 8081/tcp
 sudo ufw allow 16509/tcp
 ```
@@ -60,7 +61,7 @@ sudo netplan apply
 ### 查看网桥状态
 ```shell
 sudo ovs-vsctl show
-sudo ip a | grep br0
+sudo ip a | grep ovs-bridge
 ```
 ### 安装kvm相关组件
 ```shell
