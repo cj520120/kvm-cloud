@@ -40,7 +40,8 @@ public class WebExceptionHandler {
             log.warn(msg);
             return ResultUtil.<Void>builder().code(ErrorCode.PARAM_ERROR).message(msg).build();
         } else if (error instanceof CodeException) {
-            return ResultUtil.<Void>builder().code(((CodeException) error).getCode()).build();
+            CodeException exception = ((CodeException) error);
+            return ResultUtil.<Void>builder().code(exception.getCode()).message(exception.getMessage()).build();
         } else if (error instanceof HttpRequestMethodNotSupportedException) {
             HttpRequestMethodNotSupportedException exception = (HttpRequestMethodNotSupportedException) error;
             String msg = MessageFormat.format("process controller not support method.uri:{0},support={1},request={2}", request.getRequestURI(), String.join(",", exception.getSupportedMethods()), request.getMethod());

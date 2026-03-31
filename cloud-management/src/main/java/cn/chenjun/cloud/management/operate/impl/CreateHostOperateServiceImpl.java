@@ -5,15 +5,18 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.common.util.FunctionUtils;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateHostOperate;
+import cn.chenjun.cloud.management.servcie.HostService;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -37,12 +40,15 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateHostOperate, ResultUtil<HostInfo>> {
-
+    @Autowired
+    private HostService hostService;
 
     @Override
     public void operate(CreateHostOperate param) {
         HostEntity host = this.hostDao.findById(param.getHostId());
+
         List<StorageEntity> storageList = this.storageDao.listByStatus(Constant.StorageStatus.READY);
+
         List<NetworkEntity> networkList = this.networkDao.listByStatus(Constant.NetworkStatus.READY);
         Map<String, Object> systemConfig = this.loadGuestConfig(param.getHostId(), 0);
         List<StorageCreateRequest> createStorageRequest = storageList.stream().filter(storage -> {
@@ -51,6 +57,8 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
             }
             return Objects.equals(storage.getStatus(), Constant.StorageStatus.READY);
         }).map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
+
+
         Map<Integer, NetworkEntity> basicBridgeNetworkMap = networkList.stream().collect(Collectors.toMap(NetworkEntity::getNetworkId, Function.identity()));
         List<BasicBridgeNetwork> basicBridgeNetworks = new ArrayList<>();
         List<VlanNetwork> vlanNetworkList = new ArrayList<>();
@@ -101,7 +109,7 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
 
     @Override
     public void onFinish(CreateHostOperate param, ResultUtil<HostInfo> resultUtil) {
-        HostEntity host = HostEntity.builder().hostId(param.getHostId()).build();
+        HostEntity host = FunctionUtils.ignoreErrorCall(() -> this.hostDao.findById(param.getHostId()));
         if (host != null) {
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 HostInfo hostInfo = resultUtil.getData();
@@ -116,8 +124,11 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
                 host.setTotalMemory(hostInfo.getMemory());
                 host.setEmulator(hostInfo.getEmulator());
                 host.setHostName(hostInfo.getHostName());
-
                 host.setStatus(Constant.HostStatus.ONLINE);
+                List<StorageEntity> storageList = this.storageDao.listLocalStorage();
+                for (StorageEntity storageEntity : storageList) {
+                    this.hostService.checkAndInitHostLocalStorage(storageEntity, host);
+                }
             } else {
                 host.setStatus(Constant.HostStatus.ERROR);
             }

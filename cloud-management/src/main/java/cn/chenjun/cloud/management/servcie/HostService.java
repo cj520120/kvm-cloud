@@ -151,12 +151,12 @@ public class HostService extends AbstractHostStorageService {
     public void destroyHost(int hostId) {
         HostEntity host = this.hostDao.findById(hostId);
         if (this.guestDao.countByHostId(hostId) > 0) {
-            throw new CodeException(ErrorCode.SERVER_ERROR, "请关闭当前主机的所有虚拟机后删除");
+            throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机有运行的虚拟机或有绑定的虚拟机，请先停止或删除虚拟机后再进行操作");
         }
         List<StorageEntity> storageList = this.storageDao.listByHostId(hostId);
         for (StorageEntity storage:storageList){
             if (this.volumeDao.countByStorageId(storage.getStorageId()) > 0) {
-                throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，请首先删除该主机的本地存储池");
+                throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，且有磁盘占用，请先删除磁盘后再进行操作");
             }
         }
         this.hostDao.deleteById(hostId);

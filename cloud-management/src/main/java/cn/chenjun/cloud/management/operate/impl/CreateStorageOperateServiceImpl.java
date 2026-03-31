@@ -37,20 +37,22 @@ public class CreateStorageOperateServiceImpl extends AbstractOperateService<Crea
         if (storage.getType().equals(Constant.StorageType.LOCAL) && storage.getHostId() == 0) {
             List<StorageEntity> childStorages = this.storageDao.listStorageByParentStorageId(param.getStorageId());
             for (StorageEntity childStorage : childStorages) {
-                new InitHostStorageOperate.HostStorageBind();
                 binds.add(InitHostStorageOperate.HostStorageBind.builder().storageId(childStorage.getStorageId()).hostId(childStorage.getHostId()).build());
             }
 
         } else {
             List<HostEntity> hosts = hostDao.listAll()
                     .stream().filter(t -> {
-                        if (!Objects.equals(t.getStatus(), cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE)) {
-                            return false;
+                        switch (t.getStatus()) {
+                            case Constant.HostStatus.REGISTER:
+                            case Constant.HostStatus.ONLINE:
+                                break;
+                            default:
+                                return false;
                         }
                         return !storage.getType().equalsIgnoreCase(cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL) || Objects.equals(storage.getHostId(), t.getHostId());
                     }).collect(Collectors.toList());
             for (HostEntity host : hosts) {
-                new InitHostStorageOperate.HostStorageBind();
                 binds.add(InitHostStorageOperate.HostStorageBind.builder().storageId(param.getStorageId()).hostId(host.getHostId()).build());
             }
 
