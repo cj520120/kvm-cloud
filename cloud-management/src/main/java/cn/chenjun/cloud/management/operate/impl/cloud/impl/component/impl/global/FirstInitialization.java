@@ -36,9 +36,9 @@ public class FirstInitialization extends BaseInitialization {
         config.appendPackage("python3");
         config.appendPackage("python3-pip");
         config.appendPackage("qemu-guest-agent");
-        config.appendResourceFile("/usr/local/kvm-cloud/kvm-cloud.py", "tpl/component/init/kvm-cloud.py");
-        config.appendResourceFile("/etc/systemd/system/kvm-cloud.service", "tpl/component/init/kvm-cloud.service");
-        config.appendResourceFile("/usr/local/kvm-cloud/requirements.txt", "tpl/component/init/requirements.txt");
+        config.appendResourceFile("/usr/local/kvm-cloud/kvm-cloud.py", "tpl/component/init/kvm-cloud.py.json");
+        config.appendResourceFile("/etc/systemd/system/kvm-cloud.service", "tpl/component/init/kvm-cloud.service.json");
+        config.appendResourceFile("/usr/local/kvm-cloud/requirements.txt", "tpl/component/init/requirements.txt.json");
         config.appendRuncmd("mkdir -p /usr/local/kvm-cloud");
         config.appendRuncmd("python3 -m venv /usr/local/kvm-cloud/venv");
         config.appendRuncmd("/usr/local/kvm-cloud/venv/bin/pip install -r /usr/local/kvm-cloud/requirements.txt");

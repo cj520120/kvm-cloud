@@ -59,7 +59,7 @@ public class DnsmasqInitialization extends BaseInitialization {
         String startIp = allGuestNetwork.get(0).getIp();
         String endIp = allGuestNetwork.get(allGuestNetwork.size() - 1).getIp();
 
-        String config = ResourceUtil.readUtf8Str("tpl/component/init/dnsmasq.conf");
+        String config = ResourceUtil.readUtf8Str("tpl/component/init/dnsmasq.conf.json");
         Map<String, Object> map = new HashMap<>();
         map.put("interface", "eth" + defaultGuestNetwork.getDeviceId());
         map.put("ip", defaultGuestNetwork.getIp());

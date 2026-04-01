@@ -66,7 +66,7 @@ public class KeepalivedInitialization extends BaseInitialization {
         }
         Map<String, Object> map = new HashMap<>(1);
         map.put("vrrpList", vrrpList);
-        String config = ResourceUtil.readUtf8Str("tpl/component/init/keepalived.conf");
+        String config = ResourceUtil.readUtf8Str("tpl/component/init/keepalived.conf.json");
         return JinjavaParser.create().render(config, map);
     }
 }

@@ -52,7 +52,7 @@ public class ConfigService {
 
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_USER_NAME, "kvm-user", "组件默认用户名", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_USER_PASSWORD, "Kvm@123456", "组件默认密码", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CLOUD_INIT_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cloud.xml"), "local-cloud加载模版配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CLOUD_INIT_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cloud.xml.json"), "local-cloud加载模版配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.SYSTEM_COMPONENT_CLOUD_INIT_PATH, "/var/kvm-cloud/", "local-cloud默认配置路径", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
 
@@ -112,14 +112,14 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
 
-        initDefaultConfig(ConfigKey.STORAGE_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.STORAGE_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/glusterfs/storage.xml"), "glusterfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/secret.xml"), "ceph rbd 存储池密钥模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/storage.xml"), "ceph rbd 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.STORAGE_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/nfs/storage.xml.json"), "nfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/glusterfs/storage.xml.json"), "glusterfs 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_SECRET_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/secret.xml.json"), "ceph rbd 存储池密钥模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/ceph/storage.xml.json"), "ceph rbd 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.STORAGE_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/storage/local/storage.xml.json"), "local 存储池模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.NETWORK_OVS_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml.json"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVS_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml.json"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_DISK_CACHE, "none", "磁盘读写缓冲(cache)模式", Constant.ConfigValueType.SELECT, Arrays.asList("writethrough", "writeback", "none", "unsafe", "directsync"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_AIO, "native", "磁盘读写AIO模式", Constant.ConfigValueType.SELECT, Arrays.asList("native", "thread"), StringConvert.Default);
@@ -135,21 +135,21 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.VM_DEFAULT_DEVICE_TPL, "", "其他设备Xml配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
 
-        initDefaultConfig(ConfigKey.VM_DOMAIN_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/vm.xml"), "VM模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DOMAIN_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/vm.xml.json"), "VM模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_DISK_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DISK_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DISK_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DISK_BLOCK_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/block/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DISK_FILE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/file/disk.xml"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml.json"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml.json"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/ceph/disk.xml.json"), "vm ceph rbd 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/local/disk.xml.json"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_BLOCK_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/block/disk.xml.json"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_DISK_FILE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/file/disk.xml.json"), "vm local存储池磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_CD_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CD_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CD_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/ceph/cd.xml"), "vm ceph rbd 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_CD_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cd.xml"), "vm local存储池光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/nfs/cd.xml.json"), "vm nfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/glusterfs/cd.xml.json"), "vm glusterfs 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_CEPH_RBD_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/ceph/cd.xml.json"), "vm ceph rbd 光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_CD_LOCAL_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/cd/local/cd.xml.json"), "vm local存储池光驱模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_INTERFACE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/interface/interface.xml"), "vm 基础网络网卡配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.VM_INTERFACE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/interface/interface.xml.json"), "vm 基础网络网卡配置", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
 
         initDefaultConfig(ConfigKey.LOGIN_JWD_PASSWORD, "#$1fa)&*WS09", "登录使用的JWT 密码", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
