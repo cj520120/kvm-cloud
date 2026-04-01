@@ -56,11 +56,11 @@ public class TaskDispatchRunner extends AbstractRunner {
                     log.error("调用任务出现未知错误.param={}", entity.getParam(), err);
                     resultUtil = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
                 }
-                if (resultUtil.getCode() != ErrorCode.WAITING) {
+                if (resultUtil.getCode() == ErrorCode.WAITING) {
                     log.info("任务:{}-{}延期执行,延期原因:{}", entity.getTaskId(), entity.getTitle(), resultUtil.getMessage());
-                    this.taskService.submitTaskFinish(entity.getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
-                } else {
                     this.taskService.delayTask(entity);
+                } else {
+                    this.taskService.submitTaskFinish(entity.getTaskId(), GsonBuilderUtil.create().toJson(resultUtil));
                 }
             }
         }
