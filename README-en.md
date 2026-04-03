@@ -191,7 +191,6 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 ```$xslt
 Official images based on Red Hat (with iptables support) are recommended. Examples:
 > https://yum.oracle.com/templates/OracleLinux/OL10/u1/x86_64/OL10U1_x86_64-kvm-b270.qcow2
-> https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-20260223.0.x86_64.qcow2
 Restriction
 Do not use domestic Linux distribution images.
 They have inconsistent support for cloud-init, which may lead to initialization failures. Test compatibility on your own if necessary.

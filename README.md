@@ -189,7 +189,6 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 ```$xslt
 使用基于 RedHat、支持 iptables的官方镜像，示例如下：
 > https://yum.oracle.com/templates/OracleLinux/OL10/u1/x86_64/OL10U1_x86_64-kvm-b270.qcow2
-> https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-20260223.0.x86_64.qcow2
  
 请务使用国内发行版镜像，国内版本对 cloud-init 的支持存在差异，可能导致系统初始化失败；若确有使用需求，请自行测试兼容性。
 
