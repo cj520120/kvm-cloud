@@ -32,11 +32,11 @@ public class TaskService {
 
     @Transactional(rollbackFor = Exception.class)
     public void addTask(BaseOperateParam operateParam) {
-        this.addTask(operateParam, 0);
+        this.addTask(operateParam, 0,false);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void addTask(BaseOperateParam operateParam, int delayMinute) {
+    public void addTask(BaseOperateParam operateParam, int delayMinute,boolean update) {
         TaskEntity task = this.findTask(operateParam.getTaskId());
         if (task == null) {
             task = TaskEntity.builder().taskId(operateParam.getTaskId())
@@ -48,6 +48,10 @@ public class TaskService {
                     .createTime(new Date(System.currentTimeMillis()))
                     .build();
             taskDao.insert(task);
+        } else if (update) {
+            task.setExpireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(delayMinute)));
+            task.setVersion(0);
+            taskDao.update(task);
         }
     }
 

@@ -21,4 +21,11 @@ public class DestroyGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.DESTROY_GUEST;
     }
+
+
+
+    @Override
+    public String getTaskId() {
+        return "Guest-Destroy:" + guestId;
+    }
 }

@@ -191,9 +191,11 @@ public class TemplateService extends AbstractService {
             throw new CodeException(ErrorCode.TEMPLATE_NOT_FOUND, "模版不存在");
         }
         int timeout = 0;
+        boolean bUpdateTask=false;
         switch (template.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.TemplateStatus.DESTROY:
             case cn.chenjun.cloud.common.util.Constant.TemplateStatus.ERROR:
+                bUpdateTask=true;
                 break;
             default:
                 timeout = configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
@@ -202,7 +204,7 @@ public class TemplateService extends AbstractService {
         template.setStatus(cn.chenjun.cloud.common.util.Constant.TemplateStatus.DESTROY);
         this.templateDao.update(template);
         BaseOperateParam operate = DestroyTemplateOperate.builder().id(UUID.randomUUID().toString()).title("删除模版[" + template.getName() + "]").templateId(templateId).build();
-        operateTask.addTask(operate, timeout);
+        operateTask.addTask(operate, timeout,bUpdateTask);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(templateId).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_TEMPLATE).build());
         return template;
 

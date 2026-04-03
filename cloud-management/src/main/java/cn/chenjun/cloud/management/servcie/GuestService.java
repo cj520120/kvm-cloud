@@ -696,6 +696,7 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "客户机不存在");
         }
         int timeout = 0;
+        boolean bUpdateTask=false;
         switch (guest.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
                 if (guest.getType().equals(cn.chenjun.cloud.common.util.Constant.GuestType.USER)) {
@@ -704,6 +705,7 @@ public class GuestService extends AbstractService {
                 break;
             case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
             case cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY:
+                bUpdateTask=true;
                 break;
             default:
                 throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前主机不是关机状态");
@@ -713,7 +715,7 @@ public class GuestService extends AbstractService {
         this.guestDao.update(guest);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-        operateTask.addTask(operate, timeout);
+        operateTask.addTask(operate, timeout,bUpdateTask);
         return guest;
     }
 

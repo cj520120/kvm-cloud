@@ -21,4 +21,9 @@ public class DestroyVolumeOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.DESTROY_VOLUME;
     }
+
+    @Override
+    public String getTaskId() {
+        return "Volume-Destroy:" + volumeId;
+    }
 }

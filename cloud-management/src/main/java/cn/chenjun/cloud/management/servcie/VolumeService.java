@@ -282,14 +282,15 @@ public class VolumeService extends AbstractService {
                 volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.DESTROY);
                 volumeDao.update(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate, volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE));
+                int timeout= volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
+                operateTask.addTask(operate,timeout,false);
 
                 NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return volume;
             }
             case Constant.VolumeStatus.DESTROY: {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate, 0);
+                operateTask.addTask(operate, 0,true);
                 NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return volume;
             }
