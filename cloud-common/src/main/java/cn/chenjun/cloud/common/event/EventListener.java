@@ -2,7 +2,10 @@ package cn.chenjun.cloud.common.event;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -17,9 +20,12 @@ public class EventListener<T> {
             Collection<EventHandler<T>> listener = this.listener;
             final EventObject<T> model = new EventObject<T>(target);
             for (EventHandler<T> ev : listener) {
-                this.fire(ev, sender, model);
+                try {
+                    this.fire(ev, sender, model);
+                } catch (Exception e) {
+                    log.error("notify event fail.data={}", model, e);
+                }
             }
-
         } finally {
             this.lock.readLock().unlock();
         }
@@ -52,4 +58,7 @@ public class EventListener<T> {
         }
     }
 
+    public void clear() {
+        this.listener.clear();
+    }
 }

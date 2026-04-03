@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.servcie;
 
-import cn.chenjun.cloud.common.bean.Graphics;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -8,13 +7,17 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.model.GraphicsModel;
 import cn.chenjun.cloud.management.operate.bean.*;
 import cn.chenjun.cloud.management.servcie.bean.AttachNicInfo;
 import cn.chenjun.cloud.management.servcie.bean.AttachVolumeInfo;
 import cn.chenjun.cloud.management.servcie.bean.GuestExtern;
+import cn.chenjun.cloud.management.servcie.bean.MemGraphicsInfo;
 import cn.chenjun.cloud.management.util.*;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +36,8 @@ import java.util.stream.Collectors;
 public class GuestService extends AbstractService {
     @Autowired
     private AllocateService allocateService;
+    @Autowired
+    private RedissonClient redissonClient;
 
     private void checkSystemComponentComplete(int networkId) {
         NetworkEntity network = this.networkDao.findById(networkId);
@@ -151,7 +157,7 @@ public class GuestService extends AbstractService {
         GuestExtern extern = new GuestExtern();
         extern.setMetaData(GuestExternUtil.buildMetaDataParam(guest, hostName));
         extern.setUserData(GuestExternUtil.buildUserDataParam(guest, password, Optional.ofNullable(ssh).map(SshAuthorizedEntity::getSshPublicKey).orElse("")));
-        extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        extern.setGraphics(GuestExternUtil.buildVncParam());
         extern.setInitVendorData(initVendorData);
         guest.setExtern(GsonBuilderUtil.create().toJson(extern));
 
@@ -711,7 +717,7 @@ public class GuestService extends AbstractService {
         return guest;
     }
 
-    public Graphics getGuestGraphics(int guestId) {
+    public GraphicsModel getGuestGraphics(int guestId) {
         GuestEntity guest = this.guestDao.findById(guestId);
         if (guest == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
@@ -720,19 +726,29 @@ public class GuestService extends AbstractService {
         if(extern == null){
             extern = new GuestExtern();
         }
-        Graphics graphics = new Graphics();
         if(extern.getGraphics() == null){
             throw new CodeException(ErrorCode.GUEST_NOT_START, "虚拟机未启动");
         }else{
-            graphics.setPort(Integer.parseInt(extern.getGraphics().getPort()));
+            String token = UUID.randomUUID().toString();
+            MemGraphicsInfo memGraphicsInfo = MemGraphicsInfo.builder()
+                    .guestId(guest.getGuestId())
+                    .guestName(guest.getName())
+                    .protocol(extern.getGraphics().getProtocol())
+                    .hostId(guest.getHostId())
+                    .build();
+            RBucket<MemGraphicsInfo> bucket = redissonClient.getBucket(RedisKeyUtil.getGuestGraphicsToken(token));
+            bucket.set(memGraphicsInfo, 5, TimeUnit.MINUTES);
+
+            GraphicsModel graphics = new GraphicsModel();
             graphics.setPassword(extern.getGraphics().getPassword());
+            graphics.setToken(token);
             if(ObjectUtils.isEmpty(extern.getGraphics().getProtocol()))
                 extern.getGraphics().setProtocol("vnc");
             else{
                 extern.getGraphics().setProtocol(extern.getGraphics().getProtocol());
             }
+            return graphics;
         }
-        return graphics;
     }
 
     @Transactional(rollbackFor = Exception.class)

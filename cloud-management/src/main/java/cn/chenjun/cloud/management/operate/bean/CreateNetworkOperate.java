@@ -23,7 +23,7 @@ public class CreateNetworkOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Net-Create:" + networkId;
     }
 

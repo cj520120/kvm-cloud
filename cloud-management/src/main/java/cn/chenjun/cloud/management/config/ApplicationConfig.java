@@ -12,4 +12,11 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "app")
 public class ApplicationConfig {
     private String managerUri;
+    private ClusterConfig cluster;
+
+    @Data
+    public static class ClusterConfig {
+        private String token;
+        private String nodeUrl;
+    }
 }

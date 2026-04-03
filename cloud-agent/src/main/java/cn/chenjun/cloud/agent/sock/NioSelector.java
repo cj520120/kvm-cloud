@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -27,7 +26,7 @@ public class NioSelector {
     private final ScheduledThreadPoolExecutor poolExecutor;
     private final Selector selector;
     private final Map<SocketChannel, NioClient> channelMap = new ConcurrentHashMap<>();
-    private final ByteBuffer socketReceiveBuffer = ByteBuffer.allocate(10240);
+    private final ByteBuffer socketReceiveBuffer = ByteBuffer.allocate(1024);
 
     private boolean isRunning = true;
 
@@ -48,12 +47,12 @@ public class NioSelector {
                         if (sk.isValid() && sk.isReadable()) {
                             SocketChannel channel = (SocketChannel) sk.channel();
                             try {
-                                ((Buffer) socketReceiveBuffer).clear();
+                                socketReceiveBuffer.clear();
                                 int len = channel.read(socketReceiveBuffer);
                                 if (len < 0) {
                                     closeChannel(channel);
                                 } else if (len > 0) {
-                                    ((Buffer) socketReceiveBuffer).flip();
+                                    socketReceiveBuffer.flip();
                                     NioClient client = channelMap.get(channel);
                                     if (client != null && client.getCallback() != null) {
                                         client.getCallback().onData(socketReceiveBuffer);

@@ -25,7 +25,7 @@ public class ChangeGuestCdRoomOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vm-Cd:" + guestId + ":" + cdRoom;
     }
 }

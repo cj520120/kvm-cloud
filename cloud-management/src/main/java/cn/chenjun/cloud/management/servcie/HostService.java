@@ -170,5 +170,8 @@ public class HostService extends AbstractHostStorageService {
         return this.hostDao.listByIds(hostIds);
     }
 
-
+    @Transactional(rollbackFor = Exception.class)
+    public void updateHost(HostEntity host) {
+        this.hostDao.update(host);
+    }
 }

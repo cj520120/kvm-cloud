@@ -5,9 +5,10 @@ import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.core.operate.OperateService;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.common.util.SecurityUtil;
+import cn.chenjun.cloud.management.config.ApplicationConfig;
 import cn.chenjun.cloud.management.data.dao.*;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.servcie.AllocateService;
@@ -15,8 +16,11 @@ import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.TaskService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.util.*;
+import cn.chenjun.cloud.management.websocket.listen.context.HostContext;
+import cn.chenjun.cloud.management.websocket.manager.HostClientManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,12 +35,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * @author chenjun
  */
+@Slf4j
 public abstract class AbstractOperateService<T extends BaseOperateParam, V extends ResultUtil> implements OperateService {
 
     @Autowired
@@ -73,6 +79,8 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     @Autowired
     @Qualifier("workExecutorService")
     protected ScheduledThreadPoolExecutor executor;
+    @Autowired
+    protected ApplicationConfig applicationConfig;
 
     protected static String getVolumePath(StorageEntity storage, String volumeName) {
         String path;
@@ -105,11 +113,32 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
         Objects.requireNonNull(host.getUri(), "host uri cannot be null");
         Objects.requireNonNull(host.getClientId(), "clientId cannot be null");
         Objects.requireNonNull(host.getClientSecret(), "clientSecret cannot be null");
-
+        String hostKey = RedisKeyUtil.getHostConnectionKey(host.getHostId());
+        HostContext hostContext = (HostContext) this.redissonClient.getBucket(hostKey).get();
+        if (hostContext == null) {
+            throw new CodeException(ErrorCode.HOST_NOT_READY, "当前主机未就绪");
+        }
+        if (Objects.equals(this.applicationConfig.getCluster().getNodeUrl(), hostContext.getNodeUrl())) {
+            TaskRequest taskRequest = TaskRequest.builder()
+                    .command(command)
+                    .data(GsonBuilderUtil.create().toJson(data))
+                    .taskId(param.getTaskId()).build();
+            String json = GsonBuilderUtil.create().toJson(taskRequest);
+            log.info("转发任务到本地执行:task={} data={}", param.getTaskId(), json);
+            HostClientManager.send(host.getHostId(), Constant.SocketCommand.AGENT_TASK_SUBMIT, json.getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+        String nodeUrl = hostContext.getNodeUrl();
+        if (nodeUrl.endsWith("/")) {
+            nodeUrl = nodeUrl.substring(0, nodeUrl.length() - 1);
+        }
+        String forwardUrl = nodeUrl + "/api/cluster/host/forward";
         this.executor.submit(() -> {
             RequestContextHolderUtil.initContext();
             Gson gson = GsonBuilderUtil.create();
             try {
+
+
                 TaskRequest taskRequest = TaskRequest.builder()
                         .command(command)
                         .data(gson.toJson(data))
@@ -118,14 +147,13 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 String nonce = String.valueOf(System.nanoTime());
                 Map<String, Object> map = new HashMap<>(6);
                 map.put("data", gson.toJson(taskRequest));
+                map.put("hostId", host.getHostId());
+                map.put("command", Constant.SocketCommand.AGENT_TASK_SUBMIT);
+                map.put("nonce", nonce);
                 map.put("timestamp", System.currentTimeMillis());
 
-                String sign = AppUtils.sign(map, host.getClientId(), host.getClientSecret(), nonce);
+                String sign = SecurityUtil.signature(map, this.applicationConfig.getCluster().getToken());
                 map.put("sign", sign);
-
-                String url = host.getUri().endsWith("/")
-                        ? host.getUri() + "api/operate"
-                        : host.getUri() + "/api/operate";
 
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -134,7 +162,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 map.forEach((k, v) -> requestMap.add(k, v != null ? v.toString() : ""));
 
                 RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
-                        .post(URI.create(url))
+                        .post(URI.create(forwardUrl))
                         .headers(httpHeaders)
                         .body(requestMap);
 

@@ -24,7 +24,7 @@ public class CreateVolumeOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vol-Create:" + volumeId;
     }
 }

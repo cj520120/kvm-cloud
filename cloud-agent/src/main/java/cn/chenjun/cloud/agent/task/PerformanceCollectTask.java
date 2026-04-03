@@ -15,9 +15,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class PerformanceCollectTask {
     @Autowired
     private ApplicationConfig applicationConfig;
+
     @Scheduled(fixedDelay = 2000)
     public void run() {
-        int size=TaskPoolUtil.size();
-        log.info("任务线程数:{} 等待的任务数目：{}",applicationConfig.getTaskThreadSize(), size);
+        int size = TaskPoolUtil.size();
+        log.info("任务线程数:{} 等待的任务数目：{}", applicationConfig.getTaskThreadSize(), size);
     }
 }

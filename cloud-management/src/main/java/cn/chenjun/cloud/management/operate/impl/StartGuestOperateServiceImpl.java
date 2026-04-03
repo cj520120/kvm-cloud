@@ -84,7 +84,7 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
         deviceXmlList.addAll(this.buildInterfaceListXml(guest, guestNetworkEntityList, systemConfig));
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
         if (extern.getGraphics() == null) {
-            extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", ""));
+            extern.setGraphics(GuestExternUtil.buildVncParam());
         }
         guest.setHostId(host.getHostId());
         guest.setLastHostId(host.getHostId());
@@ -132,12 +132,10 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
                 GuestInfo guestInfo = resultUtil.getData();
                 GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
                 if (extern.getGraphics() == null) {
-                    extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", ""));
+                    extern.setGraphics(GuestExternUtil.buildVncParam());
                 }
 
                 HostEntity host = this.hostDao.findById(guest.getHostId());
-                extern.getGraphics().setHost(host.getHostIp());
-                extern.getGraphics().setPort(String.valueOf(guestInfo.getGraphics().getPort()));
                 extern.getGraphics().setProtocol(guestInfo.getGraphics().getProtocol());
                 guest.setExtern(GsonBuilderUtil.create().toJson(extern));
                 this.guestDao.update(guest);

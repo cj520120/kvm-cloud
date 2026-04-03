@@ -1,14 +1,14 @@
 package cn.chenjun.cloud.management.websocket.action;
 
-import cn.chenjun.cloud.management.websocket.client.WebSocket;
-import cn.chenjun.cloud.management.websocket.message.WsRequest;
+import cn.chenjun.cloud.common.socket.packet.WsMessage;
+import cn.chenjun.cloud.management.websocket.listen.client.Client;
 
 import java.io.IOException;
 
 /**
  * @author chenjun
  */
-public interface WsAction {
+public interface WsAction<T> {
     /**
      * ws 消息处理
      *
@@ -16,7 +16,7 @@ public interface WsAction {
      * @param msg
      * @throws IOException
      */
-    void doAction(WebSocket webSocket, WsRequest msg) throws IOException;
+    void doAction(Client webSocket, WsMessage<T> msg) throws IOException;
 
     /**
      * 消息类型

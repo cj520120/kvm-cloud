@@ -3,22 +3,18 @@ package cn.chenjun.cloud.agent.util;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
-import cn.chenjun.cloud.common.util.AppUtils;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.crypto.digest.MD5;
-import cn.hutool.http.HttpUtil;
 import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author chenjun
@@ -67,23 +63,32 @@ public class ClientService implements CommandLineRunner {
             this.clientSecret = config.get("clientSecret");
             this.managerUri = config.get("managerUri");
         }
-        if (!StringUtils.isEmpty(this.clientId) && !StringUtils.isEmpty(this.clientSecret) && !StringUtils.isEmpty(this.managerUri)) {
-            String nonce = String.valueOf(System.nanoTime());
-            Map<String, Object> map = new HashMap<>(2);
-            map.put("timestamp", System.currentTimeMillis());
-            String sign = AppUtils.sign(map, this.clientId, this.clientSecret, nonce);
-            map.put("sign", sign);
-            String response = HttpUtil.post(this.managerUri + "api/agent/register", map);
-            ResultUtil<Void> result = GsonBuilderUtil.create().fromJson(response, new com.google.gson.reflect.TypeToken<ResultUtil<Void>>() {
-            }.getType());
-            if (result.getCode() != ErrorCode.SUCCESS) {
-                throw new CodeException(ErrorCode.SERVER_ERROR, "初始化失败:" + result.getMessage());
-            }
-        }
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public String getManagerUri() {
+        return managerUri;
     }
 
     @Override
     public void run(String... args) throws Exception {
         this.init();
+    }
+
+    public void updateManagerUri(String url) {
+        if (!ObjectUtils.isEmpty(url)) {
+            this.init(url, this.clientId, this.clientSecret);
+        }
+    }
+
+    public boolean isInit() {
+        return !ObjectUtils.isEmpty(this.clientId) && !ObjectUtils.isEmpty(this.clientSecret) && !ObjectUtils.isEmpty(this.managerUri);
     }
 }

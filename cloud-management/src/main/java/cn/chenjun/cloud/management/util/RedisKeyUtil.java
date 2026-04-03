@@ -21,6 +21,10 @@ public class RedisKeyUtil {
         return "Cloud.Host.Keep." + hostId;
     }
 
+    public static String getHostConnectionKey(int hostId) {
+        return "Cloud.Host.Connection." + hostId;
+    }
+
     public static String getUserToken(Integer userId) {
         return "User.Token." + userId;
     }
@@ -33,4 +37,7 @@ public class RedisKeyUtil {
         return "User.Info." + userId;
     }
 
+    public static String getGuestGraphicsToken(String token) {
+        return "Guest.Graphics." + token;
+    }
 }

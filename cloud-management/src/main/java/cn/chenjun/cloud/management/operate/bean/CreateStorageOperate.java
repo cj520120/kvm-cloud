@@ -23,7 +23,7 @@ public class CreateStorageOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Storage-Create:" + storageId;
     }
 }

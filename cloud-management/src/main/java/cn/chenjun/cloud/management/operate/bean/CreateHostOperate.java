@@ -23,7 +23,7 @@ public class CreateHostOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Host-Create:" + hostId;
     }
 }

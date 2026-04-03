@@ -66,20 +66,16 @@ public class GuestInfoOperateServiceImpl extends AbstractOperateService<GuestInf
                     extern = new GuestExtern();
                 }
                 if(extern.getGraphics()==null){
-                    extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", ""));
+                    extern.setGraphics(GuestExternUtil.buildVncParam());
                 }
-                HostEntity host = this.hostDao.findById(guest.getHostId());
-                extern.getGraphics().setHost(host.getHostIp());
                 Graphics graphics = resultUtil.getData().getGraphics();
                 if (graphics == null) {
-                    graphics = Graphics.builder().protocol("vnc").port(Integer.parseInt(extern.getGraphics().getPort())).build();
+                    graphics = Graphics.builder().protocol("vnc").build();
                 }
-                String type = graphics.getProtocol();
-                int port = graphics.getPort();
-                String oldType = extern.getGraphics().getProtocol();
-                int oldPort = Integer.parseInt(extern.getGraphics().getPort());
-                if (!Objects.equals(oldType, type) || oldPort != port) {
-                    extern.getGraphics().setPort(String.valueOf(port));
+                String protocol = graphics.getProtocol();
+                String oldProtocol = extern.getGraphics().getProtocol();
+                if (!Objects.equals(protocol, oldProtocol)) {
+                    extern.getGraphics().setProtocol(protocol);
                     guest.setExtern(GsonBuilderUtil.create().toJson(extern));
                     this.guestDao.update(guest);
                 }

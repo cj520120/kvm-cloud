@@ -94,6 +94,7 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
         }
 
         InitHostRequest request = InitHostRequest.builder()
+                .url((String) systemConfig.get(ConfigKey.DEFAULT_MANAGER_URI))
                 .storageList(createStorageRequest)
                 .basicBridgeNetworkList(basicBridgeNetworks)
                 .vlanNetworkList(vlanNetworkList)

@@ -25,7 +25,7 @@ public class MigrateGuestOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vm-Migrate:" + guestId + ":" + sourceHostId + ":" + toHostId;
     }
 }

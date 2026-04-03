@@ -26,11 +26,11 @@ public class LinuxUserDataService implements UserDataService {
             return MetaData.builder().type(MetaDataType.CLOUD).body("").build();
         }
         StringBuilder data = new StringBuilder();
-        GuestExtern.UserData userData = extern.getUserData();
-        String encodeKey = userData.getPasswordEncodeKey();
-        String ivKey = userData.getPasswordIvKey();
-        String password =userData.getPassword();
-        String ssh =userData.getSshPublicKey();
+        GuestExtern.UserDataExtern userDataExtern = extern.getUserData();
+        String encodeKey = userDataExtern.getPasswordEncodeKey();
+        String ivKey = userDataExtern.getPasswordIvKey();
+        String password = userDataExtern.getPassword();
+        String ssh = userDataExtern.getSshPublicKey();
         if (!ObjectUtils.isEmpty(encodeKey) && !ObjectUtils.isEmpty(ivKey) && !ObjectUtils.isEmpty(password)) {
             SymmetricCryptoUtil util = SymmetricCryptoUtil.build(encodeKey, ivKey);
             password = util.decrypt(password);

@@ -1,12 +1,17 @@
 app:
-  #启动后请修改系统配置项default.cluster.manager.uri
-  manager-uri: http://192.168.2.193:8080/
+  #启动后请修改系统配置项default.cluster.manager.uri,不能使用localhost或者127.0.0.1
+  manager-uri: http://192.168.2.102:8080/
   task:
     thread:
       size: 8
   work:
     thread:
       size: 4
+  cluster:
+    #需真实的IP地址，后续会用到此IP地址进行主机连接管理分发,不能使用localhost或者127.0.0.1
+    node-url: http://192.168.2.102:8080/
+    #集群管理token，集群间通信的验证凭证
+    token: 123456
 server:
   port: 8080
   servlet:

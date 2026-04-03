@@ -127,6 +127,8 @@ public class Constant {
     public static class SocketCommand {
 
 
+        public static final int PING = 1;
+        public static final int PONG = 2;
         public static final int WEB_LOGIN = 100;
         public static final int WEB_LOGIN_SUCCESS = 101;
         public static final int WEB_LOGIN_TOKEN_ERROR = 102;
@@ -142,6 +144,22 @@ public class Constant {
         public static final int COMPONENT_NAT_REQUEST = 207;
         public static final int COMPONENT_META_REQUEST = 208;
         public static final int COMPONENT_META_RESPONSE = 209;
+
+        public static final int AGENT_CONNECT = 300;
+        public static final int AGENT_REGISTER = 301;
+        public static final int AGENT_REGISTER_RESPONSE = 302;
+        public static final int AGENT_HEART_BEAT = 303;
+        public static final int AGENT_TASK_SUBMIT = 304;
+        public static final int AGENT_TASK_CALLBACK = 305;
+
+        public static final int VNC_CONNECT = 306;
+        public static final int VNC_DATA = 307;
+        public static final int VNC_DISCONNECT = 308;
+
+        public static final int NODE_REGISTER = 401;
+        public static final int NODE_REGISTER_RESPONSE = 402;
+        public static final int NODE_HEART_BEAT = 403;
+
 
     }
 

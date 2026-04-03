@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class Graphics {
     private String protocol;
     private int port;
-    private String password;
 }

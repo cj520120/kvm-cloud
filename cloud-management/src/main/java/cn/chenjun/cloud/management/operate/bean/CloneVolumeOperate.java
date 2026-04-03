@@ -24,7 +24,7 @@ public class CloneVolumeOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vol-Clone:" + sourceVolumeId + ":" + targetVolumeId;
     }
 }

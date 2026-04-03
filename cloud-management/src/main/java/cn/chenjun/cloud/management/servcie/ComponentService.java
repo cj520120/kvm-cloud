@@ -82,7 +82,7 @@ public class ComponentService extends AbstractService {
         this.guestDao.insert(guest);
         GuestExtern extern = new GuestExtern();
         extern.setMetaData(GuestExternUtil.buildMetaDataParam(guest, Constant.ComponentType.getComponentName(component.getComponentType()).toLowerCase()));
-        extern.setGraphics(GuestExternUtil.buildVncParam(guest, "", "5900"));
+        extern.setGraphics(GuestExternUtil.buildVncParam());
         guest.setExtern(GsonBuilderUtil.create().toJson(extern));
         this.guestDao.update(guest);
         String volumeType = this.configService.getConfig(ConfigKey.DEFAULT_DISK_TYPE);

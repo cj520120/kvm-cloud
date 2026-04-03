@@ -1,6 +1,5 @@
 package cn.chenjun.cloud.management.controller;
 
-import cn.chenjun.cloud.common.bean.Graphics;
 import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
@@ -69,8 +68,9 @@ public class GuestController extends BaseController {
     }
 
     @GetMapping("/api/guest/graphics")
-    public ResultUtil<Graphics> getVncPassword(@RequestParam("guestId") int guestId) {
-        Graphics graphics = this.guestService.getGuestGraphics(guestId);
+    public ResultUtil<GraphicsModel> getGuestGraphics(@RequestParam("guestId") int guestId) {
+        GraphicsModel graphics = this.guestService.getGuestGraphics(guestId);
+
         return ResultUtil.success(graphics);
     }
 

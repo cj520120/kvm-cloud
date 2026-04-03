@@ -25,7 +25,7 @@ public class ChangeGuestNetworkInterfaceOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vm-Nic:" + guestId + ":" + guestNetworkId + ":" + attach;
     }
 }

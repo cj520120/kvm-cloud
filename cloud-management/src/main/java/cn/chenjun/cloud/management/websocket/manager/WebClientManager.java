@@ -1,7 +1,7 @@
 package cn.chenjun.cloud.management.websocket.manager;
 
-import cn.chenjun.cloud.common.bean.WsMessage;
-import cn.chenjun.cloud.management.websocket.client.WebSocket;
+import cn.chenjun.cloud.common.socket.packet.WsMessage;
+import cn.chenjun.cloud.management.websocket.listen.client.Client;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 
 import java.util.ArrayList;
@@ -11,16 +11,16 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class WebClientManager {
-    public final static Map<Integer, List<WebSocket>> WEB_CLIENT_MAP = new HashMap<>();
+    public final static Map<Integer, List<Client>> WEB_CLIENT_MAP = new HashMap<>();
 
-    public static void addClient(int userId, WebSocket webSocket) {
+    public static void addClient(int userId, Client webSocket) {
         synchronized (WEB_CLIENT_MAP) {
-            List<WebSocket> userList = WEB_CLIENT_MAP.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
+            List<Client> userList = WEB_CLIENT_MAP.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
             userList.add(webSocket);
         }
-        webSocket.onClose.addEvent((sender, event) -> {
+        webSocket.registerOnClose((sender, event) -> {
             synchronized (WEB_CLIENT_MAP) {
-                List<WebSocket> userList = WEB_CLIENT_MAP.get(userId);
+                List<Client> userList = WEB_CLIENT_MAP.get(userId);
                 if (userList == null) {
                     return;
                 }
@@ -34,17 +34,20 @@ public class WebClientManager {
 
     public static synchronized <T> void sendAll(NotifyData<T> message) {
         WsMessage<NotifyData<T>> wsMessage = WsMessage.<NotifyData<T>>builder().command(cn.chenjun.cloud.common.util.Constant.SocketCommand.WEB_NOTIFY).data(message).build();
-        List<WebSocket> userList = new ArrayList<>();
+        List<Client> userList = new ArrayList<>();
         synchronized (WEB_CLIENT_MAP) {
-            for (List<WebSocket> webSockets : WEB_CLIENT_MAP.values()) {
+            for (List<Client> webSockets : WEB_CLIENT_MAP.values()) {
                 userList.addAll(webSockets);
             }
         }
         userList.parallelStream().forEach(ws -> {
             try {
-                ws.send(wsMessage);
+                ws.sendJsonPacket(wsMessage);
             } catch (Exception ignored) {
-                ws.close();
+                try {
+                    ws.close();
+                } catch (Exception ignored2) {
+                }
             }
         });
     }

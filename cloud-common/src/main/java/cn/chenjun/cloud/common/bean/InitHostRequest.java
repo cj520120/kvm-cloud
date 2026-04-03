@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class InitHostRequest {
+    private String url;
     private List<StorageCreateRequest> storageList;
     private List<BasicBridgeNetwork> basicBridgeNetworkList;
     private List<VlanNetwork> vlanNetworkList;

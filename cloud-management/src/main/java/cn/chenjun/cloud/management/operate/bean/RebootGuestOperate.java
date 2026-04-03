@@ -23,7 +23,7 @@ public class RebootGuestOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vm-Reboot:" + guestId;
     }
 }

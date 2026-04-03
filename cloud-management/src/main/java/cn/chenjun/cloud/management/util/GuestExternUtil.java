@@ -12,35 +12,33 @@ import org.springframework.util.StringUtils;
 public class GuestExternUtil {
     private static final int VNC_PASSWORD_SIZE = 8;
 
-    public static GuestExtern.MetaData buildMetaDataParam(GuestEntity guest, String hostname) {
-        GuestExtern.MetaData metaData = new GuestExtern.MetaData();
+    public static GuestExtern.MetaDataExtern buildMetaDataParam(GuestEntity guest, String hostname) {
+        GuestExtern.MetaDataExtern metaDataExtern = new GuestExtern.MetaDataExtern();
         if (ObjectUtils.isEmpty(hostname)) {
             hostname = "VM-" + guest.getGuestIp().replace(".", "-");
         }
-        metaData.setHostname(hostname);
-        metaData.setLocalHostname(hostname);
-        metaData.setInstanceId(guest.getName());
-        return metaData;
+        metaDataExtern.setHostname(hostname);
+        metaDataExtern.setLocalHostname(hostname);
+        metaDataExtern.setInstanceId(guest.getName());
+        return metaDataExtern;
     }
 
-    public static  GuestExtern.UserData buildUserDataParam(GuestEntity guest, String password, String sshPublicKey) {
-        GuestExtern.UserData userData = new GuestExtern.UserData();
+    public static GuestExtern.UserDataExtern buildUserDataParam(GuestEntity guest, String password, String sshPublicKey) {
+        GuestExtern.UserDataExtern userDataExtern = new GuestExtern.UserDataExtern();
         if (!StringUtils.isEmpty(password)) {
             SymmetricCryptoUtil util = SymmetricCryptoUtil.build();
-            userData.setPasswordIvKey(util.getIvKey());
-            userData.setPasswordEncodeKey(util.getEncodeKey());
-            userData.setPassword(util.encrypt(password));
+            userDataExtern.setPasswordIvKey(util.getIvKey());
+            userDataExtern.setPasswordEncodeKey(util.getEncodeKey());
+            userDataExtern.setPassword(util.encrypt(password));
         }
-        userData.setSshPublicKey(sshPublicKey);
-        return userData;
+        userDataExtern.setSshPublicKey(sshPublicKey);
+        return userDataExtern;
     }
 
-    public static GuestExtern.Graphics buildVncParam(GuestEntity guest, String host, String port) {
-        GuestExtern.Graphics graphics = new GuestExtern.Graphics();
-        graphics.setHost(host);
-        graphics.setPort(port);
-        graphics.setProtocol("vnc");
-        graphics.setPassword(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
-        return graphics;
+    public static GuestExtern.GraphicsExtern buildVncParam() {
+        GuestExtern.GraphicsExtern graphicsExtern = new GuestExtern.GraphicsExtern();
+        graphicsExtern.setProtocol("vnc");
+        graphicsExtern.setPassword(RandomStringUtils.randomAlphanumeric(VNC_PASSWORD_SIZE));
+        return graphicsExtern;
     }
 }

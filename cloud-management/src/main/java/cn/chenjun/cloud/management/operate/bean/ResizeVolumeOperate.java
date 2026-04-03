@@ -24,7 +24,7 @@ public class ResizeVolumeOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Volume-Resize:" + volumeId + ":" + size;
     }
 }

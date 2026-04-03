@@ -25,7 +25,7 @@ public class StopGuestOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vm-Destroy:" + guestId + ":" + force + ":" + destroy;
     }
 }

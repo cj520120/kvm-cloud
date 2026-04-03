@@ -1,13 +1,12 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.common.core.annotation.DispatchBind;
+import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.common.bean.*;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.util.Constant;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.SystemPropsUtil;
 import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -31,6 +30,8 @@ public class HostOperate {
     private NetworkOperate networkOperate;
     @Autowired
     private StorageOperate storageOperate;
+    @Autowired
+    private ClientService clientService;
 
 
     @SneakyThrows
@@ -124,6 +125,7 @@ public class HostOperate {
 
     @DispatchBind(command = Constant.Command.HOST_INIT)
     public HostInfo initHost(Connect connect, InitHostRequest request) throws Exception {
+        clientService.updateManagerUri(request.getUrl());
         List<StorageCreateRequest> storageList = request.getStorageList();
         if (storageList != null) {
             for (StorageCreateRequest storage : storageList) {

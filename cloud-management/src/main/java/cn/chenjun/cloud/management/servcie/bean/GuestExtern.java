@@ -6,16 +6,16 @@ import lombok.Data;
 @Data
 public class GuestExtern {
     @SerializedName(GuestExternNames.META_DATA)
-    private MetaData metaData;
+    private MetaDataExtern metaData;
     @SerializedName(GuestExternNames.USER_DATA)
-    private UserData userData;
+    private UserDataExtern userData;
     @SerializedName(value=GuestExternNames.GRAPHICS,alternate = {GuestExternNames.VNC})
-    private Graphics graphics;
+    private GraphicsExtern graphics;
     @SerializedName(GuestExternNames.VENDOR_DATA)
     private String initVendorData;
 
     @Data
-    public static class MetaData {
+    public static class MetaDataExtern {
         @SerializedName(GuestExternNames.MetaDataNames.HOSTNAME)
         private String hostname;
         @SerializedName(GuestExternNames.MetaDataNames.LOCAL_HOSTNAME)
@@ -25,7 +25,7 @@ public class GuestExtern {
     }
 
     @Data
-    public static class UserData {
+    public static class UserDataExtern {
         @SerializedName(GuestExternNames.UserDataNames.PASSWORD_IV_KEY)
         private String passwordIvKey;
         @SerializedName(GuestExternNames.UserDataNames.PASSWORD_ENCODE_KEY)
@@ -38,13 +38,9 @@ public class GuestExtern {
     }
 
     @Data
-    public static class Graphics {
+    public static class GraphicsExtern {
         @SerializedName(GuestExternNames.VncNames.PASSWORD)
         private String password;
-        @SerializedName(GuestExternNames.VncNames.PORT)
-        private String port;
-        @SerializedName(GuestExternNames.VncNames.HOST)
-        private String host;
         @SerializedName(GuestExternNames.VncNames.PROTOCOL)
         private String protocol;
 

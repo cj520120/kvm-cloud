@@ -24,7 +24,7 @@ public class DownloadTemplateOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Template-Download:" + templateVolumeId;
     }
 

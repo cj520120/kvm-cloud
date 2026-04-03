@@ -24,7 +24,7 @@ public class CreateGuestOperate extends CreateVolumeOperate {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Vm-Create:" + guestId;
     }
 }

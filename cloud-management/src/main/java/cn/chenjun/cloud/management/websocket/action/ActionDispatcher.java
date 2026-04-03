@@ -1,8 +1,8 @@
 package cn.chenjun.cloud.management.websocket.action;
 
+import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
-import cn.chenjun.cloud.management.websocket.client.WebSocket;
-import cn.chenjun.cloud.management.websocket.message.WsRequest;
+import cn.chenjun.cloud.management.websocket.listen.client.Client;
 import lombok.SneakyThrows;
 
 import java.util.Collection;
@@ -16,7 +16,7 @@ public class ActionDispatcher {
     }
 
     @SneakyThrows
-    public static void dispatch(WebSocket webSocket, WsRequest msg) {
+    public static void dispatch(Client webSocket, WsMessage msg) {
         webSocket.setLastActiveTime(System.currentTimeMillis());
         for (WsAction action : ACTION_LIST) {
             if (Objects.equals(action.getCommand(), msg.getCommand())) {

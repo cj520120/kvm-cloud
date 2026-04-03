@@ -26,15 +26,15 @@ public class DefaultMetaDataService implements MetaDataService {
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
         List<String> metaDatas = new ArrayList<>();
         if (extern != null && extern.getMetaData() != null) {
-            GuestExtern.MetaData metaData = extern.getMetaData();
-            if (!ObjectUtils.isEmpty(metaData.getHostname())) {
-                metaDatas.add(GuestExtern.GuestExternNames.MetaDataNames.HOSTNAME + ": " + metaData.getHostname());
+            GuestExtern.MetaDataExtern metaDataExtern = extern.getMetaData();
+            if (!ObjectUtils.isEmpty(metaDataExtern.getHostname())) {
+                metaDatas.add(GuestExtern.GuestExternNames.MetaDataNames.HOSTNAME + ": " + metaDataExtern.getHostname());
             }
-            if (!ObjectUtils.isEmpty(metaData.getLocalHostname())) {
-                metaDatas.add(GuestExtern.GuestExternNames.MetaDataNames.LOCAL_HOSTNAME + ": " + metaData.getLocalHostname());
+            if (!ObjectUtils.isEmpty(metaDataExtern.getLocalHostname())) {
+                metaDatas.add(GuestExtern.GuestExternNames.MetaDataNames.LOCAL_HOSTNAME + ": " + metaDataExtern.getLocalHostname());
             }
-            if (!ObjectUtils.isEmpty(metaData.getInstanceId())) {
-                metaDatas.add(GuestExtern.GuestExternNames.MetaDataNames.INSTANCE_ID + ": " + metaData.getInstanceId());
+            if (!ObjectUtils.isEmpty(metaDataExtern.getInstanceId())) {
+                metaDatas.add(GuestExtern.GuestExternNames.MetaDataNames.INSTANCE_ID + ": " + metaDataExtern.getInstanceId());
             }
         }
         return MetaData.builder().type(MetaDataType.CLOUD).body(String.join("\r\n", metaDatas)).build();
@@ -63,14 +63,14 @@ public class DefaultMetaDataService implements MetaDataService {
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
         List<String> metaKeys = new ArrayList<>();
         if (extern != null && extern.getMetaData() != null) {
-            GuestExtern.MetaData metaData = extern.getMetaData();
-            if (!ObjectUtils.isEmpty(metaData.getHostname())) {
+            GuestExtern.MetaDataExtern metaDataExtern = extern.getMetaData();
+            if (!ObjectUtils.isEmpty(metaDataExtern.getHostname())) {
                 metaKeys.add(GuestExtern.GuestExternNames.MetaDataNames.HOSTNAME );
             }
-            if (!ObjectUtils.isEmpty(metaData.getLocalHostname())) {
+            if (!ObjectUtils.isEmpty(metaDataExtern.getLocalHostname())) {
                 metaKeys.add(GuestExtern.GuestExternNames.MetaDataNames.LOCAL_HOSTNAME);
             }
-            if (!ObjectUtils.isEmpty(metaData.getInstanceId())) {
+            if (!ObjectUtils.isEmpty(metaDataExtern.getInstanceId())) {
                 metaKeys.add(GuestExtern.GuestExternNames.MetaDataNames.INSTANCE_ID);
             }
         }

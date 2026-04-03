@@ -22,7 +22,7 @@ public class CreateGuestVolumeOperate extends CreateVolumeOperate {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Guest-Vol-Create:" + guestId + ":" + this.getVolumeId();
     }
 }

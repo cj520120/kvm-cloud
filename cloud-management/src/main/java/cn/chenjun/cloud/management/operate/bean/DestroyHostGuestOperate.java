@@ -22,4 +22,9 @@ public class DestroyHostGuestOperate extends BaseOperateParam {
     public int getType() {
         return Constant.OperateType.DESTROY_HOST_GUEST;
     }
+
+    @Override
+    public String getTaskId() {
+        return "Host-Vm-Destroy:" + hostId + ":" + name;
+    }
 }

@@ -24,7 +24,7 @@ public class MigrateTemplateVolumeOperate extends BaseOperateParam {
     }
 
     @Override
-    public String getId() {
+    public String getTaskId() {
         return "Template-Vol-Migrate:" + sourceTemplateVolumeId + ":" + targetTemplateVolumeId;
     }
 }
