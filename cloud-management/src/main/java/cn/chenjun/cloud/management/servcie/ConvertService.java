@@ -145,16 +145,6 @@ public class ConvertService {
         return SshAuthorizedModel.builder().id(entity.getId()).name(entity.getSshName()).build();
     }
 
-    public GuestNetworkModel initGuestNetworkModel(GuestNetworkEntity entity) {
-        return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())
-                .networkId(entity.getNetworkId())
-                .ip(entity.getIp())
-                .mac(entity.getMac())
-                .guestId(entity.getAllocateId())
-                .driveType(entity.getDeviceType())
-                .deviceId(entity.getDeviceId())
-                .build();
-    }
 
     public HostModel initHostModel(HostEntity entity) {
         List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(entity.getHostId()).build());
@@ -222,5 +212,16 @@ public class ConvertService {
         userModel.setUserStatus(loginInfoEntity.getUserStatus());
         userModel.setRegisterTime(loginInfoEntity.getCreateTime());
         return userModel;
+    }
+
+    public GuestNetworkModel initGuestNetworkModel(GuestNetworkEntity entity) {
+        return GuestNetworkModel.builder().guestNetworkId(entity.getGuestNetworkId())
+                .networkId(entity.getNetworkId())
+                .ip(entity.getIp())
+                .mac(entity.getMac())
+                .guestId(entity.getAllocateId())
+                .driveType(entity.getDeviceType())
+                .deviceId(entity.getDeviceId())
+                .build();
     }
 }

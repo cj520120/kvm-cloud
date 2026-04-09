@@ -437,4 +437,6 @@ public class Constant {
         public static final int UOS = BASE_LINUX + 7;
         public static final int ORACLE_LINUX = BASE_LINUX + 8;
     }
+
+
 }

@@ -112,14 +112,21 @@ public class ComponentService extends AbstractService {
                 .build();
         this.volumeDao.insert(volume);
         NetworkEntity network = this.networkDao.findById(component.getNetworkId());
+        switch (network.getType()) {
+            case Constant.NetworkType.VLAN: {
+                this.allocateService.allocateNetwork(network.getBasicNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
+                GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 1, nicDriveType, "Component Guest Basic Nic");
+                guest.setGuestIp(currentGuestNetwork.getIp());
+            }
+            break;
+            case Constant.NetworkType.BASIC: {
+                GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
+                guest.setGuestIp(currentGuestNetwork.getIp());
+            }
+            break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型");
 
-        if (Objects.equals(network.getType(), cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN)) {
-            this.allocateService.allocateNetwork(network.getBasicNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
-            GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 1, nicDriveType, "Component Guest Basic Nic");
-            guest.setGuestIp(currentGuestNetwork.getIp());
-        } else {
-            GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
-            guest.setGuestIp(currentGuestNetwork.getIp());
         }
 
         this.guestDao.update(guest);
@@ -171,7 +178,7 @@ public class ComponentService extends AbstractService {
         boolean isCheckComponentEnable = Objects.equals(this.configService.getConfig(queryList, ConfigKey.SYSTEM_COMPONENT_ENABLE), Constant.Enable.YES);
         if (!isCheckComponentEnable) {
             NetworkEntity network = this.networkDao.findById(networkId);
-            if (network.getStatus() != cn.chenjun.cloud.common.util.Constant.NetworkStatus.INSTALL) {
+            if (network.getStatus() != Constant.NetworkStatus.READY) {
                 network.setStatus(Constant.NetworkStatus.READY);
                 this.networkDao.update(network);
                 NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());

@@ -1,8 +1,8 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
 import cn.chenjun.cloud.common.bean.VlanNetwork;
+import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.util.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
@@ -35,7 +35,6 @@ public class NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_BASIC)
-
     public Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
         createNetworkPool(connect, request.getPoolId(), request.getXml());
         return null;
@@ -58,7 +57,6 @@ public class NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_VLAN)
-
     public Void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
         log.info("创建Vlan网络:{}", vlan);
         createNetworkPool(connect, vlan.getPoolId(), vlan.getBasic().getXml());
@@ -67,7 +65,6 @@ public class NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_BASIC)
-
     public Void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
         log.info("销毁基础网络:{}", bridge);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
@@ -81,14 +78,11 @@ public class NetworkOperate {
             }
         }
         return null;
-
-
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_VLAN)
-
     public Void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
-        log.info("销毁Vlan网络:{}", vlan);
+        log.info("销毁VLan网络:{}", vlan);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
         if (networkNames.contains(vlan.getPoolId())) {
             try {
@@ -101,5 +95,4 @@ public class NetworkOperate {
         }
         return null;
     }
-
 }

@@ -6,119 +6,177 @@ import cn.chenjun.cloud.agent.ws.client.WsClient;
 import cn.chenjun.cloud.agent.ws.handler.PacketHandler;
 import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.common.util.Constant;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.Closeable;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class SessionManager {
+public class SessionManager implements Closeable {
+
     @Autowired
     private ClientService clientService;
+
     @Autowired
     private List<PacketHandler> packetHandlers;
+    private static final long HEARTBEAT_INTERVAL_MS = 30000;
     private WsClient session = null;
+    private final Object sessionLock = new Object();
 
-    @Scheduled(fixedRate = 10000)
-    @Synchronized
+    @Scheduled(fixedRate = 5000)
     public void checkConnect() {
-        if (this.session == null) {
-            if (!this.clientService.isInit()) {
-                return;
-            }
-            try {
-                String serverUrl = this.clientService.getManagerUri();
-                if (serverUrl.endsWith("/")) {
-                    serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
+        synchronized (sessionLock) {
+            if (session == null) {
+                if (!clientService.isInit()) {
+                    log.info("管理端未初始化，不尝试连接");
+                    return;
                 }
-                serverUrl = serverUrl.replace("http://", "ws://").replace("https://", "wss://");
-                serverUrl += "/api/host/ws";
-                this.session = new WsClient(new URI(serverUrl));
-                this.session.connect();
-                log.info("尝试连接管理端，url:{}", serverUrl);
-                this.session.onConnect.addEvent((sender, obj) -> {
-                    log.info("服务器连接成功");
-                });
-                this.session.onMessage.addEvent((sender, obj) -> {
-                    WsMessage<byte[]> wsMessage = obj.getEvent();
-                    List<PacketHandler> handlers = this.packetHandlers.stream().filter(handler -> handler.getCommand() == wsMessage.getCommand()).collect(Collectors.toList());
-                    if (handlers.isEmpty()) {
-                        log.warn("未找到对应的处理器，command:{}", wsMessage.getCommand());
-                    } else {
-                        for (PacketHandler handler : handlers) {
-                            log.debug("收到消息，command:{},处理器={}", wsMessage.getCommand(), handler.getClass().getName());
-                            try {
-                                handler.process((WsClient) sender, wsMessage);
-                            } catch (Exception e) {
-                                log.error("处理器执行异常，command:{},处理器={}", wsMessage.getCommand(), handler.getClass().getName(), e);
-                            }
-                        }
-                    }
-
-                });
-                this.session.onClose.addEvent((sender, obj) -> {
-                    if (Objects.equals(this.session, sender)) {
-                        log.info("连接断开，稍后重试...");
-                        this.close();
-                    }
-                });
-            } catch (Exception e) {
-                log.error("连接管理端，认证失败", e);
-                this.close();
+                try {
+                    String serverUrl = buildWsUrl();
+                    log.info("尝试连接管理端，url: {}", serverUrl);
+                    WsClient newSession = new WsClient(new URI(serverUrl));
+                    registerEventListeners(newSession);
+                    newSession.connect();
+                    this.session = newSession;
+                    log.info("WebSocket 连接已建立");
+                } catch (Exception e) {
+                    log.error("连接管理端失败", e);
+                    closeSessionInternal();
+                }
+            } else {
+                log.info("心跳间隔已超过，发送心跳...");
+                sendHeartbeat();
             }
-        } else {
-            this.sendHeartbeat();
         }
     }
 
-    public void sendHeartbeat() {
-        if (!this.isConnected()) {
+    private String buildWsUrl() throws URISyntaxException {
+        String managerUri = clientService.getManagerUri();
+        URI original = new URI(managerUri);
+        String scheme = "ws".equals(original.getScheme()) ? "ws" :
+                ("https".equals(original.getScheme()) ? "wss" : "ws");
+        String path = "/api/host/ws";
+        URI wsUri = new URI(scheme, original.getUserInfo(), original.getHost(), original.getPort(), path, null, null);
+        return wsUri.toString();
+    }
+
+    /**
+     * 注册 WebSocket 事件监听器
+     */
+    private void registerEventListeners(WsClient client) {
+        client.onConnect.addEvent((sender, obj) -> {
+            log.info("管理端 WebSocket 连接成功，开始登录...");
+        });
+        client.onMessage.addEvent((sender, obj) -> {
+            WsMessage<byte[]> wsMessage = obj.getEvent();
+            List<PacketHandler> handlers = packetHandlers.stream()
+                    .filter(handler -> handler.getCommand() == wsMessage.getCommand())
+                    .collect(Collectors.toList());
+            if (handlers.isEmpty()) {
+                log.warn("未找到对应的处理器，command: {}", wsMessage.getCommand());
+            } else {
+                for (PacketHandler handler : handlers) {
+                    log.debug("收到消息，command: {}, 处理器: {}", wsMessage.getCommand(), handler.getClass().getName());
+                    try {
+                        handler.process((WsClient) sender, wsMessage);
+                    } catch (Exception e) {
+                        log.error("处理器执行异常，command: {}, 处理器: {}", wsMessage.getCommand(), handler.getClass().getName(), e);
+                    }
+                }
+            }
+        });
+
+        // 连接关闭事件
+        client.onClose.addEvent((sender, obj) -> {
+            log.info("WebSocket 连接关闭事件触发");
+            synchronized (sessionLock) {
+                if (session == sender) {
+                    log.info("连接断开，稍后重连...");
+                    closeSessionInternal();
+                }
+            }
+        });
+    }
+
+
+    /**
+     * 发送心跳（仅在连接正常时调用，需持有 sessionLock）
+     */
+    private void sendHeartbeat() {
+        if (session == null || !session.isLogin()) {
             return;
         }
         try {
-            this.session.sendCommand(Constant.SocketCommand.AGENT_HEART_BEAT);
+            session.sendCommand(Constant.SocketCommand.AGENT_HEART_BEAT);
+            log.trace("发送心跳");
         } catch (Exception e) {
             log.error("发送心跳失败", e);
-            this.close();
+            closeSessionInternal();
         }
     }
 
-
-    public void close() {
-        log.info("关闭连接");
-        if (this.session != null) {
-            try {
-                this.session.close();
-            } catch (Exception ignored) {
-
+    private void closeSessionInternal() {
+        WsClient toClose = null;
+        synchronized (sessionLock) {
+            if (this.session != null) {
+                toClose = this.session;
+                this.session = null;
             }
         }
-        this.session = null;
+        if (toClose != null) {
+            try {
+                toClose.close();
+                log.info("已关闭 WebSocket 连接");
+            } catch (Exception e) {
+                log.warn("关闭连接时发生异常", e);
+            }
+        }
     }
 
+    @Override
+    public void close() {
+        closeSessionInternal();
+    }
+
+    /**
+     * 上报任务结果
+     *
+     * @param submitTask 任务数据
+     * @return true 如果发送成功，false 如果当前未连接或发送失败
+     */
     public boolean submitTask(SubmitTask submitTask) {
-        if (!this.isConnected()) {
+        WsClient currentSession;
+        synchronized (sessionLock) {
+            currentSession = this.session;
+        }
+        if (currentSession == null || !currentSession.isLogin()) {
+            log.warn("submitTask 失败：WebSocket 未连接，taskId={}", submitTask.getTaskId());
             return false;
         }
         try {
-            this.session.sendJson(Constant.SocketCommand.AGENT_TASK_CALLBACK, submitTask);
-            log.info("上报任务成功:taskId={},data={}", submitTask.getTaskId(), submitTask.getData());
+            currentSession.sendJson(Constant.SocketCommand.AGENT_TASK_CALLBACK, submitTask);
+            log.info("上报任务成功: taskId={}, data={}", submitTask.getTaskId(), submitTask.getData());
             return true;
         } catch (Exception e) {
-            log.error("上报任务失败", e);
+            log.error("上报任务失败: taskId={}", submitTask.getTaskId(), e);
+            closeSessionInternal();
             return false;
         }
     }
 
+    /**
+     * 判断是否已连接并登录
+     */
     public boolean isConnected() {
-        return this.session != null && this.session.isLogin();
+        synchronized (sessionLock) {
+            return session != null && session.isLogin();
+        }
     }
-
 }

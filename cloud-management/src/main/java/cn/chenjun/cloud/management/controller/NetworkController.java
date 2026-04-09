@@ -15,17 +15,18 @@ import cn.chenjun.cloud.management.model.NicMode;
 import cn.chenjun.cloud.management.model.SimpleNetworkModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.util.IpValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
  * @author chenjun
  */
+@Slf4j
 @LoginRequire
 @RestController
 public class NetworkController extends BaseController {
@@ -102,16 +103,15 @@ public class NetworkController extends BaseController {
         if (StringUtils.isEmpty(domain)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入搜索域");
         }
-        if (Objects.equals(cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN, type) && vlanId <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
-        }
-        if (Objects.equals(cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN, type)) {
-            if (vlanId <= 0) {
+        switch (type) {
+            case Constant.NetworkType.VLAN:
+                if (vlanId <= 0) {
                 throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
             }
-            if (basicNetworkId <= 0) {
-                throw new CodeException(ErrorCode.PARAM_ERROR, "请输入基础网络");
-            }
+            case Constant.NetworkType.BASIC:
+                break;
+            default:
+                throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
         }
         NetworkEntity network = this.globalLockCall(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
         return ResultUtil.success(this.convertService.initNetworkModel(network));

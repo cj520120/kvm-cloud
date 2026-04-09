@@ -1,6 +1,6 @@
 package cn.chenjun.cloud.management.operate.impl.cloud.bean;
 
-import cn.chenjun.cloud.management.util.ResourceUtil;
+import cn.chenjun.cloud.common.util.ResourceUtil;
 import lombok.Data;
 
 import java.util.*;
@@ -57,11 +57,16 @@ public class CloudConfig {
     }
 
     public void addNetwork(String name, Map<String, Object> network) {
-        Map<String, Object> ethernets = (Map<String, Object>) this.networks.get("ethernets");
+        Map<String, Object> networkMap = (Map<String, Object>) this.networks.get("network");
+        if (networkMap == null) {
+            networkMap = new HashMap<>();
+            this.networks.put("network", networkMap);
+        }
+        Map<String, Object> ethernets = (Map<String, Object>) networkMap.get("ethernets");
         if (ethernets == null) {
             ethernets = new HashMap<>();
-            this.networks.put("ethernets", ethernets);
-            this.networks.put("version", 2);
+            networkMap.put("ethernets", ethernets);
+            networkMap.put("version", 2);
         }
         ethernets.put(name, network);
     }

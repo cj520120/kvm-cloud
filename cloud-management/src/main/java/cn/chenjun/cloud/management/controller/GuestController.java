@@ -77,7 +77,8 @@ public class GuestController extends BaseController {
     @GetMapping("/api/guest/network")
     public ResultUtil<List<GuestNetworkModel>> listGuestNetworks(@RequestParam("guestId") int guestId) {
         List<GuestNetworkEntity> nics = this.networkService.listGuestNetworks(guestId);
-        List<GuestNetworkModel> models = BeanConverter.convert(nics, GuestNetworkModel.class);
+        BeanConverter.Converter<GuestNetworkEntity, GuestNetworkModel> converter = this.convertService::initGuestNetworkModel;
+        List<GuestNetworkModel> models = BeanConverter.convert(nics, converter);
         return ResultUtil.success(models);
     }
 

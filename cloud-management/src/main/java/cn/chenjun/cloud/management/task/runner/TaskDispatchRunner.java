@@ -35,11 +35,11 @@ public class TaskDispatchRunner extends AbstractRunner {
     @SuppressWarnings({"unchecked"})
     protected void dispatch() throws Exception {
         List<TaskEntity> taskList = this.taskService.listCanRunTask(100);
-        log.debug("检测到可执行任务:{}", taskList.size());
+        log.info("检测到可执行任务:{}", taskList.size());
         for (TaskEntity entity : taskList) {
             try {
                 if (this.taskService.startTask(entity)) {
-                    log.debug("执行任务:{}-{}", entity.getTaskId(), entity.getTitle());
+                    log.info("执行任务:{}-{}", entity.getTaskId(), entity.getTitle());
                     Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(entity.getType());
                     BaseOperateParam operateParam = GsonBuilderUtil.create().fromJson(entity.getParam(), paramClass);
                     this.operateEngine.process(operateParam);

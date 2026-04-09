@@ -641,7 +641,6 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择需要网络驱动");
         }
         GuestEntity guest = this.guestDao.findById(guestId);
-
         List<GuestNetworkEntity> guestNetworkList = this.guestNetworkDao.listByGuestId(guestId);
         List<Integer> guestNetworkDeviceIds = guestNetworkList.stream().map(GuestNetworkEntity::getDeviceId).collect(Collectors.toList());
         int deviceId = -1;
@@ -664,8 +663,6 @@ public class GuestService extends AbstractService {
 
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         return AttachNicInfo.builder().guest(guest).nic(guestNetwork).build();
-//        return ResultUtil.success(AttachGuestNetworkModel.builder().guest(this.initGuestInfo(guest)).network(this.initNetwork(guestNetwork)).build());
-
 
     }
 

@@ -45,7 +45,7 @@ public class CloudInitHelper {
                 Domain domain = DomainUtil.findDomainByName(connect, name);
                 if (domain == null) {
                     log.warn("虚拟机已经关闭，退出检测...");
-                    throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机已经关闭");
+                    throw new CodeException(ErrorCode.GUEST_NOT_START, "虚拟机已经关闭");
                 }
                 if (waitForQgaReady(domain, QgaCommand.GUEST_EXEC, maxTimeoutSeconds)) {
                     log.info("QGA 支持 guest-exec 命令，开始检测CloudInit完成状态...");

@@ -327,6 +327,20 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 .build();
     }
 
+
+    protected VxLanNetwork buildVxLanCreateRequest(NetworkEntity basicNetworkEntity, NetworkEntity network, String localIp, String remoteIps, Map<String, Object> sysconfig) {
+
+        BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(basicNetworkEntity, sysconfig);
+        return VxLanNetwork.builder()
+                .poolId(network.getPoolId())
+                .xml(buildNetworkXml(network, sysconfig))
+                .basic(basicBridgeNetwork)
+                .vni(network.getNetworkId())
+                .bridge(network.getBridge())
+                .localIp(localIp)
+                .remoteIps(remoteIps)
+                .build();
+    }
     protected Map<String, Object> loadGuestConfig(int hostId, int guestId) {
         List<ConfigQuery> queryList = new ArrayList<>();
         queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());

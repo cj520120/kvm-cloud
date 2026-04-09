@@ -49,7 +49,8 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
 
         List<StorageEntity> storageList = this.storageDao.listByStatus(Constant.StorageStatus.READY);
 
-        List<NetworkEntity> networkList = this.networkDao.listByStatus(Constant.NetworkStatus.READY);
+        List<NetworkEntity> networkList = this.networkDao.listAll();
+        Map<Integer, NetworkEntity> networkMap = networkList.stream().collect(Collectors.toMap(NetworkEntity::getNetworkId, Function.identity()));
         Map<String, Object> systemConfig = this.loadGuestConfig(param.getHostId(), 0);
         List<StorageCreateRequest> createStorageRequest = storageList.stream().filter(storage -> {
             if (storage.getType().equalsIgnoreCase(Constant.StorageType.LOCAL) && !Objects.equals(storage.getHostId(), host.getHostId())) {
@@ -59,17 +60,23 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
         }).map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
 
 
-        Map<Integer, NetworkEntity> basicBridgeNetworkMap = networkList.stream().collect(Collectors.toMap(NetworkEntity::getNetworkId, Function.identity()));
         List<BasicBridgeNetwork> basicBridgeNetworks = new ArrayList<>();
         List<VlanNetwork> vlanNetworkList = new ArrayList<>();
         for (NetworkEntity network : networkList) {
-            if (Objects.equals(Constant.NetworkType.VLAN, network.getType())) {
-                NetworkEntity basicBridgeNetwork = basicBridgeNetworkMap.get(network.getBasicNetworkId());
-                if (basicBridgeNetwork != null) {
-                    vlanNetworkList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, systemConfig));
+            if (network.getStatus() == Constant.NetworkStatus.MAINTENANCE) {
+                continue;
+            }
+            switch (network.getType()) {
+                case Constant.NetworkType.VLAN: {
+                    NetworkEntity basicBridgeNetwork = networkMap.get(network.getBasicNetworkId());
+                    if (basicBridgeNetwork != null) {
+                        vlanNetworkList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, systemConfig));
+                    }
+                    break;
                 }
-            } else {
-                basicBridgeNetworks.add(this.buildBasicNetworkRequest(network, systemConfig));
+                case Constant.NetworkType.BASIC:
+                    basicBridgeNetworks.add(this.buildBasicNetworkRequest(network, systemConfig));
+                    break;
             }
         }
         String uri = String.format("%s/api/init", host.getUri());

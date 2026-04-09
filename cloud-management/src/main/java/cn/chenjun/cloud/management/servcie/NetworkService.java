@@ -74,16 +74,24 @@ public class NetworkService extends AbstractService {
     @Transactional(rollbackFor = Exception.class)
     public NetworkEntity createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId, int bridgeType) {
 
-        if (Objects.equals(cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN, type)) {
-            NetworkEntity basicNetwork = this.networkDao.findById(basicNetworkId);
-            if (basicNetwork == null) {
-                throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络不存在");
-            }
-            bridge = basicNetwork.getBridge();
-            if (!Objects.equals(basicNetwork.getBridgeType(), cn.chenjun.cloud.common.util.Constant.NetworkBridgeType.OPEN_SWITCH.bridgeType())) {
-                throw new CodeException(ErrorCode.PARAM_ERROR, "vlan所属基础网络必须未OpenSwitch网络类型");
-            }
-            bridgeType = basicNetwork.getBridgeType();
+
+        NetworkEntity basicNetwork = null;
+        switch (type) {
+            case Constant.NetworkType.BASIC:
+                break;
+            case Constant.NetworkType.VLAN:
+                basicNetwork = this.networkDao.findById(basicNetworkId);
+                if (basicNetwork == null) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络不存在");
+                }
+                bridge = basicNetwork.getBridge();
+                if (!Objects.equals(basicNetwork.getBridgeType(), cn.chenjun.cloud.common.util.Constant.NetworkBridgeType.OPEN_SWITCH.bridgeType())) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络必须为OpenSwitch网络类型");
+                }
+                bridgeType = basicNetwork.getBridgeType();
+                break;
+            default:
+                throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
         }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
@@ -130,9 +138,16 @@ public class NetworkService extends AbstractService {
             GuestNetworkEntity componentVip = this.allocateService.allocateNetwork(network.getNetworkId(), component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Route Basic VIP[" + network.getName() + "]");
             component.setComponentVip(componentVip.getIp());
             component.setBasicComponentVip(componentVip.getIp());
-            if (type == cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN) {
-                GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(basicNetworkId, component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Route Basic VIP[" + network.getName() + "]");
-                component.setBasicComponentVip(basicComponentVip.getIp());
+            switch (type) {
+                case Constant.NetworkType.BASIC:
+                    break;
+                case Constant.NetworkType.VLAN: {
+                    GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(basicNetworkId, component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Route Basic VIP[" + network.getName() + "]");
+                    component.setBasicComponentVip(basicComponentVip.getIp());
+                }
+                break;
+                default:
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
             }
             componentMapper.update(component);
             if (type == cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN && ObjectUtils.isEmpty(gateway)) {
@@ -222,9 +237,11 @@ public class NetworkService extends AbstractService {
         GuestNetworkEntity componentVip = this.allocateService.allocateNetwork(network.getNetworkId(), component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Nat VIP [" + network.getName() + "]");
         component.setComponentVip(componentVip.getIp());
         component.setBasicComponentVip(componentVip.getIp());
-        if (Objects.equals(network.getType(), Constant.NetworkType.VLAN)) {
-            GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(network.getBasicNetworkId(), component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Nat VIP [" + network.getName() + "]");
-            component.setBasicComponentVip(basicComponentVip.getIp());
+        switch (type) {
+            case Constant.NetworkType.VLAN:
+                GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(network.getBasicNetworkId(), component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Nat VIP [" + network.getName() + "]");
+                component.setBasicComponentVip(basicComponentVip.getIp());
+                break;
         }
         componentMapper.update(component);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(component.getComponentId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_COMPONENT).build());

@@ -23,7 +23,12 @@ public class BeanConverter {
         if (sourceList == null || sourceList.isEmpty()) return new ArrayList<>();
         return sourceList.stream().map(source -> convert(source, targetClass)).collect(Collectors.toList());
     }
-
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public static <S, T> List<T> convert(List<S> sourceList, Converter<S,T> converter) {
+        if (sourceList == null || sourceList.isEmpty()) return new ArrayList<>();
+        return sourceList.stream().map(source -> converter.convert(source)).collect(Collectors.toList());
+    }
 
     @FunctionalInterface
     public interface Converter<S, T> {

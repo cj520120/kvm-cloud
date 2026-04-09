@@ -105,7 +105,7 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
     }
 
     private String buildFileMeta(String path, String content, boolean cleanFlag) {
-        String tpl = ResourceUtil.readUtf8Str("tpl/kvm/vm/meta/file-meta.xml.json");
+        String tpl = cn.chenjun.cloud.common.util.ResourceUtil.readUtf8Str("tpl/kvm/vm/meta/file-meta.xml.json");
         String flag = cleanFlag ? Constant.Enable.YES : Constant.Enable.NO;
         Map<String, Object> map = new HashMap<>();
         map.put("path", path);

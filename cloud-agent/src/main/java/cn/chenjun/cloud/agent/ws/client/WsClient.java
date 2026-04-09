@@ -15,6 +15,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class WsClient extends WebSocketClient {
@@ -23,6 +24,7 @@ public class WsClient extends WebSocketClient {
     public final EventListener<Void> onClose = new EventListener<>();
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private boolean auth = false;
+    private final AtomicLong lastSendTime = new AtomicLong(System.currentTimeMillis());
 
     public WsClient(URI serverUri) {
         super(serverUri, new Draft_6455());
@@ -30,12 +32,17 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
+        lastSendTime.set(System.currentTimeMillis());
         this.onConnect.fire(this, null);
     }
 
     @Override
     public void onMessage(String message) {
 
+    }
+
+    public long getLastSendTime() {
+        return lastSendTime.get();
     }
 
     @Override
@@ -104,6 +111,7 @@ public class WsClient extends WebSocketClient {
         buffer.flip();
         try {
             this.send(buffer);
+            lastSendTime.set(System.currentTimeMillis());
         } catch (Exception e) {
             log.error("发送数据失败,将关闭连接....", e);
             this.close();

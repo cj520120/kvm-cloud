@@ -2,10 +2,10 @@ package cn.chenjun.cloud.management.operate.impl.cloud.impl.component.impl.globa
 
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.JinjavaParser;
+import cn.chenjun.cloud.common.util.ResourceUtil;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.impl.cloud.bean.CloudConfig;
 import cn.chenjun.cloud.management.operate.impl.cloud.impl.component.impl.BaseInitialization;
-import cn.chenjun.cloud.management.util.ResourceUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 

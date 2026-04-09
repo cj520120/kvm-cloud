@@ -1,4 +1,4 @@
-package cn.chenjun.cloud.management.util;
+package cn.chenjun.cloud.common.util;
 
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import lombok.Data;

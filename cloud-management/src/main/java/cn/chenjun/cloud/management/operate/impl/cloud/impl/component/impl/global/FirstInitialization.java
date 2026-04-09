@@ -75,14 +75,18 @@ public class FirstInitialization extends BaseInitialization {
                 nicNetwork = networkDao.findById(nic.getNetworkId());
             }
             nicConfig.put("addresses", Collections.singletonList(nic.getIp() + "/" + network.getMask()));
-            nicConfig.put("routes", Collections.singletonList(
-                    MapUtil.of("to", "0.0.0.0/0", "via", nicNetwork.getGateway())
-            ));
+            if (i == 0) {
+                nicConfig.put("routes", Collections.singletonList(
+                        MapUtil.of("to", "0.0.0.0/0", "via", nicNetwork.getGateway())
+                ));
+            }
             nicConfig.put("nameservers", MapUtil.of("addresses", Arrays.asList(nicNetwork.getDns().split(","))));
             nicConfig.put("set-name", "eth" + i);
             config.addNetwork("eth" + i, nicConfig);
         }
         config.appendRuncmd("echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf");
+        config.appendRuncmd("echo 'net.ipv6.conf.all.disable_ipv6=1' >> /etc/sysctl.conf");
+        config.appendRuncmd("echo 'net.ipv6.conf.default.disable_ipv6=1' >> /etc/sysctl.conf");
         config.appendRuncmd("echo 'net.ipv4.conf.all.route_localnet=1' >> /etc/sysctl.conf");
         config.appendRuncmd("echo 'net.ipv4.conf.all.accept_redirects=1' >> /etc/sysctl.conf");
         config.appendRuncmd("echo 'net.ipv4.conf.default.accept_redirects=1' >> /etc/sysctl.conf");

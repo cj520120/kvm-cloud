@@ -64,7 +64,7 @@ public class InitHostNetworkOperateServiceImpl extends AbstractOperateService<In
             case Constant.NetworkType.VLAN: {
                 NetworkEntity basicNetworkEntity = networkDao.findById(network.getBasicNetworkId());
                 if (basicNetworkEntity == null) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR, "Vlan的基础网络不存在");
+                    throw new CodeException(ErrorCode.SERVER_ERROR, "VLan的基础网络不存在");
                 }
                 VlanNetwork vlan = buildVlanCreateRequest(basicNetworkEntity, network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_VLAN, vlan);
