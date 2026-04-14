@@ -15,17 +15,22 @@ import cn.chenjun.cloud.management.data.entity.NatEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
-import cn.chenjun.cloud.management.util.IpCalculate;
+import cn.chenjun.cloud.management.servcie.bean.SubnetNetwork;
+import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.MacCalculate;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
+import cn.chenjun.cloud.management.util.SubnetCalculator;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import cn.hutool.crypto.digest.DigestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author chenjun
@@ -67,42 +72,44 @@ public class NetworkService extends AbstractService {
 
     public List<NetworkEntity> listNetwork() {
         List<NetworkEntity> networkList = this.networkDao.listAll();
-//        List<SimpleNetworkModel> models = BeanConverter.convert(networkList, SimpleNetworkModel.class);
         return networkList;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public NetworkEntity createNetwork(String name, String startIp, String endIp, String gateway, String mask, String subnet, String broadcast, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId, int bridgeType) {
+    public NetworkEntity createNetwork(String name, SubnetNetwork subnetNetwork, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId, int bridgeType) {
 
 
         NetworkEntity basicNetwork = null;
         switch (type) {
             case Constant.NetworkType.BASIC:
                 break;
+            case Constant.NetworkType.VxLAN:
             case Constant.NetworkType.VLAN:
                 basicNetwork = this.networkDao.findById(basicNetworkId);
                 if (basicNetwork == null) {
                     throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络不存在");
                 }
-                bridge = basicNetwork.getBridge();
-                if (!Objects.equals(basicNetwork.getBridgeType(), cn.chenjun.cloud.common.util.Constant.NetworkBridgeType.OPEN_SWITCH.bridgeType())) {
-                    throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络必须为OpenSwitch网络类型");
+                if (basicNetwork.getStatus() != Constant.NetworkStatus.READY) {
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "基础网络必须为就绪状态");
                 }
-                bridgeType = basicNetwork.getBridgeType();
                 break;
             default:
                 throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
         }
+        if (type == Constant.NetworkType.VxLAN) {
+            bridge = "";
+            bridgeType = Constant.NetworkBridgeType.OVN.bridgeType();
+        }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
                 .poolId(DigestUtil.md5Hex(UUID.randomUUID().toString()))
-                .startIp(startIp)
-                .endIp(endIp)
+                .startIp(subnetNetwork.getFirstIp())
+                .endIp(subnetNetwork.getLastIp())
                 .bridgeType(bridgeType)
-                .gateway(gateway)
-                .mask(mask)
-                .subnet(subnet)
-                .broadcast(broadcast)
+                .gateway(subnetNetwork.getGateway())
+                .mask(subnetNetwork.getMask())
+                .subnet(subnetNetwork.getSubnet())
+                .broadcast(subnetNetwork.getBroadcast())
                 .bridge(bridge)
                 .dns(dns)
                 .domain(domain)
@@ -113,7 +120,7 @@ public class NetworkService extends AbstractService {
                 .status(cn.chenjun.cloud.common.util.Constant.NetworkStatus.CREATING)
                 .createTime(new Date()).build();
         networkDao.insert(network);
-        List<String> ips = IpCalculate.parseIpRange(startIp, endIp);
+        List<String> ips = SubnetCalculator.listRangeIps(subnetNetwork.getFirstIp(), subnetNetwork.getLastIp());
         for (String ip : ips) {
             GuestNetworkEntity guestNetwork = GuestNetworkEntity.builder()
                     .allocateId(0)
@@ -121,7 +128,7 @@ public class NetworkService extends AbstractService {
                     .allocateDescription("")
                     .ip(ip)
                     .networkId(network.getNetworkId())
-                    .mac(IpCalculate.getRandomMacAddress())
+                    .mac(MacCalculate.getRandomMacAddress())
                     .deviceType("")
                     .deviceId(0)
                     .createTime(new Date())
@@ -141,6 +148,10 @@ public class NetworkService extends AbstractService {
             switch (type) {
                 case Constant.NetworkType.BASIC:
                     break;
+                case Constant.NetworkType.VxLAN:
+                    if (!this.checkOvnSupport()) {
+                        throw new CodeException(ErrorCode.PARAM_ERROR, "当前配置不支持VxLan网络");
+                    }
                 case Constant.NetworkType.VLAN: {
                     GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(basicNetworkId, component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Route Basic VIP[" + network.getName() + "]");
                     component.setBasicComponentVip(basicComponentVip.getIp());
@@ -150,13 +161,8 @@ public class NetworkService extends AbstractService {
                     throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
             }
             componentMapper.update(component);
-            if (type == cn.chenjun.cloud.common.util.Constant.NetworkType.VLAN && ObjectUtils.isEmpty(gateway)) {
-                //如果没有硬件网关地址，则将VIP设置为模拟网关
-                network.setGateway(componentVip.getIp());
-                this.networkDao.update(network);
-            }
         }
-        BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
+        BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("创建网络[" + network.getName() + "]").networkId(network.getNetworkId()).networkType(network.getType()).build();
         this.operateTask.addTask(operateParam);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
@@ -170,7 +176,7 @@ public class NetworkService extends AbstractService {
         }
         network.setStatus(cn.chenjun.cloud.common.util.Constant.NetworkStatus.CREATING);
         this.networkDao.update(network);
-        BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).build();
+        BaseOperateParam operateParam = CreateNetworkOperate.builder().id(UUID.randomUUID().toString()).title("注册网络[" + network.getName() + "]").networkId(network.getNetworkId()).networkType(network.getType()).build();
         this.operateTask.addTask(operateParam);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
@@ -212,7 +218,7 @@ public class NetworkService extends AbstractService {
             this.componentMapper.deleteById(componentEntity.getComponentId());
             this.natMapper.deleteByComponentId(componentEntity.getComponentId());
         }
-        BaseOperateParam operateParam = DestroyNetworkOperate.builder().id(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).build();
+        BaseOperateParam operateParam = DestroyNetworkOperate.builder().id(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).networkType(network.getType()).build();
         this.operateTask.addTask(operateParam);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(network.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
         return network;
@@ -343,5 +349,9 @@ public class NetworkService extends AbstractService {
 
     public List<NetworkEntity> listNetworkByIds(List<Integer> networkIds) {
         return this.networkDao.listNetworkByIds(networkIds);
+    }
+
+    public Boolean checkOvnSupport() {
+        return Constant.Enable.YES.equals(this.configService.getConfig(ConfigKey.NETWORK_OVN_ENABLE));
     }
 }

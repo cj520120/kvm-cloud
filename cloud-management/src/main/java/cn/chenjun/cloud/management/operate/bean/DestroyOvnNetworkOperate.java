@@ -14,18 +14,11 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class CreateNetworkOperate extends BaseOperateParam {
+public class DestroyOvnNetworkOperate extends BaseOperateParam {
     private int networkId;
-    private int networkType;
 
     @Override
     public int getType() {
-        return Constant.OperateType.CREATE_NETWORK;
+        return Constant.OperateType.DESTROY_OVN_NETWORK;
     }
-
-    @Override
-    public String getTaskId() {
-        return "Net-Create:" + networkId;
-    }
-
 }

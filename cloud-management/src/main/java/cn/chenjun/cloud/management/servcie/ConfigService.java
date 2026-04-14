@@ -121,6 +121,15 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/default/network.xml.json"), "基于系统桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.NETWORK_OVS_BRIDGE_TPL, ResourceUtil.readUtf8Str("tpl/kvm/network/ovs/network.xml.json"), "基于OpenvSwitch桥接方式网络模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
+
+        initDefaultConfig(ConfigKey.NETWORK_OVN_ENABLE, cn.chenjun.cloud.common.util.Constant.Enable.NO, "是否启用Ovn", Constant.ConfigValueType.SELECT, Arrays.asList(Constant.Enable.YES, Constant.Enable.NO), StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVN_URI, "", "Ovn 服务器地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVN_API_KEY, "", "Ovn 服务器密钥", Constant.ConfigValueType.STRING, null, StringConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVN_API_CONNECT_TIMEOUT_SECONDS, 30, "Ovn Api连接超时时间", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVN_API_READ_TIMEOUT_SECONDS, 30, "Ovn Api读取超时时间", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.NETWORK_OVN_API_WRITE_TIMEOUT_SECONDS, 30, "Ovn Api写入超时时间", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+
+
         initDefaultConfig(ConfigKey.VM_DISK_CACHE, "none", "磁盘读写缓冲(cache)模式", Constant.ConfigValueType.SELECT, Arrays.asList("writethrough", "writeback", "none", "unsafe", "directsync"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_AIO, "native", "磁盘读写AIO模式", Constant.ConfigValueType.SELECT, Arrays.asList("native", "thread"), StringConvert.Default);
 

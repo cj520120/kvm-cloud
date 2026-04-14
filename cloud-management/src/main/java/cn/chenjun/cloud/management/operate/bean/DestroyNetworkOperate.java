@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DestroyNetworkOperate extends BaseOperateParam {
     private int networkId;
+    private int networkType;
 
     @Override
     public int getType() {

@@ -1,17 +1,20 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
+import cn.chenjun.cloud.management.operate.bean.CreateOvnNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -31,16 +34,36 @@ public class CreateNetworkOperateServiceImpl extends AbstractOperateService<Crea
 
     @Override
     public void operate(CreateNetworkOperate param) {
-        List<HostEntity> hosts = hostDao.listAll();
-        List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
-        InitHostNetworkOperate operate = InitHostNetworkOperate.builder().id(UUID.randomUUID().toString())
-                .title(param.getTitle())
-                .networkId(param.getNetworkId())
-                .networkId(param.getNetworkId())
-                .nextHostIds(hostIds)
-                .build();
-        this.taskService.addTask(operate);
-        this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        switch (param.getNetworkType()) {
+            case Constant.NetworkType.BASIC:
+            case Constant.NetworkType.VLAN: {
+                List<HostEntity> hosts = hostDao.listAll();
+                List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());
+                if (ObjectUtils.isEmpty(hostIds)) {
+                    NetworkEntity network = networkDao.findById(param.getNetworkId());
+                    network.setStatus(Constant.NetworkStatus.INSTALL);
+                    networkDao.update(network);
+                    this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+                    return;
+                }
+                InitHostNetworkOperate operate = InitHostNetworkOperate.builder().id(UUID.randomUUID().toString())
+                        .title(param.getTitle())
+                        .networkId(param.getNetworkId())
+                        .networkId(param.getNetworkId())
+                        .nextHostIds(hostIds)
+                        .build();
+                this.taskService.addTask(operate);
+                this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+            }
+            break;
+            case Constant.NetworkType.VxLAN:
+                CreateOvnNetworkOperate operate = CreateOvnNetworkOperate.builder().id(UUID.randomUUID().toString()).networkId(param.getNetworkId()).build();
+                this.taskService.addTask(operate);
+                this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+                break;
+            default:
+                throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
+        }
     }
 
     @Override
@@ -58,7 +81,6 @@ public class CreateNetworkOperateServiceImpl extends AbstractOperateService<Crea
                 networkDao.update(network);
             }
         }
-
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_NETWORK).build());
 
     }

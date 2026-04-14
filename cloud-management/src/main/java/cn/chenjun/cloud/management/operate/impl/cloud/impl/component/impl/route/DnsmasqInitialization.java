@@ -8,7 +8,7 @@ import cn.chenjun.cloud.common.util.ResourceUtil;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.impl.cloud.bean.CloudConfig;
 import cn.chenjun.cloud.management.operate.impl.cloud.impl.component.impl.BaseInitialization;
-import cn.chenjun.cloud.management.util.IpCalculate;
+import cn.chenjun.cloud.management.util.SubnetCalculator;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -52,7 +52,7 @@ public class DnsmasqInitialization extends BaseInitialization {
         GuestNetworkEntity defaultGuestNetwork = optional.get();
         //删除VIP地址、网关地址、以及本机的IP地址
         allGuestNetwork.removeIf(t -> Objects.equals(t.getIp(), network.getGateway()) || Objects.equals(t.getIp(), component.getComponentVip()) || (Objects.equals(t.getAllocateId(), guest.getGuestId()) && Objects.equals(t.getAllocateType(), Constant.NetworkAllocateType.GUEST)));
-        allGuestNetwork.sort(Comparator.comparingLong(o -> IpCalculate.ipToLong(o.getIp())));
+        allGuestNetwork.sort(Comparator.comparingLong(o -> SubnetCalculator.ipToLong(o.getIp())));
         if (allGuestNetwork.size() < MIN_DHCP_SIZE) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "Dnsmasq初始化失败.没有可分配的区间,ComponentId=" + component.getComponentId());
         }

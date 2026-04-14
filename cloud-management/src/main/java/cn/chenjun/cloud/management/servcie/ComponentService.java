@@ -113,7 +113,8 @@ public class ComponentService extends AbstractService {
         this.volumeDao.insert(volume);
         NetworkEntity network = this.networkDao.findById(component.getNetworkId());
         switch (network.getType()) {
-            case Constant.NetworkType.VLAN: {
+            case Constant.NetworkType.VLAN:
+            case Constant.NetworkType.VxLAN: {
                 this.allocateService.allocateNetwork(network.getBasicNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
                 GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 1, nicDriveType, "Component Guest Basic Nic");
                 guest.setGuestIp(currentGuestNetwork.getIp());

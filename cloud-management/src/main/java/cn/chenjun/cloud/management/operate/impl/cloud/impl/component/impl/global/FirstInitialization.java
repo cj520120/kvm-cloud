@@ -1,11 +1,17 @@
 package cn.chenjun.cloud.management.operate.impl.cloud.impl.component.impl.global;
 
+import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.MapUtil;
+import cn.chenjun.cloud.common.util.ResourceUtil;
 import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.impl.cloud.bean.CloudConfig;
+import cn.chenjun.cloud.management.operate.impl.cloud.bean.SystemParamConfig;
 import cn.chenjun.cloud.management.operate.impl.cloud.impl.component.impl.BaseInitialization;
 import cn.chenjun.cloud.management.util.ConfigKey;
+import cn.chenjun.cloud.management.util.KeepalivedConfigGenerator;
+import cn.chenjun.cloud.management.util.SubnetCalculator;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +80,7 @@ public class FirstInitialization extends BaseInitialization {
             if (!Objects.equals(nic.getNetworkId(), network.getNetworkId())) {
                 nicNetwork = networkDao.findById(nic.getNetworkId());
             }
-            nicConfig.put("addresses", Collections.singletonList(nic.getIp() + "/" + network.getMask()));
+            nicConfig.put("addresses", Collections.singletonList(nic.getIp() + "/" + Long.bitCount(SubnetCalculator.ipToLong(nicNetwork.getMask()))));
             if (i == 0) {
                 nicConfig.put("routes", Collections.singletonList(
                         MapUtil.of("to", "0.0.0.0/0", "via", nicNetwork.getGateway())
@@ -84,12 +90,17 @@ public class FirstInitialization extends BaseInitialization {
             nicConfig.put("set-name", "eth" + i);
             config.addNetwork("eth" + i, nicConfig);
         }
-        config.appendRuncmd("echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf");
-        config.appendRuncmd("echo 'net.ipv6.conf.all.disable_ipv6=1' >> /etc/sysctl.conf");
-        config.appendRuncmd("echo 'net.ipv6.conf.default.disable_ipv6=1' >> /etc/sysctl.conf");
-        config.appendRuncmd("echo 'net.ipv4.conf.all.route_localnet=1' >> /etc/sysctl.conf");
-        config.appendRuncmd("echo 'net.ipv4.conf.all.accept_redirects=1' >> /etc/sysctl.conf");
-        config.appendRuncmd("echo 'net.ipv4.conf.default.accept_redirects=1' >> /etc/sysctl.conf");
+        String sysctlConfig = ResourceUtil.readUtf8Str("tpl/component/init/sysctl.config.json");
+        List<SystemParamConfig> sysctlConfigList = GsonBuilderUtil.create().fromJson(sysctlConfig, new TypeToken<List<SystemParamConfig>>() {
+        }.getType());
+        for (SystemParamConfig sysctl : sysctlConfigList) {
+            if (sysctl.getSupportNetworks().contains(network.getType())) {
+                Map<String, Integer> params = sysctl.getParams();
+                params.forEach((k, v) -> {
+                    config.appendRuncmd(String.format("echo '%s=%d' >> /etc/sysctl.conf", k, v));
+                });
+            }
+        }
         config.appendRuncmd("sysctl -p");
         config.appendRuncmd("setenforce 0");
         config.appendRuncmd("sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config");
@@ -100,7 +111,7 @@ public class FirstInitialization extends BaseInitialization {
         config.appendRuncmd("iptables -F");
         config.appendRuncmd("iptables -t nat -F");
         config.appendRuncmd("iptables -A INPUT -p vrrp -j ACCEPT");
-        config.appendRuncmd("iptables -A INPUT -d 224.0.0.18 -j ACCEPT");
+        config.appendRuncmd(String.format("iptables -A INPUT -d %s -j ACCEPT", KeepalivedConfigGenerator.generateMcastGroup4(network.getPoolId(), component.getComponentId())));
         config.appendRuncmd("iptables -A INPUT -p tcp --dport 22 -j ACCEPT");
         guestNicList.sort(Comparator.comparing(GuestNetworkEntity::getDeviceId));
         for (int i = 0; i < guestNicList.size(); i++) {

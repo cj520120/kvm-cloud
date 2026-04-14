@@ -16,7 +16,8 @@ public class Constant {
          * 基础网络
          */
         BASIC(0, "bridge"),
-        OPEN_SWITCH(1, "OpenSwitch");
+        OPEN_SWITCH(1, "OpenSwitch"),
+        OVN(2, "Ovn");
         private final String bridgeName;
         private final int bridgeType;
 
@@ -320,6 +321,7 @@ public class Constant {
     public static class NetworkType {
         public static final int BASIC = 0;
         public static final int VLAN = 1;
+        public static final int VxLAN = 2;
 
     }
 
@@ -361,6 +363,9 @@ public class Constant {
         public static int DESTROY_TEMPLATE_VOLUME = 38;
         public static int STORAGE_VOLUME_CLEAR = 39;
         public static int CREATE_GUEST_VOLUME = 40;
+        public static int CREATE_OVN_NETWORK = 41;
+
+        public static int DESTROY_OVN_NETWORK = 42;
     }
 
 

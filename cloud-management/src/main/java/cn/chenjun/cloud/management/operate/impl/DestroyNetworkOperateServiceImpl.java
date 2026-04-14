@@ -7,6 +7,7 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
+import cn.chenjun.cloud.management.operate.bean.DestroyOvnNetworkOperate;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
@@ -30,15 +31,21 @@ public class DestroyNetworkOperateServiceImpl extends AbstractOperateService<Des
 
     @Override
     public void operate(DestroyNetworkOperate param) {
-        List<HostEntity> hosts = hostDao.listByStatus(Constant.HostStatus.ONLINE);
-        List<Integer> hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
-        DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().id(UUID.randomUUID().toString())
-                .title(param.getTitle())
-                .networkId(param.getNetworkId())
-                .nextHostIds(hostIds)
-                .build();
-        this.taskService.addTask(operate);
-        this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        if (param.getNetworkType() == Constant.NetworkType.VxLAN) {
+            DestroyOvnNetworkOperate operate = DestroyOvnNetworkOperate.builder().id(UUID.randomUUID().toString()).networkId(param.getNetworkId()).build();
+            this.taskService.addTask(operate);
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        } else {
+            List<HostEntity> hosts = hostDao.listByStatus(Constant.HostStatus.ONLINE);
+            List<Integer> hostIds = hosts.stream().map(HostEntity::getHostId).collect(Collectors.toList());
+            DestroyHostNetworkOperate operate = DestroyHostNetworkOperate.builder().id(UUID.randomUUID().toString())
+                    .title(param.getTitle())
+                    .networkId(param.getNetworkId())
+                    .nextHostIds(hostIds)
+                    .build();
+            this.taskService.addTask(operate);
+            this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
+        }
     }
 
     @Override

@@ -14,7 +14,9 @@ import cn.chenjun.cloud.management.model.NetworkModel;
 import cn.chenjun.cloud.management.model.NicMode;
 import cn.chenjun.cloud.management.model.SimpleNetworkModel;
 import cn.chenjun.cloud.management.servcie.NetworkService;
+import cn.chenjun.cloud.management.servcie.bean.SubnetNetwork;
 import cn.chenjun.cloud.management.util.IpValidator;
+import cn.chenjun.cloud.management.util.SubnetCalculator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -33,6 +35,23 @@ public class NetworkController extends BaseController {
     @Autowired
     private NetworkService networkService;
 
+    private static void verifyBaseNetwork(String startIp, String endIp, String bridge, String subnet, String broadcast, String gateway) {
+        if (!IpValidator.isValidIp(startIp) || !IpValidator.isValidIp(endIp)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的开始IP和结束IP");
+        }
+        if (StringUtils.isEmpty(bridge)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入桥接网卡名称");
+        }
+        if (!IpValidator.isValidIp(subnet)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的子网信息");
+        }
+        if (!IpValidator.isValidIp(broadcast)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的广播地址");
+        }
+        if (!IpValidator.isValidIp(gateway)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的网关地址");
+        }
+    }
     @GetMapping("/api/network/info")
     public ResultUtil<NetworkModel> getNetworkInfo(@RequestParam("networkId") int networkId) {
         NetworkEntity network = networkService.getNetworkInfo(networkId);
@@ -57,16 +76,21 @@ public class NetworkController extends BaseController {
         return ResultUtil.success(models);
     }
 
+    @GetMapping("/api/network/ovn/supported")
+    public ResultUtil<Boolean> checkOvnSupport() {
+        return ResultUtil.success(networkService.checkOvnSupport());
+    }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/network/create")
     public ResultUtil<NetworkModel> createNetwork(@RequestParam("name") String name,
-                                                  @RequestParam("startIp") String startIp,
-                                                  @RequestParam("endIp") String endIp,
-                                                  @RequestParam(value = "gateway", defaultValue = "") String gateway,
+                                                  @RequestParam(value = "startIp", required = false) String startIp,
+                                                  @RequestParam(value = "endIp", required = false) String endIp,
+                                                  @RequestParam(value = "gateway", required = false) String gateway,
+                                                  @RequestParam(value = "broadcast", required = false) String broadcast,
+                                                  @RequestParam(value = "bridge", required = false) String bridge,
                                                   @RequestParam("mask") String mask,
-                                                  @RequestParam(value = "bridge", defaultValue = "") String bridge,
                                                   @RequestParam("subnet") String subnet,
-                                                  @RequestParam("broadcast") String broadcast,
                                                   @RequestParam("dns") String dns,
                                                   @RequestParam("domain") String domain,
                                                   @RequestParam("type") int type,
@@ -76,46 +100,42 @@ public class NetworkController extends BaseController {
         if (StringUtils.isEmpty(name)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入网络名称");
         }
-        if (!IpValidator.isValidIp(startIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的开始IP");
-        }
-        if (!IpValidator.isValidIp(endIp)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的结束IP");
-        }
-        if (cn.chenjun.cloud.common.util.Constant.NetworkType.BASIC == type && StringUtils.isEmpty(gateway)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的网关地址");
-        }
-        if (!IpValidator.isValidIp(mask)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的子网掩码");
-        }
-        if (cn.chenjun.cloud.common.util.Constant.NetworkType.BASIC == type && StringUtils.isEmpty(bridge)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入桥接网卡名称");
+        if (StringUtils.isEmpty(domain)) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入搜索域");
         }
         if (StringUtils.isEmpty(dns)) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入DNS信息");
         }
-        if (!IpValidator.isValidIp(subnet)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的子网信息");
-        }
-        if (!IpValidator.isValidIp(broadcast)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的广播地址");
-        }
-        if (StringUtils.isEmpty(domain)) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入搜索域");
-        }
+        SubnetNetwork subnetNetwork = null;
         switch (type) {
+            case Constant.NetworkType.BASIC:
+                verifyBaseNetwork(startIp, endIp, bridge, subnet, broadcast, gateway);
+                subnetNetwork = SubnetNetwork.builder()
+                        .firstIp(startIp)
+                        .lastIp(endIp)
+                        .subnet(subnet)
+                        .broadcast(broadcast)
+                        .gateway(gateway)
+                        .mask(mask)
+                        .build();
+                break;
             case Constant.NetworkType.VLAN:
                 if (vlanId <= 0) {
-                throw new CodeException(ErrorCode.PARAM_ERROR, "请输入Vlan ID");
-            }
-            case Constant.NetworkType.BASIC:
+                    throw new CodeException(ErrorCode.PARAM_ERROR, "请输入VLan ID");
+                }
+                subnetNetwork = SubnetCalculator.calculate(subnet, mask);
+                break;
+            case Constant.NetworkType.VxLAN:
+                subnetNetwork = SubnetCalculator.calculate(subnet, mask);
                 break;
             default:
                 throw new CodeException(ErrorCode.PARAM_ERROR, "不支持的网络类型");
         }
-        NetworkEntity network = this.globalLockCall(() -> networkService.createNetwork(name, startIp, endIp, gateway, mask, subnet, broadcast, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
+        SubnetNetwork finalSubnetNetwork = subnetNetwork;
+        NetworkEntity network = this.globalLockCall(() -> networkService.createNetwork(name, finalSubnetNetwork, bridge, dns, domain, type, vlanId, basicNetworkId, bridgeType));
         return ResultUtil.success(this.convertService.initNetworkModel(network));
     }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @GetMapping("/api/network/nics")
     public ResultUtil<List<NicMode>> listNetworkNic(@RequestParam("networkId") int networkId) {

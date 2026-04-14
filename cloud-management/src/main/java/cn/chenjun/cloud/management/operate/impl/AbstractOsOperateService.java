@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.ovn.service.OvnService;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.DomainUtil;
@@ -20,6 +21,9 @@ import java.util.Map;
 public abstract class AbstractOsOperateService<T extends BaseOperateParam, V extends ResultUtil> extends AbstractOperateService<T, V> {
     @Autowired
     protected ConfigService configService;
+    @Autowired
+    private OvnService ovnService;
+
 
     protected String buildCdXml(GuestEntity guest, Map<String, Object> configParam) {
         if (guest.getCdRoom() <= 0) {
@@ -96,7 +100,15 @@ public abstract class AbstractOsOperateService<T extends BaseOperateParam, V ext
         return DomainUtil.buildHostFileXml(tpl, sysconfig, guest, volume, deviceId, deviceType);
     }
     public String buildInterfaceXml(NetworkEntity network, GuestNetworkEntity guestNetwork, Map<String, Object> systemConfig) {
-        String tpl = (String) systemConfig.get(ConfigKey.VM_INTERFACE_TPL);
-        return DomainUtil.buildNetworkInterfaceXml(tpl, systemConfig, network, guestNetwork);
+        switch (network.getType()) {
+            case Constant.NetworkType.BASIC:
+            case Constant.NetworkType.VLAN:
+                String tpl = (String) systemConfig.get(ConfigKey.VM_INTERFACE_TPL);
+                return DomainUtil.buildNetworkInterfaceXml(tpl, systemConfig, network, guestNetwork);
+            case Constant.NetworkType.VxLAN:
+                return ovnService.buildInterfaceXml(network.getPoolId(), guestNetwork.getDeviceType(), guestNetwork.getMac());
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型[" + network.getType() + "]");
+        }
     }
 }

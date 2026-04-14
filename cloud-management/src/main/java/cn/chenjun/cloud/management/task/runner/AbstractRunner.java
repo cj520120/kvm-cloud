@@ -32,17 +32,22 @@ public abstract class AbstractRunner {
                 return;
             }
             RequestContextHolderUtil.initContext();
-            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
+            boolean isRun = lockRunner.lockCall(RedisKeyUtil.getGlobalJobLockKey(this.getClass().getSimpleName()), () -> {
                 if (this.getPeriodSeconds() > 0) {
                     String key = this.getJobKey();
                     RBucket<Long> rBucket = redissonClient.getBucket(key);
                     if (rBucket.isExists()) {
-                        return;
+                        return false;
                     }
                     rBucket.set(System.currentTimeMillis(), Math.max(1, this.getPeriodSeconds()), TimeUnit.SECONDS);
                 }
-                this.doWork();
+                return true;
             });
+            if (isRun) {
+                this.doWork();
+            }else{
+                log.debug("任务正在执行中,忽略本次执行:{}", this.getName());
+            }
         } catch (Exception err) {
             log.error("周期任务执行失败.", err);
         }finally {

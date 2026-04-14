@@ -38,7 +38,6 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
 
     @Autowired
     private List<CloudInitService> cloudInitServices;
-
     @Override
     public boolean requireLock() {
         return true;
