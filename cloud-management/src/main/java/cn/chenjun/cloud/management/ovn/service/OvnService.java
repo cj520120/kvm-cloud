@@ -5,7 +5,7 @@ import cn.chenjun.cloud.management.ovn.exception.OvnApiException;
 import cn.chenjun.cloud.management.ovn.model.request.BuildInterfaceXmlRequest;
 import cn.chenjun.cloud.management.ovn.model.request.CreateBridgeRequest;
 import cn.chenjun.cloud.management.ovn.model.response.BaseResponse;
-import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeData;
+import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeResponse;
 import cn.chenjun.cloud.management.ovn.model.response.NicXmlData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +20,9 @@ public class OvnService {
 
     private final OvnClient ovnClientClient;
 
-    public CreateBridgeData createBridge(String name, String cidr, String gateway) throws OvnApiException {
+    public CreateBridgeResponse createBridge(String name, String cidr, String gateway) throws OvnApiException {
         CreateBridgeRequest request = CreateBridgeRequest.builder().cidr(cidr).gateway(gateway).name(name).build();
-        BaseResponse<CreateBridgeData> response = ovnClientClient.createBridge(request);
+        BaseResponse<CreateBridgeResponse> response = ovnClientClient.createBridge(request);
 
         if (response.getCode() == 0) {
             log.info("网桥创建成功: {}", response.getData().getUserBridgeName());
@@ -52,7 +52,7 @@ public class OvnService {
                 .build();
         BaseResponse<NicXmlData> response = ovnClientClient.buildInterfaceXml(request);
         if (response.getCode() == 0) {
-            log.info("获取网卡 XML 成功, portUuid: {}", response.getData().getPortUuid());
+            log.info("获取网卡 XML 成功, portName: {}", response.getData().getPortName());
             return response.getData().getXml();
         } else {
             log.error("获取网卡 XML 失败: {}", response.getMsg());

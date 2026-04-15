@@ -19,6 +19,4 @@ public class CreateBridgeRequest {
     private String cidr;
 
     private String gateway;
-
-    private List<Map<String, Object>> ports;
 }

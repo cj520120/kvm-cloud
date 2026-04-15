@@ -4,16 +4,15 @@ import cn.chenjun.cloud.management.ovn.exception.OvnApiException;
 import cn.chenjun.cloud.management.ovn.model.request.BuildInterfaceXmlRequest;
 import cn.chenjun.cloud.management.ovn.model.request.CreateBridgeRequest;
 import cn.chenjun.cloud.management.ovn.model.response.BaseResponse;
-import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeData;
+import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeResponse;
 import cn.chenjun.cloud.management.ovn.model.response.HealthResponse;
 import cn.chenjun.cloud.management.ovn.model.response.NicXmlData;
 
 import java.util.Map;
 
 public interface OvnClient {
-    HealthResponse health() throws OvnApiException;
 
-    BaseResponse<CreateBridgeData> createBridge(CreateBridgeRequest request) throws OvnApiException;
+    BaseResponse<CreateBridgeResponse> createBridge(CreateBridgeRequest request) throws OvnApiException;
 
     BaseResponse<Map<String, String>> deleteBridge(String name) throws OvnApiException;
 

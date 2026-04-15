@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateBridgeData {
+public class CreateBridgeResponse {
 
     @SerializedName("user_bridge_name")
     private String userBridgeName;

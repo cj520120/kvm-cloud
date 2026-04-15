@@ -119,16 +119,6 @@
             <version>2.18.0</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.12.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <version>3.6.0</version>
-        </dependency>
     </dependencies>
     <repositories>
     </repositories>

@@ -127,7 +127,6 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.NETWORK_OVN_API_KEY, "", "Ovn 服务器密钥", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.NETWORK_OVN_API_CONNECT_TIMEOUT_SECONDS, 30, "Ovn Api连接超时时间", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.NETWORK_OVN_API_READ_TIMEOUT_SECONDS, 30, "Ovn Api读取超时时间", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
-        initDefaultConfig(ConfigKey.NETWORK_OVN_API_WRITE_TIMEOUT_SECONDS, 30, "Ovn Api写入超时时间", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
 
         initDefaultConfig(ConfigKey.VM_DISK_CACHE, "none", "磁盘读写缓冲(cache)模式", Constant.ConfigValueType.SELECT, Arrays.asList("writethrough", "writeback", "none", "unsafe", "directsync"), StringConvert.Default);

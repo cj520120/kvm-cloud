@@ -80,8 +80,6 @@ public class ConfigKey {
     public static final String NETWORK_OVN_API_KEY = "network.ovn.key";
     public static final String NETWORK_OVN_API_CONNECT_TIMEOUT_SECONDS = "network.ovn.connect.timeout.seconds";
     public static final String NETWORK_OVN_API_READ_TIMEOUT_SECONDS = "network.ovn.read.timeout.seconds";
-    public static final String NETWORK_OVN_API_WRITE_TIMEOUT_SECONDS = "network.ovn.write.timeout.seconds";
-
     public static final String VM_DOMAIN_TPL = "vm.domain.tpl";
 
     public static final String VM_PCI_DISK_BUS = "vm.disk.pci.bus";

@@ -6,7 +6,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateOvnNetworkOperate;
-import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeData;
+import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeResponse;
 import cn.chenjun.cloud.management.ovn.service.OvnService;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
@@ -26,7 +26,7 @@ import java.lang.reflect.Type;
  */
 @Component
 @Slf4j
-public class CreateOvnNetworkOperateServiceImpl extends AbstractOperateService<CreateOvnNetworkOperate, ResultUtil<CreateBridgeData>> {
+public class CreateOvnNetworkOperateServiceImpl extends AbstractOperateService<CreateOvnNetworkOperate, ResultUtil<CreateBridgeResponse>> {
 
     @Autowired
     private OvnService ovnService;
@@ -52,8 +52,8 @@ public class CreateOvnNetworkOperateServiceImpl extends AbstractOperateService<C
         this.executor.submit(() -> {
             RequestContextHolderUtil.initContext();
             try {
-                CreateBridgeData createBridgeData = ovnService.createBridge(networkName, cidr, gateway);
-                this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(createBridgeData));
+                CreateBridgeResponse createBridgeResponse = ovnService.createBridge(networkName, cidr, gateway);
+                this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success(createBridgeResponse));
             } catch (Exception err) {
                 this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "Request error: " + err.getMessage()));
             } finally {
@@ -65,12 +65,12 @@ public class CreateOvnNetworkOperateServiceImpl extends AbstractOperateService<C
 
     @Override
     public Type getCallResultType() {
-        return new TypeToken<ResultUtil<CreateBridgeData>>() {
+        return new TypeToken<ResultUtil<CreateBridgeResponse>>() {
         }.getType();
     }
 
     @Override
-    public void onFinish(CreateOvnNetworkOperate param, ResultUtil<CreateBridgeData> resultUtil) {
+    public void onFinish(CreateOvnNetworkOperate param, ResultUtil<CreateBridgeResponse> resultUtil) {
         NetworkEntity network = networkDao.findById(param.getNetworkId());
         if (network != null) {
             switch (network.getStatus()) {

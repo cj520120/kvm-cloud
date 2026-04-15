@@ -28,9 +28,6 @@ public abstract class AbstractRunner {
 
     public void call() {
         try {
-            if (!this.isStart()) {
-                return;
-            }
             RequestContextHolderUtil.initContext();
             boolean isRun = lockRunner.lockCall(RedisKeyUtil.getGlobalJobLockKey(this.getClass().getSimpleName()), () -> {
                 if (this.getPeriodSeconds() > 0) {
@@ -39,7 +36,7 @@ public abstract class AbstractRunner {
                     if (rBucket.isExists()) {
                         return false;
                     }
-                    rBucket.set(System.currentTimeMillis(), Math.max(1, this.getPeriodSeconds()), TimeUnit.SECONDS);
+                    rBucket.set(System.currentTimeMillis(), this.getPeriodSeconds(), TimeUnit.SECONDS);
                 }
                 return true;
             });
@@ -91,7 +88,5 @@ public abstract class AbstractRunner {
      */
     protected abstract String getName();
 
-    protected boolean isStart() {
-        return true;
-    }
+
 }

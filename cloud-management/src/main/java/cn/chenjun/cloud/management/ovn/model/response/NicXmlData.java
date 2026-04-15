@@ -12,9 +12,6 @@ public class NicXmlData {
 
     private String xml;
 
-    @SerializedName("port_uuid")
-    private String portUuid;
-
     @SerializedName("port_name")
     private String portName;
 
