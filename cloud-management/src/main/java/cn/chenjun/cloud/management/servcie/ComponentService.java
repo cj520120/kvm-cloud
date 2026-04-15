@@ -398,4 +398,8 @@ public class ComponentService extends AbstractService {
     public void updateComponentGuest(ComponentGuestEntity componentGuest) {
         this.componentGuestDao.update(componentGuest);
     }
+
+    public void deleteComponentGuest(Integer guestId) {
+        this.componentGuestDao.deleteByGuestId(guestId);
+    }
 }

@@ -51,4 +51,8 @@ public class ComponentGuestDao {
                 .eq(ComponentGuestEntity.COMPONENT_ID, componentId)
                 .eq(ComponentGuestEntity.HOST_ID, hostId));
     }
+
+    public void deleteByGuestId(Integer guestId) {
+        mapper.delete(new QueryWrapper<ComponentGuestEntity>().eq(ComponentGuestEntity.GUEST_ID, guestId));
+    }
 }

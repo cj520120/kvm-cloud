@@ -9,10 +9,12 @@ import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyVolumeOperate;
+import cn.chenjun.cloud.management.servcie.ComponentService;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -28,6 +30,8 @@ import java.util.UUID;
 @Slf4j
 public class DestroyGuestOperateServiceImpl extends AbstractOperateService<DestroyGuestOperate, ResultUtil<Void>> {
 
+    @Autowired
+    private ComponentService componentService;
 
     @Override
     public void operate(DestroyGuestOperate param) {
@@ -70,6 +74,7 @@ public class DestroyGuestOperateServiceImpl extends AbstractOperateService<Destr
             this.configService.deleteAllocateConfig(cn.chenjun.cloud.common.util.Constant.ConfigType.GUEST, param.getGuestId());
             this.guestDao.deleteById(guest.getGuestId());
             this.configService.deleteAllocateConfig(cn.chenjun.cloud.common.util.Constant.ConfigType.GUEST, guest.getGuestId());
+            this.componentService.deleteComponentGuest(guest.getGuestId());
             NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
             NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
