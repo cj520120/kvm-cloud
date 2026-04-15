@@ -48,11 +48,9 @@ public class TaskPoolUtil {
     }
 
     public static DispatchProcess offerDispatch() {
-        if (TaskPoolUtil.TASK_QUEUE.isEmpty()) {
-            return null;
-        }
+
         try {
-            return TaskPoolUtil.TASK_QUEUE.poll(1, TimeUnit.MILLISECONDS);
+            return TaskPoolUtil.TASK_QUEUE.poll(10, TimeUnit.SECONDS);
         } catch (Exception err) {
             log.error("弹出队列失败.", err);
             return null;
@@ -60,11 +58,8 @@ public class TaskPoolUtil {
     }
 
     public static SubmitTask offerSubmit() {
-        if (TaskPoolUtil.SUBMIT_QUEUE.isEmpty()) {
-            return null;
-        }
         try {
-            return TaskPoolUtil.SUBMIT_QUEUE.poll(1, TimeUnit.MILLISECONDS);
+            return TaskPoolUtil.SUBMIT_QUEUE.poll(10, TimeUnit.SECONDS);
         } catch (Exception err) {
             log.error("弹出队列失败.", err);
             return null;

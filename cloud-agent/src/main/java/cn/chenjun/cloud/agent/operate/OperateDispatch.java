@@ -83,7 +83,6 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
             log.error("dispatch fail. taskId={} command={} data={}", task.getTaskId(), task.getCommand(), task.getData(), err);
             executeResult = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         } finally {
-//            this.submitTaskCallback(task, executeResult);
             SubmitTask submitTask = SubmitTask.builder().taskId(task.getTaskId()).data(GsonBuilderUtil.create().toJson(executeResult)).build();
             TaskPoolUtil.pushSubmit(submitTask);
             TaskPoolUtil.removeDispatch(task.getTaskId());
@@ -98,35 +97,14 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
         return executeResult;
     }
 
-//    private <T> void submitTaskCallback(TaskRequest task, ResultUtil<T> resultUtil) {
-//        String result = GsonBuilderUtil.create().toJson(resultUtil);
-//        try {
-//            String nonce = String.valueOf(System.nanoTime());
-//            Map<String, Object> map = new HashMap<>(5);
-//            map.put("taskId", task.getTaskId());
-//            map.put("data", result);
-//            map.put("timestamp", String.valueOf(System.currentTimeMillis()));
-//            String sign = AppUtils.sign(map, clientService.getClientId(), clientService.getClientSecret(), nonce);
-//            map.put("sign", sign);
-//            String url = clientService.getManagerUri();
-//            if (!url.endsWith("/")) {
-//                url += "/";
-//            }
-//            url += "api/agent/task/report";
-//            HttpUtil.post(url, map);
-//        } catch (Exception err) {
-//            log.error("上报任务出现异常.command={} param={} result={}", task.getCommand(), task.getData(), result, err);
-//        }
-//    }
-
     @Override
     public void run(String... args) throws Exception {
         int taskSize = Math.max(this.applicationConfig.getTaskThreadSize(), 1);
         this.executor = new ScheduledThreadPoolExecutor(taskSize, new BasicThreadFactory.Builder().namingPattern("job-executor-pool-%d").daemon(true).build());
         for (int i = 0; i < taskSize; i++) {
-            this.executor.scheduleAtFixedRate(this::consumeTask, 10, 1, TimeUnit.SECONDS);
+            this.executor.scheduleAtFixedRate(this::consumeTask, 10, 1, TimeUnit.MILLISECONDS);
         }
-        this.executor.scheduleAtFixedRate(this::submitTask, 10, 1, TimeUnit.SECONDS);
+        this.executor.scheduleAtFixedRate(this::submitTask, 10, 1, TimeUnit.MILLISECONDS);
     }
 
     public void consumeTask() {

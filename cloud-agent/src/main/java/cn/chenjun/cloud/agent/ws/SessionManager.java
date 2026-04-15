@@ -26,7 +26,6 @@ public class SessionManager implements Closeable {
 
     @Autowired
     private List<PacketHandler> packetHandlers;
-    private static final long HEARTBEAT_INTERVAL_MS = 30000;
     private WsClient session = null;
     private final Object sessionLock = new Object();
 
@@ -51,7 +50,7 @@ public class SessionManager implements Closeable {
                     closeSessionInternal();
                 }
             } else {
-                log.info("心跳间隔已超过，发送心跳...");
+                log.debug("心跳间隔已超过，发送心跳...");
                 sendHeartbeat();
             }
         }

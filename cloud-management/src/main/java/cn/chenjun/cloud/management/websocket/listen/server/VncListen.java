@@ -74,7 +74,7 @@ public class VncListen extends AbstractWsService<ByteBuffer> {
 
     @Override
     protected int getSocketType() {
-        return SocketType.AGENT_SOCKET;
+        return SocketType.VNC_SOCKET;
     }
 
     @SneakyThrows
