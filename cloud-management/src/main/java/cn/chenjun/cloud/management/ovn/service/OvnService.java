@@ -25,7 +25,7 @@ public class OvnService {
         BaseResponse<CreateBridgeResponse> response = ovnClientClient.createBridge(request);
 
         if (response.getCode() == 0) {
-            log.info("网桥创建成功: {}", response.getData().getUserBridgeName());
+            log.info("网桥创建成功: {}", response.getData());
             return response.getData();
         } else {
             log.error("网桥创建失败: {}", response.getMsg());

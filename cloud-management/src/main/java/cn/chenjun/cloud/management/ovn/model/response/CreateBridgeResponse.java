@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateBridgeResponse {
 
-    @SerializedName("user_bridge_name")
-    private String userBridgeName;
+    @SerializedName("app_bridge_name")
+    private String appBridgeName;
 
     @SerializedName("ovn_bridge_uuid")
     private String ovnBridgeUuid;

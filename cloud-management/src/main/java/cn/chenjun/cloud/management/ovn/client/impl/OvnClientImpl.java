@@ -53,21 +53,21 @@ public class OvnClientImpl implements OvnClient {
     public BaseResponse<CreateBridgeResponse> createBridge(CreateBridgeRequest request) throws OvnApiException {
         Type type = new TypeToken<BaseResponse<CreateBridgeResponse>>() {
         }.getType();
-        return post("/api/network/create", request, type);
+        return post("/api/bridge/", request, type);
     }
 
     @Override
     public BaseResponse<Map<String, String>> deleteBridge(String name) throws OvnApiException {
         Type type = new TypeToken<BaseResponse<Map<String, String>>>() {
         }.getType();
-        return delete("/api/network/delete/" + encodePath(name), type);
+        return delete("/api/bridge/" + encodePath(name), type);
     }
 
     @Override
     public BaseResponse<NicXmlData> buildInterfaceXml(BuildInterfaceXmlRequest request) throws OvnApiException {
         Type type = new TypeToken<BaseResponse<NicXmlData>>() {
         }.getType();
-        return post("/api/nic/xml", request, type);
+        return post("/api/bridge/port/nic/xml", request, type);
     }
 
 
