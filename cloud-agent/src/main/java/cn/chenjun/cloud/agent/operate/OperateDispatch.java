@@ -6,7 +6,6 @@ import cn.chenjun.cloud.agent.operate.bean.Dispatch;
 import cn.chenjun.cloud.agent.operate.bean.DispatchProcess;
 import cn.chenjun.cloud.agent.operate.bean.SubmitTask;
 import cn.chenjun.cloud.agent.operate.process.DispatchFactory;
-import cn.chenjun.cloud.agent.util.ClientService;
 import cn.chenjun.cloud.agent.util.ConnectFactory;
 import cn.chenjun.cloud.agent.util.TaskPoolUtil;
 import cn.chenjun.cloud.agent.ws.SessionManager;
@@ -41,27 +40,28 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
 
 
     private ScheduledThreadPoolExecutor executor;
-    @Autowired
-    private ClientService clientService;
 
     @Autowired
     private ApplicationConfig applicationConfig;
 
 
-    public <T, V> ResultUtil<T> dispatch(String data) {
+    public <T, V> void dispatch(String data) {
         TaskRequest task = GsonBuilderUtil.create().fromJson(data, TaskRequest.class);
         Dispatch<T, V> dispatch = this.dispatchFactory.getDispatch(task.getCommand());
         if (dispatch == null) {
-            return ResultUtil.error(ErrorCode.SERVER_ERROR, "不支持的操作:" + task.getCommand());
+            ResultUtil<T> executeResult = ResultUtil.<T>builder().code(ErrorCode.NOT_SUPPORT_METHOD).message("不支持的操作:" + task.getCommand()).build();
+            SubmitTask submitTask = SubmitTask.builder().taskId(task.getTaskId()).data(GsonBuilderUtil.create().toJson(executeResult)).build();
+            TaskPoolUtil.pushSubmit(submitTask);
         }
         if (dispatch.isAsync()) {
             DispatchProcess dispatchProcess = DispatchProcess.builder().dispatch(dispatch).task(task).build();
             TaskPoolUtil.pushDispatch(dispatchProcess);
             log.info("提交异步任务:{}[{}]", task.getCommand(), task.getTaskId());
-            return ResultUtil.<T>builder().code(ErrorCode.AGENT_TASK_ASYNC_WAIT).build();
         } else {
             log.info("同步执行任务{}[{}]", task.getCommand(), task.getTaskId());
-            return dispatchTaskConsumer(task, dispatch);
+            ResultUtil<T> executeResult = dispatchTaskConsumer(task, dispatch);
+            SubmitTask submitTask = SubmitTask.builder().taskId(task.getTaskId()).data(GsonBuilderUtil.create().toJson(executeResult)).build();
+            TaskPoolUtil.pushSubmit(submitTask);
         }
     }
 
@@ -75,12 +75,13 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
             V param = StringUtils.isEmpty(task.getData()) ? null : GsonBuilderUtil.create().fromJson(task.getData(), dispatch.getParamType());
             Consumer<T, V> consumer = dispatch.getConsumer();
             T result = consumer.dispatch(connect, param);
-            log.info("dispatch   cost={}ms command={} param={} result={}", System.currentTimeMillis() - startTime, task.getCommand(), task.getData(), result);
+            log.info("执行任务结束:{}-{} 耗时={}ms,返回:{}", task.getCommand(), task.getTaskId(), System.currentTimeMillis() - startTime, result);
             executeResult = ResultUtil.success(result);
         } catch (CodeException err) {
+            log.warn("执行任务失败. {}-{} code={}", task.getCommand(), task.getTaskId(), err.getCode());
             executeResult = ResultUtil.error(err.getCode(), err.getMessage());
         } catch (Exception err) {
-            log.error("dispatch fail. taskId={} command={} data={}", task.getTaskId(), task.getCommand(), task.getData(), err);
+            log.error("执行任务失败.{}-{}", task.getCommand(), task.getTaskId(), err);
             executeResult = ResultUtil.error(ErrorCode.SERVER_ERROR, err.getMessage());
         } finally {
             SubmitTask submitTask = SubmitTask.builder().taskId(task.getTaskId()).data(GsonBuilderUtil.create().toJson(executeResult)).build();
@@ -102,15 +103,19 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
         int taskSize = Math.max(this.applicationConfig.getTaskThreadSize(), 1);
         this.executor = new ScheduledThreadPoolExecutor(taskSize, new BasicThreadFactory.Builder().namingPattern("job-executor-pool-%d").daemon(true).build());
         for (int i = 0; i < taskSize; i++) {
-            this.executor.scheduleAtFixedRate(this::consumeTask, 10, 1, TimeUnit.MILLISECONDS);
+            this.executor.scheduleAtFixedRate(this::consumeTask, 1, 1, TimeUnit.SECONDS);
         }
-        this.executor.scheduleAtFixedRate(this::submitTask, 10, 1, TimeUnit.MILLISECONDS);
+        this.executor.scheduleAtFixedRate(this::submitTask, 1, 1, TimeUnit.SECONDS);
     }
 
     public void consumeTask() {
-        DispatchProcess dispatchProcess = TaskPoolUtil.offerDispatch();
-        if (dispatchProcess != null) {
-            this.dispatchTaskConsumer(dispatchProcess.getTask(), dispatchProcess.getDispatch());
+        while (true) {
+            DispatchProcess dispatchProcess = TaskPoolUtil.offerDispatch();
+            if (dispatchProcess != null) {
+                this.dispatchTaskConsumer(dispatchProcess.getTask(), dispatchProcess.getDispatch());
+            } else {
+                break;
+            }
         }
     }
 
@@ -119,12 +124,17 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
             log.warn("当前与服务端断开连接,不执行上报任务.");
             return;
         }
-        SubmitTask submitTask = TaskPoolUtil.offerSubmit();
-        if (submitTask != null) {
-            if (!this.sessionManager.submitTask(submitTask)) {
-                TaskPoolUtil.pushSubmit(submitTask);
+        while (true) {
+            SubmitTask submitTask = TaskPoolUtil.offerSubmit();
+            if (submitTask != null) {
+                if (!this.sessionManager.submitTask(submitTask)) {
+                    TaskPoolUtil.pushSubmit(submitTask);
+                    break;
+                } else {
+                    TaskPoolUtil.removeSubmit(submitTask.getTaskId());
+                }
             } else {
-                TaskPoolUtil.removeSubmit(submitTask.getTaskId());
+                break;
             }
         }
     }

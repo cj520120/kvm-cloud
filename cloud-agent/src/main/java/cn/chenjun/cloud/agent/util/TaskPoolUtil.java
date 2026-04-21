@@ -50,7 +50,7 @@ public class TaskPoolUtil {
     public static DispatchProcess offerDispatch() {
 
         try {
-            return TaskPoolUtil.TASK_QUEUE.poll(10, TimeUnit.SECONDS);
+            return TaskPoolUtil.TASK_QUEUE.poll(1, TimeUnit.MILLISECONDS);
         } catch (Exception err) {
             log.error("弹出队列失败.", err);
             return null;
@@ -59,7 +59,7 @@ public class TaskPoolUtil {
 
     public static SubmitTask offerSubmit() {
         try {
-            return TaskPoolUtil.SUBMIT_QUEUE.poll(10, TimeUnit.SECONDS);
+            return TaskPoolUtil.SUBMIT_QUEUE.poll(1, TimeUnit.MILLISECONDS);
         } catch (Exception err) {
             log.error("弹出队列失败.", err);
             return null;
