@@ -62,6 +62,27 @@ CREATE TABLE `tbl_component_info` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+--
+-- Table structure for table `tbl_component_info`
+--
+
+DROP TABLE IF EXISTS `tbl_route_strategy`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_route_strategy` (
+                                      `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                      `component_id` varchar(64) NOT NULL COMMENT '组件/网络/设备唯一标识（用于索引查询）',
+                                      `dest_ip` varchar(32) NOT NULL COMMENT '目标网段IP，如 192.168.50.0',
+                                      `cidr` int NOT NULL COMMENT '子网掩码，如 24',
+                                      `nexthop` varchar(32) NOT NULL COMMENT '下一跳IP（转发机器IP）',
+                                      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                      PRIMARY KEY (`id`),
+                                      KEY `idx_component_id` (`component_id`) COMMENT 'component_id 索引，加速查询'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4  COMMENT='路由策略配置表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 --
 -- Table structure for table `tbl_dns_info`
 --

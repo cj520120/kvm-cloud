@@ -54,7 +54,7 @@ public class CreateGuestOperateServiceImpl extends CreateVolumeOperateServiceImp
                 guestDao.update(guest);
                 this.allocateService.initHostAllocate();
             }
-            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(Constant.NotifyType.UPDATE_DNS).build());
         }
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(param.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
     }

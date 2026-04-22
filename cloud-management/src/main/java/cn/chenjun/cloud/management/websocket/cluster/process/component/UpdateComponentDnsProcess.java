@@ -36,7 +36,7 @@ public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess<Lis
         List<DnsModel> dnsModelList = dnsList.stream().map(convertService::initDnsModel).collect(Collectors.toList());
 
         List<ComponentEntity> components = this.networkService.listNetworkComponent(msg.getId());
-        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModelList).version(System.currentTimeMillis()).build();
+        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().id(msg.getId()).type(Constant.NotifyType.NOTIFY_DNS_UPDATE).data(dnsModelList).version(System.currentTimeMillis()).build();
 
         for (ComponentEntity component : components) {
             if (component.getComponentType() == Constant.ComponentType.ROUTE) {
@@ -47,6 +47,6 @@ public class UpdateComponentDnsProcess extends AbstractClusterMessageProcess<Lis
 
     @Override
     public int getType() {
-        return Constant.NotifyType.COMPONENT_UPDATE_DNS;
+        return Constant.NotifyType.UPDATE_COMPONENT_DNS;
     }
 }

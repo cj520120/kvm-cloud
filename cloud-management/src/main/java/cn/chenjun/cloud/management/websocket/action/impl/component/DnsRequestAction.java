@@ -37,7 +37,7 @@ public class DnsRequestAction implements WsAction<MapData> {
         }
         List<DnsEntity> dnsList = this.dnsService.listLocalNetworkDns(context.getNetworkId());
         List<DnsModel> dnsModels = dnsList.stream().map(convertService::initDnsModel).collect(Collectors.toList());
-        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_DNS).data(dnsModels).build();
+        NotifyData<List<DnsModel>> sendMsg = NotifyData.<List<DnsModel>>builder().type(Constant.NotifyType.NOTIFY_DNS_UPDATE).data(dnsModels).build();
         WsMessage<NotifyData<List<DnsModel>>> wsMessage = WsMessage.<NotifyData<List<DnsModel>>>builder().command(Constant.SocketCommand.COMPONENT_NOTIFY).data(sendMsg).build();
         webSocket.sendJsonPacket(wsMessage);
     }

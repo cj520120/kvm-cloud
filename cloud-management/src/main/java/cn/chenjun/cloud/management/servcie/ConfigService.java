@@ -85,6 +85,8 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_TASK_EXPIRE_TIMEOUT_SECOND, 120, "任务过期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_WAIT_DELAY_SECOND, 10, "任务等待延期时间(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
 
+        initDefaultConfig(ConfigKey.AUTO_DELETE_UNLINK_GUEST, Constant.Enable.YES, "自动清理未关联的主机", Constant.ConfigValueType.SELECT, Arrays.asList(cn.chenjun.cloud.common.util.Constant.Enable.YES, cn.chenjun.cloud.common.util.Constant.Enable.NO), StringConvert.Default);
+
         initDefaultConfig(ConfigKey.VM_CPU_MODEL, "host-passthrough", "cpu模式", Constant.ConfigValueType.SELECT, Arrays.asList("host-passthrough", "host-model", "custom"), StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_CPUTUNE_VCPUPIN_CONFIG, new ArrayList<>(0), "Cpu绑定策略,例如[{\"vcpu\":0,\"cpuset\":0},{\"vcpu\":1,\"cpuset\":1}]", Constant.ConfigValueType.MULTI_STRING, null, VCpuTuneConvert.Default);
 

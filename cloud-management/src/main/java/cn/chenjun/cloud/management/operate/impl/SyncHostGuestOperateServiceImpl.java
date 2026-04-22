@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.GuestInfo;
+import cn.chenjun.cloud.common.bean.GuestShutdownRequest;
 import cn.chenjun.cloud.common.bean.NoneRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
@@ -11,7 +12,9 @@ import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.operate.bean.DestroyHostGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.SyncHostGuestOperate;
+import cn.chenjun.cloud.management.util.ConfigKey;
 import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * @author chenjun
  */
+@Slf4j
 @Component
 public class SyncHostGuestOperateServiceImpl extends AbstractOperateService<SyncHostGuestOperate, ResultUtil<List<GuestInfo>>> {
 
@@ -60,7 +64,21 @@ public class SyncHostGuestOperateServiceImpl extends AbstractOperateService<Sync
         List<String> guestNames = guestList.stream().map(GuestInfo::getName).collect(Collectors.toList());
         if (!guestNames.isEmpty()) {
             List<GuestEntity> guestEntityList = this.guestDao.listByNames(guestNames);
+            HostEntity host = hostDao.findById(param.getHostId());
             Map<String, GuestEntity> map = guestEntityList.stream().collect(Collectors.toMap(GuestEntity::getName, Function.identity()));
+            for (String hostGuestName : guestNames) {
+                GuestEntity guest = map.get(hostGuestName);
+                if(guest==null){
+                   if(Objects.equals(Constant.Enable.YES, this.configService.getConfig(ConfigKey.AUTO_DELETE_UNLINK_GUEST))) {
+                        log.warn("主机客户机不存在，可能是已经被删除:{}:{},开始自动关机",host.getHostName(),hostGuestName);
+                        GuestShutdownRequest request = GuestShutdownRequest.builder().name(guest.getName()).expireMillis(1).build();
+                        this.asyncInvoker(host, param, Constant.Command.GUEST_SHUTDOWN, request);
+                   }else{
+                       log.warn("主机客户机不存在，可能是已经被删除:{}:{},请手动清理",host.getHostName(),hostGuestName);
+                   }
+                }
+
+            }
             for (String guestName : guestNames) {
                 GuestEntity guest = map.get(guestName);
                 if (guest == null || Objects.equals(Constant.GuestStatus.MIGRATE, guest.getStatus())) {

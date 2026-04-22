@@ -1,12 +1,15 @@
 package cn.chenjun.cloud.management.servcie;
 
+import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.dao.ComponentGuestDao;
+import cn.chenjun.cloud.management.data.dao.RouteStrategyDao;
 import cn.chenjun.cloud.management.data.entity.*;
+import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.operate.bean.CreateGuestOperate;
 import cn.chenjun.cloud.management.servcie.bean.ConfigQuery;
 import cn.chenjun.cloud.management.servcie.bean.GuestExtern;
@@ -34,6 +37,8 @@ public class ComponentService extends AbstractService {
     private AllocateService allocateService;
     @Autowired
     private GuestService guestService;
+    @Autowired
+    private RouteStrategyDao routeStrategyDao;
 
     @Transactional(rollbackFor = Exception.class)
     public ComponentGuestEntity createComponentGuest(ComponentEntity component, TemplateEntity template, HostEntity host) {
@@ -401,5 +406,56 @@ public class ComponentService extends AbstractService {
 
     public void deleteComponentGuest(Integer guestId) {
         this.componentGuestDao.deleteByGuestId(guestId);
+    }
+
+    public RouteStrategyEntity findRouteStrategyById(Integer id) {
+        RouteStrategyEntity route = this.routeStrategyDao.findById(id);
+        if (route == null) {
+            throw new CodeException(ErrorCode.NETWORK_ROUTE_NOT_FOUND, "路由策略不存在");
+        }
+        return route;
+    }
+
+    public List<RouteStrategyEntity> listRouteStrategyByComponentId(int componentId) {
+        return this.routeStrategyDao.listByComponentId(componentId);
+    }
+
+    public void deleteRouteStrategyById(Integer id) {
+        RouteStrategyEntity route = this.routeStrategyDao.findById(id);
+        if (route == null) {
+            throw new CodeException(ErrorCode.NETWORK_ROUTE_NOT_FOUND, "路由策略不存在");
+        }
+        this.routeStrategyDao.deleteById(id);
+        NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(route.getComponentId()).type(Constant.NotifyType.UPDATE_COMPONENT_ROUTE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Integer>builder().id(id).type(Constant.NotifyType.UPDATE_ROUTE).data(route.getComponentId()).build());
+    }
+
+    public Page<RouteStrategyEntity> searchRouteStrategy(int componentId, String keyword, int no, int size) {
+
+        Page<RouteStrategyEntity> page = this.routeStrategyDao.search(componentId, keyword, no, size);
+        return page;
+    }
+
+    public RouteStrategyEntity createRoute(int componentId, String destIp, int cidr, String nexthop) {
+        ComponentEntity component = this.getComponentById(componentId);
+        if (component == null) {
+            throw new CodeException(ErrorCode.NETWORK_COMPONENT_NOT_FOUND, "组件不存在");
+        }
+        if (component.getComponentType() != Constant.ComponentType.ROUTE) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "组件类型必须是ROUTEl类型");
+        }
+        NetworkEntity network = this.networkDao.findById(component.getNetworkId());
+        if (network == null) {
+            throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
+        }
+        if (network.getType() == Constant.NetworkType.BASIC) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "网络类型必须是ADVANCED类型");
+        }
+
+        RouteStrategyEntity route = this.routeStrategyDao.create(componentId, destIp, cidr, nexthop);
+        NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(route.getComponentId()).type(Constant.NotifyType.UPDATE_COMPONENT_ROUTE).build());
+        NotifyContextHolderUtil.append(NotifyData.<Integer>builder().id(route.getId()).type(Constant.NotifyType.UPDATE_ROUTE).data(componentId).build());
+        return route;
+
     }
 }

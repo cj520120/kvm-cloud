@@ -5,10 +5,7 @@ import cn.chenjun.cloud.common.core.operate.BaseOperateParam;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
-import cn.chenjun.cloud.management.data.dao.ComponentDao;
-import cn.chenjun.cloud.management.data.dao.ComponentGuestDao;
-import cn.chenjun.cloud.management.data.dao.DnsDao;
-import cn.chenjun.cloud.management.data.dao.NatDao;
+import cn.chenjun.cloud.management.data.dao.*;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NatEntity;
@@ -43,11 +40,13 @@ public class NetworkService extends AbstractService {
     @Autowired
     private ComponentDao componentMapper;
     @Autowired
+    private NatDao natMapper;
+    @Autowired
+    private RouteStrategyDao routeStrategyDao;
+    @Autowired
     private ComponentGuestDao componentGuestMapper;
     @Autowired
     private AllocateService allocateService;
-    @Autowired
-    private NatDao natMapper;
 
     public List<GuestNetworkEntity> listGuestNetworks(int guestId) {
         List<GuestNetworkEntity> networkList = guestNetworkDao.listByGuestId(guestId);
@@ -217,6 +216,8 @@ public class NetworkService extends AbstractService {
             }
             this.componentMapper.deleteById(componentEntity.getComponentId());
             this.natMapper.deleteByComponentId(componentEntity.getComponentId());
+            this.routeStrategyDao.deleteByComponentId(componentEntity.getComponentId());
+            this.componentGuestMapper.deleteByComponentId(componentEntity.getComponentId());
         }
         BaseOperateParam operateParam = DestroyNetworkOperate.builder().id(UUID.randomUUID().toString()).title("销毁网络[" + network.getName() + "]").networkId(networkId).networkType(network.getType()).build();
         this.operateTask.addTask(operateParam);
@@ -309,8 +310,6 @@ public class NetworkService extends AbstractService {
 
     public List<GuestNetworkEntity> listNetworkNic(int networkId) {
         List<GuestNetworkEntity> list = this.guestNetworkDao.listByNetworkId(networkId);
-//        List<NicMode> nicModes = list.stream().map(this::initNicModel).collect(Collectors.toList());
-//        return ResultUtil.success(nicModes);
         return list;
     }
 

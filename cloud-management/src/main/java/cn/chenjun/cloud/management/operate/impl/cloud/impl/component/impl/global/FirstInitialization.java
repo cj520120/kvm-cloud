@@ -122,7 +122,11 @@ public class FirstInitialization extends BaseInitialization {
                 config.appendRuncmd("iptables -A FORWARD -i eth" + nic.getDeviceId() + " -o eth0 -j ACCEPT");
                 config.appendRuncmd("iptables -A FORWARD -i eth0 -o eth" + nic.getDeviceId() + " -m state --state RELATED,ESTABLISHED -j ACCEPT");
             }
-
+        }
+        if (network.getBasicNetworkId() > 0) {
+            NetworkEntity basicNetwork = networkDao.findById(network.getBasicNetworkId());
+            String snat = String.format("iptables -t nat -A POSTROUTING -s %s/%s -d %s/%s -j SNAT --to-source %s", basicNetwork.getSubnet(), basicNetwork.getMask(), network.getSubnet(), network.getMask(), guest.getGuestIp());
+            config.appendRuncmd(snat);
         }
     }
 

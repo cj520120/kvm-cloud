@@ -145,6 +145,7 @@ public class Constant {
         public static final int COMPONENT_NAT_REQUEST = 207;
         public static final int COMPONENT_META_REQUEST = 208;
         public static final int COMPONENT_META_RESPONSE = 209;
+        public static final int COMPONENT_ROUTE_REQUEST = 210;
 
         public static final int AGENT_CONNECT = 300;
         public static final int AGENT_REGISTER = 301;
@@ -165,9 +166,8 @@ public class Constant {
     }
 
     public static class NotifyType {
-
+        // 业务处理类型
         public static final int UPDATE_GUEST = 1;
-
         public static final int UPDATE_VOLUME = 2;
         public static final int UPDATE_NETWORK = 3;
         public static final int UPDATE_HOST = 4;
@@ -179,12 +179,17 @@ public class Constant {
         public static final int UPDATE_COMPONENT = 11;
         public static final int UPDATE_COMPONENT_NAT = 12;
         public static final int UPDATE_SSH = 13;
-
         public static final int UPDATE_USER = 14;
+        public static final int UPDATE_ROUTE = 15;
+        public static final int UPDATE_COMPONENT_ROUTE = 16;
+        public static final int UPDATE_COMPONENT_DNS = 17;
 
-        public static final int COMPONENT_UPDATE_DNS = 101;
-        public static final int COMPONENT_UPDATE_NAT = 102;
 
+
+        //通知类型
+        public static final int NOTIFY_DNS_UPDATE = 101;
+        public static final int NOTIFY_NAT_UPDATE = 102;
+        public static final int NOTIFY_ROUTE_UPDATE = 103;
 
 
         public static final int GUEST_START_CALLBACK_NOTIFY = 301;

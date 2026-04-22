@@ -204,7 +204,7 @@ public class GuestService extends AbstractService {
                 .title("创建客户机[" + guest.getDescription() + "]")
                 .build();
         this.operateTask.addTask(operateParam);
-        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_DNS).build());
     }
 
     private VolumeEntity createGuestVolume(int diskTemplateId, String deviceDriver, String volumeType, long size, GuestEntity guest, StorageEntity storage) {

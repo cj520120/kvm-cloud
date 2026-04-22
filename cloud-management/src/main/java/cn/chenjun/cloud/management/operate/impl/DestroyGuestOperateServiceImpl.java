@@ -77,7 +77,7 @@ public class DestroyGuestOperateServiceImpl extends AbstractOperateService<Destr
             this.componentService.deleteComponentGuest(guest.getGuestId());
             NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
 
-            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_DNS).build());
 
         }
     }

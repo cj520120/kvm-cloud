@@ -34,6 +34,7 @@ public class ConfigKey {
     public static final String DEFAULT_DESTROY_DELAY_MINUTE = "default.destroy.delay.timeout.minutes";
     public static final String DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE = "default.vm.stop.max.wait.timeout.minutes";
 
+    public static final String AUTO_DELETE_UNLINK_GUEST = "auto.delete.unlink.guest";
 
     public static final String DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default.component.check.timeout.second";
     public static final String DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND = "default.host.guest.sync.check.timeout.second";

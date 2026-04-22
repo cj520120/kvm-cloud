@@ -37,7 +37,7 @@ public class NatRequestAction implements WsAction<MapData> {
         }
         List<NatEntity> natList = this.networkService.listComponentNat(context.getComponentId());
         List<NatModel> natModels = natList.stream().map(convertService::initNatModel).collect(Collectors.toList());
-        NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().type(Constant.NotifyType.COMPONENT_UPDATE_NAT).data(natModels).build();
+        NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().type(Constant.NotifyType.NOTIFY_NAT_UPDATE).data(natModels).build();
         WsMessage<NotifyData<List<NatModel>>> wsMessage = WsMessage.<NotifyData<List<NatModel>>>builder().command(Constant.SocketCommand.COMPONENT_NOTIFY).data(sendMsg).build();
         webSocket.sendJsonPacket(wsMessage);
     }

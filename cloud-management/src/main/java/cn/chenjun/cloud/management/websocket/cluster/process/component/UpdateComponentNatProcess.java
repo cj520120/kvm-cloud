@@ -33,7 +33,7 @@ public class UpdateComponentNatProcess extends AbstractClusterMessageProcess<Voi
             return natModels;
         });
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
-            NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().id(msg.getId()).type(Constant.NotifyType.COMPONENT_UPDATE_NAT).data(resultUtil.getData()).version(System.currentTimeMillis()).build();
+            NotifyData<List<NatModel>> sendMsg = NotifyData.<List<NatModel>>builder().id(msg.getId()).type(Constant.NotifyType.NOTIFY_NAT_UPDATE).data(resultUtil.getData()).version(System.currentTimeMillis()).build();
             ComponentClientManager.send(msg.getId(), sendMsg, Constant.SocketCommand.COMPONENT_NOTIFY);
         }
     }

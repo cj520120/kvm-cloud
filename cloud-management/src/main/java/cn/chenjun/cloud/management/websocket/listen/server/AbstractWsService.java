@@ -53,6 +53,7 @@ public abstract class AbstractWsService<T> {
 
     @OnError
     public final void onError(Session session, Throwable error) {
+        log.error("websocket error.closed", error);
         this.onClose(session);
     }
 

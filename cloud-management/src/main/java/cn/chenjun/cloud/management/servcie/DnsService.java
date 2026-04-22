@@ -54,7 +54,7 @@ public class DnsService extends AbstractService {
         DnsEntity entity = this.dnsDao.findById(dnsId);
         if (entity != null) {
             this.dnsDao.deleteById(dnsId);
-            NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(entity.getNetworkId()).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+            NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(entity.getNetworkId()).type(Constant.NotifyType.UPDATE_COMPONENT_DNS).build());
         }
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(dnsId).type(Constant.NotifyType.UPDATE_DNS).build());
 
@@ -63,7 +63,7 @@ public class DnsService extends AbstractService {
     public DnsEntity createDns(int networkId, String domain, String ip) {
         DnsEntity entity = DnsEntity.builder().dnsIp(ip).dnsDomain(domain).networkId(networkId).createTime(new Date()).build();
         dnsDao.insert(entity);
-        NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(networkId).type(Constant.NotifyType.COMPONENT_UPDATE_DNS).build());
+        NotifyContextHolderUtil.append(NotifyData.<List<DnsModel>>builder().id(networkId).type(Constant.NotifyType.UPDATE_COMPONENT_DNS).build());
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getDnsId()).type(Constant.NotifyType.UPDATE_DNS).build());
         return entity;
     }

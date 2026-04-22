@@ -224,4 +224,17 @@ public class ConvertService {
                 .deviceId(entity.getDeviceId())
                 .build();
     }
+
+    public List<RouteStrategyModel> initRouteStrategy(List<RouteStrategyEntity> routes) {
+        return BeanConverter.convert(routes, this::initRouteStrategy);
+    }
+
+    public RouteStrategyModel initRouteStrategy(RouteStrategyEntity entity) {
+        return RouteStrategyModel.builder().id(entity.getId())
+                .componentId(entity.getComponentId())
+                .destIp(entity.getDestIp())
+                .cidr(entity.getCidr())
+                .nexthop(entity.getNexthop())
+                .createTime(entity.getCreateTime()).build();
+    }
 }

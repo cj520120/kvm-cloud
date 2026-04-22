@@ -26,6 +26,8 @@ public final class ErrorCode {
     public static final int NETWORK_NIC_NOT_ATTACH = BASE_NETWORK_ERROR + 7;
     public static final int NETWORK_NOT_READY = BASE_NETWORK_ERROR + 8;
     public static final int NETWORK_NIC_NOT_FOUND = BASE_NETWORK_ERROR + 9;
+
+    public static final int NETWORK_ROUTE_NOT_FOUND = BASE_NETWORK_ERROR + 10;
     /**
      * GUEST
      */
@@ -124,6 +126,7 @@ public final class ErrorCode {
     public static final int BASE_CONFIG_ERROR = BASE_ERROR * 14;
     public static final int CONFIG_EXISTS_ERROR = BASE_CONFIG_ERROR + 1;
     public static final int CONFIG_NOT_EXISTS_ERROR = BASE_CONFIG_ERROR + 1;
+
 
 
     private ErrorCode() {

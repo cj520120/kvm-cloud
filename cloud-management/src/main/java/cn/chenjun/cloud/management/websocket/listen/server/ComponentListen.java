@@ -58,6 +58,7 @@ public class ComponentListen extends AbstractWsService {
     }
 
     public void onClientCloseHandler(Object sender, EventObject<ConnectContext> obj) {
+
         ComponentService componentService = SpringContextUtils.getBean(ComponentService.class);
         LockRunner lockRunner = SpringContextUtils.getBean(LockRunner.class);
         ComponentContext context = (ComponentContext) obj.getEvent();
