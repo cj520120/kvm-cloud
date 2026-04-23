@@ -42,11 +42,14 @@ public class FirstInitialization extends BaseInitialization {
         config.appendPackage("python3");
         config.appendPackage("python3-pip");
         config.appendPackage("qemu-guest-agent");
-        config.appendResourceFile("/usr/local/kvm-cloud/kvm-cloud.py", "tpl/component/init/kvm-cloud.py.json");
+        ResourceUtil.listResources("tpl/component/init/kvm-cloud").forEach(resourceContent -> {
+            String toPath = "/usr/local/kvm-cloud" + resourceContent.getPath() + "/" + resourceContent.getFilename();
+            config.appendFileB64(toPath, resourceContent.getContent());
+        });
         config.appendResourceFile("/etc/systemd/system/kvm-cloud.service", "tpl/component/init/kvm-cloud.service.json");
-        config.appendResourceFile("/usr/local/kvm-cloud/requirements.txt", "tpl/component/init/requirements.txt.json");
         config.appendRuncmd("mkdir -p /usr/local/kvm-cloud");
         config.appendRuncmd("python3 -m venv /usr/local/kvm-cloud/venv");
+        config.appendRuncmd("/usr/local/kvm-cloud/venv/bin/python -m pip install --upgrade pip");
         config.appendRuncmd("/usr/local/kvm-cloud/venv/bin/pip install -r /usr/local/kvm-cloud/requirements.txt");
         if ("centos".equalsIgnoreCase(systemType)) {
             config.appendFile("/etc/sysconfig/qemu-ga", "BLACKLIST_RPC=");

@@ -236,7 +236,11 @@ public class GuestOperate {
                 }
                 xml = domain.getXMLDesc(0);
                 if (System.currentTimeMillis() - stopTime > timeoutMillis) {
-                    domain.destroy();
+                    try {
+                        domain.destroy();
+                    } catch (Exception e) {
+
+                    }
                     try {
                         domain.undefine();
                     } catch (Exception ignored) {

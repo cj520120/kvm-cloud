@@ -108,7 +108,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     }
 
     @SuppressWarnings({"unchecked"})
-    protected void asyncInvoker(HostEntity host, T param, String command, Object data) {
+    protected void asyncInvoker(HostEntity host, BaseOperateParam param, String command, Object data) {
         Objects.requireNonNull(host, "host cannot be null");
         Objects.requireNonNull(host.getUri(), "host uri cannot be null");
         Objects.requireNonNull(host.getClientId(), "clientId cannot be null");
