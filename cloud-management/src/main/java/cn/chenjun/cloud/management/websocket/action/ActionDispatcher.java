@@ -4,10 +4,11 @@ import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.management.util.SpringContextUtils;
 import cn.chenjun.cloud.management.websocket.listen.client.Client;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.Objects;
-
+@Slf4j
 public class ActionDispatcher {
     private static final Collection<WsAction> ACTION_LIST;
 
@@ -20,8 +21,11 @@ public class ActionDispatcher {
         webSocket.setLastActiveTime(System.currentTimeMillis());
         for (WsAction action : ACTION_LIST) {
             if (Objects.equals(action.getCommand(), msg.getCommand())) {
-                action.doAction(webSocket, msg);
-                return;
+                try {
+                    action.doAction(webSocket, msg);
+                }catch (Exception e) {
+                    log.error("Websocket 处理数据失败.", e);
+                }
             }
         }
     }
