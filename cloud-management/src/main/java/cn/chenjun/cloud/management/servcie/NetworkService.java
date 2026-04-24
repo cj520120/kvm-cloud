@@ -6,12 +6,11 @@ import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.dao.*;
-import cn.chenjun.cloud.management.data.entity.ComponentEntity;
-import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
-import cn.chenjun.cloud.management.data.entity.NatEntity;
-import cn.chenjun.cloud.management.data.entity.NetworkEntity;
+import cn.chenjun.cloud.management.data.entity.*;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
+import cn.chenjun.cloud.management.operate.bean.DestroyGuestOperate;
 import cn.chenjun.cloud.management.operate.bean.DestroyNetworkOperate;
+import cn.chenjun.cloud.management.operate.bean.StopGuestOperate;
 import cn.chenjun.cloud.management.servcie.bean.SubnetNetwork;
 import cn.chenjun.cloud.management.util.ConfigKey;
 import cn.chenjun.cloud.management.util.MacCalculate;
@@ -246,6 +245,7 @@ public class NetworkService extends AbstractService {
         component.setBasicComponentVip(componentVip.getIp());
         switch (type) {
             case Constant.NetworkType.VLAN:
+            case Constant.NetworkType.VxLAN:
                 GuestNetworkEntity basicComponentVip = this.allocateService.allocateNetwork(network.getBasicNetworkId(), component.getComponentId(), Constant.NetworkAllocateType.COMPONENT_VIP, 0, Constant.NetworkDriver.VIRTIO, "Nat VIP [" + network.getName() + "]");
                 component.setBasicComponentVip(basicComponentVip.getIp());
                 break;
@@ -260,6 +260,41 @@ public class NetworkService extends AbstractService {
         ComponentEntity component = this.componentMapper.findById(componentId);
         if (component == null) {
             return;
+        }
+        List<ComponentGuestEntity> componentGuestEntityList = this.componentGuestMapper.listByComponentId(componentId);
+        for (ComponentGuestEntity componentGuestEntity : componentGuestEntityList) {
+
+            GuestEntity guest = this.guestDao.findById(componentGuestEntity.getGuestId());
+            if (guest != null) {
+                try {
+                    switch (guest.getStatus()) {
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.STARTING:
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.RUNNING:
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.REBOOT:
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOPPING:
+                            guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.STOPPING);
+                            this.guestDao.update(guest);
+                            BaseOperateParam operateParam = StopGuestOperate.builder().guestId(guest.getGuestId()).force(true)
+                                    .id(UUID.randomUUID().toString())
+                                    .title("关闭客户机[" + guest.getDescription() + "]").build();
+                            this.operateTask.addTask(operateParam);
+                            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                            break;
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
+                        case cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY:
+                            guest.setStatus(cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY);
+                            this.guestDao.update(guest);
+                            DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
+                            operateTask.addTask(operate, 0, true);
+                            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
+                            break;
+                    }
+                } catch (Exception e) {
+                    log.error("清理组件虚拟机失败:{}", guest.getName(), e);
+                }
+            }
+
         }
         List<GuestNetworkEntity> list = this.guestNetworkDao.listByAllocate(cn.chenjun.cloud.common.util.Constant.NetworkAllocateType.COMPONENT_VIP, component.getComponentId());
         for (GuestNetworkEntity guestNetwork : list) {

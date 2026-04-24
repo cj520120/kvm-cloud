@@ -37,6 +37,7 @@ public class ConfigKey {
     public static final String AUTO_DELETE_UNLINK_GUEST = "auto.delete.unlink.guest";
 
     public static final String DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND = "default.component.check.timeout.second";
+    public static final String DEFAULT_TASK_COMPONENT_GUEST_CLEAR_TIMEOUT_SECOND = "default.component.guest.clear.timeout.second";
     public static final String DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND = "default.host.guest.sync.check.timeout.second";
     public static final String DEFAULT_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND = "default.host.task.sync.check.timeout.second";
     public static final String DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND = "default.host.check.timeout.second";

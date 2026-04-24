@@ -77,6 +77,7 @@ public class ConfigService {
         initDefaultConfig(ConfigKey.DEFAULT_VM_STOP_MAX_EXPIRE_MINUTE, 10, "虚拟机关机最大等待时间，超过时间则直接进行销毁操作(分钟)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE, 30, "执行删除操作延时保护周期", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_COMPONENT_CHECK_TIMEOUT_SECOND, 10, "系统组件状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
+        initDefaultConfig(ConfigKey.DEFAULT_TASK_COMPONENT_GUEST_CLEAR_TIMEOUT_SECOND, 60, "清理未管理系统组件虚拟机检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_GUEST_SYNC_CHECK_TIMEOUT_SECOND, 30, "宿主机运行虚拟机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND, 30, "宿主机状态检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);
         initDefaultConfig(ConfigKey.DEFAULT_TASK_STORAGE_CHECK_TIMEOUT_SECOND, 60, "宿主机存储池检测间隔(秒)", Constant.ConfigValueType.INT, null, IntegerConvert.Default);

@@ -458,4 +458,12 @@ public class ComponentService extends AbstractService {
         return route;
 
     }
+
+    public List<ComponentEntity> listAllComponent() {
+        return this.componentDao.listAll();
+    }
+
+    public List<GuestEntity> listAllComponentGuest() {
+        return this.guestDao.listAllComponentGuest();
+    }
 }

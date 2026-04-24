@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.data.dao;
 
 import cn.chenjun.cloud.common.bean.Page;
+import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.mapper.GuestMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -111,6 +112,12 @@ public class GuestDao {
     public List<GuestEntity> listByHostId(int hostId) {
         QueryWrapper<GuestEntity> wrapper = new QueryWrapper<>();
         wrapper.eq(GuestEntity.HOST_ID, hostId);
+        return mapper.selectList(wrapper);
+    }
+
+    public List<GuestEntity> listAllComponentGuest() {
+        QueryWrapper<GuestEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq(GuestEntity.GUEST_TYPE, Constant.GuestType.COMPONENT);
         return mapper.selectList(wrapper);
     }
 }
