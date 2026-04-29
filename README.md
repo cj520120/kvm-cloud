@@ -19,7 +19,7 @@ KVM Cloud 是一款基于Java实现的轻量级私有云平台，旨在帮助中
 Linux(目前只提供x86_64架构)
 
 ### 托管地址
-[AtomGit](https://gitcode.com/c520120/kvm-cloud) <br/>
+[AtomGit](https://gitcode.com/cj520120/kvm-cloud) <br/>
 [Gitee](https://gitee.com/cj520120/kvm-cloud) <br/>
 [Github](https://github.com/cj520120/kvm-cloud) <br/>    
 
