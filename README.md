@@ -17,6 +17,12 @@ KVM Cloud 是一款基于Java实现的轻量级私有云平台，旨在帮助中
 
 ### 操作系统
 Linux(目前只提供x86_64架构)
+
+### 托管地址
+[AtomGit](https://gitcode.com/c520120/kvm-cloud) <br/>
+[Gitee](https://gitee.com/cj520120/kvm-cloud) <br/>
+[Github](https://github.com/cj520120/kvm-cloud) <br/>    
+
 ### 配置说明
 文档只提供基于Centos7的配置说明，其他Linux发行版请自行参考
 ### SELinux配置
