@@ -22,9 +22,9 @@ Linux(目前只提供x86_64架构)
 [AtomGit](https://gitcode.com/cj520120/kvm-cloud) <br/>
 [Gitee](https://gitee.com/cj520120/kvm-cloud) <br/>
 [Github](https://github.com/cj520120/kvm-cloud) <br/>    
-
+如果项目对您有帮助，欢迎Star和Fork，您的Star是对我最大的支持。
 ### 配置说明
-文档只提供基于Centos7的配置说明，其他Linux发行版请自行参考
+文档只提供基于Centos7的配置说明，Ubuntu参考[Ubuntu_README.md](Ubuntu_README.md),其他系统请自行查阅相关资料
 ### SELinux配置
 ```sh
 setenforce 0
