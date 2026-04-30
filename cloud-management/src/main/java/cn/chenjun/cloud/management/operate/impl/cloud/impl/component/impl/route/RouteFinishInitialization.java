@@ -20,12 +20,12 @@ public class RouteFinishInitialization extends BaseInitialization {
 
     @Override
     public void initialize(CloudConfig config, GuestEntity guest, NetworkEntity network, ComponentEntity component, ComponentGuestEntity componentGuest) {
-        config.appendRuncmd("iptables -A INPUT -p tcp --dport 80 -j ACCEPT");
+        config.appendRuncmd(String.format("iptables -A INPUT -p tcp --dport 80 -s %s/%s -j ACCEPT", network.getSubnet(), network.getMask()));
+        config.appendRuncmd("iptables -A INPUT -p tcp --dport 80 -j DROP");
         config.appendRuncmd("iptables -t nat -A PREROUTING -d 169.254.169.254 -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:80");
         config.appendRuncmd("iptables -t nat -A OUTPUT -d 169.254.169.254 -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:80");
         config.appendRuncmd("iptables -t nat -A PREROUTING -d 169.254.169.254 -p icmp --icmp-type echo-request -j DNAT --to-destination 127.0.0.1");
         config.appendRuncmd("iptables -t nat -A OUTPUT -d 169.254.169.254 -p icmp --icmp-type echo-request -j DNAT --to-destination 127.0.0.1");
-
     }
 
     @Override

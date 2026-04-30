@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -38,7 +35,16 @@ public class FinishInitialization extends BaseInitialization {
         cloudConfig.put("COMPONENT_TYPE", component.getComponentType());
         cloudConfig.put("LOG_PATH", "/var/log/kvm-cloud.log");
         cloudConfig.put("LOG_BACKUP_DAYS", 7);
-
+        cloudConfig.put("ENABLE_CHECK_CLOUDINIT",true);
+        cloudConfig.put("ENABLE_CHECK_SERVICE",true);
+        List<String> checkServiceList = new ArrayList<>();
+        checkServiceList.add("qemu-guest-agent");
+        checkServiceList.add("iptables");
+        checkServiceList.add("keepalived");
+        if(component.getComponentType() == Constant.ComponentType.ROUTE){
+            checkServiceList.add("dnsmasq");
+        }
+        cloudConfig.put("CHECK_SERVICES", checkServiceList);
         List<GuestNetworkEntity> guestNetworkEntityList = this.guestNetworkDao.listByAllocate(Constant.NetworkAllocateType.GUEST, guest.getGuestId());
         for (GuestNetworkEntity guestNetworkEntity : guestNetworkEntityList) {
             if (Objects.equals(guestNetworkEntity.getNetworkId(), network.getNetworkId())) {
