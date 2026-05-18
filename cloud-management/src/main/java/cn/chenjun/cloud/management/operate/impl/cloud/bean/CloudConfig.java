@@ -26,13 +26,18 @@ public class CloudConfig {
     }
 
     public void appendFile(String filePath, String content) {
-        appendFileB64(filePath, Base64.getEncoder().encodeToString(content.getBytes()));
+       this.appendFile(filePath,content,"0644");
     }
-
+    public void appendFile(String filePath, String content,String permissions) {
+        appendFileB64(filePath, Base64.getEncoder().encodeToString(content.getBytes()), permissions);
+    }
     public void appendFileB64(String filePath, String b64Context) {
+        this.appendFileB64(filePath, b64Context,"0644");
+    }
+    public void appendFileB64(String filePath, String b64Context,String permissions) {
         List<Map<String, Object>> files = (List<Map<String, Object>>) this.userData.computeIfAbsent("write_files", k -> new ArrayList<Map<String, Object>>());
         Map<String, Object> file = new LinkedHashMap<>();
-        file.put("permissions", "0644");
+        file.put("permissions", permissions);
         file.put("owner", "root:root");
         file.put("encoding", "b64");
         file.put("path", filePath);
