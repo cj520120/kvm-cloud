@@ -137,7 +137,7 @@ public class GuestService extends AbstractService {
                 .cpu(scheme.getCpu())
                 .share(scheme.getShare())
                 .memory(scheme.getMemory())
-                .cdRoom(isoTemplateId | diskTemplateId)
+                .cdRoom(isoTemplateId)
                 .hostId(0)
                 .bindHostId(bindHostId)
                 .lastHostId(0)
