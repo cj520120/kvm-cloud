@@ -133,7 +133,7 @@ public class VncListen extends AbstractWsService<ByteBuffer> {
             webSocket.registerOnClose(onCloseHandler);
             this.register(nodeSocket);
         } catch (Exception e) {
-            log.error("连接节点失败", e);
+            log.error("Tcp客户端连接节点失败", e);
             FunctionUtils.ignoreRun(webSocket::close);
             if (nodeSocket != null) {
                 FunctionUtils.ignoreRun(nodeSocket::close);

@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.agent.sock;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -8,6 +9,7 @@ import java.nio.channels.SocketChannel;
 /**
  * @author chenjun
  */
+@Slf4j
 public class NioClient {
 
     @Getter
@@ -28,6 +30,7 @@ public class NioClient {
             ByteBuffer writeBuff = ByteBuffer.wrap(bytes);
             socketChannel.write(writeBuff);
         } catch (Exception err) {
+            log.error("Tcp 发送数据失败", err);
             this.callback.onError(err);
             this.callback.onClose();
         }

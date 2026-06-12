@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public abstract class AbstractWsService<T> {
+    private static final int MAX_BUFFER_SIZE = 65535;
 
     private static final ConcurrentHashMap<String, Client> WEBSOCKET_CACHE = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Class, List<Client>> CLIENT_CACHE = new ConcurrentHashMap<>();
@@ -31,6 +32,9 @@ public abstract class AbstractWsService<T> {
     @SneakyThrows
     @OnOpen
     public final void onOpen(Session session) {
+        session.setMaxBinaryMessageBufferSize(MAX_BUFFER_SIZE);
+        session.setMaxTextMessageBufferSize(MAX_BUFFER_SIZE);
+        session.setMaxIdleTimeout(60 * 60 * 1000L);
         Client webSocket = this.createWebSocket(session);
         session.addMessageHandler(this.processor.create(webSocket));
         WEBSOCKET_CACHE.put(session.getId(), webSocket);
@@ -42,10 +46,10 @@ public abstract class AbstractWsService<T> {
     protected abstract Client createWebSocket(Session session);
 
     protected void register(Client client) {
-        log.info("websocket register:{}", client.getSessionId());
+        log.info("websocket register {}:{}", this.getClass().getName(), client.getSessionId());
         List<Client> clients = CLIENT_CACHE.computeIfAbsent(this.getClass(), (k) -> Collections.synchronizedList(new ArrayList<>()));
         client.registerOnClose((s, e) -> {
-            log.info("websocket unregister:{}", client.getSessionId());
+            log.info("websocket unregister  {}:{}", this.getName(), client.getSessionId());
             clients.remove(client);
         });
         clients.add(client);
@@ -53,7 +57,7 @@ public abstract class AbstractWsService<T> {
 
     @OnError
     public final void onError(Session session, Throwable error) {
-        log.error("websocket error.closed", error);
+        log.error("websocket error.closed.{}:{}", this.getName(), session.getId(), error);
         this.onClose(session);
     }
 
@@ -61,6 +65,7 @@ public abstract class AbstractWsService<T> {
     @SneakyThrows
     @OnClose
     public final void onClose(Session session) {
+        log.info("websocket closed.{}:{}", this.getName(), session.getId());
         Client webSocket = WEBSOCKET_CACHE.remove(session.getId());
         if (webSocket != null) {
             webSocket.close();
@@ -88,13 +93,13 @@ public abstract class AbstractWsService<T> {
         checkClients.forEach(client -> {
             int expireCount = Math.toIntExact((System.currentTimeMillis() - client.getLastActiveTime()) / (this.getTimeoutSeconds() * 1000L));
             if (expireCount > 3) {
-                log.info("关闭超时连接:{},sessionId={}", client, client.getSessionId());
+                log.info("websocket 关闭超时连接:{},sessionId={}:{}", client, this.getName(), client.getSessionId());
                 FunctionUtils.ignoreRun(client::close);
                 clients.remove(client);
             } else {
                 long lastPingTime = client.getLastPingTime();
                 if ((System.currentTimeMillis() - lastPingTime) / 1000 >= this.getTimeoutSeconds()) {
-                    log.debug("发送心跳包:{},sessionId={}", client, client.getSessionId());
+                    log.debug("发送心跳包:{},sessionId={}:{}", client, this.getName(), client.getSessionId());
                     FunctionUtils.ignoreRun(() -> client.sendCommand(Constant.SocketCommand.PING));
                     client.setLastPingTime(System.currentTimeMillis());
                 }
@@ -105,5 +110,9 @@ public abstract class AbstractWsService<T> {
     @FunctionalInterface
     protected interface MessageProcess<T> {
         MessageHandler.Whole<T> create(Client webSocket);
+    }
+
+    private String getName() {
+        return this.getClass().getName();
     }
 }
