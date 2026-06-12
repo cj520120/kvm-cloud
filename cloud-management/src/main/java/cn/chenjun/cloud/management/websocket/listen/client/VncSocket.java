@@ -47,6 +47,7 @@ public class VncSocket extends BaseClient {
                     this.close();
                     break;
                 case Constant.SocketCommand.PING:
+                    session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
                     this.setLastActiveTime(System.currentTimeMillis());
                     break;
                 default:
