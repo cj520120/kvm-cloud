@@ -1,14 +1,19 @@
 package cn.chenjun.cloud.management.websocket.listen.server;
 
+import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.FunctionUtils;
 import cn.chenjun.cloud.management.websocket.listen.client.Client;
+import cn.chenjun.cloud.management.websocket.listen.codec.BaseCodecHandler;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.ObjectUtils;
 
-import javax.websocket.*;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,14 +23,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author chenjun
  */
 @Slf4j
-public abstract class AbstractWsService<T> {
+public abstract class AbstractWsService<T extends WsMessage, V> {
     private static final int MAX_BUFFER_SIZE = 65535;
 
     private static final ConcurrentHashMap<String, Client> WEBSOCKET_CACHE = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Class, List<Client>> CLIENT_CACHE = new ConcurrentHashMap<>();
-    private final MessageProcess<T> processor;
+    private static final ConcurrentHashMap<String, BaseCodecHandler> CLIENT_CODE_HANDLER = new ConcurrentHashMap<>();
+    private final MessageProcess<T, V> processor;
 
-    public AbstractWsService(MessageProcess<T> processor) {
+    public AbstractWsService(MessageProcess<T, V> processor) {
         this.processor = processor;
     }
 
@@ -36,8 +42,10 @@ public abstract class AbstractWsService<T> {
         session.setMaxTextMessageBufferSize(MAX_BUFFER_SIZE);
         session.setMaxIdleTimeout(60 * 60 * 1000L);
         Client webSocket = this.createWebSocket(session);
-        session.addMessageHandler(this.processor.create(webSocket));
+        BaseCodecHandler<T, V> handler = this.processor.create(webSocket);
+        session.addMessageHandler(handler);
         WEBSOCKET_CACHE.put(session.getId(), webSocket);
+        CLIENT_CODE_HANDLER.put(session.getId(), handler);
         this.register(webSocket);
         this.onConnection(webSocket);
 
@@ -68,7 +76,11 @@ public abstract class AbstractWsService<T> {
         log.info("websocket closed.{}:{}", this.getName(), session.getId());
         Client webSocket = WEBSOCKET_CACHE.remove(session.getId());
         if (webSocket != null) {
-            webSocket.close();
+            FunctionUtils.ignoreRun(() -> webSocket.close());
+        }
+        BaseCodecHandler handler = CLIENT_CODE_HANDLER.remove(session.getId());
+        if (handler != null) {
+            FunctionUtils.ignoreRun(() -> handler.close());
         }
     }
 
@@ -108,8 +120,8 @@ public abstract class AbstractWsService<T> {
     }
 
     @FunctionalInterface
-    protected interface MessageProcess<T> {
-        MessageHandler.Whole<T> create(Client webSocket);
+    protected interface MessageProcess<T extends WsMessage, V> {
+        BaseCodecHandler<T, V> create(Client webSocket);
     }
 
     private String getName() {

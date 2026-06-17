@@ -13,6 +13,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.framing.BinaryFrame;
+import org.java_websocket.framing.ContinuousFrame;
+import org.java_websocket.framing.DataFrame;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
@@ -23,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class NodeSocket extends WebSocketClient implements ConnectContext, Client {
+    private static final int CHUNK_SIZE = 32768;
     public final EventListener<ConnectContext> onClose = new EventListener<>();
     public final EventListener<ConnectContext> onLogin = new EventListener<>();
     public final EventListener<Void> onConnect = new EventListener<>();
@@ -136,7 +140,7 @@ public class NodeSocket extends WebSocketClient implements ConnectContext, Clien
 
     private synchronized void sendCacheBuffer() {
         for (ByteBuffer buffer : cacheBuffer) {
-            this.send(buffer);
+            this.sendFragmentBuffer(buffer, CHUNK_SIZE);
         }
         cacheBuffer.clear();
 
@@ -165,11 +169,34 @@ public class NodeSocket extends WebSocketClient implements ConnectContext, Clien
             cacheBuffer.add(buffer);
         } else {
             try {
-                this.send(buffer);
+                this.sendFragmentBuffer(buffer, CHUNK_SIZE);
             } catch (Exception err) {
                 log.error("websocket send error", err);
                 this.close();
             }
+        }
+    }
+
+    public void sendFragmentBuffer(ByteBuffer buffer, int chunkChar) {
+        buffer.rewind();
+        boolean isFirstFrame = true;
+
+        while (buffer.hasRemaining()) {
+            int readLen = Math.min(buffer.remaining(), chunkChar);
+            byte[] chunkBytes = new byte[readLen];
+            buffer.get(chunkBytes);
+            ByteBuffer payload = ByteBuffer.wrap(chunkBytes);
+            boolean isLast = !buffer.hasRemaining();
+            DataFrame frame;
+            if (isFirstFrame) {
+                frame = new BinaryFrame();
+                isFirstFrame = false;
+            } else {
+                frame = new ContinuousFrame();
+            }
+            frame.setPayload(payload);
+            frame.setFin(isLast);
+            this.sendFrame(frame);
         }
     }
 

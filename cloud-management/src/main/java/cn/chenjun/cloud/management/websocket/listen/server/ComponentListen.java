@@ -30,9 +30,9 @@ import java.util.Objects;
 @Slf4j
 @Component
 @ServerEndpoint(value = "/api/component/ws")
-public class ComponentListen extends AbstractWsService {
+public class ComponentListen extends AbstractWsService<WsMessage<MapData>, String> {
     public ComponentListen() {
-        super((client) -> new JsonCodecHandler<WsMessage<MapData>>(client, new TypeToken<WsMessage<MapData>>() {
+        super((client) -> new JsonCodecHandler<>(client, new TypeToken<WsMessage<MapData>>() {
         }.getType()));
     }
 

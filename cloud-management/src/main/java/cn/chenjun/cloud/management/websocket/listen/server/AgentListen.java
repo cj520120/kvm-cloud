@@ -1,6 +1,7 @@
 package cn.chenjun.cloud.management.websocket.listen.server;
 
 import cn.chenjun.cloud.common.event.EventObject;
+import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.servcie.HostService;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -30,7 +32,7 @@ import java.util.Objects;
 @Slf4j
 @Component
 @ServerEndpoint(value = "/api/host/ws")
-public class AgentListen extends AbstractWsService {
+public class AgentListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> {
     public AgentListen() {
         super((client) -> new ByteCodecHandler(client));
     }

@@ -1,5 +1,6 @@
 package cn.chenjun.cloud.management.websocket.listen.server;
 
+import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.management.websocket.common.SocketType;
 import cn.chenjun.cloud.management.websocket.listen.client.BinarySocket;
 import cn.chenjun.cloud.management.websocket.listen.client.Client;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
+import java.nio.ByteBuffer;
 
 /**
  * @author chenjun
@@ -16,7 +18,7 @@ import javax.websocket.server.ServerEndpoint;
 @Slf4j
 @Component
 @ServerEndpoint(value = "/api/node/ws")
-public class NodeListen extends AbstractWsService {
+public class NodeListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> {
     public NodeListen() {
         super((client) -> new ByteCodecHandler(client));
     }

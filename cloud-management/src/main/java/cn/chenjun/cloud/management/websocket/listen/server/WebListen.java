@@ -19,7 +19,7 @@ import javax.websocket.server.ServerEndpoint;
 @Slf4j
 @Component
 @ServerEndpoint(value = "/api/ws/")
-public class WebListen extends AbstractWsService<String> {
+public class WebListen extends AbstractWsService<WsMessage<MapData>, String> {
 
     public WebListen() {
         super((client) -> new JsonCodecHandler<WsMessage<MapData>>(client, new TypeToken<WsMessage<MapData>>() {

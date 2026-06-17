@@ -6,9 +6,11 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.socket.packet.WsMessage;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.common.util.FunctionUtils;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.websocket.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -24,7 +26,7 @@ public class WsClient {
     public final EventListener<Void> onConnect = new EventListener<>();
     public final EventListener<WsMessage<byte[]>> onMessage = new EventListener<>();
     public final EventListener<Void> onClose = new EventListener<>();
-
+    private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     private final URI serverUri;
     private volatile Session session;
     private boolean auth = false;
@@ -41,6 +43,7 @@ public class WsClient {
         container.setDefaultMaxBinaryMessageBufferSize(65535);
         container.setDefaultMaxTextMessageBufferSize(65535);
         container.setDefaultMaxSessionIdleTimeout(60 * 60 * 1000L);
+
         // ⭐ 将 this 作为 ClientEndpoint，并将 URI 配置传入
         this.session = container.connectToServer(this, serverUri);
     }
@@ -53,8 +56,21 @@ public class WsClient {
         onConnect.fire(this, null);
     }
 
+    @SneakyThrows
     @OnMessage
-    public void onMessage(ByteBuffer buffer, Session session) {
+    public void onPartialMessage(ByteBuffer partialBuffer, boolean last, Session session) {
+        byte[] chunk = new byte[partialBuffer.remaining()];
+        partialBuffer.get(chunk);
+        byteArrayOutputStream.write(chunk, 0, chunk.length);
+        if (last) {
+            byte[] completeData = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.reset();
+            ByteBuffer completeBuffer = ByteBuffer.wrap(completeData);
+            processMessage(completeBuffer, session);
+        }
+    }
+
+    public void processMessage(ByteBuffer buffer, Session session) {
         try {
             int command = buffer.getInt();
             int dataLength = buffer.getInt();
@@ -83,6 +99,7 @@ public class WsClient {
         log.info("连接断开，原因: {}", reason.getReasonPhrase());
         isClosed.set(true);
         onClose.fire(this, null);
+
     }
 
     @OnError
@@ -104,20 +121,29 @@ public class WsClient {
         if (isClosed.get() || session == null || !session.isOpen()) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "连接已关闭");
         }
-        int length = 8;
+        int headerLen = 8;
+        int totalLen = headerLen + (data != null ? data.length : 0);
+        ByteBuffer fullBuf = ByteBuffer.allocate(totalLen);
+        fullBuf.putInt(command);
+        fullBuf.putInt(data == null ? 0 : data.length);
         if (data != null) {
-            length += data.length;
+            fullBuf.put(data);
         }
-        ByteBuffer buffer = ByteBuffer.allocate(length);
-        buffer.putInt(command);
-        buffer.putInt(data == null ? 0 : data.length);
-        if (data != null) {
-            buffer.put(data);
-        }
-        buffer.flip();
+        fullBuf.rewind();
 
+        final int CHUNK_SIZE = 32768;
+        RemoteEndpoint.Basic basic = session.getBasicRemote();
         try {
-            session.getBasicRemote().sendBinary(buffer);
+            while (fullBuf.hasRemaining()) {
+                int readLen = Math.min(CHUNK_SIZE, fullBuf.remaining());
+                // 零拷贝切片，不复制字节
+                ByteBuffer chunk = fullBuf.slice();
+                chunk.limit(readLen);
+                fullBuf.position(fullBuf.position() + readLen);
+                boolean isLast = !fullBuf.hasRemaining();
+
+                basic.sendBinary(chunk, isLast);
+            }
             lastSendTime.set(System.currentTimeMillis());
         } catch (IOException e) {
             log.error("发送数据失败，将关闭连接...", e);
@@ -138,6 +164,7 @@ public class WsClient {
         return lastSendTime.get();
     }
 
+    @SneakyThrows
     public void close() {
         if (isClosed.compareAndSet(false, true)) {
             FunctionUtils.ignoreRun(() -> {
@@ -147,6 +174,7 @@ public class WsClient {
             });
             onClose.fire(this, null);
             onClose.clear();
+            byteArrayOutputStream.close();
         }
     }
 }

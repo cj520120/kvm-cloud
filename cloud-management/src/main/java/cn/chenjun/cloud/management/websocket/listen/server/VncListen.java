@@ -44,7 +44,7 @@ import java.util.UUID;
 @Slf4j
 @ServerEndpoint(value = "/api/vnc")
 @Component
-public class VncListen extends AbstractWsService<ByteBuffer> {
+public class VncListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> {
     public VncListen() {
         super((client) -> new VncCodecHandler(client));
     }
