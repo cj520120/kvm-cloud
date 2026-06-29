@@ -61,10 +61,13 @@ public class NetworkController extends BaseController {
 
     @GetMapping("/api/network/search")
     public ResultUtil<Page<SimpleNetworkModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
+                                                       @RequestParam(value = "type",required = false) String type,
+                                                       @RequestParam(value = "status",required = false) String status,
+                                                       @RequestParam(value = "bridgeType",required = false) String bridgeType,
                                                        @RequestParam("no") int no,
                                                        @RequestParam("size") int size) {
 
-        Page<NetworkEntity> page = networkService.search(keyword, no, size);
+        Page<NetworkEntity> page = networkService.search(type,status,bridgeType,keyword, no, size);
         Page<SimpleNetworkModel> pageModel = Page.convert(page, source -> BeanConverter.convert(source, SimpleNetworkModel.class));
         return ResultUtil.success(pageModel);
     }

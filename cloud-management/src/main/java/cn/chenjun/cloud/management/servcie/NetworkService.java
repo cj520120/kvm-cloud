@@ -62,8 +62,8 @@ public class NetworkService extends AbstractService {
         return network;
     }
 
-    public Page<NetworkEntity> search(String keyword, int no, int size) {
-        Page<NetworkEntity> page = this.networkDao.search(keyword, no, size);
+    public Page<NetworkEntity> search(String type,String status,String bridgeType,String keyword, int no, int size) {
+        Page<NetworkEntity> page = this.networkDao.search(type,status,bridgeType,keyword, no, size);
 //        return ResultUtil.success(Page.convert(page, source -> BeanConverter.convert(source, SimpleNetworkModel.class)));
         return page;
     }
