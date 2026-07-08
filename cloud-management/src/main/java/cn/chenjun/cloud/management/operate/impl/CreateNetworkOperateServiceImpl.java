@@ -35,7 +35,7 @@ public class CreateNetworkOperateServiceImpl extends AbstractOperateService<Crea
     @Override
     public void operate(CreateNetworkOperate param) {
         switch (param.getNetworkType()) {
-            case Constant.NetworkType.BASIC:
+            case Constant.NetworkType.FLAT:
             case Constant.NetworkType.VLAN: {
                 List<HostEntity> hosts = hostDao.listAll();
                 List<Integer> hostIds = hosts.stream().filter(t -> Objects.equals(cn.chenjun.cloud.common.util.Constant.HostStatus.ONLINE, t.getStatus())).map(HostEntity::getHostId).collect(Collectors.toList());

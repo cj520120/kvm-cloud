@@ -56,7 +56,7 @@ public class InitHostNetworkOperateServiceImpl extends AbstractOperateService<In
         Map<String, Object> sysconfig = this.configService.loadSystemConfig(queryList);
 
         switch (network.getType()) {
-            case Constant.NetworkType.BASIC: {
+            case Constant.NetworkType.FLAT: {
                 BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
             }

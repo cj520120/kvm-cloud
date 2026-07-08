@@ -101,7 +101,7 @@ public abstract class AbstractOsOperateService<T extends BaseOperateParam, V ext
     }
     public String buildInterfaceXml(NetworkEntity network, GuestNetworkEntity guestNetwork, Map<String, Object> systemConfig) {
         switch (network.getType()) {
-            case Constant.NetworkType.BASIC:
+            case Constant.NetworkType.FLAT:
             case Constant.NetworkType.VLAN:
                 String tpl = (String) systemConfig.get(ConfigKey.VM_INTERFACE_TPL);
                 return DomainUtil.buildNetworkInterfaceXml(tpl, systemConfig, network, guestNetwork);

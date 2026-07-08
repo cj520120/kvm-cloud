@@ -111,7 +111,7 @@ public class NetworkController extends BaseController {
         }
         SubnetNetwork subnetNetwork = null;
         switch (type) {
-            case Constant.NetworkType.BASIC:
+            case Constant.NetworkType.FLAT:
                 verifyBaseNetwork(startIp, endIp, bridge, subnet, broadcast, gateway);
                 subnetNetwork = SubnetNetwork.builder()
                         .firstIp(startIp)

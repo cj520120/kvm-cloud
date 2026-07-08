@@ -297,10 +297,10 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
         Constant.NetworkBridgeType type = Constant.NetworkBridgeType.fromBridgeType(network.getBridgeType());
         String configKey;
         switch (type) {
-            case BASIC:
+            case LINUX_BRIDGE:
                 configKey = ConfigKey.NETWORK_DEFAULT_BRIDGE_TPL;
                 break;
-            case OPEN_SWITCH:
+            case OPEN_SWITCH_BRIDGE:
                 configKey = ConfigKey.NETWORK_OVS_BRIDGE_TPL;
                 break;
             default:

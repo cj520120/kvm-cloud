@@ -125,7 +125,7 @@ public class ComponentService extends AbstractService {
                 guest.setGuestIp(currentGuestNetwork.getIp());
             }
             break;
-            case Constant.NetworkType.BASIC: {
+            case Constant.NetworkType.FLAT: {
                 GuestNetworkEntity currentGuestNetwork = this.allocateService.allocateNetwork(network.getNetworkId(), guest.getGuestId(), Constant.NetworkAllocateType.GUEST, 0, nicDriveType, "Component Guest Basic Nic");
                 guest.setGuestIp(currentGuestNetwork.getIp());
             }
@@ -448,7 +448,7 @@ public class ComponentService extends AbstractService {
         if (network == null) {
             throw new CodeException(ErrorCode.NETWORK_NOT_FOUND, "网络不存在");
         }
-        if (network.getType() == Constant.NetworkType.BASIC) {
+        if (network.getType() == Constant.NetworkType.FLAT) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "网络类型必须是ADVANCED类型");
         }
 

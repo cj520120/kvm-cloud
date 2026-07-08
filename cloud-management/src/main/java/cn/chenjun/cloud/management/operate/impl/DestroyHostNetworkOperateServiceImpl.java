@@ -48,7 +48,7 @@ public class DestroyHostNetworkOperateServiceImpl extends AbstractOperateService
             return;
         }
         switch (network.getType()) {
-            case Constant.NetworkType.BASIC: {
+            case Constant.NetworkType.FLAT: {
                 BasicBridgeNetwork basicBridgeNetwork = BasicBridgeNetwork.builder()
                         .poolId(network.getPoolId())
                         .build();

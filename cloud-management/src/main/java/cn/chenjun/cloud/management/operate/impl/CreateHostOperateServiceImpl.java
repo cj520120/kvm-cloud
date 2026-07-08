@@ -74,7 +74,7 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
                     }
                     break;
                 }
-                case Constant.NetworkType.BASIC:
+                case Constant.NetworkType.FLAT:
                     basicBridgeNetworks.add(this.buildBasicNetworkRequest(network, systemConfig));
                     break;
             }

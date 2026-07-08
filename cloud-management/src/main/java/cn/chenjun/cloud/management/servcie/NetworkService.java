@@ -79,7 +79,7 @@ public class NetworkService extends AbstractService {
 
         NetworkEntity basicNetwork = null;
         switch (type) {
-            case Constant.NetworkType.BASIC:
+            case Constant.NetworkType.FLAT:
                 break;
             case Constant.NetworkType.VxLAN:
             case Constant.NetworkType.VLAN:
@@ -96,7 +96,7 @@ public class NetworkService extends AbstractService {
         }
         if (type == Constant.NetworkType.VxLAN) {
             bridge = "";
-            bridgeType = Constant.NetworkBridgeType.OVN.bridgeType();
+            bridgeType = Constant.NetworkBridgeType.OVN_BRIDGE.bridgeType();
         }
         NetworkEntity network = NetworkEntity.builder()
                 .name(name)
@@ -144,7 +144,7 @@ public class NetworkService extends AbstractService {
             component.setComponentVip(componentVip.getIp());
             component.setBasicComponentVip(componentVip.getIp());
             switch (type) {
-                case Constant.NetworkType.BASIC:
+                case Constant.NetworkType.FLAT:
                     break;
                 case Constant.NetworkType.VxLAN:
                     if (!this.checkOvnSupport()) {
