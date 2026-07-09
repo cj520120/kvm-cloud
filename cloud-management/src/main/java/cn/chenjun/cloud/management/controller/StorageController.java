@@ -32,8 +32,8 @@ public class StorageController extends BaseController {
     }
 
     @GetMapping("/api/storage/search")
-    public ResultUtil<Page<SimpleStorageModel>> search(@RequestParam(value = "storageType", required = false) Integer storageType,
-                                                       @RequestParam(value = "storageStatus", required = false) Integer storageStatus,
+    public ResultUtil<Page<SimpleStorageModel>> search(@RequestParam(value = "type", required = false) Integer storageType,
+                                                       @RequestParam(value = "status", required = false) Integer storageStatus,
                                                        @RequestParam(value = "keyword", required = false) String keyword,
                                                        @RequestParam("no") int no,
                                                        @RequestParam("size") int size) {
@@ -41,7 +41,12 @@ public class StorageController extends BaseController {
 
         return ResultUtil.success(Page.convert(page, source -> BeanConverter.convert(source, SimpleStorageModel.class)));
     }
+    @GetMapping("/api/storage/children")
+    public ResultUtil<List<StorageModel>> listChildrenStorage(@RequestParam(value = "storageId") Integer storageId) {
+        List<StorageEntity> childrenStorages = storageService.listChildrenStorage(storageId);
 
+        return ResultUtil.success(this.convertService.initStorageModel(childrenStorages));
+    }
     @GetMapping("/api/storage/info")
     public ResultUtil<StorageModel> getStorageInfo(@RequestParam("storageId") int storageId) {
         StorageEntity storage = storageService.getStorageInfo(storageId);

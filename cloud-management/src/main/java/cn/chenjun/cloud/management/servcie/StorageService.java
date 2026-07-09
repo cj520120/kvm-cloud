@@ -39,7 +39,11 @@ public class StorageService extends AbstractHostStorageService {
         Page<StorageEntity> page = this.storageDao.search(storageType, storageStatus, keyword, no, size);
         return page;
     }
+    public List<StorageEntity> listChildrenStorage(int storageId) {
 
+        List<StorageEntity> list = this.storageDao.listStorageByParentStorageId(storageId);
+        return list;
+    }
     public StorageEntity getStorageInfo(int storageId) {
         StorageEntity storage = this.storageDao.findById(storageId);
         if (storage == null) {

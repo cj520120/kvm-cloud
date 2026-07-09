@@ -11,6 +11,7 @@ import cn.chenjun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -95,7 +96,16 @@ public class ConvertService {
         }
         return model;
     }
-
+    public List<StorageModel> initStorageModel(List<StorageEntity> entitys) {
+        List<StorageModel> models = new ArrayList<>();
+        if(!ObjectUtils.isEmpty(entitys)) {
+            for (StorageEntity entity : entitys) {
+                StorageModel model = this.initStorageModel(entity);
+                models.add(model);
+            }
+        }
+        return models;
+    }
     public SchemeModel initSchemeModel(SchemeEntity entity) {
         return BeanConverter.convert(entity, SchemeModel.class);
     }
