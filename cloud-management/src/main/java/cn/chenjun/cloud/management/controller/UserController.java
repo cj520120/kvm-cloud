@@ -7,7 +7,17 @@ import cn.chenjun.cloud.common.core.annotation.NoLoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.UserEntity;
-import cn.chenjun.cloud.management.model.*;
+import cn.chenjun.cloud.management.model.LoginRequest;
+import cn.chenjun.cloud.management.model.LoginSignatureModel;
+import cn.chenjun.cloud.management.model.LoginUserModel;
+import cn.chenjun.cloud.management.model.RefreshTokenModel;
+import cn.chenjun.cloud.management.model.TokenModel;
+import cn.chenjun.cloud.management.model.UserDestroyRequest;
+import cn.chenjun.cloud.management.model.UserModel;
+import cn.chenjun.cloud.management.model.UserRegisterRequest;
+import cn.chenjun.cloud.management.model.UserResetPasswordRequest;
+import cn.chenjun.cloud.management.model.UserSelfModifyRequest;
+import cn.chenjun.cloud.management.model.UserUpdateRequest;
 import cn.chenjun.cloud.management.servcie.UserService;
 import cn.chenjun.cloud.management.servcie.bean.RefreshTokenInfo;
 import cn.chenjun.cloud.management.servcie.bean.TokenInfo;
@@ -32,8 +42,9 @@ public class UserController extends BaseController {
 
     @NoLoginRequire
     @PostMapping("/api/user/login")
-    public ResultUtil<TokenModel> login(@RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("nonce") String nonce) {
-        TokenInfo token = userUiService.login(loginName, password, nonce);
+    public ResultUtil<TokenModel> login(@RequestBody LoginRequest request) {
+        request.validate();
+        TokenInfo token = userUiService.login(request.getLoginName(), request.getPassword(), request.getNonce());
         TokenModel model = new TokenModel();
         model.setToken(token.getToken());
         model.setExpire(token.getExpire());
@@ -42,9 +53,9 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/api/user/self/modify")
-    public ResultUtil<Void> updateSelfInfo(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestParam(value = "username", defaultValue = "") String username, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword, @RequestParam("nonce") String nonce) {
-
-        this.globalLockCall(() -> userUiService.updateSelfInfo(model.getUserId(), username, oldPassword, newPassword, nonce));
+    public ResultUtil<Void> updateSelfInfo(@RequestAttribute(cn.chenjun.cloud.common.util.Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestBody UserSelfModifyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> userUiService.updateSelfInfo(model.getUserId(), request.getUsername(), request.getOldPassword(), request.getNewPassword(), request.getNonce()));
         return ResultUtil.success();
     }
 
@@ -80,9 +91,9 @@ public class UserController extends BaseController {
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @PutMapping("/api/user/register")
-    public ResultUtil<UserModel> register(@RequestParam("userName") String userName, @RequestParam("loginName") String loginName, @RequestParam("password") String password, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
-
-        UserEntity user = this.globalLockCall(() -> userUiService.register(userName, loginName, password, userType, userStatus));
+    public ResultUtil<UserModel> register(@RequestBody UserRegisterRequest request) {
+        request.validate();
+        UserEntity user = this.globalLockCall(() -> userUiService.register(request.getUserName(), request.getLoginName(), request.getPassword(), request.getUserType(), request.getUserStatus()));
         return ResultUtil.success(this.convertService.initUserModel(user));
 
     }
@@ -98,24 +109,27 @@ public class UserController extends BaseController {
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @PostMapping("/api/user/update")
     @LoginRequire
-    public ResultUtil<UserModel> updateUserInfo(@RequestParam("userId") int userId, @RequestParam("userName") String userName, @RequestParam("userType") short userType, @RequestParam("userStatus") short userStatus) {
-        UserEntity user = this.globalLockCall(() -> userUiService.updateUser(userId, userName, userType, userStatus));
+    public ResultUtil<UserModel> updateUserInfo(@RequestBody UserUpdateRequest request) {
+        request.validate();
+        UserEntity user = this.globalLockCall(() -> userUiService.updateUser(request.getUserId(), request.getUserName(), request.getUserType(), request.getUserStatus()));
         return ResultUtil.success(this.convertService.initUserModel(user));
     }
 
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.SUPPER_ADMIN)
     @DeleteMapping("/api/user/destroy")
-    public ResultUtil<Void> destroyUser(@RequestParam("userId") int userId) {
-        this.globalLockCall(() -> userUiService.destroyUser(userId));
+    public ResultUtil<Void> destroyUser(@RequestBody UserDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> userUiService.destroyUser(request.getUserId()));
         return ResultUtil.success();
     }
 
     @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
     @PostMapping("/api/user/password/reset")
     @LoginRequire
-    public ResultUtil<UserModel> resetPassword(@RequestParam("userId") int userId, @RequestParam("password") String password) {
-        UserEntity user = this.globalLockCall(() -> userUiService.resetPassword(userId, password));
+    public ResultUtil<UserModel> resetPassword(@RequestBody UserResetPasswordRequest request) {
+        request.validate();
+        UserEntity user = this.globalLockCall(() -> userUiService.resetPassword(request.getUserId(), request.getPassword()));
         return ResultUtil.success(this.convertService.initUserModel(user));
     }
 

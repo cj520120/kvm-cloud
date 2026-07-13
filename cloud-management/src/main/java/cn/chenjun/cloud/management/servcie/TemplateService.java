@@ -131,14 +131,16 @@ public class TemplateService extends AbstractService {
         if (volume.getStatus() != cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
             throw new CodeException(ErrorCode.VOLUME_NOT_READY, "当前磁盘状态未就绪");
         }
-        GuestEntity guest = this.getVolumeGuest(volumeId);
-        if (guest != null) {
-            switch (guest.getStatus()) {
-                case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
-                case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
-                    break;
-                default:
-                    throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
+        if(volume.getGuestId() > 0) {
+            GuestEntity guest = this.getVolumeGuest(volumeId);
+            if (guest != null) {
+                switch (guest.getStatus()) {
+                    case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
+                    case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
+                        break;
+                    default:
+                        throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前磁盘所在虚拟机正在运行,请关机后重试");
+                }
             }
         }
         volume.setStatus(Constant.VolumeStatus.CREATE_TEMPLATE);

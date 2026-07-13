@@ -6,6 +6,9 @@ import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.SchemeEntity;
+import cn.chenjun.cloud.management.model.SchemeCreateRequest;
+import cn.chenjun.cloud.management.model.SchemeDestroyRequest;
+import cn.chenjun.cloud.management.model.SchemeModifyRequest;
 import cn.chenjun.cloud.management.model.SchemeModel;
 import cn.chenjun.cloud.management.servcie.SchemeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,35 +51,25 @@ public class SchemeController extends BaseController {
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/scheme/create")
-    public ResultUtil<SchemeModel> createScheme(@RequestParam("name") String name,
-                                                @RequestParam("cpu") int cpu,
-                                                @RequestParam("memory") long memory,
-                                                @RequestParam("share") int share,
-                                                @RequestParam("sockets") int sockets,
-                                                @RequestParam("cores") int cores,
-                                                @RequestParam("threads") int threads) {
-        SchemeEntity scheme = this.globalLockCall(() -> this.schemeService.createScheme(name, cpu, memory * 1024, share, sockets, cores, threads));
+    public ResultUtil<SchemeModel> createScheme(@RequestBody SchemeCreateRequest request) {
+        request.validate();
+        SchemeEntity scheme = this.globalLockCall(() -> this.schemeService.createScheme(request.getName(), request.getCpu(), request.getMemory() * 1024, request.getShare(), request.getSockets(), request.getCores(), request.getThreads()));
         return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/scheme/modify")
-    public ResultUtil<SchemeModel> updateScheme(@RequestParam("schemeId") int schemeId,
-                                                @RequestParam("name") String name,
-                                                @RequestParam("cpu") int cpu,
-                                                @RequestParam("memory") long memory,
-                                                @RequestParam("share") int share,
-                                                @RequestParam("sockets") int sockets,
-                                                @RequestParam("cores") int cores,
-                                                @RequestParam("threads") int threads) {
-        SchemeEntity scheme = this.globalLockCall(() -> this.schemeService.updateScheme(schemeId, name, cpu, memory * 1024, share, sockets, cores, threads));
+    public ResultUtil<SchemeModel> updateScheme(@RequestBody SchemeModifyRequest request) {
+        request.validate();
+        SchemeEntity scheme = this.globalLockCall(() -> this.schemeService.updateScheme(request.getSchemeId(), request.getName(), request.getCpu(), request.getMemory() * 1024, request.getShare(), request.getSockets(), request.getCores(), request.getThreads()));
         return ResultUtil.success(this.convertService.initSchemeModel(scheme));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/scheme/destroy")
-    public ResultUtil<Void> destroyScheme(@RequestParam("schemeId") int schemeId) {
-        this.globalLockCall(() -> this.schemeService.destroyScheme(schemeId));
+    public ResultUtil<Void> destroyScheme(@RequestBody SchemeDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> this.schemeService.destroyScheme(request.getSchemeId()));
         return ResultUtil.success();
     }
 }

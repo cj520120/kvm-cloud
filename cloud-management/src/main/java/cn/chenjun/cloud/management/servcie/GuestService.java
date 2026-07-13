@@ -307,11 +307,11 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<GuestEntity> batchStop(List<Integer> guestIds) {
+    public List<GuestEntity> batchStop(List<Integer> guestIds,boolean isForce) {
         List<GuestEntity> models = new ArrayList<>(guestIds.size());
         for (Integer guestId : guestIds) {
             try {
-                GuestEntity entity = this.shutdown(guestId, false);
+                GuestEntity entity = this.shutdown(guestId, isForce);
                 models.add(entity);
             } catch (Exception ignored) {
 

@@ -4,7 +4,10 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.management.data.entity.GroupEntity;
+import cn.chenjun.cloud.management.model.GroupCreateRequest;
+import cn.chenjun.cloud.management.model.GroupDestroyRequest;
 import cn.chenjun.cloud.management.model.GroupModel;
+import cn.chenjun.cloud.management.model.GroupUpdateRequest;
 import cn.chenjun.cloud.management.servcie.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -45,22 +48,25 @@ public class GroupController extends BaseController {
 
 
     @PutMapping("/api/group/create")
-    public ResultUtil<GroupModel> createGroup(@RequestParam("groupName") String groupName) {
-        GroupEntity entity = this.globalLockCall(() -> this.groupService.createGroup(groupName));
+    public ResultUtil<GroupModel> createGroup(@RequestBody GroupCreateRequest request) {
+        request.validate();
+        GroupEntity entity = this.globalLockCall(() -> this.groupService.createGroup(request.getGroupName()));
         return ResultUtil.success(this.convertService.initGroupModel(entity));
     }
 
 
     @PostMapping("/api/group/update")
-    public ResultUtil<GroupModel> updateGroup(@RequestParam("groupId") int groupId, @RequestParam("groupName") String groupName) {
-        GroupEntity entity = this.globalLockCall(() -> this.groupService.updateGroup(groupId, groupName));
+    public ResultUtil<GroupModel> updateGroup(@RequestBody GroupUpdateRequest request) {
+        request.validate();
+        GroupEntity entity = this.globalLockCall(() -> this.groupService.updateGroup(request.getGroupId(), request.getGroupName()));
         return ResultUtil.success(this.convertService.initGroupModel(entity));
     }
 
 
     @DeleteMapping("/api/group/destroy")
-    public ResultUtil<Void> deleteGroup(@RequestParam("groupId") int groupId) {
-        this.globalLockCall(() -> this.groupService.deleteGroup(groupId));
+    public ResultUtil<Void> deleteGroup(@RequestBody GroupDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> this.groupService.deleteGroup(request.getGroupId()));
         return ResultUtil.success();
     }
 }

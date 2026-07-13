@@ -3,6 +3,7 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.management.model.Oauth2LoginRequest;
 import cn.chenjun.cloud.management.model.TokenModel;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.UserService;
@@ -17,7 +18,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.RedirectView;
@@ -49,7 +50,9 @@ public class Oauth2LoginController extends BaseController {
     @SuppressWarnings("unchecked")
     @PostMapping("/api/user/oauth2/login")
     @ResponseBody
-    public ResultUtil<TokenModel> login(@RequestParam("code") String code) {
+    public ResultUtil<TokenModel> login(@RequestBody Oauth2LoginRequest oauth2LoginRequest) {
+        oauth2LoginRequest.validate();
+        String code = oauth2LoginRequest.getCode();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();

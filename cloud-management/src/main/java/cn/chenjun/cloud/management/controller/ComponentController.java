@@ -8,7 +8,11 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.RouteStrategyEntity;
+import cn.chenjun.cloud.management.model.ComponentCreateNatRequest;
+import cn.chenjun.cloud.management.model.ComponentDestroyRequest;
 import cn.chenjun.cloud.management.model.ComponentDetailModel;
+import cn.chenjun.cloud.management.model.ComponentRouteDeleteRequest;
+import cn.chenjun.cloud.management.model.ComponentRouteRequest;
 import cn.chenjun.cloud.management.model.GuestModel;
 import cn.chenjun.cloud.management.model.RouteStrategyModel;
 import cn.chenjun.cloud.management.servcie.ComponentService;
@@ -42,15 +46,17 @@ public class ComponentController extends BaseController {
     }
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/component/nat/create")
-    public ResultUtil<ComponentDetailModel> createNatComponent(@RequestParam("networkId") int networkId) {
-        ComponentEntity componentEntity = this.globalLockCall(() -> this.networkService.createComponent(networkId, cn.chenjun.cloud.common.util.Constant.ComponentType.NAT));
+    public ResultUtil<ComponentDetailModel> createNatComponent(@RequestBody ComponentCreateNatRequest request) {
+        request.validate();
+        ComponentEntity componentEntity = this.globalLockCall(() -> this.networkService.createComponent(request.getNetworkId(), cn.chenjun.cloud.common.util.Constant.ComponentType.NAT));
         return ResultUtil.success(this.convertService.initComponentModel(componentEntity));
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/component")
-    public ResultUtil<Void> destroyNetworkComponent(@RequestParam("componentId") int componentId) {
-        this.globalLockCall(() -> networkService.destroyComponent(componentId));
+    public ResultUtil<Void> destroyNetworkComponent(@RequestBody ComponentDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> networkService.destroyComponent(request.getComponentId()));
         return ResultUtil.success();
     }
 
@@ -79,14 +85,16 @@ public class ComponentController extends BaseController {
     }
 
     @PutMapping("/api/component/route")
-    public ResultUtil<RouteStrategyModel> createComponentRoutes(@RequestParam("componentId") int componentId, @RequestParam("destIp") String destIp, @RequestParam("cidr") int cidr, @RequestParam("nexthop") String nexthop) {
-        RouteStrategyEntity route = this.componentService.createRoute(componentId, destIp, cidr, nexthop);
+    public ResultUtil<RouteStrategyModel> createComponentRoutes(@RequestBody ComponentRouteRequest request) {
+        request.validate();
+        RouteStrategyEntity route = this.componentService.createRoute(request.getComponentId(), request.getDestIp(), request.getCidr(), request.getNexthop());
         return ResultUtil.success(this.convertService.initRouteStrategy(route));
     }
 
     @DeleteMapping("/api/component/route")
-    public ResultUtil<Void> deleteComponentRoute(@RequestParam("id") int id) {
-        this.componentService.deleteRouteStrategyById(id);
+    public ResultUtil<Void> deleteComponentRoute(@RequestBody ComponentRouteDeleteRequest request) {
+        request.validate();
+        this.componentService.deleteRouteStrategyById(request.getId());
         return ResultUtil.success();
     }
 

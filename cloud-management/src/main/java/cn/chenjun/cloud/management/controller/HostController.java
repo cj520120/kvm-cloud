@@ -6,7 +6,12 @@ import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
+import cn.chenjun.cloud.management.model.HostCreateRequest;
+import cn.chenjun.cloud.management.model.HostDestroyRequest;
+import cn.chenjun.cloud.management.model.HostMaintenanceRequest;
 import cn.chenjun.cloud.management.model.HostModel;
+import cn.chenjun.cloud.management.model.HostRegisterRequest;
+import cn.chenjun.cloud.management.model.HostUpdateRoleRequest;
 import cn.chenjun.cloud.management.servcie.HostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -47,38 +52,39 @@ public class HostController extends BaseController {
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/host/create")
-    public ResultUtil<HostModel> createHost(@RequestParam("displayName") String displayName,
-                                            @RequestParam("hostIp") String hostIp,
-                                            @RequestParam("uri") String uri,
-                                            @RequestParam("nic") String nic,
-                                            @RequestParam("role") int role) {
-        HostEntity entity = this.globalLockCall(() -> hostService.createHost(displayName, hostIp, uri, nic, role));
+    public ResultUtil<HostModel> createHost(@RequestBody HostCreateRequest request) {
+        request.validate();
+        HostEntity entity = this.globalLockCall(() -> hostService.createHost(request.getDisplayName(), request.getHostIp(), request.getUri(), request.getNic(), request.getRole()));
         return ResultUtil.success(convertService.initHostModel(entity));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/host/register")
-    public ResultUtil<HostModel> registerHost(@RequestParam("hostId") int hostId) {
-        HostEntity entity = this.globalLockCall(() -> hostService.registerHost(hostId));
+    public ResultUtil<HostModel> registerHost(@RequestBody HostRegisterRequest request) {
+        request.validate();
+        HostEntity entity = this.globalLockCall(() -> hostService.registerHost(request.getHostId()));
         return ResultUtil.success(convertService.initHostModel(entity));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/host/maintenance")
-    public ResultUtil<HostModel> maintenanceHost(@RequestParam("hostId") int hostId) {
-        HostEntity entity = this.globalLockCall(() -> hostService.maintenanceHost(hostId));
+    public ResultUtil<HostModel> maintenanceHost(@RequestBody HostMaintenanceRequest request) {
+        request.validate();
+        HostEntity entity = this.globalLockCall(() -> hostService.maintenanceHost(request.getHostId()));
         return ResultUtil.success(convertService.initHostModel(entity));
     }
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/host/role/update")
-    public ResultUtil<HostModel> updateHostRole(@RequestParam("hostId") int hostId,@RequestParam("role") int role) {
-        HostEntity entity = this.globalLockCall(() -> hostService.updateHostRole(hostId, role));
+    public ResultUtil<HostModel> updateHostRole(@RequestBody HostUpdateRoleRequest request) {
+        request.validate();
+        HostEntity entity = this.globalLockCall(() -> hostService.updateHostRole(request.getHostId(), request.getRole()));
         return ResultUtil.success(convertService.initHostModel(entity));
     }
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/host/destroy")
-    public ResultUtil<Void> destroyHost(@RequestParam("hostId") int hostId) {
-        this.globalLockCall(() -> hostService.destroyHost(hostId));
+    public ResultUtil<Void> destroyHost(@RequestBody HostDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> hostService.destroyHost(request.getHostId()));
         return ResultUtil.success();
     }
 }

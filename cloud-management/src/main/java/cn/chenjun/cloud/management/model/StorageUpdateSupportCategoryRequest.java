@@ -1,0 +1,34 @@
+package cn.chenjun.cloud.management.model;
+
+import cn.chenjun.cloud.common.error.CodeException;
+import cn.chenjun.cloud.common.util.ErrorCode;
+
+/**
+ * @author chenjun
+ */
+public class StorageUpdateSupportCategoryRequest {
+    private int storageId;
+    private int supportCategory;
+
+    public int getStorageId() {
+        return storageId;
+    }
+
+    public void setStorageId(int storageId) {
+        this.storageId = storageId;
+    }
+
+    public int getSupportCategory() {
+        return supportCategory;
+    }
+
+    public void setSupportCategory(int supportCategory) {
+        this.supportCategory = supportCategory;
+    }
+
+    public void validate() {
+        if (storageId <= 0) {
+            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的存储ID");
+        }
+    }
+}

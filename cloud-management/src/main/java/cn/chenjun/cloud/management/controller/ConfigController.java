@@ -3,7 +3,10 @@ package cn.chenjun.cloud.management.controller;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.management.model.ConfigCreateRequest;
+import cn.chenjun.cloud.management.model.ConfigDeleteRequest;
 import cn.chenjun.cloud.management.model.ConfigModel;
+import cn.chenjun.cloud.management.model.ConfigUpdateRequest;
 import cn.chenjun.cloud.management.model.SystemConfigModel;
 import cn.chenjun.cloud.management.servcie.ConfigService;
 import cn.chenjun.cloud.management.servcie.bean.ConfigInfo;
@@ -52,30 +55,27 @@ public class ConfigController extends BaseController {
 
     @LoginRequire
     @PutMapping("/api/config/create")
-    public ResultUtil<ConfigModel> createConfig(@RequestParam("configKey") String configKey,
-                                                @RequestParam("allocateType") int allocateType,
-                                                @RequestParam("allocateId") int allocateId,
-                                                @RequestParam("configValue") String configValue) {
+    public ResultUtil<ConfigModel> createConfig(@RequestBody ConfigCreateRequest request) {
+        request.validate();
         ConfigInfo info = this.globalLockCall(() -> {
-            return this.configService.createConfig(configKey, allocateType, allocateId, configValue);
+            return this.configService.createConfig(request.getConfigKey(), request.getAllocateType(), request.getAllocateId(), request.getConfigValue());
         });
         return ResultUtil.success(this.initConfig(info));
     }
 
     @LoginRequire
     @PostMapping("/api/config/update")
-    public ResultUtil<ConfigModel> updateConfig(@RequestParam("configKey") String configKey,
-                                                @RequestParam("allocateType") int allocateType,
-                                                @RequestParam("allocateId") int allocateId,
-                                                @RequestParam("configValue") String configValue) {
-        ConfigInfo info = this.globalLockCall(() -> this.configService.updateConfig(configKey, allocateType, allocateId, configValue));
+    public ResultUtil<ConfigModel> updateConfig(@RequestBody ConfigUpdateRequest request) {
+        request.validate();
+        ConfigInfo info = this.globalLockCall(() -> this.configService.updateConfig(request.getConfigKey(), request.getAllocateType(), request.getAllocateId(), request.getConfigValue()));
         return ResultUtil.success(this.initConfig(info));
     }
 
     @LoginRequire
     @DeleteMapping("/api/config/destroy")
-    public ResultUtil<ConfigModel> deleteConfig(@RequestParam("id") int id) {
-        ConfigInfo info = this.globalLockCall(() -> this.configService.deleteConfig(id));
+    public ResultUtil<ConfigModel> deleteConfig(@RequestBody ConfigDeleteRequest request) {
+        request.validate();
+        ConfigInfo info = this.globalLockCall(() -> this.configService.deleteConfig(request.getId()));
         return ResultUtil.success(this.initConfig(info));
     }
 }

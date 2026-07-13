@@ -8,7 +8,14 @@ import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
 import cn.chenjun.cloud.management.model.SimpleStorageModel;
+import cn.chenjun.cloud.management.model.StorageClearRequest;
+import cn.chenjun.cloud.management.model.StorageCreateRequest;
+import cn.chenjun.cloud.management.model.StorageDestroyRequest;
+import cn.chenjun.cloud.management.model.StorageMaintenanceRequest;
+import cn.chenjun.cloud.management.model.StorageMigrateRequest;
 import cn.chenjun.cloud.management.model.StorageModel;
+import cn.chenjun.cloud.management.model.StorageRegisterRequest;
+import cn.chenjun.cloud.management.model.StorageUpdateSupportCategoryRequest;
 import cn.chenjun.cloud.management.servcie.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -55,54 +62,58 @@ public class StorageController extends BaseController {
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/storage/create")
-    public ResultUtil<StorageModel> createStorage(@RequestParam("description") String description,
-                                                  @RequestParam("supportCategory") int supportCategory,
-                                                  @RequestParam("type") String type,
-                                                  @RequestParam("param") String param) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.createStorage(supportCategory, description, type, param));
+    public ResultUtil<StorageModel> createStorage(@RequestBody StorageCreateRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.createStorage(request.getSupportCategory(), request.getDescription(), request.getType(), request.getParam()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/support/category/update")
-    public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestParam("storageId") int storageId, @RequestParam("supportCategory") int supportCategory) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.updateStorageSupportCategory(storageId, supportCategory));
+    public ResultUtil<StorageModel> updateStorageSupportCategory(@RequestBody StorageUpdateSupportCategoryRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.updateStorageSupportCategory(request.getStorageId(), request.getSupportCategory()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/register")
-    public ResultUtil<StorageModel> registerStorage(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.registerStorage(storageId));
+    public ResultUtil<StorageModel> registerStorage(@RequestBody StorageRegisterRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.registerStorage(request.getStorageId()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/migrate")
-    public ResultUtil<StorageModel> migrateStorage(@RequestParam("sourceStorageId") int sourceStorageId, @RequestParam("destStorageId") int destStorageId) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.migrateStorage(sourceStorageId, destStorageId));
+    public ResultUtil<StorageModel> migrateStorage(@RequestBody StorageMigrateRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.migrateStorage(request.getSourceStorageId(), request.getDestStorageId()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/storage/maintenance")
-    public ResultUtil<StorageModel> maintenanceStorage(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.maintenanceStorage(storageId));
+    public ResultUtil<StorageModel> maintenanceStorage(@RequestBody StorageMaintenanceRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.maintenanceStorage(request.getStorageId()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @DeleteMapping("/api/storage/destroy")
-    public ResultUtil<StorageModel> destroyStorage(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.destroyStorage(storageId));
+    public ResultUtil<StorageModel> destroyStorage(@RequestBody StorageDestroyRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.destroyStorage(request.getStorageId()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
 
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/storage/clear")
-    public ResultUtil<StorageModel> clearUnLinkVolume(@RequestParam("storageId") int storageId) {
-        StorageEntity storage = this.globalLockCall(() -> storageService.clearUnLinkVolume(storageId));
+    public ResultUtil<StorageModel> clearUnLinkVolume(@RequestBody StorageClearRequest request) {
+        request.validate();
+        StorageEntity storage = this.globalLockCall(() -> storageService.clearUnLinkVolume(request.getStorageId()));
         return ResultUtil.success(this.convertService.initStorageModel(storage));
 
     }

@@ -4,6 +4,8 @@ import cn.chenjun.cloud.common.bean.Page;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.management.data.entity.DnsEntity;
+import cn.chenjun.cloud.management.model.DnsCreateRequest;
+import cn.chenjun.cloud.management.model.DnsDestroyRequest;
 import cn.chenjun.cloud.management.model.DnsModel;
 import cn.chenjun.cloud.management.servcie.DnsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +47,9 @@ public class DnsController extends BaseController {
 
     @LoginRequire
     @PutMapping("/api/dns/create")
-    public ResultUtil<DnsModel> createDns(@RequestParam("networkId") int networkId,
-                                          @RequestParam("domain") String domain,
-                                          @RequestParam("ip") String ip) {
-        DnsEntity entity = this.globalLockCall(() -> this.dnsService.createDns(networkId, domain, ip));
+    public ResultUtil<DnsModel> createDns(@RequestBody DnsCreateRequest request) {
+        request.validate();
+        DnsEntity entity = this.globalLockCall(() -> this.dnsService.createDns(request.getNetworkId(), request.getDomain(), request.getIp()));
         DnsModel model = this.convertService.initDnsModel(entity);
         return ResultUtil.success(model);
     }
@@ -56,8 +57,9 @@ public class DnsController extends BaseController {
 
     @LoginRequire
     @DeleteMapping("/api/dns/destroy")
-    public ResultUtil<Void> destroyDns(@RequestParam("id") int dnsId) {
-        this.globalLockCall(() -> this.dnsService.deleteDns(dnsId));
+    public ResultUtil<Void> destroyDns(@RequestBody DnsDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> this.dnsService.deleteDns(request.getDnsId()));
         return ResultUtil.success();
     }
 

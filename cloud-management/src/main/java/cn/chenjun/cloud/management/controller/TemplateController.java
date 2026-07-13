@@ -6,7 +6,12 @@ import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.TemplateEntity;
+import cn.chenjun.cloud.management.model.TemplateCreateRequest;
+import cn.chenjun.cloud.management.model.TemplateDestroyRequest;
+import cn.chenjun.cloud.management.model.TemplateDownloadRequest;
 import cn.chenjun.cloud.management.model.TemplateModel;
+import cn.chenjun.cloud.management.model.TemplateScriptRequest;
+import cn.chenjun.cloud.management.model.TemplateVolumeCreateRequest;
 import cn.chenjun.cloud.management.servcie.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -50,32 +55,25 @@ public class TemplateController extends BaseController {
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/template/create")
-    public ResultUtil<TemplateModel> createTemplate(@RequestParam("name") String name,
-                                                    @RequestParam("uri") String uri,
-                                                    @RequestParam("md5") String md5,
-                                                    @RequestParam("templateType") int templateType,
-                                                    @RequestParam("arch") String arch,
-                                                    @RequestParam(value = "localCloudCfg", defaultValue = "") String localCloudCfg,
-                                                    @RequestParam(value = "vendorData", defaultValue = "") String vendorData,
-                                                    @RequestParam(value = "cloudWaitFlag", defaultValue = "0") int cloudWaitFlag) {
-        TemplateEntity template = this.globalLockCall(() -> templateService.createTemplate(name, uri, md5, templateType, arch, localCloudCfg, vendorData, cloudWaitFlag));
+    public ResultUtil<TemplateModel> createTemplate(@RequestBody TemplateCreateRequest request) {
+        request.validate();
+        TemplateEntity template = this.globalLockCall(() -> templateService.createTemplate(request.getName(), request.getUri(), request.getMd5(), request.getTemplateType(), request.getArch(), request.getLocalCloudCfg(), request.getVendorData(), request.getCloudWaitFlag()));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/template/script")
-    public ResultUtil<TemplateModel> updateTemplateScript(@RequestParam("templateId") int id,
-                                                          @RequestParam(value = "localCloudCfg", defaultValue = "") String localCloudCfg,
-                                                          @RequestParam(value = "vendorData", defaultValue = "") String vendorData,
-                                                          @RequestParam(value = "cloudWaitFlag", defaultValue = "0") int cloudWaitFlag) {
-        TemplateEntity template = this.globalLockCall(() -> templateService.updateTemplateScript(id, localCloudCfg, vendorData, cloudWaitFlag));
+    public ResultUtil<TemplateModel> updateTemplateScript(@RequestBody TemplateScriptRequest request) {
+        request.validate();
+        TemplateEntity template = this.globalLockCall(() -> templateService.updateTemplateScript(request.getTemplateId(), request.getLocalCloudCfg(), request.getVendorData(), request.getCloudWaitFlag()));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/template/download")
-    public ResultUtil<TemplateModel> downloadTemplate(@RequestParam("templateId") int templateId) {
-        TemplateEntity template = this.globalLockCall(() -> templateService.downloadTemplate(templateId));
+    public ResultUtil<TemplateModel> downloadTemplate(@RequestBody TemplateDownloadRequest request) {
+        request.validate();
+        TemplateEntity template = this.globalLockCall(() -> templateService.downloadTemplate(request.getTemplateId()));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
 
 
@@ -83,10 +81,9 @@ public class TemplateController extends BaseController {
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/template/volume/create")
-    public ResultUtil<TemplateModel> createVolumeTemplate(@RequestParam("volumeId") int volumeId,
-                                                          @RequestParam("name") String name,
-                                                          @RequestParam("arch") String arch) {
-        TemplateEntity template = this.globalLockCall(() -> templateService.createVolumeTemplate(volumeId, name, arch));
+    public ResultUtil<TemplateModel> createVolumeTemplate(@RequestBody TemplateVolumeCreateRequest request) {
+        request.validate();
+        TemplateEntity template = this.globalLockCall(() -> templateService.createVolumeTemplate(request.getVolumeId(), request.getName(), request.getArch()));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
 
 
@@ -94,8 +91,9 @@ public class TemplateController extends BaseController {
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/template/destroy")
-    public ResultUtil<TemplateModel> destroyTemplate(@RequestParam("templateId") int templateId) {
-        TemplateEntity template = this.globalLockCall(() -> templateService.destroyTemplate(templateId));
+    public ResultUtil<TemplateModel> destroyTemplate(@RequestBody TemplateDestroyRequest request) {
+        request.validate();
+        TemplateEntity template = this.globalLockCall(() -> templateService.destroyTemplate(request.getTemplateId()));
         return ResultUtil.success(this.convertService.initTemplateModel(template));
     }
 }

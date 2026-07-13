@@ -8,6 +8,11 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.SshAuthorizedEntity;
 import cn.chenjun.cloud.management.model.CreateSshAuthorizedModel;
 import cn.chenjun.cloud.management.model.SshAuthorizedModel;
+import cn.chenjun.cloud.management.model.SshCreateRequest;
+import cn.chenjun.cloud.management.model.SshDestroyRequest;
+import cn.chenjun.cloud.management.model.SshDownloadRequest;
+import cn.chenjun.cloud.management.model.SshImportRequest;
+import cn.chenjun.cloud.management.model.SshModifyRequest;
 import cn.chenjun.cloud.management.servcie.SshAuthorizedService;
 import cn.chenjun.cloud.management.servcie.bean.MemSshInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,41 +65,46 @@ public class SshKeyController extends BaseController {
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @PutMapping("/api/ssh/import")
-    public ResultUtil<SshAuthorizedModel> importSshKey(@RequestParam("name") String name, @RequestParam("publicKey") String publicKey, @RequestParam("privateKey") String privateKey) {
-        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.importSshKey(name, publicKey, privateKey));
+    public ResultUtil<SshAuthorizedModel> importSshKey(@RequestBody SshImportRequest request) {
+        request.validate();
+        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.importSshKey(request.getName(), request.getPublicKey(), request.getPrivateKey()));
         return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @PutMapping("/api/ssh/create")
-    public ResultUtil<CreateSshAuthorizedModel> createKey(@RequestParam("name") String name) {
-        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.createSshKey(name));
-        CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(ssh.getId()).name(name).publicKey(ssh.getSshPublicKey()).privateKey(ssh.getSshPrivateKey()).build();
+    public ResultUtil<CreateSshAuthorizedModel> createKey(@RequestBody SshCreateRequest request) {
+        request.validate();
+        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.createSshKey(request.getName()));
+        CreateSshAuthorizedModel model = CreateSshAuthorizedModel.builder().id(ssh.getId()).name(request.getName()).publicKey(ssh.getSshPublicKey()).privateKey(ssh.getSshPrivateKey()).build();
         return ResultUtil.success(model);
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @PostMapping("/api/ssh/modify")
-    public ResultUtil<SshAuthorizedModel> modify(@RequestParam("id") int id, @RequestParam("name") String name) {
-        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.modifySshKey(id, name));
+    public ResultUtil<SshAuthorizedModel> modify(@RequestBody SshModifyRequest request) {
+        request.validate();
+        SshAuthorizedEntity ssh = this.globalLockCall(() -> this.sshAuthorizedService.modifySshKey(request.getId(), request.getName()));
         return ResultUtil.success(convertService.initSshModel(ssh));
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @LoginRequire
     @DeleteMapping("/api/ssh/destroy")
-    public ResultUtil<Void> deleteSshKey(@RequestParam("id") int id) {
-        this.globalLockCall(() -> this.sshAuthorizedService.deleteSshKey(id));
+    public ResultUtil<Void> deleteSshKey(@RequestBody SshDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> this.sshAuthorizedService.deleteSshKey(request.getId()));
         return ResultUtil.success();
     }
 
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @LoginRequire
     @PostMapping("/api/ssh/download/key")
-    public ResultUtil<String> createDownloadKey(@RequestParam("id") int id) {
-        String token = this.sshAuthorizedService.createDownloadKey(id);
+    public ResultUtil<String> createDownloadKey(@RequestBody SshDownloadRequest request) {
+        request.validate();
+        String token = this.sshAuthorizedService.createDownloadKey(request.getId());
         return ResultUtil.success(token);
     }
 
