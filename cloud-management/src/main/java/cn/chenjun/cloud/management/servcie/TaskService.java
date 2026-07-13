@@ -32,11 +32,11 @@ public class TaskService {
 
     @Transactional(rollbackFor = Exception.class)
     public void addTask(BaseOperateParam operateParam) {
-        this.addTask(operateParam, 0,false);
+        this.addTask(operateParam, 0, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void addTask(BaseOperateParam operateParam, int delayMinute,boolean update) {
+    public void addTask(BaseOperateParam operateParam, int delayMinute, boolean update) {
         TaskEntity task = this.findTask(operateParam.getTaskId());
         if (task == null) {
             task = TaskEntity.builder().taskId(operateParam.getTaskId())

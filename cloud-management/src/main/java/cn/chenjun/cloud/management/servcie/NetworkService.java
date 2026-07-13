@@ -62,8 +62,8 @@ public class NetworkService extends AbstractService {
         return network;
     }
 
-    public Page<NetworkEntity> search(String type,String status,String bridgeType,String keyword, int no, int size) {
-        Page<NetworkEntity> page = this.networkDao.search(type,status,bridgeType,keyword, no, size);
+    public Page<NetworkEntity> search(String type, String status, String bridgeType, String keyword, int no, int size) {
+        Page<NetworkEntity> page = this.networkDao.search(type, status, bridgeType, keyword, no, size);
 //        return ResultUtil.success(Page.convert(page, source -> BeanConverter.convert(source, SimpleNetworkModel.class)));
         return page;
     }
@@ -354,10 +354,10 @@ public class NetworkService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "参数错误");
         }
         GuestNetworkEntity guestNetwork = this.guestNetworkDao.findById(guestNetworkId);
-        if(guestNetwork==null){
+        if (guestNetwork == null) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "参数错误");
         }
-        if(guestNetwork.getAllocateType()!=Constant.NetworkAllocateType.DEFAULT){
+        if (guestNetwork.getAllocateType() != Constant.NetworkAllocateType.DEFAULT) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "该地址已经被分配");
         }
         guestNetwork.setAllocateType(Constant.NetworkAllocateType.CUSTOM);

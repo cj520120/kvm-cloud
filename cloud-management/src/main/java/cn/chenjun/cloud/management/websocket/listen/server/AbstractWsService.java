@@ -119,12 +119,12 @@ public abstract class AbstractWsService<T extends WsMessage, V> {
         });
     }
 
+    private String getName() {
+        return this.getClass().getName();
+    }
+
     @FunctionalInterface
     protected interface MessageProcess<T extends WsMessage, V> {
         BaseCodecHandler<T, V> create(Client webSocket);
-    }
-
-    private String getName() {
-        return this.getClass().getName();
     }
 }

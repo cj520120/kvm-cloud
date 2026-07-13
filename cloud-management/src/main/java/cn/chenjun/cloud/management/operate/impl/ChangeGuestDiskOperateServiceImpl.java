@@ -40,7 +40,7 @@ public class ChangeGuestDiskOperateServiceImpl extends AbstractOsOperateService<
 
         if (guest.getHostId() > 0) {
             HostEntity host = hostDao.findById(guest.getHostId());
-            if(Objects.equals(volume.getDevice(),Constant.DeviceType.DISK)) {
+            if (Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)) {
                 StorageEntity storage = this.storageDao.findById(volume.getStorageId());
                 if (storage == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "虚拟机[" + guest.getStatus() + "]磁盘[" + volume.getName() + "]所属存储池不存在");
@@ -61,8 +61,8 @@ public class ChangeGuestDiskOperateServiceImpl extends AbstractOsOperateService<
                 } else {
                     this.asyncInvoker(host, param, Constant.Command.GUEST_DETACH_DISK, disk);
                 }
-            }else {
-                Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(),guest.getGuestId());
+            } else {
+                Map<String, Object> volumeConfigMap = this.loadGuestConfig(guest.getBindHostId(), guest.getGuestId());
                 String xml;
                 if (volume.getDevice().equals(Constant.DeviceType.BLOCK)) {
                     xml = this.buildBlockDiskXml(guest, volume, volume.getDeviceId(), volume.getDeviceDriver(), volumeConfigMap);

@@ -23,7 +23,6 @@ public class DestroyGuestOperate extends BaseOperateParam {
     }
 
 
-
     @Override
     public String getTaskId() {
         return "Guest-Destroy:" + guestId;

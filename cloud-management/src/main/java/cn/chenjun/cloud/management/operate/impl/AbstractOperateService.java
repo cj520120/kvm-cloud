@@ -183,7 +183,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 }
             } catch (Exception err) {
                 this.onSubmitFinishEvent(param.getTaskId(), (V) ResultUtil.error(ErrorCode.SERVER_ERROR, "Request error: " + err.getMessage()));
-            }finally {
+            } finally {
                 RequestContextHolderUtil.clearContext();
                 NotifyContextHolderUtil.afterCompletion();
             }
@@ -341,6 +341,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 .remoteIps(remoteIps)
                 .build();
     }
+
     protected Map<String, Object> loadGuestConfig(int hostId, int guestId) {
         List<ConfigQuery> queryList = new ArrayList<>();
         queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());

@@ -7,15 +7,7 @@ import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.StorageEntity;
-import cn.chenjun.cloud.management.model.SimpleStorageModel;
-import cn.chenjun.cloud.management.model.StorageClearRequest;
-import cn.chenjun.cloud.management.model.StorageCreateRequest;
-import cn.chenjun.cloud.management.model.StorageDestroyRequest;
-import cn.chenjun.cloud.management.model.StorageMaintenanceRequest;
-import cn.chenjun.cloud.management.model.StorageMigrateRequest;
-import cn.chenjun.cloud.management.model.StorageModel;
-import cn.chenjun.cloud.management.model.StorageRegisterRequest;
-import cn.chenjun.cloud.management.model.StorageUpdateSupportCategoryRequest;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -48,12 +40,14 @@ public class StorageController extends BaseController {
 
         return ResultUtil.success(Page.convert(page, source -> BeanConverter.convert(source, SimpleStorageModel.class)));
     }
+
     @GetMapping("/api/storage/children")
     public ResultUtil<List<StorageModel>> listChildrenStorage(@RequestParam(value = "storageId") Integer storageId) {
         List<StorageEntity> childrenStorages = storageService.listChildrenStorage(storageId);
 
         return ResultUtil.success(this.convertService.initStorageModel(childrenStorages));
     }
+
     @GetMapping("/api/storage/info")
     public ResultUtil<StorageModel> getStorageInfo(@RequestParam("storageId") int storageId) {
         StorageEntity storage = storageService.getStorageInfo(storageId);

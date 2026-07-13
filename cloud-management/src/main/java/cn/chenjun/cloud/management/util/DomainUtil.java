@@ -19,6 +19,7 @@ public class DomainUtil {
         map.put("__SYS__", systemConfig);
         return JinjavaParser.create().render(tpl, map);
     }
+
     public static String buildBlockDiskXml(String tpl, Map<String, Object> systemConfig, GuestEntity guest, VolumeEntity volume, int deviceId, String deviceType) {
         Map<String, Object> map = new HashMap<>();
         map.put("disk", ParamBuilder.buildDiskParam(volume, deviceId, deviceType));

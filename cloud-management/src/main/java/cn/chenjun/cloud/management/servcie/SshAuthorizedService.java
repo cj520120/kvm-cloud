@@ -35,12 +35,12 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 public class SshAuthorizedService extends AbstractService {
-    @Autowired
-    private RedissonClient redissonClient;
-
     static {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     }
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     public List<SshAuthorizedEntity> listAllSshKeys() {
         List<SshAuthorizedEntity> list = this.sshAuthorizedDao.listAll();

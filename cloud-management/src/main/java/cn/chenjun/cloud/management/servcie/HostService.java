@@ -135,6 +135,7 @@ public class HostService extends AbstractHostStorageService {
         return host;
 
     }
+
     @Transactional(rollbackFor = Exception.class)
     public HostEntity updateHostRole(int hostId, int role) {
         HostEntity host = this.hostDao.findById(hostId);
@@ -156,7 +157,7 @@ public class HostService extends AbstractHostStorageService {
             throw new CodeException(ErrorCode.SERVER_ERROR, "当前主机有运行的虚拟机或有绑定的虚拟机，请先停止或删除虚拟机后再进行操作");
         }
         List<StorageEntity> storageList = this.storageDao.listByHostId(hostId);
-        for (StorageEntity storage:storageList){
+        for (StorageEntity storage : storageList) {
             if (this.volumeDao.countByStorageId(storage.getStorageId()) > 0) {
                 throw new CodeException(ErrorCode.HOST_HAS_LOCAL_STORAGE, "该主机已经启用了本地存储池，且有磁盘占用，请先删除磁盘后再进行操作");
             }

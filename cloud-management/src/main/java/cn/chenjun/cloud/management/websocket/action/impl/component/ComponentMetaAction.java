@@ -92,7 +92,7 @@ public class ComponentMetaAction implements WsAction<MapData> {
                 } else if ("meta-data-info".equals(type)) {
                     String metaKey = msg.getData().getOrDefault("meta-key", "").toString();
                     response = metaService.findMetaDataByKey(metaKey, context.getNetworkId(), ip);
-                    if(ObjectUtils.isEmpty(response)){
+                    if (ObjectUtils.isEmpty(response)) {
                         map.put("status", HttpStatus.NOT_FOUND.value());
                     }
                 } else if ("user-data".equals(type)) {

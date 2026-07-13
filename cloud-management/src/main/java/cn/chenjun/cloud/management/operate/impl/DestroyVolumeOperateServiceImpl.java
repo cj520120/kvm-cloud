@@ -33,9 +33,9 @@ public class DestroyVolumeOperateServiceImpl extends AbstractOperateService<Dest
     public void operate(DestroyVolumeOperate param) {
         VolumeEntity volume = volumeDao.findById(param.getVolumeId());
         if (volume.getStatus() == Constant.VolumeStatus.DESTROY) {
-            if(!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)){
+            if (!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)) {
                 this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
-            }else {
+            } else {
                 StorageEntity storage = storageDao.findById(volume.getStorageId());
                 if (storage.getStatus() != Constant.StorageStatus.READY) {
                     throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");

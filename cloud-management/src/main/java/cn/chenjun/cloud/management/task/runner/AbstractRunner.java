@@ -42,12 +42,12 @@ public abstract class AbstractRunner {
             });
             if (isRun) {
                 this.doWork();
-            }else{
+            } else {
                 log.debug("任务正在执行中,忽略本次执行:{}", this.getName());
             }
         } catch (Exception err) {
             log.error("周期任务执行失败.", err);
-        }finally {
+        } finally {
             RequestContextHolderUtil.clearContext();
             NotifyContextHolderUtil.afterCompletion();
         }

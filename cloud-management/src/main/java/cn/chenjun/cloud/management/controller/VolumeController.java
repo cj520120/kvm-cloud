@@ -5,26 +5,14 @@ import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
-import cn.chenjun.cloud.management.model.CloneModel;
-import cn.chenjun.cloud.management.model.MigrateModel;
-import cn.chenjun.cloud.management.model.SimpleVolumeModel;
-import cn.chenjun.cloud.management.model.VolumeBatchDestroyRequest;
-import cn.chenjun.cloud.management.model.VolumeCloneRequest;
-import cn.chenjun.cloud.management.model.VolumeCreateRequest;
-import cn.chenjun.cloud.management.model.VolumeDestroyRequest;
-import cn.chenjun.cloud.management.model.VolumeMigrateRequest;
-import cn.chenjun.cloud.management.model.VolumeModel;
-import cn.chenjun.cloud.management.model.VolumeResizeRequest;
-import cn.chenjun.cloud.management.model.VolumeTemplateCreateRequest;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.VolumeService;
 import cn.chenjun.cloud.management.servcie.bean.CloneInfo;
 import cn.chenjun.cloud.management.servcie.bean.MigrateVolumeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author chenjun

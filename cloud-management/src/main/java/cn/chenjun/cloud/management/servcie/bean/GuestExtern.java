@@ -9,7 +9,7 @@ public class GuestExtern {
     private MetaDataExtern metaData;
     @SerializedName(GuestExternNames.USER_DATA)
     private UserDataExtern userData;
-    @SerializedName(value=GuestExternNames.GRAPHICS,alternate = {GuestExternNames.VNC})
+    @SerializedName(value = GuestExternNames.GRAPHICS, alternate = {GuestExternNames.VNC})
     private GraphicsExtern graphics;
     @SerializedName(GuestExternNames.VENDOR_DATA)
     private String initVendorData;

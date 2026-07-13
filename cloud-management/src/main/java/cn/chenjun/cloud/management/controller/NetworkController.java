@@ -10,15 +10,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
-import cn.chenjun.cloud.management.model.NetworkCreateRequest;
-import cn.chenjun.cloud.management.model.NetworkDestroyRequest;
-import cn.chenjun.cloud.management.model.NetworkMaintenanceRequest;
-import cn.chenjun.cloud.management.model.NetworkModel;
-import cn.chenjun.cloud.management.model.NetworkNicAllocateRequest;
-import cn.chenjun.cloud.management.model.NetworkNicReleaseRequest;
-import cn.chenjun.cloud.management.model.NetworkRegisterRequest;
-import cn.chenjun.cloud.management.model.NicMode;
-import cn.chenjun.cloud.management.model.SimpleNetworkModel;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.NetworkService;
 import cn.chenjun.cloud.management.servcie.bean.SubnetNetwork;
 import cn.chenjun.cloud.management.util.IpValidator;
@@ -58,6 +50,7 @@ public class NetworkController extends BaseController {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入合法的网关地址");
         }
     }
+
     @GetMapping("/api/network/info")
     public ResultUtil<NetworkModel> getNetworkInfo(@RequestParam("networkId") int networkId) {
         NetworkEntity network = networkService.getNetworkInfo(networkId);
@@ -67,13 +60,13 @@ public class NetworkController extends BaseController {
 
     @GetMapping("/api/network/search")
     public ResultUtil<Page<SimpleNetworkModel>> search(@RequestParam(value = "keyword", required = false) String keyword,
-                                                       @RequestParam(value = "type",required = false) String type,
-                                                       @RequestParam(value = "status",required = false) String status,
-                                                       @RequestParam(value = "bridgeType",required = false) String bridgeType,
+                                                       @RequestParam(value = "type", required = false) String type,
+                                                       @RequestParam(value = "status", required = false) String status,
+                                                       @RequestParam(value = "bridgeType", required = false) String bridgeType,
                                                        @RequestParam("no") int no,
                                                        @RequestParam("size") int size) {
 
-        Page<NetworkEntity> page = networkService.search(type,status,bridgeType,keyword, no, size);
+        Page<NetworkEntity> page = networkService.search(type, status, bridgeType, keyword, no, size);
         Page<SimpleNetworkModel> pageModel = Page.convert(page, source -> BeanConverter.convert(source, SimpleNetworkModel.class));
         return ResultUtil.success(pageModel);
     }
@@ -131,13 +124,15 @@ public class NetworkController extends BaseController {
         List<NicMode> modes = nics.stream().map(this.convertService::initNicModel).collect(Collectors.toList());
         return ResultUtil.success(modes);
     }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/nic/special/allocate")
-    public ResultUtil< NicMode> allocateSpecialNetworkNic(@RequestBody NetworkNicAllocateRequest request) {
+    public ResultUtil<NicMode> allocateSpecialNetworkNic(@RequestBody NetworkNicAllocateRequest request) {
         request.validate();
         GuestNetworkEntity nic = this.globalLockCall(() -> networkService.allocateSpecialNetworkNic(request.getGuestNetworkId(), request.getAllocateId(), request.getAllocateDescription()));
         return ResultUtil.success(this.convertService.initNicModel(nic));
     }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/nic/special/release")
     public ResultUtil<NicMode> releaseSpecialNetworkNic(@RequestBody NetworkNicReleaseRequest request) {
@@ -145,6 +140,7 @@ public class NetworkController extends BaseController {
         GuestNetworkEntity nic = this.globalLockCall(() -> networkService.releaseSpecialNetworkNic(request.getGuestNetworkId()));
         return ResultUtil.success(this.convertService.initNicModel(nic));
     }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/network/register")
     public ResultUtil<NetworkModel> registerNetwork(@RequestBody NetworkRegisterRequest request) {

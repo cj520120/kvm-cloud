@@ -72,7 +72,7 @@ public class OperateEngine {
 
     @EventListener
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
-        this.executor.submit(() ->{
+        this.executor.submit(() -> {
             RequestContextHolderUtil.initContext();
             lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
                 try {

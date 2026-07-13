@@ -62,10 +62,10 @@ public class GuestInfoOperateServiceImpl extends AbstractOperateService<GuestInf
             this.allocateService.initHostAllocate();
             if (resultUtil.getCode() == ErrorCode.SUCCESS) {
                 GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
-                if(extern==null){
+                if (extern == null) {
                     extern = new GuestExtern();
                 }
-                if(extern.getGraphics()==null){
+                if (extern.getGraphics() == null) {
                     extern.setGraphics(GuestExternUtil.buildVncParam());
                 }
                 Graphics graphics = resultUtil.getData().getGraphics();

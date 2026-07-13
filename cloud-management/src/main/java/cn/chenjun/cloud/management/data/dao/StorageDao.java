@@ -28,7 +28,7 @@ public class StorageDao {
         QueryWrapper<StorageEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(storageType != null, StorageEntity.STORAGE_TYPE, storageType);
         queryWrapper.eq(storageStatus != null, StorageEntity.STORAGE_STATUS, storageStatus);
-        queryWrapper.eq(  StorageEntity.STORAGE_HOST_ID, 0);
+        queryWrapper.eq(StorageEntity.STORAGE_HOST_ID, 0);
         if (!ObjectUtils.isEmpty(keyword)) {
             queryWrapper.and(o -> {
                 String condition = "%" + keyword + "%";

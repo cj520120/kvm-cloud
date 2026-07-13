@@ -24,19 +24,19 @@ public class NetworkDao {
         return mapper.selectList(new QueryWrapper<>());
     }
 
-    public Page<NetworkEntity> search(String type,String status,String bridgeType,String keyword, int no, int size) {
+    public Page<NetworkEntity> search(String type, String status, String bridgeType, String keyword, int no, int size) {
         QueryWrapper<NetworkEntity> wrapper = new QueryWrapper<>();
         if (!ObjectUtils.isEmpty(keyword)) {
             String condition = "%" + keyword + "%";
             wrapper.like(NetworkEntity.NETWORK_NAME, condition);
         }
-        if(!ObjectUtils.isEmpty(type)) {
+        if (!ObjectUtils.isEmpty(type)) {
             wrapper.eq(NetworkEntity.NETWORK_TYPE, type);
         }
-        if(!ObjectUtils.isEmpty(status)) {
+        if (!ObjectUtils.isEmpty(status)) {
             wrapper.eq(NetworkEntity.NETWORK_STATUS, status);
         }
-        if(!ObjectUtils.isEmpty(bridgeType)) {
+        if (!ObjectUtils.isEmpty(bridgeType)) {
             wrapper.eq(NetworkEntity.NETWORK_BRIDGE_TYPE, bridgeType);
         }
         int nCount = Math.toIntExact(this.mapper.selectCount(wrapper));

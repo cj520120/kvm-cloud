@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 import java.util.Objects;
+
 @Slf4j
 public class ActionDispatcher {
     private static final Collection<WsAction> ACTION_LIST;
@@ -23,7 +24,7 @@ public class ActionDispatcher {
             if (Objects.equals(action.getCommand(), msg.getCommand())) {
                 try {
                     action.doAction(webSocket, msg);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     log.error("Websocket 处理数据失败.", e);
                 }
             }

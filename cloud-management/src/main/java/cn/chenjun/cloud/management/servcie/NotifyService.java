@@ -24,8 +24,8 @@ public class NotifyService {
     public <T> void publish(NotifyData<T> data) {
         try {
             this.topic.publish(data);
-        }catch (Exception e){
-            log.error("发布消息失败:{}",data,e);
+        } catch (Exception e) {
+            log.error("发布消息失败:{}", data, e);
         }
     }
 

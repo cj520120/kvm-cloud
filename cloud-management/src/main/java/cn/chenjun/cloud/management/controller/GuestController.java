@@ -41,14 +41,14 @@ public class GuestController extends BaseController {
 
     @GetMapping("/api/guest/search")
     public ResultUtil<Page<GuestModel>> search(@RequestParam(value = "guestType", required = false) Integer guestType,
-                                                     @RequestParam(value = "groupId", required = false) Integer groupId,
-                                                     @RequestParam(value = "networkId", required = false) Integer networkId,
-                                                     @RequestParam(value = "hostId", required = false) Integer hostId,
-                                                     @RequestParam(value = "schemeId", required = false) Integer schemeId,
-                                                     @RequestParam(value = "status", required = false) Integer status,
-                                                     @RequestParam(value = "keyword", required = false) String keyword,
-                                                     @RequestParam("no") int no,
-                                                     @RequestParam("size") int size) {
+                                               @RequestParam(value = "groupId", required = false) Integer groupId,
+                                               @RequestParam(value = "networkId", required = false) Integer networkId,
+                                               @RequestParam(value = "hostId", required = false) Integer hostId,
+                                               @RequestParam(value = "schemeId", required = false) Integer schemeId,
+                                               @RequestParam(value = "status", required = false) Integer status,
+                                               @RequestParam(value = "keyword", required = false) String keyword,
+                                               @RequestParam("no") int no,
+                                               @RequestParam("size") int size) {
         Page<GuestEntity> page = this.guestService.search(guestType, groupId, networkId, hostId, schemeId, status, keyword, no, size);
 
         List<GuestModel> models = this.convertService.initGuestList(page.getList());
@@ -112,7 +112,7 @@ public class GuestController extends BaseController {
     @PostMapping("/api/guest/shutdown/batch")
     public ResultUtil<List<GuestModel>> batchStop(@RequestBody GuestBatchRequest request) {
         request.validate();
-        List<GuestEntity> guests = this.globalLockCall(() -> this.guestService.batchStop(request.getGuestIds(),request.isForce()));
+        List<GuestEntity> guests = this.globalLockCall(() -> this.guestService.batchStop(request.getGuestIds(), request.isForce()));
         List<GuestModel> models = this.convertService.initGuestList(guests);
         return ResultUtil.success(models);
     }
@@ -236,6 +236,7 @@ public class GuestController extends BaseController {
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
+
     @PostMapping("/api/guest/host/bind")
     public ResultUtil<GuestModel> bindHost(@RequestBody GuestBindHostRequest request) {
         request.validate();
@@ -243,6 +244,7 @@ public class GuestController extends BaseController {
         GuestModel model = this.convertService.initGuestModel(guest);
         return ResultUtil.success(model);
     }
+
     @PostMapping("/api/guest/host/unbind")
     public ResultUtil<GuestModel> unbindHost(@RequestBody GuestDestroyRequest request) {
         request.validate();

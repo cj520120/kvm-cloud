@@ -14,6 +14,7 @@ public class JsonCodecHandler<T extends WsMessage> extends BaseCodecHandler<T, S
     private final Type clazz;
     private final Client webSocket;
     private final StringBuilder messageBuffer = new StringBuilder();
+
     public JsonCodecHandler(Client sock, Type clazz) {
         this.webSocket = sock;
         this.clazz = clazz;

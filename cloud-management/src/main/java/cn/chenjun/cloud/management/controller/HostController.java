@@ -6,12 +6,7 @@ import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.core.annotation.PermissionRequire;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
-import cn.chenjun.cloud.management.model.HostCreateRequest;
-import cn.chenjun.cloud.management.model.HostDestroyRequest;
-import cn.chenjun.cloud.management.model.HostMaintenanceRequest;
-import cn.chenjun.cloud.management.model.HostModel;
-import cn.chenjun.cloud.management.model.HostRegisterRequest;
-import cn.chenjun.cloud.management.model.HostUpdateRoleRequest;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.HostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +68,7 @@ public class HostController extends BaseController {
         HostEntity entity = this.globalLockCall(() -> hostService.maintenanceHost(request.getHostId()));
         return ResultUtil.success(convertService.initHostModel(entity));
     }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PostMapping("/api/host/role/update")
     public ResultUtil<HostModel> updateHostRole(@RequestBody HostUpdateRoleRequest request) {
@@ -80,6 +76,7 @@ public class HostController extends BaseController {
         HostEntity entity = this.globalLockCall(() -> hostService.updateHostRole(request.getHostId(), request.getRole()));
         return ResultUtil.success(convertService.initHostModel(entity));
     }
+
     @PermissionRequire(role = Constant.UserType.ADMIN)
     @DeleteMapping("/api/host/destroy")
     public ResultUtil<Void> destroyHost(@RequestBody HostDestroyRequest request) {

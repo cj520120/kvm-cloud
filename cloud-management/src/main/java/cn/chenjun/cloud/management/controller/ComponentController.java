@@ -8,13 +8,7 @@ import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.management.data.entity.ComponentEntity;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.RouteStrategyEntity;
-import cn.chenjun.cloud.management.model.ComponentCreateNatRequest;
-import cn.chenjun.cloud.management.model.ComponentDestroyRequest;
-import cn.chenjun.cloud.management.model.ComponentDetailModel;
-import cn.chenjun.cloud.management.model.ComponentRouteDeleteRequest;
-import cn.chenjun.cloud.management.model.ComponentRouteRequest;
-import cn.chenjun.cloud.management.model.GuestModel;
-import cn.chenjun.cloud.management.model.RouteStrategyModel;
+import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.ComponentService;
 import cn.chenjun.cloud.management.servcie.GuestService;
 import cn.chenjun.cloud.management.servcie.NetworkService;
@@ -44,6 +38,7 @@ public class ComponentController extends BaseController {
         return ResultUtil.success(list);
 
     }
+
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)
     @PutMapping("/api/component/nat/create")
     public ResultUtil<ComponentDetailModel> createNatComponent(@RequestBody ComponentCreateNatRequest request) {

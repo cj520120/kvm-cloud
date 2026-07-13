@@ -91,7 +91,7 @@ public class AllocateService extends AbstractService {
     public HostEntity allocateHost(int role, int hostId, String arch, int mustHostId, int cpu, long memory) {
         if (mustHostId > 0) {
             HostEntity host = this.hostDao.findById(mustHostId);
-            if (role!= HostRole.NONE && (host.getRole() & role) != role) {
+            if (role != HostRole.NONE && (host.getRole() & role) != role) {
                 throw new CodeException(ErrorCode.HOST_ROLE_NOT_SUPPORT, "主机角色不支持");
             }
             List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(cn.chenjun.cloud.common.util.Constant.ConfigType.HOST).id(host.getHostId()).build());
@@ -106,7 +106,7 @@ public class AllocateService extends AbstractService {
             return host;
         } else {
             List<HostEntity> list = this.hostDao.listAll();
-            if (role!= HostRole.NONE) {
+            if (role != HostRole.NONE) {
                 list.removeIf(t -> !HostRole.hasRole(t.getRole(), role));
                 log.info("过滤主机角色,role={}", role);
             }

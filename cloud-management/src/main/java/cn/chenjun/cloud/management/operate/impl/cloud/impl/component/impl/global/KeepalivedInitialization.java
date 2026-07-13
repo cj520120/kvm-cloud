@@ -26,7 +26,7 @@ public class KeepalivedInitialization extends BaseInitialization {
     public void initialize(CloudConfig config, GuestEntity guest, NetworkEntity network, ComponentEntity component, ComponentGuestEntity componentGuest) {
         config.appendPackage("keepalived");
         config.appendFile("/etc/keepalived/keepalived.conf", this.buildKeepaliveConfig(component, guest, componentGuest));
-        config.appendFile("/usr/local/bin/keepalived-notify.sh", ResourceUtil.readUtf8Str("tpl/component/init/keepalived-notify.sh.json"),"0755");
+        config.appendFile("/usr/local/bin/keepalived-notify.sh", ResourceUtil.readUtf8Str("tpl/component/init/keepalived-notify.sh.json"), "0755");
         config.appendRuncmd("systemctl enable keepalived");
         config.appendRuncmd("systemctl restart keepalived");
     }

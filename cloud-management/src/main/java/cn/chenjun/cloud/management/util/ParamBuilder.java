@@ -117,7 +117,8 @@ public class ParamBuilder {
         map.put("device", volume.getDevice());
         return map;
     }
-    public static Map<String, Object> buildBlockParam(VolumeEntity volume ) {
+
+    public static Map<String, Object> buildBlockParam(VolumeEntity volume) {
         Map<String, Object> map = new HashMap<>();
         map.put("device", volume.getPath());
         return map;

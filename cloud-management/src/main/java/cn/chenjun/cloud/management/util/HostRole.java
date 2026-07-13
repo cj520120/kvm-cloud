@@ -11,7 +11,8 @@ public class HostRole {
     public static boolean isMaster(int role) {
         return (role & MASTER) == MASTER;
     }
-    public static boolean hasRole(int role,int checkRole) {
+
+    public static boolean hasRole(int role, int checkRole) {
         return (role & checkRole) == checkRole;
     }
 }

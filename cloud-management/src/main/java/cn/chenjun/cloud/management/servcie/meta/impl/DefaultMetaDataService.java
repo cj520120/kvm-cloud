@@ -65,7 +65,7 @@ public class DefaultMetaDataService implements MetaDataService {
         if (extern != null && extern.getMetaData() != null) {
             GuestExtern.MetaDataExtern metaDataExtern = extern.getMetaData();
             if (!ObjectUtils.isEmpty(metaDataExtern.getHostname())) {
-                metaKeys.add(GuestExtern.GuestExternNames.MetaDataNames.HOSTNAME );
+                metaKeys.add(GuestExtern.GuestExternNames.MetaDataNames.HOSTNAME);
             }
             if (!ObjectUtils.isEmpty(metaDataExtern.getLocalHostname())) {
                 metaKeys.add(GuestExtern.GuestExternNames.MetaDataNames.LOCAL_HOSTNAME);

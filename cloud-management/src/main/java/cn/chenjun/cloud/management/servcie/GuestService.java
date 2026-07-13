@@ -41,7 +41,7 @@ public class GuestService extends AbstractService {
 
     private void checkSystemComponentComplete(int networkId) {
         NetworkEntity network = this.networkDao.findById(networkId);
-        if(network == null || !Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)) {
+        if (network == null || !Objects.equals(network.getStatus(), Constant.NetworkStatus.READY)) {
             throw new CodeException(ErrorCode.NETWORK_NOT_READY, "网络服务未初始化完成,请稍后重试");
         }
     }
@@ -76,15 +76,15 @@ public class GuestService extends AbstractService {
         if (guest == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
         }
-        if(Objects.equals(guest.getBindHostId(), hostId)){
+        if (Objects.equals(guest.getBindHostId(), hostId)) {
             return guest;
         }
-        if(!Objects.equals(guest.getStatus(), Constant.GuestStatus.STOP)){
+        if (!Objects.equals(guest.getStatus(), Constant.GuestStatus.STOP)) {
             throw new CodeException(ErrorCode.GUEST_NOT_STOP, "只能对关机状态的主机进行操作");
         }
         List<VolumeEntity> volumes = this.volumeDao.listByGuestId(guestId);
         for (VolumeEntity volume : volumes) {
-            if(volume.getHostId()>0&&!Objects.equals(volume.getHostId(), hostId)){
+            if (volume.getHostId() > 0 && !Objects.equals(volume.getHostId(), hostId)) {
                 throw new CodeException(ErrorCode.GUEST_VOLUME_BIND_OTHER_HOST, "虚拟机磁盘已经绑定了主机，无法进行相关操作");
             }
         }
@@ -95,11 +95,11 @@ public class GuestService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public GuestEntity createGuest(int groupId, String description, int systemCategory, int bootstrapType, String deviceDriver, int bindHostId,
-                                              int hostId, int schemeId, int networkId, String networkDeviceType,
-                                              int isoTemplateId, int diskTemplateId, int volumeId,
+                                   int hostId, int schemeId, int networkId, String networkDeviceType,
+                                   int isoTemplateId, int diskTemplateId, int volumeId,
                                    int storageId, long size, String hostName, String password, int sshId, String arch, String initVendorData) {
 
-        int mustHostId=0;
+        int mustHostId = 0;
 
         StorageEntity storage = this.allocateService.allocateStorage(cn.chenjun.cloud.common.util.Constant.StorageCategory.VOLUME, storageId);
         if (Objects.equals(storage.getType(), cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL)) {
@@ -108,16 +108,16 @@ public class GuestService extends AbstractService {
             }
             mustHostId = storage.getHostId();
         }
-        if(mustHostId==0 && volumeId > 0  ) {
+        if (mustHostId == 0 && volumeId > 0) {
             VolumeEntity volume = this.volumeDao.findById(volumeId);
             if (volume == null) {
                 throw new CodeException(ErrorCode.VOLUME_NOT_FOUND, "磁盘不存在");
             }
-            mustHostId=volume.getHostId();
+            mustHostId = volume.getHostId();
         }
-        if (bindHostId==0){
-            bindHostId=mustHostId;
-        }else if (mustHostId>0&&bindHostId!=mustHostId){
+        if (bindHostId == 0) {
+            bindHostId = mustHostId;
+        } else if (mustHostId > 0 && bindHostId != mustHostId) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "绑定主机与存储所在机器不一致");
         }
         if (hostId <= 0) {
@@ -234,7 +234,7 @@ public class GuestService extends AbstractService {
 
     @Transactional(rollbackFor = Exception.class)
     public GuestEntity reInstall(int guestId, String deviceDriver, int systemCategory, int bootstrapType, int isoTemplateId, int diskTemplateId, int volumeId,
-                                            int storageId, long size) {
+                                 int storageId, long size) {
 
         if (isoTemplateId <= 0 && diskTemplateId <= 0 && volumeId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请选择系统来源");
@@ -307,7 +307,7 @@ public class GuestService extends AbstractService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<GuestEntity> batchStop(List<Integer> guestIds,boolean isForce) {
+    public List<GuestEntity> batchStop(List<Integer> guestIds, boolean isForce) {
         List<GuestEntity> models = new ArrayList<>(guestIds.size());
         for (Integer guestId : guestIds) {
             try {
@@ -474,11 +474,11 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入设备描述信息");
         }
         GuestEntity guest = this.guestDao.findById(guestId);
-        if(guest==null){
-            throw new CodeException(ErrorCode.GUEST_NOT_FOUND,"虚拟机不存在");
+        if (guest == null) {
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
         }
-        if(guest.getBindHostId()<=0){
-            throw new CodeException(ErrorCode.GUEST_BIND_HOST_ERROR,"虚拟机未绑定主机");
+        if (guest.getBindHostId() <= 0) {
+            throw new CodeException(ErrorCode.GUEST_BIND_HOST_ERROR, "虚拟机未绑定主机");
         }
         switch (device) {
             case Constant.DeviceType.BLOCK:
@@ -511,7 +511,7 @@ public class GuestService extends AbstractService {
         BaseOperateParam operateParam = ChangeGuestDiskOperate.builder()
                 .deviceId(volume.getDeviceId()).deviceBus(volume.getDeviceDriver()).attach(true).volumeId(volume.getVolumeId()).guestId(guestId)
                 .id(UUID.randomUUID().toString())
-                .title("挂在磁盘[" + guest.getDescription() + "]").build();
+                .title("挂载磁盘[" + guest.getDescription() + "]").build();
         this.operateTask.addTask(operateParam);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
         return volume;
@@ -693,7 +693,7 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "客户机不存在");
         }
         int timeout = 0;
-        boolean bUpdateTask=false;
+        boolean bUpdateTask = false;
         switch (guest.getStatus()) {
             case cn.chenjun.cloud.common.util.Constant.GuestStatus.STOP:
                 if (guest.getType().equals(cn.chenjun.cloud.common.util.Constant.GuestType.USER)) {
@@ -702,7 +702,7 @@ public class GuestService extends AbstractService {
                 break;
             case cn.chenjun.cloud.common.util.Constant.GuestStatus.ERROR:
             case cn.chenjun.cloud.common.util.Constant.GuestStatus.DESTROY:
-                bUpdateTask=true;
+                bUpdateTask = true;
                 break;
             default:
                 throw new CodeException(ErrorCode.GUEST_NOT_STOP, "当前主机不是关机状态");
@@ -712,7 +712,7 @@ public class GuestService extends AbstractService {
         this.guestDao.update(guest);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         DestroyGuestOperate operate = DestroyGuestOperate.builder().id(UUID.randomUUID().toString()).title("销毁虚拟机[" + guest.getName() + "]").guestId(guest.getGuestId()).build();
-        operateTask.addTask(operate, timeout,bUpdateTask);
+        operateTask.addTask(operate, timeout, bUpdateTask);
         return guest;
     }
 
@@ -722,12 +722,12 @@ public class GuestService extends AbstractService {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
         }
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
-        if(extern == null){
+        if (extern == null) {
             extern = new GuestExtern();
         }
-        if(extern.getGraphics() == null){
+        if (extern.getGraphics() == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_START, "虚拟机未启动");
-        }else{
+        } else {
             String token = UUID.randomUUID().toString();
             MemGraphicsInfo memGraphicsInfo = MemGraphicsInfo.builder()
                     .guestId(guest.getGuestId())
@@ -741,9 +741,9 @@ public class GuestService extends AbstractService {
             GraphicsModel graphics = new GraphicsModel();
             graphics.setPassword(extern.getGraphics().getPassword());
             graphics.setToken(token);
-            if(ObjectUtils.isEmpty(extern.getGraphics().getProtocol()))
+            if (ObjectUtils.isEmpty(extern.getGraphics().getProtocol()))
                 extern.getGraphics().setProtocol("vnc");
-            else{
+            else {
                 extern.getGraphics().setProtocol(extern.getGraphics().getProtocol());
             }
             return graphics;

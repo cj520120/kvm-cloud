@@ -5,7 +5,6 @@ import cn.chenjun.cloud.management.ovn.model.request.BuildInterfaceXmlRequest;
 import cn.chenjun.cloud.management.ovn.model.request.CreateBridgeRequest;
 import cn.chenjun.cloud.management.ovn.model.response.BaseResponse;
 import cn.chenjun.cloud.management.ovn.model.response.CreateBridgeResponse;
-import cn.chenjun.cloud.management.ovn.model.response.HealthResponse;
 import cn.chenjun.cloud.management.ovn.model.response.NicXmlData;
 
 import java.util.Map;

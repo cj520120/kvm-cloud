@@ -90,15 +90,17 @@ public abstract class AbstractOsOperateService<T extends BaseOperateParam, V ext
         String tpl = (String) sysconfig.get(configKey);
         return DomainUtil.buildDiskXml(tpl, sysconfig, guest, storage, volume, deviceId, deviceType);
     }
-    protected String buildBlockDiskXml(GuestEntity guest,  VolumeEntity volume, int deviceId, String deviceType, Map<String, Object> sysconfig) {
-        String tpl=(String) sysconfig.get(ConfigKey.VM_DISK_BLOCK_TPL);
-        return DomainUtil.buildBlockDiskXml(tpl, sysconfig, guest,  volume, deviceId, deviceType);
+
+    protected String buildBlockDiskXml(GuestEntity guest, VolumeEntity volume, int deviceId, String deviceType, Map<String, Object> sysconfig) {
+        String tpl = (String) sysconfig.get(ConfigKey.VM_DISK_BLOCK_TPL);
+        return DomainUtil.buildBlockDiskXml(tpl, sysconfig, guest, volume, deviceId, deviceType);
     }
 
     protected String buildHostFileXml(GuestEntity guest, VolumeEntity volume, int deviceId, String deviceType, Map<String, Object> sysconfig) {
         String tpl = (String) sysconfig.get(ConfigKey.VM_DISK_FILE_TPL);
         return DomainUtil.buildHostFileXml(tpl, sysconfig, guest, volume, deviceId, deviceType);
     }
+
     public String buildInterfaceXml(NetworkEntity network, GuestNetworkEntity guestNetwork, Map<String, Object> systemConfig) {
         switch (network.getType()) {
             case Constant.NetworkType.FLAT:

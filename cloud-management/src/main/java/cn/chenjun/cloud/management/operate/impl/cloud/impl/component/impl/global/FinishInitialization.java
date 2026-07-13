@@ -35,13 +35,13 @@ public class FinishInitialization extends BaseInitialization {
         cloudConfig.put("COMPONENT_TYPE", component.getComponentType());
         cloudConfig.put("LOG_PATH", "/var/log/kvm-cloud.log");
         cloudConfig.put("LOG_BACKUP_DAYS", 7);
-        cloudConfig.put("ENABLE_CHECK_CLOUDINIT",true);
-        cloudConfig.put("ENABLE_CHECK_SERVICE",true);
+        cloudConfig.put("ENABLE_CHECK_CLOUDINIT", true);
+        cloudConfig.put("ENABLE_CHECK_SERVICE", true);
         List<String> checkServiceList = new ArrayList<>();
         checkServiceList.add("qemu-guest-agent");
         checkServiceList.add("iptables");
         checkServiceList.add("keepalived");
-        if(component.getComponentType() == Constant.ComponentType.ROUTE){
+        if (component.getComponentType() == Constant.ComponentType.ROUTE) {
             checkServiceList.add("dnsmasq");
         }
         cloudConfig.put("CHECK_SERVICES", checkServiceList);

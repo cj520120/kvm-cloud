@@ -19,6 +19,6 @@ public class ComponentDetailModel {
     private Integer componentType;
     private String componentVip;
     private String basicComponentVip;
-    private Integer networkId; 
+    private Integer networkId;
     private Date createTime;
 }

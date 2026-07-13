@@ -68,15 +68,15 @@ public class SyncHostGuestOperateServiceImpl extends AbstractOperateService<Sync
             Map<String, GuestEntity> map = guestEntityList.stream().collect(Collectors.toMap(GuestEntity::getName, Function.identity()));
             for (String hostGuestName : guestNames) {
                 GuestEntity guest = map.get(hostGuestName);
-                if(guest==null){
-                   if(Objects.equals(Constant.Enable.YES, this.configService.getConfig(ConfigKey.AUTO_DELETE_UNLINK_GUEST))) {
-                        log.warn("主机客户机不存在，可能是已经被删除:{}:{},开始自动关机",host.getHostName(),hostGuestName);
-                       GuestShutdownRequest request = GuestShutdownRequest.builder().name(hostGuestName).expireMillis(1).build();
-                       StopGuestOperate operateParam = StopGuestOperate.builder().guestId(0).force(true).build();
-                       this.asyncInvoker(host, operateParam, Constant.Command.GUEST_SHUTDOWN, request);
-                   }else{
-                       log.warn("主机客户机不存在，可能是已经被删除:{}:{},请手动清理",host.getHostName(),hostGuestName);
-                   }
+                if (guest == null) {
+                    if (Objects.equals(Constant.Enable.YES, this.configService.getConfig(ConfigKey.AUTO_DELETE_UNLINK_GUEST))) {
+                        log.warn("主机客户机不存在，可能是已经被删除:{}:{},开始自动关机", host.getHostName(), hostGuestName);
+                        GuestShutdownRequest request = GuestShutdownRequest.builder().name(hostGuestName).expireMillis(1).build();
+                        StopGuestOperate operateParam = StopGuestOperate.builder().guestId(0).force(true).build();
+                        this.asyncInvoker(host, operateParam, Constant.Command.GUEST_SHUTDOWN, request);
+                    } else {
+                        log.warn("主机客户机不存在，可能是已经被删除:{}:{},请手动清理", host.getHostName(), hostGuestName);
+                    }
                 }
 
             }

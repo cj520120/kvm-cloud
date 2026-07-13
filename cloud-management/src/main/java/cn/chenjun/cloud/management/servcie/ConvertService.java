@@ -96,9 +96,10 @@ public class ConvertService {
         }
         return model;
     }
+
     public List<StorageModel> initStorageModel(List<StorageEntity> entitys) {
         List<StorageModel> models = new ArrayList<>();
-        if(!ObjectUtils.isEmpty(entitys)) {
+        if (!ObjectUtils.isEmpty(entitys)) {
             for (StorageEntity entity : entitys) {
                 StorageModel model = this.initStorageModel(entity);
                 models.add(model);
@@ -106,6 +107,7 @@ public class ConvertService {
         }
         return models;
     }
+
     public SchemeModel initSchemeModel(SchemeEntity entity) {
         return BeanConverter.convert(entity, SchemeModel.class);
     }
@@ -117,7 +119,7 @@ public class ConvertService {
             model.setHost(this.initHostModel(RequestContextHolderUtil.get("Host." + volume.getHostId(), () -> this.hostService.getHostById(volume.getHostId()))));
         }
         if (volume.getGuestId() != 0) {
-            model.setGuest(BeanConverter.convert(RequestContextHolderUtil.get("Guest." + volume.getGuestId(), () ->this.guestService.getGuestById(volume.getGuestId())), SimpleGuestModel.class));
+            model.setGuest(BeanConverter.convert(RequestContextHolderUtil.get("Guest." + volume.getGuestId(), () -> this.guestService.getGuestById(volume.getGuestId())), SimpleGuestModel.class));
         }
         model.setStorage(BeanConverter.convert(RequestContextHolderUtil.get("Storage." + volume.getStorageId(), () -> this.storageService.getStorageById(volume.getStorageId())), SimpleStorageModel.class));
         if (volume.getTemplateId() > 0) {

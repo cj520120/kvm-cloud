@@ -228,8 +228,6 @@ public class UserService extends AbstractService {
     }
 
 
-
-
     public boolean verifyPermission(int userId, int role) {
         UserEntity selfInfo = this.getUserInfo(userId);
         if (selfInfo == null) {

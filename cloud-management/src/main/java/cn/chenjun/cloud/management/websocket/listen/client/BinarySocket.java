@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 public class BinarySocket extends BaseClient {
     protected final Session session;
     final int CHUNK_SIZE = 32768;
+
     public BinarySocket(Session session, int socketType) {
         super(socketType);
         this.session = session;

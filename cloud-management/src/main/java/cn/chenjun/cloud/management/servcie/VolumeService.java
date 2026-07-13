@@ -121,7 +121,7 @@ public class VolumeService extends AbstractService {
                 .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
-        volume=this.volumeDao.insert(volume);
+        volume = this.volumeDao.insert(volume);
         BaseOperateParam operateParam = CreateVolumeOperate.builder().id(UUID.randomUUID().toString()).title("创建磁盘[" + volume.getName() + "]").volumeId(volume.getVolumeId()).templateId(templateId).build();
         operateTask.addTask(operateParam);
 
@@ -139,7 +139,7 @@ public class VolumeService extends AbstractService {
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "跨宿主机本地磁盘无法完成克隆，如需进行操作，请先迁移到共享存储，然后再进行克隆");
         }
-        if(volume.getGuestId() > 0) {
+        if (volume.getGuestId() > 0) {
             GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
             if (guest != null) {
                 switch (guest.getStatus()) {
@@ -171,7 +171,7 @@ public class VolumeService extends AbstractService {
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .createTime(new Date())
                 .build();
-        cloneVolume=this.volumeDao.insert(cloneVolume);
+        cloneVolume = this.volumeDao.insert(cloneVolume);
         BaseOperateParam operateParam = CloneVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .sourceVolumeId(volume.getVolumeId())
                 .targetVolumeId(cloneVolume.getVolumeId())
@@ -211,7 +211,7 @@ public class VolumeService extends AbstractService {
         if (volume.getHostId() > 0 && storage.getHostId() > 0 && !Objects.equals(volume.getHostId(), storage.getHostId())) {
             throw new CodeException(ErrorCode.SERVER_ERROR, "跨宿主机本地磁盘无法完成迁移，如需进行操作，请先迁移到共享存储，然后再进行迁移");
         }
-        if(volume.getGuestId() > 0) {
+        if (volume.getGuestId() > 0) {
             GuestEntity guest = this.getVolumeGuest(sourceVolumeId);
             if (guest != null) {
                 switch (guest.getStatus()) {
@@ -243,7 +243,7 @@ public class VolumeService extends AbstractService {
                 .device(Constant.DeviceType.DISK)
                 .serial(DiskSerialUtil.generateDiskSerial())
                 .build();
-        migrateVolume=this.volumeDao.insert(migrateVolume);
+        migrateVolume = this.volumeDao.insert(migrateVolume);
         BaseOperateParam operateParam = MigrateVolumeOperate.builder().id(UUID.randomUUID().toString())
                 .title("迁移磁盘[" + volume.getName() + "]")
                 .sourceVolumeId(volume.getVolumeId())
@@ -289,15 +289,15 @@ public class VolumeService extends AbstractService {
                 volume.setStatus(cn.chenjun.cloud.common.util.Constant.VolumeStatus.DESTROY);
                 volumeDao.update(volume);
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                int timeout= volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
-                operateTask.addTask(operate,timeout,false);
+                int timeout = volume.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.ERROR ? 0 : configService.getConfig(ConfigKey.DEFAULT_DESTROY_DELAY_MINUTE);
+                operateTask.addTask(operate, timeout, false);
 
                 NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return volume;
             }
             case Constant.VolumeStatus.DESTROY: {
                 DestroyVolumeOperate operate = DestroyVolumeOperate.builder().id(UUID.randomUUID().toString()).title("销毁磁盘[" + volume.getName() + "]").volumeId(volumeId).build();
-                operateTask.addTask(operate, 0,true);
+                operateTask.addTask(operate, 0, true);
                 NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
                 return volume;
             }

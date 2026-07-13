@@ -38,9 +38,9 @@ public class CreateVolumeOperateServiceImpl<T extends CreateVolumeOperate> exten
     public void operate(T param) {
         VolumeEntity volume = volumeDao.findById(param.getVolumeId());
         if (volume.getStatus() == Constant.VolumeStatus.CREATING) {
-            if(!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)){
+            if (!Objects.equals(volume.getDevice(), Constant.DeviceType.DISK)) {
                 this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.error(ErrorCode.SERVER_ERROR, "不支持的操作"));
-            }else {
+            } else {
                 StorageEntity storage = storageDao.findById(volume.getStorageId());
                 if (storage.getStatus() != Constant.StorageStatus.READY) {
                     throw new CodeException(ErrorCode.STORAGE_NOT_READY, "存储池未就绪");
