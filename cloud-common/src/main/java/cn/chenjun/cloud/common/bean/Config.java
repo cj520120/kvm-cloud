@@ -5,20 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-/**
- * @author chenjun
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Volume {
-    private String storage;
-    private String name;
+public class Config {
     private String path;
-    private String type;
-    private long capacity;
-    private List<Config> configs;
+    private String content;
+
 }

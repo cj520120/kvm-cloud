@@ -82,25 +82,34 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     @Autowired
     protected ApplicationConfig applicationConfig;
 
-    protected static String getVolumePath(StorageEntity storage, String volumeName) {
-        String path;
+    protected static Volume initVolume(StorageEntity storage, String volumeName, String type, long capacity) {
+
+
         switch (storage.getType()) {
             case Constant.StorageType.NFS:
             case Constant.StorageType.GLUSTERFS:
             case Constant.StorageType.LOCAL:
-                path = storage.getMountPath() + "/" + volumeName;
-                break;
+                return Volume.builder().storage(storage.getName()).path(storage.getMountPath() + "/" + volumeName).name(volumeName).type(type).capacity(capacity).build();
+
             case Constant.StorageType.CEPH_RBD:
                 Map<String, Object> param = GsonBuilderUtil.create().fromJson(storage.getParam(), new TypeToken<Map<String, Object>>() {
                 }.getType());
                 String pool = param.get("pool").toString();
-                path = "rbd:" + pool + "/" + volumeName;
-                break;
+                String cephConfig = "[global]\nmon_host = " + param.get("uri") + "\n";
+                String keyring = "[client." + param.get("username") + "]\nkey = " + param.get("secret").toString() + "\n";
+                String configPath = "/tmp/" + UUID.randomUUID() + ".ceph.conf";
+                String keyringPath = "/tmp/" + UUID.randomUUID() + ".ceph.client.admin.keyring";
+                String path = String.format("rbd:%s/%s:id=%s:conf=%s:keyring=%s", pool, volumeName, param.get("username"), configPath, keyringPath);
+                List<Config> configs = Arrays.asList(
+                        Config.builder().path(configPath).content(cephConfig).build(),
+                        Config.builder().path(keyringPath).content(keyring).build());
+                return Volume.builder().storage(storage.getName()).path(path).name(volumeName).type(type).capacity(capacity).configs(configs).build();
             default:
                 throw new CodeException(ErrorCode.STORAGE_NOT_SUPPORT, "未知的存储池类型:" + storage.getType());
         }
-        return path;
+
     }
+
 
     @Override
     public boolean supports(@NonNull Integer type) {
@@ -240,15 +249,11 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     }
 
     protected Volume initVolume(StorageEntity storageEntity, VolumeEntity volumeEntity) {
-        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
-        }.getType());
-        return Volume.builder().storage(storageEntity.getName()).path(getVolumePath(storageEntity, volumeEntity.getName())).name(volumeEntity.getName()).type(volumeEntity.getType()).capacity(volumeEntity.getCapacity()).build();
+        return initVolume(storageEntity, volumeEntity.getName(), volumeEntity.getType(), volumeEntity.getCapacity());
     }
 
     protected Volume initVolume(StorageEntity storageEntity, TemplateVolumeEntity templateVolume) {
-        Map<String, Object> storageParam = GsonBuilderUtil.create().fromJson(storageEntity.getParam(), new TypeToken<Map<String, Object>>() {
-        }.getType());
-        return Volume.builder().storage(storageEntity.getName()).path(getVolumePath(storageEntity, templateVolume.getName())).name(templateVolume.getName()).type(templateVolume.getType()).capacity(templateVolume.getCapacity()).build();
+        return initVolume(storageEntity, templateVolume.getName(), templateVolume.getType(), templateVolume.getCapacity());
     }
 
     protected StorageCreateRequest buildStorageCreateRequest(StorageEntity storage, Map<String, Object> sysconfig) {

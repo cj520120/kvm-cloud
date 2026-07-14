@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 public class VolumeOperate {
 
     @DispatchBind(command = Constant.Command.VOLUME_INFO)
-
     public VolumeInfo getInfo(Connect connect, VolumeInfoRequest request) throws Exception {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getSourceStorage(), false);
         if (storagePool == null) {
@@ -137,16 +136,38 @@ public class VolumeOperate {
         return modelList;
     }
 
-    @DispatchBind(command = Constant.Command.VOLUME_CREATE)
+    private void createVolumeConfig(List<Config> configs) {
+        if (ObjectUtils.isEmpty(configs)) {
+            return;
+        }
+        for (Config config : configs) {
+            FileUtil.writeUtf8String(config.getContent(), config.getPath());
+        }
+    }
 
+    private void cleanVolumeConfig(List<Config> configs) {
+        if (ObjectUtils.isEmpty(configs)) {
+            return;
+        }
+        for (Config config : configs) {
+            FileUtil.del(config.getPath());
+        }
+    }
+    @DispatchBind(command = Constant.Command.VOLUME_CREATE)
     public VolumeInfo create(Connect connect, VolumeCreateRequest request) throws Exception {
-        String[] commands = new String[]{"qemu-img", "create", "-f", request.getVolume().getType(), request.getVolume().getPath(), String.valueOf(request.getVolume().getCapacity())};
-        CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
-        if (commandResult.getExitCode() == 0) {
-            VolumeInfoRequest volumeInfoRequest = VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage()).sourceName(request.getVolume().getName()).build();
-            return this.getInfo(connect, volumeInfoRequest);
-        } else {
-            throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
+        List<Config> configs = request.getVolume().getConfigs();
+        try {
+            createVolumeConfig(configs);
+            String[] commands = new String[]{"qemu-img", "create", "-f", request.getVolume().getType(), request.getVolume().getPath(), String.valueOf(request.getVolume().getCapacity())};
+            CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
+            if (commandResult.getExitCode() == 0) {
+                VolumeInfoRequest volumeInfoRequest = VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage()).sourceName(request.getVolume().getName()).build();
+                return this.getInfo(connect, volumeInfoRequest);
+            } else {
+                throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
+            }
+        } finally {
+            cleanVolumeConfig(configs);
         }
     }
 
@@ -171,19 +192,24 @@ public class VolumeOperate {
         if (sourceVolume.getCapacity() >= request.getSize()) {
             return sourceVolume;
         }
-        StorageUtil.checkStorageSuccess(connect, request.getVolume().getStorage());
-        String[] commands = new String[]{"qemu-img", "resize", request.getVolume().getPath(), String.valueOf(request.getSize())};
-        CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
-        if (commandResult.getExitCode() == 0) {
-            VolumeInfoRequest volumeInfoRequest = VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage()).sourceName(request.getVolume().getName()).build();
+        try {
+            createVolumeConfig(request.getVolume().getConfigs());
+            StorageUtil.checkStorageSuccess(connect, request.getVolume().getStorage());
+            String[] commands = new String[]{"qemu-img", "resize", request.getVolume().getPath(), String.valueOf(request.getSize())};
+            CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
+            if (commandResult.getExitCode() == 0) {
+                VolumeInfoRequest volumeInfoRequest = VolumeInfoRequest.builder().sourceStorage(request.getVolume().getStorage()).sourceName(request.getVolume().getName()).build();
 
-            VolumeInfo volumeInfo = this.getInfo(connect, volumeInfoRequest);
-            if (!ObjectUtils.isEmpty(request.getVm())) {
-                refreshDomainVolSize(connect, request.getVm(), volumeInfo.getName(), volumeInfo.getCapacity());
+                VolumeInfo volumeInfo = this.getInfo(connect, volumeInfoRequest);
+                if (!ObjectUtils.isEmpty(request.getVm())) {
+                    refreshDomainVolSize(connect, request.getVm(), volumeInfo.getName(), volumeInfo.getCapacity());
+                }
+                return volumeInfo;
+            } else {
+                throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
             }
-            return volumeInfo;
-        } else {
-            throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
+        } finally {
+            cleanVolumeConfig(request.getVolume().getConfigs());
         }
     }
 
@@ -232,6 +258,7 @@ public class VolumeOperate {
                 }
                 log.info("下载文件md5检验通过:{}", tempFile.getPath());
             }
+            createVolumeConfig(request.getVolume().getConfigs());
             String[] commands = new String[]{"qemu-img", "convert", "-O", request.getVolume().getType(), tempFile.getPath(), request.getVolume().getPath()};
             CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
             if (commandResult.getExitCode() == 0) {
@@ -245,6 +272,7 @@ public class VolumeOperate {
             throw new CodeException(ErrorCode.SERVER_ERROR, "下载文件出错:" + err.getMessage());
         } finally {
             FileUtil.del(tempFile);
+            cleanVolumeConfig(request.getVolume().getConfigs());
         }
     }
 
@@ -267,27 +295,31 @@ public class VolumeOperate {
 
     @DispatchBind(command = Constant.Command.VOLUME_CLONE)
     public VolumeInfo clone(Connect connect, VolumeCloneRequest request) throws Exception {
+        try {
 
-
-        StorageUtil.checkStorageSuccess(connect, request.getSourceVolume().getStorage());
-        StorageUtil.checkStorageSuccess(connect, request.getTargetVolume().getStorage());
-        StoragePool targetStoragePool = StorageUtil.findStorage(connect, request.getTargetVolume().getStorage(), false);
-        StorageVol targetVol = findVol(targetStoragePool, request.getTargetVolume().getName());
-        if(targetVol !=null){
-            throw new CodeException(ErrorCode.VOLUME_EXISTS_ERROR, "目标磁盘已经存在:" + request.getTargetVolume().getName());
+            StorageUtil.checkStorageSuccess(connect, request.getSourceVolume().getStorage());
+            StorageUtil.checkStorageSuccess(connect, request.getTargetVolume().getStorage());
+            StoragePool targetStoragePool = StorageUtil.findStorage(connect, request.getTargetVolume().getStorage(), false);
+            StorageVol targetVol = findVol(targetStoragePool, request.getTargetVolume().getName());
+            if (targetVol != null) {
+                throw new CodeException(ErrorCode.VOLUME_EXISTS_ERROR, "目标磁盘已经存在:" + request.getTargetVolume().getName());
+            }
+            createVolumeConfig(request.getTargetVolume().getConfigs());
+            createVolumeConfig(request.getSourceVolume().getConfigs());
+            String sourcePath = request.getSourceVolume().getPath();
+            String targetPath = request.getTargetVolume().getPath();
+            String[] commands = new String[]{"qemu-img", "convert", "-O", request.getTargetVolume().getType(), sourcePath, targetPath};
+            CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
+            if (commandResult.getExitCode() == 0) {
+                VolumeResizeRequest volumeResizeRequest = VolumeResizeRequest.builder().volume(request.getTargetVolume()).size(request.getTargetVolume().getCapacity()).build();
+                return resize(connect, volumeResizeRequest);
+            } else {
+                throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
+            }
+        } finally {
+            cleanVolumeConfig(request.getTargetVolume().getConfigs());
+            cleanVolumeConfig(request.getSourceVolume().getConfigs());
         }
-
-        String sourcePath = request.getSourceVolume().getPath();
-        String targetPath = request.getTargetVolume().getPath();
-        String[] commands = new String[]{"qemu-img", "convert", "-O", request.getTargetVolume().getType(), sourcePath, targetPath};
-        CommandExecutor.CommandResult commandResult = CommandExecutor.executeCommand(commands);
-        if (commandResult.getExitCode() == 0) {
-            VolumeResizeRequest volumeResizeRequest = VolumeResizeRequest.builder().volume(request.getTargetVolume()).size(request.getTargetVolume().getCapacity()).build();
-            return resize(connect, volumeResizeRequest);
-        } else {
-            throw new CodeException(ErrorCode.BASE_VOLUME_ERROR, "创建磁盘失败:" + commandResult.getError());
-        }
-
     }
     @DispatchBind(command = Constant.Command.CREATE_VOLUME_TEMPLATE)
     public VolumeInfo createVolumeTemplate(Connect connect, VolumeCloneRequest request) throws Exception {
