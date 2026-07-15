@@ -29,7 +29,7 @@ sysctl -p
 cat >/etc/netplan/00-installer-config.yaml<<EOF
 network:
   version: 2
-  renderer: networkd
+  renderer: networkd # 根据实际情况填写,如networkd,NetworkManager
   ethernets:
     ens10: #ens10 为实际网卡名称，根据实际情况填写
       dhcp4: false 
