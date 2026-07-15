@@ -83,7 +83,7 @@ public class ConfigKey {
     public static final String NETWORK_OVN_API_CONNECT_TIMEOUT_SECONDS = "network.ovn.connect.timeout.seconds";
     public static final String NETWORK_OVN_API_READ_TIMEOUT_SECONDS = "network.ovn.read.timeout.seconds";
     public static final String VM_DOMAIN_TPL = "vm.domain.tpl";
-
+    public static final String VM_PCI_TPL = "vm.pci.tpl";
     public static final String VM_PCI_DISK_BUS = "vm.disk.pci.bus";
     public static final String VM_PCI_DISK_SLOT = "vm.disk.pci.slot";
     public static final String VM_PCI_DISK_FUNCTION = "vm.disk.pci.function";
@@ -124,4 +124,5 @@ public class ConfigKey {
     public static final String LOGIN_JWD_PASSWORD = "login.jwt.password";
     public static final String LOGIN_JWD_ISSUER = "login.jwt.issuer";
     public static final String LOGIN_JWT_EXPIRE_MINUTES = "login.jwt.expire.minutes";
+
 }

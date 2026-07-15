@@ -85,4 +85,14 @@ public class DomainUtil {
         map.put("meta_data", String.join("\n", metaDataXml));
         return JinjavaParser.create().render(tpl, map);
     }
+
+    public static String buildHostPciXml(String tpl, Map<String, Object> systemConfig, String domain, String bus, String slot, String func) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("__SYS__", systemConfig);
+        map.put("domain", domain);
+        map.put("bus", bus);
+        map.put("slot", slot);
+        map.put("function", func);
+        return JinjavaParser.create().render(tpl, map);
+    }
 }

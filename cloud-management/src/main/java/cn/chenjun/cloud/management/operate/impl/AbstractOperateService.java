@@ -75,6 +75,8 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     protected RestTemplate restTemplate;
     @Autowired
     protected RedissonClient redissonClient;
+    @Autowired
+    protected HostPciDeviceDao hostPciDeviceDao;
 
     @Autowired
     @Qualifier("workExecutorService")
@@ -329,21 +331,6 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
                 .poolId(network.getPoolId())
                 .xml(buildNetworkXml(network, sysconfig))
                 .basic(basicBridgeNetwork)
-                .build();
-    }
-
-
-    protected VxLanNetwork buildVxLanCreateRequest(NetworkEntity basicNetworkEntity, NetworkEntity network, String localIp, String remoteIps, Map<String, Object> sysconfig) {
-
-        BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(basicNetworkEntity, sysconfig);
-        return VxLanNetwork.builder()
-                .poolId(network.getPoolId())
-                .xml(buildNetworkXml(network, sysconfig))
-                .basic(basicBridgeNetwork)
-                .vni(network.getNetworkId())
-                .bridge(network.getBridge())
-                .localIp(localIp)
-                .remoteIps(remoteIps)
                 .build();
     }
 

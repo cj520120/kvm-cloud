@@ -113,4 +113,9 @@ public abstract class AbstractOsOperateService<T extends BaseOperateParam, V ext
                 throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型[" + network.getType() + "]");
         }
     }
+
+    public String buildHostPciXml(HostPciDeviceEntity pci, Map<String, Object> systemConfig) {
+        String tpl = (String) systemConfig.get(ConfigKey.VM_PCI_TPL);
+        return DomainUtil.buildHostPciXml(tpl, systemConfig, pci.getDomain(), pci.getBus(), pci.getSlot(), pci.getFunc());
+    }
 }

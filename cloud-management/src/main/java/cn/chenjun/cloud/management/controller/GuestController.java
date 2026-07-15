@@ -6,6 +6,7 @@ import cn.chenjun.cloud.common.core.annotation.LoginRequire;
 import cn.chenjun.cloud.common.util.BeanConverter;
 import cn.chenjun.cloud.management.data.entity.GuestEntity;
 import cn.chenjun.cloud.management.data.entity.GuestNetworkEntity;
+import cn.chenjun.cloud.management.data.entity.HostPciDeviceEntity;
 import cn.chenjun.cloud.management.data.entity.VolumeEntity;
 import cn.chenjun.cloud.management.model.*;
 import cn.chenjun.cloud.management.servcie.GuestService;
@@ -259,5 +260,31 @@ public class GuestController extends BaseController {
         VolumeEntity volume = this.globalLockCall(() -> this.guestService.bindHostDevice(request.getGuestId(), request.getDeviceType(), request.getDescription(), request.getDevicePath(), request.getDiskDriver(), request.getDiskFormat()));
         return ResultUtil.success(this.convertService.initVolumeModel(volume));
     }
+
+    @GetMapping("/api/guest/pci")
+    public ResultUtil<List<HostPciDeviceModel>> listGuestPciDevices(@RequestParam("guestId") int guestId) {
+        List<HostPciDeviceEntity> entities = this.globalLockCall(() -> this.guestService.listHostPciDeviceByGuestId(guestId));
+        return ResultUtil.success(this.convertService.initHostPciDeviceModels(entities));
+    }
+
+    @GetMapping("/api/guest/pci/info")
+    public ResultUtil<HostPciDeviceModel> getGuestPciDevice(@RequestParam("id") int id) {
+        HostPciDeviceEntity entity = this.guestService.getHostPciDeviceById(id);
+        return ResultUtil.success(this.convertService.initHostPciDeviceModel(entity));
+    }
+
+    @PostMapping("/api/guest/pci/attach")
+    public ResultUtil<HostPciDeviceModel> attachPciDevice(@RequestBody GuestPciAttachRequest request) {
+        request.validate();
+        HostPciDeviceEntity entity = this.globalLockCall(() -> this.guestService.attachPciDevice(request.getGuestId(), request.getDomain(), request.getBus(), request.getSlot(), request.getFunc(), request.getDescription()));
+        return ResultUtil.success(this.convertService.initHostPciDeviceModel(entity));
+    }
+
+    @PostMapping("/api/guest/pci/detach")
+    public ResultUtil<Void> detachGuestPciDevice(@RequestBody GuestPciDetachRequest request) {
+        this.globalLockCall(() -> this.guestService.detachGuestPciDevice(request.getId()));
+        return ResultUtil.success();
+    }
+
 
 }

@@ -99,6 +99,8 @@ public class Constant {
         public static final String GUEST_DETACH_DISK = "DetachDisk";
         public static final String GUEST_ATTACH_NIC = "AttachNic";
         public static final String GUEST_DETACH_NIC = "DetachNic";
+        public static final String GUEST_ATTACH_PCI = "AttachPCI";
+        public static final String GUEST_DETACH_PCI = "DetachPCI";
 
     }
 
@@ -183,6 +185,7 @@ public class Constant {
         public static final int UPDATE_ROUTE = 15;
         public static final int UPDATE_COMPONENT_ROUTE = 16;
         public static final int UPDATE_COMPONENT_DNS = 17;
+        public static final int UPDATE_GUEST_PIC = 18;
 
 
 
@@ -371,6 +374,7 @@ public class Constant {
         public static int CREATE_OVN_NETWORK = 41;
 
         public static int DESTROY_OVN_NETWORK = 42;
+        public static int CHANGE_GUEST_PIC = 43;
     }
 
 

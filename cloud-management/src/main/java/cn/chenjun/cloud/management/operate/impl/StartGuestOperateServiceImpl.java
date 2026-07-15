@@ -56,6 +56,7 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
         HostEntity host = this.allocateService.allocateHost(hostRole, guest.getLastHostId(), guest.getArch(), param.getHostId(), guest.getCpu(), guest.getMemory());
         Map<String, Object> systemConfig = this.loadGuestConfig(param.getHostId(), param.getGuestId());
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkDao.listByAllocate(Constant.NetworkAllocateType.GUEST, guest.getGuestId());
+        List<HostPciDeviceEntity> hostPciDeviceEntityList = hostPciDeviceDao.listPciDeviceByGuestId(param.getGuestId());
         List<String> deviceXmlList = new ArrayList<>();
         List<String> metaDataXmlList = new ArrayList<>();
         deviceXmlList.add(this.buildCdXml(guest, systemConfig));
@@ -82,6 +83,7 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
         }
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
         deviceXmlList.addAll(this.buildInterfaceListXml(guest, guestNetworkEntityList, systemConfig));
+        deviceXmlList.addAll(this.buildHostPciListXml(hostPciDeviceEntityList, systemConfig));
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
         if (extern.getGraphics() == null) {
             extern.setGraphics(GuestExternUtil.buildVncParam());
@@ -203,6 +205,17 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
             networkInterfaces.add(this.buildInterfaceXml(network, entity, systemConfig));
         }
         return networkInterfaces;
+    }
+
+    protected List<String> buildHostPciListXml(List<HostPciDeviceEntity> hostPciDevices, Map<String, Object> systemConfig) {
+        List<String> pciDevices = new ArrayList<>();
+        String tpl = systemConfig.get(ConfigKey.VM_PCI_TPL).toString();
+        for (HostPciDeviceEntity entity : hostPciDevices) {
+
+
+            pciDevices.add(this.buildHostPciXml(entity, systemConfig));
+        }
+        return pciDevices;
     }
 
 

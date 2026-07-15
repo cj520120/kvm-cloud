@@ -432,6 +432,34 @@ CREATE TABLE `tbl_user_info` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+
+
+
+--
+-- Table structure for table `tbl_host_pci_device`
+--
+
+DROP TABLE IF EXISTS `tbl_host_pci_device`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_host_pci_device` (
+                                       `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                       `guest_id` int DEFAULT 0 COMMENT '虚拟机ID',
+                                       `host_id` int DEFAULT 0 COMMENT '宿主机ID',
+                                       `pci_domain` int NOT NULL DEFAULT 0 COMMENT 'PCI域(十进制)',
+                                       `pci_bus` int NOT NULL DEFAULT 0 COMMENT 'PCI总线号(十进制)',
+                                       `pci_slot` int NOT NULL DEFAULT 0 COMMENT 'PCI插槽号(十进制)',
+                                       `pci_function` int NOT NULL DEFAULT 0 COMMENT 'PCI功能号(十进制)',
+                                       `pci_description` varchar(255) DEFAULT '' COMMENT '设备描述',
+                                       `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间戳',
+                                       `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间戳',
+                                       PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='宿主机PCI直通设备表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
 --
 -- Table structure for table `tbl_volume_info`
 --

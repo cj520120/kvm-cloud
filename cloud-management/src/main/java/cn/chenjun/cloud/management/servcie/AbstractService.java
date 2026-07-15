@@ -46,6 +46,8 @@ public abstract class AbstractService {
     protected ConfigService configService;
     @Autowired
     protected GroupDao groupDao;
+    @Autowired
+    protected HostPciDeviceDao hostPciDeviceDao;
 
 
     public GuestEntity getGuestById(int guestId) {

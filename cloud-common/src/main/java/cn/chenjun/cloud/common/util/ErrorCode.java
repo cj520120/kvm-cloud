@@ -42,6 +42,7 @@ public final class ErrorCode {
     public static final int GUEST_IS_RUNNING_ERROR = BASE_GUEST_ERROR + 9;
     public static final int GUEST_VOLUME_BIND_OTHER_HOST = BASE_GUEST_ERROR + 10;
     public static final int GUEST_BIND_HOST_ERROR = BASE_GUEST_ERROR + 11;
+    public static final int GUEST_PCI_DEVICE_BIND = BASE_GUEST_ERROR + 12;
     /**
      * Agent
      */

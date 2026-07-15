@@ -89,6 +89,13 @@ public class GuestService extends AbstractService {
             }
         }
         guest.setBindHostId(hostId);
+        if (hostId == 0) {
+            List<HostPciDeviceEntity> hostPciDeviceEntityList = this.hostPciDeviceDao.listPciDeviceByGuestId(guestId);
+            if (!hostPciDeviceEntityList.isEmpty()) {
+                throw new CodeException(ErrorCode.GUEST_PCI_DEVICE_BIND, "虚拟机已经绑定了PCI设备，无法进行相关操作");
+            }
+
+        }
         this.guestDao.update(guest);
         return guest;
     }
@@ -601,7 +608,6 @@ public class GuestService extends AbstractService {
         this.operateTask.addTask(operateParam);
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_GUEST).build());
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(volume.getVolumeId()).type(cn.chenjun.cloud.common.util.Constant.NotifyType.UPDATE_VOLUME).build());
-//        return ResultUtil.success(AttachGuestVolumeModel.builder().guest(this.initGuestInfo(guest)).volume(this.initVolume(volume)).build());
         return AttachVolumeInfo.builder().guest(guest).volume(volume).build();
 
     }
@@ -781,5 +787,66 @@ public class GuestService extends AbstractService {
 
     public List<GuestEntity> selectByIds(List<Integer> guestIds) {
         return this.guestDao.selectByIds(guestIds);
+    }
+
+    public List<HostPciDeviceEntity> listHostPciDeviceByGuestId(int guestId) {
+        return this.hostPciDeviceDao.listPciDeviceByGuestId(guestId);
+    }
+
+    public HostPciDeviceEntity getHostPciDeviceById(int id) {
+        return this.hostPciDeviceDao.findById(id);
+    }
+
+    public HostPciDeviceEntity attachPciDevice(int guestId, String domain, String bus, String slot, String function, String description) {
+        GuestEntity guest = this.guestDao.findById(guestId);
+        if (guest == null) {
+            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机不存在");
+        }
+        if (guest.getBindHostId() < 0) {
+            throw new CodeException(ErrorCode.GUEST_BIND_HOST_ERROR, "虚拟机未绑定宿主机");
+        }
+        HostPciDeviceEntity entity = HostPciDeviceEntity.builder()
+                .guestId(guestId)
+                .hostId(guest.getBindHostId())
+                .domain(domain)
+                .bus(bus)
+                .slot(slot)
+                .func(function)
+                .description(description)
+                .createTime(new Date())
+                .updateTime(new Date())
+                .build();
+        entity = this.hostPciDeviceDao.insert(entity);
+
+        BaseOperateParam operateParam = ChangeGuestPicOperate.builder()
+                .guestId(entity.getGuestId())
+                .domain(entity.getDomain())
+                .bus(entity.getBus())
+                .slot(entity.getSlot())
+                .function(entity.getFunc())
+                .id(UUID.randomUUID().toString())
+                .isAttach(true)
+                .title("挂载PCI[" + entity.getDescription() + "]").build();
+        this.operateTask.addTask(operateParam);
+        NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST_PIC).build());
+        return entity;
+    }
+
+    public void detachGuestPciDevice(int id) {
+        HostPciDeviceEntity entity = this.getHostPciDeviceById(id);
+        if (entity != null) {
+            BaseOperateParam operateParam = ChangeGuestPicOperate.builder()
+                    .guestId(entity.getGuestId())
+                    .domain(entity.getDomain())
+                    .bus(entity.getBus())
+                    .slot(entity.getSlot())
+                    .function(entity.getFunc())
+                    .id(UUID.randomUUID().toString())
+                    .isAttach(false)
+                    .title("卸载PCI[" + entity.getDescription() + "]").build();
+            this.operateTask.addTask(operateParam);
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(entity.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST_PIC).build());
+        }
+        this.hostPciDeviceDao.deleteById(id);
     }
 }

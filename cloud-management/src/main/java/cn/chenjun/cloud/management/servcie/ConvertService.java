@@ -249,4 +249,18 @@ public class ConvertService {
                 .nexthop(entity.getNexthop())
                 .createTime(entity.getCreateTime()).build();
     }
+
+    public List<HostPciDeviceModel> initHostPciDeviceModels(List<HostPciDeviceEntity> entities) {
+        List<HostPciDeviceModel> models = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(entities)) {
+            for (HostPciDeviceEntity entity : entities) {
+                models.add(this.initHostPciDeviceModel(entity));
+            }
+        }
+        return models;
+    }
+
+    public HostPciDeviceModel initHostPciDeviceModel(HostPciDeviceEntity entity) {
+        return BeanConverter.convert(entity, HostPciDeviceModel.class);
+    }
 }
