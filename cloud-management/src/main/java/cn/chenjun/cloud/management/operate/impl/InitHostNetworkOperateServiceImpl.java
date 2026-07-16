@@ -1,8 +1,8 @@
 package cn.chenjun.cloud.management.operate.impl;
 
-import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
+import cn.chenjun.cloud.common.bean.BasicBridgeNetworkRequest;
 import cn.chenjun.cloud.common.bean.ResultUtil;
-import cn.chenjun.cloud.common.bean.VlanNetwork;
+import cn.chenjun.cloud.common.bean.VLanNetworkRequest;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
 import cn.chenjun.cloud.common.util.ErrorCode;
@@ -57,8 +57,8 @@ public class InitHostNetworkOperateServiceImpl extends AbstractOperateService<In
 
         switch (network.getType()) {
             case Constant.NetworkType.FLAT: {
-                BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(network, sysconfig);
-                this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetwork);
+                BasicBridgeNetworkRequest basicBridgeNetworkRequest = buildBasicNetworkRequest(network, sysconfig);
+                this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_BASIC, basicBridgeNetworkRequest);
             }
             break;
             case Constant.NetworkType.VLAN: {
@@ -66,7 +66,7 @@ public class InitHostNetworkOperateServiceImpl extends AbstractOperateService<In
                 if (basicNetworkEntity == null) {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "VLan的基础网络不存在");
                 }
-                VlanNetwork vlan = buildVlanCreateRequest(basicNetworkEntity, network, sysconfig);
+                VLanNetworkRequest vlan = buildVlanCreateRequest(basicNetworkEntity, network, sysconfig);
                 this.asyncInvoker(host, param, Constant.Command.NETWORK_CREATE_VLAN, vlan);
             }
             break;

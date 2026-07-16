@@ -19,8 +19,5 @@ public class GuestStartRequest {
         if (guestId <= 0) {
             throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的虚拟机ID");
         }
-        if (hostId <= 0) {
-            throw new CodeException(ErrorCode.PARAM_ERROR, "请输入有效的主机ID");
-        }
     }
 }

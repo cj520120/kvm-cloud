@@ -1,9 +1,9 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.agent.config.ApplicationConfig;
 import cn.chenjun.cloud.agent.util.CloudInitHelper;
 import cn.chenjun.cloud.agent.util.DomainUtil;
 import cn.chenjun.cloud.agent.util.GraphicsUtil;
+import cn.chenjun.cloud.agent.util.VxLanProxy;
 import cn.chenjun.cloud.common.bean.*;
 import cn.chenjun.cloud.common.core.annotation.DispatchBind;
 import cn.chenjun.cloud.common.error.CodeException;
@@ -13,20 +13,19 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.Node;
+import org.dom4j.*;
+import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 import org.libvirt.*;
 import org.libvirt.Error;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -37,9 +36,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class GuestOperate {
-
-    @Autowired
-    private ApplicationConfig applicationConfig;
 
 
     private static int bit(final int i) {
@@ -184,6 +180,35 @@ public class GuestOperate {
         return null;
     }
 
+    private static void initNetworkNicXml(NetworkNic nic) {
+        switch (nic.getType()) {
+            case Constant.NetworkType.FLAT:
+            case Constant.NetworkType.VLAN:
+                break;
+            case Constant.NetworkType.VxLAN:
+                VxLanProxy vxLanProxy = VxLanProxy.builder()
+                        .baseUrl(nic.getBaseUrl())
+                        .token(nic.getToken())
+                        .connectTimeout(30L)
+                        .readTimeout(30L)
+                        .build();
+                VxLanProxy.CreateBirgePortRequest createBirgePortRequest = VxLanProxy.CreateBirgePortRequest.builder()
+                        .bridgeName(nic.getPoolId())
+                        .mac(nic.getMac())
+                        .model(nic.getModel())
+                        .ip(nic.getIp())
+                        .build();
+                VxLanProxy.BaseResponse<VxLanProxy.BridgePortData> createBridgePortResponse = vxLanProxy.createBridgePort(createBirgePortRequest);
+                if (createBridgePortResponse.getCode() != 0) {
+                    throw new CodeException(ErrorCode.SERVER_ERROR, createBridgePortResponse.getMsg());
+                }
+                nic.setXml(createBridgePortResponse.getData().getXml());
+                break;
+            default:
+                throw new CodeException(ErrorCode.SERVER_ERROR, "不支持的网络类型[" + nic.getType() + "]");
+        }
+    }
+
     @DispatchBind(command = Constant.Command.GUEST_ATTACH_NIC)
     public Void attachNic(Connect connect, ChangeGuestInterfaceRequest request) throws Exception {
 
@@ -191,8 +216,9 @@ public class GuestOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        log.info("attachNic xml={}", request.getXml());
-        domain.attachDevice(request.getXml());
+        initNetworkNicXml(request.getNic());
+        log.info("attachNic xml={}", request.getNic().getXml());
+        domain.attachDevice(request.getNic().getXml());
         return null;
     }
 
@@ -203,8 +229,11 @@ public class GuestOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
-        log.info("detachNic xml={}", request.getXml());
-        domain.detachDevice(request.getXml());
+
+        NetworkNic nic = request.getNic();
+        initNetworkNicXml(nic);
+        log.info("detachNic xml={}", nic.getXml());
+        domain.detachDevice(nic.getXml());
         return null;
     }
 
@@ -231,8 +260,8 @@ public class GuestOperate {
     public GuestInfo start(Connect connect, GuestStartRequest request) throws Exception {
 
         this.stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(1));
+        initVmResource(request);
         log.info("create vm={}", request.getXml());
-        initVmResource(request.getXml());
         Domain domain = connect.domainCreateXML(request.getXml(), 0);
         if (request.isWaitCloudInit()) {
             CloudInitHelper.waitCloudInit(connect, request.getName(), request.getWaitCloudInitTimeoutSeconds());
@@ -366,8 +395,8 @@ public class GuestOperate {
         return null;
     }
 
-    private void initVmResource(String xml) {
-        try (StringReader sr = new StringReader(xml)) {
+    private void initVmResource(GuestStartRequest request) {
+        try (StringReader sr = new StringReader(request.getXml())) {
             SAXReader reader = new SAXReader();
             reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             Document doc = reader.read(sr);
@@ -406,8 +435,24 @@ public class GuestOperate {
                         byte[] bytes = Base64.getDecoder().decode(resourceContent);
                         FileUtil.writeBytes(bytes, resourceFile);
                         log.info("初始化虚拟机meta定义的文件:{}", resourceFile.getAbsolutePath());
+                        resourceContentEl.setText("");
                     }
                 }
+            }
+            Element deviceElement = (Element) doc.selectSingleNode("/domain/devices");
+            for (NetworkNic nic : request.getNics()) {
+                initNetworkNicXml(nic);
+                if (!ObjectUtils.isEmpty(nic.getXml())) {
+                    Element nicElement = DocumentHelper.parseText(nic.getXml()).getRootElement();
+                    deviceElement.add(nicElement);
+                }
+            }
+            OutputFormat format = OutputFormat.createPrettyPrint();
+            try (StringWriter stringWriter = new StringWriter()) {
+                XMLWriter writer = new XMLWriter(stringWriter, format);
+                writer.write(doc);
+                writer.close();
+                request.setXml(stringWriter.toString());
             }
         } catch (Exception err) {
             log.error("初始化虚拟机资源异常", err);

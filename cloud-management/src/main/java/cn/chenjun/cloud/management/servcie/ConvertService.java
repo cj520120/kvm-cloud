@@ -220,7 +220,6 @@ public class ConvertService {
         userModel.setLoginType(loginInfoEntity.getLoginType());
         userModel.setUserType(loginInfoEntity.getUserType());
         userModel.setLoginName(loginInfoEntity.getLoginName());
-        userModel.setPasswordSalt(loginInfoEntity.getLoginPasswordSalt());
         userModel.setUserStatus(loginInfoEntity.getUserStatus());
         userModel.setRegisterTime(loginInfoEntity.getCreateTime());
         return userModel;

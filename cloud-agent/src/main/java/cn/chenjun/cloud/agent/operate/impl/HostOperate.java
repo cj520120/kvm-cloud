@@ -132,16 +132,16 @@ public class HostOperate {
                 this.storageOperate.create(connect, storage);
             }
         }
-        List<BasicBridgeNetwork> basicBridgeNetworkList = request.getBasicBridgeNetworkList();
-        if (basicBridgeNetworkList != null) {
-            for (BasicBridgeNetwork basicBridgeNetwork : basicBridgeNetworkList) {
-                this.networkOperate.createBasic(connect, basicBridgeNetwork);
+        List<BasicBridgeNetworkRequest> basicBridgeNetworkRequestList = request.getBasicBridgeNetworkRequestList();
+        if (basicBridgeNetworkRequestList != null) {
+            for (BasicBridgeNetworkRequest basicBridgeNetworkRequest : basicBridgeNetworkRequestList) {
+                this.networkOperate.createBasic(connect, basicBridgeNetworkRequest);
             }
         }
-        List<VlanNetwork> vlanNetworkList = request.getVlanNetworkList();
-        if (vlanNetworkList != null) {
-            for (VlanNetwork vlanNetwork : vlanNetworkList) {
-                this.networkOperate.createVlan(connect, vlanNetwork);
+        List<VLanNetworkRequest> VLanNetworkRequestList = request.getVLanNetworkRequestList();
+        if (VLanNetworkRequestList != null) {
+            for (VLanNetworkRequest VLanNetworkRequest : VLanNetworkRequestList) {
+                this.networkOperate.createVlan(connect, VLanNetworkRequest);
             }
         }
         return this.getHostInfo(connect, null);

@@ -78,9 +78,9 @@ public class NetworkController extends BaseController {
         return ResultUtil.success(models);
     }
 
-    @GetMapping("/api/network/ovn/supported")
-    public ResultUtil<Boolean> checkOvnSupport() {
-        return ResultUtil.success(networkService.checkOvnSupport());
+    @GetMapping("/api/network/vxlan/supported")
+    public ResultUtil<Boolean> checkVxLanSupport() {
+        return ResultUtil.success(networkService.checkVxLanSupport());
     }
 
     @PermissionRequire(role = cn.chenjun.cloud.common.util.Constant.UserType.ADMIN)

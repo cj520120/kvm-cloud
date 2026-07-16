@@ -17,6 +17,6 @@ import java.util.List;
 public class InitHostRequest {
     private String url;
     private List<StorageCreateRequest> storageList;
-    private List<BasicBridgeNetwork> basicBridgeNetworkList;
-    private List<VlanNetwork> vlanNetworkList;
+    private List<BasicBridgeNetworkRequest> basicBridgeNetworkRequestList;
+    private List<VLanNetworkRequest> VLanNetworkRequestList;
 }

@@ -77,11 +77,9 @@ public class ConfigKey {
 
     public static final String NETWORK_DEFAULT_BRIDGE_TPL = "network.default.bridge.tpl";
     public static final String NETWORK_OVS_BRIDGE_TPL = "network.ovs.bridge.tpl";
-    public static final String NETWORK_OVN_ENABLE = "network.ovn.enable";
-    public static final String NETWORK_OVN_URI = "network.ovn.uri";
-    public static final String NETWORK_OVN_API_KEY = "network.ovn.key";
-    public static final String NETWORK_OVN_API_CONNECT_TIMEOUT_SECONDS = "network.ovn.connect.timeout.seconds";
-    public static final String NETWORK_OVN_API_READ_TIMEOUT_SECONDS = "network.ovn.read.timeout.seconds";
+    public static final String NETWORK_VX_LAN_ENABLE = "network.vxlan.enable";
+    public static final String NETWORK_VX_LAN_BASE_URL = "network.vxlan.uri";
+    public static final String NETWORK_VX_LAN_API_KEY = "network.vxlan.key";
     public static final String VM_DOMAIN_TPL = "vm.domain.tpl";
     public static final String VM_PCI_TPL = "vm.pci.tpl";
     public static final String VM_PCI_DISK_BUS = "vm.disk.pci.bus";

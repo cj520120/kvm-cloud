@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author chenjun
  */
@@ -15,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class GuestStartRequest {
     private String name;
     private String xml;
+    private List<NetworkNic> nics;
     private boolean waitCloudInit;
     private int waitCloudInitTimeoutSeconds;
 

@@ -71,6 +71,8 @@ public class Constant {
         public static final String NETWORK_DESTROY_BASIC = "DestroyBasicNetwork";
         public static final String NETWORK_CREATE_VLAN = "CreateVlanNetwork";
         public static final String NETWORK_DESTROY_VLAN = "DestroyVlanNetwork";
+        public static final String NETWORK_CREATE_VxLAN = "CreateVxLanNetwork";
+        public static final String NETWORK_DESTROY_VxLAN = "DestroyVxLanNetwork";
         public static final String VOLUME_INFO = "VolumeInfo";
         public static final String BATCH_VOLUME_INFO = "BatchVolumeInfo";
         public static final String VOLUME_CREATE = "CreateVolume";
@@ -371,9 +373,9 @@ public class Constant {
         public static int DESTROY_TEMPLATE_VOLUME = 38;
         public static int STORAGE_VOLUME_CLEAR = 39;
         public static int CREATE_GUEST_VOLUME = 40;
-        public static int CREATE_OVN_NETWORK = 41;
+        public static int CREATE_VX_LAN_NETWORK = 41;
 
-        public static int DESTROY_OVN_NETWORK = 42;
+        public static int DESTROY_VX_LAN_NETWORK = 42;
         public static int CHANGE_GUEST_PIC = 43;
     }
 

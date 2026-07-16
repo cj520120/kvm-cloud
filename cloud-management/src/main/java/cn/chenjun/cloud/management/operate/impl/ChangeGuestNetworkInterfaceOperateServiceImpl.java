@@ -35,10 +35,9 @@ public class ChangeGuestNetworkInterfaceOperateServiceImpl extends AbstractOsOpe
             HostEntity host = hostDao.findById(guest.getHostId());
             NetworkEntity network = networkDao.findById(guestNetwork.getNetworkId());
             Map<String, Object> systemConfig = this.loadGuestConfig(host.getHostId(), guest.getGuestId());
-            String xml = this.buildInterfaceXml(network, guestNetwork, systemConfig);
             ChangeGuestInterfaceRequest nic = ChangeGuestInterfaceRequest.builder()
                     .name(guest.getName())
-                    .xml(xml)
+                    .nic(this.buildInterfaceXml(network, guestNetwork, systemConfig))
                     .build();
             if (param.isAttach()) {
                 this.asyncInvoker(host, param, Constant.Command.GUEST_ATTACH_NIC, nic);

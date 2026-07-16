@@ -317,20 +317,20 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
         return DomainUtil.buildNetworkXml(tpl, sysconfig, network);
     }
 
-    protected BasicBridgeNetwork buildBasicNetworkRequest(NetworkEntity network, Map<String, Object> sysconfig) {
-        return BasicBridgeNetwork.builder()
+    protected BasicBridgeNetworkRequest buildBasicNetworkRequest(NetworkEntity network, Map<String, Object> sysconfig) {
+        return BasicBridgeNetworkRequest.builder()
                 .poolId(network.getPoolId())
                 .xml(buildNetworkXml(network, sysconfig))
                 .build();
     }
 
-    protected VlanNetwork buildVlanCreateRequest(NetworkEntity basicNetworkEntity, NetworkEntity network, Map<String, Object> sysconfig) {
+    protected VLanNetworkRequest buildVlanCreateRequest(NetworkEntity basicNetworkEntity, NetworkEntity network, Map<String, Object> sysconfig) {
 
-        BasicBridgeNetwork basicBridgeNetwork = buildBasicNetworkRequest(basicNetworkEntity, sysconfig);
-        return VlanNetwork.builder()
+        BasicBridgeNetworkRequest basicBridgeNetworkRequest = buildBasicNetworkRequest(basicNetworkEntity, sysconfig);
+        return VLanNetworkRequest.builder()
                 .poolId(network.getPoolId())
                 .xml(buildNetworkXml(network, sysconfig))
-                .basic(basicBridgeNetwork)
+                .basic(basicBridgeNetworkRequest)
                 .build();
     }
 

@@ -147,7 +147,7 @@ public class NetworkService extends AbstractService {
                 case Constant.NetworkType.FLAT:
                     break;
                 case Constant.NetworkType.VxLAN:
-                    if (!this.checkOvnSupport()) {
+                    if (!this.checkVxLanSupport()) {
                         throw new CodeException(ErrorCode.PARAM_ERROR, "当前配置不支持VxLan网络");
                     }
                 case Constant.NetworkType.VLAN: {
@@ -385,7 +385,7 @@ public class NetworkService extends AbstractService {
         return this.networkDao.listNetworkByIds(networkIds);
     }
 
-    public Boolean checkOvnSupport() {
-        return Constant.Enable.YES.equals(this.configService.getConfig(ConfigKey.NETWORK_OVN_ENABLE));
+    public Boolean checkVxLanSupport() {
+        return Constant.Enable.YES.equals(this.configService.getConfig(ConfigKey.NETWORK_VX_LAN_ENABLE));
     }
 }

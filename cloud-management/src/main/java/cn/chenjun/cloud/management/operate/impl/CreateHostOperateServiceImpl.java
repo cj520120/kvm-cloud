@@ -60,8 +60,8 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
         }).map(storage -> buildStorageCreateRequest(storage, systemConfig)).collect(Collectors.toList());
 
 
-        List<BasicBridgeNetwork> basicBridgeNetworks = new ArrayList<>();
-        List<VlanNetwork> vlanNetworkList = new ArrayList<>();
+        List<BasicBridgeNetworkRequest> basicBridgeNetworkRequests = new ArrayList<>();
+        List<VLanNetworkRequest> VLanNetworkRequestList = new ArrayList<>();
         for (NetworkEntity network : networkList) {
             if (network.getStatus() == Constant.NetworkStatus.MAINTENANCE) {
                 continue;
@@ -70,12 +70,12 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
                 case Constant.NetworkType.VLAN: {
                     NetworkEntity basicBridgeNetwork = networkMap.get(network.getBasicNetworkId());
                     if (basicBridgeNetwork != null) {
-                        vlanNetworkList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, systemConfig));
+                        VLanNetworkRequestList.add(this.buildVlanCreateRequest(basicBridgeNetwork, network, systemConfig));
                     }
                     break;
                 }
                 case Constant.NetworkType.FLAT:
-                    basicBridgeNetworks.add(this.buildBasicNetworkRequest(network, systemConfig));
+                    basicBridgeNetworkRequests.add(this.buildBasicNetworkRequest(network, systemConfig));
                     break;
             }
         }
@@ -103,8 +103,8 @@ public class CreateHostOperateServiceImpl extends AbstractOperateService<CreateH
         InitHostRequest request = InitHostRequest.builder()
                 .url((String) systemConfig.get(ConfigKey.DEFAULT_MANAGER_URI))
                 .storageList(createStorageRequest)
-                .basicBridgeNetworkList(basicBridgeNetworks)
-                .vlanNetworkList(vlanNetworkList)
+                .basicBridgeNetworkRequestList(basicBridgeNetworkRequests)
+                .VLanNetworkRequestList(VLanNetworkRequestList)
                 .build();
         this.asyncInvoker(host, param, Constant.Command.HOST_INIT, request);
     }

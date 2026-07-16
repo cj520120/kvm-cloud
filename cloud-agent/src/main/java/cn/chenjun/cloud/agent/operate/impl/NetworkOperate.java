@@ -1,22 +1,21 @@
 package cn.chenjun.cloud.agent.operate.impl;
 
-import cn.chenjun.cloud.common.bean.BasicBridgeNetwork;
-import cn.chenjun.cloud.common.bean.VlanNetwork;
+import cn.chenjun.cloud.agent.util.VxLanProxy;
+import cn.chenjun.cloud.common.bean.BasicBridgeNetworkRequest;
+import cn.chenjun.cloud.common.bean.VLanNetworkRequest;
+import cn.chenjun.cloud.common.bean.VxLanNetworkRequest;
 import cn.chenjun.cloud.common.core.annotation.DispatchBind;
+import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.Constant;
+import cn.chenjun.cloud.common.util.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.libvirt.Connect;
 import org.libvirt.Network;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenjun
@@ -24,21 +23,11 @@ import java.util.List;
 @Slf4j
 @Component
 public class NetworkOperate {
-    private static String getNodeAttr(String xml, String path, String attrName) throws SAXException, DocumentException {
-        try (StringReader sr = new StringReader(xml)) {
-            SAXReader reader = new SAXReader();
-            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            Document doc = reader.read(sr);
-            Element node = (Element) doc.selectSingleNode(path);
-            return node == null ? null : node.attributeValue(attrName);
-        }
-    }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_BASIC)
-    public Void createBasic(Connect connect, BasicBridgeNetwork request) throws Exception {
+    public Void createBasic(Connect connect, BasicBridgeNetworkRequest request) throws Exception {
         createNetworkPool(connect, request.getPoolId(), request.getXml());
         return null;
-
     }
 
     private void createNetworkPool(Connect connect, String name, String xml) throws Exception {
@@ -57,15 +46,15 @@ public class NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_VLAN)
-    public Void createVlan(Connect connect, VlanNetwork vlan) throws Exception {
-        log.info("创建Vlan网络:{}", vlan);
+    public Void createVlan(Connect connect, VLanNetworkRequest vlan) throws Exception {
+        log.info("创建Van网络:{}", vlan);
         createNetworkPool(connect, vlan.getPoolId(), vlan.getBasic().getXml());
         createNetworkPool(connect, vlan.getPoolId(), vlan.getXml());
         return null;
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_BASIC)
-    public Void destroyBasic(Connect connect, BasicBridgeNetwork bridge) throws Exception {
+    public Void destroyBasic(Connect connect, BasicBridgeNetworkRequest bridge) throws Exception {
         log.info("销毁基础网络:{}", bridge);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
         if (networkNames.contains(bridge.getPoolId())) {
@@ -78,10 +67,11 @@ public class NetworkOperate {
             }
         }
         return null;
+
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_VLAN)
-    public Void destroyVlan(Connect connect, VlanNetwork vlan) throws Exception {
+    public Void destroyVlan(Connect connect, VLanNetworkRequest vlan) throws Exception {
         log.info("销毁VLan网络:{}", vlan);
         List<String> networkNames = Arrays.asList(connect.listNetworks());
         if (networkNames.contains(vlan.getPoolId())) {
@@ -94,5 +84,59 @@ public class NetworkOperate {
             }
         }
         return null;
+    }
+
+    @DispatchBind(command = Constant.Command.NETWORK_CREATE_VxLAN)
+    public Void createVxLan(Connect connect, VxLanNetworkRequest vxLan) throws Exception {
+        log.info("创建VxLan网络:{}", vxLan);
+        VxLanProxy.CreateBridgeRequest request = VxLanProxy.CreateBridgeRequest.builder()
+                .cidr(vxLan.getCidr())
+                .gateway(vxLan.getGateway())
+                .name(vxLan.getPoolId())
+                .build();
+        VxLanProxy vxLanProxy = VxLanProxy.builder()
+                .baseUrl(vxLan.getBaseUrl())
+                .token(vxLan.getToken())
+                .connectTimeout(30L)
+                .readTimeout(30L)
+                .build();
+        VxLanProxy.BaseResponse<VxLanProxy.CreateBridgeResponse> response = vxLanProxy.createBridge(request);
+        if (response.getCode() != 0) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, response.getMsg());
+        }
+        log.info("创建VxLan网络成功:{}", vxLan);
+        return null;
+//        List<VxLanNetworkResponse.Port> ports=new ArrayList<>(vxLan.getMacs().size()) ;
+//        for (String mac: vxLan.getMacs()) {
+//
+//            VxLanProxy.CreateBirgePortRequest createBirgePortRequest = VxLanProxy.CreateBirgePortRequest.builder()
+//                    .bridgeName(vxLan.getPoolId())
+//                    .mac(mac)
+//                    .build();
+//            VxLanProxy.BaseResponse<VxLanProxy.BridgePortData> createBridgePortResponse = vxLanProxy.createBridgePort(createBirgePortRequest);
+//            if (createBridgePortResponse.getCode() != 0) {
+//                throw new CodeException(ErrorCode.SERVER_ERROR, createBridgePortResponse.getMsg());
+//            }
+//            VxLanProxy.BridgePortData bridgePortData= createBridgePortResponse.getData();
+//            ports.add(VxLanNetworkResponse.Port.builder().mac(mac).port(bridgePortData.getPortName()).build());
+//        }
+//        return VxLanNetworkResponse.builder().ports(ports).build();
+
+    }
+
+    @DispatchBind(command = Constant.Command.NETWORK_DESTROY_VxLAN)
+    public Void destroyVxLan(Connect connect, VxLanNetworkRequest vxLan) throws Exception {
+        VxLanProxy vxLanProxy = VxLanProxy.builder()
+                .baseUrl(vxLan.getBaseUrl())
+                .token(vxLan.getToken())
+                .connectTimeout(30L)
+                .readTimeout(30L)
+                .build();
+        VxLanProxy.BaseResponse<Map<String, String>> response = vxLanProxy.deleteBridge(vxLan.getPoolId());
+        if (response.getCode() != 0) {
+            throw new CodeException(ErrorCode.SERVER_ERROR, response.getMsg());
+        }
+        return null;
+
     }
 }

@@ -6,16 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 基础网络信息
+ *
  * @author chenjun
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChangeGuestInterfaceRequest {
-    /**
-     * 虚拟机名称
-     */
-    private String name;
-    private NetworkNic nic;
+public class BasicBridgeNetworkRequest {
+    private String poolId;
+    private String xml;
+
 }

@@ -7,7 +7,7 @@ import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.chenjun.cloud.management.data.entity.HostEntity;
 import cn.chenjun.cloud.management.data.entity.NetworkEntity;
 import cn.chenjun.cloud.management.operate.bean.CreateNetworkOperate;
-import cn.chenjun.cloud.management.operate.bean.CreateOvnNetworkOperate;
+import cn.chenjun.cloud.management.operate.bean.CreateVxLanNetworkOperate;
 import cn.chenjun.cloud.management.operate.bean.InitHostNetworkOperate;
 import cn.chenjun.cloud.management.util.NotifyContextHolderUtil;
 import cn.chenjun.cloud.management.websocket.message.NotifyData;
@@ -57,7 +57,7 @@ public class CreateNetworkOperateServiceImpl extends AbstractOperateService<Crea
             }
             break;
             case Constant.NetworkType.VxLAN:
-                CreateOvnNetworkOperate operate = CreateOvnNetworkOperate.builder().id(UUID.randomUUID().toString()).networkId(param.getNetworkId()).build();
+                CreateVxLanNetworkOperate operate = CreateVxLanNetworkOperate.builder().id(UUID.randomUUID().toString()).networkId(param.getNetworkId()).build();
                 this.taskService.addTask(operate);
                 this.onSubmitFinishEvent(param.getTaskId(), ResultUtil.success());
                 break;

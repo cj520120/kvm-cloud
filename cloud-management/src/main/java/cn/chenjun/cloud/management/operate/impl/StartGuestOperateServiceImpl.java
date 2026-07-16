@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.operate.impl;
 
 import cn.chenjun.cloud.common.bean.GuestInfo;
 import cn.chenjun.cloud.common.bean.GuestStartRequest;
+import cn.chenjun.cloud.common.bean.NetworkNic;
 import cn.chenjun.cloud.common.bean.ResultUtil;
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
@@ -82,7 +83,6 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
             request.setWaitCloudInitTimeoutSeconds((int) TimeUnit.MINUTES.toSeconds(expireMinutes));
         }
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
-        deviceXmlList.addAll(this.buildInterfaceListXml(guest, guestNetworkEntityList, systemConfig));
         deviceXmlList.addAll(this.buildHostPciListXml(hostPciDeviceEntityList, systemConfig));
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
         if (extern.getGraphics() == null) {
@@ -102,6 +102,7 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
 
         String xml = DomainUtil.buildDomainXml(tpl, systemConfig, guest, host, scheme, extern.getGraphics().getPassword(), deviceXmlList, metaDataXmlList);
         request.setXml(xml);
+        request.setNics(this.buildInterfaceListXml(guest, guestNetworkEntityList, systemConfig));
         this.asyncInvoker(host, param, Constant.Command.GUEST_START, request);
 
     }
@@ -192,9 +193,9 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
         return disks;
     }
 
-    protected List<String> buildInterfaceListXml(GuestEntity guest, List<GuestNetworkEntity> guestNetworkEntityList, Map<String, Object> systemConfig) {
+    protected List<NetworkNic> buildInterfaceListXml(GuestEntity guest, List<GuestNetworkEntity> guestNetworkEntityList, Map<String, Object> systemConfig) {
         guestNetworkEntityList.sort(Comparator.comparingInt(GuestNetworkEntity::getDeviceId));
-        List<String> networkInterfaces = new ArrayList<>();
+        List<NetworkNic> networkInterfaces = new ArrayList<>();
         for (GuestNetworkEntity entity : guestNetworkEntityList) {
             NetworkEntity network = networkDao.findById(entity.getNetworkId());
             if (!guest.getType().equals(Constant.GuestType.COMPONENT)) {

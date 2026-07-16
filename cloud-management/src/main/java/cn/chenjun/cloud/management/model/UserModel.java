@@ -40,10 +40,6 @@ public class UserModel {
      */
     private String loginName;
     /**
-     * 密码
-     */
-    private String passwordSalt;
-    /**
      * 状态
      */
     private short userStatus;
