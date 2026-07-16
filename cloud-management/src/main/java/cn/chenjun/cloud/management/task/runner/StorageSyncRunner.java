@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -37,7 +38,7 @@ public class StorageSyncRunner extends AbstractRunner {
     protected void dispatch() {
         List<StorageEntity> storageList = this.storageService.listStorage();
         for (StorageEntity storage : storageList) {
-            if (storage.getType() == Constant.StorageType.LOCAL && storage.getParentId() == 0) {
+            if (Objects.equals(storage.getType(), Constant.StorageType.LOCAL) && storage.getParentId() == 0) {
                 continue;
             }
             BaseOperateParam operateParam = StorageCheckOperate.builder().id(UUID.randomUUID().toString()).storageId(storage.getStorageId()).title("检测存储池使用情况").build();

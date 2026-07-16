@@ -42,11 +42,6 @@ public class DnsService extends AbstractService {
         if (network == null) {
             return new ArrayList<>();
         }
-        List<DnsModel> list = new ArrayList<>();
-        List<GuestEntity> guestList = this.guestDao.listByNetworkId(networkId);
-        for (GuestEntity guest : guestList) {
-            list.add(DnsModel.builder().domain(guest.getName() + "." + network.getDomain()).ip(guest.getGuestIp()).build());
-        }
         return this.dnsDao.listByNetworkId(networkId);
     }
 

@@ -31,7 +31,7 @@ public abstract class AbstractWsService<T extends WsMessage, V> {
     private static final ConcurrentHashMap<String, BaseCodecHandler> CLIENT_CODE_HANDLER = new ConcurrentHashMap<>();
     private final MessageProcess<T, V> processor;
 
-    public AbstractWsService(MessageProcess<T, V> processor) {
+    protected AbstractWsService(MessageProcess<T, V> processor) {
         this.processor = processor;
     }
 
@@ -76,11 +76,11 @@ public abstract class AbstractWsService<T extends WsMessage, V> {
         log.info("websocket closed.{}:{}", this.getName(), session.getId());
         Client webSocket = WEBSOCKET_CACHE.remove(session.getId());
         if (webSocket != null) {
-            FunctionUtils.ignoreRun(() -> webSocket.close());
+            FunctionUtils.ignoreRun(webSocket::close);
         }
         BaseCodecHandler handler = CLIENT_CODE_HANDLER.remove(session.getId());
         if (handler != null) {
-            FunctionUtils.ignoreRun(() -> handler.close());
+            FunctionUtils.ignoreRun(handler::close);
         }
     }
 

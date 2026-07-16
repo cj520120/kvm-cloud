@@ -2,6 +2,7 @@ package cn.chenjun.cloud.management.websocket.manager;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import cn.chenjun.cloud.common.util.FunctionUtils;
 import cn.chenjun.cloud.management.websocket.listen.client.Client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,10 +19,14 @@ public class HostClientManager {
         }
 
         webSocket.registerOnClose((sender, obj) -> {
+            Client removeClient = null;
             synchronized (HOST_CLIENT_MAP) {
                 if (Objects.equals(HOST_CLIENT_MAP.get(hostId), webSocket)) {
-                    HOST_CLIENT_MAP.remove(hostId);
+                    removeClient=HOST_CLIENT_MAP.remove(hostId);
                 }
+            }
+            if(removeClient!=null){
+                 FunctionUtils.ignoreRun(removeClient::close);
             }
         });
 
@@ -47,9 +52,9 @@ public class HostClientManager {
 
     @Scheduled(fixedDelay = 10000)
     public void checkKeep() {
-        List<Client> wsList = new ArrayList<>();
+        List<Client> wsList;
         synchronized (HOST_CLIENT_MAP) {
-            wsList.addAll(HOST_CLIENT_MAP.values());
+            wsList = new ArrayList<>(HOST_CLIENT_MAP.values());
         }
         for (Client ws : wsList) {
             if (ws.getLastActiveTime() < System.currentTimeMillis() - 1000 * 60) {

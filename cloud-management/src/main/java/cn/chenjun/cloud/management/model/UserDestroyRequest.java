@@ -2,20 +2,16 @@ package cn.chenjun.cloud.management.model;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author chenjun
  */
+@Setter
+@Getter
 public class UserDestroyRequest {
     private int userId;
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
 
     public void validate() {
         if (userId <= 0) {

@@ -18,7 +18,7 @@ public class EventListener<T> {
         try {
             this.lock.readLock().lock();
             Collection<EventHandler<T>> listener = this.listener;
-            final EventObject<T> model = new EventObject<T>(target);
+            final EventObject<T> model = new EventObject<>(target);
             for (EventHandler<T> ev : listener) {
                 try {
                     this.fire(ev, sender, model);

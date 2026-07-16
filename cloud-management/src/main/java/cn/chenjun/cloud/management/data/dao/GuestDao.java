@@ -36,7 +36,7 @@ public class GuestDao {
     }
 
     public Page<GuestEntity> search(Integer guestType, Integer groupId, Integer networkId, Integer hostId, Integer schemeId, Integer status, String keyword, int no, int size) {
-        QueryWrapper queryWrapper = new QueryWrapper<GuestEntity>();
+        QueryWrapper<GuestEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(groupId != null, GuestEntity.GROUP_ID, groupId);
         queryWrapper.eq(hostId != null, GuestEntity.HOST_ID, hostId);
         queryWrapper.eq(networkId != null, GuestEntity.NETWORK_ID, networkId);
@@ -46,8 +46,7 @@ public class GuestDao {
         if (!ObjectUtils.isEmpty(keyword)) {
             queryWrapper.and(o -> {
                 String condition = "%" + keyword + "%";
-                QueryWrapper<GuestEntity> wrapper = (QueryWrapper) o;
-                wrapper.like(GuestEntity.GUEST_IP, condition)
+                o.like(GuestEntity.GUEST_IP, condition)
                         .or().like(GuestEntity.GUEST_NAME, condition)
                         .or().like(GuestEntity.GUEST_DESCRIPTION, condition);
             });

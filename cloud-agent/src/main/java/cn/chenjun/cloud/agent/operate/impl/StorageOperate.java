@@ -48,7 +48,6 @@ public class StorageOperate {
     }
 
     @DispatchBind(command = Constant.Command.BATCH_STORAGE_INFO)
-
     public List<StorageInfo> batchStorageInfo(Connect connect, List<StorageInfoRequest> batchRequest) throws Exception {
         List<StorageInfo> list = new ArrayList<>();
         for (StorageInfoRequest request : batchRequest) {

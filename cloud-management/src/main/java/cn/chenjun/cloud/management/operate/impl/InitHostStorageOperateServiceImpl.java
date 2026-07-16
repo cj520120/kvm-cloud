@@ -87,7 +87,7 @@ public class InitHostStorageOperateServiceImpl extends AbstractOperateService<In
                 if (Objects.equals(storage.getStatus(), Constant.StorageStatus.INIT)) {
                     storage.setStatus(Constant.StorageStatus.READY);
                 }
-            } else if (resultUtil.getCode() != ErrorCode.SUCCESS) {
+            } else {
                 storage.setStatus(Constant.StorageStatus.ERROR);
             }
             storageDao.update(storage);
@@ -109,7 +109,7 @@ public class InitHostStorageOperateServiceImpl extends AbstractOperateService<In
                 }
             }
             storageDao.update(storage);
-            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(storage.getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
+            NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(Objects.requireNonNull(storage).getStorageId()).type(Constant.NotifyType.UPDATE_STORAGE).build());
         }
     }
 

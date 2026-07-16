@@ -33,9 +33,7 @@ public class VncManager {
             webSocket.sendBinaryPacket(Constant.SocketCommand.VNC_DISCONNECT, VncDisconnect.builder().id(vncConnect.getId()).build().toBytes());
             return;
         }
-        EventHandler<ConnectContext> onCloseHandler = (sender, event) -> {
-            disconnect(VncDisconnect.builder().id(agentVncconnect.getId()).build());
-        };
+        EventHandler<ConnectContext> onCloseHandler = (sender, event) -> disconnect(VncDisconnect.builder().id(agentVncconnect.getId()).build());
         webSocket.registerOnClose(onCloseHandler);
         agentWebSocket.registerOnClose(onCloseHandler);
         VncBind bind = VncBind.builder().id(agentVncconnect.getId()).webSocket(webSocket).agentWebSocket(agentWebSocket).build();
@@ -58,9 +56,7 @@ public class VncManager {
         agentVncconnect.setId(vncConnect.getId());
         agentVncconnect.setName(vncConnect.getName());
         agentVncconnect.setHostId(vncConnect.getHostId());
-        EventHandler<ConnectContext> onCloseHandler = (sender, event) -> {
-            disconnect(VncDisconnect.builder().id(agentVncconnect.getId()).build());
-        };
+        EventHandler<ConnectContext> onCloseHandler = (sender, event) -> disconnect(VncDisconnect.builder().id(agentVncconnect.getId()).build());
         webSocket.registerOnClose(onCloseHandler);
         nodeSocket.registerOnClose(onCloseHandler);
         VncBind oldBind = vncMap.put(agentVncconnect.getId(), VncBind.builder().id(agentVncconnect.getId()).webSocket(webSocket).agentWebSocket(nodeSocket).build());

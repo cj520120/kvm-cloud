@@ -5,6 +5,7 @@ import cn.chenjun.cloud.common.gson.GsonBuilderUtil;
 import cn.chenjun.cloud.common.util.ErrorCode;
 import cn.hutool.core.thread.ThreadUtil;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -73,7 +74,7 @@ public class CloudInitHelper {
         if (returnType == null) {
             return null;
         }
-        Map<String, Object> response = GsonBuilderUtil.create().fromJson(responseJson, Map.class);
+        Map<String, Object> response = GsonBuilderUtil.create().fromJson(responseJson, new TypeToken<Map<String, Object>>() {}.getType());
         if (response.containsKey("error")) {
             String errorDesc = Optional.ofNullable(response.get("error")).map(obj -> GsonBuilderUtil.create().toJson(obj)).orElse("未知错误");
             throw new CodeException(ErrorCode.VM_COMMAND_ERROR, "QGA命令执行失败：" + errorDesc);
@@ -92,7 +93,7 @@ public class CloudInitHelper {
         List<String> cmdArgs = Arrays.asList("-c", CHECK_CLOUD_INIT_CMD);
         GuestExecArguments execArgs = new GuestExecArguments("sh", cmdArgs, true);
         QgaCommandRequest execRequest = new QgaCommandRequest(QgaCommand.GUEST_EXEC, execArgs);
-        return executeCommand(domain, execRequest, maxTimeoutSeconds, GuestExecReturn.class).getPid();
+        return Objects.requireNonNull(executeCommand(domain, execRequest, maxTimeoutSeconds, GuestExecReturn.class)).getPid();
     }
 
     private static String parseGuestExecOutput(String output) {
@@ -117,7 +118,7 @@ public class CloudInitHelper {
         QgaCommandRequest statusRequest = new QgaCommandRequest(QgaCommand.GUEST_EXEC_STATUS, statusArgs);
         while (System.currentTimeMillis() < deadline) {
             GuestExecStatusReturn execStatusReturn = executeCommand(domain, statusRequest, 30, GuestExecStatusReturn.class);
-            if (Objects.isNull(execStatusReturn.getExited()) || !execStatusReturn.getExited()) {
+            if (execStatusReturn==null || Objects.isNull(execStatusReturn.getExited()) || !execStatusReturn.getExited()) {
                 log.info("CloudInit检测进程[{}]正在运行，等待中...", pid);
                 ThreadUtil.safeSleep(5000);
             } else {
@@ -150,7 +151,7 @@ public class CloudInitHelper {
             executeCommand(domain, QgaCommandRequest.builder().execute(QgaCommand.GUEST_PING).build(), timeoutSeconds, null);
             GuestInfoReturn info = executeCommand(domain, QgaCommandRequest.builder().execute(QgaCommand.GUEST_INFO).build(), timeoutSeconds, GuestInfoReturn.class);
             boolean isSupported = false;
-            if (!ObjectUtils.isEmpty(info.getSupportedCommands())) {
+            if (info!=null&&!ObjectUtils.isEmpty(info.getSupportedCommands())) {
                 isSupported = info.getSupportedCommands().stream().anyMatch(command -> Objects.equals(command.getName(), requiredCommand) && command.isEnabled());
             }
             if (isSupported) {

@@ -87,7 +87,7 @@ public class NetworkController extends BaseController {
     @PutMapping("/api/network/create")
     public ResultUtil<NetworkModel> createNetwork(@RequestBody NetworkCreateRequest request) {
         request.validate();
-        SubnetNetwork subnetNetwork = null;
+        SubnetNetwork subnetNetwork;
         switch (request.getType()) {
             case Constant.NetworkType.FLAT:
                 verifyBaseNetwork(request.getStartIp(), request.getEndIp(), request.getBridge(), request.getSubnet(), request.getBroadcast(), request.getGateway());

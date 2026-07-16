@@ -46,11 +46,8 @@ public class ComponentGuestCloudInitServiceImpl implements CloudInitService {
             return null;
         }
         CloudConfig cloudConfig = new CloudConfig();
-        List<ComponentInitialization> builders = componentInitializations.stream().filter(builder -> builder.isSupport(component.getComponentType())).collect(Collectors.toList());
-        builders.sort(Comparator.comparingInt(ComponentInitialization::getOrder));
-        builders.forEach(builder -> {
-            builder.initialize(cloudConfig, guest, network, component, componentGuest);
-        });
+        List<ComponentInitialization> builders = componentInitializations.stream().filter(builder -> builder.isSupport(component.getComponentType())).sorted(Comparator.comparingInt(ComponentInitialization::getOrder)).collect(Collectors.toList());
+        builders.forEach(builder -> builder.initialize(cloudConfig, guest, network, component, componentGuest));
         if (ObjectUtils.isEmpty(cloudConfig.getUserData()) && ObjectUtils.isEmpty(cloudConfig.getNetworks())) {
             return null;
         }

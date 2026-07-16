@@ -14,6 +14,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.ValidationException;
 import java.text.MessageFormat;
+import java.util.Objects;
 
 /**
  * @author chenjun
@@ -36,7 +37,7 @@ public class WebExceptionHandler {
             return ResultUtil.<Void>builder().code(ErrorCode.PARAM_ERROR).message(msg).build();
         } else if (error instanceof MethodArgumentTypeMismatchException) {
             MethodArgumentTypeMismatchException exception = ((MethodArgumentTypeMismatchException) error);
-            String msg = MessageFormat.format("process controller parse param error.uri:{0},param:[{1}={2}] type=[{3}],method={4}", request.getRequestURI(), exception.getName(), exception.getValue(), exception.getRequiredType().getName(), request.getMethod());
+            String msg = MessageFormat.format("process controller parse param error.uri:{0},param:[{1}={2}] type=[{3}],method={4}", request.getRequestURI(), exception.getName(), exception.getValue(), Objects.requireNonNull(exception.getRequiredType()).getName(), request.getMethod());
             log.warn(msg);
             return ResultUtil.<Void>builder().code(ErrorCode.PARAM_ERROR).message(msg).build();
         } else if (error instanceof CodeException) {
@@ -44,7 +45,7 @@ public class WebExceptionHandler {
             return ResultUtil.<Void>builder().code(exception.getCode()).message(exception.getMessage()).build();
         } else if (error instanceof HttpRequestMethodNotSupportedException) {
             HttpRequestMethodNotSupportedException exception = (HttpRequestMethodNotSupportedException) error;
-            String msg = MessageFormat.format("process controller not support method.uri:{0},support={1},request={2}", request.getRequestURI(), String.join(",", exception.getSupportedMethods()), request.getMethod());
+            String msg = MessageFormat.format("process controller not support method.uri:{0},support={1},request={2}", request.getRequestURI(), String.join(",", Objects.requireNonNull(exception.getSupportedMethods())), request.getMethod());
             log.warn(msg);
             return ResultUtil.<Void>builder().code(ErrorCode.NOT_SUPPORT_METHOD).message(msg).build();
         } else if (error instanceof ValidationException) {

@@ -53,7 +53,7 @@ public class ClientService implements CommandLineRunner {
         return ResultUtil.success();
     }
 
-    private void init() throws Exception {
+    private void init() {
 
         File configFile = new File("./config.json");
         if (configFile.exists()) {
@@ -63,18 +63,6 @@ public class ClientService implements CommandLineRunner {
             this.clientSecret = config.get("clientSecret");
             this.managerUri = config.get("managerUri");
         }
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public String getManagerUri() {
-        return managerUri;
     }
 
     @Override

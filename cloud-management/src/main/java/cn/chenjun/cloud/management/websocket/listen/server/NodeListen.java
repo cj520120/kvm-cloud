@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 @ServerEndpoint(value = "/api/node/ws")
 public class NodeListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> {
     public NodeListen() {
-        super((client) -> new ByteCodecHandler(client));
+        super(ByteCodecHandler::new);
     }
 
 

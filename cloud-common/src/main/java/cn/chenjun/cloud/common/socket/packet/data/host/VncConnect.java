@@ -2,9 +2,11 @@ package cn.chenjun.cloud.common.socket.packet.data.host;
 
 import cn.chenjun.cloud.common.socket.packet.data.BaseJsonData;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.nio.ByteBuffer;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class VncConnect extends BaseJsonData {
     private String name;

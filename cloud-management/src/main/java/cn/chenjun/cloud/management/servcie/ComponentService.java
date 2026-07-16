@@ -206,7 +206,7 @@ public class ComponentService extends AbstractService {
             GuestEntity guest = this.guestDao.findById(componentGuest.getGuestId());
             if (guest == null) {
                 this.componentGuestDao.deleteById(componentGuest.getComponentGuestId());
-                componentGuestList.remove(componentGuestList);
+                componentGuestList.remove(componentGuest);
                 log.warn("组件虚拟机不存在，清理组件信息，guest_id={}", componentGuest.getGuestId());
             } else if (Objects.equals(SystemUtil.COMPONENT_VERSION, componentGuest.getComponentVersion())) {
                 checkComponentGuestStatus(guest, componentGuest);

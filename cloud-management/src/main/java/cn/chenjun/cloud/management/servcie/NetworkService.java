@@ -77,7 +77,7 @@ public class NetworkService extends AbstractService {
     public NetworkEntity createNetwork(String name, SubnetNetwork subnetNetwork, String bridge, String dns, String domain, int type, int vlanId, int basicNetworkId, int bridgeType) {
 
 
-        NetworkEntity basicNetwork = null;
+        NetworkEntity basicNetwork;
         switch (type) {
             case Constant.NetworkType.FLAT:
                 break;

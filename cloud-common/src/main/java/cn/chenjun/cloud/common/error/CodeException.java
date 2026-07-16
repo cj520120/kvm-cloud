@@ -1,10 +1,12 @@
 package cn.chenjun.cloud.common.error;
 
 import cn.chenjun.cloud.common.bean.ResultUtil;
+import lombok.Getter;
 
 /**
  * @author chenjun
  */
+@Getter
 public class CodeException extends RuntimeException {
     private final int code;
 
@@ -41,7 +43,4 @@ public class CodeException extends RuntimeException {
         this.code = code;
     }
 
-    public int getCode() {
-        return code;
-    }
 }

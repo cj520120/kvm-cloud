@@ -22,7 +22,9 @@ public class NotifyData<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof NotifyData)) return false;
+        if (!(o instanceof NotifyData)) {
+            return false;
+        }
         NotifyData<?> that = (NotifyData<?>) o;
         return type == that.type && id == that.id && Objects.equals(data, that.data);
     }

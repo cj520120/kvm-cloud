@@ -3,6 +3,7 @@ package cn.chenjun.cloud.common.util;
 import cn.hutool.crypto.Mode;
 import cn.hutool.crypto.Padding;
 import cn.hutool.crypto.symmetric.AES;
+import lombok.Getter;
 
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -18,7 +19,9 @@ public class SymmetricCryptoUtil {
     /**
      * 16字节
      */
+    @Getter
     private final String encodeKey;
+    @Getter
     private final String ivKey;
 
     private SymmetricCryptoUtil(String encodeKey, String ivKey) {
@@ -37,14 +40,6 @@ public class SymmetricCryptoUtil {
 
     public static SymmetricCryptoUtil build() {
         return new SymmetricCryptoUtil();
-    }
-
-    public String getEncodeKey() {
-        return encodeKey;
-    }
-
-    public String getIvKey() {
-        return ivKey;
     }
 
     public String encrypt(String data) {

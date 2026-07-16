@@ -11,7 +11,9 @@ public class BeanConverter {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <S, T> T convert(S source, Class<T> targetClass) {
-        if (source == null) return null;
+        if (source == null) {
+            return null;
+        }
         T target = targetClass.getDeclaredConstructor().newInstance();
         BeanUtils.copyProperties(source, target);
         return target;
@@ -20,14 +22,18 @@ public class BeanConverter {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <S, T> List<T> convert(List<S> sourceList, Class<T> targetClass) {
-        if (sourceList == null || sourceList.isEmpty()) return new ArrayList<>();
+        if (sourceList == null || sourceList.isEmpty()) {
+            return new ArrayList<>();
+        }
         return sourceList.stream().map(source -> convert(source, targetClass)).collect(Collectors.toList());
     }
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static <S, T> List<T> convert(List<S> sourceList, Converter<S,T> converter) {
-        if (sourceList == null || sourceList.isEmpty()) return new ArrayList<>();
-        return sourceList.stream().map(source -> converter.convert(source)).collect(Collectors.toList());
+        if (sourceList == null || sourceList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return sourceList.stream().map(converter::convert).collect(Collectors.toList());
     }
 
     @FunctionalInterface

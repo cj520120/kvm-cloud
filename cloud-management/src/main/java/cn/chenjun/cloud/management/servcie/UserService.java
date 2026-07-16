@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -126,7 +127,7 @@ public class UserService extends AbstractService {
 
     public RefreshTokenInfo refreshToken(int userId) {
         RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
-        userToken.expire(1, TimeUnit.HOURS);
+        userToken.expire(Duration.ofHours(1));
         return RefreshTokenInfo.builder().self(getUserInfo(userId)).expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))).build();
     }
 

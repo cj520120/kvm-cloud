@@ -89,7 +89,7 @@ public class TaskPoolUtil {
             ArrayList<String> list = new ArrayList<>();
             list.addAll(TaskPoolUtil.TASK_MAP.keySet());
             list.addAll(TaskPoolUtil.SUBMIT_QUEUE.stream().map(SubmitTask::getTaskId).collect(Collectors.toList()));
-            return new ArrayList<>(TaskPoolUtil.TASK_MAP.keySet());
+            return list;
         }
     }
 }

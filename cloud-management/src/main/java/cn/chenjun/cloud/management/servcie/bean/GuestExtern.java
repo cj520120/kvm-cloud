@@ -9,7 +9,7 @@ public class GuestExtern {
     private MetaDataExtern metaData;
     @SerializedName(GuestExternNames.USER_DATA)
     private UserDataExtern userData;
-    @SerializedName(value = GuestExternNames.GRAPHICS, alternate = {GuestExternNames.VNC})
+    @SerializedName(value = GuestExternNames.GRAPHICS)
     private GraphicsExtern graphics;
     @SerializedName(GuestExternNames.VENDOR_DATA)
     private String initVendorData;
@@ -50,8 +50,7 @@ public class GuestExtern {
         public static final String META_DATA = "meta-data";
         public static final String USER_DATA = "user-data";
         public static final String VENDOR_DATA = "vendor-data";
-        @Deprecated
-        public static final String VNC = "vnc";
+
         public static final String GRAPHICS = "graphics";
 
         public static final class VncNames {

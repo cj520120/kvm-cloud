@@ -52,6 +52,7 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
             ResultUtil<T> executeResult = ResultUtil.<T>builder().code(ErrorCode.NOT_SUPPORT_METHOD).message("不支持的操作:" + task.getCommand()).build();
             SubmitTask submitTask = SubmitTask.builder().taskId(task.getTaskId()).data(GsonBuilderUtil.create().toJson(executeResult)).build();
             TaskPoolUtil.pushSubmit(submitTask);
+            return;
         }
         if (dispatch.isAsync()) {
             DispatchProcess dispatchProcess = DispatchProcess.builder().dispatch(dispatch).task(task).build();
@@ -99,7 +100,7 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         int taskSize = Math.max(this.applicationConfig.getTaskThreadSize(), 1);
         this.executor = new ScheduledThreadPoolExecutor(taskSize, new BasicThreadFactory.Builder().namingPattern("job-executor-pool-%d").daemon(true).build());
         for (int i = 0; i < taskSize; i++) {
@@ -139,7 +140,7 @@ public class OperateDispatch implements CommandLineRunner, Closeable {
         }
     }
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (this.executor != null) {
             this.executor.shutdown();
         }

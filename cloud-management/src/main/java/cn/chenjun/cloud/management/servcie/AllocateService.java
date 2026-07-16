@@ -41,7 +41,7 @@ public class AllocateService extends AbstractService {
         List<StorageEntity> storageList = storageDao.listAll().stream().filter(
                 storage -> (storage.getSupportCategory() & category) == category
                         && storage.getStatus() == cn.chenjun.cloud.common.util.Constant.StorageStatus.READY
-                        && storage.getType() != cn.chenjun.cloud.common.util.Constant.StorageType.LOCAL
+                        && !Objects.equals(storage.getType(), Constant.StorageType.LOCAL)
         ).collect(Collectors.toList());
         Map<Integer, Float> scoreMap = storageList.parallelStream().collect(Collectors.toMap(StorageEntity::getStorageId, entity -> {
             List<ConfigQuery> queryList = Arrays.asList(

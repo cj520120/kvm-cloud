@@ -50,7 +50,7 @@ public abstract class BaseClient implements Client {
     public String getSessionId() {
         return this.sessionId;
     }
-
+    @Override
     public ConnectContext getContext() {
         return this.context;
     }

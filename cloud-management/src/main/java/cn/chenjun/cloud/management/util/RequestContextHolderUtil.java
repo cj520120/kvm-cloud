@@ -10,13 +10,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+@SuppressWarnings("unchecked")
 public class RequestContextHolderUtil {
     public static final String REQUEST_ID = "RequestId";
     public static final String CURRENT_USER = "CurrentUser";
-    private static final ThreadLocal<Map<String, Holder>> REQUEST_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, Holder<?>>> REQUEST_CONTEXT = new ThreadLocal<>();
 
     public static <T> T get(String key) {
-        Map<String, Holder> context = REQUEST_CONTEXT.get();
+        Map<String, Holder<?>> context = REQUEST_CONTEXT.get();
         if (context == null) {
             throw new IllegalStateException("Request context is not initialized");
         }
@@ -29,7 +30,7 @@ public class RequestContextHolderUtil {
     }
 
     public static <T> T get(String key, Callable<T> callable) {
-        Map<String, Holder> context = REQUEST_CONTEXT.get();
+        Map<String, Holder<?>> context = REQUEST_CONTEXT.get();
         if (context == null) {
             throw new IllegalStateException("Request context is not initialized");
         }
@@ -53,7 +54,7 @@ public class RequestContextHolderUtil {
     }
 
     public static void put(String key, Object data) {
-        Map<String, Holder> context = REQUEST_CONTEXT.get();
+        Map<String, Holder<?>> context = REQUEST_CONTEXT.get();
         if (context == null) {
             throw new IllegalStateException("Request context is not initialized");
         }

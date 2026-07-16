@@ -1,13 +1,11 @@
 package cn.chenjun.cloud.common.socket.packet.data.host;
 
 import cn.chenjun.cloud.common.socket.packet.data.BaseJsonData;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.nio.ByteBuffer;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

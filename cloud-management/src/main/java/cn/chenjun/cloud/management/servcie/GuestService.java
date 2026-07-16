@@ -747,9 +747,9 @@ public class GuestService extends AbstractService {
             GraphicsModel graphics = new GraphicsModel();
             graphics.setPassword(extern.getGraphics().getPassword());
             graphics.setToken(token);
-            if (ObjectUtils.isEmpty(extern.getGraphics().getProtocol()))
+            if (ObjectUtils.isEmpty(extern.getGraphics().getProtocol())) {
                 extern.getGraphics().setProtocol("vnc");
-            else {
+            } else {
                 extern.getGraphics().setProtocol(extern.getGraphics().getProtocol());
             }
             return graphics;

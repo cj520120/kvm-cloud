@@ -46,7 +46,7 @@ import java.util.UUID;
 @Component
 public class VncListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> {
     public VncListen() {
-        super((client) -> new VncCodecHandler(client));
+        super(VncCodecHandler::new);
     }
 
     @Override
@@ -100,8 +100,9 @@ public class VncListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> 
         String hostKey = RedisKeyUtil.getHostConnectionKey(memGraphicsInfo.getHostId());
         HostContext hostContext = (HostContext) redissonClient.getBucket(hostKey).get();
         if (hostContext == null) {
-            webSocket.close();
+            FunctionUtils.ignoreRun(webSocket::close);
             log.info("Vnc连接失败，宿主机不在线.guest={},hostId={}", memGraphicsInfo.getGuestName(), memGraphicsInfo.getHostId());
+            return;
         }
         if (Objects.equals(applicationConfig.getCluster().getNodeUrl(), hostContext.getNodeUrl())) {
             log.info("当前主机在本节点,无需转发");
@@ -135,9 +136,7 @@ public class VncListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> 
         } catch (Exception e) {
             log.error("Tcp客户端连接节点失败", e);
             FunctionUtils.ignoreRun(webSocket::close);
-            if (nodeSocket != null) {
-                FunctionUtils.ignoreRun(nodeSocket::close);
-            }
+            FunctionUtils.ignoreRun(nodeSocket::close);
         }
     }
 

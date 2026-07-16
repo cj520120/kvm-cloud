@@ -51,14 +51,14 @@ public class VolumeService extends AbstractService {
 
     public List<VolumeEntity> listGuestVolumes(int guestId) {
         List<VolumeEntity> diskList = this.volumeDao.listByGuestId(guestId);
-        Collections.sort(diskList, (o1, o2) -> {
-            if (o1.getStatus() == o2.getStatus()) {
+        diskList.sort((o1, o2) -> {
+            if (Objects.equals(o1.getStatus(), o2.getStatus())) {
                 return Integer.compare(o1.getVolumeId(), o2.getVolumeId());
             }
-            if (o1.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
+            if (o1.getStatus() == Constant.VolumeStatus.READY) {
                 return -1;
             }
-            if (o2.getStatus() == cn.chenjun.cloud.common.util.Constant.VolumeStatus.READY) {
+            if (o2.getStatus() == Constant.VolumeStatus.READY) {
                 return 1;
             }
             return Integer.compare(o1.getStatus(), o2.getStatus());
@@ -68,14 +68,12 @@ public class VolumeService extends AbstractService {
     }
 
     public Page<VolumeEntity> search(Integer storageId, Integer status, Integer templateId, String volumeType, String keyword, int no, int size) {
-        Page<VolumeEntity> page = this.volumeDao.search(storageId, status, templateId, volumeType, keyword, no, size);
-        return page;
+        return this.volumeDao.search(storageId, status, templateId, volumeType, keyword, no, size);
 
     }
 
     public List<VolumeEntity> listVolumes() {
-        List<VolumeEntity> volumeList = this.volumeDao.listAll();
-        return volumeList;
+        return this.volumeDao.listAll();
     }
 
     public List<VolumeEntity> listNoAttachVolumes(int guestId) {

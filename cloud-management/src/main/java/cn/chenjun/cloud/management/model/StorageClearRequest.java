@@ -2,20 +2,16 @@ package cn.chenjun.cloud.management.model;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author chenjun
  */
+@Setter
+@Getter
 public class StorageClearRequest {
     private int storageId;
-
-    public int getStorageId() {
-        return storageId;
-    }
-
-    public void setStorageId(int storageId) {
-        this.storageId = storageId;
-    }
 
     public void validate() {
         if (storageId <= 0) {

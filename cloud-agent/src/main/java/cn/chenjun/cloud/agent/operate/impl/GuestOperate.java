@@ -272,10 +272,6 @@ public class GuestOperate {
     /**
      * 关机操作
      *
-     * @param connect
-     * @param name
-     * @param timeoutMillis
-     * @throws Exception
      */
     private void stopDomain(Connect connect, String name, long timeoutMillis) throws Exception {
         long stopTime = System.currentTimeMillis();
@@ -291,7 +287,7 @@ public class GuestOperate {
                 if (System.currentTimeMillis() - stopTime > timeoutMillis) {
                     try {
                         domain.destroy();
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
 
                     }
                     try {

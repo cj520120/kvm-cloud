@@ -99,9 +99,7 @@ public class FirstInitialization extends BaseInitialization {
         for (SystemParamConfig sysctl : sysctlConfigList) {
             if (sysctl.getSupportNetworks().contains(network.getType())) {
                 Map<String, Integer> params = sysctl.getParams();
-                params.forEach((k, v) -> {
-                    config.appendRuncmd(String.format("echo '%s=%d' >> /etc/sysctl.conf", k, v));
-                });
+                params.forEach((k, v) -> config.appendRuncmd(String.format("echo '%s=%d' >> /etc/sysctl.conf", k, v)));
             }
         }
         config.appendRuncmd("sysctl -p");

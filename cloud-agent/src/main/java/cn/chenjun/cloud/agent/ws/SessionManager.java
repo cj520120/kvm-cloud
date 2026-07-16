@@ -70,9 +70,7 @@ public class SessionManager implements Closeable {
      * 注册 WebSocket 事件监听器
      */
     private void registerEventListeners(WsClient client) {
-        client.onConnect.addEvent((sender, obj) -> {
-            log.info("管理端 WebSocket 连接成功，开始登录...");
-        });
+        client.onConnect.addEvent((sender, obj) -> log.info("管理端 WebSocket 连接成功，开始登录..."));
         client.onMessage.addEvent((sender, obj) -> {
             WsMessage<byte[]> wsMessage = obj.getEvent();
             List<PacketHandler> handlers = packetHandlers.stream()

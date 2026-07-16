@@ -134,15 +134,6 @@ public class VxLanProxy {
         private String ovnBridgeName;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class HealthResponse {
-
-        private String status;
-
-        private String service;
-    }
 
     @Data
     @NoArgsConstructor
@@ -160,29 +151,4 @@ public class VxLanProxy {
         private String bridgeName;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PortInfoData {
-
-        private String mac;
-
-        @SerializedName("port_uuid")
-        private String portUuid;
-
-        @SerializedName("port_name")
-        private String portName;
-
-        @SerializedName("user_bridge_name")
-        private String userBridgeName;
-
-        @SerializedName("ovn_bridge_name")
-        private String ovnBridgeName;
-
-        @SerializedName("ip_address")
-        private String ipAddress;
-
-        @SerializedName("created_at")
-        private String createdAt;
-    }
 }

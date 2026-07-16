@@ -39,7 +39,7 @@ public class ResizeVolumeOperateServiceImpl extends AbstractOperateService<Resiz
             GuestEntity guest = this.guestDao.findById(volume.getGuestId());
             int hostId = 0;
             String vm = "";
-            HostEntity host = null;
+            HostEntity host;
             if (guest != null && guest.getHostId() > 0) {
                 host = this.hostDao.findById(guest.getHostId());
                 vm = guest.getName();

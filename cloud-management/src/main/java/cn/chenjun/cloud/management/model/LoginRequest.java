@@ -2,39 +2,19 @@ package cn.chenjun.cloud.management.model;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 /**
  * @author chenjun
  */
+@Setter
+@Getter
 public class LoginRequest {
     private String loginName;
     private String password;
     private String nonce;
-
-    public String getLoginName() {
-        return loginName;
-    }
-
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getNonce() {
-        return nonce;
-    }
-
-    public void setNonce(String nonce) {
-        this.nonce = nonce;
-    }
 
     public void validate() {
         if (StringUtils.isEmpty(loginName)) {

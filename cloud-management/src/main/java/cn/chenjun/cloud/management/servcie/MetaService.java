@@ -34,7 +34,9 @@ public class MetaService extends AbstractService {
     public MetaData loadAllGuestMetaData(int networkId, String ip) {
         do {
             GuestEntity guest = getRequestGuest(networkId, ip);
-            if (guest == null) break;
+            if (guest == null) {
+                break;
+            }
             Optional<MetaDataService> metaDataServiceOptional = metaDataPluginRegistry.getPluginFor(guest);
             if (metaDataServiceOptional.isPresent()) {
                 MetaData metaData = metaDataServiceOptional.get().buildCloudInitMetaData(guest);
@@ -48,7 +50,9 @@ public class MetaService extends AbstractService {
         StringBuilder data = new StringBuilder();
         do {
             GuestEntity guest = getRequestGuest(networkId, ip);
-            if (guest == null) break;
+            if (guest == null) {
+                break;
+            }
             Optional<MetaDataService> optional = metaDataPluginRegistry.getPluginFor(guest);
             if (!optional.isPresent()) {
                 break;
@@ -90,7 +94,9 @@ public class MetaService extends AbstractService {
         List<MetaData> metaDataList = new ArrayList<>();
         do {
             GuestEntity guest = getRequestGuest(networkId, ip);
-            if (guest == null) break;
+            if (guest == null) {
+                break;
+            }
             List<VendorDataService> vendorDataServiceList = vendorDataPluginRegistry.getPluginsFor(guest);
             for (VendorDataService vendorDataService : vendorDataServiceList) {
                 MetaData metaData = vendorDataService.load(guest);
@@ -106,7 +112,9 @@ public class MetaService extends AbstractService {
         List<MetaData> metaDataList = new ArrayList<>();
         do {
             GuestEntity guest = getRequestGuest(networkId, ip);
-            if (guest == null) break;
+            if (guest == null) {
+                break;
+            }
             List<UserDataService> userDataServiceList = userDataPluginRegistry.getPluginsFor(guest);
             for (UserDataService userDataService : userDataServiceList) {
                 MetaData metaData = userDataService.load(guest);

@@ -61,9 +61,7 @@ public class OperateEngine {
 
         optional.ifPresent(operateService -> {
             if (operateService.requireLock()) {
-                lockRunner.lockRun(operateService.getLockKey(operateParam), () -> {
-                    operateService.process(operateParam);
-                });
+                lockRunner.lockRun(operateService.getLockKey(operateParam), () -> operateService.process(operateParam));
             } else {
                 operateService.process(operateParam);
             }

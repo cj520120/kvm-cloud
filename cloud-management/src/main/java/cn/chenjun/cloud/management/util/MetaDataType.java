@@ -1,5 +1,8 @@
 package cn.chenjun.cloud.management.util;
 
+import lombok.Getter;
+
+@Getter
 public enum MetaDataType {
     CLOUD("#cloud-config\n", "text/cloud-config");
     private final String firstLine;
@@ -10,11 +13,4 @@ public enum MetaDataType {
         this.contextType = contextType;
     }
 
-    public String getContextType() {
-        return contextType;
-    }
-
-    public String getFirstLine() {
-        return firstLine;
-    }
 }

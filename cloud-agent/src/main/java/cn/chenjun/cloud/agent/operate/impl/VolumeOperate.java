@@ -66,7 +66,7 @@ public class VolumeOperate {
     }
 
     @DispatchBind(command = Constant.Command.DESTROY_UNLINK_VOLUME)
-    public Void destroyUnlinkVolume(Connect connect, DestroyUnLinkVolumeRequest request) throws Exception {
+    public Void destroyUnlinkVolume(Connect connect, DestroyUnLinkVolumeRequest request) {
         StoragePool storagePool = StorageUtil.findStorage(connect, request.getStorage(), false);
         if (storagePool == null) {
             throw new CodeException(ErrorCode.STORAGE_NOT_READY, "当前存储池未就绪:[" + request.getStorage() + "]");
@@ -74,6 +74,9 @@ public class VolumeOperate {
         for (String volume : request.getVolumes()) {
             try {
                 StorageVol storageVol = this.findVol(storagePool, volume);
+                if(storageVol==null){
+                    continue;
+                }
                 String path=storageVol.getPath();
                 if(!ObjectUtils.isEmpty(path)){
                     try {
@@ -87,9 +90,7 @@ public class VolumeOperate {
 
                     }
                 }
-                if (storageVol != null) {
-                    storageVol.delete(0);
-                }
+                storageVol.delete(0);
             }catch (Exception ignored) {
                 log.warn("删除存储卷失败:{}", volume);
             }
@@ -223,12 +224,12 @@ public class VolumeOperate {
             HttpUtil.downloadFile(request.getSourceUri(), tempFile, new StreamProgress() {
                 int lastPercent = 0;
 
-
+                @Override
                 public void start() {
                     log.info("开始下载文件:uri={},file={}", request.getSourceUri(), tempFile.getPath());
                 }
 
-
+                @Override
                 public void progress(long total, long progressSize) {
                     if (total > 0) {
                         int percent = (int) (progressSize * 100 / total);
@@ -239,10 +240,9 @@ public class VolumeOperate {
                     }
                 }
 
-
+                @Override
                 public void finish() {
                     log.info("文件下载完毕:{}", tempFile.getPath());
-
                 }
             });
             if (tempFile.length() <= 0) {

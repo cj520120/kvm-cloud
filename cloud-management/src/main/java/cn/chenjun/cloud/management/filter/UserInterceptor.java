@@ -50,7 +50,7 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response, @NonNull Object handler, Exception ex) throws Exception {
         RequestContextHolderUtil.clearContext();
         NotifyContextHolderUtil.afterCompletion();
     }

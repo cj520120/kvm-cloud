@@ -2,29 +2,17 @@ package cn.chenjun.cloud.management.model;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author chenjun
  */
+@Setter
+@Getter
 public class StorageUpdateSupportCategoryRequest {
     private int storageId;
     private int supportCategory;
-
-    public int getStorageId() {
-        return storageId;
-    }
-
-    public void setStorageId(int storageId) {
-        this.storageId = storageId;
-    }
-
-    public int getSupportCategory() {
-        return supportCategory;
-    }
-
-    public void setSupportCategory(int supportCategory) {
-        this.supportCategory = supportCategory;
-    }
 
     public void validate() {
         if (storageId <= 0) {

@@ -34,7 +34,7 @@ import java.util.Objects;
 @ServerEndpoint(value = "/api/host/ws")
 public class AgentListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer> {
     public AgentListen() {
-        super((client) -> new ByteCodecHandler(client));
+        super(ByteCodecHandler::new);
     }
 
 

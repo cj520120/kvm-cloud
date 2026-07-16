@@ -7,6 +7,7 @@ import cn.chenjun.cloud.management.servcie.bean.MetaData;
 import cn.chenjun.cloud.management.servcie.meta.VendorDataService;
 import cn.chenjun.cloud.management.util.MetaDataType;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,7 @@ public class CustomVendorDataService implements VendorDataService {
     }
 
     @Override
-    public boolean supports(GuestEntity entity) {
+    public boolean supports(@NonNull GuestEntity entity) {
         return true;
     }
 }

@@ -53,7 +53,7 @@ public class StorageVolumeClearOperateServiceImpl extends AbstractOperateService
         if (resultUtil.getCode() == ErrorCode.SUCCESS) {
             List<String> volumeNames = resultUtil.getData();
             List<VolumeEntity> volumeList = this.volumeDao.listByStorageId(param.getStorageId());
-            List<String> useVolumeNames = new ArrayList<>(volumeList.stream().map(VolumeEntity::getName).collect(Collectors.toList()));
+            List<String> useVolumeNames = volumeList.stream().map(VolumeEntity::getName).collect(Collectors.toList());
             List<TemplateVolumeEntity> templateVolumeList = this.templateVolumeDao.listByStorageId(param.getStorageId());
             useVolumeNames.addAll(templateVolumeList.stream().map(TemplateVolumeEntity::getName).collect(Collectors.toList()));
             List<String> destroyVolumeNames = new ArrayList<>();

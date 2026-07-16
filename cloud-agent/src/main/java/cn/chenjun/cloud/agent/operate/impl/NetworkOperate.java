@@ -87,7 +87,7 @@ public class NetworkOperate {
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_CREATE_VxLAN)
-    public Void createVxLan(Connect connect, VxLanNetworkRequest vxLan) throws Exception {
+    public Void createVxLan(Connect connect, VxLanNetworkRequest vxLan) {
         log.info("创建VxLan网络:{}", vxLan);
         VxLanProxy.CreateBridgeRequest request = VxLanProxy.CreateBridgeRequest.builder()
                 .cidr(vxLan.getCidr())
@@ -106,26 +106,11 @@ public class NetworkOperate {
         }
         log.info("创建VxLan网络成功:{}", vxLan);
         return null;
-//        List<VxLanNetworkResponse.Port> ports=new ArrayList<>(vxLan.getMacs().size()) ;
-//        for (String mac: vxLan.getMacs()) {
-//
-//            VxLanProxy.CreateBirgePortRequest createBirgePortRequest = VxLanProxy.CreateBirgePortRequest.builder()
-//                    .bridgeName(vxLan.getPoolId())
-//                    .mac(mac)
-//                    .build();
-//            VxLanProxy.BaseResponse<VxLanProxy.BridgePortData> createBridgePortResponse = vxLanProxy.createBridgePort(createBirgePortRequest);
-//            if (createBridgePortResponse.getCode() != 0) {
-//                throw new CodeException(ErrorCode.SERVER_ERROR, createBridgePortResponse.getMsg());
-//            }
-//            VxLanProxy.BridgePortData bridgePortData= createBridgePortResponse.getData();
-//            ports.add(VxLanNetworkResponse.Port.builder().mac(mac).port(bridgePortData.getPortName()).build());
-//        }
-//        return VxLanNetworkResponse.builder().ports(ports).build();
 
     }
 
     @DispatchBind(command = Constant.Command.NETWORK_DESTROY_VxLAN)
-    public Void destroyVxLan(Connect connect, VxLanNetworkRequest vxLan) throws Exception {
+    public Void destroyVxLan(Connect connect, VxLanNetworkRequest vxLan) {
         VxLanProxy vxLanProxy = VxLanProxy.builder()
                 .baseUrl(vxLan.getBaseUrl())
                 .token(vxLan.getToken())

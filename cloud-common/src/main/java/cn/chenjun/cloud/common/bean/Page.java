@@ -60,7 +60,7 @@ public class Page<T> implements Serializable {
     }
 
     public static <T> Page<T> create(Page<?> page) {
-        Page<T> paginationClass = new Page<T>();
+        Page<T> paginationClass = new Page<>();
         paginationClass.page = page.page;
         paginationClass.index = page.index;
         paginationClass.length = page.length;
@@ -71,7 +71,7 @@ public class Page<T> implements Serializable {
     }
 
     public static <T> Page<T> create(Page<?> page, List<T> list) {
-        Page<T> paginationClass = new Page<T>();
+        Page<T> paginationClass = new Page<>();
         paginationClass.page = page.page;
         paginationClass.index = page.index;
         paginationClass.length = page.length;
@@ -83,7 +83,7 @@ public class Page<T> implements Serializable {
     }
 
     public static <S, T> Page<T> convert(Page<S> page, BeanConverter.Converter<S, T> converter) {
-        Page<T> paginationClass = new Page<T>();
+        Page<T> paginationClass = new Page<>();
         paginationClass.page = page.page;
         paginationClass.index = page.index;
         paginationClass.length = page.length;

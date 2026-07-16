@@ -159,6 +159,9 @@ public class ConvertService {
 
 
     public HostModel initHostModel(HostEntity entity) {
+        if(entity == null) {
+            return null;
+        }
         List<ConfigQuery> queryList = Arrays.asList(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).build(), ConfigQuery.builder().type(Constant.ConfigType.HOST).id(entity.getHostId()).build());
 
 

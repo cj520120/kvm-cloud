@@ -23,7 +23,8 @@ public class GsonBuilderUtil {
                 .registerTypeAdapter(HashMap.class, gsonNumberAdapter)
                 .registerTypeAdapter(List.class, gsonNumberAdapter)
                 .registerTypeAdapter(ArrayList.class, gsonNumberAdapter)
-                .registerTypeAdapter(java.util.Date.class, new DateSerializer()).setDateFormat(DateFormat.LONG);
+                .registerTypeAdapter(java.util.Date.class, new DateSerializer())
+                .setDateFormat(DateFormat.LONG, DateFormat.LONG);
         return gb.create();
     }
 }

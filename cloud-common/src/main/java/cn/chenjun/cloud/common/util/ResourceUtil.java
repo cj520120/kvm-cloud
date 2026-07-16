@@ -24,7 +24,7 @@ public class ResourceUtil {
         String resourceBody = cn.hutool.core.io.resource.ResourceUtil.readUtf8Str(resourcePath);
         try {
             ResourceContent resource = GsonBuilderUtil.create().fromJson(resourceBody, ResourceContent.class);
-            if (!resource.getEncoding().equals("b64")) {
+            if (!"b64".equals(resource.getEncoding())) {
                 throw new IllegalArgumentException("resource encoding must be b64");
             }
             byte[] contentBuffer = Base64.getDecoder().decode(resource.getContent().getBytes(StandardCharsets.UTF_8));

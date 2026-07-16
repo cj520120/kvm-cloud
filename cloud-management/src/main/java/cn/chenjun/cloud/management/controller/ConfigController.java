@@ -53,9 +53,7 @@ public class ConfigController extends BaseController {
     @PutMapping("/api/config/create")
     public ResultUtil<ConfigModel> createConfig(@RequestBody ConfigCreateRequest request) {
         request.validate();
-        ConfigInfo info = this.globalLockCall(() -> {
-            return this.configService.createConfig(request.getConfigKey(), request.getAllocateType(), request.getAllocateId(), request.getConfigValue());
-        });
+        ConfigInfo info = this.globalLockCall(() -> this.configService.createConfig(request.getConfigKey(), request.getAllocateType(), request.getAllocateId(), request.getConfigValue()));
         return ResultUtil.success(this.initConfig(info));
     }
 

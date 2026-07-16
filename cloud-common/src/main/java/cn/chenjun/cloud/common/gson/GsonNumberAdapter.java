@@ -84,14 +84,14 @@ public class GsonNumberAdapter extends TypeAdapter<Object> {
                 throw new IllegalStateException();
         }
     }
-
+    @SuppressWarnings("unchecked")
     @Override
     public void write(JsonWriter out, Object value) throws IOException {
         if (value == null) {
             out.nullValue();
             return;
         }
-        TypeAdapter typeAdapter = gson.getAdapter(value.getClass());
+        TypeAdapter<Object> typeAdapter = (TypeAdapter<Object>) gson.getAdapter(value.getClass());
         if (typeAdapter instanceof ObjectTypeAdapter) {
             out.beginObject();
             out.endObject();

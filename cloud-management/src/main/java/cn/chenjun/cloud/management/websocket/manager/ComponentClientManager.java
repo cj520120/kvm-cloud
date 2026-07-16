@@ -61,7 +61,7 @@ public class ComponentClientManager {
             } catch (Exception ignored) {
                 try {
                     webSocket.close();
-                } catch (Exception e) {
+                } catch (Exception ignored1) {
                 }
             }
         });
@@ -71,9 +71,7 @@ public class ComponentClientManager {
     public void checkKeep() {
         List<Client> wsList = new ArrayList<>();
         synchronized (COMPONENT_CLIENT_MAP) {
-            COMPONENT_CLIENT_MAP.forEach((componentId, webSocketList) -> {
-                wsList.addAll(webSocketList);
-            });
+            COMPONENT_CLIENT_MAP.forEach((componentId, webSocketList) -> wsList.addAll(webSocketList));
         }
         for (Client ws : wsList) {
             if (ws.getLastActiveTime() < System.currentTimeMillis() - 1000 * 60) {

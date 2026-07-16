@@ -2,30 +2,18 @@ package cn.chenjun.cloud.management.model;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 /**
  * @author chenjun
  */
+@Setter
+@Getter
 public class UserResetPasswordRequest {
     private int userId;
     private String password;
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public void validate() {
         if (userId <= 0) {

@@ -65,7 +65,7 @@ public class NodeSocket extends WebSocketClient implements ConnectContext, Clien
     public String getSessionId() {
         return this.sessionId;
     }
-
+    @Override
     public ConnectContext getContext() {
         return this.context;
     }

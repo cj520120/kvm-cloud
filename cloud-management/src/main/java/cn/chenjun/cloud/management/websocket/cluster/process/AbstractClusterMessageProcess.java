@@ -37,11 +37,11 @@ public abstract class AbstractClusterMessageProcess<T> implements ClusterMessage
 
     protected abstract void doProcess(NotifyData<T> msg);
 
-    protected <S, T> ResultUtil<T> getResourceData(LockRunner.LockAction<S> runnable, BeanConverter.Converter<S, T> converter) {
+    protected <Source, Target> ResultUtil<Target> getResourceData(LockRunner.LockAction<Source> runnable, BeanConverter.Converter<Source, Target> converter) {
         try {
-            S result = lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), runnable);
-            T data = converter.convert(result);
-            return ResultUtil.<T>builder().data(data).code(ErrorCode.SUCCESS).build();
+            Source result = lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), runnable);
+            Target data = converter.convert(result);
+            return ResultUtil.<Target>builder().data(data).code(ErrorCode.SUCCESS).build();
         } catch (CodeException e) {
             return ResultUtil.error(e.getCode(), e.getMessage());
         } catch (Exception e) {

@@ -2,20 +2,16 @@ package cn.chenjun.cloud.management.model;
 
 import cn.chenjun.cloud.common.error.CodeException;
 import cn.chenjun.cloud.common.util.ErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author chenjun
  */
+@Setter
+@Getter
 public class SshDownloadRequest {
     private int id;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public void validate() {
         if (id <= 0) {
