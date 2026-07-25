@@ -137,8 +137,6 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
                 if (extern.getGraphics() == null) {
                     extern.setGraphics(GuestExternUtil.buildVncParam());
                 }
-
-                HostEntity host = this.hostDao.findById(guest.getHostId());
                 extern.getGraphics().setProtocol(guestInfo.getGraphics().getProtocol());
                 guest.setExtern(GsonBuilderUtil.create().toJson(extern));
                 this.guestDao.update(guest);

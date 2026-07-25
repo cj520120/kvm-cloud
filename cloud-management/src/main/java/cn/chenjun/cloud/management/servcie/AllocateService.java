@@ -173,6 +173,7 @@ public class AllocateService extends AbstractService {
                 host.setAllocationCpu(guestList.stream().mapToInt(GuestEntity::getCpu).sum());
                 host.setAllocationMemory(guestList.stream().mapToLong(GuestEntity::getMemory).sum());
             }
+            this.hostDao.update(host);
         }
     }
 }
