@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-labelledby="title desc">
+  <title id="title">Ruiyun Cloud</title>
+  <desc id="desc">A cloud surrounding a directional control symbol</desc>
+
+  <path
+    d="M269 429H183C126 429 80 382 80 324s46-105 103-105c5 0 10 0 15 1 5-62 57-111 121-111 60 0 111 44 120 102 4-1 9-1 14-1 59 0 107 49 107 109 0 61-48 110-107 110h-36"
+    fill="none"
+    stroke="#071d49"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <path
+    d="M320 181 460 321 320 461 180 321Z"
+    fill="#fff"
+    stroke="#071d49"
+    stroke-width="22"
+    stroke-linejoin="round"
+  />
+
+  <g fill="#078fa4">
+    <path d="M310 231a10 10 0 0 1 20 0v39h-20Z"/>
+    <rect x="220" y="311" width="43" height="20" rx="10"/>
+    <rect x="377" y="311" width="43" height="20" rx="10"/>
+    <path d="M310 374h20v36a10 10 0 0 1-20 0Z"/>
+  </g>
+
+  <rect x="273" y="278" width="94" height="87" rx="16" fill="#071d49"/>
+</svg>

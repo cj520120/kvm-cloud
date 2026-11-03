@@ -1,0 +1,31 @@
+package cn.ruiyun.cloud.management.operate.bean;
+
+import cn.ruiyun.cloud.common.core.operate.BaseOperateParam;
+import cn.ruiyun.cloud.common.util.Constant;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * @author chenjun
+ */
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = false)
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StopGuestOperate extends BaseOperateParam {
+    private int guestId;
+    private boolean force;
+    private boolean destroy;
+
+    @Override
+    public int getType() {
+        return Constant.OperateType.STOP_GUEST;
+    }
+
+    @Override
+    public String getTaskId() {
+        return "Vm-Destroy:" + guestId + ":" + force + ":" + destroy;
+    }
+}

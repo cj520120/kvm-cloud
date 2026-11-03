@@ -1,0 +1,55 @@
+package cn.ruiyun.cloud.management.servcie.meta.impl;
+
+import cn.ruiyun.cloud.common.gson.GsonBuilderUtil;
+import cn.ruiyun.cloud.common.util.Constant;
+import cn.ruiyun.cloud.common.util.SymmetricCryptoUtil;
+import cn.ruiyun.cloud.management.data.entity.GuestEntity;
+import cn.ruiyun.cloud.management.servcie.bean.GuestExtern;
+import cn.ruiyun.cloud.management.servcie.bean.MetaData;
+import cn.ruiyun.cloud.management.servcie.meta.UserDataService;
+import cn.ruiyun.cloud.management.util.MetaDataType;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
+/**
+ * @author chenjun
+ */
+@Service
+public class LinuxUserDataService implements UserDataService {
+
+    @Override
+    public MetaData load(GuestEntity guest) {
+        GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
+        if (extern == null || extern.getUserData() == null) {
+            return MetaData.builder().type(MetaDataType.CLOUD).body("").build();
+        }
+        StringBuilder data = new StringBuilder();
+        GuestExtern.UserDataExtern userDataExtern = extern.getUserData();
+        String encodeKey = userDataExtern.getPasswordEncodeKey();
+        String ivKey = userDataExtern.getPasswordIvKey();
+        String password = userDataExtern.getPassword();
+        String ssh = userDataExtern.getSshPublicKey();
+        if (!ObjectUtils.isEmpty(encodeKey) && !ObjectUtils.isEmpty(ivKey) && !ObjectUtils.isEmpty(password)) {
+            SymmetricCryptoUtil util = SymmetricCryptoUtil.build(encodeKey, ivKey);
+            password = util.decrypt(password);
+            if (!StringUtils.isEmpty(password)) {
+                data.append("password: \"").append(password).append("\"\n");
+                data.append("chpasswd: {expire: False}\n");
+                data.append("ssh_pwauth: True\n");
+            }
+        }
+        if (!ObjectUtils.isEmpty(ssh)) {
+            data.append("ssh_authorized_keys:\n");
+            data.append("  - ").append(ssh);
+            data.append("\n");
+        }
+        return MetaData.builder().type(MetaDataType.CLOUD).body(data.toString()).build();
+    }
+
+    @Override
+    public boolean supports(@NonNull GuestEntity guest) {
+        return guest.getSystemCategory() != Constant.SystemCategory.WINDOWS;
+    }
+}

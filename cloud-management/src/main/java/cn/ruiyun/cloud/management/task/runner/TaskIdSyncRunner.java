@@ -1,0 +1,53 @@
+package cn.ruiyun.cloud.management.task.runner;
+
+import cn.ruiyun.cloud.common.core.operate.BaseOperateParam;
+import cn.ruiyun.cloud.common.util.Constant;
+import cn.ruiyun.cloud.management.data.entity.HostEntity;
+import cn.ruiyun.cloud.management.operate.bean.SyncHostTaskIdOperate;
+import cn.ruiyun.cloud.management.servcie.HostService;
+import cn.ruiyun.cloud.management.servcie.TaskService;
+import cn.ruiyun.cloud.management.util.ConfigKey;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+/**
+ * @author chenjun
+ */
+@Slf4j
+@Component
+public class TaskIdSyncRunner extends AbstractRunner {
+
+    @Autowired
+    private HostService hostService;
+    @Autowired
+    private TaskService taskService;
+
+
+    @Override
+    public int getPeriodSeconds() {
+
+        return configService.getConfig(ConfigKey.DEFAULT_TASK_HOST_TASK_SYNC_CHECK_TIMEOUT_SECOND);
+    }
+
+    @Override
+    protected void dispatch() {
+        List<HostEntity> hostList = hostService.listAllHost();
+        for (HostEntity host : hostList) {
+            if (Objects.equals(host.getStatus(), Constant.HostStatus.ONLINE)) {
+                BaseOperateParam operateParam = SyncHostTaskIdOperate.builder().hostId(host.getHostId()).id(UUID.randomUUID().toString()).title("同步主机任务列表").build();
+                this.taskService.addTask(operateParam);
+            }
+        }
+    }
+
+    @Override
+    public String getName() {
+        return "检测主机任务列表";
+    }
+
+}

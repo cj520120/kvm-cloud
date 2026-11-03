@@ -1,0 +1,61 @@
+package cn.ruiyun.cloud.management.websocket.cluster;
+
+import cn.ruiyun.cloud.common.error.CodeException;
+import cn.ruiyun.cloud.common.util.ErrorCode;
+import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
+import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.RequestContextHolderUtil;
+import cn.ruiyun.cloud.management.websocket.cluster.process.ClusterMessageProcess;
+import cn.ruiyun.cloud.management.websocket.message.NotifyData;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RTopic;
+import org.redisson.api.RedissonClient;
+import org.redisson.api.listener.MessageListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.event.EventListener;
+import org.springframework.plugin.core.PluginRegistry;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
+/**
+ * @author chenjun
+ */
+@Slf4j
+@Component
+public class WsCluster implements CommandLineRunner, MessageListener<NotifyData<?>> {
+    @Autowired
+    private RedissonClient redissonClient;
+    private RTopic topic;
+    @Autowired
+    private PluginRegistry<ClusterMessageProcess, Integer> processPluginRegistry;
+
+    @Override
+    public void run(String... args) throws Exception {
+        topic = redissonClient.getTopic(RedisKeyUtil.getGlobalNotifyKey());
+        topic.addListener(NotifyData.class, this);
+    }
+
+    @Override
+    public void onMessage(CharSequence channel, NotifyData<?> msg) {
+        try {
+            RequestContextHolderUtil.initContext();
+            Optional<ClusterMessageProcess> optional = this.processPluginRegistry.getPluginFor(msg.getType());
+            ClusterMessageProcess process = optional.orElseThrow(() -> new CodeException(ErrorCode.SERVER_ERROR, "不支持的注册方式"));
+            process.process(msg);
+        } catch (Exception err) {
+            log.error("process cluster msg fail.msg={}", msg, err);
+        } finally {
+            RequestContextHolderUtil.clearContext();
+            NotifyContextHolderUtil.afterCompletion();
+        }
+    }
+
+
+    @EventListener
+    public <T> void onCloudEventNotify(NotifyData<T> notifyData) {
+        this.topic.publish(notifyData);
+    }
+
+}

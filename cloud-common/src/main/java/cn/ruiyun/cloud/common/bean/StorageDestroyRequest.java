@@ -1,0 +1,25 @@
+package cn.ruiyun.cloud.common.bean;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @author chenjun
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StorageDestroyRequest {
+    /**
+     * 存储池名称
+     */
+    private String name;
+    /**
+     * 存储池类型
+     */
+    private String type;
+
+}

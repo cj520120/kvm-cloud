@@ -1,0 +1,26 @@
+package cn.ruiyun.cloud.common.bean;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Vlan网络
+ *
+ * @author chenjun
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class VLanNetworkRequest {
+    private String poolId;
+
+    private String xml;
+
+    /**
+     * 基础网络
+     */
+    private BasicBridgeNetworkRequest basic;
+}

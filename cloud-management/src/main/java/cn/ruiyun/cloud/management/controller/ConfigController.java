@@ -1,0 +1,76 @@
+package cn.ruiyun.cloud.management.controller;
+
+import cn.ruiyun.cloud.common.bean.ResultUtil;
+import cn.ruiyun.cloud.common.core.annotation.LoginRequire;
+import cn.ruiyun.cloud.common.util.Constant;
+import cn.ruiyun.cloud.management.model.*;
+import cn.ruiyun.cloud.management.model.*;
+import cn.ruiyun.cloud.management.servcie.ConfigService;
+import cn.ruiyun.cloud.management.servcie.bean.ConfigInfo;
+import cn.ruiyun.cloud.management.util.ConfigKey;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @author chenjun
+ */
+@RestController
+public class ConfigController extends BaseController {
+    @Autowired
+    private ConfigService configService;
+
+    private ConfigModel initConfig(ConfigInfo config) {
+        if (config == null) {
+            return null;
+        }
+        ConfigModel model = new ConfigModel();
+        BeanUtils.copyProperties(config, model);
+        return model;
+    }
+
+    @GetMapping("/api/config")
+    public ResultUtil<SystemConfigModel> getSystemConfig() {
+        SystemConfigModel.Oauth2 oauth2 = SystemConfigModel.Oauth2.builder()
+                .enable(Constant.Enable.YES.equals(this.configService.getConfig(ConfigKey.OAUTH2_ENABLE)))
+                .title(this.configService.getConfig(ConfigKey.OAUTH2_TITLE))
+                .build();
+        SystemConfigModel model = SystemConfigModel.builder().oauth2(oauth2).baseUri(this.configService.getConfig(ConfigKey.DEFAULT_BASE_URI)).build();
+        return ResultUtil.success(model);
+    }
+
+    @LoginRequire
+    @GetMapping("/api/config/search")
+    public ResultUtil<List<ConfigModel>> listConfig(@RequestParam("allocateType") int allocateType, @RequestParam("allocateId") int allocateId) {
+        List<ConfigInfo> configInfos = this.configService.listConfig(allocateType, allocateId);
+        List<ConfigModel> list = configInfos.stream().map(this::initConfig).collect(Collectors.toList());
+        return ResultUtil.success(list);
+    }
+
+    @LoginRequire
+    @PutMapping("/api/config/create")
+    public ResultUtil<ConfigModel> createConfig(@RequestBody ConfigCreateRequest request) {
+        request.validate();
+        ConfigInfo info = this.globalLockCall(() -> this.configService.createConfig(request.getConfigKey(), request.getAllocateType(), request.getAllocateId(), request.getConfigValue()));
+        return ResultUtil.success(this.initConfig(info));
+    }
+
+    @LoginRequire
+    @PostMapping("/api/config/update")
+    public ResultUtil<ConfigModel> updateConfig(@RequestBody ConfigUpdateRequest request) {
+        request.validate();
+        ConfigInfo info = this.globalLockCall(() -> this.configService.updateConfig(request.getConfigKey(), request.getAllocateType(), request.getAllocateId(), request.getConfigValue()));
+        return ResultUtil.success(this.initConfig(info));
+    }
+
+    @LoginRequire
+    @DeleteMapping("/api/config/destroy")
+    public ResultUtil<ConfigModel> deleteConfig(@RequestBody ConfigDeleteRequest request) {
+        request.validate();
+        ConfigInfo info = this.globalLockCall(() -> this.configService.deleteConfig(request.getId()));
+        return ResultUtil.success(this.initConfig(info));
+    }
+}

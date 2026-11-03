@@ -1,0 +1,145 @@
+package cn.ruiyun.cloud.management.controller;
+
+import cn.ruiyun.cloud.common.bean.Page;
+import cn.ruiyun.cloud.common.bean.ResultUtil;
+import cn.ruiyun.cloud.common.core.annotation.LoginRequire;
+import cn.ruiyun.cloud.common.core.annotation.NoLoginRequire;
+import cn.ruiyun.cloud.common.core.annotation.PermissionRequire;
+import cn.ruiyun.cloud.common.util.Constant;
+import cn.ruiyun.cloud.management.data.entity.UserEntity;
+import cn.ruiyun.cloud.management.model.*;
+import cn.ruiyun.cloud.management.model.*;
+import cn.ruiyun.cloud.management.servcie.UserService;
+import cn.ruiyun.cloud.management.servcie.bean.RefreshTokenInfo;
+import cn.ruiyun.cloud.management.servcie.bean.TokenInfo;
+import cn.ruiyun.cloud.management.servcie.bean.UserSignatureInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 用户管理
+ *
+ * @author chenjun
+ */
+@LoginRequire
+@RestController
+@ResponseBody
+public class UserController extends BaseController {
+    @Autowired
+    private UserService userUiService;
+
+    @NoLoginRequire
+    @PostMapping("/api/user/login")
+    public ResultUtil<TokenModel> login(@RequestBody LoginRequest request) {
+        request.validate();
+        TokenInfo token = userUiService.login(request.getLoginName(), request.getPassword(), request.getNonce());
+        TokenModel model = new TokenModel();
+        model.setToken(token.getToken());
+        model.setExpire(token.getExpire());
+        model.setSelf(this.convertService.initUserModel(token.getSelf()));
+        return ResultUtil.success(model);
+    }
+
+    @PostMapping("/api/user/self/modify")
+    public ResultUtil<Void> updateSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model, @RequestBody UserSelfModifyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> userUiService.updateSelfInfo(model.getUserId(), request.getUsername(), request.getOldPassword(), request.getNewPassword(), request.getNonce()));
+        return ResultUtil.success();
+    }
+
+    @PostMapping("/api/user/token/refresh")
+    public ResultUtil<RefreshTokenModel> refreshToken(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel loginUser) {
+        RefreshTokenInfo info = userUiService.refreshToken(loginUser.getUserId());
+        RefreshTokenModel model = new RefreshTokenModel();
+        model.setExpire(info.getExpire());
+        model.setSelf(this.convertService.initUserModel(info.getSelf()));
+        return ResultUtil.success(model);
+    }
+
+    @NoLoginRequire
+    @GetMapping("/api/user/login/signature")
+    public ResultUtil<LoginSignatureModel> getSignature(@RequestParam("loginName") String loginName) {
+        UserSignatureInfo signatureInfo = userUiService.getSignature(loginName);
+        LoginSignatureModel model = new LoginSignatureModel();
+        model.setNonce(signatureInfo.getNonce());
+        model.setSignature(signatureInfo.getSignature());
+        return ResultUtil.success(model);
+    }
+
+    @GetMapping("/api/user/signature")
+    public ResultUtil<LoginSignatureModel> getLoginSignature(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel current) {
+
+        UserSignatureInfo signatureInfo = userUiService.getLoginSignature(current.getUserId());
+        LoginSignatureModel model = new LoginSignatureModel();
+        model.setNonce(signatureInfo.getNonce());
+        model.setSignature(signatureInfo.getSignature());
+        return ResultUtil.success(model);
+    }
+
+
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PutMapping("/api/user/register")
+    public ResultUtil<UserModel> register(@RequestBody UserRegisterRequest request) {
+        request.validate();
+        UserEntity user = this.globalLockCall(() -> userUiService.register(request.getUserName(), request.getLoginName(), request.getPassword(), request.getUserType(), request.getUserStatus()));
+        return ResultUtil.success(this.convertService.initUserModel(user));
+
+    }
+
+    @GetMapping("/api/user/self")
+    public ResultUtil<UserModel> getSelfInfo(@RequestAttribute(Constant.HttpHeaderNames.LOGIN_USER_INFO_ATTRIBUTE) LoginUserModel model) {
+
+        UserEntity user = userUiService.getUserInfo(model.getUserId());
+        return ResultUtil.success(this.convertService.initUserModel(user));
+
+    }
+
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PostMapping("/api/user/update")
+    @LoginRequire
+    public ResultUtil<UserModel> updateUserInfo(@RequestBody UserUpdateRequest request) {
+        request.validate();
+        UserEntity user = this.globalLockCall(() -> userUiService.updateUser(request.getUserId(), request.getUserName(), request.getUserType(), request.getUserStatus()));
+        return ResultUtil.success(this.convertService.initUserModel(user));
+    }
+
+
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @DeleteMapping("/api/user/destroy")
+    public ResultUtil<Void> destroyUser(@RequestBody UserDestroyRequest request) {
+        request.validate();
+        this.globalLockCall(() -> userUiService.destroyUser(request.getUserId()));
+        return ResultUtil.success();
+    }
+
+    @PermissionRequire(role = Constant.UserType.SUPPER_ADMIN)
+    @PostMapping("/api/user/password/reset")
+    @LoginRequire
+    public ResultUtil<UserModel> resetPassword(@RequestBody UserResetPasswordRequest request) {
+        request.validate();
+        UserEntity user = this.globalLockCall(() -> userUiService.resetPassword(request.getUserId(), request.getPassword()));
+        return ResultUtil.success(this.convertService.initUserModel(user));
+    }
+
+    @GetMapping("/api/user/list")
+    public ResultUtil<List<UserModel>> listUsers() {
+
+
+        List<UserEntity> users = userUiService.listUsers();
+        List<UserModel> models = users.stream().map(this.convertService::initUserModel).collect(Collectors.toList());
+        return ResultUtil.success(models);
+    }
+
+    @GetMapping("/api/user/search")
+    public ResultUtil<Page<UserModel>> search(@RequestParam("keyword") String keyword,
+                                              @RequestParam("no") int no,
+                                              @RequestParam("size") int size) {
+
+        Page<UserEntity> page = userUiService.search(keyword, no, size);
+        return ResultUtil.success(Page.convert(page, this.convertService::initUserModel));
+
+    }
+}
