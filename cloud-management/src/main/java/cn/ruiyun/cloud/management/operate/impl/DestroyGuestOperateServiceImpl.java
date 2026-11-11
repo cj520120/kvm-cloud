@@ -75,7 +75,6 @@ public class DestroyGuestOperateServiceImpl extends AbstractOperateService<Destr
             this.guestDao.deleteById(guest.getGuestId());
             this.configService.deleteAllocateConfig(Constant.ConfigType.GUEST, guest.getGuestId());
             this.componentService.deleteComponentGuest(guest.getGuestId());
-            this.hostPciDeviceDao.deleteByGuestId(guest.getGuestId());
             NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getGuestId()).type(Constant.NotifyType.UPDATE_GUEST).build());
             NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(guest.getNetworkId()).type(Constant.NotifyType.UPDATE_DNS).build());
 

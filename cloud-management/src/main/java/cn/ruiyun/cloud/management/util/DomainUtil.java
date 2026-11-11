@@ -3,7 +3,6 @@ package cn.ruiyun.cloud.management.util;
 import cn.ruiyun.cloud.common.util.JinjavaParser;
 import cn.ruiyun.cloud.common.util.MapUtil;
 import cn.ruiyun.cloud.management.data.entity.*;
-import cn.ruiyun.cloud.management.data.entity.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -84,16 +83,6 @@ public class DomainUtil {
         map.put("vnc", ParamBuilder.buildVncParam(vncPassword));
         map.put("device", MapUtil.of("xml", String.join("\n", deviceXml)));
         map.put("meta_data", String.join("\n", metaDataXml));
-        return JinjavaParser.create().render(tpl, map);
-    }
-
-    public static String buildHostPciXml(String tpl, Map<String, Object> systemConfig, String domain, String bus, String slot, String func) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("__SYS__", systemConfig);
-        map.put("domain", domain);
-        map.put("bus", bus);
-        map.put("slot", slot);
-        map.put("function", func);
         return JinjavaParser.create().render(tpl, map);
     }
 }

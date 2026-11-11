@@ -155,29 +155,6 @@ public class GuestOperate {
         return null;
     }
 
-    @DispatchBind(command = Constant.Command.GUEST_ATTACH_PCI)
-    public Void attachPci(Connect connect, ChangeGuestPciRequest request) throws Exception {
-
-        Domain domain = connect.domainLookupByName(request.getName());
-        if (domain == null) {
-            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
-        }
-        log.info("attachPci xml={}", request.getXml());
-        domain.attachDevice(request.getXml());
-        return null;
-    }
-
-    @DispatchBind(command = Constant.Command.GUEST_DETACH_PCI)
-    public Void detachPci(Connect connect, ChangeGuestPciRequest request) throws Exception {
-
-        Domain domain = connect.domainLookupByName(request.getName());
-        if (domain == null) {
-            throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
-        }
-        log.info("detachPci xml={}", request.getXml());
-        domain.detachDevice(request.getXml());
-        return null;
-    }
 
     private static void initNetworkNicXml(NetworkNic nic) {
         switch (nic.getType()) {

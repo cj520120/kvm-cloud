@@ -1,5 +1,6 @@
 package cn.ruiyun.cloud.management.operate.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.ruiyun.cloud.common.bean.GuestInfo;
 import cn.ruiyun.cloud.common.bean.GuestStartRequest;
 import cn.ruiyun.cloud.common.bean.NetworkNic;
@@ -9,7 +10,6 @@ import cn.ruiyun.cloud.common.gson.GsonBuilderUtil;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.common.util.JinjavaParser;
-import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.common.util.ResourceUtil;
 import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.management.operate.bean.StartGuestOperate;
@@ -17,9 +17,7 @@ import cn.ruiyun.cloud.management.operate.impl.cloud.CloudInitService;
 import cn.ruiyun.cloud.management.operate.impl.cloud.bean.CloudData;
 import cn.ruiyun.cloud.management.servcie.bean.GuestExtern;
 import cn.ruiyun.cloud.management.util.*;
-import cn.ruiyun.cloud.management.util.*;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
-import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +58,6 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
         HostEntity host = this.allocateService.allocateHost(hostRole, guest.getLastHostId(), guest.getArch(), param.getHostId(), guest.getCpu(), guest.getMemory());
         Map<String, Object> systemConfig = this.loadGuestConfig(param.getHostId(), param.getGuestId());
         List<GuestNetworkEntity> guestNetworkEntityList = guestNetworkDao.listByAllocate(Constant.NetworkAllocateType.GUEST, guest.getGuestId());
-        List<HostPciDeviceEntity> hostPciDeviceEntityList = hostPciDeviceDao.listPciDeviceByGuestId(param.getGuestId());
         List<String> deviceXmlList = new ArrayList<>();
         List<String> metaDataXmlList = new ArrayList<>();
         deviceXmlList.add(this.buildCdXml(guest, systemConfig));
@@ -86,7 +83,6 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
             request.setWaitCloudInitTimeoutSeconds((int) TimeUnit.MINUTES.toSeconds(expireMinutes));
         }
         deviceXmlList.addAll(this.buildDiskListXml(guest, systemConfig));
-        deviceXmlList.addAll(this.buildHostPciListXml(hostPciDeviceEntityList, systemConfig));
         GuestExtern extern = GsonBuilderUtil.create().fromJson(guest.getExtern(), GuestExtern.class);
         if (extern.getGraphics() == null) {
             extern.setGraphics(GuestExternUtil.buildVncParam());
@@ -207,17 +203,6 @@ public class StartGuestOperateServiceImpl extends AbstractOsOperateService<Start
             networkInterfaces.add(this.buildInterfaceXml(network, entity, systemConfig));
         }
         return networkInterfaces;
-    }
-
-    protected List<String> buildHostPciListXml(List<HostPciDeviceEntity> hostPciDevices, Map<String, Object> systemConfig) {
-        List<String> pciDevices = new ArrayList<>();
-        String tpl = systemConfig.get(ConfigKey.VM_PCI_TPL).toString();
-        for (HostPciDeviceEntity entity : hostPciDevices) {
-
-
-            pciDevices.add(this.buildHostPciXml(entity, systemConfig));
-        }
-        return pciDevices;
     }
 
 

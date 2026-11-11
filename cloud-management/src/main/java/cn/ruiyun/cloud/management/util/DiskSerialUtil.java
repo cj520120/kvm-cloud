@@ -6,6 +6,6 @@ public class DiskSerialUtil {
 
     public static String generateDiskSerial() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        return "CJ" + sdf.format(System.currentTimeMillis());
+        return "RY" + sdf.format(System.currentTimeMillis());
     }
 }

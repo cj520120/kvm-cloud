@@ -5,8 +5,6 @@ import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.management.data.dao.*;
 import cn.ruiyun.cloud.management.data.entity.*;
-import cn.ruiyun.cloud.management.data.dao.*;
-import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.management.util.ConfigKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +47,6 @@ public abstract class AbstractService {
     protected ConfigService configService;
     @Autowired
     protected GroupDao groupDao;
-    @Autowired
-    protected HostPciDeviceDao hostPciDeviceDao;
 
 
     public GuestEntity getGuestById(int guestId) {

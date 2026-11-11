@@ -165,38 +165,36 @@ mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
 1、导入mysql表及相关数据
 > **脚本位于scripts下**
 
-2、安装Redis
+2、修改配置文件
 
-3、修改配置文件
-
-4、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
+3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
 ```
 管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
  --spring.config.location 是可选项，用于指定配置文件，如果不需要修改，可以去掉,配置文件为各自模块下的src/main/resources/application.properties文件
 ```
 
-5、平台登陆账号默认用户名/密码:admin/123456
+4、平台登陆账号默认用户名/密码:admin/123456
 
-6、创建基础网络
+5、创建基础网络
 
 > **采用桥接网络配置，IP地址段与主机主机段需保持一致，可通过起始IP与结束IP和主机网络进行分离，防止IP冲突,Vlan只支持OVS方式**
 
 ![](images/zh/network.png)
 
 
-7、创建主机`
+6、创建主机`
 `
 
 ![](images/zh/host.png)
 
 
-8、创建存储池(只支持nfs)
-
+7、创建存储池
+> 模版只能使用共享存储池
 
 ![](images/zh/storage.png)
 
-9、下载基础模版
+8、下载基础模版
 ```$xslt
 使用基于 RedHat、支持 iptables的官方镜像，示例如下：
 > https://yum.oracle.com/templates/OracleLinux/OL10/u1/x86_64/OL10U1_x86_64-kvm-b270.qcow2
@@ -215,16 +213,16 @@ Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.pr
 默认用户名：kvm-user
 默认密码：Kvm@123456
 ```
-10、配置系统模版
+9、配置系统模版
 
 ![](images/zh/template.png)
 
-11、等待系统模版下载完成，并初始化系统VM成功
+10、等待系统模版下载完成，并初始化系统VM成功
 
-12、windows附加磁盘时请安装virtio-win.iso驱动 
- 
+11、windows附加磁盘时请安装virtio-win.iso驱动  
 
-13、创建VM
+
+12、创建VM
 
 
 ![](images/zh/create-vm.png)

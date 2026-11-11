@@ -140,7 +140,6 @@ public class ConfigService {
 
 
         initDefaultConfig(ConfigKey.VM_DOMAIN_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/vm.xml.json"), "VM模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_PCI_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/pci/pci.xml.json"), "PCI 模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
 
         initDefaultConfig(ConfigKey.VM_DISK_NFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/nfs/disk.xml.json"), "vm nfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_DISK_GLUSTERFS_TPL, ResourceUtil.readUtf8Str("tpl/kvm/vm/disk/glusterfs/disk.xml.json"), "vm glusterfs 磁盘模版", Constant.ConfigValueType.MULTI_STRING, null, StringConvert.Default);

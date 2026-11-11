@@ -122,8 +122,4 @@ public abstract class AbstractOsOperateService<T extends BaseOperateParam, V ext
         return nic;
     }
 
-    public String buildHostPciXml(HostPciDeviceEntity pci, Map<String, Object> systemConfig) {
-        String tpl = (String) systemConfig.get(ConfigKey.VM_PCI_TPL);
-        return DomainUtil.buildHostPciXml(tpl, systemConfig, pci.getDomain(), pci.getBus(), pci.getSlot(), pci.getFunc());
-    }
 }

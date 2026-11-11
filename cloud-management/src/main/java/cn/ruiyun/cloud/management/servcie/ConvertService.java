@@ -5,8 +5,6 @@ import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.FunctionUtils;
 import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.management.model.*;
-import cn.ruiyun.cloud.management.data.entity.*;
-import cn.ruiyun.cloud.management.model.*;
 import cn.ruiyun.cloud.management.servcie.bean.ConfigQuery;
 import cn.ruiyun.cloud.management.util.ConfigKey;
 import cn.ruiyun.cloud.management.util.RequestContextHolderUtil;
@@ -252,19 +250,5 @@ public class ConvertService {
                 .cidr(entity.getCidr())
                 .nexthop(entity.getNexthop())
                 .createTime(entity.getCreateTime()).build();
-    }
-
-    public List<HostPciDeviceModel> initHostPciDeviceModels(List<HostPciDeviceEntity> entities) {
-        List<HostPciDeviceModel> models = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(entities)) {
-            for (HostPciDeviceEntity entity : entities) {
-                models.add(this.initHostPciDeviceModel(entity));
-            }
-        }
-        return models;
-    }
-
-    public HostPciDeviceModel initHostPciDeviceModel(HostPciDeviceEntity entity) {
-        return BeanConverter.convert(entity, HostPciDeviceModel.class);
     }
 }

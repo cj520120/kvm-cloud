@@ -7,7 +7,6 @@ import cn.ruiyun.cloud.common.error.CodeException;
 import cn.ruiyun.cloud.common.gson.GsonBuilderUtil;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
-import cn.ruiyun.cloud.management.config.ApplicationConfig;
 import cn.ruiyun.cloud.management.data.dao.*;
 import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.management.servcie.AllocateService;
@@ -23,14 +22,12 @@ import cn.ruiyun.cloud.management.websocket.manager.HostClientManager;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * @author chenjun
@@ -67,15 +64,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     @Autowired
     protected RestTemplate restTemplate;
     @Autowired
-    protected HostPciDeviceDao hostPciDeviceDao;
-    @Autowired
     protected CacheService cacheService;
-
-    @Autowired
-    @Qualifier("workExecutorService")
-    protected ScheduledThreadPoolExecutor executor;
-    @Autowired
-    protected ApplicationConfig applicationConfig;
 
     protected static Volume initVolume(StorageEntity storage, String volumeName, String type, long capacity) {
 

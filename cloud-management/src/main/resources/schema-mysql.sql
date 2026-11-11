@@ -150,11 +150,11 @@ CREATE TABLE IF NOT EXISTS `tbl_network_info` (
                                     `network_broadcast` varchar(45) DEFAULT NULL,
                                     `network_dns` varchar(128) NOT NULL,
                                     `network_vlan_id` int NOT NULL,
-                                    `network_secret` varchar(128) NOT NULL DEFAULT 'CJ:KVM:CLOUD',
+                                    `network_secret` varchar(128) NOT NULL DEFAULT 'RY:KVM:CLOUD',
                                     `network_basic_network_id` int NOT NULL,
                                     `network_type` varchar(20) NOT NULL,
                                     `network_status` int NOT NULL,
-                                    `network_domain` varchar(64) NOT NULL DEFAULT 'cj.kvm.internal',
+                                    `network_domain` varchar(64) NOT NULL DEFAULT 'ry.kvm.internal',
                                     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                     PRIMARY KEY (`network_id`),
                                     UNIQUE KEY `IX_NETWORK_POOL_ID` (`network_pool_id`)
@@ -254,19 +254,6 @@ CREATE TABLE IF NOT EXISTS `tbl_user_info` (
                                  PRIMARY KEY (`user_id`),
                                  UNIQUE KEY `IX_LOGIN_NAME` (`login_name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;
-CREATE TABLE IF NOT EXISTS `tbl_host_pci_device` (
-                                       `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-                                       `guest_id` int DEFAULT 0 COMMENT '虚拟机ID',
-                                       `host_id` int DEFAULT 0 COMMENT '宿主机ID',
-                                       `pci_domain` int NOT NULL DEFAULT 0 COMMENT 'PCI域(十进制)',
-                                       `pci_bus` int NOT NULL DEFAULT 0 COMMENT 'PCI总线号(十进制)',
-                                       `pci_slot` int NOT NULL DEFAULT 0 COMMENT 'PCI插槽号(十进制)',
-                                       `pci_function` int NOT NULL DEFAULT 0 COMMENT 'PCI功能号(十进制)',
-                                       `pci_description` varchar(255) DEFAULT '' COMMENT '设备描述',
-                                       `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间戳',
-                                       `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间戳',
-                                       PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='宿主机PCI直通设备表';
 CREATE TABLE IF NOT EXISTS `tbl_volume_info` (
                                    `volume_id` int NOT NULL AUTO_INCREMENT,
                                    `volume_description` varchar(45) NOT NULL DEFAULT '',

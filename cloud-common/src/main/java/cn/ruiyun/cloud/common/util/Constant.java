@@ -101,8 +101,6 @@ public class Constant {
         public static final String GUEST_DETACH_DISK = "DetachDisk";
         public static final String GUEST_ATTACH_NIC = "AttachNic";
         public static final String GUEST_DETACH_NIC = "DetachNic";
-        public static final String GUEST_ATTACH_PCI = "AttachPCI";
-        public static final String GUEST_DETACH_PCI = "DetachPCI";
 
     }
 
