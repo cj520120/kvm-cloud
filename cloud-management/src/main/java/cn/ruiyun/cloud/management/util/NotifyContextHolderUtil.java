@@ -19,11 +19,13 @@ public class NotifyContextHolderUtil {
 
     public static void afterCompletion() {
         Set<NotifyData<?>> notifyDatas = NOTIFY_CONTEXT.get();
-        NotifyService notifyService = SpringContextUtils.getBean(NotifyService.class);
-        if (notifyDatas != null) {
-            notifyDatas.forEach(notifyService::publish);
-            notifyDatas.clear();
-            NOTIFY_CONTEXT.remove();
-        }
+        TransactionUtils.doAfterCommitTail(() -> {
+            NotifyService notifyService = SpringContextUtils.getBean(NotifyService.class);
+            if (notifyDatas != null) {
+                notifyDatas.forEach(notifyService::publish);
+                notifyDatas.clear();
+            }
+        });
+        NOTIFY_CONTEXT.remove();
     }
 }

@@ -1,5 +1,7 @@
 package cn.ruiyun.cloud.management.servcie;
 
+import cn.hutool.core.lang.UUID;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.ruiyun.cloud.common.bean.Page;
 import cn.ruiyun.cloud.common.bean.ResultUtil;
 import cn.ruiyun.cloud.common.error.CodeException;
@@ -8,24 +10,18 @@ import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.management.data.dao.UserInfoDao;
 import cn.ruiyun.cloud.management.data.entity.UserEntity;
 import cn.ruiyun.cloud.management.model.LoginUserModel;
-import cn.ruiyun.cloud.management.model.UserModel;
 import cn.ruiyun.cloud.management.servcie.bean.RefreshTokenInfo;
 import cn.ruiyun.cloud.management.servcie.bean.TokenInfo;
 import cn.ruiyun.cloud.management.servcie.bean.UserSignatureInfo;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
-import cn.hutool.core.lang.UUID;
-import cn.hutool.crypto.digest.DigestUtil;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +35,7 @@ public class UserService extends AbstractService {
     private UserInfoDao userDao;
 
     @Autowired
-    private RedissonClient redissonClient;
+    private CacheService cacheService;
 
 
     public TokenInfo login(String loginName, String password, String nonce) {
@@ -87,8 +83,7 @@ public class UserService extends AbstractService {
             throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登录已过期");
         }
         try {
-            RBucket<Integer> tokenUser = redissonClient.getBucket(RedisKeyUtil.getTokenUser(token));
-            Integer userId = tokenUser.get();
+            Integer userId = cacheService.get(CacheKeyUtil.getTokenUser(token));
             if (userId == null) {
                 throw new CodeException(ErrorCode.NO_LOGIN_ERROR, "登录已过期");
             }
@@ -126,8 +121,8 @@ public class UserService extends AbstractService {
 
 
     public RefreshTokenInfo refreshToken(int userId) {
-        RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
-        userToken.expire(Duration.ofHours(1));
+        String token = this.cacheService.get(CacheKeyUtil.getUserToken(userId));
+        this.cacheService.expire(CacheKeyUtil.getTokenUser(token), TimeUnit.HOURS.toMillis(1));
         return RefreshTokenInfo.builder().self(getUserInfo(userId)).expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))).build();
     }
 
@@ -155,11 +150,10 @@ public class UserService extends AbstractService {
         loginInfoEntity.setUserType(userType);
         this.userDao.update(loginInfoEntity);
         if (state == Constant.UserState.DISABLE) {
-            RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userId));
-            userToken.delete();
+
+            this.cacheService.delete(CacheKeyUtil.getUserToken(userId));
         }
-        RBucket<UserModel> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
-        rUserInfo.delete();
+        this.cacheService.delete(CacheKeyUtil.getUserInfo(userId));
 
         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(userId).type(Constant.NotifyType.UPDATE_USER).build());
         return loginInfoEntity;
@@ -214,18 +208,14 @@ public class UserService extends AbstractService {
 
 
     public UserEntity getUserInfo(int userId) {
-        RBucket<UserEntity> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userId));
-        if (rUserInfo.isExists()) {
-            return rUserInfo.get();
-        } else {
-            UserEntity user = userDao.findById(userId);
-            if (user != null) {
-                rUserInfo.set(user, 7, TimeUnit.DAYS);
-                return user;
+        return this.cacheService.get(CacheKeyUtil.getUserInfo(userId), () -> {
+            UserEntity findUser = userDao.findById(userId);
+            if (findUser != null) {
+                return findUser;
             } else {
                 throw new CodeException(ErrorCode.USER_NOT_FOUND, "用户不存在");
             }
-        }
+        });
     }
 
 
@@ -246,12 +236,13 @@ public class UserService extends AbstractService {
 
     private TokenInfo buildToken(UserEntity userInfo) {
         String token = UUID.randomUUID().toString().replace("-", "").toUpperCase();
-        RBucket<String> userToken = redissonClient.getBucket(RedisKeyUtil.getUserToken(userInfo.getUserId()));
-        userToken.set(token, 1, TimeUnit.HOURS);
-        RBucket<Integer> tokenUser = redissonClient.getBucket(RedisKeyUtil.getTokenUser(token));
-        tokenUser.set(userInfo.getUserId(), 1, TimeUnit.HOURS);
-        RBucket<UserEntity> rUserInfo = redissonClient.getBucket(RedisKeyUtil.getUserInfo(userInfo.getUserId()));
-        rUserInfo.set(userInfo, 7, TimeUnit.DAYS);
+        this.cacheService.put(CacheKeyUtil.getUserToken(userInfo.getUserId()), token, TimeUnit.HOURS.toMillis(1));
+
+
+        this.cacheService.put(CacheKeyUtil.getTokenUser(token), userInfo.getUserId(), TimeUnit.DAYS.toMillis(7));
+
+        this.cacheService.put(CacheKeyUtil.getUserInfo(userInfo.getUserId()), userInfo, TimeUnit.DAYS.toMillis(7));
+
         return TokenInfo.builder().expire(new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)))
                 .token(token).self(userInfo).build();
     }

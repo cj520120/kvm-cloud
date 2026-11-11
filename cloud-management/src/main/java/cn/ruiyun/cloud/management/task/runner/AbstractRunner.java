@@ -1,16 +1,11 @@
 package cn.ruiyun.cloud.management.task.runner;
 
 import cn.ruiyun.cloud.management.servcie.ConfigService;
-import cn.ruiyun.cloud.management.servcie.LockRunner;
 import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
 import cn.ruiyun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenjun
@@ -18,38 +13,26 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class AbstractRunner {
 
-    @Autowired
-    protected RedissonClient redissonClient;
+
     @Autowired
     protected ConfigService configService;
+    private long lastRunTime = 0;
 
-    @Autowired
-    private LockRunner lockRunner;
 
     public void call() {
-        try {
-            RequestContextHolderUtil.initContext();
-            boolean isRun = lockRunner.lockCall(RedisKeyUtil.getGlobalJobLockKey(this.getClass().getSimpleName()), () -> {
-                if (this.getPeriodSeconds() > 0) {
-                    String key = this.getJobKey();
-                    RBucket<Long> rBucket = redissonClient.getBucket(key);
-                    if (rBucket.isExists()) {
-                        return false;
-                    }
-                    rBucket.set(System.currentTimeMillis(), this.getPeriodSeconds(), TimeUnit.SECONDS);
-                }
-                return true;
-            });
-            if (isRun) {
+        Long now = System.currentTimeMillis();
+        long interval = this.getPeriodSeconds() * 1000L;
+        if (now > interval + lastRunTime) {
+            try {
+                RequestContextHolderUtil.initContext();
                 this.doWork();
-            } else {
-                log.debug("任务正在执行中,忽略本次执行:{}", this.getName());
+            } catch (Exception err) {
+                log.error("周期任务执行失败.", err);
+            } finally {
+                RequestContextHolderUtil.clearContext();
+                NotifyContextHolderUtil.afterCompletion();
+                this.lastRunTime = System.currentTimeMillis();
             }
-        } catch (Exception err) {
-            log.error("周期任务执行失败.", err);
-        } finally {
-            RequestContextHolderUtil.clearContext();
-            NotifyContextHolderUtil.afterCompletion();
         }
     }
 
@@ -70,9 +53,6 @@ public abstract class AbstractRunner {
         return 10;
     }
 
-    protected String getJobKey() {
-        return RedisKeyUtil.getGlobalJobKey(this.getClass().getName());
-    }
 
     /**
      * 任务分发

@@ -4,13 +4,13 @@ import cn.ruiyun.cloud.common.socket.packet.WsMessage;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.FunctionUtils;
 import cn.ruiyun.cloud.management.data.entity.HostEntity;
+import cn.ruiyun.cloud.management.servcie.CacheService;
 import cn.ruiyun.cloud.management.servcie.HostService;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.websocket.action.WsAction;
 import cn.ruiyun.cloud.management.websocket.listen.client.Client;
 import cn.ruiyun.cloud.management.websocket.listen.context.HostContext;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class AgentHeartBeatAction implements WsAction<byte[]> {
     @Autowired
-    private RedissonClient redissonClient;
+    private CacheService cacheService;
     @Autowired
     private HostService hostService;
     @Autowired
@@ -38,10 +38,10 @@ public class AgentHeartBeatAction implements WsAction<byte[]> {
         if (Objects.isNull(host)) {
             return;
         }
-        String key = RedisKeyUtil.getHostConnectionKey(host.getHostId());
-        redissonClient.getBucket(key).set(context, 30, TimeUnit.SECONDS);
+        cacheService.put(CacheKeyUtil.getHostLastKeepKey(host.getHostId()), System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(30));
+        cacheService.put(CacheKeyUtil.getHostConnectionKey(host.getHostId()), context, TimeUnit.SECONDS.toMillis(30));
         if (host.getStatus().equals(Constant.HostStatus.OFFLINE)) {
-            lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), () -> hostService.registerHost(context.getHostId()));
+            lockRunner.lockCall(CacheKeyUtil.getGlobalLockKey(), () -> hostService.registerHost(context.getHostId()));
         }
     }
 

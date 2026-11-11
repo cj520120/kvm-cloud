@@ -1,5 +1,6 @@
 package cn.ruiyun.cloud.management.websocket.action.impl.component;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.ruiyun.cloud.common.gson.GsonBuilderUtil;
 import cn.ruiyun.cloud.common.socket.packet.WsMessage;
 import cn.ruiyun.cloud.common.socket.packet.data.base.MapData;
@@ -10,12 +11,11 @@ import cn.ruiyun.cloud.management.data.entity.NetworkEntity;
 import cn.ruiyun.cloud.management.servcie.ComponentService;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
 import cn.ruiyun.cloud.management.servcie.NetworkService;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.websocket.action.WsAction;
 import cn.ruiyun.cloud.management.websocket.listen.client.Client;
 import cn.ruiyun.cloud.management.websocket.listen.context.ComponentContext;
 import cn.ruiyun.cloud.management.websocket.manager.ComponentClientManager;
-import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +52,7 @@ public class ComponentConnectionAction implements WsAction<MapData> {
             context.setSessionId(sessionId);
             webSocket.login(context);
             ComponentClientManager.addComponentClient(context.getComponentId(), webSocket);
-            ComponentGuestEntity loginComponentGuest = lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), () -> {
+            ComponentGuestEntity loginComponentGuest = lockRunner.lockCall(CacheKeyUtil.getGlobalLockKey(), () -> {
                 ComponentGuestEntity componentGuest = componentService.findComponentGuestById(context.getComponentGuestId());
                 if (componentGuest != null) {
                     if (context.getStatus() == COMPONENT_STATUS_SUCCESS) {

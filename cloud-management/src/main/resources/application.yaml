@@ -7,11 +7,7 @@ app:
   work:
     thread:
       size: 4
-  cluster:
-    #需真实的IP地址，后续会用到此IP地址进行主机连接管理分发,不能使用localhost或者127.0.0.1
-    node-url: http://192.168.2.102:8080/
-    #集群管理token，集群间通信的验证凭证
-    token: 123456
+
 server:
   port: 8080
   servlet:
@@ -19,46 +15,15 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    druid:
-      filters: stat,wall
-      stat-view-servlet.enabled: false
-      initial-size: 8
-      max-idle: 8
-      max-active: 16
-      max-wait: 60000
-      time-between-eviction-runsMillis: 60000
-      min-evictable-idle-timeMillis: 300000
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
-      pool-prepared-statements: true
-      max-open-prepared-statements: 32
-      max-pool-prepared-statement-per-connection-size: 32
-      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-    password: KvmCloud@123456
-    type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://192.168.1.100:3306/cj_kvm_cloud?characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true
     username: kvm-cloud
-  redis:
-    redisson:
-      config: |
-        singleServerConfig:
-         idleConnectionTimeout: 10000
-         connectTimeout: 10000
-         timeout: 3000
-         retryAttempts: 3
-         retryInterval: 1500
-         address: "redis://192.168.1.100:6379"
-         password: 
-         database: 0
-         subscriptionsPerConnection: 5
-         subscriptionConnectionMinimumIdleSize: 1
-         subscriptionConnectionPoolSize: 50
-         connectionMinimumIdleSize: 32
-         connectionPoolSize: 64
-         dnsMonitoringInterval: 5000
-        threads: 16
-        nettyThreads: 32
-        codec: !<org.redisson.codec.JsonJacksonCodec> {}
-        transportMode: "NIO"
+    password: KvmCloud@123456
+    initialization-mode: always
+    schema: classpath:/schema-mysql.sql
+    continue-on-error: false
+    hikari:
+      minimum-idle: 8
+      maximum-pool-size: 16
+      idle-timeout: 300000
+      connection-timeout: 60000
+      max-lifetime: 1800000

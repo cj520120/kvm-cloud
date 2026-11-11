@@ -2,7 +2,7 @@ package cn.ruiyun.cloud.management.controller;
 
 import cn.ruiyun.cloud.management.servcie.ConvertService;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,11 +17,11 @@ public class BaseController {
     private LockRunner lockRunner;
 
     public <T> T globalLockCall(LockRunner.LockAction<T> runnable) {
-        return this.globalLockCall(RedisKeyUtil.getGlobalLockKey(), runnable);
+        return this.globalLockCall(CacheKeyUtil.getGlobalLockKey(), runnable);
     }
 
     public void globalLockCall(Runnable runnable) {
-        this.globalLockCall(RedisKeyUtil.getGlobalLockKey(), () -> {
+        this.globalLockCall(CacheKeyUtil.getGlobalLockKey(), () -> {
             runnable.run();
             return null;
         });

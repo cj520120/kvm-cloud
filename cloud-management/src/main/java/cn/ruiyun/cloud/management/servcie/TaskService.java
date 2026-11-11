@@ -6,6 +6,7 @@ import cn.ruiyun.cloud.management.data.dao.TaskDao;
 import cn.ruiyun.cloud.management.data.entity.TaskEntity;
 import cn.ruiyun.cloud.management.servcie.bean.OperateFinishBean;
 import cn.ruiyun.cloud.management.util.ConfigKey;
+import cn.ruiyun.cloud.management.util.TransactionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -38,21 +39,27 @@ public class TaskService {
     @Transactional(rollbackFor = Exception.class)
     public void addTask(BaseOperateParam operateParam, int delayMinute, boolean update) {
         TaskEntity task = this.findTask(operateParam.getTaskId());
+        int updateDelayMinute = delayMinute;
         if (task == null) {
             task = TaskEntity.builder().taskId(operateParam.getTaskId())
                     .version(0)
                     .title(operateParam.getTitle())
                     .type(operateParam.getClass().getName())
                     .param(GsonBuilderUtil.create().toJson(operateParam))
-                    .expireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(delayMinute)))
+                    .expireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)))
                     .createTime(new Date(System.currentTimeMillis()))
                     .build();
+
             taskDao.insert(task);
         } else if (update) {
-            task.setExpireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(delayMinute)));
+            task.setExpireTime(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)));
             task.setVersion(0);
             taskDao.update(task);
         }
+        TaskEntity finalTask = task;
+        TransactionUtils.doAfterCommitTail(() -> {
+            taskDao.updateExpireTime(finalTask.getTaskId(), new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(updateDelayMinute)));
+        });
     }
 
     @Transactional(rollbackFor = Exception.class)

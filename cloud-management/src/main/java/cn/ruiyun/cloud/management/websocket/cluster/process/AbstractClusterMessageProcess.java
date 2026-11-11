@@ -5,7 +5,7 @@ import cn.ruiyun.cloud.common.error.CodeException;
 import cn.ruiyun.cloud.common.util.BeanConverter;
 import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +39,7 @@ public abstract class AbstractClusterMessageProcess<T> implements ClusterMessage
 
     protected <Source, Target> ResultUtil<Target> getResourceData(LockRunner.LockAction<Source> runnable, BeanConverter.Converter<Source, Target> converter) {
         try {
-            Source result = lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), runnable);
+            Source result = lockRunner.lockCall(CacheKeyUtil.getGlobalLockKey(), runnable);
             Target data = converter.convert(result);
             return ResultUtil.<Target>builder().data(data).code(ErrorCode.SUCCESS).build();
         } catch (CodeException e) {

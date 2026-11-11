@@ -7,7 +7,7 @@ import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.management.data.entity.ComponentGuestEntity;
 import cn.ruiyun.cloud.management.servcie.ComponentService;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.util.SpringContextUtils;
 import cn.ruiyun.cloud.management.websocket.common.SocketType;
 import cn.ruiyun.cloud.management.websocket.listen.client.Client;
@@ -64,7 +64,7 @@ public class ComponentListen extends AbstractWsService<WsMessage<MapData>, Strin
         ComponentContext context = (ComponentContext) obj.getEvent();
         if (context != null) {
             //设置网络组件下线
-            lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), () -> {
+            lockRunner.lockCall(CacheKeyUtil.getGlobalLockKey(), () -> {
 
                 ComponentGuestEntity componentGuest = componentService.findComponentGuestById(context.getComponentGuestId());
                 if (componentGuest != null && Objects.equals(componentGuest.getSessionId(), context.getSessionId())) {

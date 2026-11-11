@@ -8,8 +8,8 @@ import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
 import cn.ruiyun.cloud.management.servcie.TaskService;
 import cn.ruiyun.cloud.management.servcie.bean.OperateFinishBean;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
 import cn.ruiyun.cloud.management.util.RequestContextHolderUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,7 @@ public class OperateEngine {
     public <T> void onOperateFinish(OperateFinishBean<T> operateFinishBean) {
         this.executor.submit(() -> {
             RequestContextHolderUtil.initContext();
-            lockRunner.lockRun(RedisKeyUtil.getGlobalLockKey(), () -> {
+            lockRunner.lockRun(CacheKeyUtil.getGlobalLockKey(), () -> {
                 try {
                     log.info("任务回调:task={} result={}", operateFinishBean.getTaskId(), operateFinishBean.getResult());
                     Class<BaseOperateParam> paramClass = (Class<BaseOperateParam>) Class.forName(operateFinishBean.getOperateType());

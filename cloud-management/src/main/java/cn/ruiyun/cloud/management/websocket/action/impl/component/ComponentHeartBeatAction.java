@@ -6,7 +6,7 @@ import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.management.data.entity.ComponentGuestEntity;
 import cn.ruiyun.cloud.management.servcie.ComponentService;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.websocket.action.WsAction;
 import cn.ruiyun.cloud.management.websocket.listen.client.Client;
 import cn.ruiyun.cloud.management.websocket.listen.context.ComponentContext;
@@ -30,7 +30,7 @@ public class ComponentHeartBeatAction implements WsAction<MapData> {
             ComponentContext context = (ComponentContext) webSocket.getContext();
             if (context != null) {
                 //设置网络组件心跳
-                lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), () -> {
+                lockRunner.lockCall(CacheKeyUtil.getGlobalLockKey(), () -> {
                     ComponentGuestEntity componentGuest = componentService.findComponentGuestById(context.getComponentGuestId());
                     if (componentGuest != null && Objects.equals(componentGuest.getSessionId(), context.getSessionId())) {
                         componentGuest.setLastActiveTime(new Date(System.currentTimeMillis()));

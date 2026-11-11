@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class HostContext implements ConnectContext {
     private int hostId;
-    private String nodeUrl;
     private String sessionId;
 
 }

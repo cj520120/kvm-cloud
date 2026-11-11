@@ -6,6 +6,7 @@ import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.management.data.entity.SshAuthorizedEntity;
 import cn.ruiyun.cloud.management.servcie.bean.MemSshInfo;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +15,6 @@ import org.bouncycastle.crypto.util.OpenSSHPrivateKeyUtil;
 import org.bouncycastle.crypto.util.OpenSSHPublicKeyUtil;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ public class SshAuthorizedService extends AbstractService {
     }
 
     @Autowired
-    private RedissonClient redissonClient;
+    private CacheService cacheService;
 
     public List<SshAuthorizedEntity> listAllSshKeys() {
         List<SshAuthorizedEntity> list = this.sshAuthorizedDao.listAll();
@@ -125,14 +124,13 @@ public class SshAuthorizedService extends AbstractService {
             throw new CodeException(ErrorCode.SSH_AUTHORIZED_NOT_FOUND, "SSH公钥不存在");
         }
         String token = UUID.randomUUID().toString().replace("-", "");
-        RBucket<MemSshInfo> rBucket = redissonClient.getBucket("SSH." + token);
 
-        rBucket.set(MemSshInfo.builder().id(id).name(entity.getSshName()).privateKey(entity.getSshPrivateKey()).publicKey(entity.getSshPublicKey()).build(), 10, TimeUnit.MINUTES);
+
+        this.cacheService.put(CacheKeyUtil.getSshDownloadKey(token), MemSshInfo.builder().id(id).name(entity.getSshName()).privateKey(entity.getSshPrivateKey()).publicKey(entity.getSshPublicKey()).build(), TimeUnit.MINUTES.toMillis(10));
         return token;
     }
 
     public MemSshInfo getDownloadKey(String token) {
-        RBucket<MemSshInfo> rBucket = redissonClient.getBucket("SSH." + token);
-        return rBucket.getAndDelete();
+        return this.cacheService.getAndRemove(CacheKeyUtil.getSshDownloadKey(token));
     }
 }

@@ -7,13 +7,12 @@ import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.management.data.entity.HostEntity;
 import cn.ruiyun.cloud.management.operate.bean.HostCheckOperate;
 import cn.ruiyun.cloud.management.servcie.bean.ConfigQuery;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.util.ConfigKey;
 import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -46,8 +45,7 @@ public class HostCheckOperateServiceImpl extends AbstractOperateService<HostChec
     public void onFinish(HostCheckOperate param, ResultUtil<HostInfo> resultUtil) {
         HostInfo hostInfo = resultUtil.getData();
         HostEntity updateHost = HostEntity.builder().hostId(param.getHostId()).build();
-        String hostKeepKey = RedisKeyUtil.getHostLastKeepKey(updateHost.getHostId());
-        RBucket<Long> rBucket = this.redissonClient.getBucket(hostKeepKey);
+        String hostKeepKey = CacheKeyUtil.getHostLastKeepKey(updateHost.getHostId());
         boolean isNotify = false;
         if (hostInfo != null) {
             isNotify = !Objects.equals(updateHost.getStatus(), Constant.HostStatus.ONLINE);
@@ -71,8 +69,8 @@ public class HostCheckOperateServiceImpl extends AbstractOperateService<HostChec
             queryList.add(ConfigQuery.builder().type(Constant.ConfigType.DEFAULT).id(0).build());
             queryList.add(ConfigQuery.builder().type(Constant.ConfigType.HOST).id(1).build());
             int expire = this.configService.getConfig(queryList, ConfigKey.DEFAULT_TASK_HOST_CHECK_TIMEOUT_SECOND);
-            rBucket.set(System.currentTimeMillis(), Math.max(1, expire * 2), TimeUnit.SECONDS);
-        } else if (!rBucket.isExists()) {
+            this.cacheService.put(hostKeepKey, System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(Math.max(1, expire * 2)));
+        } else if (!cacheService.exists(hostKeepKey)) {
             isNotify = !Objects.equals(updateHost.getStatus(), Constant.HostStatus.OFFLINE);
             updateHost.setStatus(Constant.HostStatus.OFFLINE);
             hostDao.update(updateHost);

@@ -7,37 +7,27 @@ import cn.ruiyun.cloud.common.error.CodeException;
 import cn.ruiyun.cloud.common.gson.GsonBuilderUtil;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
-import cn.ruiyun.cloud.common.util.SecurityUtil;
 import cn.ruiyun.cloud.management.config.ApplicationConfig;
 import cn.ruiyun.cloud.management.data.dao.*;
 import cn.ruiyun.cloud.management.data.entity.*;
-import cn.ruiyun.cloud.management.data.dao.*;
-import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.management.servcie.AllocateService;
+import cn.ruiyun.cloud.management.servcie.CacheService;
 import cn.ruiyun.cloud.management.servcie.ConfigService;
 import cn.ruiyun.cloud.management.servcie.TaskService;
 import cn.ruiyun.cloud.management.servcie.bean.ConfigQuery;
-import cn.ruiyun.cloud.management.util.*;
-import cn.ruiyun.cloud.management.util.*;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
+import cn.ruiyun.cloud.management.util.ConfigKey;
+import cn.ruiyun.cloud.management.util.DomainUtil;
 import cn.ruiyun.cloud.management.websocket.listen.context.HostContext;
 import cn.ruiyun.cloud.management.websocket.manager.HostClientManager;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -77,9 +67,9 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
     @Autowired
     protected RestTemplate restTemplate;
     @Autowired
-    protected RedissonClient redissonClient;
-    @Autowired
     protected HostPciDeviceDao hostPciDeviceDao;
+    @Autowired
+    protected CacheService cacheService;
 
     @Autowired
     @Qualifier("workExecutorService")
@@ -127,81 +117,18 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
         Objects.requireNonNull(host.getUri(), "host uri cannot be null");
         Objects.requireNonNull(host.getClientId(), "clientId cannot be null");
         Objects.requireNonNull(host.getClientSecret(), "clientSecret cannot be null");
-        String hostKey = RedisKeyUtil.getHostConnectionKey(host.getHostId());
-        HostContext hostContext = (HostContext) this.redissonClient.getBucket(hostKey).get();
+        String hostKey = CacheKeyUtil.getHostConnectionKey(host.getHostId());
+        HostContext hostContext = this.cacheService.get(hostKey);
         if (hostContext == null) {
             throw new CodeException(ErrorCode.HOST_NOT_READY, "当前主机未就绪");
         }
-        if (Objects.equals(this.applicationConfig.getCluster().getNodeUrl(), hostContext.getNodeUrl())) {
-            TaskRequest taskRequest = TaskRequest.builder()
+        TaskRequest taskRequest = TaskRequest.builder()
                     .command(command)
                     .data(GsonBuilderUtil.create().toJson(data))
                     .taskId(param.getTaskId()).build();
-            String json = GsonBuilderUtil.create().toJson(taskRequest);
-            log.info("转发任务到本地执行:task={} data={}", param.getTaskId(), json);
-            HostClientManager.send(host.getHostId(), Constant.SocketCommand.AGENT_TASK_SUBMIT, json.getBytes(StandardCharsets.UTF_8));
-            return;
-        }
-        String nodeUrl = hostContext.getNodeUrl();
-        if (nodeUrl.endsWith("/")) {
-            nodeUrl = nodeUrl.substring(0, nodeUrl.length() - 1);
-        }
-        String forwardUrl = nodeUrl + "/api/cluster/host/forward";
-        this.executor.submit(() -> {
-            RequestContextHolderUtil.initContext();
-            Gson gson = GsonBuilderUtil.create();
-            try {
-
-
-                TaskRequest taskRequest = TaskRequest.builder()
-                        .command(command)
-                        .data(gson.toJson(data))
-                        .taskId(param.getTaskId()).build();
-
-                String nonce = String.valueOf(System.nanoTime());
-                Map<String, Object> map = new HashMap<>(6);
-                map.put("data", gson.toJson(taskRequest));
-                map.put("hostId", host.getHostId());
-                map.put("command", Constant.SocketCommand.AGENT_TASK_SUBMIT);
-                map.put("nonce", nonce);
-                map.put("timestamp", System.currentTimeMillis());
-
-                String sign = SecurityUtil.signature(map, this.applicationConfig.getCluster().getToken());
-                map.put("sign", sign);
-
-                HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-                MultiValueMap<String, String> requestMap = new LinkedMultiValueMap<>();
-                map.forEach((k, v) -> requestMap.add(k, v != null ? v.toString() : ""));
-
-                RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity
-                        .post(URI.create(forwardUrl))
-                        .headers(httpHeaders)
-                        .body(requestMap);
-
-                ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
-                if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-                    throw new CodeException(ErrorCode.SERVER_ERROR,
-                            "Request failed with status: " + responseEntity.getStatusCode());
-                }
-
-                String response = responseEntity.getBody();
-                ResultUtil<Object> resultUtil = gson.fromJson(response, this.getCallResultType());
-
-                if (resultUtil == null) {
-                    this.onSubmitFinishEvent(param.getTaskId(),
-                            (V) ResultUtil.error(ErrorCode.SERVER_ERROR, "Invalid response: " + response));
-                } else if (resultUtil.getCode() != ErrorCode.AGENT_TASK_ASYNC_WAIT) {
-                    this.onSubmitFinishEvent(param.getTaskId(), (V) resultUtil);
-                }
-            } catch (Exception err) {
-                this.onSubmitFinishEvent(param.getTaskId(), (V) ResultUtil.error(ErrorCode.SERVER_ERROR, "Request error: " + err.getMessage()));
-            } finally {
-                RequestContextHolderUtil.clearContext();
-                NotifyContextHolderUtil.afterCompletion();
-            }
-        });
+        String json = GsonBuilderUtil.create().toJson(taskRequest);
+        log.info("转发任务到本地执行:task={} data={}", param.getTaskId(), json);
+        HostClientManager.send(host.getHostId(), Constant.SocketCommand.AGENT_TASK_SUBMIT, json.getBytes(StandardCharsets.UTF_8));
     }
 
 
@@ -250,7 +177,7 @@ public abstract class AbstractOperateService<T extends BaseOperateParam, V exten
 
     @Override
     public String getLockKey(BaseOperateParam param) {
-        return RedisKeyUtil.getGlobalLockKey();
+        return CacheKeyUtil.getGlobalLockKey();
     }
 
     protected Volume initVolume(StorageEntity storageEntity, VolumeEntity volumeEntity) {

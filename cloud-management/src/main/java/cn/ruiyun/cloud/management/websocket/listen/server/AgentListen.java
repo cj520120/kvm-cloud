@@ -4,10 +4,11 @@ import cn.ruiyun.cloud.common.event.EventObject;
 import cn.ruiyun.cloud.common.socket.packet.WsMessage;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.management.data.entity.HostEntity;
+import cn.ruiyun.cloud.management.servcie.CacheService;
 import cn.ruiyun.cloud.management.servcie.HostService;
 import cn.ruiyun.cloud.management.servcie.LockRunner;
+import cn.ruiyun.cloud.management.util.CacheKeyUtil;
 import cn.ruiyun.cloud.management.util.NotifyContextHolderUtil;
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
 import cn.ruiyun.cloud.management.util.SpringContextUtils;
 import cn.ruiyun.cloud.management.websocket.common.SocketType;
 import cn.ruiyun.cloud.management.websocket.listen.client.BinarySocket;
@@ -17,8 +18,6 @@ import cn.ruiyun.cloud.management.websocket.listen.context.ConnectContext;
 import cn.ruiyun.cloud.management.websocket.listen.context.HostContext;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
@@ -63,19 +62,18 @@ public class AgentListen extends AbstractWsService<WsMessage<byte[]>, ByteBuffer
     public void onClientCloseHandler(Object sender, EventObject<ConnectContext> obj) {
         HostContext context = (HostContext) obj.getEvent();
         HostService hostService = SpringContextUtils.getBean(HostService.class);
-        RedissonClient redissonClient = SpringContextUtils.getBean(RedissonClient.class);
+        CacheService cacheService = SpringContextUtils.getBean(CacheService.class);
         LockRunner lockRunner = SpringContextUtils.getBean(LockRunner.class);
         if (context != null) {
-            lockRunner.lockCall(RedisKeyUtil.getGlobalLockKey(), () -> {
-                String key = RedisKeyUtil.getHostConnectionKey(context.getHostId());
-                RBucket<HostContext> bucket = redissonClient.getBucket(key);
-                HostContext sessionContext = bucket.get();
+            lockRunner.lockCall(CacheKeyUtil.getGlobalLockKey(), () -> {
+                String key = CacheKeyUtil.getHostConnectionKey(context.getHostId());
+                HostContext sessionContext = cacheService.get(key);
                 if (Objects.nonNull(sessionContext) && Objects.equals(sessionContext.getSessionId(), context.getSessionId())) {
                     HostEntity host = hostService.getHostById(context.getHostId());
                     if (!Objects.equals(host.getStatus(), Constant.HostStatus.MAINTENANCE)) {
                         host.setStatus(Constant.HostStatus.OFFLINE);
                         hostService.updateHost(host);
-                        bucket.delete();
+                        cacheService.delete(key);
                         NotifyContextHolderUtil.append(NotifyData.<Void>builder().id(host.getHostId()).type(Constant.NotifyType.UPDATE_HOST).build());
                     }
                 }

@@ -1,11 +1,10 @@
 package cn.ruiyun.cloud.management.servcie;
 
-import cn.ruiyun.cloud.management.util.RedisKeyUtil;
+import cn.ruiyun.cloud.management.websocket.cluster.WsCluster;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RTopic;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,16 +13,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class NotifyService {
+    @Autowired
+    @Lazy
+    private WsCluster wsCluster;
 
-    private final RTopic topic;
-
-    public NotifyService(@Autowired RedissonClient redissonClient) {
-        topic = redissonClient.getTopic(RedisKeyUtil.getGlobalNotifyKey());
-    }
 
     public <T> void publish(NotifyData<T> data) {
         try {
-            this.topic.publish(data);
+            this.wsCluster.onCloudEventNotify(data);
         } catch (Exception e) {
             log.error("发布消息失败:{}", data, e);
         }

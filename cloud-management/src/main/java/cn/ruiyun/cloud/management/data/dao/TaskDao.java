@@ -48,4 +48,8 @@ public class TaskDao {
         mapper.insert(entity);
         return entity;
     }
+
+    public void updateExpireTime(String taskId, Date date) {
+        this.mapper.updateExpireTime(taskId, date);
+    }
 }

@@ -3,23 +3,14 @@ package cn.ruiyun.cloud.management.util;
 /**
  * @author chenjun
  */
-public class RedisKeyUtil {
+public class CacheKeyUtil {
 
-    public static String getGlobalNotifyKey() {
-        return "Cloud.Notify";
-    }
 
     public static String getGlobalLockKey() {
         return "Cloud.Lock";
     }
 
-    public static String getGlobalJobKey(String jobName) {
-        return "Cloud.Job." + jobName;
-    }
 
-    public static String getGlobalJobLockKey(String jobName) {
-        return "Cloud.Job." + jobName + ".Lock";
-    }
 
     public static String getHostLastKeepKey(int hostId) {
         return "Cloud.Host.Keep." + hostId;
@@ -43,5 +34,9 @@ public class RedisKeyUtil {
 
     public static String getGuestGraphicsToken(String token) {
         return "Guest.Graphics." + token;
+    }
+
+    public static String getSshDownloadKey(String token) {
+        return "SSH.Download." + token;
     }
 }

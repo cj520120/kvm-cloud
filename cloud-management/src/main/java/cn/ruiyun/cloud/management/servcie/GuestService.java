@@ -7,20 +7,15 @@ import cn.ruiyun.cloud.common.gson.GsonBuilderUtil;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
 import cn.ruiyun.cloud.management.data.entity.*;
-import cn.ruiyun.cloud.management.data.entity.*;
 import cn.ruiyun.cloud.management.model.GraphicsModel;
-import cn.ruiyun.cloud.management.operate.bean.*;
 import cn.ruiyun.cloud.management.operate.bean.*;
 import cn.ruiyun.cloud.management.servcie.bean.AttachNicInfo;
 import cn.ruiyun.cloud.management.servcie.bean.AttachVolumeInfo;
 import cn.ruiyun.cloud.management.servcie.bean.GuestExtern;
 import cn.ruiyun.cloud.management.servcie.bean.MemGraphicsInfo;
 import cn.ruiyun.cloud.management.util.*;
-import cn.ruiyun.cloud.management.util.*;
 import cn.ruiyun.cloud.management.websocket.message.NotifyData;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +35,7 @@ public class GuestService extends AbstractService {
     @Autowired
     private AllocateService allocateService;
     @Autowired
-    private RedissonClient redissonClient;
+    private CacheService cacheService;
 
     private void checkSystemComponentComplete(int networkId) {
         NetworkEntity network = this.networkDao.findById(networkId);
@@ -744,9 +739,7 @@ public class GuestService extends AbstractService {
                     .protocol(extern.getGraphics().getProtocol())
                     .hostId(guest.getHostId())
                     .build();
-            RBucket<MemGraphicsInfo> bucket = redissonClient.getBucket(RedisKeyUtil.getGuestGraphicsToken(token));
-            bucket.set(memGraphicsInfo, 5, TimeUnit.MINUTES);
-
+            this.cacheService.put(CacheKeyUtil.getGuestGraphicsToken(token), memGraphicsInfo, TimeUnit.MINUTES.toMillis(5));
             GraphicsModel graphics = new GraphicsModel();
             graphics.setPassword(extern.getGraphics().getPassword());
             graphics.setToken(token);

@@ -1,6 +1,7 @@
 package cn.ruiyun.cloud.management;
 
 import cn.ruiyun.cloud.common.core.operate.OperateService;
+import cn.ruiyun.cloud.management.data.mapper.ConfigMapper;
 import cn.ruiyun.cloud.management.servcie.meta.MetaDataService;
 import cn.ruiyun.cloud.management.servcie.meta.UserDataService;
 import cn.ruiyun.cloud.management.servcie.meta.VendorDataService;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableTransactionManagement
 @EnablePluginRegistries({ClusterMessageProcess.class, OperateService.class, VendorDataService.class, MetaDataService.class, UserDataService.class})
-@MapperScan("cn.ruiyun.cloud.management.data")
+@MapperScan(basePackageClasses = ConfigMapper.class)
 public class MainService {
     public static void main(String[] args) {
         SpringApplication.run(MainService.class, args);
