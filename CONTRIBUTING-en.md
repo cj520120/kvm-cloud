@@ -10,6 +10,12 @@ KVM Cloud is a Java 8 and Spring Boot project with three Maven modules:
 - `cloud-agent`: host-side agent, VM operations, and management communication.
 - `cloud-management`: management APIs, web interface, persistence, authentication, and orchestration.
 
+## Open-source and Subscription Editions
+
+This guide applies only to the open-source repository. The subscription edition includes independently licensed enterprise enhancements. Its source code, licensing, delivery, and support are not provided through this repository or pull requests. Open-source contributions must not depend on proprietary subscription-edition components and must keep the open-source edition independently buildable and runnable. For subscription-related requests, use the official [contact page](https://www.ruiyuncloud.cn/#contact).
+
+Security vulnerabilities should still be reported privately by email as described in [Security Reporting](#security-reporting).
+
 ## Reporting Bugs
 
 Before opening a bug report:
