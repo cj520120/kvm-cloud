@@ -324,15 +324,11 @@ Centos: /usr/libexec/qemu-kvm -machine help
 Ubuntu: qemu-system-i386 -machine help
 ```
 
-12、UEFI 支持
-```$xslt
-需要调整系统配置项vm.uefi.loader.path 、vm.uefi.loader.vargs.template.path 、vm.uefi.loader.vargs.base.path
-```
-13、关于网络不通问题
+12、关于网络不通问题
 ```$xslt
 尽量使用纯净系统安装，如果网络不通，请检查防火墙、iptables等
 ```
-14、关于ubuntu无法启动虚拟机问题
+13、关于ubuntu无法启动虚拟机问题
 ```$xslt
 ubuntu 提示qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory
 关闭大页缓存，修改配置vm.memory.huge.pages.enable和vm.memory.huge.pages.size，或在/etc/sysctl.conf 中追加 vm.nr_hugepages=10240 #具体值请根据实际情况修改

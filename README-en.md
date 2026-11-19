@@ -344,17 +344,12 @@ CentOS: /usr/libexec/qemu-kvm -machine help
 Ubuntu: qemu-system-i386 -machine help
 ```
 
-12. UEFI support
-```sh
-Adjust the system configuration properties vm.uefi.loader.path, vm.uefi.loader.vargs.template.path, and vm.uefi.loader.vargs.base.path.
-```
-
-13. Network connectivity problems
+12. Network connectivity problems
 ```sh
 Use a clean operating system installation whenever possible. If the network is unavailable, check the firewall, iptables, and other related settings.
 ```
 
-14. VMs fail to start on Ubuntu
+13. VMs fail to start on Ubuntu
 ```sh
 Ubuntu reports: qemu-system-x86_64: unable to map backing store for guest RAM: Cannot allocate memory
 Disable huge page caching by modifying vm.memory.huge.pages.enable and vm.memory.huge.pages.size, or append vm.nr_hugepages=10240 to /etc/sysctl.conf. Adjust the value according to your actual requirements.

@@ -107,11 +107,6 @@ public class ConfigService {
 
         initDefaultConfig(ConfigKey.VM_CLOCK_TYPE, "utc", "虚拟机时钟配置", Constant.ConfigValueType.SELECT, Arrays.asList("utc", "localtime", "timezone", "variable"), StringConvert.Default);
 
-        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_PATH, "/usr/share/edk2/ovmf/OVMF_CODE.fd", "Uefi加载固件地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_VARGS_TEMPLATE_PATH, "/usr/share/edk2/ovmf/OVMF_VARS.fd", "Uefi加载参数模版地址", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-        initDefaultConfig(ConfigKey.VM_DEFAULT_UEFI_LOADER_VARGS_BASE_PATH, "/var/lib/libvirt/qemu/nvram/", "Uefi加载参数基础地址(尽量使用共享地址，否则将出现修改配置后，跨主机不生效问题,如没有修改需求，默认即可)", Constant.ConfigValueType.STRING, null, StringConvert.Default);
-
-        initDefaultConfig(ConfigKey.VM_MACHINE_ARCH, "x86_64", "vm machine arch", Constant.ConfigValueType.STRING, null, StringConvert.Default);
         initDefaultConfig(ConfigKey.VM_MACHINE_NAME, "", "vm machine name", Constant.ConfigValueType.STRING, null, StringConvert.Default);
 
 
