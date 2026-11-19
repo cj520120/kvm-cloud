@@ -9,3 +9,4 @@ target
 .venv
 .vscode
 build
+.workbuddy
