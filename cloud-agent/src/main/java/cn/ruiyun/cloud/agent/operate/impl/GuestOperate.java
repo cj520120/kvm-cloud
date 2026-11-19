@@ -1,5 +1,7 @@
 package cn.ruiyun.cloud.agent.operate.impl;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.ruiyun.cloud.agent.util.CloudInitHelper;
 import cn.ruiyun.cloud.agent.util.DomainUtil;
 import cn.ruiyun.cloud.agent.util.GraphicsUtil;
@@ -8,8 +10,6 @@ import cn.ruiyun.cloud.common.core.annotation.DispatchBind;
 import cn.ruiyun.cloud.common.error.CodeException;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.*;
@@ -316,12 +316,77 @@ public class GuestOperate {
         if (domain == null) {
             throw new CodeException(ErrorCode.GUEST_NOT_FOUND, "虚拟机没有运行:" + request.getName());
         }
+        // 迁移带 VIR_MIGRATE_UNDEFINE_SOURCE，成功后源端 domain 被 undefine，
+        // stopDomain 无法再取到 XML 触发资源清理，因此迁移前先保存 domain XML
+        String domainXml = domain.getXMLDesc(0);
+        // cloud-init ISO 是宿主机本地文件，随域迁移到目标主机会因文件不存在而失败，迁移前先弹出光盘
+        this.detachCloudInitCdRom(domain, domainXml);
         @Cleanup
         Connect toConnect = new Connect(String.format("qemu+tcp://%s/system", request.getHost()));
         long liveMigrationFlag = MigrateFlags.VIR_MIGRATE_UNDEFINE_SOURCE | MigrateFlags.VIR_MIGRATE_PEER2PEER | MigrateFlags.VIR_MIGRATE_LIVE | MigrateFlags.VIR_MIGRATE_TUNNELLED | MigrateFlags.VIR_MIGRATE_UNSAFE;
         domain.migrate(toConnect, liveMigrationFlag, null, null, 0);
+        // 迁移成功后清理源端残留的 cloud-init ISO 及 channel 等本地文件
+        this.cleanVmResource(domainXml);
         this.stopDomain(connect, request.getName(), TimeUnit.MINUTES.toMillis(10));
         return null;
+    }
+
+    /**
+     * 迁移前弹出 cloud-init 挂载的光盘。
+     *
+     * <p>cloud-init ISO 是宿主机本地文件（默认 /var/kvm-cloud/{虚拟机名}.iso），路径记录在
+     * domain metadata 的 {@code kvm-cloud:fileinfo} 中。若随 domain 一起迁移到目标主机，
+     * 目标主机不存在该文件会导致迁移失败。这里传入不含 {@code <source>} 的光盘设备 XML
+     * 通过 {@code updateDeviceFlags} 弹出光盘；ISO 源文件由迁移成功后显式调用
+     * {@link #cleanVmResource(String)} 清理（源端 domain 迁移后已被 undefine，
+     * 无法再通过 stopDomain 取到 XML 清理）。</p>
+     */
+    private void detachCloudInitCdRom(Domain domain, String domainXml) throws Exception {
+        try (StringReader sr = new StringReader(domainXml)) {
+            SAXReader reader = new SAXReader();
+            reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            Document doc = reader.read(sr);
+
+            // metadata 中标记为待清理的本地文件即 cloud-init ISO 路径
+            Set<String> cloudInitIsoPaths = new HashSet<>();
+            Element metadataElement = (Element) doc.selectSingleNode("/domain/metadata");
+            if (metadataElement != null) {
+                metadataElement.addNamespace("kvm-cloud", "http://kvm-cloud.local/kvm-cloud");
+                List<Node> metaNodes = metadataElement.selectNodes("kvm-cloud:fileinfo");
+                for (Node metaNode : metaNodes) {
+                    Element element = (Element) metaNode;
+                    Element cleanupFlagElement = (Element) element.selectSingleNode("kvm-cloud:cleanup-flag");
+                    if (cleanupFlagElement == null || !Constant.Enable.YES.equalsIgnoreCase(cleanupFlagElement.getText())) {
+                        continue;
+                    }
+                    Element resourcePathElement = (Element) element.selectSingleNode("kvm-cloud:resource-path");
+                    if (resourcePathElement != null && !ObjectUtils.isEmpty(resourcePathElement.getText())) {
+                        cloudInitIsoPaths.add(resourcePathElement.getText().trim());
+                    }
+                }
+            }
+
+            // 找到挂载 cloud-init ISO 的光驱并弹出（hdb 为 cloud-init 固定目标，普通光驱为 hda）
+            List<Node> cdromNodes = doc.selectNodes("/domain/devices/disk[@device='cdrom']");
+            for (Node node : cdromNodes) {
+                Element disk = (Element) node;
+                Element sourceElement = (Element) disk.selectSingleNode("source");
+                if (sourceElement == null) {
+                    continue;
+                }
+                String sourceFile = sourceElement.attributeValue("file");
+                Element targetElement = (Element) disk.selectSingleNode("target");
+                boolean cloudInitCdRom = cloudInitIsoPaths.contains(sourceFile)
+                        || (targetElement != null && "hdb".equals(targetElement.attributeValue("dev")));
+                if (!cloudInitCdRom) {
+                    continue;
+                }
+                // 去掉 source 即为“弹出光盘”，保留 alias/address 便于 libvirt 精确匹配设备
+                disk.remove(sourceElement);
+                log.info("迁移前弹出cloud-init光盘: name={}, source={}", domain.getName(), sourceFile);
+                domain.updateDeviceFlags(disk.asXML(), 1);
+            }
+        }
     }
 
     @DispatchBind(command = Constant.Command.GUEST_DESTROY)

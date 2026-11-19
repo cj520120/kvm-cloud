@@ -156,13 +156,6 @@ public class Constant {
         public static final int AGENT_TASK_SUBMIT = 304;
         public static final int AGENT_TASK_CALLBACK = 305;
 
-        public static final int VNC_CONNECT = 306;
-        public static final int VNC_DATA = 307;
-        public static final int VNC_DISCONNECT = 308;
-
-        public static final int NODE_REGISTER = 401;
-        public static final int NODE_REGISTER_RESPONSE = 402;
-        public static final int NODE_HEART_BEAT = 403;
 
 
     }

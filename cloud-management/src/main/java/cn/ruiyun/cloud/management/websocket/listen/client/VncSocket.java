@@ -1,10 +1,11 @@
 package cn.ruiyun.cloud.management.websocket.listen.client;
 
+
 import cn.ruiyun.cloud.common.error.CodeException;
 import cn.ruiyun.cloud.common.socket.packet.WsMessage;
-import cn.ruiyun.cloud.common.socket.packet.data.host.VncData;
 import cn.ruiyun.cloud.common.util.Constant;
 import cn.ruiyun.cloud.common.util.ErrorCode;
+import cn.ruiyun.cloud.management.servcie.bean.MemGraphicsInfo;
 import cn.ruiyun.cloud.management.websocket.common.SocketType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -39,13 +40,6 @@ public class VncSocket extends BaseClient {
     public synchronized void sendBinaryPacket(int command, byte[] data) {
         try {
             switch (command) {
-                case Constant.SocketCommand.VNC_DATA:
-                    VncData vncData = VncData.fromBytes(data);
-                    session.getBasicRemote().sendBinary(ByteBuffer.wrap(vncData.getData()));
-                    break;
-                case Constant.SocketCommand.VNC_DISCONNECT:
-                    this.close();
-                    break;
                 case Constant.SocketCommand.PING:
                     session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
                     this.setLastActiveTime(System.currentTimeMillis());
@@ -54,7 +48,20 @@ public class VncSocket extends BaseClient {
                     throw new CodeException(ErrorCode.SERVER_ERROR, "无效的处理类型");
             }
         } catch (Exception e) {
-            log.error("sendBinaryPacket error", e);
+            MemGraphicsInfo graphics = graphics();
+            log.error("发送VNC控制数据失败,guestId={},guestName={},hostId={}",
+                    guestId(graphics), guestName(graphics), hostId(graphics), e);
+            close();
+        }
+    }
+
+    public synchronized void sendVncData(byte[] data) {
+        try {
+            session.getBasicRemote().sendBinary(ByteBuffer.wrap(data));
+        } catch (Exception error) {
+            MemGraphicsInfo graphics = graphics();
+            log.error("发送VNC原始数据到浏览器失败,guestId={},guestName={},hostId={}",
+                    guestId(graphics), guestName(graphics), hostId(graphics), error);
             close();
         }
     }
@@ -67,5 +74,22 @@ public class VncSocket extends BaseClient {
     @Override
     public void sendCommand(int command) {
         this.sendBinaryPacket(command, new byte[0]);
+    }
+
+    private MemGraphicsInfo graphics() {
+        Object value = getAttribute("vnc");
+        return value instanceof MemGraphicsInfo ? (MemGraphicsInfo) value : null;
+    }
+
+    private long guestId(MemGraphicsInfo graphics) {
+        return graphics == null ? 0 : graphics.getGuestId();
+    }
+
+    private String guestName(MemGraphicsInfo graphics) {
+        return graphics == null ? "unknown" : graphics.getGuestName();
+    }
+
+    private long hostId(MemGraphicsInfo graphics) {
+        return graphics == null ? 0 : graphics.getHostId();
     }
 }
