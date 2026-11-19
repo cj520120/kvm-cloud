@@ -49,20 +49,34 @@ Linux(目前只提供x86_64架构)
 [Github](https://github.com/cj520120/kvm-cloud) <br/>    
 如果项目对您有帮助，欢迎Star和Fork，您的Star是对我最大的支持。
 ### 配置说明
-文档只提供基于Centos7的配置说明，Ubuntu参考[Ubuntu_README.md](Ubuntu_README.md),其他系统请自行查阅相关资料
+文档同时提供基于 CentOS 7 和 Ubuntu 22.04 的配置说明，同一配置项下分别列出两种系统的做法，按你使用的系统选择即可，其他系统请自行查阅相关资料。Ubuntu 适用版本为 22.04.3 LTS，其他 Ubuntu 版本请自行查阅相关配置（原独立文档见 [Ubuntu_README.md](Ubuntu_README.md)）。
+
+### 系统升级（Ubuntu）
+```shell
+sudo apt update -y
+sudo apt upgrade -y
+```
 ### SELinux配置
+> 本节为 CentOS 7 专有；Ubuntu 默认使用 AppArmor、不启用 SELinux，可跳过。
 ```sh
 setenforce 0
 vi /etc/selinux/config
 SELINUX=permissive
 ```
-### sysctl配置 
+### sysctl配置（启用IP转发）
+**CentOS 7**
 ```sh
 vim /etc/sysctl.conf 
 net.ipv4.ip_forward=1               # 设置转发并保存
 sysctl -p
 ```
+**Ubuntu**
+```shell
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf 
+sysctl -p
+```
 ### 防火墙配置
+**CentOS 7**（关闭防火墙及相关服务）
 ```sh
 systemctl stop firewalld
 systemctl disable firewalld
@@ -71,12 +85,22 @@ systemctl disable iptables
 systemctl stop NetworkManager
 systemctl disable NetworkManager
 ```
+**Ubuntu**（放行相关端口）
+```shell
+sudo ufw allow 8081/tcp
+sudo ufw allow 16509/tcp
+```
 ### NFS配置
 #### 1、安装NFS软件包
+**CentOS 7**（服务端）
 ```sh
 yum -y install nfs-utils rpcbind
 ```
-#### 2、设置开机自启以及启动服务
+**Ubuntu**（客户端，作为存储池使用时按需安装）
+```shell
+sudo apt install nfs-common -y
+```
+#### 2、设置开机自启以及启动服务（CentOS 7 服务端）
 ```sh
 systemctl enable rpcbind
 systemctl enable nfs-server
@@ -111,14 +135,35 @@ umount /mnt
 
 ### KVM
 #### 1、验证主机是否支持虚拟化
+**CentOS 7**
 ```sh
  lsmod | grep kvm #查看结果确认是否支持虚拟化
  如果是vmware开启的虚拟机，请启用虚拟化技术
 ```
+**Ubuntu**
+```shell
+egrep -c '(vmx|svm)' /proc/cpuinfo
+# 输出大于 0 表示支持虚拟化，可以安装 KVM
+```
 #### 2、主机安装KVM
+**CentOS 7**
 ```sh
 yum install qemu-kvm libvirt bridge-utils
 yum install java-1.8.0-openjdk* -y
+```
+**Ubuntu**
+```shell
+sudo apt install qemu-kvm libvirt-daemon-system ovmf -y
+```
+#### 2.1、安装存储池相关组件（Ubuntu，根据实际情况选择安装）
+```shell
+sudo apt install ceph-common libvirt-daemon-driver-storage-rbd -y 
+sudo apt install nfs-common -y
+sudo apt install glusterfs-client -y
+```
+#### 2.2、安装JDK（Ubuntu）
+```shell
+sudo apt install openjdk-8-jdk -y
 ```
 
 #### 3、配置KVM主机网桥，增加一个网桥
@@ -151,7 +196,44 @@ BRIDGE=br0
 ```
 3)、如需ovs配置，请参考[ovs-bridge-sample.md](scripts/ovs-bridge-sample.md)
 
+**Ubuntu**（通过 netplan 配置 OVS 网桥）
+1)、安装 OVS 网络组件
+```shell
+sudo apt install openvswitch-switch -y
+sudo systemctl enable openvswitch-switch
+sudo systemctl start openvswitch-switch
+```
+2)、编辑 `/etc/netplan/00-installer-config.yaml`（具体文件名请自行查看系统），调整如下配置：
+```yaml
+network:
+  version: 2
+  renderer: networkd # 根据实际情况填写,如networkd,NetworkManager
+  ethernets:
+    ens10: #ens10 为实际网卡名称，根据实际情况填写
+      dhcp4: false 
+  bridges:
+    ovs-bridge:
+      interfaces: [ ens10 ] #ens10 为实际网卡名称，根据实际情况填写
+      addresses: [192.168.6.7/24]  #真实IP，根据实际情况填写
+      routes: 
+        - to: default
+          via: 192.168.6.1 #真实网关，根据实际情况填写
+      openvswitch: {}
+      nameservers: 
+        addresses: [8.8.8.8]  #dns，根据实际情况填写
+      parameters: 
+        forward-delay: 4
+      dhcp4: no
+```
+3)、重启网络并查看网桥状态
+```shell
+sudo netplan apply 
+sudo ovs-vsctl show
+sudo ip a | grep ovs-bridge
+```
+
 #### 4、VNC配置 
+**CentOS 7 / Ubuntu 通用**
 ```sh
 vi /etc/libvirt/qemu.conf
 vnc_listen="0.0.0.0"
@@ -159,8 +241,9 @@ user = "root"
 group = "root"
 ```
 #### 5、Libvirtd配置
- 
-1)、修改/etc/sysconfig/libvirtd 配置
+**CentOS 7**
+
+1)、修改 `/etc/libvirt/libvirtd.conf` 配置
 ```sh
 vi /etc/libvirt/libvirtd.conf
 listen_tls = 0
@@ -177,6 +260,10 @@ vi /etc/sysconfig/libvirtd
 LIBVIRTD_ARGS="--listen"
 systemctl restart libvirtd 
 ```
+**Ubuntu**
+```shell
+sudo systemctl enable --now libvirtd-tcp.socket
+```
 #### 项目编译
 ```$xslt
 mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
@@ -188,10 +275,52 @@ mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
 2、修改配置文件
 
 3、分别启动管理端及Agent端，浏览页面：http://localhost:8080/
+
+**CentOS 7**（命令行直接启动）
 ```
 管理端: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
  --spring.config.location 是可选项，用于指定配置文件，如果不需要修改，可以去掉,配置文件为各自模块下的src/main/resources/application.properties文件
+```
+
+**Ubuntu**（使用 supervisor 托管 Agent）
+
+1)、安装 supervisor
+```shell
+sudo apt install supervisor
+sudo systemctl start supervisor
+sudo systemctl enable supervisor
+```
+2)、安装 agent，上传 `cloud-agent-1.0-SNAPSHOT.jar` 到 `/usr/local/cloud` 并创建配置文件
+```shell
+sudo mkdir -p /usr/local/cloud
+cat <<EOF >> /usr/local/cloud/client.properties
+server.port=8081
+app.task-thread-size=8
+EOF
+```
+3)、创建 supervisor 管理文件
+```shell
+cat <<EOF >> /etc/supervisor/conf.d/cloud-agent.conf
+[program:Kvm-Cloud-Agent]
+command = java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
+directory = /usr/local/cloud
+autostart = true
+startsecs = 5
+autorestart = true
+startretries = 3
+user = root
+redirect_stderr = true
+stdout_logfile_maxbytes = 20MB
+stdout_logfile_backups = 10
+stdout_logfile = /var/log/cloud-agent.log
+EOF
+```
+4)、加载服务并查看运行日志
+```shell
+sudo supervisorctl update
+sudo supervisorctl
+tail -f Kvm-Cloud-Agent
 ```
 
 4、平台登陆账号默认用户名/密码:admin/123456

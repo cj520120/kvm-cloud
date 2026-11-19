@@ -51,23 +51,36 @@ Linux (currently only the x86_64 architecture is supported)
 If this project is helpful to you, please star and fork it. Your star is the greatest support for us.
 
 ### Configuration Notes
-This document provides configuration instructions for CentOS 7 only. For Ubuntu, refer to [Ubuntu_README.md](Ubuntu_README.md). For other operating systems, please consult the relevant documentation.
+This document provides configuration instructions for both CentOS 7 and Ubuntu 22.04. Under each configuration item, the steps for both systems are listed side by side; choose the one that matches your system. For other operating systems, please consult the relevant documentation. The supported Ubuntu version is 22.04.3 LTS; for other Ubuntu versions, please consult the relevant documentation (the original standalone document is [Ubuntu_README.md](Ubuntu_README.md)).
 
+### System Upgrade (Ubuntu)
+```shell
+sudo apt update -y
+sudo apt upgrade -y
+```
 ### SELinux Configuration
+> This section applies to CentOS 7 only. Ubuntu uses AppArmor by default and does not enable SELinux, so you can skip this section.
 ```sh
 setenforce 0
 vi /etc/selinux/config
 SELINUX=permissive
 ```
 
-### Sysctl Configuration
+### Sysctl Configuration (Enable IP Forwarding)
+**CentOS 7**
 ```sh
 vim /etc/sysctl.conf
 net.ipv4.ip_forward=1               # Enable forwarding and save
 sysctl -p
 ```
+**Ubuntu**
+```shell
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sysctl -p
+```
 
 ### Firewall Configuration
+**CentOS 7** (stop the firewall and related services)
 ```sh
 systemctl stop firewalld
 systemctl disable firewalld
@@ -76,14 +89,24 @@ systemctl disable iptables
 systemctl stop NetworkManager
 systemctl disable NetworkManager
 ```
+**Ubuntu** (allow the required ports)
+```shell
+sudo ufw allow 8081/tcp
+sudo ufw allow 16509/tcp
+```
 
 ### NFS Configuration
 #### 1. Install NFS Packages
+**CentOS 7** (server)
 ```sh
 yum -y install nfs-utils rpcbind
 ```
+**Ubuntu** (client; install as needed when used as a storage pool)
+```shell
+sudo apt install nfs-common -y
+```
 
-#### 2. Enable Services at Boot and Start Them
+#### 2. Enable Services at Boot and Start Them (CentOS 7 server)
 ```sh
 systemctl enable rpcbind
 systemctl enable nfs-server
@@ -122,15 +145,38 @@ umount /mnt
 
 ### KVM
 #### 1. Verify That the Host Supports Virtualization
+**CentOS 7**
 ```sh
 lsmod | grep kvm # Check the output to confirm whether virtualization is supported
 If the host is a VMware virtual machine, enable virtualization in the VM settings.
 ```
+**Ubuntu**
+```shell
+egrep -c '(vmx|svm)' /proc/cpuinfo
+# An output greater than 0 means virtualization is supported and KVM can be installed
+```
 
 #### 2. Install KVM on the Host
+**CentOS 7**
 ```sh
 yum install qemu-kvm libvirt bridge-utils
 yum install java-1.8.0-openjdk* -y
+```
+**Ubuntu**
+```shell
+sudo apt install qemu-kvm libvirt-daemon-system ovmf -y
+```
+
+#### 2.1 Install Storage Pool Components (Ubuntu; install as needed)
+```shell
+sudo apt install ceph-common libvirt-daemon-driver-storage-rbd -y
+sudo apt install nfs-common -y
+sudo apt install glusterfs-client -y
+```
+
+#### 2.2 Install JDK (Ubuntu)
+```shell
+sudo apt install openjdk-8-jdk -y
 ```
 
 #### 3. Configure a Network Bridge on the KVM Host
@@ -166,7 +212,44 @@ BRIDGE=br0
 
 3) For OVS configuration, refer to [ovs-bridge-sample.md](scripts/ovs-bridge-sample.md).
 
+**Ubuntu** (configure an OVS bridge via netplan)
+1) Install the OVS network components
+```shell
+sudo apt install openvswitch-switch -y
+sudo systemctl enable openvswitch-switch
+sudo systemctl start openvswitch-switch
+```
+2) Edit `/etc/netplan/00-installer-config.yaml` (check the actual filename on your system) and adjust it as follows:
+```yaml
+network:
+  version: 2
+  renderer: networkd # Set as appropriate, e.g. networkd, NetworkManager
+  ethernets:
+    ens10: # ens10 is the actual interface name; set as appropriate
+      dhcp4: false
+  bridges:
+    ovs-bridge:
+      interfaces: [ ens10 ] # ens10 is the actual interface name; set as appropriate
+      addresses: [192.168.6.7/24]  # Real IP address; set as appropriate
+      routes:
+        - to: default
+          via: 192.168.6.1 # Real gateway; set as appropriate
+      openvswitch: {}
+      nameservers:
+        addresses: [8.8.8.8]  # DNS; set as appropriate
+      parameters:
+        forward-delay: 4
+      dhcp4: no
+```
+3) Restart the network and check the bridge status
+```shell
+sudo netplan apply
+sudo ovs-vsctl show
+sudo ip a | grep ovs-bridge
+```
+
 #### 4. VNC Configuration
+**Common to CentOS 7 / Ubuntu**
 ```sh
 vi /etc/libvirt/qemu.conf
 vnc_listen="0.0.0.0"
@@ -175,6 +258,7 @@ group = "root"
 ```
 
 #### 5. Libvirtd Configuration
+**CentOS 7**
 1) Modify the libvirtd configuration.
 ```sh
 vi /etc/libvirt/libvirtd.conf
@@ -192,6 +276,10 @@ vi /etc/sysconfig/libvirtd
 LIBVIRTD_ARGS="--listen"
 systemctl restart libvirtd
 ```
+**Ubuntu**
+```shell
+sudo systemctl enable --now libvirtd-tcp.socket
+```
 
 #### Project Compilation
 ```sh
@@ -205,10 +293,51 @@ mvn clean package -Dfile.encoding=UTF-8 -DskipTests=true
 2. Modify the configuration files.
 
 3. Start the management and agent services separately, then open http://localhost:8080/ in a browser.
+
+**CentOS 7** (start directly from the command line)
 ```sh
 Management: java -jar cloud-management-1.0-SNAPSHOT.jar --spring.config.location=server.yaml
 Agent: java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
 --spring.config.location is optional and specifies the configuration file. It can be omitted if no changes are needed. The configuration files are application.properties in the src/main/resources directory of each module.
+```
+
+**Ubuntu** (manage the Agent with supervisor)
+1) Install supervisor
+```shell
+sudo apt install supervisor
+sudo systemctl start supervisor
+sudo systemctl enable supervisor
+```
+2) Install the agent, upload `cloud-agent-1.0-SNAPSHOT.jar` to `/usr/local/cloud`, and create the configuration file
+```shell
+sudo mkdir -p /usr/local/cloud
+cat <<EOF >> /usr/local/cloud/client.properties
+server.port=8081
+app.task-thread-size=8
+EOF
+```
+3) Create the supervisor configuration file
+```shell
+cat <<EOF >> /etc/supervisor/conf.d/cloud-agent.conf
+[program:Kvm-Cloud-Agent]
+command = java -jar cloud-agent-1.0-SNAPSHOT.jar --spring.config.location=client.properties
+directory = /usr/local/cloud
+autostart = true
+startsecs = 5
+autorestart = true
+startretries = 3
+user = root
+redirect_stderr = true
+stdout_logfile_maxbytes = 20MB
+stdout_logfile_backups = 10
+stdout_logfile = /var/log/cloud-agent.log
+EOF
+```
+4) Reload the service and view the runtime log
+```shell
+sudo supervisorctl update
+sudo supervisorctl
+tail -f Kvm-Cloud-Agent
 ```
 
 4. The default platform login username/password is admin/123456.
